@@ -18,3 +18,13 @@ E:\主数据库\编程\方案V5\PCMgr\Debug\PCMgrCore32.dll
 E:\主数据库\编程\方案V5\PCMgr\TaskMgr\obj\Debug\PCMgrCore32.dll
 E:\主数据库\编程\方案V5\PCMgr\TaskMgr\obj\Debug\PCMgrCoreApp.csprojResolveAssemblyReference.cache
 E:\主数据库\编程\方案8\PCMgr\Debug\PCMgrCore32.dll
+E:\主数据库\编程\方案8\PCMgr\Debug\PCMgrCore32.pdb
+E:\主数据库\编程\方案8\PCMgr\TaskMgr\obj\Debug\PCMgrCoreApp.csprojResolveAssemblyReference.cache
+E:\主数据库\编程\方案8\PCMgr\TaskMgr\obj\Debug\TaskMgr.FormMain.resources
+E:\主数据库\编程\方案8\PCMgr\TaskMgr\obj\Debug\TaskMgr.Properties.Resources.resources
+E:\主数据库\编程\方案8\PCMgr\TaskMgr\obj\Debug\TaskMgr.WorkWindow.FormMainListHeaders.resources
+E:\主数据库\编程\方案8\PCMgr\TaskMgr\obj\Debug\TaskMgr.WorkWindow.FormSpyWindow.resources
+E:\主数据库\编程\方案8\PCMgr\TaskMgr\obj\Debug\PCMgrCoreApp.csproj.GenerateResource.Cache
+E:\主数据库\编程\方案8\PCMgr\TaskMgr\obj\Debug\PCMgrCoreApp.csproj.CoreCompileInputs.cache
+E:\主数据库\编程\方案8\PCMgr\TaskMgr\obj\Debug\PCMgrCore32.dll
+E:\主数据库\编程\方案8\PCMgr\TaskMgr\obj\Debug\PCMgrCore32.pdb
