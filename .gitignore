@@ -1,4 +1,8 @@
 .vs/
+obj/
+bin/
+Debug/
+Release/
 depends.exe - 快捷方式.lnk
 *.pdb
 *.cache
