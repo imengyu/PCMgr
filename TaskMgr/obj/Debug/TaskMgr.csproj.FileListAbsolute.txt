@@ -1,9 +1,0 @@
-E:\主数据库\编程\方案V5\TaskMgr\Debug\TaskMgr32.exe
-E:\主数据库\编程\方案V5\TaskMgr\Debug\TaskMgr32.pdb
-E:\主数据库\编程\方案V5\TaskMgr\TaskMgr\obj\Debug\TaskMgr.FormMain.resources
-E:\主数据库\编程\方案V5\TaskMgr\TaskMgr\obj\Debug\TaskMgr.Properties.Resources.resources
-E:\主数据库\编程\方案V5\TaskMgr\TaskMgr\obj\Debug\TaskMgr.csproj.GenerateResource.Cache
-E:\主数据库\编程\方案V5\TaskMgr\TaskMgr\obj\Debug\TaskMgr32.exe
-E:\主数据库\编程\方案V5\TaskMgr\TaskMgr\obj\Debug\TaskMgr32.pdb
-E:\主数据库\编程\方案V5\TaskMgr\TaskMgr\obj\Debug\TaskMgr.csprojResolveAssemblyReference.cache
-E:\主数据库\编程\方案V5\TaskMgr\TaskMgr\obj\Debug\TaskMgr.WorkWindow.FormSpyWindow.resources

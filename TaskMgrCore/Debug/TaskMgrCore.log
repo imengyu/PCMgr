@@ -1,7 +1,0 @@
-﻿C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\VC\VCTargets\Microsoft.CppBuild.targets(387,5): warning MSB8028: 中间目录(Debug\)包含从另一个项目(TaskMgrCore.vcxproj)共享的文件。   这会导致错误的清除和重新生成行为。
-  prochlp.cpp
-e:\主数据库\编程\方案8\pcmgr\taskmgrcore\prochlp.cpp(483): warning C4293: “<<”: Shift 计数为负或过大，其行为未定义
-e:\主数据库\编程\方案8\pcmgr\taskmgrcore\prochlp.cpp(484): warning C4293: “<<”: Shift 计数为负或过大，其行为未定义
-e:\主数据库\编程\方案8\pcmgr\taskmgrcore\prochlp.cpp(506): warning C4244: “初始化”: 从“INT64”转换到“double”，可能丢失数据
-e:\主数据库\编程\方案8\pcmgr\taskmgrcore\prochlp.cpp(555): warning C4244: “return”: 从“DWORDLONG”转换到“ULONG”，可能丢失数据
-  TaskMgrCore.vcxproj -> E:\主数据库\编程\方案8\PCMgr\Debug\PCMgr32.dll
