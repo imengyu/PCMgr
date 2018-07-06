@@ -48,6 +48,24 @@
     <ClInclude Include="mainprocs.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="fmhlp.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="StringHlp.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="StringSplit.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="comdlghlp.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectoryHelper.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="PathHelper.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -72,6 +90,24 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="mainprocs.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="fmhlp.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="StringHlp.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="StringSplit.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="comdlghlp.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectoryHelper.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="PathHelper.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

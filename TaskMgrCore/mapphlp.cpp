@@ -3,7 +3,10 @@
 #include "resource.h"
 #include "prochlp.h"
 #include "vprocx.h"
+#include "comdlghlp.h"
+#include "fmhlp.h"
 #include "VersionHelpers.h"
+#include "StringHlp.h"
 #include <shellapi.h>
 #include <Vsstyle.h>
 #include <vssym32.h>
@@ -12,8 +15,15 @@
 #include <string>
 #include <metahost.h>
 #include <mscoree.h>
+#pragma comment(linker,"\"/manifestdependency:type='win32' \
+name = 'Microsoft.Windows.Common-Controls' version = '6.0.0.0' \
+processorArchitecture = '*' publicKeyToken = '6595b64144ccf1df' language = '*'\"")
 
 extern HINSTANCE hInst;
+
+extern LPWSTR fmCurrectSelectFilePath0;
+extern bool fmMutilSelect;
+extern int fmMutilSelectCount;
 
 typedef HRESULT(WINAPI*CLRCreateInstanceFun)(REFCLSID clsid, REFIID riid, LPVOID *ppInterface);
 
@@ -352,11 +362,29 @@ M_API VOID MShowFileProp(LPWSTR file)
 {
 	SHELLEXECUTEINFO info = { 0 };
 	info.cbSize = sizeof(SHELLEXECUTEINFO);
+	info.hwnd = hWndMain;
 	info.lpVerb = L"properties";
 	info.lpFile = file;
 	info.nShow = SW_SHOW;
 	info.fMask = SEE_MASK_INVOKEIDLIST;
 	ShellExecuteEx(&info);
+}
+M_API BOOL MCopyToClipboard(const WCHAR* pszData, const int nDataLen)
+{
+	if (OpenClipboard(NULL))
+	{
+		EmptyClipboard();
+		HGLOBAL clipbuffer;
+		WCHAR *buffer;
+		clipbuffer = ::GlobalAlloc(GMEM_DDESHARE, nDataLen + 1);
+		buffer = (WCHAR*)GlobalLock(clipbuffer);
+		wcscpy_s(buffer, nDataLen, pszData);
+		GlobalUnlock(clipbuffer);
+		SetClipboardData(CF_TEXT, clipbuffer);
+		CloseClipboard();
+		return TRUE;
+	}
+	return FALSE;
 }
 
 void ThrowErrorAndErrorCodeX(DWORD code, LPWSTR msg, LPWSTR title)
@@ -377,16 +405,19 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_COMMAND:
 		switch (wParam)
 		{
-		case IDM_ABOUT:
+		case IDM_ABOUT: {
 			DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
 			break;
-		case IDM_TEXIT:
+		}
+		case IDM_TEXIT: {
 			MAppExit();
 			break;
-		case IDM_TREBOT:
+		}
+		case IDM_TREBOT: {
 			MAppRebot();
 			break;
-		case IDM_KILL:
+		}
+		case IDM_KILL: {
 			if (thisCommandPid > 4)
 			{
 				LPWSTR t1 = MStrAdd(L"你希望结束 ", thisCommandName);
@@ -410,17 +441,19 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 						MShowErrorMessage(L"无效进程。", L"无法结束进程", MB_ICONWARNING, MB_OK);
 						SendMessage(hWndMain, WM_COMMAND, 41012, 0);
 					}
-					else ThrowErrorAndErrorCodeX(rs, L"无法打开进程，错误代码：", L"无法结束进程"); 
+					else ThrowErrorAndErrorCodeX(rs, L"无法打开进程，错误代码：", L"无法结束进程");
 				}
 				delete t1;
 				delete t2;
 			}
 			break;
-		case IDM_FILEPROP:
+		}
+		case IDM_FILEPROP: {
 			if (thisCommandPath)
 				MShowFileProp(thisCommandPath);
 			else MShowErrorMessage(L"无法获取路径。", L"无法完成该操作", MB_ICONERROR, MB_OK);
 			break;
+		}
 		case IDM_OPENPATH: {
 			if (thisCommandPath)
 			{
@@ -443,7 +476,7 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			if (thisCommandPid > 4)
 				MAppVProcessWindows(thisCommandPid, hWndMain, thisCommandName);
 			break;
-		case IDM_SUPROC:
+		case IDM_SUPROC: {
 			if (thisCommandPid > 4)
 			{
 				int rs = MSuspendTaskNt(thisCommandPid);
@@ -456,7 +489,8 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				else SendMessage(hWndMain, WM_COMMAND, 41012, 0);
 			}
 			break;
-		case IDM_RESPROC:
+		}
+		case IDM_RESPROC: {
 			if (thisCommandPid > 4)
 			{
 				int rs = MRusemeTaskNt(thisCommandPid);
@@ -469,34 +503,179 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				else SendMessage(hWndMain, WM_COMMAND, 41012, 0);
 			}
 			break;
-		case ID_MAINWINMENU_SETTO:
+		}
+		case ID_MAINWINMENU_SETTO: {
 			if (IsWindow(selectItem4))
 			{
 				ShowWindow(selectItem4, SW_RESTORE);
 				SetForegroundWindow(selectItem4);
 			}
 			break;
-		case ID_MAINWINMENU_SPYWIN:
+		}
+		case ID_MAINWINMENU_SPYWIN: {
 			if (hEnumWinsCallBack)
 				hEnumWinsCallBack(selectItem4, hWnd);
 			break;
-		case ID_MAINWINMENU_END:
+		}
+		case ID_MAINWINMENU_END: {
 			if (IsWindow(selectItem4))
 				SendMessage(selectItem4, WM_SYSCOMMAND, SC_CLOSE, NULL);
 			else SendMessage(hWndMain, WM_COMMAND, 41012, 0);
 			break;
-		case ID_MAINWINMENU_MAX:
+		}
+		case ID_MAINWINMENU_MAX: {
 			if (IsWindow(selectItem4))
 				ShowWindow(selectItem4, SW_MAXIMIZE);
 			break;
-		case ID_MAINWINMENU_MIN:
+		}
+		case ID_MAINWINMENU_MIN: {
 			if (IsWindow(selectItem4))
 				ShowWindow(selectItem4, SW_MINIMIZE);
 			break;
-		case ID_MAINWINMENU_BRINGFORNT:
+		}
+		case ID_MAINWINMENU_BRINGFORNT: {
 			if (IsWindow(selectItem4))
 				SetForegroundWindow(selectItem4);
 			break;
+		}
+		case ID_FMMAIN_REFESH: {
+			MFM_Refesh();
+			break;
+		}
+		case ID_FMMAIN_OPEN: {
+			ShellExecute(hWndMain, L"open", fmCurrectSelectFilePath0, NULL, NULL, 5);
+			break;
+		}
+		case ID_FMMAIN_OPENWAY: {
+			LPCSTR s = W2A(fmCurrectSelectFilePath0);
+			std::string strCmd = FormatString("rundll32 shell32,OpenAs_RunDLL %s", s);
+			WinExec(strCmd.c_str(), SW_SHOWNORMAL);
+			delete s;
+			break;
+		}
+		case ID_FMMAIN_DEL: {
+			MFM_DelFileToRecBinUser();
+			break;
+		}
+		case ID_FMMAIN_REMOVE: {
+			MFM_DelFileBinUser();
+			break;
+		}
+		case ID_FMMAIN_RENAME: {
+			MFM_Recall(9, fmCurrectSelectFilePath0);
+			break;
+		}
+		case ID_FMMAIN_COPYTO: {
+			if (!MFM_CopyFileToUser())
+				MShowErrorMessage(fmCurrectSelectFilePath0, L"无法复制文件", MB_ICONWARNING, MB_OK);
+			break;
+		}
+		case ID_FMMAIN_MOVETO: {
+			if (!MFM_MoveFileToUser())
+				MShowErrorMessage(fmCurrectSelectFilePath0, L"无法移动文件", MB_ICONWARNING, MB_OK);
+			break;
+		}
+		case ID_FMMAIN_COPYPATH: {
+			MCopyToClipboard(fmCurrectSelectFilePath0, wcslen(fmCurrectSelectFilePath0));
+			MFM_SetStatus2(9);
+			break;
+		}
+		case ID_FMMAIN_NEW: {
+
+			break;
+		}
+		case ID_FMMAIN_SHIWHIDEDFILES: {
+			MFM_ReSetShowHiddenFiles();
+			break;
+		}
+		case ID_FMMAIN_NEWFOLDER: {
+			MFM_Recall(10, fmCurrectSelectFilePath0);
+			break;
+		}
+		case ID_FMMAIN_PROP: {
+			if (_waccess(fmCurrectSelectFilePath0, 0) == 0)
+				MShowFileProp(fmCurrectSelectFilePath0);
+			break;
+		}
+		case ID_FMMAIN_SELALL: {
+			MFM_Recall(11, 0);
+			break;
+		}
+		case ID_FMMAIN_NOSEL: {
+			MFM_Recall(12, 0);
+			break;
+		}
+		case ID_FMMAIN_RESEL: {
+			MFM_Recall(13, 0);
+			break;
+		}
+		case ID_FMMAIN_CUT: {
+			if (_waccess(fmCurrectSelectFilePath0, 0) == 0) {
+				MFM_CopyOrCutFileToClipboard(fmCurrectSelectFilePath0, FALSE);
+				MFM_SetStatus2(5);
+			}
+			break;
+		}
+		case ID_FMMAIN_PTASE: {
+			MFM_RenameFile();
+			break;
+		}
+		case ID_FMMAIN_COPY: {
+			if (_waccess(fmCurrectSelectFilePath0, 0) == 0) {
+				MFM_CopyOrCutFileToClipboard(fmCurrectSelectFilePath0, FALSE);
+				MFM_SetStatus2(6);
+			}
+			break;
+		}
+		case ID_FMM_READONLY: {
+			break;
+		}
+		case ID_FMM_HIDDEN: {
+			break;
+		}
+		case ID_FMM_SYSTEM: {
+			break;
+		}
+		case ID_FMFOLDER_PROP: {
+			MFF_ShowFolderProp();
+			break;
+		}
+		case ID_FMFOLDER_COPYPATH: {
+			MFF_CopyPath();
+			break;
+		}
+		case ID_FMFOLDER_RENAME: {
+			MFF_Remane();
+			break;
+		}
+		case ID_FMFOLDER_REMOVE: {
+			MFF_Del();
+			break;
+		}
+		case ID_FMFOLDER_DEL: {
+			MFF_DelToRecBin();
+			break;
+		}
+		case ID_FMFOLDER_PTASE: {
+			MFF_Patse();
+			break;
+		}
+		case ID_FMFOLDER_CUT: {
+			MFF_Cut();
+			break;
+		}
+		case ID_FMFOLDER_COPY: {
+			MFF_Copy();
+			break;
+		}
+		case ID_FMFOLDER_OPENINEXP: {
+			MFF_ShowInExplorer();
+			break;
+		}
+		case ID_FMFOLDER_OPEN: {
+			MFF_ShowFolder();
+			break;
+		}
 		default:
 			break;
 		}
@@ -556,6 +735,15 @@ int MShowMessageDialog(HWND hwnd, LPWSTR text, LPWSTR title, LPWSTR apptl, int i
 int MShowErrorMessage(LPWSTR text, LPWSTR intr, int ico, int btn)
 {
 	return MShowMessageDialog(hWndMain, text, DEFDIALOGGTITLE, intr, ico, btn);
+}
+
+EXTERN_C M_API HRESULT MTaskDialogIndirect(_In_ const TASKDIALOGCONFIG *pTaskConfig, _Out_opt_ int *pnButton, _Out_opt_ int *pnRadioButton, _Out_opt_ BOOL *pfVerificationFlagChecked)
+{
+	return TaskDialogIndirect(pTaskConfig, pnButton, pnRadioButton, pfVerificationFlagChecked);
+}
+EXTERN_C M_API HRESULT MTaskDialog(_In_opt_ HWND hwndOwner, _In_opt_ HINSTANCE hInstance, _In_opt_ PCWSTR pszWindowTitle, _In_opt_ PCWSTR pszMainInstruction, _In_opt_ PCWSTR pszContent, TASKDIALOG_COMMON_BUTTON_FLAGS dwCommonButtons, _In_opt_ PCWSTR pszIcon, _Out_opt_ int *pnButton)
+{
+	return TaskDialog(hwndOwner, hInstance, pszWindowTitle, pszMainInstruction, pszContent, dwCommonButtons, pszIcon, pnButton);
 }
 
 #pragma region StringHlp
@@ -796,14 +984,15 @@ M_API int MHexStrToIntW(wchar_t *s)
 M_API long long MHexStrToLongW(wchar_t *s)
 {
 	bool isx = false;
-	for (int i = 0; i<sizeof(s) / sizeof(s[0]); i++)
+	int len = lstrlen(s);
+	for (int i = 0; i<len; i++)
 	{
 		if (s[i] == 'x' || s[i] == 'X') {
 			isx = true;
 			break;
 		}
 	}
-	int i, m = isx ? lstrlen(s) - 2 : lstrlen(s), n;
+	int i, m = isx ? lstrlen(s) - 2 : lstrlen(s), n, w = m;
 	long long temp = 0;
 	for (i = isx ? 2 : 0; i < m; i++) {
 		if (s[i] >= L'A'&&s[i] <= L'F')
@@ -811,7 +1000,8 @@ M_API long long MHexStrToLongW(wchar_t *s)
 		else if (s[i] >= L'a'&&s[i] <= L'f')
 			n = s[i] - L'a' + 10;
 		else n = s[i] - L'0';
-		temp = temp * 16 + n;
+		w--;
+		temp += static_cast<long long>(pow(16, w) * n);
 	}
 	return temp;
 }

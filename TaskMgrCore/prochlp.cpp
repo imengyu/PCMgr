@@ -31,6 +31,7 @@ ZwOpenProcessFun ZwOpenProcess;
 NtQuerySystemInformationFun NtQuerySystemInformation;
 NtUnmapViewOfSectionFun NtUnmapViewOfSection;
 NtQueryInformationProcessFun NtQueryInformationProcess;
+PSYSTEM_PROCESSES current_system_process = NULL;
 
 EXTERN_C BOOL MAppVProcessAllWindows();
 
@@ -91,29 +92,57 @@ M_API BOOL MGetPrivileges2()
 	CloseHandle(hToken);
 	return TRUE;
 }
+void MEnumProcessCore()
+{
+	if (current_system_process) {
+		free(current_system_process);
+		current_system_process = NULL;
+	}
+	DWORD dwSize = 0;
+	NtQuerySystemInformation(SystemProcessesAndThreadsInformation, NULL, 0, &dwSize);
+	current_system_process = (PSYSTEM_PROCESSES)malloc(dwSize);
+	NtQuerySystemInformation(SystemProcessesAndThreadsInformation, current_system_process, dwSize, 0);
+}
+M_API void MEnumProcessFree()
+{
+
+	if (current_system_process) {
+		free(current_system_process);
+		current_system_process = NULL;
+	}
+}
 M_API void MEnumProcess(EnumProcessCallBack calBack)
 {
 	if (calBack)
 	{
 		MAppVProcessAllWindows();
-
-		HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-		if (INVALID_HANDLE_VALUE == hSnapshot)
-			return;
-		PROCESSENTRY32 pe = { 0 };
-		pe.dwSize = sizeof(PROCESSENTRY32);
-
+		MEnumProcessCore();
+		bool done = false;
 		int ix = 0;
-		BOOL fOk;
-		for (fOk = Process32First(hSnapshot, &pe); fOk; fOk = Process32Next(hSnapshot, &pe))
+		for (PSYSTEM_PROCESSES p = current_system_process; !done; p = PSYSTEM_PROCESSES(PCHAR(p) + p->NextEntryDelta))
 		{
 			WCHAR exeFullPath[260];
-			if (MGetProcessFullPathEx(pe.th32ProcessID, exeFullPath))
-				calBack(pe.th32ProcessID, pe.th32ParentProcessID, pe.szExeFile, exeFullPath, 1);
-			else calBack(pe.th32ProcessID, pe.th32ParentProcessID, pe.szExeFile, 0, 1);
+			if (MGetProcessFullPathEx(p->ProcessId, exeFullPath))
+				calBack(p->ProcessId, p->InheritedFromProcessId, p->ProcessName.Buffer, exeFullPath, 1);
+			else calBack(p->ProcessId, p->InheritedFromProcessId, p->ProcessName.Buffer, 0, 1);
 			ix++;
+			done = p->NextEntryDelta == 0;
 		}
 		calBack(ix, 0, NULL, NULL, 0);
+	}
+}
+M_API void MEnumProcess2(EnumProcessCallBack2 callBack)
+{
+	if (callBack)
+	{
+		MAppVProcessAllWindows();
+		MEnumProcessCore();
+		bool done = false;
+		for (PSYSTEM_PROCESSES p = current_system_process; !done; p = PSYSTEM_PROCESSES(PCHAR(p) + p->NextEntryDelta))
+		{
+			callBack(p->ProcessId);
+			done = p->NextEntryDelta == 0;
+		}
 	}
 }
 
@@ -271,18 +300,9 @@ M_API HICON MGetExeIcon(LPWSTR pszFullPath)
 }
 M_API int MGetExeState(DWORD pid, HWND hWnd)
 {
-	int rs = 1;
-	ULONG n = 0x100;
-	PSYSTEM_PROCESSES sp = new SYSTEM_PROCESSES[n];
-	while (NtQuerySystemInformation(5, sp, n*sizeof(SYSTEM_PROCESSES), 0) == STATUS_INFO_LENGTH_MISMATCH)
-	{
-		delete[] sp;
-		sp = new SYSTEM_PROCESSES[n = n * 2];
-	}
 	bool done = false;
-
 	//遍历进程列表
-	for (PSYSTEM_PROCESSES p = sp; !done;
+	for (PSYSTEM_PROCESSES p = current_system_process; !done;
 	p = PSYSTEM_PROCESSES(PCHAR(p) + p->NextEntryDelta))
 	{
 		if (p->ProcessId == pid)
@@ -290,20 +310,30 @@ M_API int MGetExeState(DWORD pid, HWND hWnd)
 			SYSTEM_THREADS systemThread = p->Threads[0];
 			if (systemThread.ThreadState == THREAD_STATE::StateWait && systemThread.WaitReason == Suspended)
 			{
-				delete[] sp;
 				return 2;
 			}
 			else
 			{
-				delete[] sp;
 				return 1;
 			}
 			done = true;
 		}
 		done = p->NextEntryDelta == 0;
 	}
-	delete[] sp;
-	return rs;
+	return 0;
+}
+M_API SYSTEM_THREADS* MGetExeThreads(DWORD pid, HWND hWnd)
+{
+	bool done = false;
+	//遍历进程列表
+	for (PSYSTEM_PROCESSES p = current_system_process; !done;
+		p = PSYSTEM_PROCESSES(PCHAR(p) + p->NextEntryDelta))
+	{
+		if (p->ProcessId == pid)
+			return p->Threads;
+		done = p->NextEntryDelta == 0; 
+	}
+	return 0;
 }
 M_API ULONG MGetExeRam(DWORD pid)
 {

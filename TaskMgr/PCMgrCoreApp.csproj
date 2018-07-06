@@ -150,6 +150,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="icoPcmgr.ico" />
+    <None Include="Resources\icoServiceHost.ico" />
+    <None Include="Resources\icoService.ico" />
     <None Include="Resources\application_view_list.png" />
     <None Include="Resources\System.Windows.Forms.LinkLabel.bmp" />
     <None Include="Resources\System.Windows.Forms.RichTextBox.bmp" />

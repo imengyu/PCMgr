@@ -1,2 +1,13 @@
-Debug/
-Release/
+.vs/
+depends.exe - 快捷方式.lnk
+*.pdb
+*.cache
+*.idb
+*.tlog
+*.lnk
+*.obj
+*.res
+*.log
+*.pch
+*.lastbulidstate
+

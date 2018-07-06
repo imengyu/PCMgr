@@ -18,17 +18,30 @@ namespace TaskMgr.Aero.TaskDialog {
     internal class NativeMethods {
 
         /// <summary>Direct Task Dialog call.</summary>
-        [DllImport("comctl32.dll", CharSet = CharSet.Unicode, EntryPoint = "TaskDialog")]
-        public static extern int TaskDialog(IntPtr hWndParent, IntPtr hInstance,
+        [DllImport(FormMain.COREDLLNAME, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int MTaskDialog(IntPtr hWndParent, IntPtr hInstance,
             string pszWindowTitle, string pszMainInstruction, string pszContent,
             int dwCommonButtons, IntPtr pszIcon, out int pnButton);
 
         /// <summary>Indirect Task Dialog call. Allows complex dialogs with interaction logic (via callback).</summary>
-        [DllImport("comctl32.dll", CharSet = CharSet.Unicode, PreserveSig=false)]
-        public static extern IntPtr TaskDialogIndirect(ref TaskDialogConfig pTaskConfig,
+        [DllImport(FormMain.COREDLLNAME, CharSet = CharSet.Unicode, PreserveSig = false, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr MTaskDialogIndirect(ref TaskDialogConfig pTaskConfig,
             out int pnButton, out int pnRadioButton, out bool pfVerificationFlagChecked);
 
+        public static int TaskDialog(IntPtr hWndParent, IntPtr hInstance, string pszWindowTitle, string pszMainInstruction, string pszContent,
+            int dwCommonButtons, IntPtr pszIcon, out int pnButton)
+        {
+            return MTaskDialog(hWndParent, hInstance, pszWindowTitle, pszMainInstruction, pszContent,
+                dwCommonButtons, pszIcon, out pnButton);
+        }
+        public static IntPtr TaskDialogIndirect(ref TaskDialogConfig pTaskConfig,
+            out int pnButton, out int pnRadioButton, out bool pfVerificationFlagChecked)
+        {
+            return MTaskDialogIndirect(ref pTaskConfig, out pnButton, out pnRadioButton, out pfVerificationFlagChecked);
+        }
+
         internal delegate IntPtr TaskDialogCallback(IntPtr hwnd, uint msg, UIntPtr wParam, IntPtr lParam, IntPtr refData);
+
 
         /// <summary>The Task Dialog config structure.</summary>
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode, Pack = 1)]

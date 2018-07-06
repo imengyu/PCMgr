@@ -8,7 +8,7 @@
 
 #include <list>
 
-typedef void(__stdcall *EnumWinsCallBack)(HWND hWnd, HWND hWndParent);
+typedef void(__cdecl *EnumWinsCallBack)(HWND hWnd, HWND hWndParent);
 
 DWORD currentPid = 0;
 int selectItem2 = 0, selectItem1 = 0, currentShowThreadPid = 0, winscount = 0, winicoidx = 0, threadscount = 0;
@@ -93,9 +93,6 @@ void ThrowErrorAndErrorCode(DWORD code, LPWSTR msg, LPWSTR title)
 
 BOOL FreeLibraryEx()
 {
-	TCHAR path[MAX_PATH];
-	ListView_GetItemText(hListModuls, selectItem2, 0, path, MAX_PATH);
-	LPCSTR szModuleName = W2A(path);
 	HANDLE hProcess;
 	DWORD rs = MOpenProcessNt(currentPid, &hProcess);
 	if (rs == -1) {

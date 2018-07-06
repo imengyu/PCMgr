@@ -25,6 +25,7 @@ void ShowMainCoreStartUp()
 
 BOOL ShowMainCore(HWND hWndParent)
 {
+	return TRUE;
 	HWND hWnd;
 	hWnd = CreateWindowW(L"PCMGRWINDOW", L"进程详细信息窗口", WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, hWndParent, NULL, hInst, nullptr);

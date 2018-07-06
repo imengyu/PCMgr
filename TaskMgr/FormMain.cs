@@ -37,19 +37,16 @@ namespace TaskMgr
             GetPrivateProfileString(configSection, configkey, "", temp, 1024, Application.StartupPath + "\\" + currentProcessName + ".ini");
             return temp.ToString();
         }
+
+
+        //private bool showSystemProcess = false;
+        private bool showHiddenFiles = false;
+
         #endregion
 
         #region API S
 
-        /*struct EXEPROFENCE
-        {
-            int state;
-            double cpu;
-            ulong ram;
-            int disk;
-            int internet;
-            long cputime;
-        }*/
+        #region MainApi
 
         const int MB_OK = 0x00000000;
         const int MB_OKCANCEL = 0x00000001;
@@ -103,65 +100,175 @@ namespace TaskMgr
         WNDPROC coreWndProc = null;
         EXITCALLBACK exitCallBack;
         EnumProcessCallBack enumProcessCallBack;
+        EnumProcessCallBack2 enumProcessCallBack2;
         taskdialogcallback taskDialogCallBack;
         EnumWinsCallBack enumWinsCallBack;
         EnumWinsCallBack getWinsCallBack;
 
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private delegate void EnumProcessCallBack2(int pid);
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate long WNDPROC(IntPtr hWnd, uint msg, IntPtr lParam, IntPtr wParam);
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate void EXITCALLBACK();
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate void EnumProcessCallBack(int pid, int ppid, IntPtr name, IntPtr exefullpath, int tp);
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate int taskdialogcallback(IntPtr hwnd, [MarshalAs(UnmanagedType.LPWStr)]string text, [MarshalAs(UnmanagedType.LPWStr)] string title, [MarshalAs(UnmanagedType.LPWStr)]string apptl, int ico, int button);
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate void EnumWinsCallBack(IntPtr hWnd, IntPtr hWndParent);
 
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        private static extern void MEnumProcessFree();
         //[DllImport(COREDLLNAME, EntryPoint = "MGetExeProfenceInfo")]
         //private static extern EXEPROFENCE MGetExeProfenceInfo(long dwPId, int intervalTime, ulong lastcputime);
-        [DllImport(COREDLLNAME, EntryPoint = "MAppVProcessAllWindowsGetProcessWindow")]
+        [DllImport(COREDLLNAME, EntryPoint = "MAppVProcessAllWindowsGetProcessWindow", CallingConvention = CallingConvention.Cdecl)]
         private static extern bool MAppVProcessAllWindowsGetProcessWindow(long pid);
-        [DllImport(COREDLLNAME, EntryPoint = "MGetPrivileges2")]
+        [DllImport(COREDLLNAME, EntryPoint = "MGetPrivileges2", CallingConvention = CallingConvention.Cdecl)]
         private static extern bool MGetPrivileges2();
-        [DllImport(COREDLLNAME, EntryPoint = "MGetPrivileges")]
+        [DllImport(COREDLLNAME, EntryPoint = "MGetPrivileges", CallingConvention = CallingConvention.Cdecl)]
         private static extern bool MGetPrivileges();
-        [DllImport(COREDLLNAME, EntryPoint = "MEnumProcess")]
+        [DllImport(COREDLLNAME, EntryPoint = "MEnumProcess", CallingConvention = CallingConvention.Cdecl)]
         private static extern void MEnumProcess(IntPtr callback);
-        [DllImport(COREDLLNAME, EntryPoint = "MAppSetCallBack")]
+        [DllImport(COREDLLNAME, EntryPoint = "MEnumProcess2", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void MEnumProces2(IntPtr callback);
+        [DllImport(COREDLLNAME, EntryPoint = "MAppSetCallBack", CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr MAppSetCallBack(IntPtr ptr, int id);
-        [DllImport(COREDLLNAME)]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern int MAppWorkCall3(int id, IntPtr hWnd, IntPtr data);
-        [DllImport(COREDLLNAME, EntryPoint = "MAppExit")]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "MAppExit")]
         private static extern void MAppExit();
-        [DllImport(COREDLLNAME, EntryPoint = "MAppRebot")]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "MAppRebot")]
         private static extern void MAppRebot();
-        [DllImport(COREDLLNAME, EntryPoint = "MIs64BitOS")]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "MIs64BitOS")]
         public static extern bool MIs64BitOS();
-        [DllImport(COREDLLNAME, EntryPoint = "MGetExeState")]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "MGetExeState")]
         private static extern int MGetExeState(long dwPID, IntPtr hwnd);
-        [DllImport(COREDLLNAME, EntryPoint = "MGetProcessFullPathEx", CharSet = CharSet.Unicode)]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "MGetProcessFullPathEx", CharSet = CharSet.Unicode)]
         private static extern string MGetProcessFullPathEx(long dwPID);
-        [DllImport(COREDLLNAME, EntryPoint = "MGetExeInfo", CharSet = CharSet.Unicode)]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "MGetExeInfo", CharSet = CharSet.Unicode)]
         private static extern bool MGetExeInfo(string strFilePath, string InfoItem, StringBuilder b, int maxcount);
-        [DllImport(COREDLLNAME, EntryPoint = "MGetExeDescribe", CharSet = CharSet.Unicode)]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "MGetExeDescribe", CharSet = CharSet.Unicode)]
         private static extern bool MGetExeDescribe(string pszFullPath, StringBuilder b, int maxcount);
-        [DllImport(COREDLLNAME, EntryPoint = "MGetExeCompany", CharSet = CharSet.Unicode)]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "MGetExeCompany", CharSet = CharSet.Unicode)]
         private static extern bool MGetExeCompany(string pszFullPath, StringBuilder b, int maxcount);
-        [DllImport(COREDLLNAME, EntryPoint = "MGetExeIcon", CharSet = CharSet.Unicode)]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "MGetExeIcon", CharSet = CharSet.Unicode)]
         private static extern IntPtr MGetExeIcon(string pszFullPath);
-        [DllImport(COREDLLNAME, EntryPoint = "MGetCpuUseAge")]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "MGetCpuUseAge")]
         private static extern double MGetCpuUseAge();
-        [DllImport(COREDLLNAME, EntryPoint = "MGetRamUseAge")]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "MGetRamUseAge")]
         private static extern double MGetRamUseAge();
-        [DllImport(COREDLLNAME, EntryPoint = "MGetDiskUseAge")]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "MGetDiskUseAge")]
         private static extern double MGetDiskUseAge();
-        [DllImport(COREDLLNAME, EntryPoint = "MAppWorkShowMenuProcess")]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "MAppWorkShowMenuProcess")]
         private static extern int MAppWorkShowMenuProcess([MarshalAs(UnmanagedType.LPWStr)]string strFilePath, [MarshalAs(UnmanagedType.LPWStr)]string strFileName, long pid, IntPtr hWnd, int data);
-        [DllImport(COREDLLNAME, EntryPoint = "MGetExeRam")]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "MGetExeRam")]
         private static extern ulong MGetExeRam(long pid);
-        [DllImport(COREDLLNAME, EntryPoint = "MGetAllRam")]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "MGetAllRam")]
         private static extern ulong MGetAllRam();
-        [DllImport(COREDLLNAME, CharSet = CharSet.Unicode)]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         private static extern bool MGetProcessCommandLine(long pid, StringBuilder b, int m);
-        [DllImport(COREDLLNAME)]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern bool MAppVProcess(IntPtr hWnd);
         #endregion
+
+        #region FM API
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+        private struct WIN32_FIND_DATA
+        {
+            public uint dwFileAttributes;
+            public System.Runtime.InteropServices.ComTypes.FILETIME ftCreationTime;
+            public System.Runtime.InteropServices.ComTypes.FILETIME ftLastAccessTime;
+            public System.Runtime.InteropServices.ComTypes.FILETIME ftLastWriteTime;
+            public uint nFileSizeHigh;
+            public uint nFileSizeLow;
+            uint dwReserved0;
+            uint dwReserved1;
+
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
+            public string cFileName;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 14)]
+            public string cAlternateFileName;
+        };
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private delegate IntPtr MFCALLBACK(int msg, IntPtr lParam, IntPtr wParam);
+
+        private MFCALLBACK fileMgrCallBack;
+
+        [DllImport(COREDLLNAME, EntryPoint = "MFM_GetFileAttr", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        private static extern bool MFM_GetFileAttr(uint attr, StringBuilder sb, int maxcount, ref bool bout);
+        [DllImport(COREDLLNAME, EntryPoint = "MFM_GetFileTime", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        private static extern bool MFM_GetFileTime(ref System.Runtime.InteropServices.ComTypes.FILETIME fILETIME, StringBuilder sb, int maxcount);
+        [DllImport(COREDLLNAME, EntryPoint = "MFM_GetFileIcon", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        private static extern IntPtr MFM_GetFileIcon([MarshalAs(UnmanagedType.LPWStr)] string fileExt, StringBuilder sb, int maxcount);
+        [DllImport(COREDLLNAME, EntryPoint = "MFM_GetFolderIcon", CallingConvention = CallingConvention.Cdecl)]
+        private static extern IntPtr MFM_GetFolderIcon();
+        [DllImport(COREDLLNAME, EntryPoint = "MFM_GetMyComputerIcon", CallingConvention = CallingConvention.Cdecl)]
+        private static extern IntPtr MFM_GetMyComputerIcon();
+        [DllImport(COREDLLNAME, EntryPoint = "MFM_SetCallBack", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void MFM_SetCallBack(IntPtr cp);
+        [DllImport(COREDLLNAME, EntryPoint = "MFM_GetRoots", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void MFM_GetRoots();
+        [DllImport(COREDLLNAME, EntryPoint = "MFM_GetFolders", CallingConvention = CallingConvention.Cdecl)]
+        private static extern bool MFM_GetFolders([MarshalAs(UnmanagedType.LPWStr)] string filePath);
+        [DllImport(COREDLLNAME, EntryPoint = "MFM_GetFiles", CallingConvention = CallingConvention.Cdecl)]
+        private static extern bool MFM_GetFiles([MarshalAs(UnmanagedType.LPWStr)] string filePath);
+        [DllImport(COREDLLNAME, EntryPoint = "MFM_GetMyComputerName", CallingConvention = CallingConvention.Cdecl)]
+        private static extern IntPtr MFM_GetMyComputerName();
+        [DllImport(COREDLLNAME, EntryPoint = "MFM_OpenFile", CallingConvention = CallingConvention.Cdecl)]
+        private static extern bool MFM_OpenFile([MarshalAs(UnmanagedType.LPWStr)] string filePath, IntPtr hWnd);
+        [DllImport(COREDLLNAME, EntryPoint = "MAppWorkShowMenuFM", CallingConvention = CallingConvention.Cdecl)]
+        private static extern int MAppWorkShowMenuFM([MarshalAs(UnmanagedType.LPWStr)] string filePath, bool mutilSelect, int selectCount);
+        [DllImport(COREDLLNAME, EntryPoint = "MAppWorkShowMenuFMF", CallingConvention = CallingConvention.Cdecl)]
+        private static extern int MAppWorkShowMenuFMF([MarshalAs(UnmanagedType.LPWStr)] string filePath);
+        [DllImport(COREDLLNAME, EntryPoint = "MFM_IsValidateFolderFileName", CallingConvention = CallingConvention.Cdecl)]
+        private static extern bool MFM_IsValidateFolderFileName([MarshalAs(UnmanagedType.LPWStr)] string name);
+        [DllImport(COREDLLNAME, EntryPoint = "MFM_CreateDir", CallingConvention = CallingConvention.Cdecl)]
+        private static extern bool MFM_CreateDir([MarshalAs(UnmanagedType.LPWStr)] string path);
+        [DllImport(COREDLLNAME, EntryPoint = "MFM_UpdateFile", CallingConvention = CallingConvention.Cdecl)]
+        private static extern bool MFM_UpdateFile([MarshalAs(UnmanagedType.LPWStr)] string fullPath, [MarshalAs(UnmanagedType.LPWStr)] string dirPath);
+        [DllImport(COREDLLNAME, EntryPoint = "MFM_ReUpdateFile", CallingConvention = CallingConvention.Cdecl)]
+        private static extern bool MFM_ReUpdateFile([MarshalAs(UnmanagedType.LPWStr)] string fullPath, [MarshalAs(UnmanagedType.LPWStr)] string dirPath);
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        private static extern void MFM_SetShowHiddenFiles(bool b);
+
+        public static String FormatFileSize(Int64 fileSize)
+        {
+            if (fileSize < 0)
+            {
+                throw new ArgumentOutOfRangeException("fileSize");
+            }
+            else if (fileSize >= 1024 * 1024 * 1024)
+            {
+                return string.Format("{0:########0.00} G", ((Double)fileSize) / (1024 * 1024 * 1024));
+            }
+            else if (fileSize >= 1024 * 1024)
+            {
+                return string.Format("{0:####0.00} M", ((Double)fileSize) / (1024 * 1024));
+            }
+            else if (fileSize >= 1024)
+            {
+                return string.Format("{0:####0.00} K", ((Double)fileSize) / 1024);
+            }
+            else
+            {
+                return string.Format("{0} b", fileSize);
+            }
+        }
+
+        #endregion
+
+
+
+        #endregion
+
+        private bool processListInited = false;
+        private bool driverListInited = false;
+        private bool scListInited = false;
+        private bool fileListInited = false;
+        private bool startListInited = false;
 
         #region ProcessListWork
         private int sortitem = -1;
@@ -170,54 +277,40 @@ namespace TaskMgr
         private Timer baseProcessRefeshTimer = new Timer();
         public static string currentProcessName = "";
         private ListViewColumnSorter lvwColumnSorter = new ListViewColumnSorter();
-        private class psitem
+
+        private class PsItem
         {
+            public Ctls.TaskMgrListItem item = null;
             public int pid;
-            public bool isvalidid = false;
             public ulong lastcoutime = 0;
         }
-        private struct pstag
+        private struct PsTag
         {
             public long pid;
             public string exename;
             public string exepath;
         }
         private bool isSelectExplorer = false;
-        private List<psitem> loadedPs = new List<psitem>();
+        private List<int> validPid = new List<int>();
+        private List<PsItem> loadedPs = new List<PsItem>();
         private List<string> windowsProcess = new List<string>();
         private long selectedpid = 0;
         private Font smallListFont = new Font("微软雅黑", 9f);
         private TaskMgrListItem thisLoadItem = null;
 
-        private bool IsWindowsrocess(string str)
-        {
-            bool rs = false;
-            foreach(string s in windowsProcess)
-            {
-                if (s == str)
-                {
-                    rs = true;
-                    break;
-                }
-            }
-            return rs;
-        }
         private void MainGetWinsCallBack(IntPtr hWnd, IntPtr data)
         {
             if (thisLoadItem != null)
             {
                 if (WorkWindow.FormSpyWindow.IsWindow(hWnd))
                 {
-                    //if (WorkWindow.FormSpyWindow.IsWindowVisible(hWnd))
-                    //{
-
-
-                    IntPtr icon = WorkWindow.FormSpyWindow.MGetWindowIcon(hWnd);
-                    TaskMgrListItemChild c = new TaskMgrListItemChild(Marshal.PtrToStringAuto(data), icon != IntPtr.Zero ? Icon.FromHandle(icon) : Properties.Resources.icoShowedWindow);
-                    c.Tag = hWnd;
-                    thisLoadItem.Childs.Add(c);
-
-                    //}
+                    if (WorkWindow.FormSpyWindow.IsWindowVisible(hWnd))
+                    {
+                        IntPtr icon = WorkWindow.FormSpyWindow.MGetWindowIcon(hWnd);
+                        TaskMgrListItemChild c = new TaskMgrListItemChild(Marshal.PtrToStringAuto(data), icon != IntPtr.Zero ? Icon.FromHandle(icon) : Properties.Resources.icoShowedWindow);
+                        c.Tag = hWnd;
+                        thisLoadItem.Childs.Add(c);
+                    }
                 }
             }
         }
@@ -227,25 +320,13 @@ namespace TaskMgr
             Control fp = FromHandle(hWndParent);
             f.ShowDialog(fp);
         }
-        private TaskMgrListItem ProcessListFindItem(int pid)
-        {
-            TaskMgrListItem rs = null;
-            foreach (TaskMgrListItem r in listProcess.Items)
-            {
-                if (r.PID == pid)
-                {
-                    rs = r;
-                    break;
-                }
-            }
-            return rs;
-        }
-        private bool ProcessListIsProcessLoaded(int pid)
+
+        private bool IsWindowsProcess(string str)
         {
             bool rs = false;
-            foreach (psitem f in loadedPs)
+            foreach (string s in windowsProcess)
             {
-                if (f.pid == pid)
+                if (s == str)
                 {
                     rs = true;
                     break;
@@ -253,17 +334,64 @@ namespace TaskMgr
             }
             return rs;
         }
+        private TaskMgrListItem ProcessListFindItem(int pid)
+        {
+            TaskMgrListItem rs = null;
+            foreach (TaskMgrListItem i in listProcess.Items)
+            {
+                if (i.PID == pid)
+                {
+                    rs = i;
+                    break;
+                }
+            }
+            return rs;
+        }
+        private bool ProcessListIsProcessLoaded(int pid, out PsItem item)
+        {
+            bool rs = false;
+            foreach (PsItem f in loadedPs)
+            {
+                if (f.pid == pid)
+                {
+                    item = f;
+                    rs = true;
+                    return rs;
+                }
+            }
+            item = null;
+            return rs;
+        }
         private void ProcessListInit()
+        {
+            if (!processListInited)
+            {
+                baseProcessRefeshTimer.Start();
+
+                processListInited = true;
+                ProcessListRefesh();
+            }
+        }
+        private void ProcessListRefesh()
         {
             ProcessListPrepareClear();
             listProcess.Locked = true;
             MEnumProcess(Marshal.GetFunctionPointerForDelegate(enumProcessCallBack));
         }
+        private void ProcessListRefesh2()
+        {
+            ProcessListPrepareClear();
+            listProcess.Locked = true;
+            MEnumProces2(Marshal.GetFunctionPointerForDelegate(enumProcessCallBack2));
+            ProcessListClear();
+            ProcessListUpdateValues();
+            listProcess.Locked = false;
+            listProcess.Invalidate();
+        }
         private void ProcessListLoad(int pid, int ppid, string exename, string exefullpath)
         {
-            psitem p = new psitem();
+            PsItem p = new PsItem();
             p.pid = pid;
-            p.isvalidid = true;
             loadedPs.Add(p);
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.Append(exefullpath);
@@ -278,7 +406,7 @@ namespace TaskMgr
                 else taskMgrListItem = new TaskMgrListItem(exename);
             }
             else taskMgrListItem = new TaskMgrListItem(exename);
-
+            p.item = taskMgrListItem;
             if (exefullpath == @"C:\Windows\System32\svchost.exe" || exename == "svchost.exe")
                 taskMgrListItem.Icon = Properties.Resources.icoServiceHost;
             else
@@ -287,10 +415,12 @@ namespace TaskMgr
                 if (intPtr != IntPtr.Zero) taskMgrListItem.Icon = Icon.FromHandle(intPtr);
             }
 
-            pstag t = new TaskMgr.FormMain.pstag();
-            t.exename = exename;
-            t.pid = pid;
-            t.exepath = stringBuilder.ToString();
+            PsTag t = new PsTag
+            {
+                exename = exename,
+                pid = pid,
+                exepath = stringBuilder.ToString()
+            };
             taskMgrListItem.Tag = t;
             taskMgrListItem.SubItems.Add("");
             taskMgrListItem.SubItems.Add("");
@@ -338,44 +468,26 @@ namespace TaskMgr
 
             if (taskMgrListItem.Childs.Count > 0)
                 taskMgrListItem.Group = listProcess.Groups[0];
-            else if (pid == 0 || pid == 4 || IsWindowsrocess(exefullpath))
+            else if (pid == 0 || pid == 4 || IsWindowsProcess(exefullpath))
                 taskMgrListItem.Group = listProcess.Groups[2];
             else taskMgrListItem.Group = listProcess.Groups[1];
 
             taskMgrListItem.PID = pid;
             listProcess.Items.Add(taskMgrListItem);
-            ProcessListUpdate(pid, ppid, exename, exefullpath, true, p);
+            ProcessListUpdate(pid, true, taskMgrListItem);
         }
-        private void ProcessListUpdate(int pid, int ppid, string name, string exefullpath, bool isload = false, psitem item=null)
+        private void ProcessListUpdate(int pid, bool isload = false, TaskMgrListItem it=null)
         {
-            psitem thisitem = null;
-            if (!isload)
-            {
-                foreach (psitem f in loadedPs)
-                {
-                    if (f.pid == pid)
-                    {
-                        thisitem = f;
-                        break;
-                    }
-                }
-                if (thisitem == null)
-                    return;
-                thisitem.isvalidid = true;
-            }
-            else thisitem = item;
-
-            TaskMgrListItem it = ProcessListFindItem(pid);
+            //Child and group
             if (it.Childs.Count > 0)
             {
                 for (int i = it.Childs.Count - 1; i >= 0; i--)
                 {
                     IntPtr h = (IntPtr)it.Childs[i].Tag;
-                    if (!WorkWindow.FormSpyWindow.IsWindow(h))
+                    if (!WorkWindow.FormSpyWindow.IsWindow(h) || !WorkWindow.FormSpyWindow.IsWindowVisible(h))
                         it.Childs.Remove(it.Childs[i]);
                 }
-                if (it.Childs.Count == 0)
-                    it.Group = listProcess.Groups[1];
+                if (it.Childs.Count == 0) it.Group = listProcess.Groups[1];
             }
             else
             {
@@ -387,16 +499,15 @@ namespace TaskMgr
 
                     if (it.Childs.Count > 0)
                         it.Group = listProcess.Groups[0];
-                    else if (pid == 0 || pid == 4 || IsWindowsrocess(exefullpath))
+                    else if (pid == 0 || pid == 4 || IsWindowsProcess(((PsTag)it.Tag).exepath))
                         it.Group = listProcess.Groups[2];
                     else it.Group = listProcess.Groups[1];
                 }
             }
 
-
-            if(stateindex!=-1)
+            if (stateindex != -1)
             {
-                int i = MGetExeState(pid,IntPtr.Zero);
+                int i = MGetExeState(pid, IntPtr.Zero);
                 if (i == 1)
                 {
                     it.SubItems[stateindex].Text = "";
@@ -442,7 +553,7 @@ namespace TaskMgr
             if (d <= 0)
                 return Color.FromArgb(255, 244, 196);
             else if (d > 0 && d <= 0.1)
-                return Color.FromArgb(255, 228, 135); 
+                return Color.FromArgb(255, 228, 135);
             else if (d > 0.1 && d <= 0.3)
                 return Color.FromArgb(249, 236, 168);
             else if (d > 0.3 && d <= 0.6)
@@ -457,16 +568,13 @@ namespace TaskMgr
         }
         private void ProcessListPrepareClear()
         {
-            for (int i = 0; i < loadedPs.Count; i++)
-            {
-                loadedPs[i].isvalidid = false;
-            }
+            validPid.Clear();
         }
         private void ProcessListClear()
         {
             for (int i = loadedPs.Count - 1; i >= 0; i--)
             {
-                if (!loadedPs[i].isvalidid)
+                if (!validPid.Contains(loadedPs[i].pid))
                 {
                     TaskMgrListItem li = ProcessListFindItem(loadedPs[i].pid);
                     loadedPs.Remove(loadedPs[i]);
@@ -478,16 +586,17 @@ namespace TaskMgr
         {
             if (tp == 1)
             {
-                if (ProcessListIsProcessLoaded(pid))
-                    ProcessListUpdate(pid, ppid, Marshal.PtrToStringAuto(name), Marshal.PtrToStringAuto(exefullpath));
+                validPid.Add(pid);
+                PsItem item;
+                if (ProcessListIsProcessLoaded(pid, out item))
+                    ProcessListUpdate(pid, false, item.item);
                 else ProcessListLoad(pid, ppid, Marshal.PtrToStringAuto(name), Marshal.PtrToStringAuto(exefullpath));
             }
             else if (tp == 0)
             {
                 ProcessListClear();
-                lbProcessCount.Text = "进程数：" + pid;                          
-                //if (isClickRefesh) { TaskDialog.Show("刷新成功。", DEFAPPTITLE, ""); isClickRefesh = false; }
-                if(isFirstLoad)
+                lbProcessCount.Text = "进程数：" + pid;
+                if (isFirstLoad)
                 {
                     if (sortitem < listProcess.Header.Items.Count && sortitem >= 0)
                     {
@@ -507,6 +616,17 @@ namespace TaskMgr
                 listProcess.SyncItems(true);
             }
         }
+        private void ProcessListHandle2(int pid)
+        {          
+            validPid.Add(pid);
+        }
+        private void ProcessListUpdateValues()
+        {
+            for (int i = 0; i < listProcess.ShowedItems.Count; i++)
+            {
+                ProcessListUpdate(listProcess.ShowedItems[i].PID, false, listProcess.ShowedItems[i]);
+            }
+        }
 
         private void BaseProcessRefeshTimer_Tick(object sender, EventArgs e)
         {
@@ -515,13 +635,15 @@ namespace TaskMgr
                 listProcess.Colunms[cpuindex].TextBig = ((int)(MGetCpuUseAge())) + "%";
             if (ramindex != -1)
                 listProcess.Colunms[ramindex].TextBig = ((int)(MGetRamUseAge() * 100)) + "%";
-            //if (diskindex != -1)
-            //listProcess.Colunms[diskindex].TextBig = (MGetDiskUseAge() * 100).ToString("00") + "%";
-            //ProcessListInit();
+            if (diskindex != -1)
+                listProcess.Colunms[diskindex].TextBig = (MGetDiskUseAge() * 100).ToString("00") + "%";
+            ProcessListRefesh2();
             listProcess.Locked = false;
             listProcess.Header.Invalidate();
             //listProcess.Invalidate();
         }
+       
+
 
         #region ListEvents
 
@@ -531,7 +653,7 @@ namespace TaskMgr
             {
                 if (listProcess.SelectedItem != null && listProcess.SelectedChildItem == null)
                 {
-                    pstag t = (pstag)listProcess.SelectedItem.Tag;
+                    PsTag t = (PsTag)listProcess.SelectedItem.Tag;
                     int rs = MAppWorkShowMenuProcess(t.exepath,
                         t.exename,
                         selectedpid, Handle, isSelectExplorer ? 1 : 0);
@@ -546,7 +668,7 @@ namespace TaskMgr
         {
             if (listProcess.SelectedItem != null)
             {
-                pstag t = (pstag)listProcess.SelectedItem.Tag;
+                PsTag t = (PsTag)listProcess.SelectedItem.Tag;
                 selectedpid = t.pid;
                 if (selectedpid > 4)
                 {
@@ -564,6 +686,7 @@ namespace TaskMgr
         {
 
         }
+
         private void Header_CloumClick(object sender, TaskMgrListHeader.TaskMgrListHeaderEventArgs e)
         {
             if (e.MouseEventArgs.Button == MouseButtons.Left && e.MouseEventArgs.Clicks == 1)
@@ -599,16 +722,22 @@ namespace TaskMgr
                 }
             }
         }
+
         private void btnEndProcess_Click(object sender, EventArgs e)
         {
             MAppWorkCall3(190, Handle, IntPtr.Zero);
         }
+        private void lbShowDetals_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            if (!MAppVProcess(Handle)) TaskDialog.Show("无法打开详细信息窗口", DEFAPPTITLE, "未知错误。", TaskDialogButton.OK, TaskDialogIcon.Stop);
+        }
+
         #endregion
 
         #region Headers
         public class itemheader
         {
-            public itemheader(int index, string name,int wi)
+            public itemheader(int index, string name, int wi)
             {
                 this.index = index;
                 this.name = name;
@@ -679,6 +808,556 @@ namespace TaskMgr
 
         #endregion
 
+        #region FileMgrWork
+
+        private Dictionary<string, string> fileTypeNames = new Dictionary<string, string>();
+        private TreeNode lastClickTreeNode = null;
+        private string lastShowDir = "";
+
+        private void FileMgrInit()
+        {
+            if (!fileListInited)
+            {
+                fileListInited = true;
+
+                fileMgrCallBack = FileMgrCallBack;
+                MFM_SetCallBack(Marshal.GetFunctionPointerForDelegate(fileMgrCallBack));
+
+                imageListFileMgrLeft.Images.Add("folder", Icon.FromHandle(MFM_GetFolderIcon()));
+                imageListFileMgrLeft.Images.Add("mycp", Icon.FromHandle(MFM_GetMyComputerIcon()));
+
+                imageListFileTypeList.Images.Add("folder", Icon.FromHandle(MFM_GetFolderIcon()));
+
+                MAppWorkCall3(182, treeFmLeft.Handle, IntPtr.Zero);
+                MAppWorkCall3(182, listFm.Handle, IntPtr.Zero);
+
+                string smycp = Marshal.PtrToStringAuto(MFM_GetMyComputerName());
+                treeFmLeft.Nodes.Add("mycp", smycp, "mycp", "mycp").Tag = "mycp";
+                MFM_GetRoots();
+            }
+        }
+        private IntPtr FileMgrCallBack(int msg, IntPtr lParam, IntPtr wParam)
+        {
+            switch (msg)
+            {
+                case 2:
+                    {
+                        string s = Marshal.PtrToStringAuto(lParam);
+                        string path = Marshal.PtrToStringAuto(wParam);
+                        Icon icon = Icon.FromHandle(MFM_GetFileIcon(path, null, 0));
+                        imageListFileMgrLeft.Images.Add(path, icon);
+                        imageListFileTypeList.Images.Add(path, icon);
+                        TreeNode n = treeFmLeft.Nodes[0].Nodes.Add(path, s, path, path);
+                        n.Tag = path;
+                        n.Nodes.Add("loading", "正在加载...", "loading", "loading");
+                        break;
+                    }
+                case 3:
+                    {
+                        if (wParam.ToInt32() == -1)
+                        {
+                            lastClickTreeNode.Nodes[0].Text = "无法访问此文件夹";
+                            lastClickTreeNode.Nodes[0].ImageKey = "err";
+                        }
+                        else
+                        {
+                            string s = Marshal.PtrToStringAuto(lParam);
+                            string path = Marshal.PtrToStringAuto(wParam);
+                            TreeNode n = lastClickTreeNode.Nodes.Add(s, s, "folder", "folder");
+                            if (path.EndsWith("\\"))
+                                n.Tag = path + s;
+                            else n.Tag = path + "\\" + s;
+                            n.Nodes.Add("loading", "正在加载...", "loading", "loading");
+                        }
+                        break;
+                    }
+                case 5:
+                    {
+                        string s = Marshal.PtrToStringAuto(lParam);
+                        string path = Marshal.PtrToStringAuto(wParam);
+                        listFm.Items.Add(new ListViewItem(s, "folder") { Tag = path.EndsWith("\\") ? path + s : path + "\\" + s });
+                        break;
+                    }
+                case 6:
+                case 26:
+                    {
+                        if (wParam.ToInt32() == -1)
+                        {
+                            listFm.Items.Clear();
+                            string path = Marshal.PtrToStringAuto(lParam);
+                            listFm.Items.Add(new ListViewItem("..", "folder") { Tag = "..\\back\\" + path });
+                            ListViewItem lvi = listFm.Items.Add("无法读取文件夹", "err");
+                        }
+                        else
+                        {
+                            ListViewItem it = null;
+                            WIN32_FIND_DATA data = default(WIN32_FIND_DATA);
+                            data = (WIN32_FIND_DATA)Marshal.PtrToStructure(lParam, data.GetType());
+                            string s = data.cFileName;
+                            string path = Marshal.PtrToStringAuto(wParam);
+                            string fpath = path + "\\" + s;
+                            fpath = fpath.Replace("\\\\", "\\");
+                            string fext = "*" + Path.GetExtension(fpath);
+                            if (fext == "") fext = "*.*";
+                            if (fext == "*.exe")
+                            {
+                                if (!imageListFileTypeList.Images.ContainsKey(fpath) && File.Exists(fpath))
+                                {
+                                    StringBuilder sb0 = new StringBuilder(260);
+                                    IntPtr h = MGetExeIcon(fpath);
+                                    if (h != IntPtr.Zero)
+                                        imageListFileTypeList.Images.Add(fpath, Icon.FromHandle(h));
+                                    if (!fileTypeNames.ContainsKey(fpath))
+                                    {
+                                        MGetExeDescribe(fpath, sb0, 260);
+                                        fileTypeNames.Add(fpath, sb0.ToString());
+                                    }
+                                    sb0 = null;
+                                }
+                                if (msg == 26)
+                                {
+                                    foreach (ListViewItem i in listFm.Items)
+                                    {
+                                        if (i.Tag.ToString() == fpath)
+                                        {
+                                            it = i;
+                                            break;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    it = listFm.Items.Add(new ListViewItem(s, fpath) { Tag = fpath });
+                                }
+                                string typeName = "";
+                                if (fileTypeNames.TryGetValue(fpath, out typeName))
+                                    it.SubItems.Add(typeName);
+                                else it.SubItems.Add("");
+                            }
+                            else
+                            {
+                                if (!imageListFileTypeList.Images.ContainsKey(fext))
+                                {
+                                    StringBuilder sb0 = new StringBuilder(80);
+                                    imageListFileTypeList.Images.Add(fext, Icon.FromHandle(MFM_GetFileIcon(fext, sb0, 80)));
+                                    if (!fileTypeNames.ContainsKey(fext))
+                                        fileTypeNames.Add(fext, sb0.ToString());
+                                    else imageListFileTypeList.Images.Add(fext, Icon.FromHandle(MFM_GetFileIcon(fext, null, 0)));
+                                    sb0 = null;
+                                }
+                                if (msg == 26)
+                                {
+                                    foreach (ListViewItem i in listFm.Items)
+                                    {
+                                        if (i.Tag.ToString() == fpath)
+                                        {
+                                            it = i;
+                                            break;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    it = listFm.Items.Add(new ListViewItem(s, fext) { Tag = fpath });
+                                }
+
+                                string typeName = "";
+                                if (fileTypeNames.TryGetValue(fext, out typeName))
+                                    it.SubItems.Add(typeName);
+                                else it.SubItems.Add("");
+                            }
+
+                            long size = (data.nFileSizeHigh * 0xffffffff + 1) + data.nFileSizeLow;
+                            it.SubItems.Add(FormatFileSize(size));
+
+                            StringBuilder sb = new StringBuilder(26);
+                            if (MFM_GetFileTime(ref data.ftCreationTime, sb, 26))
+                                it.SubItems.Add(sb.ToString());
+                            else it.SubItems.Add("Unknow");
+
+                            StringBuilder sb2 = new StringBuilder(26);
+                            if (MFM_GetFileTime(ref data.ftLastWriteTime, sb2, 26))
+                                it.SubItems.Add(sb2.ToString());
+                            else it.SubItems.Add("Unknow");
+
+                            StringBuilder sb3 = new StringBuilder(32);
+                            bool hidden = false;
+                            if (MFM_GetFileAttr(data.dwFileAttributes, sb3, 32, ref hidden))
+                            {
+                                if (hidden)
+                                {
+                                    it.ForeColor = Color.Gray;
+                                    it.SubItems[0].ForeColor = Color.Gray;
+                                    it.SubItems[1].ForeColor = Color.Gray;
+                                    it.SubItems[2].ForeColor = Color.Gray;
+                                    it.SubItems[3].ForeColor = Color.Gray;
+                                }
+                                it.SubItems.Add(sb3.ToString());
+                            }
+                            else it.SubItems.Add("");
+
+                        }
+                        break;
+                    }
+                case 7:
+                    {
+                        string path = Marshal.PtrToStringAuto(wParam);
+                        listFm.Items.Add(new ListViewItem("..", "folder") { Tag = "..\\back\\" + path });
+                        break;
+                    }
+                case 8:
+                    FileMgrShowFiles(null);
+                    break;
+                case 9:
+                    {
+                        if (listFm.SelectedItems.Count > 0)
+                        {
+                            ListViewItem listViewItem = listFm.SelectedItems[0];
+                            string path = listViewItem.Tag.ToString();
+                            listViewItem.BeginEdit();
+                            currEditingItem = listViewItem;
+                        }
+                        break;
+                    }
+                case 10:
+                    {
+                        ListViewItem listViewItem = listFm.Items.Add("新建文件夹", "folder");
+                        listViewItem.Tag = "newfolder";
+                        listViewItem.BeginEdit();
+                        currEditingItem = listViewItem;
+                        break;
+                    }
+                case 11:
+                    {
+                        foreach (ListViewItem i in listFm.Items)
+                            i.Selected = true;
+                        break;
+                    }
+                case 12:
+                    {
+                        foreach (ListViewItem i in listFm.Items)
+                            i.Selected = false;
+                        break;
+                    }
+                case 13:
+                    {
+                        foreach (ListViewItem i in listFm.Items)
+                            i.Selected = !i.Selected;
+                        break;
+                    }
+                case 14:
+                    lbFileMgrStatus.Text = Marshal.PtrToStringAuto(lParam);
+                    break;
+                case 15:
+                    switch (lParam.ToInt32())
+                    {
+                        case 0: lbFileMgrStatus.Text = "就绪"; break;
+                        case 1: {
+                                if (listFm.SelectedItems.Count > 0)
+                                    lbFileMgrStatus.Text = "就绪  共 " + listFm.Items.Count + " 个项目  选择了 " + listFm.SelectedItems.Count + " 个项目";
+                                else lbFileMgrStatus.Text = "就绪  共 " + listFm.Items.Count + " 个项目";
+                                break;
+                            }
+                        case 2: lbFileMgrStatus.Text = ""; break;
+                        case 3: lbFileMgrStatus.Text = ""; break;
+                        case 4: lbFileMgrStatus.Text = ""; break;
+                        case 5: lbFileMgrStatus.Text = "文件已经剪切到剪贴板"; break;
+                        case 6: lbFileMgrStatus.Text = "文件已经复制到剪贴板"; break;
+                        case 7: lbFileMgrStatus.Text = "新建文件夹失败"; break;
+                        case 8: lbFileMgrStatus.Text = "新建文件夹成功"; break;
+                        case 9: lbFileMgrStatus.Text = "路径已经复制到剪贴板"; break;
+                        case 10: lbFileMgrStatus.Text = "文件夹已经剪切到剪贴板"; break;
+                        case 11: lbFileMgrStatus.Text = "文件夹已经复制到剪贴板"; break;
+                    }
+
+                    break;
+                case 16:
+                    int index = lParam.ToInt32();
+                    if (index > 0 && index < listFm.SelectedItems.Count)
+                        return Marshal.StringToHGlobalAuto(listFm.SelectedItems[index].Tag.ToString());
+                    break;
+                case 17:
+                    if (lParam != IntPtr.Zero)
+                        Marshal.FreeHGlobal(wParam);
+                    break;
+                case 18:
+                    return showHiddenFiles ? new IntPtr(1) : new IntPtr(0);
+                case 19:
+                    FileMgrShowFiles(Marshal.PtrToStringAuto(lParam));
+                    break;
+            }
+            return IntPtr.Zero;
+        }
+        private void FileMgrShowFiles(string path)
+        {
+            if (path == null)
+            {
+                path = lastShowDir;
+                lastShowDir = null;
+            }
+            if (lastShowDir != path)
+            {
+                lastShowDir = path;
+                listFm.Items.Clear();
+                if (lastShowDir == "mycp" || lastShowDir == "\\\\")
+                {
+                    for (int i = 0; i < treeFmLeft.Nodes[0].Nodes.Count; i++)
+                        listFm.Items.Add(new ListViewItem(treeFmLeft.Nodes[0].Nodes[i].Text, treeFmLeft.Nodes[0].Nodes[i].ImageKey) { Tag = "..\\ROOT\\" + treeFmLeft.Nodes[0].Nodes[i].Tag });
+                    textBoxFmCurrent.Text = treeFmLeft.Nodes[0].Text;
+                }
+                else
+                {
+                    MFM_GetFiles(lastShowDir);
+                    textBoxFmCurrent.Text = lastShowDir;
+                }
+                if (path == "mycp") fileSystemWatcher.Path = "";
+                else fileSystemWatcher.Path = path;
+                fileSystemWatcher.EnableRaisingEvents = true;
+
+
+                FileMgrUpdateStatus(1);
+            }
+        }
+        private void FileMgrUpdateStatus(int i)
+        {
+            FileMgrCallBack(15, new IntPtr(i), IntPtr.Zero);
+        }
+
+        private void textBoxFmCurrent_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+                btnFmAddGoto_Click(sender, e);
+        }
+        private void btnFmAddGoto_Click(object sender, EventArgs e)
+        {
+            if (textBoxFmCurrent.Text == "")
+                TaskDialog.Show("请输入要跳转的路径！", "提示");
+            else if (Directory.Exists(textBoxFmCurrent.Text))
+                FileMgrShowFiles(textBoxFmCurrent.Text);
+            else if (File.Exists(textBoxFmCurrent.Text)) {
+                string d = Path.GetDirectoryName(textBoxFmCurrent.Text);
+                string f = Path.GetFileName(textBoxFmCurrent.Text);
+                FileMgrShowFiles(d);
+                ListViewItem[] lis = listFm.Items.Find(f, false);
+                if (lis.Length > 0) lis[0].Selected = true;
+            }
+            else TaskDialog.Show("路径不存在！", "提示");
+        }
+        private void treeFmLeft_BeforeExpand(object sender, TreeViewCancelEventArgs e)
+        {
+            if (e.Node.Nodes.Count == 0 || e.Node.Nodes[0].Text == "正在加载..." && e.Node.Tag != null)
+            {
+                lastClickTreeNode = e.Node;
+                string s = e.Node.Tag.ToString();
+                if (MFM_GetFolders(s)) lastClickTreeNode.Nodes.Remove(lastClickTreeNode.Nodes[0]);
+            }
+        }
+        private void treeFmLeft_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
+        {
+            TreeNode n = treeFmLeft.SelectedNode;
+            if (n != null && n.Tag != null)
+            {
+                if (e.Button == MouseButtons.Left)
+                {
+                    lastClickTreeNode = n;
+                    FileMgrShowFiles(lastClickTreeNode.Tag.ToString());
+                }
+                else if (e.Button == MouseButtons.Right)
+                {
+                    MAppWorkShowMenuFMF(n.Tag.ToString());
+                }
+            }
+        }
+
+        private ListViewItem currEditingItem = null;
+        private void listFm_AfterLabelEdit(object sender, LabelEditEventArgs e)
+        {
+            if (currEditingItem != null && e.Item == 0)
+            {
+                string path = currEditingItem.Tag.ToString();
+                string targetName = e.Label;
+                //Folder
+                if(path == "newfolder")
+                {
+                    if (targetName == "")
+                    {
+                        targetName = "新建文件夹";
+                        int ix = 1;
+                        string spt = lastShowDir + "\\" + targetName + (ix == 1 ? "" : (" (" + ix + ")"));
+                        bool finded = false;
+                        while (!finded)
+                        {
+                            if (Directory.Exists(spt))
+                                ix++;
+                            else
+                            {
+                                finded = true;
+                                break;
+                            }
+                        }
+                        if (!MFM_CreateDir(spt))
+                        {
+                            e.CancelEdit = true;
+                            listFm.Items.Remove(currEditingItem);
+                            FileMgrUpdateStatus(7);
+                        }
+                        else FileMgrUpdateStatus(8);
+                    }
+                    else if (MFM_IsValidateFolderFileName(targetName))
+                    {
+                        string spt = lastShowDir + "\\" + targetName;
+                        if (Directory.Exists(spt))
+                        {
+                            e.CancelEdit = true;
+                            listFm.Items.Remove(currEditingItem);
+                            TaskDialog.Show("指定的文件夹已经存在");
+                        }
+                        else
+                        {
+                            if (!MFM_CreateDir(spt))
+                            {
+                                e.CancelEdit = true;
+                                listFm.Items.Remove(currEditingItem);
+                                FileMgrUpdateStatus(7);
+                            }
+                            else FileMgrUpdateStatus(8);
+                        }
+                    }
+                    else
+                    {
+                        e.CancelEdit = true;
+                        listFm.Items.Remove(currEditingItem);
+                        TaskDialog.Show("文件名无效");
+                    }
+                }
+                else
+                {
+
+                }
+            }
+            else e.CancelEdit = true;
+        }
+        private void listFm_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            FileMgrUpdateStatus(1);
+        }
+        private void listFm_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                if (listFm.SelectedItems.Count > 0)
+                {
+                    ListViewItem listViewItem = listFm.SelectedItems[0];
+                    string path = listViewItem.Tag.ToString();
+                    if (path.StartsWith("..\\back\\"))
+                    {
+                        path = path.Remove(0, 8);
+                        int ix = path.LastIndexOf('\\');
+                        if (ix > 0 && ix < path.Length)
+                        {
+                            path = path.Remove(ix);
+                            FileMgrShowFiles(path);
+                        }
+                    }
+                    else
+                    {
+                        if (listViewItem.ImageKey == "folder" && Directory.Exists(path))
+                            FileMgrShowFiles(path);
+                        else if (path.StartsWith("..\\ROOT\\"))
+                        {
+                            path = path.Remove(0, 8);
+                            FileMgrShowFiles(path);
+                        }
+                        else if (File.Exists(path))
+                        {
+                            if (TaskDialog.Show("您想打开此文件吗？", "疑问", "文件路径：" + path, TaskDialogButton.Yes | TaskDialogButton.No) == Result.Yes)
+                                MFM_OpenFile(path, Handle);
+                        }
+                    }
+                }
+            }
+        }
+        private void listFm_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                if (listFm.SelectedItems.Count > 0)
+                {
+                    ListViewItem listViewItem = listFm.SelectedItems[0];
+                    string path = listViewItem.Tag.ToString();
+                    if (e.Button == MouseButtons.Right)
+                        MAppWorkShowMenuFM(path, listFm.SelectedItems.Count > 1, listFm.SelectedItems.Count);
+                }
+            }
+        }
+
+        private void fileSystemWatcher_Changed(object sender, FileSystemEventArgs e)
+        {
+            string fullpath = e.FullPath;
+            MFM_UpdateFile(fullpath, Path.GetDirectoryName(fullpath));
+        }
+        private void fileSystemWatcher_Created(object sender, FileSystemEventArgs e)
+        {
+            string fullpath = e.FullPath;
+            MFM_ReUpdateFile(fullpath, Path.GetDirectoryName(fullpath));
+            FileMgrUpdateStatus(1);
+        }
+        private void fileSystemWatcher_Deleted(object sender, FileSystemEventArgs e)
+        {
+            //Remove 
+            string fullpath = e.FullPath;
+            ListViewItem ii = null;
+            foreach (ListViewItem i in listFm.Items)
+            {
+                if (i.Tag.ToString() == fullpath)
+                {
+                    ii = i;
+                    break;
+                }
+            }
+            listFm.Items.Remove(ii);
+            FileMgrUpdateStatus(1);
+        }
+        private void fileSystemWatcher_Renamed(object sender, RenamedEventArgs e)
+        {
+            string oldfullpath = e.OldFullPath;
+            string fullpath = e.FullPath;
+            //Rename 
+            ListViewItem ii = null;
+            foreach (ListViewItem i in listFm.Items)
+            {
+                if (i.Tag.ToString() == oldfullpath)
+                {
+                    ii = i;
+                    break;
+                }
+            }
+            ii.Tag = fullpath;
+            ii.Text = e.Name;
+            ii.ImageKey = "*" + Path.GetExtension(fullpath);
+        }
+
+        #endregion
+
+        #region ScMgrWork
+
+        private void ScMgrInit()
+        {
+            if(!scListInited)
+            {
+                scListInited = true;
+            }
+        }
+
+        private void linkOpenScMsc_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            MFM_OpenFile("services.msc", Handle);
+        }
+
+
+
+        #endregion
+
         private void AppLoad()
         {
             if (!MGetPrivileges()) TaskDialog.Show("提权失败！", DEFAPPTITLE, "", TaskDialogButton.OK, TaskDialogIcon.Warning);
@@ -697,7 +1376,8 @@ namespace TaskMgr
                 }
                 catch { }
             }
-
+            showHiddenFiles = GetConfig("ShowHiddenFiles", "AppSetting")=="True";
+            MFM_SetShowHiddenFiles(showHiddenFiles);
             #endregion
 
             #region LoadList
@@ -806,8 +1486,6 @@ namespace TaskMgr
             allRam = MGetAllRam();
             ramtop = (ulong)((double)allRam * 0.2);
 
-            ProcessListInit();
-
             #region Pos
             string s = GetConfig("OldSize", "AppSetting");
             string p = GetConfig("OldPos", "AppSetting");
@@ -823,16 +1501,24 @@ namespace TaskMgr
                 Left = int.Parse(pp[0]);
                 Top = int.Parse(pp[1]);
             }
-            #endregion
+            #endregion         
 
-            baseProcessRefeshTimer.Start();
+            ProcessListInit();
         }
         private void AppExit()
         {
+            MEnumProcessFree();
+            fileSystemWatcher.EnableRaisingEvents = false;
+
             Application.Exit();
         }
 
         #region FormEvent
+
+        private void FormMain_Shown(object sender, EventArgs e)
+        {
+            AppLoad();
+        }
         private void FormMain_Load(object sender, EventArgs e)
         {
             exitCallBack = AppExit;
@@ -840,6 +1526,7 @@ namespace TaskMgr
             enumProcessCallBack = ProcessListHandle;
             enumWinsCallBack = MainEnumWinsCallBack;
             getWinsCallBack = MainGetWinsCallBack;
+            enumProcessCallBack2 = ProcessListHandle2;
             MAppSetCallBack(Marshal.GetFunctionPointerForDelegate(exitCallBack), 1);
             MAppSetCallBack(Marshal.GetFunctionPointerForDelegate(taskDialogCallBack), 2);
             MAppSetCallBack(Marshal.GetFunctionPointerForDelegate(enumWinsCallBack), 3);
@@ -847,7 +1534,6 @@ namespace TaskMgr
 
             MAppWorkCall3(183, Handle, IntPtr.Zero);
             coreWndProc = (WNDPROC)Marshal.GetDelegateForFunctionPointer(MAppSetCallBack(IntPtr.Zero, 0), typeof(WNDPROC));
-            AppLoad();
         }
         protected override void WndProc(ref System.Windows.Forms.Message m)
         {
@@ -873,8 +1559,9 @@ namespace TaskMgr
                     if (f.ShowDialog() == DialogResult.OK)
                         MAppWorkCall3(191, IntPtr.Zero, IntPtr.Zero);
                     break;
+                case 41130:
                 case 41012:
-                    ProcessListInit();
+                    ProcessListRefesh();
                     break;
                 case 40019:
                     {
@@ -920,9 +1607,22 @@ namespace TaskMgr
 
         #endregion
 
-        private void lbShowDetals_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        
+
+        private void tabControlMain_Selected(object sender, TabControlEventArgs e)
         {
-            if (!MAppVProcess(Handle)) TaskDialog.Show("无法打开详细信息窗口", DEFAPPTITLE, "未知错误。", TaskDialogButton.OK, TaskDialogIcon.Stop);
+            if (e.TabPage == tabPageProcCtl)
+            {
+                ProcessListInit();
+            }
+            else if (e.TabPage == tabPageScCtl)
+            {
+                ScMgrInit();
+            }
+            else if (e.TabPage == tabPageFileCtl)
+            {
+                FileMgrInit();
+            }
         }
     }
 }

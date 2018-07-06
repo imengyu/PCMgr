@@ -10,9 +10,9 @@ namespace TaskMgr.Ctls
 {
     public class TaskMgrList : Control
     {
-        [DllImport(FormMain.COREDLLNAME)]
+        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern void MListDrawItem(IntPtr hWnd, IntPtr hdc, int x, int y, int w, int h, int state);
-        [DllImport(FormMain.COREDLLNAME)]
+        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern int MAppWorkCall3(int id, IntPtr hWnd, IntPtr data);
 
         public TaskMgrList()
@@ -45,7 +45,7 @@ namespace TaskMgr.Ctls
             scrol.Hide();
             t = new Timer();
             t.Tick += T_Tick;
-            t.Interval = 100;
+            t.Interval = 50;
         }
 
         private bool b1 = false;
@@ -289,9 +289,11 @@ namespace TaskMgr.Ctls
                     Color bgcolor = item.SubItems[i2].BackColor;
                     if (bgcolor.A != 0 && !(bgcolor.R == 255 && bgcolor.G == 255 && bgcolor.B == 255))
                     {
-                        dwawLine.Add(x);
+                        if (!dwawLine.Contains(x))
+                            dwawLine.Add(x);
                         g.FillRectangle(new SolidBrush(bgcolor), x, item.YPos - yOffest, header.Items[i2].Width, itemHeight);
-                        dwawLine.Add(x + header.Items[i2].Width);
+                        if (!dwawLine.Contains(x + header.Items[i2].Width))
+                            dwawLine.Add(x + header.Items[i2].Width);
                     }
                 }
             }*/
@@ -316,8 +318,6 @@ namespace TaskMgr.Ctls
                 int x = header.Items[i2].X - xOffest;
                 if (x < Width && x + header.Items[i2].Width > 0)
                 {
-
-
                     StringFormat f = new StringFormat();
                     f.LineAlignment = StringAlignment.Far;
                     f.Trimming = StringTrimming.EllipsisCharacter;
@@ -378,7 +378,7 @@ namespace TaskMgr.Ctls
                 g.DrawIcon(item.Icon, new Rectangle(7 - xOffest + 25, item.YPos - YOffest + itemHeight / 2 - 8, 16, 16));
             #endregion
         }
-        private void PaintItems(Graphics g)
+        private void PaintItems(Graphics g, Rectangle r)
         {
             dwawLine.Clear();
             showedItems.Clear();
@@ -390,26 +390,30 @@ namespace TaskMgr.Ctls
                     if (groups[i].Tag == null || (int)groups[i].Tag == 1)
                     {
                         TaskMgrListGroup gurrs = groups[i];
-                        StringFormat f = new StringFormat();
-                        f.LineAlignment = StringAlignment.Far;
-                        f.Trimming = StringTrimming.EllipsisCharacter;
-                        if (gurrs.HeaderAlignment == HorizontalAlignment.Center)
-                            f.Alignment = StringAlignment.Center;
-                        else if (gurrs.HeaderAlignment == HorizontalAlignment.Left)
-                            f.Alignment = StringAlignment.Near;
-                        else if (gurrs.HeaderAlignment == HorizontalAlignment.Right)
-                            f.Alignment = StringAlignment.Far;
+                        Rectangle rgtext = new Rectangle(3 - xOffest, gurrs.Y - yOffest, 3 - xOffest + Width - 6, 34);
+                        if (rgtext.IntersectsWith(r))
+                        {
+                            StringFormat f = new StringFormat();
+                            f.LineAlignment = StringAlignment.Far;
+                            f.Trimming = StringTrimming.EllipsisCharacter;
+                            if (gurrs.HeaderAlignment == HorizontalAlignment.Center)
+                                f.Alignment = StringAlignment.Center;
+                            else if (gurrs.HeaderAlignment == HorizontalAlignment.Left)
+                                f.Alignment = StringAlignment.Near;
+                            else if (gurrs.HeaderAlignment == HorizontalAlignment.Right)
+                                f.Alignment = StringAlignment.Far;
 
-                        if (gurrs.Header != "")
-                            g.DrawString(gurrs.Header + "(" + gurrs.ChildsCount + ")", fgroupText, new SolidBrush(Color.FromArgb(31, 89, 195)), new Rectangle(3 - xOffest, gurrs.Y - yOffest, 3 - xOffest + Width - 6, 34), f);
-                        f.Dispose();
+                            if (gurrs.Header != "")
+                                g.DrawString(gurrs.Header + "(" + gurrs.ChildsCount + ")", fgroupText, new SolidBrush(Color.FromArgb(31, 89, 195)), rgtext, f);
+                            f.Dispose();
+                        }
 
                         TaskMgrListItem lastdrawitem = null;
                         for (int i1 = 0; i1 < items.Count; i1++)
                         {
                             if (items[i1].Group == gurrs)
                             {
-                                if (items[i1].YPos - yOffest > 0 && items[i1].YPos - yOffest + itemHeight < Height + header.Height)
+                                if (items[i1].YPos - yOffest >= r.Top && items[i1].YPos - yOffest + itemHeight <= r.Bottom + header.Height)
                                 {
                                     DrawItem(g, items[i1]);
                                     lastdrawitem = items[i1];
@@ -424,16 +428,21 @@ namespace TaskMgr.Ctls
             {
                 for (int i1 = 0; i1 < items.Count; i1++)
                 {
-                    if (items[i1].YPos - yOffest > 0 && items[i1].YPos - yOffest + itemHeight < Height + header.Height)
+                    if (items[i1].YPos - yOffest >= r.Top && items[i1].YPos - yOffest + itemHeight <= r.Bottom + header.Height)
                         DrawItem(g, items[i1]);
                 }
             }
+
             for (int i = 0; i < dwawLine.Count; i++)
-            {
-                if (i != 0)
-                    if (dwawLine[i] < Width)
-                        g.DrawLine(new Pen(Color.FromArgb(234, 213, 160)), dwawLine[i], 0, dwawLine[i], Height);
-            }
+                if (i != 0 && dwawLine[i] < Width)
+                    g.DrawLine(new Pen(Color.FromArgb(234, 213, 160)), dwawLine[i], r.Top, dwawLine[i], r.Bottom);
+        }
+
+        private void InvalidAItem(TaskMgrListItem it)
+        {
+            int y = it.YPos - yOffest;
+            int height = (it.ChildsOpened ? itemHeight + it.Childs.Count * smallItemHeight : itemHeight);
+            Invalidate(new Rectangle(0, y, Width, height));
         }
 
         protected override void OnHandleCreated(EventArgs e)
@@ -474,40 +483,31 @@ namespace TaskMgr.Ctls
         }
         protected override void OnMouseDown(MouseEventArgs e)
         {
-            if (mouseenteredItem != null)
+            if (mouseenteredItem != null && selectedItem != null)
             {
                 if (selectedItem != mouseenteredItem)
                 {
                     SelectItemChanged?.Invoke(this, EventArgs.Empty);
+                    TaskMgrListItem it = selectedItem;
                     selectedItem = mouseenteredItem;
+                    InvalidAItem(it);
                 }
                 if (selectedItem.GlyphHoted)
                 {
                     if (selectedItem.ChildsOpened)
                         selectedItem.ChildsOpened = false;
-                    else
-                        selectedItem.ChildsOpened = true;
+                    else selectedItem.ChildsOpened = true;
+
                     SyncItems(false);
                 }
                 if (selectedItem.ChildsOpened)
                     selectedChildItem = selectedItem.OldSelectedItem;
                 else selectedChildItem = null;
+
+                if (selectedItem != null)
+                    InvalidAItem(selectedItem);
             }
             base.OnMouseDown(e);
-        }
-        protected override void OnMouseClick(MouseEventArgs e)
-        {
-            base.OnMouseClick(e);
-            Invalidate();
-        }
-        protected override void OnLeave(EventArgs e)
-        {
-            base.OnLeave(e);
-            if (mouseenteredItem != null)
-            {
-                mouseenteredItem = null;
-                Invalidate();
-            }
         }
         protected override void OnMouseMove(MouseEventArgs e)
         {
@@ -516,13 +516,24 @@ namespace TaskMgr.Ctls
             {
                 m = true;
                 t.Start();
-                {        
+                {
                     for (int i = 0; i < showedItems.Count; i++)
                     {
                         int y = showedItems[i].YPos - yOffest;
-                        if (e.Y > y && e.Y < y +( showedItems[i].ChildsOpened ? itemHeight + showedItems[i].Childs.Count * smallItemHeight : itemHeight))
+                        int yheight = (showedItems[i].ChildsOpened ? itemHeight + showedItems[i].Childs.Count * smallItemHeight : itemHeight);
+                        if (e.Y > y && e.Y < y + yheight)
                         {
-                            mouseenteredItem = showedItems[i];
+                            if (mouseenteredItem == showedItems[i])
+                                return;
+                            if (mouseenteredItem == null)
+                                mouseenteredItem = showedItems[i];
+                            else
+                            {
+                                TaskMgrListItem it = mouseenteredItem;
+                                mouseenteredItem = showedItems[i];
+                                InvalidAItem(it);
+                            }
+
                             if (e.X >= 0 && e.X <= 22 - xOffest)
                                 showedItems[i].GlyphHoted = true;
                             else if (showedItems[i].Childs.Count > 0 && showedItems[i].ChildsOpened)
@@ -534,15 +545,12 @@ namespace TaskMgr.Ctls
                                 if (e.Y - y - itemHeight < itemHeight)
                                     selectedChildItem = null;
                             }
-                            else
-                            {
-                                showedItems[i].GlyphHoted = false;
-                            }
-                            Invalidate();
-                            return;
+                            else showedItems[i].GlyphHoted = false;
+
+                            Invalidate(new Rectangle(0, y, Width, yheight));
+                            //return;
                         }
                     }
-                    OnLeave(null);
                 }
             }
         }
@@ -551,7 +559,7 @@ namespace TaskMgr.Ctls
             if (!locked)
             {
                 base.OnPaint(e);
-                PaintItems(e.Graphics);
+                PaintItems(e.Graphics, e.ClipRectangle);
                 if (isvs && ishs) e.Graphics.FillRectangle(Brushes.White, new Rectangle(Width - 16, Height - 16, 16, 16));
             }
         }

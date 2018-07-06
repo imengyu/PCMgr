@@ -1,7 +1,8 @@
 #pragma once
 #include "stdafx.h"
 
-typedef void(_stdcall*EnumProcessCallBack)(int pid, int parentid, LPWSTR exename, LPWSTR exefullpath, int tp);
+typedef void(__cdecl*EnumProcessCallBack)(int pid, int parentid, LPWSTR exename, LPWSTR exefullpath, int tp);
+typedef void(__cdecl*EnumProcessCallBack2)(int pid);
 
 #define EXEPROFENCE_STATE_UNGET 0
 #define EXEPROFENCE_STATE_ERROR 1
@@ -19,7 +20,9 @@ typedef struct EXEPROFENCE
 
 EXTERN_C M_API int MGetCpuCount();
 EXTERN_C M_API BOOL MGetPrivileges2();
+EXTERN_C M_API void MEnumProcessFree();
 EXTERN_C M_API void MEnumProcess(EnumProcessCallBack calBack);
+EXTERN_C M_API void MEnumProcess2(EnumProcessCallBack2 callBack);
 EXTERN_C M_API BOOL MDosPathToNtPath(LPWSTR pszDosPath, LPWSTR pszNtPath);
 EXTERN_C M_API BOOL MGetProcessFullPathEx(DWORD dwPID, LPWSTR outNter);
 EXTERN_C M_API BOOL MGetExeInfo(LPWSTR strFilePath, LPWSTR InfoItem, LPWSTR str, int maxCount);

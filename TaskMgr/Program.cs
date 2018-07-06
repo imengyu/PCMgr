@@ -14,6 +14,7 @@ namespace TaskMgr
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            Application.ThreadException += Application_ThreadException;
 
             FormMain.currentProcessName = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
 
@@ -35,6 +36,11 @@ namespace TaskMgr
             {
                 Application.Run(new FormMain());
             }
+        }
+
+        private static void Application_ThreadException(object sender, System.Threading.ThreadExceptionEventArgs e)
+        {
+            MessageBox.Show(e.Exception.ToString(), "Exception ! ", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
         public static int EntryPoint(string args)

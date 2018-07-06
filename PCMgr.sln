@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2036
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PCMgrCoreApp", "TaskMgr\PCMgrCoreApp.csproj", "{59FEF6F8-2687-4046-8934-90A7E68B35B7}"
 EndProject
@@ -9,8 +9,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PCMgrCore", "TaskMgrCore\Ta
 	ProjectSection(ProjectDependencies) = postProject
 		{59FEF6F8-2687-4046-8934-90A7E68B35B7} = {59FEF6F8-2687-4046-8934-90A7E68B35B7}
 	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PcMgr1", "..\..\方案\PcMgr\MProcessMgr\MProcessMgr.vcxproj", "{B7D6F604-E4B9-485B-8262-E95F8254C93A}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PCMgr", "PCMgr\PCMgr.vcxproj", "{29ACB9E4-F42D-4BEC-8B38-CC17A013EA2B}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -50,16 +48,6 @@ Global
 		{F6BC96EA-82F7-422D-A371-A468F5E1CF22}.Release|x64.Build.0 = Release|x64
 		{F6BC96EA-82F7-422D-A371-A468F5E1CF22}.Release|x86.ActiveCfg = Release|Win32
 		{F6BC96EA-82F7-422D-A371-A468F5E1CF22}.Release|x86.Build.0 = Release|Win32
-		{B7D6F604-E4B9-485B-8262-E95F8254C93A}.Debug|Any CPU.ActiveCfg = Debug|Win32
-		{B7D6F604-E4B9-485B-8262-E95F8254C93A}.Debug|x64.ActiveCfg = Debug|x64
-		{B7D6F604-E4B9-485B-8262-E95F8254C93A}.Debug|x64.Build.0 = Debug|x64
-		{B7D6F604-E4B9-485B-8262-E95F8254C93A}.Debug|x86.ActiveCfg = Debug|Win32
-		{B7D6F604-E4B9-485B-8262-E95F8254C93A}.Debug|x86.Build.0 = Debug|Win32
-		{B7D6F604-E4B9-485B-8262-E95F8254C93A}.Release|Any CPU.ActiveCfg = Release|Win32
-		{B7D6F604-E4B9-485B-8262-E95F8254C93A}.Release|x64.ActiveCfg = Release|x64
-		{B7D6F604-E4B9-485B-8262-E95F8254C93A}.Release|x64.Build.0 = Release|x64
-		{B7D6F604-E4B9-485B-8262-E95F8254C93A}.Release|x86.ActiveCfg = Release|Win32
-		{B7D6F604-E4B9-485B-8262-E95F8254C93A}.Release|x86.Build.0 = Release|Win32
 		{29ACB9E4-F42D-4BEC-8B38-CC17A013EA2B}.Debug|Any CPU.ActiveCfg = Debug|Win32
 		{29ACB9E4-F42D-4BEC-8B38-CC17A013EA2B}.Debug|Any CPU.Build.0 = Debug|Win32
 		{29ACB9E4-F42D-4BEC-8B38-CC17A013EA2B}.Debug|x64.ActiveCfg = Debug|x64
@@ -74,5 +62,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C111F42C-DADE-4A0B-892C-E4242E2D40C1}
 	EndGlobalSection
 EndGlobal

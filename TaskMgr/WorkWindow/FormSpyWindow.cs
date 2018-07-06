@@ -23,7 +23,7 @@ namespace TaskMgr.WorkWindow
 
         #region APIS
 
-        [DllImport(FormMain.COREDLLNAME)]
+        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr MGetWindowIcon(IntPtr hWnd);
         [DllImport("user32.dll")]
         public static extern int GetWindowText(IntPtr hWnd, byte[] byBuffer, int nMaxCount);

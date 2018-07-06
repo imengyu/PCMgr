@@ -17,3 +17,4 @@ E:\主数据库\编程\方案V5\PCMgr\TaskMgr\obj\Debug\TaskMgr.WorkWindow.FormM
 E:\主数据库\编程\方案V5\PCMgr\Debug\PCMgrCore32.dll
 E:\主数据库\编程\方案V5\PCMgr\TaskMgr\obj\Debug\PCMgrCore32.dll
 E:\主数据库\编程\方案V5\PCMgr\TaskMgr\obj\Debug\PCMgrCoreApp.csprojResolveAssemblyReference.cache
+E:\主数据库\编程\方案8\PCMgr\Debug\PCMgrCore32.dll

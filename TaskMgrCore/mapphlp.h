@@ -1,9 +1,9 @@
 #pragma once
 #include "stdafx.h"
 
-typedef void(__stdcall *exitcallback)();
-typedef int(__stdcall *taskdialogcallback)(HWND hwnd, LPWSTR text, LPWSTR title, LPWSTR apptl, int ico, int button);
-typedef void(__stdcall *EnumWinsCallBack)(HWND hWnd, HWND hWndParent);
+typedef void(__cdecl *exitcallback)();
+typedef int(__cdecl *taskdialogcallback)(HWND hwnd, LPWSTR text, LPWSTR title, LPWSTR apptl, int ico, int button);
+typedef void(__cdecl *EnumWinsCallBack)(HWND hWnd, HWND hWndParent);
 
 LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
@@ -20,6 +20,7 @@ EXTERN_C M_API void MAppRebot();
 EXTERN_C M_API void MListDrawItem(HWND hWnd, HDC hdc, int x, int y, int w, int h, int state);
 EXTERN_C M_API bool MGetPrivileges();
 EXTERN_C M_API VOID MShowFileProp(LPWSTR file);
+EXTERN_C M_API BOOL MCopyToClipboard(const WCHAR * pszData, const int nDataLen);
 EXTERN_C M_API int MAppWorkCall3(int id, HWND hWnd, void*data);
 EXTERN_C M_API HICON MGetWindowIcon(HWND hWnd);
 
