@@ -4,7 +4,7 @@
 #include <Shlobj.h>
 #include <Shobjidl.h>
 
-BOOL ChooseFileSingal(HWND hWnd, LPWSTR startDir, LPWSTR title, LPWSTR fileFilter, LPWSTR fileName, LPWSTR defExt, LPWSTR*strrs, size_t bufsize)
+BOOL MChooseFileSingal(HWND hWnd, LPWSTR startDir, LPWSTR title, LPWSTR fileFilter, LPWSTR fileName, LPWSTR defExt, LPWSTR*strrs, size_t bufsize)
 {
 	if (strrs) {
 		OPENFILENAME ofn;
@@ -33,7 +33,7 @@ BOOL ChooseFileSingal(HWND hWnd, LPWSTR startDir, LPWSTR title, LPWSTR fileFilte
 	}
 	return 0;
 }
-BOOL ChooseDir(HWND hWnd, LPWSTR startDir, LPWSTR title, LPWSTR*strrs, size_t bufsize)
+BOOL MChooseDir(HWND hWnd, LPWSTR startDir, LPWSTR title, LPWSTR*strrs, size_t bufsize)
 {
 	if (strrs) {
 		IFileDialog *pfd = NULL;

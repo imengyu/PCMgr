@@ -212,16 +212,11 @@ namespace TaskMgr.Ctls
                 string ts = items[i].TextSmall;
                 if (tb != "" || ts != "")
                 {
-                    StringFormat f = new StringFormat();
-                    f.LineAlignment = StringAlignment.Far;
-                    f.Trimming = StringTrimming.EllipsisCharacter;
-                    f.Alignment = items[i].Alignment;
-
+                    StringFormat f = items[i].AlignmentStringFormat;
                     if (tb != "")
                         g.DrawString(tb, fb, Brushes.Black, new Rectangle(thisWidth + 3, 10, items[i].Width - 6, 24), f);
                     if (ts != "")
                         g.DrawString(ts, fs, new SolidBrush(Color.FromArgb(76, 96, 122)), new Rectangle(thisWidth + 3, Height - 22, items[i].Width - 6, 18), f);
-                    f.Dispose();
                 }
                 if (!arrdrawed)
                     if (items[i].ArrowType == TaskMgrListHeaderSortArrow.Ascending)
@@ -393,12 +388,29 @@ namespace TaskMgr.Ctls
         TaskMgrListHeaderSortArrow a = TaskMgrListHeaderSortArrow.None;
         bool m = false;
         StringAlignment agr = StringAlignment.Near;
+        StringFormat format = null;
         bool m1 = false;
 
+        public bool IsNum { get; set; }
         public bool IsHot
         {
             get { return m1; }
             set { m1 = value; }
+        }
+        public StringFormat AlignmentStringFormat
+        {
+            get
+            {
+                if (format == null)
+                {
+                    format = new StringFormat();
+                    format.LineAlignment = StringAlignment.Center;
+                    format.FormatFlags |= StringFormatFlags.LineLimit;
+                    format.Trimming = StringTrimming.EllipsisCharacter;
+                    format.Alignment = agr;
+                }
+                return format;
+            }
         }
         public StringAlignment Alignment
         {

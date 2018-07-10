@@ -4,7 +4,10 @@
 #include "mapphlp.h"
 #include "prochlp.h"
 #include "thdhlp.h"
+#include "syshlp.h"
+#include "fmhlp.h"
 #include "ntdef.h"
+#include "StringHlp.h"
 
 #include <list>
 
@@ -31,30 +34,6 @@ extern EnumWinsCallBack hEnumWinsCallBack;
 extern EnumWinsCallBack hGetWinsWinsCallBack;
 
 extern BOOL ShowMainCore(HWND hWndParent);
-
-DWORD GetPId4Name(const wchar_t *pszProcessName)
-{
-	DWORD id = 0;
-	//获得系统快照句柄 (通俗的讲, 就是得到当前的所有进程)   
-	HANDLE hSnapShot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-	PROCESSENTRY32 pInfo; //用于保存进程信息的一个数据结构   
-	pInfo.dwSize = sizeof(pInfo);
-	//从快照中获取进程列表   
-	Process32First(hSnapShot, &pInfo); //从第一个进程开始循环   
-	do
-	{
-		//这里的 pszProcessName 为你的进程名称   
-
-		_wcslwr_s(pInfo.szExeFile);
-		if (lstrcmp(pInfo.szExeFile, pszProcessName) == 0)
-		{
-			id = pInfo.th32ProcessID;
-			break;
-		}
-	} while (Process32Next(hSnapShot, &pInfo) != FALSE);
-	CloseHandle(hSnapShot);
-	return id; //id 就是你要的进程PID 了..   
-}
 
 LPARAM GetItemData(HWND hList, int nItem)
 {
@@ -84,7 +63,7 @@ LPARAM SetItemData(HWND hList, int nItem, LPARAM dwData)
 void ThrowErrorAndErrorCode(DWORD code, LPWSTR msg, LPWSTR title)
 {
 	wchar_t errcode[260];
-	wsprintf(errcode, L"Code: %d\nNTSTATUS:0x%lX", code, code);
+	wsprintf(errcode, L"Code: %d\nNTSTATUS : 0x%lX", code, code);
 
 	LPWSTR l = MStrAddW(msg, errcode);
 	MessageBox(NULL, l, title, MB_OK | MB_ICONERROR);
@@ -366,7 +345,10 @@ BOOL MAppVModuls(DWORD dwPID, HWND hDlg, LPWSTR procName)
 		hModuleSnap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, dwPID);
 		if (hModuleSnap == INVALID_HANDLE_VALUE) {
 			if (GetLastError() == 299) SetWindowText(htitle, L"枚举模块失败。\n无效进程。");
-			else SetWindowText(htitle, MStrAddW(MStrAddW(L"枚举模块失败。\n错误代码:", MIntToStrW(GetLastError())), L"。"));
+			else {
+				wstring str = FormatString(L"无法枚举模块。\n错误代码 : 0x%08x", GetLastError());
+				SetWindowText(htitle, str.c_str());
+			}
 			return FALSE;
 		}
 
@@ -408,20 +390,14 @@ BOOL MAppVModuls(DWORD dwPID, HWND hDlg, LPWSTR procName)
 
 			i++;
 		}
-
-		LPWSTR str1 = L"进程 ";
-		LPWSTR str2 = MStrAdd(str1, procName);
-		LPWSTR str3 = MStrAdd(str2, L"[%d] 的所有模块：%d");
-		delete str2;
-		wchar_t text[1024];
-		wsprintf(text, str3, dwPID, i);
-		SetWindowText(hDlg, text);
-		delete str3;
+		wstring str = FormatString(L"进程 %s [%d] 的所有模块：%d", procName, dwPID, i);
+		SetWindowText(hDlg, str.c_str());
 		CloseHandle(hModuleSnap);
 		return TRUE;
 	}
 	else {
-		SetWindowText(htitle, MStrAddW(L"无法枚举模块，无法打开进程。\n错误码：", MIntToStrW(rs)));
+		wstring str = FormatString(L"无法枚举模块，无法打开进程。\n错误代码 : 0x%08x", rs);
+		SetWindowText(htitle, str.c_str());
 		return 0;
 	}
 }
@@ -496,19 +472,19 @@ BOOL MAppVThreads(DWORD dwPID, HWND hDlg, LPWSTR procName)
 					switch (ts)
 					{
 					case THREAD_STATE::StateReady:
-						vitem.pszText = L"就绪(StateReady)";
+						vitem.pszText = L"就绪 (StateReady)";
 						break;
 					case THREAD_STATE::StateRunning:
-						vitem.pszText = L"运行(StateRunning)";
+						vitem.pszText = L"运行 (StateRunning)";
 						break;
 					case THREAD_STATE::StateWait:
-						vitem.pszText = L"等待(StateWait)";
+						vitem.pszText = L"等待 (StateWait)";
 						break;
 					case THREAD_STATE::StateTerminated:
-						vitem.pszText = L"终止(StateTerminated)";
+						vitem.pszText = L"终止 (StateTerminated)";
 						break;
 					case 9:
-						vitem.pszText = L"等待(StateWait 已挂起)";
+						vitem.pszText = L"等待 (StateWait 已挂起)";
 						break;
 					default:
 						vitem.pszText = L"0";
@@ -526,14 +502,8 @@ BOOL MAppVThreads(DWORD dwPID, HWND hDlg, LPWSTR procName)
 				threadscount = i;
 			}
 
-			LPWSTR str1 = L"进程 ";
-			LPWSTR str2 = MStrAdd(str1, procName);
-			LPWSTR str3 = MStrAdd(str2, L" [%d] 的所有线程：%d");
-			delete str2;
-			wchar_t text[512];
-			wsprintf(text, str3, dwPID, threadscount);
-			SetWindowText(hDlg, text);
-			delete str3;			
+			wstring str = FormatString(L"进程 %s [%d] 的所有线程：%d", procName, dwPID, threadscount);
+			SetWindowText(hDlg, str.c_str());
 			currentShowThreadPid = dwPID;
 			CloseHandle(hSnapThread);
 
@@ -541,21 +511,15 @@ BOOL MAppVThreads(DWORD dwPID, HWND hDlg, LPWSTR procName)
 		}
 		else
 		{
-			LPWSTR l1 = MIntToStrW(GetLastError());
-			LPWSTR l2 = MStrAddW(L"枚举线程失败。\n错误代码:", l1);
-			LPWSTR l3 = MStrAddW(l2, L"。");
-			SetWindowText(htitle, l3);
-			delete l1; delete l2; delete l3;
+			wstring str = FormatString(L"枚举线程失败。\n错误代码 : 0x%x", GetLastError());
+			SetWindowText(htitle, str.c_str());
 			return FALSE;
 		}
 	}
 	else
 	{
-		LPWSTR l1 = MIntToStrW(rs);
-		LPWSTR l = MStrAddW(L"枚举线程失败。\n无法打开进程。\n错误代码:", l1);
-		SetWindowText(htitle, l);
-		delete l1;
-		delete l;
+		wstring str = FormatString(L"枚举线程失败，无法打开进程。\n错误代码 : 0x%08x", rs);
+		SetWindowText(htitle, str.c_str());
 		return FALSE;
 	}
 }
@@ -574,15 +538,8 @@ BOOL MAppVWins(DWORD dwPID, HWND hDlg, LPWSTR procName)
 	HWND htitle = GetDlgItem(hDlg, IDC_RESULT);
 	if (EnumWindows(lpEnumFunc, dwPID))
 	{
-		LPWSTR str1 = L"进程 ";
-		LPWSTR str2 = MStrAdd(str1, procName);
-		LPWSTR str3 = MStrAdd(str2, L"[%d] 的所有窗口：%d");
-		delete str2;
-		wchar_t text[1024];
-		wsprintf(text, str3, dwPID, winscount);
-		SetWindowText(hDlg, text);
-		SetWindowText(htitle, text);
-		delete str3;
+		wstring str = FormatString(L"进程 %s [%d] 的所有窗口：%d", procName, dwPID, winscount);
+		SetWindowText(hDlg, str.c_str());
 		return TRUE;
 	}
 	return FALSE;

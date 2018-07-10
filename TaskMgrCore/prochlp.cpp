@@ -1,6 +1,10 @@
 #include "stdafx.h"
 #include "prochlp.h"
 #include "ntdef.h"
+
+#include "perfhlp.h"
+#include "syshlp.h"
+#include "nthlp.h"
 #include "resource.h"
 #include <Psapi.h>
 #include <process.h>
@@ -16,14 +20,19 @@ LPWSTR thisCommandName = NULL;
 DWORD thisCommandPid = 0;
 HICON HIconDef;
 HWND hWndMain;
+PSYSTEM_PROCESSES current_system_process = NULL;
+
+
+//Api s
+
+//shell32
+_RunFileDlg RunFileDlg;
+//ntdll
 ZwSuspendThreadFun ZwSuspendThread;
 ZwResumeThreadFun ZwResumeThread;
 ZwTerminateThreadFun ZwTerminateThread;
 ZwOpenThreadFun ZwOpenThread;
 ZwQueryInformationThreadFun ZwQueryInformationThread;
-RtlNtStatusToDosErrorFun RtlNtStatusToDosError;
-RtlGetLastWin32ErrorFun RtlGetLastWin32Error;
-
 ZwSuspendProcessFun ZwSuspendProcess;
 ZwResumeProcessFun ZwResumeProcess;
 ZwTerminateProcessFun ZwTerminateProcess;
@@ -31,8 +40,19 @@ ZwOpenProcessFun ZwOpenProcess;
 NtQuerySystemInformationFun NtQuerySystemInformation;
 NtUnmapViewOfSectionFun NtUnmapViewOfSection;
 NtQueryInformationProcessFun NtQueryInformationProcess;
-PSYSTEM_PROCESSES current_system_process = NULL;
+LdrGetProcedureAddressFun LdrGetProcedureAddress;
+RtlInitAnsiStringFun RtlInitAnsiString;
+RtlNtStatusToDosErrorFun RtlNtStatusToDosError;
+RtlGetLastWin32ErrorFun RtlGetLastWin32Error;
+//K32 api
+_IsImmersiveProcess dIsImmersiveProcess;
+_GetPackageFullName dGetPackageFullName;
+_GetPackageInfo dGetPackageInfo;
+_ClosePackageInfo dClosePackageInfo;
+_OpenPackageInfoByFullName dOpenPackageInfoByFullName;
+_GetPackageId dGetPackageId;
 
+//Enum apis
 EXTERN_C BOOL MAppVProcessAllWindows();
 
 M_API BOOL MGetPrivileges2()
@@ -115,6 +135,7 @@ M_API void MEnumProcess(EnumProcessCallBack calBack)
 {
 	if (calBack)
 	{
+		HANDLE hProcess = NULL;
 		MAppVProcessAllWindows();
 		MEnumProcessCore();
 		bool done = false;
@@ -122,16 +143,16 @@ M_API void MEnumProcess(EnumProcessCallBack calBack)
 		for (PSYSTEM_PROCESSES p = current_system_process; !done; p = PSYSTEM_PROCESSES(PCHAR(p) + p->NextEntryDelta))
 		{
 			WCHAR exeFullPath[260];
-			if (MGetProcessFullPathEx(p->ProcessId, exeFullPath))
-				calBack(p->ProcessId, p->InheritedFromProcessId, p->ProcessName.Buffer, exeFullPath, 1);
-			else calBack(p->ProcessId, p->InheritedFromProcessId, p->ProcessName.Buffer, 0, 1);
+			if (MGetProcessFullPathEx(p->ProcessId, exeFullPath, &hProcess))
+				calBack(p->ProcessId, p->InheritedFromProcessId, p->ProcessName.Buffer, exeFullPath, 1, hProcess);
+			else calBack(p->ProcessId, p->InheritedFromProcessId, p->ProcessName.Buffer, 0, 1, NULL);
 			ix++;
 			done = p->NextEntryDelta == 0;
 		}
-		calBack(ix, 0, NULL, NULL, 0);
+		calBack(ix, 0, NULL, NULL, 0, 0);
 	}
 }
-M_API void MEnumProcess2(EnumProcessCallBack2 callBack)
+M_API void MEnumProcess2Refesh(EnumProcessCallBack2 callBack)
 {
 	if (callBack)
 	{
@@ -145,69 +166,29 @@ M_API void MEnumProcess2(EnumProcessCallBack2 callBack)
 		}
 	}
 }
-
-M_API BOOL MDosPathToNtPath(LPWSTR pszDosPath, LPWSTR pszNtPath)
+M_API BOOL MReUpdateProcess(DWORD pid, EnumProcessCallBack calBack)
 {
-	TCHAR            szDriveStr[500];
-	TCHAR            szDrive[3];
-	TCHAR            szDevName[100];
-	INT                cchDevName;
-	INT                i;
-	//检查参数
-	if (!pszDosPath || !pszNtPath)
-		return FALSE;
-	if (GetLogicalDriveStrings(sizeof(szDriveStr), szDriveStr))
+	bool done = false;
+	//遍历进程列表
+	for (PSYSTEM_PROCESSES p = current_system_process; !done;
+		p = PSYSTEM_PROCESSES(PCHAR(p) + p->NextEntryDelta))
 	{
-		for (i = 0; szDriveStr[i]; i += 4)
+		if (p->ProcessId == pid)
 		{
-			if (!lstrcmpi(&(szDriveStr[i]), L"A:\\") || !lstrcmpi(&(szDriveStr[i]), L"B:\\"))
-				continue;
-
-			szDrive[0] = szDriveStr[i];
-			szDrive[1] = szDriveStr[i + 1];
-			szDrive[2] = '\0';
-			if (!QueryDosDevice(szDrive, szDevName, 100)) {//查询 Dos 设备名		
-				return FALSE;
-			}
-			cchDevName = lstrlen(szDevName);
-			if (_tcsnicmp(pszDosPath, szDevName, cchDevName) == 0)//命中
-			{
-				lstrcpy(pszNtPath, szDrive);//复制驱动器
-				lstrcat(pszNtPath, pszDosPath + cchDevName);//复制路径
-				return TRUE;
-			}
+			HANDLE hProcess;
+			WCHAR exeFullPath[260];
+			if (MGetProcessFullPathEx(p->ProcessId, exeFullPath, &hProcess))
+				calBack(p->ProcessId, p->InheritedFromProcessId, p->ProcessName.Buffer, exeFullPath, 1, hProcess);
+			else calBack(p->ProcessId, p->InheritedFromProcessId, p->ProcessName.Buffer, 0, 1, NULL);
+			done = true;
+			return TRUE;
 		}
-	}
-	lstrcpy(pszNtPath, pszDosPath);
-	return FALSE;
+		done = p->NextEntryDelta == 0;
+	}			
+	return 0;
 }
-M_API BOOL MGetProcessFullPathEx(DWORD dwPID, LPWSTR outNter)
-{
-	if (dwPID == 0) { wcscpy_s(outNter, 260, L"处理器空闲时间百分比"); return 1; }
-	else if (dwPID == 4) { wcscpy_s(outNter, 260, L"NT Kernel & System"); return 1; }
 
-	TCHAR szResult[MAX_PATH];
-	TCHAR szImagePath[MAX_PATH];
-	HANDLE hProcess;
-
-	int rs = MOpenProcessNt(dwPID, &hProcess);
-	if (!hProcess || rs != 1)
-		return FALSE;
-	if (!K32GetProcessImageFileNameW(hProcess, szImagePath, MAX_PATH))
-	{
-		if (hProcess != INVALID_HANDLE_VALUE && hProcess != (HANDLE)0xCCCCCCCCL)
-			CloseHandle(hProcess);
-		return FALSE;
-	}
-	if (!MDosPathToNtPath(szImagePath, szResult))
-	{
-		CloseHandle(hProcess);
-		return FALSE;
-	}
-	CloseHandle(hProcess);
-	wcscpy_s(outNter, 260, szResult);
-	return TRUE;
-}
+//EXE information
 M_API BOOL MGetExeInfo(LPWSTR strFilePath, LPWSTR InfoItem, LPWSTR str, int maxCount)
 {
 	/*
@@ -298,7 +279,77 @@ M_API HICON MGetExeIcon(LPWSTR pszFullPath)
 		hIcon = HIconDef;
 	return hIcon;
 }
-M_API int MGetExeState(DWORD pid, HWND hWnd)
+
+//Process information
+M_API BOOL MDosPathToNtPath(LPWSTR pszDosPath, LPWSTR pszNtPath)
+{
+	TCHAR            szDriveStr[500];
+	TCHAR            szDrive[3];
+	TCHAR            szDevName[100];
+	INT                cchDevName;
+	INT                i;
+	//检查参数
+	if (!pszDosPath || !pszNtPath)
+		return FALSE;
+	if (GetLogicalDriveStrings(sizeof(szDriveStr), szDriveStr))
+	{
+		for (i = 0; szDriveStr[i]; i += 4)
+		{
+			if (!lstrcmpi(&(szDriveStr[i]), L"A:\\") || !lstrcmpi(&(szDriveStr[i]), L"B:\\"))
+				continue;
+
+			szDrive[0] = szDriveStr[i];
+			szDrive[1] = szDriveStr[i + 1];
+			szDrive[2] = '\0';
+			if (!QueryDosDevice(szDrive, szDevName, 100)) {//查询 Dos 设备名		
+				return FALSE;
+			}
+			cchDevName = lstrlen(szDevName);
+			if (_tcsnicmp(pszDosPath, szDevName, cchDevName) == 0)//命中
+			{
+				lstrcpy(pszNtPath, szDrive);//复制驱动器
+				lstrcat(pszNtPath, pszDosPath + cchDevName);//复制路径
+				return TRUE;
+			}
+		}
+	}
+	lstrcpy(pszNtPath, pszDosPath);
+	return FALSE;
+}
+M_API BOOL MGetProcessFullPathEx(DWORD dwPID, LPWSTR outNter, PHANDLE phandle)
+{
+	if (dwPID == 0) {
+		wcscpy_s(outNter, 260, L"处理器空闲时间百分比"); 
+		MOpenProcessNt(dwPID, phandle);
+		return 1;
+	}
+	else if (dwPID == 4) {
+		wcscpy_s(outNter, 260, L"NT Kernel & System"); 
+		MOpenProcessNt(dwPID, phandle);
+		return 1;
+	}
+
+	TCHAR szResult[MAX_PATH];
+	TCHAR szImagePath[MAX_PATH];
+	HANDLE hProcess;
+
+	int rs = MOpenProcessNt(dwPID, &hProcess);
+	if (!hProcess || rs != 1)
+		return FALSE;
+	if (!K32GetProcessImageFileNameW(hProcess, szImagePath, MAX_PATH))
+	{
+		if (hProcess != INVALID_HANDLE_VALUE && hProcess != (HANDLE)0xCCCCCCCCL)
+			CloseHandle(hProcess);
+		return FALSE;
+	}
+	if (!MDosPathToNtPath(szImagePath, szResult))
+		return FALSE;
+	wcscpy_s(outNter, 260, szResult);
+	if (phandle)*phandle = hProcess;
+	else MCloseHandle(hProcess);
+	return TRUE;
+}
+M_API int MGetProcessState(DWORD pid, HWND hWnd)
 {
 	bool done = false;
 	//遍历进程列表
@@ -322,7 +373,7 @@ M_API int MGetExeState(DWORD pid, HWND hWnd)
 	}
 	return 0;
 }
-M_API SYSTEM_THREADS* MGetExeThreads(DWORD pid, HWND hWnd)
+M_API VOID* MGetProcessThreads(DWORD pid)
 {
 	bool done = false;
 	//遍历进程列表
@@ -335,28 +386,94 @@ M_API SYSTEM_THREADS* MGetExeThreads(DWORD pid, HWND hWnd)
 	}
 	return 0;
 }
-M_API ULONG MGetExeRam(DWORD pid)
+M_API BOOL MGetProcessCommandLine(HANDLE handle, LPWSTR l, int maxcount) {
+	if (handle && l) {
+		DWORD id = GetProcessId(handle);
+		if (id != 0 && id != 4) {
+			PUNICODE_STRING commandLine;
+			NTSTATUS status = MQueryProcessVariableSize(handle, ProcessCommandLineInformation, (PVOID*)&commandLine);
+			if (NT_SUCCESS(status)) {
+				wcscpy_s(l, maxcount, commandLine->Buffer);
+				free(commandLine);
+				return TRUE;
+			}
+		}
+		else {
+			wcscpy_s(l, maxcount, L"");
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+M_API BOOL MGetProcessIsUWP(HANDLE handle)
 {
-	ULONG rs = 0;
-	return rs;
+	return dIsImmersiveProcess(handle);
+}
+//UWP Process information
+M_API BOOL MGetUWPPackageId(HANDLE handle, MPerfAndProcessData*data)
+{
+	if (handle && data)
+	{
+		UINT32 bufferLength = 0;
+		LONG result = GetPackageId(handle, &bufferLength, nullptr);
+		BYTE* buffer = (PBYTE)malloc(bufferLength);
+		result = GetPackageId(handle, &bufferLength, buffer);
+		if (result == ERROR_SUCCESS) {
+			data->packageId = reinterpret_cast<PACKAGE_ID*>(buffer);
+			return TRUE;
+		}
+	}
+	return 0;
+}
+M_API BOOL MGetUWPPackageFullName(HANDLE handle, int*len, LPWSTR buffer)
+{
+	if (*len == 0)
+	{
+		UINT32 len2 = 0;
+		dGetPackageFullName(handle, &len2, NULL);
+		*len = static_cast<int>(len2);
+		return TRUE;
+	}
+	else {
+		if (buffer)
+		{
+			UINT32 len2 = static_cast<UINT32>(*len); ;
+			return dGetPackageFullName(handle, &len2, buffer) == ERROR_SUCCESS;
+		}
+	}
+	return 0;
 }
 
-M_API DWORD MSuspendTaskNt(DWORD dwPId)
+//..
+M_API BOOL MCloseHandle(HANDLE handle)
+{
+	return CloseHandle(handle);
+}
+//Process Control
+M_API DWORD MSuspendProcessNt(DWORD dwPId, HANDLE handle)
 {
 	if (dwPId != 0 && dwPId != 4 && dwPId > 0) {
 		HANDLE hProcess;
 		DWORD rs = MOpenProcessNt(dwPId, &hProcess);
 		if (hProcess) {
 			rs = ZwSuspendProcess(hProcess);
+			MCloseHandle(hProcess);
 			if (rs == 0)
 				return TRUE;
 			else return rs;
 		}
 		return rs;
 	}
+	else if (handle)
+	{
+		DWORD  rs = ZwSuspendProcess(handle);
+		if (rs == 0)
+			return TRUE;
+		else return rs;
+	}
 	return FALSE;
 }
-M_API DWORD MRusemeTaskNt(DWORD dwPId)
+M_API DWORD MRusemeProcessNt(DWORD dwPId, HANDLE handle)
 {
 	if (dwPId != 0 && dwPId != 4 && dwPId > 0) {
 		HANDLE hProcess;
@@ -364,9 +481,16 @@ M_API DWORD MRusemeTaskNt(DWORD dwPId)
 		if (hProcess)
 		{
 			DWORD rs = ZwResumeProcess(hProcess);
+			MCloseHandle(hProcess);
 			if (rs == 0) return TRUE;
 			else return rs;
 		}
+	}
+	else if (handle)
+	{
+		DWORD rs = ZwResumeProcess(handle);
+		if (rs == 0) return TRUE;
+		else return rs;
 	}
 	return FALSE;
 }
@@ -400,41 +524,32 @@ M_API DWORD MOpenProcessNt(DWORD dwId, PHANDLE pLandle)
 		return -1;
 	else return NtStatus;
 }
-M_API DWORD MTerminateProcessNt(HANDLE handle)
+M_API DWORD MTerminateProcessNt(DWORD dwId, HANDLE handle)
 {
-	DWORD rs = ZwTerminateProcess(handle, 0);
-	if (rs == 0)
-		return TRUE;
-	else return rs;
-}
-M_API bool MGetProcessCommandLine(DWORD pid, LPWSTR l, int maxcount) {
-	HANDLE hproc = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
-	if (INVALID_HANDLE_VALUE != hproc) {
-		HANDLE hnewdup = NULL;
-		PEB peb;
-		RTL_USER_PROCESS_PARAMETERS upps;
-		WCHAR buffer[MAX_PATH] = { NULL };
-		if (DuplicateHandle(GetCurrentProcess(), hproc, GetCurrentProcess(), &hnewdup, 0, FALSE, DUPLICATE_SAME_ACCESS)) {
-			PROCESS_BASIC_INFORMATION pbi;
-			DWORD isok = NtQueryInformationProcess(hnewdup, 0/*ProcessBasicInformation*/, (PVOID)&pbi, sizeof(PROCESS_BASIC_INFORMATION), 0);
-			if ((isok)) {
-				if (ReadProcessMemory(hnewdup, pbi.PebBaseAddress, &peb, sizeof(PEB), 0))
-					if (ReadProcessMemory(hnewdup, peb.ProcessParameters, &upps, sizeof(RTL_USER_PROCESS_PARAMETERS), 0)) {
-						WCHAR *buffer = new WCHAR[upps.CommandLine.Length + 1];
-						ZeroMemory(buffer, (upps.CommandLine.Length + 1) * sizeof(WCHAR));
-						ReadProcessMemory(hnewdup, upps.CommandLine.Buffer, buffer, upps.CommandLine.Length, 0);
-						wcscpy_s(l, maxcount, buffer);
-						delete buffer;
-						return true;
-					}
-			}
-			CloseHandle(hnewdup);
-		}
-		CloseHandle(hproc);
+	if (handle) {
+		DWORD rs = ZwTerminateProcess(handle, 0);
+		if (rs == 0) return TRUE;
+		else return rs;
 	}
-	return false;
+	else
+	{
+		if (dwId != 0 && dwId != 4 && dwId > 0) {
+			HANDLE hProcess;
+			MOpenProcessNt(dwId, &hProcess);
+			if (hProcess)
+			{
+				DWORD rs = ZwTerminateProcess(hProcess, 0);
+				MCloseHandle(hProcess);
+				if (rs == 0) return TRUE;
+				else return rs;
+			}
+			else return 0xC0000022;
+		}
+		else return 0xC0000022;
+	}
 }
 
+//MENU
 M_API int MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWORD pid, HWND hDlg, int data)
 {
 	thisCommandPid = pid;
@@ -478,38 +593,7 @@ M_API int MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWORD 
 	return 0;
 }
 
-INT64 CompareFileTime(FILETIME time1, FILETIME time2)
-{
-	INT64 a = time1.dwHighDateTime << 32 | time1.dwLowDateTime;
-	INT64 b = time2.dwHighDateTime << 32 | time2.dwLowDateTime;
-	return   (b - a);
-}
-
-FILETIME m_preidleTime;
-FILETIME m_prekernelTime;
-FILETIME m_preuserTime;
-
-M_API double MGetCpuUseAge()
-{
-	FILETIME idleTime;
-	FILETIME kernelTime;
-	FILETIME userTime;
-	GetSystemTimes(&idleTime, &kernelTime, &userTime);
-
-	INT64 idle = CompareFileTime(m_preidleTime, idleTime);
-	INT64 kernel = CompareFileTime(m_prekernelTime, kernelTime);
-	INT64 user = CompareFileTime(m_preuserTime, userTime);
-
-	if (kernel + user == 0)
-		return 0.0;
-	//（总的时间-空闲时间）/总的时间=占用cpu的时间就是使用率
-	double cpu = (kernel + user - idle) * 100 / (kernel + user);
-
-	m_preidleTime = idleTime;
-	m_prekernelTime = kernelTime;
-	m_preuserTime = userTime;
-	return cpu;
-}
+//Ram
 M_API double MGetRamUseAge()
 {
 	MEMORYSTATUSEX statex;
@@ -519,99 +603,28 @@ M_API double MGetRamUseAge()
 	double ram = ((statex.ullTotalPhys - statex.ullAvailPhys) / (double)statex.ullTotalPhys);
 	return ram;
 }
-M_API double MGetDiskUseAge()
-{
-	return 0;
-}
-M_API double MGetInternetUseAge()
-{
-	return 0;
-}
-
-int cpuCount = 0;
-
-M_API int MGetCpuCount()
-{
-	GetSystemTimes(&m_preidleTime, &m_prekernelTime, &m_preuserTime);
-	SYSTEM_INFO info;
-	GetSystemInfo(&info);
-	cpuCount = info.dwNumberOfProcessors;;
-	return info.dwNumberOfProcessors;
-}
-
-UINT64 file_time_2_utc(const FILETIME* ftime)
-{
-	LARGE_INTEGER li;
-	li.LowPart = ftime->dwLowDateTime;
-	li.HighPart = ftime->dwHighDateTime;
-	return li.QuadPart;
-}
-
 M_API ULONG MGetAllRam()
 {
 	MEMORYSTATUSEX statex;
 	statex.dwLength = sizeof(statex);
 	GlobalMemoryStatusEx(&statex);
-	return statex.ullTotalPhys / 1048576;
-}
-/* M_API EXEPROFENCE MGetExeProfenceInfo(DWORD dwPId, int intervalTime, UINT64 lastcputime)
-{
-EXEPROFENCE exe = EXEPROFENCE();
-HANDLE hProcess;
-hProcess = OpenProcess(PROCESS_QUERY_INFORMATION |
-	PROCESS_VM_READ,
-	FALSE, dwPId);
-if (NULL == hProcess)
-return exe;
-
-PROCESS_MEMORY_COUNTERS pmc;
-if (GetProcessMemoryInfo(hProcess, &pmc, sizeof(pmc)))
-exe.ram = pmc.WorkingSetSize / 1048576;
-
-FILETIME creation_time;
-FILETIME exit_time;
-FILETIME kernel_time;
-FILETIME user_time;
-
-UINT64 cpu_time;
-
-if (!GetProcessTimes(hProcess, &creation_time, &exit_time, &kernel_time, &user_time)) {
-	cpu_time = (file_time_2_utc(&kernel_time) + file_time_2_utc(&user_time))
-		/ cpuCount;
-	if (lastcputime != 0) {
-		UINT64 this_time = cpu_time - lastcputime;
-		double cpuuse = (double)(this_time / (double)(intervalTime * 2));
-		exe.cpu = cpuuse < 0 ? 0 : cpuuse;
-	}
-	else exe.cpu = 0;
-	exe.cputime = cpu_time;
+	return static_cast<ULONG>(statex.ullTotalPhys / 1048576);
 }
 
-return exe;
-}*/
+
+//ntdll apis
 
 HINSTANCE hNtDll;
-
-typedef struct
-{
-	int tk;
-	DWORD pid;
-	PVOID token;
-}PCMGRTOKEN, *PPCMGRTOKEN;
-
-typedef PPCMGRTOKEN(*MGetTokenFun)();
-typedef DWORD(*MGetPIDFun)();
-
-MGetPIDFun MGetPID;
-MGetTokenFun MGetToken;
-
-extern void ShowMainCoreStartUp();
-
-void AntiTest();
+HINSTANCE hShell32;
+HINSTANCE hKernel32;
+HINSTANCE hUser32;
 
 BOOL LoadDll()
 {
 	hNtDll = LoadLibrary(L"ntdll.dll");
+	hShell32 = LoadLibrary(L"shell32.dll");
+	hKernel32 = GetModuleHandle(L"kernel32.dll");
+	hUser32 = GetModuleHandle(L"user32.dll");
 	thisCommandPath = new WCHAR[260];
 	thisCommandName = new WCHAR[260];
 	if (hNtDll == NULL) {
@@ -633,6 +646,7 @@ BOOL LoadDll()
 		KsSuspendProcess = (KsSuspendProcessFun)GetProcAddress(hMain, "KsSuspendProcess");
 		KsResusemeProcess = (KsResusemeProcessFun)GetProcAddress(hMain, "KsResusemeProcess");*/
 
+		//ntdll
 		NtQuerySystemInformation = (NtQuerySystemInformationFun)GetProcAddress(hNtDll, "NtQuerySystemInformation");
 		ZwSuspendProcess = (ZwSuspendProcessFun)GetProcAddress(hNtDll, "ZwSuspendProcess");
 		ZwResumeProcess = (ZwResumeProcessFun)GetProcAddress(hNtDll, "ZwResumeProcess");
@@ -647,36 +661,22 @@ BOOL LoadDll()
 		ZwSuspendThread = (ZwSuspendThreadFun)GetProcAddress(hNtDll, "ZwSuspendThread");
 		NtUnmapViewOfSection = (NtUnmapViewOfSectionFun)GetProcAddress(hNtDll, "NtUnmapViewOfSection");
 		NtQueryInformationProcess = (NtQueryInformationProcessFun)GetProcAddress(hNtDll, "NtQueryInformationProcess");
+		LdrGetProcedureAddress = (LdrGetProcedureAddressFun)GetProcAddress(hNtDll, "LdrGetProcedureAddress");
+		RtlInitAnsiString = (RtlInitAnsiStringFun)GetProcAddress(hNtDll, "RtlInitAnsiString");
+		//shell32
+		RunFileDlg = (_RunFileDlg)MGetProcedureAddress(hShell32, NULL, 61);
+		//k32
+		dIsImmersiveProcess = (_IsImmersiveProcess)GetProcAddress(hUser32, "IsImmersiveProcess");
+		dGetPackageFullName = (_GetPackageFullName)GetProcAddress(hKernel32, "GetPackageFullName");
+		dGetPackageInfo = (_GetPackageInfo)GetProcAddress(hKernel32, "GetPackageInfo");
+		dClosePackageInfo = (_ClosePackageInfo)GetProcAddress(hKernel32, "ClosePackageInfo");
+		dOpenPackageInfoByFullName = (_OpenPackageInfoByFullName)GetProcAddress(hKernel32, "OpenPackageInfoByFullName");
+	    dGetPackageId = (_GetPackageId)GetProcAddress(hKernel32, "GetPackageId");
 
-		AntiTest();
-
-		ShowMainCoreStartUp();
 		return TRUE;
 	}
 }
 void FreeDll() {
 	delete thisCommandPath;
 	delete thisCommandName;
-}
-
-void Anti()
-{
-	MessageBox(0, L"抱歉，出现了错误。", DEFDIALOGGTITLE, MB_ICONERROR | MB_OK);
-	int*p = nullptr; 
-	*p = 0;
-}
-
-void AntiTest()
-{
-	HMODULE hMain = GetModuleHandle(NULL);
-	MGetToken = (MGetTokenFun)GetProcAddress(hMain, "MGetToken");
-	MGetPID = (MGetPIDFun)GetProcAddress(hMain, "MGetPID");
-
-	PCMGRTOKEN * t = MGetToken();
-	if (t->pid != MGetPID())
-		Anti();
-	if (t->tk != 342342 + 53672 * 56)
-		Anti();
-	if (wcscmp((wchar_t*)t->token, L"23RGMCP") != 0)
-		Anti();
 }

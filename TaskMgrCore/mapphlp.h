@@ -12,15 +12,18 @@ int MShowMessageDialog(HWND hwnd, LPWSTR text, LPWSTR title, LPWSTR apptl, int i
 int MShowErrorMessage(LPWSTR text, LPWSTR intr, int ico=0, int btn=0);
 
 EXTERN_C M_API BOOL MIsSystemSupport();
-EXTERN_C M_API BOOL MLoadMainApp();
-EXTERN_C M_API bool MIs64BitOS();
+EXTERN_C M_API BOOL MAppMainLoad();
+EXTERN_C M_API BOOL MAppMainRun();
+EXTERN_C M_API void MAppMainFree();
+EXTERN_C M_API void MAppMainExit(UINT exitcode);
+EXTERN_C M_API DWORD MAppMainGetExitCode();
+EXTERN_C M_API DWORD MAppMainSetExitCode(DWORD ex);
+
 EXTERN_C M_API void* MAppSetCallBack(void* cp, int id);
 EXTERN_C M_API void MAppExit();
 EXTERN_C M_API void MAppRebot();
+EXTERN_C M_API void MAppRebotAdmin();
 EXTERN_C M_API void MListDrawItem(HWND hWnd, HDC hdc, int x, int y, int w, int h, int state);
-EXTERN_C M_API bool MGetPrivileges();
-EXTERN_C M_API VOID MShowFileProp(LPWSTR file);
-EXTERN_C M_API BOOL MCopyToClipboard(const WCHAR * pszData, const int nDataLen);
 EXTERN_C M_API int MAppWorkCall3(int id, HWND hWnd, void*data);
 EXTERN_C M_API HICON MGetWindowIcon(HWND hWnd);
 

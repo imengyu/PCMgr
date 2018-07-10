@@ -13,20 +13,13 @@ extern RtlNtStatusToDosErrorFun RtlNtStatusToDosError;
 extern RtlGetLastWin32ErrorFun RtlGetLastWin32Error;
 extern NtQuerySystemInformationFun NtQuerySystemInformation;
 
+extern PSYSTEM_PROCESSES current_system_process;
+
 M_API DWORD MGetThreadState(ULONG ulPID, ULONG ulTID)
 {
 #ifndef _AMD64_
-	ULONG n = 0x100;
-	PSYSTEM_PROCESSES sp = new SYSTEM_PROCESSES[n];
-	while (NtQuerySystemInformation(5, sp, n*sizeof(SYSTEM_PROCESSES), 0) == STATUS_INFO_LENGTH_MISMATCH)
-	{
-		delete[] sp;
-		sp = new SYSTEM_PROCESSES[n = n * 2];
-	}
-	bool done = false;
-
-	//遍历进程列表
-	for (PSYSTEM_PROCESSES p = sp; !done;
+	bool done=false;
+	for (PSYSTEM_PROCESSES p = current_system_process; !done;
 	p = PSYSTEM_PROCESSES(PCHAR(p) + p->NextEntryDelta))
 	{
 		if (p->ProcessId == ulPID)
@@ -34,17 +27,12 @@ M_API DWORD MGetThreadState(ULONG ulPID, ULONG ulTID)
 			for (ULONG i = 0; i<p->ThreadCount; i++)
 			{
 				SYSTEM_THREADS systemThread = p->Threads[i];
-				if ((ULONG)systemThread.ClientId.UniqueThread == ulTID) //找到线程              
-				{
-					delete[] sp;
+				if ((ULONG)systemThread.ClientId.UniqueThread == ulTID)          
 					return systemThread.ThreadState;
-				}
 			}
 		}
 		done = p->NextEntryDelta == 0;
 	}
-
-	delete[] sp;
 	return 0;
 #else
 	return 0;
@@ -90,8 +78,7 @@ M_API DWORD MTerminateThreadNt(HANDLE handle)
 		WaitForSingleObject(handle, 1000);
 		return TRUE;
 	}
-	else
-		return rs;
+	else return rs;
 }
 
 M_API DWORD MResumeThreadNt(HANDLE handle)

@@ -3,12 +3,16 @@
 #include "resource.h"
 
 HINSTANCE hInst;
+
 extern HICON HIconDef;
 extern BOOL LoadDll();
 extern void FreeDll();
 extern HCURSOR hCurLoading;
 
-EXTERN_C M_API int MGetCpuCount();
+extern int GetProcessNumber();
+extern void ShowMainCoreStartUp();
+
+void DllStartup();
 
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,
@@ -19,10 +23,7 @@ BOOL APIENTRY DllMain( HMODULE hModule,
 	{
 	case DLL_PROCESS_ATTACH:
 		hInst = (HINSTANCE)hModule;
-		HIconDef = (HICON)LoadImage(hInst, MAKEINTRESOURCE(IDI_ICONDEFAPP), IMAGE_ICON, 16, 16, 0);
-		LoadDll();
-		hCurLoading = LoadCursor(NULL, IDC_WAIT);
-		MGetCpuCount();
+		DllStartup();
 		break;
 	case DLL_THREAD_ATTACH:
 	case DLL_THREAD_DETACH:
@@ -32,5 +33,13 @@ BOOL APIENTRY DllMain( HMODULE hModule,
 		break;
 	}
 	return TRUE;
+}
+
+void DllStartup() {
+	HIconDef = (HICON)LoadImage(hInst, MAKEINTRESOURCE(IDI_ICONDEFAPP), IMAGE_ICON, 16, 16, 0);
+	LoadDll();
+	hCurLoading = LoadCursor(NULL, IDC_WAIT);
+	ShowMainCoreStartUp();
+	GetProcessNumber();
 }
 

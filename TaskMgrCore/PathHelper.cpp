@@ -32,7 +32,7 @@ bool Path::IsValidateFolderFileName(std::wstring * path)
 	for (u32Index = 0; (u32Index < u32Length) && (ret == 0);
 		u32Index++)
 	{
-		if (u8CtrlCharBegin <= pName[u32Index] <= u8CtrlCharEnd)
+		if (u8CtrlCharBegin <= pName[u32Index] && pName[u32Index] <= u8CtrlCharEnd)
 			ret = false;
 		else if (wcschr(u8SpecialChar, pName[u32Index]) != NULL)
 			ret = false;

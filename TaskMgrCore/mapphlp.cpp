@@ -5,6 +5,7 @@
 #include "vprocx.h"
 #include "comdlghlp.h"
 #include "fmhlp.h"
+#include "syshlp.h"
 #include "VersionHelpers.h"
 #include "StringHlp.h"
 #include <shellapi.h>
@@ -35,7 +36,15 @@ taskdialogcallback hMainTaskDialogCallBack;
 EnumWinsCallBack hEnumWinsCallBack;
 EnumWinsCallBack hGetWinsWinsCallBack;
 CLRCreateInstanceFun _CLRCreateInstance;
+
+ICLRMetaHost        *pMetaHost = nullptr;
+ICLRMetaHostPolicy  *pMetaHostPolicy = nullptr;
+ICLRRuntimeHost     *pRuntimeHost = nullptr;
+ICLRRuntimeInfo     *pRuntimeInfo = nullptr;
+DWORD dwMainAppRet = 0;
+
 HWND selectItem4;
+LPWSTR selectItemScSmall = NULL;
 
 void print(LPWSTR str)
 {
@@ -50,18 +59,35 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 	case 182:
 		SetWindowTheme(hWnd, L"Explorer", NULL);
 		return 1;
-	case 183:
+	case 183: {
 		hMenuMain = LoadMenu(hInst, MAKEINTRESOURCE(IDR_MENUMAIN));
+		HMENU hR = GetSubMenu(hMenuMain, 0);
+		if (!MIsRunasAdmin())
+			InsertMenu(hR, 1, MF_BYPOSITION, IDM_REBOOT_AS_ADMIN, L"以管理员模式重启程序");
 		SetMenu(hWnd, hMenuMain);
 		hWndMain = hWnd;
 		return 1;
-	case 184:
-		if (MIs64BitOS())
-		{
-			if (MessageBox(0, L"检测到您在64位系统中运行32位的Task Manager，这将导致某些功能不可用。\n您还要继续运行软件吗？", L"Task Manager 信息", MB_YESNO | MB_ICONWARNING) == IDNO)
-				MAppExit();
+	}
+	case 184: {
+		selectItemScSmall = (LPWSTR)data;
+		if (data) {
+			HMENU hroot = LoadMenu(hInst, MAKEINTRESOURCE(IDR_MENUSCSMALL));
+			if (hroot) {
+				HMENU hpop = GetSubMenu(hroot, 0);
+				POINT pt;
+				GetCursorPos(&pt);
+				TrackPopupMenu(hpop,
+					TPM_LEFTALIGN | TPM_TOPALIGN | TPM_RIGHTBUTTON,
+					pt.x,
+					pt.y,
+					0,
+					hWnd,
+					NULL);
+				DestroyMenu(hroot);
+			}
 		}
 		break;
+	}
 	case 185:
 		ExitWindowsEx(EWX_REBOOT, 0);
 		break;
@@ -111,6 +137,9 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 	case 191:
 		MAppRebot();
 		break;
+	case 192:
+		SendMessage((HWND)data, WM_SYSCOMMAND, SC_CLOSE, 0);
+		break;
 	default:
 		return 0;
 		break;
@@ -157,56 +186,62 @@ M_API BOOL MIsSystemSupport()
 {
 	return IsWindows7OrGreater();
 }
-M_API BOOL MLoadMainApp()
+M_API BOOL MAppMainRun()
+{
+	HRESULT hr = pRuntimeHost->ExecuteInDefaultAppDomain(L"PCMgrCore32.dll", L"TaskMgr.Program", L"EntryPoint", L"", &dwMainAppRet);
+	hr = pRuntimeHost->Stop();
+	return SUCCEEDED(hr);
+}
+M_API void MAppMainFree()
+{
+	if (pRuntimeInfo != nullptr) {
+		pRuntimeInfo->Release();
+		pRuntimeInfo = nullptr;
+	}
+	if (pRuntimeHost != nullptr) {
+		pRuntimeHost->Release();
+		pRuntimeHost = nullptr;
+	}
+	if (pMetaHost != nullptr) {
+		pMetaHost->Release();
+		pMetaHost = nullptr;
+	}
+}
+M_API void MAppMainExit(UINT exitcode)
+{
+	ExitProcess(exitcode);
+}
+M_API DWORD MAppMainGetExitCode()
+{
+	return dwMainAppRet;
+}
+M_API DWORD MAppMainSetExitCode(DWORD ex)
+{
+	DWORD old = dwMainAppRet;
+	dwMainAppRet = ex;
+	return old;
+}
+M_API BOOL MAppMainLoad()
 {
 	HMODULE hMscoree = LoadLibrary(L"MSCOREE.DLL");
 	if (hMscoree)
 	{
 		_CLRCreateInstance = (CLRCreateInstanceFun)GetProcAddress(hMscoree, "CLRCreateInstance");
-
-		ICLRMetaHost        *pMetaHost = nullptr;
-		ICLRMetaHostPolicy  *pMetaHostPolicy = nullptr;
-		ICLRRuntimeHost     *pRuntimeHost = nullptr;
-		ICLRRuntimeInfo     *pRuntimeInfo = nullptr;
-
 		HRESULT hr = _CLRCreateInstance(CLSID_CLRMetaHost, IID_ICLRMetaHost, (LPVOID*)&pMetaHost);
 		if (FAILED(hr))
 		{
 			if (hr == 0x80004001)
 				MessageBox(0, L"无法运行程序，因为您的计算机上没有安装.NET Framework 4.0 。\n百度“.NET Framework 4.0”就可以下载安装了。", DEFDIALOGGTITLE, MB_ICONERROR | MB_OK);
-			goto CLEAR;
+			return false;
 		}
 		hr = pMetaHost->GetRuntime(L"v4.0.30319", IID_PPV_ARGS(&pRuntimeInfo));
 		if (FAILED(hr))
 		{
 			MessageBox(0, L"无法运行程序，因为您的计算机上没有安装.NET Framework 4.0 。\n百度“.NET Framework 4.0”就可以下载安装了。", DEFDIALOGGTITLE, MB_ICONERROR | MB_OK);
-			goto CLEAR;
+			return false;
 		}
 		hr = pRuntimeInfo->GetInterface(CLSID_CLRRuntimeHost, IID_PPV_ARGS(&pRuntimeHost));
 		hr = pRuntimeHost->Start();
-
-		DWORD dwRet = 0;
-		hr = pRuntimeHost->ExecuteInDefaultAppDomain(L"PCMgrCore32.dll",
-			L"TaskMgr.Program",
-			L"EntryPoint",
-			L"",
-			&dwRet);
-
-		hr = pRuntimeHost->Stop();
-
-		CLEAR:
-		if (pRuntimeInfo != nullptr) {
-			pRuntimeInfo->Release();
-			pRuntimeInfo = nullptr;
-		}
-		if (pRuntimeHost != nullptr) {
-			pRuntimeHost->Release();
-			pRuntimeHost = nullptr;
-		}
-		if (pMetaHost != nullptr) {
-			pMetaHost->Release();
-			pMetaHost = nullptr;
-		}
 	}
 	else MessageBox(0, L"无法运行程序，因为您的计算机上没有安装.NET Framework 2.0 。\n百度“.NET Framework 2.0”就可以下载安装了。", DEFDIALOGGTITLE, MB_ICONERROR | MB_OK);
 	return true;
@@ -228,35 +263,32 @@ bool MLoadAppBackUp()
 	return false;
 }
 
-M_API bool MIs64BitOS()
-{
-	typedef void (WINAPI *LPFN_PGNSI)(LPSYSTEM_INFO);
-	bool bRetVal = false;
-	SYSTEM_INFO si = { 0 };
-	LPFN_PGNSI pGNSI = (LPFN_PGNSI)GetProcAddress(GetModuleHandle(L"kernel32.dll"), "GetNativeSystemInfo");
-	if (pGNSI == NULL)
-	{
-		return false;
-	}
-	pGNSI(&si);
-	if (si.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64 ||
-		si.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_IA64)
-		bRetVal = true;
-	return bRetVal;
-}
-
 M_API void MAppExit() {
 	if (hMainExitCallBack)
 		hMainExitCallBack();
 }
 M_API void MAppRebot() {
 
-	TCHAR exeFullPath[256];
+	TCHAR exeFullPath[MAX_PATH];
 	GetModuleFileName(NULL, exeFullPath, MAX_PATH);
 	ShellExecute(NULL, L"open", exeFullPath, NULL, NULL, 5);
 
 	if (hMainExitCallBack)
 		hMainExitCallBack();
+}
+M_API void MAppRebotAdmin() {
+
+	TCHAR exeFullPath[MAX_PATH];
+	GetModuleFileName(NULL, exeFullPath, MAX_PATH);
+	if ((int)ShellExecute(NULL, L"runas", exeFullPath, NULL, NULL, 5) > 32) {
+		if (hMainExitCallBack) 
+			hMainExitCallBack();
+	}
+	else {
+		if (GetLastError() == ERROR_CANCELLED) {
+			MShowMessageDialog(hWndMain, L"请在刚才的对话框中选择”是“或者”确定“来赋予本程序管理员权限。", L"提示", L"您拒绝了权限赋予。");
+		}
+	}
 }
 M_API void MListDrawItem(HWND hWnd, HDC hdc, int x, int y, int w, int h, int state)
 {
@@ -304,88 +336,6 @@ M_API void MListDrawItem(HWND hWnd, HDC hdc, int x, int y, int w, int h, int sta
 	}
 	if (hTheme != NULL)CloseThemeData(hTheme);
 }
-M_API bool MGetPrivileges()
-{
-	HANDLE hToken;
-	TOKEN_PRIVILEGES tp;
-	TOKEN_PRIVILEGES oldtp;
-	DWORD dwSize = sizeof(TOKEN_PRIVILEGES);
-	LUID luid;
-	TOKEN_PRIVILEGES tkp = { 0 };
-
-	ZeroMemory(&tp, sizeof(tp));
-	if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken)) {
-		if (GetLastError() == ERROR_CALL_NOT_IMPLEMENTED) return true;
-		else return false;
-	}
-	if (!LookupPrivilegeValue(NULL, SE_SHUTDOWN_NAME, &luid))
-	{
-		CloseHandle(hToken);
-		return false;
-	}
-	tp.PrivilegeCount = 1;
-	tp.Privileges[0].Luid = luid;
-	tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
-	if (!AdjustTokenPrivileges(hToken, FALSE, &tp, sizeof(TOKEN_PRIVILEGES), &oldtp, &dwSize)) {
-		CloseHandle(hToken);
-		return false;
-	}
-	if (!LookupPrivilegeValue(NULL, SE_DEBUG_NAME, &luid))
-	{
-		CloseHandle(hToken);
-		return false;
-	}
-	tp.PrivilegeCount = 1;
-	tp.Privileges[0].Luid = luid;
-	tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
-	if (!AdjustTokenPrivileges(hToken, FALSE, &tp, sizeof(TOKEN_PRIVILEGES), &oldtp, &dwSize)) {
-		CloseHandle(hToken);
-		return false;
-	}
-	if (!LookupPrivilegeValue(NULL, SE_LOAD_DRIVER_NAME, &luid))
-	{
-		CloseHandle(hToken);
-		return false;
-	}
-	tp.PrivilegeCount = 1;
-	tp.Privileges[0].Luid = luid;
-	tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
-	if (!AdjustTokenPrivileges(hToken, FALSE, &tp, sizeof(TOKEN_PRIVILEGES), &oldtp, &dwSize)) {
-		CloseHandle(hToken);
-		return false;
-	}
-
-	CloseHandle(hToken);
-	return true;
-}
-M_API VOID MShowFileProp(LPWSTR file)
-{
-	SHELLEXECUTEINFO info = { 0 };
-	info.cbSize = sizeof(SHELLEXECUTEINFO);
-	info.hwnd = hWndMain;
-	info.lpVerb = L"properties";
-	info.lpFile = file;
-	info.nShow = SW_SHOW;
-	info.fMask = SEE_MASK_INVOKEIDLIST;
-	ShellExecuteEx(&info);
-}
-M_API BOOL MCopyToClipboard(const WCHAR* pszData, const int nDataLen)
-{
-	if (OpenClipboard(NULL))
-	{
-		EmptyClipboard();
-		HGLOBAL clipbuffer;
-		WCHAR *buffer;
-		clipbuffer = ::GlobalAlloc(GMEM_DDESHARE, nDataLen + 1);
-		buffer = (WCHAR*)GlobalLock(clipbuffer);
-		wcscpy_s(buffer, nDataLen, pszData);
-		GlobalUnlock(clipbuffer);
-		SetClipboardData(CF_TEXT, clipbuffer);
-		CloseClipboard();
-		return TRUE;
-	}
-	return FALSE;
-}
 
 void ThrowErrorAndErrorCodeX(DWORD code, LPWSTR msg, LPWSTR title)
 {
@@ -405,6 +355,14 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_COMMAND:
 		switch (wParam)
 		{
+		case IDM_RUN: {
+			MRunFileDlg(hWnd, NULL, NULL, NULL, NULL, 0);
+			break;
+		}
+		case IDM_REBOOT_AS_ADMIN: {
+			MAppRebotAdmin();
+			break;
+		}
 		case IDM_ABOUT: {
 			DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
 			break;
@@ -428,7 +386,7 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 					int rs = MOpenProcessNt(thisCommandPid, &hProcess);
 					if (rs == 1)
 					{
-						rs = MTerminateProcessNt(hProcess);
+						rs = MTerminateProcessNt(0, hProcess);
 						if (rs == 0xC0000022)
 							MShowErrorMessage(L"拒绝访问。", L"无法结束进程", MB_ICONERROR, MB_OK);
 						else if (rs != 1)
@@ -464,28 +422,30 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			else MShowErrorMessage(L"无法获取路径。", L"无法完成该操作", MB_ICONERROR, MB_OK);
 			break;
 		}
-		case IDM_VMODULS:
+		case IDM_VMODULS: {
 			if (thisCommandPid > 4)
 				MAppVProcessModuls(thisCommandPid, hWndMain, thisCommandName);
 			break;
-		case IDM_VTHREAD:
+		}
+		case IDM_VTHREAD: {
 			if (thisCommandPid > 4)
 				MAppVProcessThreads(thisCommandPid, hWndMain, thisCommandName);
 			break;
-		case IDM_VWINS:
+		}
+		case IDM_VWINS: {
 			if (thisCommandPid > 4)
 				MAppVProcessWindows(thisCommandPid, hWndMain, thisCommandName);
 			break;
+		}
 		case IDM_SUPROC: {
 			if (thisCommandPid > 4)
 			{
-				int rs = MSuspendTaskNt(thisCommandPid);
+				int rs = MSuspendProcessNt(thisCommandPid, NULL);
 				if (rs == -1) {
 					MShowErrorMessage(L"无效进程。", L"无法完成该操作", MB_ICONWARNING, MB_OK);
 					SendMessage(hWndMain, WM_COMMAND, 41012, 0);
 				}
-				else if (rs != 1)
-					ThrowErrorAndErrorCodeX(rs, L"无法暂停进程运行进程，错误代码：", L"无法完成该操作");
+				else if (rs != 1) ThrowErrorAndErrorCodeX(rs, L"无法暂停进程运行进程，错误代码：", L"无法完成该操作");
 				else SendMessage(hWndMain, WM_COMMAND, 41012, 0);
 			}
 			break;
@@ -493,13 +453,12 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		case IDM_RESPROC: {
 			if (thisCommandPid > 4)
 			{
-				int rs = MRusemeTaskNt(thisCommandPid);
+				int rs = MRusemeProcessNt(thisCommandPid, NULL);
 				if (rs == -1) {
 					MShowErrorMessage(L"无效进程。", L"无法完成该操作", MB_ICONWARNING, MB_OK);
 					SendMessage(hWndMain, WM_COMMAND, 41012, 0);
-				}
-				else if (rs != 1)
-					ThrowErrorAndErrorCodeX(rs, L"无法继续进程运行进程，错误代码：", L"无法完成该操作");
+				} 
+				else if (rs != 1)ThrowErrorAndErrorCodeX(rs, L"无法继续进程运行进程，错误代码：", L"无法完成该操作");
 				else SendMessage(hWndMain, WM_COMMAND, 41012, 0);
 			}
 			break;
@@ -586,6 +545,7 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 		case ID_FMMAIN_SHIWHIDEDFILES: {
 			MFM_ReSetShowHiddenFiles();
+			MFM_Refesh();
 			break;
 		}
 		case ID_FMMAIN_NEWFOLDER: {
@@ -674,6 +634,18 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 		case ID_FMFOLDER_OPEN: {
 			MFF_ShowFolder();
+			break;
+		}
+		case ID_SCSMALL_STOPSC: {
+
+			break;
+		}
+		case ID_SCSMALL_REBOOTSC: {
+
+			break;
+		}
+		case ID_SCSMALL_GOTOSC: {
+
 			break;
 		}
 		default:

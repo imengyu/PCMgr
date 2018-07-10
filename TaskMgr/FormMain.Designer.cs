@@ -32,17 +32,22 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMain));
             this.tabControlMain = new System.Windows.Forms.TabControl();
             this.tabPageProcCtl = new System.Windows.Forms.TabPage();
+            this.check_showAllProcess = new System.Windows.Forms.CheckBox();
             this.spl1 = new System.Windows.Forms.PictureBox();
             this.lbShowDetals = new System.Windows.Forms.LinkLabel();
             this.btnEndProcess = new System.Windows.Forms.Button();
             this.lbProcessCount = new System.Windows.Forms.Label();
-            this.listProcess = new TaskMgr.Ctls.TaskMgrList();
             this.tabPageKernelCtl = new System.Windows.Forms.TabPage();
             this.lbDriversCount = new System.Windows.Forms.Label();
-            this.listDrivers = new TaskMgr.Ctls.TaskMgrList();
             this.tabPageSysCtl = new System.Windows.Forms.TabPage();
+            this.tabPageUWPCtl = new System.Windows.Forms.TabPage();
+            this.pl_UWPEnumFailTip = new System.Windows.Forms.Panel();
+            this.lbUWPEnumFailText = new System.Windows.Forms.Label();
             this.tabPageScCtl = new System.Windows.Forms.TabPage();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.pl_ScNeedAdminTip = new System.Windows.Forms.Panel();
+            this.linkRebootAsAdmin = new System.Windows.Forms.LinkLabel();
+            this.lbScNeedAdminTip = new System.Windows.Forms.Label();
+            this.sp2 = new System.Windows.Forms.PictureBox();
             this.linkOpenScMsc = new System.Windows.Forms.LinkLabel();
             this.lbServicesCount = new System.Windows.Forms.Label();
             this.listService = new System.Windows.Forms.ListView();
@@ -52,6 +57,8 @@
             this.columnHeader10 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader11 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader12 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader13 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader14 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tabPageStartCtl = new System.Windows.Forms.TabPage();
             this.tabPageFileCtl = new System.Windows.Forms.TabPage();
             this.lbFileMgrStatus = new System.Windows.Forms.Label();
@@ -71,12 +78,18 @@
             this.spBottom = new System.Windows.Forms.PictureBox();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
             this.fileSystemWatcher = new System.IO.FileSystemWatcher();
+            this.listProcess = new TaskMgr.Ctls.TaskMgrList();
+            this.listDrivers = new TaskMgr.Ctls.TaskMgrList();
+            this.listUwpApps = new TaskMgr.Ctls.TaskMgrList();
             this.tabControlMain.SuspendLayout();
             this.tabPageProcCtl.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.spl1)).BeginInit();
             this.tabPageKernelCtl.SuspendLayout();
+            this.tabPageUWPCtl.SuspendLayout();
+            this.pl_UWPEnumFailTip.SuspendLayout();
             this.tabPageScCtl.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            this.pl_ScNeedAdminTip.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.sp2)).BeginInit();
             this.tabPageFileCtl.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerFm)).BeginInit();
             this.splitContainerFm.Panel1.SuspendLayout();
@@ -94,6 +107,7 @@
             this.tabControlMain.Controls.Add(this.tabPageProcCtl);
             this.tabControlMain.Controls.Add(this.tabPageKernelCtl);
             this.tabControlMain.Controls.Add(this.tabPageSysCtl);
+            this.tabControlMain.Controls.Add(this.tabPageUWPCtl);
             this.tabControlMain.Controls.Add(this.tabPageScCtl);
             this.tabControlMain.Controls.Add(this.tabPageStartCtl);
             this.tabControlMain.Controls.Add(this.tabPageFileCtl);
@@ -103,10 +117,12 @@
             this.tabControlMain.SelectedIndex = 0;
             this.tabControlMain.Size = new System.Drawing.Size(909, 594);
             this.tabControlMain.TabIndex = 0;
+            this.tabControlMain.Visible = false;
             this.tabControlMain.Selected += new System.Windows.Forms.TabControlEventHandler(this.tabControlMain_Selected);
             // 
             // tabPageProcCtl
             // 
+            this.tabPageProcCtl.Controls.Add(this.check_showAllProcess);
             this.tabPageProcCtl.Controls.Add(this.spl1);
             this.tabPageProcCtl.Controls.Add(this.lbShowDetals);
             this.tabPageProcCtl.Controls.Add(this.btnEndProcess);
@@ -120,11 +136,26 @@
             this.tabPageProcCtl.Text = "进程管理";
             this.tabPageProcCtl.UseVisualStyleBackColor = true;
             // 
+            // check_showAllProcess
+            // 
+            this.check_showAllProcess.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.check_showAllProcess.Image = ((System.Drawing.Image)(resources.GetObject("check_showAllProcess.Image")));
+            this.check_showAllProcess.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.check_showAllProcess.Location = new System.Drawing.Point(87, 533);
+            this.check_showAllProcess.Name = "check_showAllProcess";
+            this.check_showAllProcess.Size = new System.Drawing.Size(168, 23);
+            this.check_showAllProcess.TabIndex = 8;
+            this.check_showAllProcess.Text = "显示所有用户的进程";
+            this.check_showAllProcess.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.check_showAllProcess.UseVisualStyleBackColor = true;
+            this.check_showAllProcess.Visible = false;
+            this.check_showAllProcess.CheckedChanged += new System.EventHandler(this.check_showAllProcess_CheckedChanged);
+            // 
             // spl1
             // 
             this.spl1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.spl1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(207)))), ((int)(((byte)(207)))), ((int)(((byte)(207)))));
-            this.spl1.Location = new System.Drawing.Point(163, 537);
+            this.spl1.Location = new System.Drawing.Point(80, 537);
             this.spl1.Name = "spl1";
             this.spl1.Size = new System.Drawing.Size(1, 14);
             this.spl1.TabIndex = 7;
@@ -172,26 +203,6 @@
             this.lbProcessCount.TabIndex = 5;
             this.lbProcessCount.Text = "进程数：--";
             // 
-            // listProcess
-            // 
-            this.listProcess.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.listProcess.BackColor = System.Drawing.SystemColors.Window;
-            this.listProcess.FocusedType = false;
-            this.listProcess.Icons = null;
-            this.listProcess.ListViewItemSorter = null;
-            this.listProcess.Location = new System.Drawing.Point(0, 0);
-            this.listProcess.Name = "listProcess";
-            this.listProcess.ShowGroup = false;
-            this.listProcess.Size = new System.Drawing.Size(901, 520);
-            this.listProcess.TabIndex = 1;
-            this.listProcess.Value = 0D;
-            this.listProcess.XOffest = 0;
-            this.listProcess.SelectItemChanged += new System.EventHandler(this.listProcess_SelectItemChanged);
-            this.listProcess.MouseDown += new System.Windows.Forms.MouseEventHandler(this.listProcess_MouseDown);
-            this.listProcess.MouseUp += new System.Windows.Forms.MouseEventHandler(this.listProcess_MouseUp);
-            // 
             // tabPageKernelCtl
             // 
             this.tabPageKernelCtl.Controls.Add(this.lbDriversCount);
@@ -214,23 +225,6 @@
             this.lbDriversCount.TabIndex = 6;
             this.lbDriversCount.Text = "驱动数：--";
             // 
-            // listDrivers
-            // 
-            this.listDrivers.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.listDrivers.BackColor = System.Drawing.SystemColors.Window;
-            this.listDrivers.FocusedType = false;
-            this.listDrivers.ListViewItemSorter = null;
-            this.listDrivers.Location = new System.Drawing.Point(1, 1);
-            this.listDrivers.Name = "listDrivers";
-            this.listDrivers.ShowGroup = false;
-            this.listDrivers.Size = new System.Drawing.Size(898, 519);
-            this.listDrivers.TabIndex = 0;
-            this.listDrivers.Text = "taskMgrList1";
-            this.listDrivers.Value = 0D;
-            this.listDrivers.XOffest = 0;
-            // 
             // tabPageSysCtl
             // 
             this.tabPageSysCtl.Location = new System.Drawing.Point(4, 26);
@@ -241,9 +235,42 @@
             this.tabPageSysCtl.Text = "系统管理";
             this.tabPageSysCtl.UseVisualStyleBackColor = true;
             // 
+            // tabPageUWPCtl
+            // 
+            this.tabPageUWPCtl.Controls.Add(this.pl_UWPEnumFailTip);
+            this.tabPageUWPCtl.Controls.Add(this.listUwpApps);
+            this.tabPageUWPCtl.Location = new System.Drawing.Point(4, 26);
+            this.tabPageUWPCtl.Name = "tabPageUWPCtl";
+            this.tabPageUWPCtl.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageUWPCtl.Size = new System.Drawing.Size(901, 564);
+            this.tabPageUWPCtl.TabIndex = 6;
+            this.tabPageUWPCtl.Text = "通用应用";
+            this.tabPageUWPCtl.UseVisualStyleBackColor = true;
+            // 
+            // pl_UWPEnumFailTip
+            // 
+            this.pl_UWPEnumFailTip.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.pl_UWPEnumFailTip.Controls.Add(this.lbUWPEnumFailText);
+            this.pl_UWPEnumFailTip.Location = new System.Drawing.Point(210, 160);
+            this.pl_UWPEnumFailTip.Name = "pl_UWPEnumFailTip";
+            this.pl_UWPEnumFailTip.Size = new System.Drawing.Size(483, 228);
+            this.pl_UWPEnumFailTip.TabIndex = 11;
+            this.pl_UWPEnumFailTip.Visible = false;
+            // 
+            // lbUWPEnumFailText
+            // 
+            this.lbUWPEnumFailText.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lbUWPEnumFailText.Location = new System.Drawing.Point(0, 0);
+            this.lbUWPEnumFailText.Name = "lbUWPEnumFailText";
+            this.lbUWPEnumFailText.Size = new System.Drawing.Size(483, 228);
+            this.lbUWPEnumFailText.TabIndex = 0;
+            this.lbUWPEnumFailText.Text = "未知错误";
+            this.lbUWPEnumFailText.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
             // tabPageScCtl
             // 
-            this.tabPageScCtl.Controls.Add(this.pictureBox1);
+            this.tabPageScCtl.Controls.Add(this.pl_ScNeedAdminTip);
+            this.tabPageScCtl.Controls.Add(this.sp2);
             this.tabPageScCtl.Controls.Add(this.linkOpenScMsc);
             this.tabPageScCtl.Controls.Add(this.lbServicesCount);
             this.tabPageScCtl.Controls.Add(this.listService);
@@ -255,16 +282,51 @@
             this.tabPageScCtl.Text = "服务管理";
             this.tabPageScCtl.UseVisualStyleBackColor = true;
             // 
-            // pictureBox1
+            // pl_ScNeedAdminTip
             // 
-            this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.pictureBox1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(207)))), ((int)(((byte)(207)))), ((int)(((byte)(207)))));
-            this.pictureBox1.Location = new System.Drawing.Point(87, 537);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(1, 14);
-            this.pictureBox1.TabIndex = 9;
-            this.pictureBox1.TabStop = false;
-            this.pictureBox1.Visible = false;
+            this.pl_ScNeedAdminTip.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.pl_ScNeedAdminTip.Controls.Add(this.linkRebootAsAdmin);
+            this.pl_ScNeedAdminTip.Controls.Add(this.lbScNeedAdminTip);
+            this.pl_ScNeedAdminTip.Location = new System.Drawing.Point(325, 228);
+            this.pl_ScNeedAdminTip.Name = "pl_ScNeedAdminTip";
+            this.pl_ScNeedAdminTip.Size = new System.Drawing.Size(200, 55);
+            this.pl_ScNeedAdminTip.TabIndex = 10;
+            this.pl_ScNeedAdminTip.Visible = false;
+            // 
+            // linkRebootAsAdmin
+            // 
+            this.linkRebootAsAdmin.DisabledLinkColor = System.Drawing.SystemColors.MenuHighlight;
+            this.linkRebootAsAdmin.Image = ((System.Drawing.Image)(resources.GetObject("linkRebootAsAdmin.Image")));
+            this.linkRebootAsAdmin.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.linkRebootAsAdmin.LinkBehavior = System.Windows.Forms.LinkBehavior.HoverUnderline;
+            this.linkRebootAsAdmin.LinkColor = System.Drawing.SystemColors.MenuHighlight;
+            this.linkRebootAsAdmin.Location = new System.Drawing.Point(27, 29);
+            this.linkRebootAsAdmin.Name = "linkRebootAsAdmin";
+            this.linkRebootAsAdmin.Size = new System.Drawing.Size(147, 21);
+            this.linkRebootAsAdmin.TabIndex = 9;
+            this.linkRebootAsAdmin.TabStop = true;
+            this.linkRebootAsAdmin.Text = "以管理员权限重启软件";
+            this.linkRebootAsAdmin.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.linkRebootAsAdmin.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkRebootAsAdmin_LinkClicked);
+            // 
+            // lbScNeedAdminTip
+            // 
+            this.lbScNeedAdminTip.AutoSize = true;
+            this.lbScNeedAdminTip.Location = new System.Drawing.Point(1, 10);
+            this.lbScNeedAdminTip.Name = "lbScNeedAdminTip";
+            this.lbScNeedAdminTip.Size = new System.Drawing.Size(200, 17);
+            this.lbScNeedAdminTip.TabIndex = 0;
+            this.lbScNeedAdminTip.Text = "需要管理员权限才能启动服务管理器";
+            // 
+            // sp2
+            // 
+            this.sp2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.sp2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(207)))), ((int)(((byte)(207)))), ((int)(((byte)(207)))));
+            this.sp2.Location = new System.Drawing.Point(90, 537);
+            this.sp2.Name = "sp2";
+            this.sp2.Size = new System.Drawing.Size(1, 14);
+            this.sp2.TabIndex = 9;
+            this.sp2.TabStop = false;
             // 
             // linkOpenScMsc
             // 
@@ -281,7 +343,6 @@
             this.linkOpenScMsc.TabStop = true;
             this.linkOpenScMsc.Text = "打开服务";
             this.linkOpenScMsc.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.linkOpenScMsc.Visible = false;
             this.linkOpenScMsc.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkOpenScMsc_LinkClicked);
             // 
             // lbServicesCount
@@ -296,13 +357,19 @@
             // 
             // listService
             // 
+            this.listService.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.listService.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.listService.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader7,
             this.columnHeader8,
             this.columnHeader9,
             this.columnHeader10,
             this.columnHeader11,
-            this.columnHeader12});
+            this.columnHeader12,
+            this.columnHeader13,
+            this.columnHeader14});
             this.listService.FullRowSelect = true;
             this.listService.Location = new System.Drawing.Point(0, 0);
             this.listService.Name = "listService";
@@ -314,7 +381,7 @@
             // columnHeader7
             // 
             this.columnHeader7.Text = "名称";
-            this.columnHeader7.Width = 222;
+            this.columnHeader7.Width = 127;
             // 
             // columnHeader8
             // 
@@ -324,21 +391,32 @@
             // columnHeader9
             // 
             this.columnHeader9.Text = "描述";
-            this.columnHeader9.Width = 334;
+            this.columnHeader9.Width = 173;
             // 
             // columnHeader10
             // 
             this.columnHeader10.Text = "状态";
-            this.columnHeader10.Width = 79;
+            this.columnHeader10.Width = 65;
             // 
             // columnHeader11
             // 
             this.columnHeader11.Text = "组";
-            this.columnHeader11.Width = 133;
+            this.columnHeader11.Width = 126;
             // 
             // columnHeader12
             // 
             this.columnHeader12.Text = "启动类型";
+            this.columnHeader12.Width = 62;
+            // 
+            // columnHeader13
+            // 
+            this.columnHeader13.Text = "类型";
+            this.columnHeader13.Width = 62;
+            // 
+            // columnHeader14
+            // 
+            this.columnHeader14.Text = "文件路径";
+            this.columnHeader14.Width = 222;
             // 
             // tabPageStartCtl
             // 
@@ -428,7 +506,9 @@
             this.treeFmLeft.Size = new System.Drawing.Size(226, 488);
             this.treeFmLeft.TabIndex = 0;
             this.treeFmLeft.BeforeExpand += new System.Windows.Forms.TreeViewCancelEventHandler(this.treeFmLeft_BeforeExpand);
+            this.treeFmLeft.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeFmLeft_AfterSelect);
             this.treeFmLeft.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.treeFmLeft_NodeMouseClick);
+            this.treeFmLeft.MouseClick += new System.Windows.Forms.MouseEventHandler(this.treeFmLeft_MouseClick);
             // 
             // imageListFileMgrLeft
             // 
@@ -518,6 +598,60 @@
             this.fileSystemWatcher.Deleted += new System.IO.FileSystemEventHandler(this.fileSystemWatcher_Deleted);
             this.fileSystemWatcher.Renamed += new System.IO.RenamedEventHandler(this.fileSystemWatcher_Renamed);
             // 
+            // listProcess
+            // 
+            this.listProcess.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.listProcess.BackColor = System.Drawing.SystemColors.Window;
+            this.listProcess.FocusedType = false;
+            this.listProcess.Icons = null;
+            this.listProcess.ListViewItemSorter = null;
+            this.listProcess.Location = new System.Drawing.Point(0, 0);
+            this.listProcess.Name = "listProcess";
+            this.listProcess.ShowGroup = false;
+            this.listProcess.Size = new System.Drawing.Size(901, 520);
+            this.listProcess.TabIndex = 1;
+            this.listProcess.Value = 0D;
+            this.listProcess.XOffest = 0;
+            this.listProcess.SelectItemChanged += new System.EventHandler(this.listProcess_SelectItemChanged);
+            this.listProcess.KeyDown += new System.Windows.Forms.KeyEventHandler(this.listProcess_KeyDown);
+            this.listProcess.MouseDown += new System.Windows.Forms.MouseEventHandler(this.listProcess_MouseDown);
+            this.listProcess.MouseUp += new System.Windows.Forms.MouseEventHandler(this.listProcess_MouseUp);
+            // 
+            // listDrivers
+            // 
+            this.listDrivers.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.listDrivers.BackColor = System.Drawing.SystemColors.Window;
+            this.listDrivers.FocusedType = false;
+            this.listDrivers.ListViewItemSorter = null;
+            this.listDrivers.Location = new System.Drawing.Point(1, 1);
+            this.listDrivers.Name = "listDrivers";
+            this.listDrivers.ShowGroup = false;
+            this.listDrivers.Size = new System.Drawing.Size(898, 519);
+            this.listDrivers.TabIndex = 0;
+            this.listDrivers.Text = "taskMgrList1";
+            this.listDrivers.Value = 0D;
+            this.listDrivers.XOffest = 0;
+            // 
+            // listUwpApps
+            // 
+            this.listUwpApps.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.listUwpApps.BackColor = System.Drawing.SystemColors.Window;
+            this.listUwpApps.FocusedType = false;
+            this.listUwpApps.ListViewItemSorter = null;
+            this.listUwpApps.Location = new System.Drawing.Point(0, 4);
+            this.listUwpApps.Name = "listUwpApps";
+            this.listUwpApps.ShowGroup = false;
+            this.listUwpApps.Size = new System.Drawing.Size(898, 516);
+            this.listUwpApps.TabIndex = 1;
+            this.listUwpApps.Value = 0D;
+            this.listUwpApps.XOffest = 0;
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -526,6 +660,7 @@
             this.ClientSize = new System.Drawing.Size(907, 593);
             this.Controls.Add(this.spBottom);
             this.Controls.Add(this.tabControlMain);
+            this.Cursor = System.Windows.Forms.Cursors.AppStarting;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MinimumSize = new System.Drawing.Size(400, 300);
             this.Name = "FormMain";
@@ -542,9 +677,13 @@
             ((System.ComponentModel.ISupportInitialize)(this.spl1)).EndInit();
             this.tabPageKernelCtl.ResumeLayout(false);
             this.tabPageKernelCtl.PerformLayout();
+            this.tabPageUWPCtl.ResumeLayout(false);
+            this.pl_UWPEnumFailTip.ResumeLayout(false);
             this.tabPageScCtl.ResumeLayout(false);
             this.tabPageScCtl.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            this.pl_ScNeedAdminTip.ResumeLayout(false);
+            this.pl_ScNeedAdminTip.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.sp2)).EndInit();
             this.tabPageFileCtl.ResumeLayout(false);
             this.tabPageFileCtl.PerformLayout();
             this.splitContainerFm.Panel1.ResumeLayout(false);
@@ -597,9 +736,19 @@
         private System.Windows.Forms.ColumnHeader columnHeader10;
         private System.Windows.Forms.ColumnHeader columnHeader11;
         private System.Windows.Forms.ColumnHeader columnHeader12;
-        private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.PictureBox sp2;
         private System.Windows.Forms.LinkLabel linkOpenScMsc;
         private System.Windows.Forms.Label lbServicesCount;
+        private System.Windows.Forms.Panel pl_ScNeedAdminTip;
+        private System.Windows.Forms.LinkLabel linkRebootAsAdmin;
+        private System.Windows.Forms.Label lbScNeedAdminTip;
+        private System.Windows.Forms.ColumnHeader columnHeader13;
+        private System.Windows.Forms.ColumnHeader columnHeader14;
+        private System.Windows.Forms.CheckBox check_showAllProcess;
+        private System.Windows.Forms.TabPage tabPageUWPCtl;
+        private Ctls.TaskMgrList listUwpApps;
+        private System.Windows.Forms.Panel pl_UWPEnumFailTip;
+        private System.Windows.Forms.Label lbUWPEnumFailText;
     }
 }
 

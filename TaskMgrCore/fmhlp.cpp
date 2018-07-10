@@ -89,6 +89,35 @@ M_API LPWSTR MFM_GetMyComputerName()
 	return strMyComputer;
 }
 
+M_API VOID MShowFileProp(LPWSTR file)
+{
+	SHELLEXECUTEINFO info = { 0 };
+	info.cbSize = sizeof(SHELLEXECUTEINFO);
+	info.hwnd = hWndMain;
+	info.lpVerb = L"properties";
+	info.lpFile = file;
+	info.nShow = SW_SHOW;
+	info.fMask = SEE_MASK_INVOKEIDLIST;
+	ShellExecuteEx(&info);
+}
+M_API BOOL MCopyToClipboard(const WCHAR* pszData, const int nDataLen)
+{
+	if (OpenClipboard(NULL))
+	{
+		EmptyClipboard();
+		HGLOBAL clipbuffer;
+		WCHAR *buffer;
+		clipbuffer = ::GlobalAlloc(GMEM_DDESHARE, (nDataLen + 1) * sizeof(WCHAR));
+		buffer = (WCHAR*)GlobalLock(clipbuffer);
+		wcscpy_s(buffer, nDataLen + 1, pszData);
+		GlobalUnlock(clipbuffer);
+		SetClipboardData(CF_UNICODETEXT, clipbuffer);
+		CloseClipboard();
+		return TRUE;
+	}
+	return FALSE;
+}
+
 M_API void MFM_GetRoots()
 {
 	DWORD dwLen = GetLogicalDriveStrings(0, NULL);
@@ -98,14 +127,15 @@ M_API void MFM_GetRoots()
 
 	while (*pszDriver != '\0') {
 		int a = wcslen(pszDriver);
-
 		DWORD serialNumber, maxComponentLength, fsFlags;
-		TCHAR szFileSystem[12];
-		TCHAR szVolumeName[24];
+
+		TCHAR szFileSystem[16] = { 0 };
+		TCHAR szVolumeName[32] = { 0 };
 		TCHAR szRoot[4] = { 0 };
+
 		wcscpy_s(szRoot, pszDriver);
 
-		if (!GetVolumeInformation(
+		if (!GetVolumeInformationW(
 			szRoot,
 			szVolumeName,
 			sizeof(szVolumeName),
@@ -114,6 +144,7 @@ M_API void MFM_GetRoots()
 			&fsFlags,
 			szFileSystem,
 			sizeof(szFileSystem))) {
+			continue;
 		}
 
 		std::wstring w = FormatString(L"%s/%s (%s)", szVolumeName, szFileSystem, szRoot);
@@ -368,6 +399,7 @@ M_API void MFM_SetShowHiddenFiles(BOOL b)
 void MFM_ReSetShowHiddenFiles()
 {
 	fmShowHiddenFile = !fmShowHiddenFile;
+
 }
 /*
 LPWSTR buf;
@@ -386,7 +418,7 @@ BOOL MFM_RenameFile() {
 BOOL MFM_MoveFileToUser()
 {
 	WCHAR targetDir[MAX_PATH];
-	if (ChooseDir(hWndMain, NULL, L"选择移动目标文件夹", (LPWSTR*)&targetDir, sizeof(targetDir)))
+	if (MChooseDir(hWndMain, NULL, L"选择移动目标文件夹", (LPWSTR*)&targetDir, sizeof(targetDir)))
 	{
 		if (fmMutilSelect) {
 			std::wstring paths(fmCurrectSelectFilePath0);
@@ -428,7 +460,7 @@ BOOL MFM_MoveFileToUser()
 BOOL MFM_CopyFileToUser()
 {
 	WCHAR targetDir[MAX_PATH];
-	if (ChooseDir(hWndMain, NULL, L"选择复制目标文件夹", (LPWSTR*)&targetDir, sizeof(targetDir)))
+	if (MChooseDir(hWndMain, NULL, L"选择复制目标文件夹", (LPWSTR*)&targetDir, sizeof(targetDir)))
 	{
 		if (fmMutilSelect) {
 			std::wstring paths(fmCurrectSelectFilePath0);
@@ -627,16 +659,15 @@ M_API int MAppWorkShowMenuFM(LPWSTR strFilePath, BOOL mutilSelect, int selectCou
 	HMENU hroot = LoadMenu(hInst, MAKEINTRESOURCE(IDR_MENUFMMAIN));
 	if (hroot) {
 		HMENU hpop = GetSubMenu(hroot, 0);
-		HMENU hattr = GetSubMenu(hpop, 17);
 		DWORD attr = GetFileAttributesW(strFilePath);
-		CheckMenuItem(hattr, ID_FMM_READONLY, attr & FILE_ATTRIBUTE_READONLY);
-		CheckMenuItem(hattr, ID_FMM_HIDDEN, attr & FILE_ATTRIBUTE_HIDDEN);
-		CheckMenuItem(hattr, ID_FMM_SYSTEM, attr & FILE_ATTRIBUTE_SYSTEM);
+		CheckMenuItem(hpop, ID_FMM_READONLY, (attr & FILE_ATTRIBUTE_READONLY) ? MF_CHECKED : MF_UNCHECKED);
+		CheckMenuItem(hpop, ID_FMM_HIDDEN, (attr & FILE_ATTRIBUTE_HIDDEN) ? MF_CHECKED : MF_UNCHECKED);
+		CheckMenuItem(hpop, ID_FMM_SYSTEM, (attr & FILE_ATTRIBUTE_SYSTEM) ? MF_CHECKED : MF_UNCHECKED);
 
 		if ((!mutilSelect && MFM_IsPathDir(strFilePath)) || mutilSelect)
-			EnableMenuItem(hpop, ID_FMMAIN_OPENWAY, FALSE);
+			EnableMenuItem(hpop, ID_FMMAIN_OPENWAY, MF_DISABLED);
 
-		CheckMenuItem(hattr, ID_FMMAIN_SHIWHIDEDFILES, fmShowHiddenFile);
+		CheckMenuItem(hpop, ID_FMMAIN_SHIWHIDEDFILES, fmShowHiddenFile ? MF_CHECKED : MF_UNCHECKED);
 
 		POINT pt;
 		GetCursorPos(&pt);
@@ -664,10 +695,10 @@ M_API int MAppWorkShowMenuFMF(LPWSTR strfolderPath)
 				fmCurrectSelectFolderPath0[0] >= L'A'&& fmCurrectSelectFolderPath0[0] <= L'Z'&&
 				fmCurrectSelectFolderPath0[2] == L'\\')
 			{
-				EnableMenuItem(hpop, ID_FMFOLDER_REMOVE, 0);
-				EnableMenuItem(hpop, ID_FMFOLDER_DEL, 0);
-				EnableMenuItem(hpop, ID_FMFOLDER_CUT, 0);
-				EnableMenuItem(hpop, ID_FMFOLDER_COPY, 0);
+				EnableMenuItem(hpop, ID_FMFOLDER_REMOVE, MF_DISABLED);
+				EnableMenuItem(hpop, ID_FMFOLDER_DEL, MF_DISABLED);
+				EnableMenuItem(hpop, ID_FMFOLDER_CUT, MF_DISABLED);
+				EnableMenuItem(hpop, ID_FMFOLDER_COPY, MF_DISABLED);
 			}
 
 			POINT pt;

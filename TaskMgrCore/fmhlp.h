@@ -7,6 +7,9 @@
 
 typedef void* (__cdecl*MFCALLBACK)(int msg, void* lParam, void* wParam);
 
+EXTERN_C M_API VOID MShowFileProp(LPWSTR file);
+EXTERN_C M_API BOOL MCopyToClipboard(const WCHAR * pszData, const int nDataLen);
+
 EXTERN_C M_API HICON MFM_GetFileIcon(LPWSTR extention, LPWSTR s, int count);
 EXTERN_C M_API HICON MFM_GetFolderIcon();
 EXTERN_C M_API HICON MFM_GetMyComputerIcon();

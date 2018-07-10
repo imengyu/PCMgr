@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="源文件\HLPS">
+      <UniqueIdentifier>{6c73b6fd-0d4e-469c-87f1-0ac2e19c2eb4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\HLPS">
+      <UniqueIdentifier>{8c3b26f9-8c4a-42c0-818b-1467fb2739d3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -42,36 +48,48 @@
     <ClInclude Include="thdhlp.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="VersionHelpers.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="mainprocs.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="fmhlp.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="StringHlp.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="StringSplit.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="comdlghlp.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="DirectoryHelper.h">
+    <ClInclude Include="schlp.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="syshlp.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="perfhlp.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="sysfuns.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectoryHelper.h">
+      <Filter>头文件\HLPS</Filter>
+    </ClInclude>
     <ClInclude Include="PathHelper.h">
+      <Filter>头文件\HLPS</Filter>
+    </ClInclude>
+    <ClInclude Include="StringSplit.h">
+      <Filter>头文件\HLPS</Filter>
+    </ClInclude>
+    <ClInclude Include="StringHlp.h">
+      <Filter>头文件\HLPS</Filter>
+    </ClInclude>
+    <ClInclude Include="VersionHelpers.h">
+      <Filter>头文件\HLPS</Filter>
+    </ClInclude>
+    <ClInclude Include="nthlp.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="TaskMgrCore.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="dllmain.cpp">
@@ -95,19 +113,31 @@
     <ClCompile Include="fmhlp.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="StringHlp.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="StringSplit.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="comdlghlp.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="DirectoryHelper.cpp">
+    <ClCompile Include="schlp.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="syshlp.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="perfhlp.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectoryHelper.cpp">
+      <Filter>源文件\HLPS</Filter>
+    </ClCompile>
     <ClCompile Include="PathHelper.cpp">
+      <Filter>源文件\HLPS</Filter>
+    </ClCompile>
+    <ClCompile Include="StringSplit.cpp">
+      <Filter>源文件\HLPS</Filter>
+    </ClCompile>
+    <ClCompile Include="StringHlp.cpp">
+      <Filter>源文件\HLPS</Filter>
+    </ClCompile>
+    <ClCompile Include="nthlp.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

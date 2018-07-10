@@ -10,6 +10,8 @@ namespace TaskMgr.Ctls
 {
     public class TaskMgrList : Control
     {
+        internal const int itemHeight = 28, groupHeaderHeight = 38, smallItemHeight = 22;
+
         [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern void MListDrawItem(IntPtr hWnd, IntPtr hdc, int x, int y, int w, int h, int state);
         [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
@@ -40,12 +42,20 @@ namespace TaskMgr.Ctls
             scrol.Location = new Point(Width - 16, header.Height);
             scrol.Width = 16;
             scrol.ValueChanged += Scrol_ValueChanged;
-
+            ChildStringFormat = new StringFormat();
+            ChildStringFormat.LineAlignment = StringAlignment.Center;
+            ChildStringFormat.Trimming = StringTrimming.EllipsisCharacter;
+            ChildStringFormat.Alignment = StringAlignment.Near;
             Controls.Add(scrol);
             scrol.Hide();
             t = new Timer();
             t.Tick += T_Tick;
-            t.Interval = 50;
+            t.Interval = 40;
+            defLineColorPen = new Pen(Color.FromArgb(234, 213, 160));
+            hotLineColorPen = new Pen(Color.FromArgb(248, 106, 42));
+            defBgSolidBrush = new SolidBrush(Color.FromArgb(255, 249, 228));
+            defTagSolidBrush = new SolidBrush(Color.FromArgb(0, 120, 215));
+            errTagSolidBrush = new SolidBrush(Color.Orange);
         }
 
         private bool b1 = false;
@@ -78,6 +88,11 @@ namespace TaskMgr.Ctls
         }
 
         private Timer t;
+        private SolidBrush errTagSolidBrush = null;
+        private SolidBrush defTagSolidBrush = null;
+        private SolidBrush defBgSolidBrush = null;
+        private Pen defLineColorPen = null;
+        private Pen hotLineColorPen = null;
         private VScrollBar scrol = null;
         private TaskMgrListGroupCollection groups = null;
         private TaskMgrListItemCollection items = null;
@@ -85,7 +100,6 @@ namespace TaskMgr.Ctls
         private TaskMgrListHeader header;
         private bool showGroup = false, m = false;
         private double value = 0;
-        private int itemHeight = 28, groupHeaderHeight = 38, smallItemHeight = 22;
         private int xOffest = 0;
         private int yOffest = 0;
         private ImageList imageList;
@@ -94,14 +108,28 @@ namespace TaskMgr.Ctls
         private Font fgroupText = new Font("微软雅黑", 13f);
         private Font fnormalText2 = new Font("微软雅黑", 9f);
         private TaskMgrListItem selectedItem = null;
-        private TaskMgrListItem mouseenteredItem = null;
+        private TaskMgrListItem mouseenteredItem_ = null;
+        private TaskMgrListItem mouseenteredItem
+        {
+            get { return mouseenteredItem_; }
+            set
+            {
+                if (mouseenteredItem_ != value)
+                {
+                    TaskMgrListItem li = mouseenteredItem_;
+                    mouseenteredItem_ = value;
+                    InvalidAItem(li);
+                    InvalidAItem(mouseenteredItem_);
+                }
+            }
+        }
         private TaskMgrListItemChild selectedChildItem = null;
-        private List<int> dwawLine = new List<int>();
         private int ougtHeight = 0;
         private bool focused = false;
         private bool locked = false;
         private ListViewColumnSorter sorter = null;
         private bool sorted = false;
+        private StringFormat ChildStringFormat = null;
 
         public bool isvs = false;
         public bool ishs = false;
@@ -216,14 +244,18 @@ namespace TaskMgr.Ctls
                                 allItemHeight += groupHeaderHeight;
                                 groups[i].Tag = 1;
                             }
-
-                            items[i1].YPos = allItemHeight;
-                            if (items[i1].ChildsOpened)
+                            items[i1].YPos = allItemHeight;                       
+                            if (items[i1].IsGroup && items[i1].ChildsOpened)
                             {
-                                for (int i2 = 0; i2 < items[i1].Childs.Count; i2++)
-                                    allItemHeight += smallItemHeight;
+                                allItemHeight += itemHeight;
+                                TaskMgrListItemGroup t = items[i1] as TaskMgrListItemGroup;
+                                for (int i2 = 0; i2 < t.Items.Count; i2++)
+                                {
+                                    t.Items[i2].YPos = allItemHeight;
+                                    allItemHeight += t.Items[i2].ItemHeight;
+                                }
                             }
-                            allItemHeight += itemHeight;
+                            else allItemHeight += items[i1].ItemHeight;
                             icount++;
                         }
                     }
@@ -235,13 +267,18 @@ namespace TaskMgr.Ctls
             {
                 for (int i1 = 0; i1 < items.Count; i1++)
                 {
-                    items[i1].YPos = allItemHeight;
-                    if (items[i1].ChildsOpened)
+                    items[i1].YPos = allItemHeight;                
+                    if (items[i1].IsGroup && items[i1].ChildsOpened)
                     {
-                        for (int i2 = 0; i2 < items[i1].Childs.Count; i2++)
-                            allItemHeight += smallItemHeight;
+                        allItemHeight += itemHeight;
+                        TaskMgrListItemGroup t = items[i1] as TaskMgrListItemGroup;
+                        for (int i2 = 0; i2 < t.Items.Count; i2++)
+                        {
+                            t.Items[i2].YPos = allItemHeight;
+                            allItemHeight += t.Items[i2].ItemHeight;
+                        }
                     }
-                    allItemHeight += itemHeight;
+                    else allItemHeight += items[i1].ItemHeight;
                 }
             }
 
@@ -254,8 +291,8 @@ namespace TaskMgr.Ctls
                     yOffest = ougtHeight + 16;
 
                 scrol.Maximum = allItemHeight - header.Height + 16;
-                scrol.LargeChange = h;
-                scrol.SmallChange = allItemHeight / 20;
+                scrol.LargeChange = h < 0 ? 0 : h;
+                scrol.SmallChange = allItemHeight / 50;
                 scrol.Left = Width - 16;
                 scrol.Value = yOffest + 16;
 
@@ -277,111 +314,131 @@ namespace TaskMgr.Ctls
             if (paint) Invalidate();
             b1 = false;
         }
-        private void DrawItem(Graphics g, TaskMgrListItem item)
+        private void DrawItem(Graphics g, TaskMgrListItem item, int index, Rectangle rect)
         {
             showedItems.Add(item);
 
-            /*for (int i2 = 0; i2 < item.SubItems.Count && i2 < header.Items.Count; i2++)
-            {
-                int x = header.Items[i2].X - xOffest;
-                if (x < Width && x + header.Items[i2].Width > 0)
-                {
-                    Color bgcolor = item.SubItems[i2].BackColor;
-                    if (bgcolor.A != 0 && !(bgcolor.R == 255 && bgcolor.G == 255 && bgcolor.B == 255))
-                    {
-                        if (!dwawLine.Contains(x))
-                            dwawLine.Add(x);
-                        g.FillRectangle(new SolidBrush(bgcolor), x, item.YPos - yOffest, header.Items[i2].Width, itemHeight);
-                        if (!dwawLine.Contains(x + header.Items[i2].Width))
-                            dwawLine.Add(x + header.Items[i2].Width);
-                    }
-                }
-            }*/
-
             if (selectedItem == item)
             {
-                if (FocusedType)
-                    MListDrawItem(Handle, g.GetHdc(), 1 - xOffest, selectedItem.YPos + 1 - yOffest, header.AllWidth, itemHeight - 2, 1);
-                else
-                    MListDrawItem(Handle, g.GetHdc(), 1 - xOffest, selectedItem.YPos + 1 - yOffest, header.AllWidth, itemHeight - 2, 2);
+                int height = item.ChildsOpened ? itemHeight + item.Childs.Count * smallItemHeight : itemHeight - 2;
+                if (FocusedType) MListDrawItem(Handle, g.GetHdc(), 1 - xOffest, selectedItem.YPos + 1 - yOffest, header.AllWidth, height, 1);
+                else MListDrawItem(Handle, g.GetHdc(), 1 - xOffest, selectedItem.YPos + 1 - yOffest, header.AllWidth, height, 2);
                 g.ReleaseHdc();
             }
-            if (mouseenteredItem == item && item != selectedItem)
+            else if (mouseenteredItem == item)
             {
-                MListDrawItem(Handle, g.GetHdc(), 1 - xOffest, mouseenteredItem.YPos + 1 - yOffest, header.AllWidth, itemHeight - 2, 3);
+                MListDrawItem(Handle, g.GetHdc(), 1 - xOffest, mouseenteredItem.YPos + 1 - yOffest, header.AllWidth, item.ChildsOpened ? itemHeight + item.Childs.Count * smallItemHeight : itemHeight - 2, 3);
                 g.ReleaseHdc();
             }
+
+            if (item.IsUWP)
+            {
+                if (item.IsUWPButErrInfo) g.FillRectangle(errTagSolidBrush, new Rectangle(53, item.YPos - yOffest + 11, 6, 6));
+                else g.FillRectangle(defTagSolidBrush, new Rectangle(53, item.YPos - yOffest + 11, 6, 6));
+            }
+            if (item.IsUWPICO) g.FillRectangle(defTagSolidBrush, new Rectangle(7 - xOffest + 25, item.YPos - YOffest + itemHeight / 2 - 8, 16, 16));
 
             #region SubItems
             for (int i2 = 0; i2 < item.SubItems.Count && i2 < header.Items.Count; i2++)
             {
                 int x = header.Items[i2].X - xOffest;
-                if (x < Width && x + header.Items[i2].Width > 0)
+                if (x <= rect.Right && x + header.Items[i2].Width > rect.Left)
                 {
-                    StringFormat f = new StringFormat();
-                    f.LineAlignment = StringAlignment.Far;
-                    f.Trimming = StringTrimming.EllipsisCharacter;
-                    f.Alignment = header.Items[i2].Alignment;
+                    Color bgcolor = item.SubItems[i2].BackColor;
+                    StringFormat f = header.Items[i2].AlignmentStringFormat;
+                    if (bgcolor.A != 0 && !(bgcolor.R == 255 && bgcolor.G == 255 && bgcolor.B == 255))
+                    {
+                        using (SolidBrush s = (selectedItem == item || mouseenteredItem == item) ?
+                           new SolidBrush(Color.FromArgb(150, bgcolor)) : new SolidBrush(bgcolor))
+                            g.FillRectangle(s, x + 1, item.YPos - yOffest, header.Items[i2].Width - 1, itemHeight);
+                    }
 
-                    if (item.SubItems[i2].Text != "")
-                        if (i2 > 0)
-                            g.DrawString(item.SubItems[i2].Text, item.SubItems[i2].Font, new SolidBrush(item.SubItems[i2].ForeColor), new Rectangle(x + 2, item.YPos - yOffest + itemHeight / 2 - item.SubItems[i2].Font.Height / 2, header.Items[i2].Width - 2, item.SubItems[i2].Font.Height), f);
-                        else g.DrawString(item.SubItems[0].Text, fnormalText2, new SolidBrush(item.SubItems[0].ForeColor), new Rectangle(x + 63, item.YPos - yOffest + itemHeight / 2 - fnormalText2.Height / 2, header.Items[0].Width - 60, fnormalText2.Height), f);
-                    f.Dispose();
+                    if (i2 > 0 && item.SubItems[i2].Text != "") g.DrawString(item.SubItems[i2].Text, item.SubItems[i2].Font, item.SubItems[i2].ForeColorSolidBrush, new Rectangle(x + 6, item.YPos - yOffest, header.Items[i2].Width - 10, itemHeight), f);
+                    else if (i2 == 0) g.DrawString(item.Text, fnormalText2, item.SubItems[0].ForeColorSolidBrush, new Rectangle(x + 63, item.YPos - yOffest, header.Items[0].Width - 60, itemHeight), f);
                 }
+                else if (x > rect.Right) break;
             }
             #endregion
 
             #region Childs
-            if (item.Childs.Count > 0)
+            if (item.Childs.Count > 0 || item.IsGroup)
             {
                 if (item.ChildsOpened)
                 {
-                    if (item.GlyphHoted && item == mouseenteredItem)
-                        MListDrawItem(Handle, g.GetHdc(), 4 - xOffest, item.YPos - yOffest + 5, 16, 16, 8);
-                    else
-                        MListDrawItem(Handle, g.GetHdc(), 4 - xOffest, item.YPos - yOffest + 5, 16, 16, 6);
+                    if (item.GlyphHoted && item == mouseenteredItem) MListDrawItem(Handle, g.GetHdc(), 4 - xOffest, item.YPos - yOffest + 5, 16, 16, 8);
+                    else MListDrawItem(Handle, g.GetHdc(), 4 - xOffest, item.YPos - yOffest + 5, 16, 16, 6);
                     g.ReleaseHdc();
-                    StringFormat f = new StringFormat();
-                    f.LineAlignment = StringAlignment.Far;
-                    f.Trimming = StringTrimming.EllipsisCharacter;
-                    f.Alignment = StringAlignment.Near;
                     for (int i2 = 0; i2 < item.Childs.Count; i2++)
                     {
-                        if (item.Childs[i2] == item.OldSelectedItem)
+                        if (item.YPos - yOffest + i2 * smallItemHeight + itemHeight < rect.Bottom)
                         {
-                            if (FocusedType)
-                                MListDrawItem(Handle, g.GetHdc(), 37 - xOffest, item.YPos - yOffest + i2 * smallItemHeight + itemHeight, header.AllWidth - 22, smallItemHeight, 4);
-                            else
-                                MListDrawItem(Handle, g.GetHdc(), 37 - xOffest, item.YPos - yOffest + i2 * smallItemHeight + itemHeight, header.AllWidth - 22, smallItemHeight, 2);
-                            g.ReleaseHdc();
+                            if (item.Childs[i2] == item.OldSelectedItem)
+                            {
+                                if (FocusedType) MListDrawItem(Handle, g.GetHdc(), 37 - xOffest, item.YPos - yOffest + i2 * smallItemHeight + itemHeight, header.AllWidth - 37, smallItemHeight, 4);
+                                else MListDrawItem(Handle, g.GetHdc(), 37 - xOffest, item.YPos - yOffest + i2 * smallItemHeight + itemHeight, header.AllWidth - 37, smallItemHeight, 2);
+                                g.ReleaseHdc();
+                            }
+                            g.DrawString(item.Childs[i2].Text, fnormalText2, Brushes.Black, new Rectangle(65 - xOffest, item.YPos - yOffest + smallItemHeight * i2 + itemHeight, Width - 2, itemHeight), ChildStringFormat);
+                            if (item.Childs[i2].Icon != null) g.DrawIcon(item.Childs[i2].Icon, new Rectangle(40 - xOffest, item.YPos - yOffest + i2 * smallItemHeight + itemHeight + 4, 16, 16));
                         }
-                        g.DrawString(item.Childs[i2].Text, fnormalText2, Brushes.Black, new Rectangle(65 - xOffest, item.YPos - yOffest + smallItemHeight * i2 + itemHeight + itemHeight / 2 - fnormalText2.Height / 2, Width - 2, fnormalText2.Height), f);
-                        if (item.Childs[i2].Icon != null)
-                            g.DrawIcon(item.Childs[i2].Icon, new Rectangle(40 - xOffest, item.YPos - yOffest + i2 * smallItemHeight + itemHeight + 4, 16, 16));
+                        else break;
                     }
-                    f.Dispose();
                 }
                 else
                 {
-                    if (item.GlyphHoted && item == mouseenteredItem)
-                        MListDrawItem(Handle, g.GetHdc(), 4 - xOffest, item.YPos - yOffest + 5, 16, 16, 7);
-                    else
-                        MListDrawItem(Handle, g.GetHdc(), 4 - xOffest, item.YPos - yOffest + 5, 16, 16, 5);
+                    if (item.GlyphHoted && item == mouseenteredItem) MListDrawItem(Handle, g.GetHdc(), 4 - xOffest, item.YPos - yOffest + 5, 16, 16, 7);
+                    else MListDrawItem(Handle, g.GetHdc(), 4 - xOffest, item.YPos - yOffest + 5, 16, 16, 5);
                     g.ReleaseHdc();
                 }
             }
             #endregion
 
             #region Icons
-            if (item.Icon != null)
-                g.DrawIcon(item.Icon, new Rectangle(7 - xOffest + 25, item.YPos - YOffest + itemHeight / 2 - 8, 16, 16));
+            if (item.Icon != null) g.DrawIcon(item.Icon, new Rectangle(7 - xOffest + 25, item.YPos - YOffest + itemHeight / 2 - 8, 16, 16));
             #endregion
+        }
+        private void DrawItem(Graphics g, TaskMgrListItemGroup item, int index, Rectangle rect)
+        {
+            showedItems.Add(item);
+            DrawItem(g, item as TaskMgrListItem, index, rect);
+            if (item.ChildsOpened)
+            {
+                for (int i = 0; i < item.Items.Count; i++)
+                    DrawItem(g, item.Items[i], index, rect);
+            }
         }
         private void PaintItems(Graphics g, Rectangle r)
         {
-            dwawLine.Clear();
             showedItems.Clear();
+
+            //draw lines
+            bool isFirstLine = true;
+            for (int i = 0; i < header.Items.Count; i++)
+            {
+                int x = header.Items[i].X - xOffest;
+                int xw = x + header.Items[i].Width;
+                if (x < r.Right && xw > 0)
+                {
+                    if (header.Items[i].IsNum)
+                    {
+                        if(isFirstLine)
+                        {
+                            if (header.Items[i].IsHot) g.DrawLine(hotLineColorPen, x, r.Top, x, r.Bottom);
+                            else g.DrawLine(defLineColorPen, x, r.Top, x, r.Bottom);
+                            isFirstLine = false;
+                        }
+                        if (header.Items[i].IsHot)
+                        {
+                            g.DrawLine(hotLineColorPen, x, r.Top, x, r.Bottom);
+                            g.DrawLine(hotLineColorPen, xw, r.Top, xw, r.Bottom);
+                        }
+                        else g.DrawLine(defLineColorPen, xw, r.Top, xw, r.Bottom);
+                        g.FillRectangle(defBgSolidBrush, x + 2, r.Top, header.Items[i].Width - 2, r.Height);
+                    }
+                }
+                else if (xw <= 0) break;
+            }
+
             if (showGroup)
             {
                 int paintgroupHeadery = header.Height - yOffest;
@@ -413,14 +470,19 @@ namespace TaskMgr.Ctls
                         {
                             if (items[i1].Group == gurrs)
                             {
-                                if (items[i1].YPos - yOffest >= r.Top && items[i1].YPos - yOffest + itemHeight <= r.Bottom + header.Height)
+                                if (items[i1].YPos - yOffest >= r.Top || items[i1].YPos - yOffest + items[i1].ItemHeight - header.Height <= r.Bottom)
                                 {
-                                    DrawItem(g, items[i1]);
+                                    if (items[i1].IsGroup)
+                                        DrawItem(g, items[i1] as TaskMgrListItemGroup, i1, r);
+                                    else
+                                        DrawItem(g, items[i1], i1, r);
                                     lastdrawitem = items[i1];
                                 }
+                                else if (items[i1].YPos - yOffest + items[i1].ItemHeight - header.Height > r.Bottom)
+                                    break;
                             }
                         }
-                        if (lastdrawitem != null) paintgroupHeadery = lastdrawitem.YPos - yOffest + itemHeight;
+                        if (lastdrawitem != null) paintgroupHeadery = lastdrawitem.YPos - yOffest + lastdrawitem.ItemHeight;
                     }
                 }
             }
@@ -428,21 +490,27 @@ namespace TaskMgr.Ctls
             {
                 for (int i1 = 0; i1 < items.Count; i1++)
                 {
-                    if (items[i1].YPos - yOffest >= r.Top && items[i1].YPos - yOffest + itemHeight <= r.Bottom + header.Height)
-                        DrawItem(g, items[i1]);
+                    if (items[i1].YPos - yOffest >= r.Top || items[i1].YPos - yOffest + items[i1].ItemHeight - header.Height <= r.Bottom)
+                    {
+                        if (items[i1].IsGroup)
+                            DrawItem(g, items[i1] as TaskMgrListItemGroup, i1, r);
+                        else
+                            DrawItem(g, items[i1], i1, r);
+                    }
+                    else if (items[i1].YPos - yOffest + items[i1].ItemHeight - header.Height > r.Bottom)
+                        break;
                 }
             }
-
-            for (int i = 0; i < dwawLine.Count; i++)
-                if (i != 0 && dwawLine[i] < Width)
-                    g.DrawLine(new Pen(Color.FromArgb(234, 213, 160)), dwawLine[i], r.Top, dwawLine[i], r.Bottom);
         }
 
         private void InvalidAItem(TaskMgrListItem it)
         {
-            int y = it.YPos - yOffest;
-            int height = (it.ChildsOpened ? itemHeight + it.Childs.Count * smallItemHeight : itemHeight);
-            Invalidate(new Rectangle(0, y, Width, height));
+            if (it != null)
+            {
+                int y = it.YPos - yOffest;
+                int height = (it.ChildsOpened ? itemHeight + it.Childs.Count * smallItemHeight : itemHeight);
+                Invalidate(new Rectangle(0, y, Width, height));
+            }
         }
 
         protected override void OnHandleCreated(EventArgs e)
@@ -483,73 +551,97 @@ namespace TaskMgr.Ctls
         }
         protected override void OnMouseDown(MouseEventArgs e)
         {
-            if (mouseenteredItem != null && selectedItem != null)
+            if (mouseenteredItem != null)
             {
+                bool fullinved = false;
                 if (selectedItem != mouseenteredItem)
                 {
                     SelectItemChanged?.Invoke(this, EventArgs.Empty);
                     TaskMgrListItem it = selectedItem;
                     selectedItem = mouseenteredItem;
-                    InvalidAItem(it);
+                    if (it != null) InvalidAItem(it);
                 }
                 if (selectedItem.GlyphHoted)
                 {
                     if (selectedItem.ChildsOpened)
+                    {
                         selectedItem.ChildsOpened = false;
-                    else selectedItem.ChildsOpened = true;
-
+                        fullinved = true;
+                    }
+                    else
+                    {
+                        fullinved = true;
+                        selectedItem.ChildsOpened = true;
+                    }
                     SyncItems(false);
                 }
                 if (selectedItem.ChildsOpened)
                     selectedChildItem = selectedItem.OldSelectedItem;
                 else selectedChildItem = null;
 
-                if (selectedItem != null)
+                if (fullinved == false && selectedItem != null)
                     InvalidAItem(selectedItem);
+                else if (fullinved) Invalidate();
             }
             base.OnMouseDown(e);
         }
         protected override void OnMouseMove(MouseEventArgs e)
         {
             base.OnMouseMove(e);
-            if(!m)
+            if (!m)
             {
+                bool oldgy = false;
                 m = true;
                 t.Start();
                 {
-                    for (int i = 0; i < showedItems.Count; i++)
+                    if (e.X > 0 && e.X < XOffest + header.AllWidth)
                     {
-                        int y = showedItems[i].YPos - yOffest;
-                        int yheight = (showedItems[i].ChildsOpened ? itemHeight + showedItems[i].Childs.Count * smallItemHeight : itemHeight);
-                        if (e.Y > y && e.Y < y + yheight)
+                        for (int i = showedItems.Count - 1; i >= 0; i--)
                         {
-                            if (mouseenteredItem == showedItems[i])
-                                return;
-                            if (mouseenteredItem == null)
+                            int y = showedItems[i].YPos - yOffest;
+                            int yheight = (showedItems[i].ChildsOpened ? itemHeight + showedItems[i].Childs.Count * smallItemHeight : itemHeight);
+                            if (e.Y > y && e.Y < y + yheight)
+                            {
+                                oldgy = showedItems[i].GlyphHoted;
+                                if (e.Y < y + 30 && e.X >= 0 && e.X <= 22 - xOffest) showedItems[i].GlyphHoted = true;
+                                else if (showedItems[i].Childs.Count > 0 && showedItems[i].ChildsOpened)
+                                {
+                                    showedItems[i].GlyphHoted = false;
+                                    int iii = ((e.Y - y - itemHeight)) / smallItemHeight;
+                                    if (iii >= 0 && iii < showedItems[i].Childs.Count)
+                                        showedItems[i].OldSelectedItem = showedItems[i].Childs[iii];
+                                    else showedItems[i].OldSelectedItem = null;
+                                    if (e.Y - y - itemHeight < itemHeight)
+                                        selectedChildItem = null;
+
+                                    InvalidAItem(showedItems[i]);
+                                }
+                                else showedItems[i].GlyphHoted = false;
+                                if (oldgy != showedItems[i].GlyphHoted)
+                                    Invalidate(new Rectangle(0, y, 22, 22));
+ 
                                 mouseenteredItem = showedItems[i];
+                                return;
+                            }
                             else
                             {
-                                TaskMgrListItem it = mouseenteredItem;
-                                mouseenteredItem = showedItems[i];
-                                InvalidAItem(it);
+                                if (showedItems[i].OldSelectedItem != null)
+                                {
+                                    showedItems[i].OldSelectedItem = null;
+                                    InvalidAItem(showedItems[i]);
+                                }
                             }
-
-                            if (e.X >= 0 && e.X <= 22 - xOffest)
-                                showedItems[i].GlyphHoted = true;
-                            else if (showedItems[i].Childs.Count > 0 && showedItems[i].ChildsOpened)
-                            {
-                                showedItems[i].GlyphHoted = false;
-                                int iii = ((e.Y - y - itemHeight)) / smallItemHeight;
-                                if (iii >= 0 && iii < showedItems[i].Childs.Count)
-                                    showedItems[i].OldSelectedItem = showedItems[i].Childs[iii];
-                                if (e.Y - y - itemHeight < itemHeight)
-                                    selectedChildItem = null;
-                            }
-                            else showedItems[i].GlyphHoted = false;
-
-                            Invalidate(new Rectangle(0, y, Width, yheight));
-                            //return;
                         }
+                        if (mouseenteredItem != null)
+                        {
+                            mouseenteredItem = null;
+                            InvalidAItem(mouseenteredItem);
+                        }
+                    }
+                    else if(mouseenteredItem!=null)
+                    {
+                        mouseenteredItem = null;
+                        InvalidAItem(mouseenteredItem);
                     }
                 }
             }
@@ -567,6 +659,12 @@ namespace TaskMgr.Ctls
         public event EventHandler SelectItemChanged;
     }
 
+    public enum TaskMgrListItemTextDirection
+    {
+        Left,
+        Center,
+        Right,
+    }
     public class TaskMgrListItemChild
     {
         public TaskMgrListItemChild(string text,Icon ico)
@@ -606,26 +704,60 @@ namespace TaskMgr.Ctls
         public TaskMgrListItem()
         {
             childs = new List<TaskMgrListItemChild>();
+            subItem = new List<TaskMgrListViewSubItem>();
         }
         public TaskMgrListItem(string a) : base(a)
         {
             childs = new List<TaskMgrListItemChild>();
+            subItem = new List<TaskMgrListViewSubItem>();
         }
 
         private List<TaskMgrListItemChild> childs;
         private int yPos;
         private bool childsOpened = false;
         private bool glyphHoted = false;
+        private bool isGroup = false;
         private Icon icon;
-        private int pid;
+        private uint pid;
         private TaskMgrListGroup group;
+        private List<TaskMgrListViewSubItem> subItem = null;
 
+        public class TaskMgrListViewSubItem : ListViewSubItem
+        {
+            private SolidBrush _ForeColorSolidBrush = null;
+
+            public uint CustomData { get; set; }
+            public new Color ForeColor
+            {
+                get { return base.ForeColor; }
+                set
+                {
+                    base.ForeColor = value;
+                    if(_ForeColorSolidBrush!=null)
+                        _ForeColorSolidBrush.Dispose();
+                    _ForeColorSolidBrush = new SolidBrush(value);
+                }
+            }
+            public SolidBrush ForeColorSolidBrush
+            {
+                get
+                {
+                    if(_ForeColorSolidBrush == null)
+                        _ForeColorSolidBrush = new SolidBrush(ForeColor);
+                    return _ForeColorSolidBrush;
+                }
+            }
+        }
+
+        public virtual int ItemHeight { get { return TaskMgrList.itemHeight + (childsOpened ? (childs.Count * TaskMgrList.smallItemHeight) : 0); } }
+        public new List<TaskMgrListViewSubItem> SubItems { get { return subItem; } }
+        public Rectangle GlyphRect { get; set; }
         public new TaskMgrListGroup Group
         {
             get { return group; }
             set { group = value; }
         }
-        public int PID
+        public uint PID
         {
             get { return pid; }
             set { pid = value; }
@@ -635,6 +767,11 @@ namespace TaskMgr.Ctls
             get { return icon; }
             set { icon = value; }
         }
+        public bool IsGroup { get { return isGroup; } set { isGroup = value; } }
+        public bool IsUWPICO { get; set; }
+        public TaskMgrListItemGroup Parent { get; set; }
+        public bool IsUWP { get; set; }
+        public bool IsUWPButErrInfo { get; set; }
         public bool GlyphHoted
         {
             get { return glyphHoted; }
@@ -654,6 +791,40 @@ namespace TaskMgr.Ctls
         public List<TaskMgrListItemChild> Childs
         {
             get { return childs; }
+        }
+    }
+    public class TaskMgrListItemGroup : TaskMgrListItem
+    {
+        public TaskMgrListItemGroup(string a) : base(a)
+        {
+            items = new TaskMgrListItemCollection();
+            items.ItemAdd += Items_ItemAdd;
+            items.ItemRemoved += Items_ItemRemoved;
+            IsGroup = true;
+        }
+        public TaskMgrListItemGroup()
+        {
+            items = new TaskMgrListItemCollection();
+            IsGroup = true;
+            items.ItemAdd += Items_ItemAdd;
+            items.ItemRemoved += Items_ItemRemoved;
+        }
+
+        private void Items_ItemRemoved(TaskMgrListItem obj)
+        {
+            obj.Parent = null;
+        }
+        private void Items_ItemAdd(TaskMgrListItem obj)
+        {
+            obj.Parent = this;
+        }
+
+        private TaskMgrListItemCollection items = null;
+
+        public override int ItemHeight { get { return (TaskMgrList.itemHeight * ((ChildsOpened ? Items.Count : 0) + 1)); } }
+        public TaskMgrListItemCollection Items
+        {
+            get { return items; }
         }
     }
     public class TaskMgrListGroup 
@@ -788,21 +959,20 @@ namespace TaskMgr.Ctls
             return false;
         }
         private string nextFoundKey = "";
-        private ListViewComparer comparer = new ListViewComparer();
 
         public void Sort(ListViewColumnSorter order)
         {
             if (order.Order == SortOrder.Ascending)
             {
-                comparer.OrderOfSort = SortOrder.Ascending;
-                comparer.ColumnToSort = order.SortColumn;
-                Sort(comparer);
+                order.OrderOfSort = SortOrder.Ascending;
+                order.ColumnToSort = order.SortColumn;
+                base.Sort(order);
             }
             else if (order.Order == SortOrder.Descending)
             {
-                comparer.OrderOfSort = SortOrder.Descending;
-                comparer.ColumnToSort = order.SortColumn;
-                Sort(comparer);
+                order.OrderOfSort = SortOrder.Descending;
+                order.ColumnToSort = order.SortColumn;
+                base.Sort(order);
             }
         }
 
@@ -819,10 +989,11 @@ namespace TaskMgr.Ctls
 
         private static bool IsInt(string value)
         {
+            if (string.IsNullOrEmpty(value)) return false;
             return System.Text.RegularExpressions.Regex.IsMatch(value, @"^[+-]?\d*$");
         }
 
-        public int Compare(TaskMgrListItem x, TaskMgrListItem y)
+        public virtual int Compare(TaskMgrListItem x, TaskMgrListItem y)
         {
             int compareResult;
 
@@ -841,20 +1012,12 @@ namespace TaskMgr.Ctls
     /// <summary>
     /// This class is an implementation of the 'IComparer' interface.
     /// </summary>
-    public class ListViewColumnSorter : IComparer
+    public class ListViewColumnSorter : ListViewComparer
     {
-        /// <summary>
-        /// Specifies the column to be sorted
-        /// </summary>
-        private int ColumnToSort;
-        /// <summary>
-        /// Specifies the order in which to sort (i.e. 'Ascending').
-        /// </summary>
-        private SortOrder OrderOfSort;
         /// <summary>
         /// Case insensitive comparer object
         /// </summary>
-        private CaseInsensitiveComparer ObjectCompare;
+        protected CaseInsensitiveComparer ObjectCompare;
 
         /// <summary>
         /// Class constructor.  Initializes various elements
@@ -872,47 +1035,23 @@ namespace TaskMgr.Ctls
         }
 
         private int comaretInt = 0;
-        /// <summary>
-        /// This method is inherited from the IComparer interface.  It compares the two objects passed using a case insensitive comparison.
-        /// </summary>
-        /// <param name="x">First object to be compared</param>
-        /// <param name="y">Second object to be compared</param>
-        /// <returns>The result of the comparison. "0" if equal, negative if 'x' is less than 'y' and positive if 'x' is greater than 'y'</returns>
-        public int Compare(object x, object y)
+
+        public override int Compare(TaskMgrListItem x, TaskMgrListItem y)
         {
-            int compareResult;
-            ListViewItem listviewX, listviewY;
-
-            // Cast the objects to be compared to ListViewItem objects
-            listviewX = (ListViewItem)x;
-            listviewY = (ListViewItem)y;
-
-            if (int.TryParse(listviewX.SubItems[ColumnToSort].Text, out comaretInt) &&
-               int.TryParse(listviewY.SubItems[ColumnToSort].Text, out comaretInt))
-            {
-                compareResult = int.Parse(listviewX.SubItems[ColumnToSort].Text).CompareTo(int.Parse(listviewY.SubItems[ColumnToSort].Text));
-            }
+            int compareResult = 0;
+            if (int.TryParse(x.SubItems[ColumnToSort].Text, out comaretInt) &&
+                 int.TryParse(x.SubItems[ColumnToSort].Text, out comaretInt))
+                compareResult = int.Parse(x.SubItems[ColumnToSort].Text).CompareTo(int.Parse(y.SubItems[ColumnToSort].Text));
             else
             {
-                // Compare the two items
-                compareResult = ObjectCompare.Compare(listviewX.SubItems[ColumnToSort].Text, listviewY.SubItems[ColumnToSort].Text);
+                compareResult = ObjectCompare.Compare(x.SubItems[ColumnToSort].Text, y.SubItems[ColumnToSort].Text);
+                // Calculate correct return value based on object comparison
+                if (OrderOfSort == SortOrder.Ascending)
+                    return compareResult;
+                else if (OrderOfSort == SortOrder.Descending)
+                    return (-compareResult);
             }
-            // Calculate correct return value based on object comparison
-            if (OrderOfSort == SortOrder.Ascending)
-            {
-                // Ascending sort is selected, return normal result of compare operation
-                return compareResult;
-            }
-            else if (OrderOfSort == SortOrder.Descending)
-            {
-                // Descending sort is selected, return negative result of compare operation
-                return (-compareResult);
-            }
-            else
-            {
-                // Return '0' to indicate they are equal
-                return 0;
-            }
+            return compareResult;
         }
 
         /// <summary>

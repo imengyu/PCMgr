@@ -93,10 +93,12 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;TASKMGRCORE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <ProgramDataBaseFileName>$(IntDir)vc$(PlatformToolsetVersion)_PCMgrCore.pdb</ProgramDataBaseFileName>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(OutDir)$(TargetName)_PCMgrCore.pdb</ProgramDatabaseFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -121,12 +123,14 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;TASKMGRCORE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <ProgramDataBaseFileName>$(IntDir)vc$(PlatformToolsetVersion)_PCMgrCore.pdb</ProgramDataBaseFileName>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <ProgramDatabaseFile>$(OutDir)$(TargetName)_PCMgrCore.pdb</ProgramDatabaseFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -156,12 +160,17 @@
     <ClInclude Include="mainprocs.h" />
     <ClInclude Include="mapphlp.h" />
     <ClInclude Include="ntdef.h" />
+    <ClInclude Include="nthlp.h" />
     <ClInclude Include="PathHelper.h" />
+    <ClInclude Include="perfhlp.h" />
     <ClInclude Include="prochlp.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="schlp.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="StringHlp.h" />
     <ClInclude Include="StringSplit.h" />
+    <ClInclude Include="sysfuns.h" />
+    <ClInclude Include="syshlp.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="thdhlp.h" />
     <ClInclude Include="VersionHelpers.h" />
@@ -187,8 +196,11 @@
     <ClCompile Include="fmhlp.cpp" />
     <ClCompile Include="mainprocs.cpp" />
     <ClCompile Include="mapphlp.cpp" />
+    <ClCompile Include="nthlp.cpp" />
     <ClCompile Include="PathHelper.cpp" />
+    <ClCompile Include="perfhlp.cpp" />
     <ClCompile Include="prochlp.cpp" />
+    <ClCompile Include="schlp.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -197,7 +209,7 @@
     </ClCompile>
     <ClCompile Include="StringHlp.cpp" />
     <ClCompile Include="StringSplit.cpp" />
-    <ClCompile Include="TaskMgrCore.cpp" />
+    <ClCompile Include="syshlp.cpp" />
     <ClCompile Include="thdhlp.cpp" />
     <ClCompile Include="vprocx.cpp" />
   </ItemGroup>
