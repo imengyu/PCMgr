@@ -333,8 +333,8 @@ namespace TaskMgr.Ctls
 
             if (item.IsUWP)
             {
-                if (item.IsUWPButErrInfo) g.FillRectangle(errTagSolidBrush, new Rectangle(53, item.YPos - yOffest + 11, 6, 6));
-                else g.FillRectangle(defTagSolidBrush, new Rectangle(53, item.YPos - yOffest + 11, 6, 6));
+                if (item.IsUWPButErrInfo) g.FillRectangle(errTagSolidBrush, new Rectangle(53 - xOffest, item.YPos - yOffest + 11, 6, 6));
+                else g.FillRectangle(defTagSolidBrush, new Rectangle(53 - xOffest, item.YPos - yOffest + 11, 6, 6));
             }
             if (item.IsUWPICO) g.FillRectangle(defTagSolidBrush, new Rectangle(7 - xOffest + 25, item.YPos - YOffest + itemHeight / 2 - 8, 16, 16));
 
