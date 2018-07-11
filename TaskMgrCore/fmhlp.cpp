@@ -129,6 +129,11 @@ M_API void MFM_GetRoots()
 		int a = wcslen(pszDriver);
 		DWORD serialNumber, maxComponentLength, fsFlags;
 
+		if (!lstrcmpi(pszDriver, L"A:\\") || !lstrcmpi(pszDriver, L"B:\\")) {
+			pszDriver += a + 1;
+			continue;
+		}
+
 		TCHAR szFileSystem[16] = { 0 };
 		TCHAR szVolumeName[32] = { 0 };
 		TCHAR szRoot[4] = { 0 };
@@ -144,7 +149,8 @@ M_API void MFM_GetRoots()
 			&fsFlags,
 			szFileSystem,
 			sizeof(szFileSystem))) {
-			continue;
+			pszDriver += a + 1;
+			continue;		
 		}
 
 		std::wstring w = FormatString(L"%s/%s (%s)", szVolumeName, szFileSystem, szRoot);

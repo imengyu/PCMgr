@@ -44,6 +44,7 @@ LdrGetProcedureAddressFun LdrGetProcedureAddress;
 RtlInitAnsiStringFun RtlInitAnsiString;
 RtlNtStatusToDosErrorFun RtlNtStatusToDosError;
 RtlGetLastWin32ErrorFun RtlGetLastWin32Error;
+_IsWow64Process dIsWow64Process;
 //K32 api
 _IsImmersiveProcess dIsImmersiveProcess;
 _GetPackageFullName dGetPackageFullName;
@@ -280,10 +281,12 @@ M_API HICON MGetExeIcon(LPWSTR pszFullPath)
 	return hIcon;
 }
 
+TCHAR szDriveStr[500];
+BOOL driveStrGeted = FALSE;
+
 //Process information
 M_API BOOL MDosPathToNtPath(LPWSTR pszDosPath, LPWSTR pszNtPath)
 {
-	TCHAR            szDriveStr[500];
 	TCHAR            szDrive[3];
 	TCHAR            szDevName[100];
 	INT                cchDevName;
@@ -291,29 +294,33 @@ M_API BOOL MDosPathToNtPath(LPWSTR pszDosPath, LPWSTR pszNtPath)
 	//检查参数
 	if (!pszDosPath || !pszNtPath)
 		return FALSE;
-	if (GetLogicalDriveStrings(sizeof(szDriveStr), szDriveStr))
-	{
-		for (i = 0; szDriveStr[i]; i += 4)
-		{
-			if (!lstrcmpi(&(szDriveStr[i]), L"A:\\") || !lstrcmpi(&(szDriveStr[i]), L"B:\\"))
-				continue;
 
-			szDrive[0] = szDriveStr[i];
-			szDrive[1] = szDriveStr[i + 1];
-			szDrive[2] = '\0';
-			if (!QueryDosDevice(szDrive, szDevName, 100)) {//查询 Dos 设备名		
-				return FALSE;
-			}
-			cchDevName = lstrlen(szDevName);
-			if (_tcsnicmp(pszDosPath, szDevName, cchDevName) == 0)//命中
-			{
-				lstrcpy(pszNtPath, szDrive);//复制驱动器
-				lstrcat(pszNtPath, pszDosPath + cchDevName);//复制路径
-				return TRUE;
-			}
+	if (!driveStrGeted)
+		if (!GetLogicalDriveStrings(sizeof(szDriveStr), szDriveStr)) {
+			lstrcpy(pszNtPath, pszDosPath);
+			return TRUE;
+		}
+		else driveStrGeted = TRUE;
+
+	for (i = 0; szDriveStr[i]; i += 4)
+	{
+		if (!lstrcmpi(&(szDriveStr[i]), L"A:\\") || !lstrcmpi(&(szDriveStr[i]), L"B:\\"))
+			continue;
+
+		szDrive[0] = szDriveStr[i];
+		szDrive[1] = szDriveStr[i + 1];
+		szDrive[2] = '\0';
+		if (!QueryDosDevice(szDrive, szDevName, 100)) {//查询 Dos 设备名		
+			return FALSE;
+		}
+		cchDevName = lstrlen(szDevName);
+		if (_tcsnicmp(pszDosPath, szDevName, cchDevName) == 0)//命中
+		{
+			lstrcpy(pszNtPath, szDrive);//复制驱动器
+			lstrcat(pszNtPath, pszDosPath + cchDevName);//复制路径
+			return TRUE;
 		}
 	}
-	lstrcpy(pszNtPath, pszDosPath);
 	return FALSE;
 }
 M_API BOOL MGetProcessFullPathEx(DWORD dwPID, LPWSTR outNter, PHANDLE phandle)
@@ -409,22 +416,28 @@ M_API BOOL MGetProcessIsUWP(HANDLE handle)
 {
 	return dIsImmersiveProcess(handle);
 }
+M_API BOOL MGetProcessIs32Bit(HANDLE handle) {
+	BOOL rs = TRUE;
+	IsWow64Process(handle, &rs);
+	return rs;
+}
+
 //UWP Process information
-M_API BOOL MGetUWPPackageId(HANDLE handle, MPerfAndProcessData*data)
+/*M_API BOOL MGetUWPPackageId(HANDLE handle, MPerfAndProcessData*data)
 {
 	if (handle && data)
 	{
 		UINT32 bufferLength = 0;
-		LONG result = GetPackageId(handle, &bufferLength, nullptr);
+		LONG result = dGetPackageId(handle, &bufferLength, nullptr);
 		BYTE* buffer = (PBYTE)malloc(bufferLength);
-		result = GetPackageId(handle, &bufferLength, buffer);
+		result = dGetPackageId(handle, &bufferLength, buffer);
 		if (result == ERROR_SUCCESS) {
 			data->packageId = reinterpret_cast<PACKAGE_ID*>(buffer);
 			return TRUE;
 		}
 	}
 	return 0;
-}
+}*/
 M_API BOOL MGetUWPPackageFullName(HANDLE handle, int*len, LPWSTR buffer)
 {
 	if (*len == 0)
@@ -590,6 +603,44 @@ M_API int MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWORD 
 			DestroyMenu(hroot);
 		}
 	}
+	else if(pid==0)
+	{
+		HMENU hroot = LoadMenu(hInst, MAKEINTRESOURCE(IDR_MENUTASK));
+		if (hroot) {
+			HMENU hpop = GetSubMenu(hroot, 0);
+			POINT pt;
+			GetCursorPos(&pt);
+
+			EnableMenuItem(hpop, IDM_KILL, MF_DISABLED);
+			EnableMenuItem(hpop, IDM_SUPROC, MF_DISABLED);
+			EnableMenuItem(hpop, IDM_RESPROC, MF_DISABLED);
+			EnableMenuItem(hpop, IDM_KILLKERNEL, MF_DISABLED);
+			EnableMenuItem(hpop, IDM_KILLPROCTREE, MF_DISABLED);
+			EnableMenuItem(hpop, IDM_OPENPATH, MF_DISABLED);
+			EnableMenuItem(hpop, IDM_VTHREAD, MF_DISABLED);
+			EnableMenuItem(hpop, IDM_VHANDLES, MF_DISABLED);
+			EnableMenuItem(hpop, IDM_VMODULS, MF_DISABLED);
+			EnableMenuItem(hpop, IDM_VWINS, MF_DISABLED);
+
+			if (wcscmp(strFilePath, L"") == 0 || wcscmp(strFilePath, L"-") == 0) {
+				EnableMenuItem(hpop, IDM_OPENPATH, MF_DISABLED);
+				EnableMenuItem(hpop, IDM_FILEPROP, MF_DISABLED);
+			}
+
+			if (wcslen(strFilePath) < 260)
+				wcscpy_s(thisCommandPath, 260, strFilePath);
+
+			TrackPopupMenu(hpop,
+				TPM_LEFTALIGN | TPM_TOPALIGN | TPM_RIGHTBUTTON,
+				pt.x,
+				pt.y,
+				0,
+				hWndMain,
+				NULL);
+
+			DestroyMenu(hroot);
+		}
+	}
 	return 0;
 }
 
@@ -611,7 +662,6 @@ M_API ULONG MGetAllRam()
 	return static_cast<ULONG>(statex.ullTotalPhys / 1048576);
 }
 
-
 //ntdll apis
 
 HINSTANCE hNtDll;
@@ -621,6 +671,7 @@ HINSTANCE hUser32;
 
 BOOL LoadDll()
 {
+	
 	hNtDll = LoadLibrary(L"ntdll.dll");
 	hShell32 = LoadLibrary(L"shell32.dll");
 	hKernel32 = GetModuleHandle(L"kernel32.dll");
@@ -677,6 +728,7 @@ BOOL LoadDll()
 	}
 }
 void FreeDll() {
+
 	delete thisCommandPath;
 	delete thisCommandName;
 }

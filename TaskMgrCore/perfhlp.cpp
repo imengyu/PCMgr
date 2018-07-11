@@ -33,8 +33,6 @@ M_CAPI(MPerfAndProcessData*) MPERF_PerfDataCreate()
 M_CAPI(void) MPERF_PerfDataDestroy(MPerfAndProcessData*data)
 {
 	if (data) {
-		if (data->packageId)
-			delete data->packageId;
 		delete data;
 	}
 }

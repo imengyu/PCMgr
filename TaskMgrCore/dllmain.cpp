@@ -5,13 +5,18 @@
 HINSTANCE hInst;
 
 extern HICON HIconDef;
+extern HCURSOR hCurLoading;
+
 extern BOOL LoadDll();
 extern void FreeDll();
-extern HCURSOR hCurLoading;
+extern void WindowEnumStart();
+extern void WindowEnumDestroy();
+
 
 extern int GetProcessNumber();
 extern void ShowMainCoreStartUp();
 
+void DllDestroy();
 void DllStartup();
 
 BOOL APIENTRY DllMain( HMODULE hModule,
@@ -29,7 +34,7 @@ BOOL APIENTRY DllMain( HMODULE hModule,
 	case DLL_THREAD_DETACH:
 		break;
 	case DLL_PROCESS_DETACH:
-		FreeDll();
+		DllDestroy();
 		break;
 	}
 	return TRUE;
@@ -41,5 +46,9 @@ void DllStartup() {
 	hCurLoading = LoadCursor(NULL, IDC_WAIT);
 	ShowMainCoreStartUp();
 	GetProcessNumber();
+	WindowEnumStart();
 }
-
+void DllDestroy() {
+	FreeDll();
+	WindowEnumDestroy();
+}

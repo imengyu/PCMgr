@@ -32,13 +32,48 @@ namespace PCMgrUWP
         }
 
         private PackageManager packageManager = new PackageManager();
-        private IEnumerable<Package> packages = null;
         private bool enumlated = false;
         private int packageCount = 0;
         private List<UWPPackage> packageDatas = new List<UWPPackage>();
 
         public int PackageCount { get { return packageCount; } }
         public List<UWPPackage> Packages { get { return packageDatas; } }
+
+        public static string DisplayNameTozhCN(string dsb)
+        {
+            switch(dsb)
+            {
+                case "Get Help":
+                    return "获取帮助";
+                case "My Office":
+                    return "我的 Office";
+                case "Windows Alarms & Clock":
+                    return "闹钟和时钟";
+                case "Windows Voice Recorder":
+                    return "录音机";
+                case "Mobile Plans":
+                    return "移动套餐";
+                case "Micrsoft Pepole":
+                    return "人脉";
+                case "Windows Calculator":
+                    return "计算器";
+                case "Micrsoft Photos":
+                    return "Micrsoft 照片";
+                case "Windows Maps":
+                    return "地图";
+                case "Groove Music":
+                    return "Groove 音乐";
+                case "Movies & TV":
+                    return "电影和电视";
+                case "Micrsoft Tips":
+                    return "使用技巧";
+                case "Mail and Calendar":
+                    return "邮件和日历";
+                case "Windows Camera":
+                    return "相机";
+            }
+            return dsb;
+        }
 
         private static string ExtractDisplayIcon(string dir, string logoPath)
         {
@@ -75,22 +110,38 @@ namespace PCMgrUWP
             imageFile = Path.Combine(dir, logoPath);
 
             if (File.Exists(imageFile)) return imageFile;
-            else
-                ;
+
             imageFile = Path.Combine(dir, "en-us", logoPath);
             if (File.Exists(imageFile)) return imageFile;
             return Path.ChangeExtension(imageFile, "scale-16.png");
         }
         private static string ExtractDisplayName(string dir, Package package, string displayName)
         {
-            var priPath = Path.Combine(dir, "resources.pri");
-            if (!Uri.TryCreate(displayName, UriKind.Absolute, out Uri uri)) return displayName;
+            bool k1 = false;
+            var priPath = Path.Combine(dir, "\\pris\\resources.zh-CN.pri");
+            if (!File.Exists(priPath)) { priPath = Path.Combine(dir, "resources.pri"); k1 = true; }
+
+            if (!Uri.TryCreate(displayName, UriKind.Absolute, out Uri uri))
+                Uri.TryCreate("ms-resource:ApplicationDisplayName", UriKind.Absolute, out uri);
+
             var resource = string.Format("ms-resource://{0}/resources/{1}", package.Id.Name, uri.Segments.Last());
+        
             var name = ExtractStringFromPRIFile(priPath, resource);
             if (!string.IsNullOrWhiteSpace(name)) return name;
+
+            if (!k1)
+            {
+                priPath = Path.Combine(dir, "resources.pri");
+                name = ExtractStringFromPRIFile(priPath, resource);
+                if (!string.IsNullOrWhiteSpace(name)) return name;
+            }
+
             var res = string.Concat(uri.Segments.Skip(1));
             resource = string.Format("ms-resource://{0}/{1}", package.Id.Name, res);
-            return ExtractStringFromPRIFile(priPath, resource);
+            name = ExtractStringFromPRIFile(priPath, resource);
+            if (!string.IsNullOrWhiteSpace(name)) return name;
+
+            return displayName;
         }
 
         public bool EnumlateAll()
@@ -139,7 +190,7 @@ namespace PCMgrUWP
 
                     if (dsbText != "") p.Description = ExtractDisplayName(p.InstalledLocation, package, dsbText);
                     if (dsbName != "") p.Name = ExtractDisplayName(p.InstalledLocation, package, dsbName);
-                    if (dsbPublisher != "") p.Publisher = ExtractDisplayName(p.InstalledLocation, package, dsbPublisher);
+                    if (dsbPublisher != "") p.Publisher =  dsbPublisher;
                     if (logoPath != "") p.IconPath = ExtractDisplayIcon(p.InstalledLocation, logoPath);
 
                     xml.Clone();

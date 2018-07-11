@@ -4,6 +4,8 @@
 typedef void(__cdecl *exitcallback)();
 typedef int(__cdecl *taskdialogcallback)(HWND hwnd, LPWSTR text, LPWSTR title, LPWSTR apptl, int ico, int button);
 typedef void(__cdecl *EnumWinsCallBack)(HWND hWnd, HWND hWndParent);
+typedef void(__cdecl *GetWinsCallBack)(HWND hWnd, HWND hWndParent, int i);
+typedef void(__cdecl *WorkerCallBack)(int msg, void* data1, void* data2);
 
 LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
@@ -20,6 +22,7 @@ EXTERN_C M_API DWORD MAppMainGetExitCode();
 EXTERN_C M_API DWORD MAppMainSetExitCode(DWORD ex);
 
 EXTERN_C M_API void* MAppSetCallBack(void* cp, int id);
+EXTERN_C M_API void MAppMainCall(int msg, void * data1, void * data2);
 EXTERN_C M_API void MAppExit();
 EXTERN_C M_API void MAppRebot();
 EXTERN_C M_API void MAppRebotAdmin();
@@ -55,4 +58,4 @@ EXTERN_C M_API BOOL MStrContainsW(const LPWSTR str, const LPWSTR testStr, LPWSTR
 EXTERN_C M_API int MHexStrToIntW(wchar_t *s);
 EXTERN_C M_API long long MHexStrToLongW(wchar_t *s);
 
-void ThrowErrorAndErrorCodeX(DWORD code, LPWSTR msg, LPWSTR title);
+void ThrowErrorAndErrorCodeX(DWORD code, LPWSTR msg, LPWSTR title, BOOL ntstatus = TRUE);

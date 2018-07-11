@@ -11,7 +11,11 @@
 
 EXTERN_C M_API BOOL MAppVProcessAllWindows();
 
+EXTERN_C M_API void MAppVProcessAllWindowsUWP();
+
 EXTERN_C M_API BOOL MAppVProcessAllWindowsGetProcessWindow(DWORD pid);
+
+EXTERN_C M_API BOOL MAppVProcessAllWindowsGetProcessWindow2(DWORD pid);
 
 EXTERN_C M_API BOOL MAppVProcessMsg(DWORD dwPID, HWND hDlg, int type, LPWSTR procName);
 

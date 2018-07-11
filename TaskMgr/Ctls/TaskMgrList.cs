@@ -63,8 +63,15 @@ namespace TaskMgr.Ctls
         {
             if (!b1)
             {
-                yOffest = ((VScrollBar)sender).Value - ((VScrollBar)sender).Minimum;
-                SyncItems(true);
+                if (!m)
+                {
+                    m = true;
+                    t.Start();
+                    {
+                        yOffest = ((VScrollBar)sender).Value - ((VScrollBar)sender).Minimum;
+                        SyncItems(true);
+                    }
+                }
             }
         }
         private void Header_XOffestChanged(object sender, EventArgs e)
@@ -436,7 +443,7 @@ namespace TaskMgr.Ctls
                         g.FillRectangle(defBgSolidBrush, x + 2, r.Top, header.Items[i].Width - 2, r.Height);
                     }
                 }
-                else if (xw <= 0) break;
+                else if (x >= r.Right) break;
             }
 
             if (showGroup)
@@ -607,10 +614,11 @@ namespace TaskMgr.Ctls
                                 else if (showedItems[i].Childs.Count > 0 && showedItems[i].ChildsOpened)
                                 {
                                     showedItems[i].GlyphHoted = false;
-                                    int iii = ((e.Y - y - itemHeight)) / smallItemHeight;
+                                    int iii = ((e.Y - y - itemHeight - 20)) / smallItemHeight;
                                     if (iii >= 0 && iii < showedItems[i].Childs.Count)
                                         showedItems[i].OldSelectedItem = showedItems[i].Childs[iii];
                                     else showedItems[i].OldSelectedItem = null;
+
                                     if (e.Y - y - itemHeight < itemHeight)
                                         selectedChildItem = null;
 
@@ -791,6 +799,13 @@ namespace TaskMgr.Ctls
         public List<TaskMgrListItemChild> Childs
         {
             get { return childs; }
+        }
+        public bool HasChild(IntPtr tag)
+        {
+            bool rs = false;
+            foreach (TaskMgrListItemChild c in childs)
+                if ((IntPtr)c.Tag== tag) return true;
+            return rs;
         }
     }
     public class TaskMgrListItemGroup : TaskMgrListItem

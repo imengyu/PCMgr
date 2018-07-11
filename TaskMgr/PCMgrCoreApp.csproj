@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>TaskMgr</RootNamespace>
     <AssemblyName>PCMgrCore32</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
@@ -75,8 +75,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Areo\CommandLink.cs">
@@ -95,6 +97,24 @@
     <Compile Include="Areo\TaskDialog\TaskDialogButton.cs" />
     <Compile Include="Areo\TaskDialog\TaskDialogIcon.cs" />
     <Compile Include="Areo\TaskDialog\TaskDialog_static.cs" />
+    <Compile Include="Ctls\PerformanceCpu.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Ctls\PerformanceCpu.Designer.cs">
+      <DependentUpon>PerformanceCpu.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Ctls\PerformanceGrid.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Ctls\PerformanceInfos.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Ctls\PerformanceList.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Ctls\PerformanceTitle.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Ctls\TaskMgrListHeader.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -123,6 +143,9 @@
     <Compile Include="WorkWindow\FormSpyWindow.Designer.cs">
       <DependentUpon>FormSpyWindow.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="Ctls\PerformanceCpu.resx">
+      <DependentUpon>PerformanceCpu.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FormMain.resx">
       <DependentUpon>FormMain.cs</DependentUpon>
     </EmbeddedResource>

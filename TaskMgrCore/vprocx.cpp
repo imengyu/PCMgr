@@ -27,11 +27,22 @@ HCURSOR hCurLoading;
 
 using namespace std;
 
-list<HWND> *hAllWins = new list<HWND>();
+list<HWND> *hAllWins = nullptr;
+list<HWND> *hUWPWins = nullptr;
+
+void WindowEnumStart() {
+	hAllWins = new list<HWND>();
+	hUWPWins = new list<HWND>();
+
+}
+void WindowEnumDestroy() {
+	delete hUWPWins;
+	delete hAllWins;
+}
 
 extern NtUnmapViewOfSectionFun NtUnmapViewOfSection;
 extern EnumWinsCallBack hEnumWinsCallBack;
-extern EnumWinsCallBack hGetWinsWinsCallBack;
+extern GetWinsCallBack hGetWinsWinsCallBack;
 
 extern BOOL ShowMainCore(HWND hWndParent);
 
@@ -246,15 +257,32 @@ BOOL CALLBACK lpEnumFunc2(HWND hWnd, LPARAM lParam)
 		GetClassName(hWnd, clsn, 50);
 		if (wcscmp(clsn, L"ApplicationFrameWindow") != 0)
 		{
-			if ((l & WS_EX_APPWINDOW) == WS_EX_APPWINDOW || (l & WS_EX_WINDOWEDGE) == WS_EX_WINDOWEDGE)
+			if ((l & WS_EX_APPWINDOW) == WS_EX_APPWINDOW)
 				hAllWins->push_back(hWnd);
 			else if ((ls & WS_CAPTION) == WS_CAPTION)
 				hAllWins->push_back(hWnd);
+		}
+		else 
+		{
+			if ((l & WS_EX_APPWINDOW) == WS_EX_APPWINDOW)
+				hUWPWins->push_back(hWnd);
+			else if ((ls & WS_CAPTION) == WS_CAPTION)
+				hUWPWins->push_back(hWnd);
 		}
 	}
 	return TRUE;
 }
 
+M_API void MAppVProcessAllWindowsUWP()
+{
+	list<HWND>::iterator it;
+	for (it = hUWPWins->begin(); it != hUWPWins->end(); it++)
+	{
+		wchar_t text[512];
+		GetWindowText(*it, text, 512);
+		if (hGetWinsWinsCallBack)hGetWinsWinsCallBack(*it, (HWND)&text, 1);
+	}
+}
 M_API BOOL MAppVProcessAllWindowsGetProcessWindow(DWORD pid)
 {
 	list<HWND>::iterator it;
@@ -266,7 +294,24 @@ M_API BOOL MAppVProcessAllWindowsGetProcessWindow(DWORD pid)
 		{
 			wchar_t text[512];
 			GetWindowText(*it, text, 512);
-			if (hGetWinsWinsCallBack)hGetWinsWinsCallBack(*it, (HWND)&text);
+			if (hGetWinsWinsCallBack)hGetWinsWinsCallBack(*it, (HWND)&text, 0);
+			else return FALSE;
+		}
+	}
+	return TRUE;
+}
+M_API BOOL MAppVProcessAllWindowsGetProcessWindow2(DWORD pid)
+{
+	list<HWND>::iterator it;
+	for (it = hAllWins->begin(); it != hAllWins->end(); it++)
+	{
+		DWORD processId = 0;
+		GetWindowThreadProcessId(*it, &processId);
+		if (processId == pid)
+		{
+			wchar_t text[512];
+			GetWindowText(*it, text, 512);
+			if (hGetWinsWinsCallBack)hGetWinsWinsCallBack(*it, (HWND)&text, 2);
 			else return FALSE;
 		}
 	}
@@ -333,6 +378,10 @@ BOOL MAppVModuls(DWORD dwPID, HWND hDlg, LPWSTR procName)
 	int rs = MOpenProcessNt(dwPID, &hProcess);
 	if (rs == -1) {
 		SetWindowText(htitle, L"枚举模块失败。\n无效进程。");
+		return -1;
+	}	
+	else if (rs == 0xC0000022) {
+		SetWindowText(htitle, L"枚举模块失败。\n拒绝访问。");
 		return -1;
 	}
 	else if (rs == 1 && hProcess) {
@@ -410,6 +459,10 @@ BOOL MAppVThreads(DWORD dwPID, HWND hDlg, LPWSTR procName)
 	DWORD rs = MOpenProcessNt(dwPID, &hProcess);
 	if (rs == -1) {
 		SetWindowText(htitle, L"枚举线程失败。\n无效进程。");
+		return -1;
+	}
+	else if (rs == 0xC0000022) {
+		SetWindowText(htitle, L"枚举线程失败。\n拒绝访问。");
 		return -1;
 	}
 	else if (hProcess && rs == 1) {
@@ -545,6 +598,76 @@ BOOL MAppVWins(DWORD dwPID, HWND hDlg, LPWSTR procName)
 	return FALSE;
 }
 
+int CALLBACK Sort_VMODULS(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
+{
+	if (lParam1 == lParam2)
+		return -1;
+	int cloums = lParamSort;
+	switch (cloums)
+	{
+	case 1: {
+		wchar_t s1[MAX_PATH];
+		wchar_t s2[MAX_PATH];
+		ListView_GetItemText(hListModuls, lParam1, lParamSort, s1, MAX_PATH);
+		ListView_GetItemText(hListModuls, lParam2, lParamSort, s2, MAX_PATH);
+		return wcscmp(s1, s2);
+	}
+	case 0:
+	case 2:
+	case 3:
+	case 4: {
+		wchar_t s1[64];
+		wchar_t s2[64];
+		ListView_GetItemText(hListModuls, lParam1, lParamSort, s1, 64);
+		ListView_GetItemText(hListModuls, lParam2, lParamSort, s2, 64);
+		return wcscmp(s1, s2);
+	}
+	default:
+		break;
+	}
+	return 0;
+}
+int CALLBACK Sort_VTHREADS(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
+{
+	if (lParam1 == lParam2)
+		return -1;
+	int cloums = lParamSort;
+	switch (cloums)
+	{
+	case 0:
+	case 7: {
+		wchar_t s1[64];
+		wchar_t s2[64];
+		ListView_GetItemText(hListThreads, lParam1, lParamSort, s1, 64);
+		ListView_GetItemText(hListThreads, lParam2, lParamSort, s2, 64);
+		int i1 = _wtoi(s1), i2 = _wtoi(s2);
+		if (i1 == i2)return 0;
+		if (i1 > i2) return 1;
+		else return  -1;
+	}
+	case 5: {
+		wchar_t s1[MAX_PATH];
+		wchar_t s2[MAX_PATH];
+		ListView_GetItemText(hListThreads, lParam1, lParamSort, s1, MAX_PATH);
+		ListView_GetItemText(hListThreads, lParam2, lParamSort, s2, MAX_PATH);
+		return wcscmp(s1, s2);
+	}
+	case 1:
+	case 2:
+	case 3:
+	case 4:
+	case 6: {
+		wchar_t s1[64];
+		wchar_t s2[64];
+		ListView_GetItemText(hListThreads, lParam1, lParamSort, s1, 64);
+		ListView_GetItemText(hListThreads, lParam2, lParamSort, s2, 64);
+		return wcscmp(s1, s2);
+	}
+	default:
+		break;
+	}
+	return 0;
+}
 
 INT_PTR CALLBACK VWinsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -838,8 +961,8 @@ INT_PTR CALLBACK VModulsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 			switch (((LPNMHDR)lParam)->code)
 			{
 			case LVN_COLUMNCLICK:
-			{
-
+			{											
+				ListView_SortItemsEx(hListModuls, Sort_VMODULS, ((LPNMLISTVIEW)lParam)->iSubItem);
 			}
 			case NM_CLICK:
 				selectItem2 = ListView_GetSelectionMark(hListModuls);
@@ -979,7 +1102,7 @@ INT_PTR CALLBACK VThreadsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPar
 			{
 			case LVN_COLUMNCLICK:
 			{
-
+				ListView_SortItemsEx(hListThreads, Sort_VTHREADS, ((LPNMLISTVIEW)lParam)->iSubItem);
 			}
 			case NM_CLICK: {
 				TCHAR id[20];

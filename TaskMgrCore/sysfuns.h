@@ -9,3 +9,4 @@ typedef LONG(WINAPI *_GetPackageInfo)(PACKAGE_INFO_REFERENCE packageInfoReferenc
 typedef LONG(WINAPI *_ClosePackageInfo)(PACKAGE_INFO_REFERENCE packageInfoReference);
 typedef LONG(WINAPI *_OpenPackageInfoByFullName)(PCWSTR packageFullName,	const UINT32 reserved, PACKAGE_INFO_REFERENCE *packageInfoReference);
 typedef LONG(WINAPI *_GetPackageId)(_In_ HANDLE hProcess, _Inout_ UINT32 * bufferLength, _Out_writes_bytes_opt_(*bufferLength) BYTE * buffer);
+typedef BOOL(WINAPI *_IsWow64Process)(HANDLE, PBOOL);

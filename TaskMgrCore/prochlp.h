@@ -26,6 +26,7 @@ EXTERN_C M_API DWORD MTerminateProcessNt(DWORD dwId, HANDLE handle);
 
 EXTERN_C M_API BOOL MGetProcessCommandLine(HANDLE handle, LPWSTR l, int maxcount);
 EXTERN_C M_API BOOL MGetProcessIsUWP(HANDLE handle);
+EXTERN_C M_API BOOL MGetProcessIs32Bit(HANDLE handle);
 EXTERN_C M_API BOOL MGetUWPPackageId(HANDLE handle, MPerfAndProcessData * data);
 EXTERN_C M_API BOOL MGetUWPPackageFullName(HANDLE handle, int * len, LPWSTR buffer);
 EXTERN_C M_API int MGetProcessState(DWORD pid, HWND hWnd);

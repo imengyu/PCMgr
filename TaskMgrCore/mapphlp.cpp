@@ -6,6 +6,7 @@
 #include "comdlghlp.h"
 #include "fmhlp.h"
 #include "syshlp.h"
+#include "schlp.h"
 #include "VersionHelpers.h"
 #include "StringHlp.h"
 #include <shellapi.h>
@@ -34,8 +35,9 @@ extern HWND hWndMain;
 extern void ThrowErrorAndErrorCode(DWORD code, LPWSTR msg, LPWSTR title);
 taskdialogcallback hMainTaskDialogCallBack;
 EnumWinsCallBack hEnumWinsCallBack;
-EnumWinsCallBack hGetWinsWinsCallBack;
+GetWinsCallBack hGetWinsWinsCallBack;
 CLRCreateInstanceFun _CLRCreateInstance;
+WorkerCallBack hWorkerCallBack;
 
 ICLRMetaHost        *pMetaHost = nullptr;
 ICLRMetaHostPolicy  *pMetaHostPolicy = nullptr;
@@ -43,8 +45,15 @@ ICLRRuntimeHost     *pRuntimeHost = nullptr;
 ICLRRuntimeInfo     *pRuntimeInfo = nullptr;
 DWORD dwMainAppRet = 0;
 
+HMENU hMenuMainSet;
+HMENU hMenuMainView;
 HWND selectItem4;
-LPWSTR selectItemScSmall = NULL;
+
+bool refesh_fast = false;
+bool refesh_paused = false;
+bool min_hide = false;
+bool close_hide = false;
+bool top_most = false;
 
 void print(LPWSTR str)
 {
@@ -62,6 +71,8 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 	case 183: {
 		hMenuMain = LoadMenu(hInst, MAKEINTRESOURCE(IDR_MENUMAIN));
 		HMENU hR = GetSubMenu(hMenuMain, 0);
+		hMenuMainSet = GetSubMenu(hMenuMain, 1);
+		hMenuMainView = GetSubMenu(hMenuMain, 2);
 		if (!MIsRunasAdmin())
 			InsertMenu(hR, 1, MF_BYPOSITION, IDM_REBOOT_AS_ADMIN, L"以管理员模式重启程序");
 		SetMenu(hWnd, hMenuMain);
@@ -69,8 +80,8 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 		return 1;
 	}
 	case 184: {
-		selectItemScSmall = (LPWSTR)data;
 		if (data) {
+			MSCM_SetCurrSelSc((LPWSTR)data);
 			HMENU hroot = LoadMenu(hInst, MAKEINTRESOURCE(IDR_MENUSCSMALL));
 			if (hroot) {
 				HMENU hpop = GetSubMenu(hroot, 0);
@@ -140,6 +151,44 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 	case 192:
 		SendMessage((HWND)data, WM_SYSCOMMAND, SC_CLOSE, 0);
 		break;
+	case 193: {
+		int c = (int)data;
+		switch (c)
+		{
+		case 0:
+			refesh_paused = true;
+			break;
+		case 1:
+			refesh_paused = false;
+			refesh_fast = false;
+			break;
+		case 2:
+			refesh_paused = false;
+			refesh_fast = true;
+			break;
+		}
+		HMENU h = GetSubMenu(hMenuMainView, 1);
+		CheckMenuItem(h, IDM_REFESH_FAST, (!refesh_paused && refesh_fast) ? MF_CHECKED : MF_UNCHECKED);
+		CheckMenuItem(h, IDM_REFESH_PAUSED, refesh_paused ? MF_CHECKED : MF_UNCHECKED);
+		CheckMenuItem(h, IDM_REFESH_SLOW, (!refesh_paused && !refesh_fast) ? MF_CHECKED : MF_UNCHECKED);
+		hWorkerCallBack(5, (LPVOID)c, 0);
+		break;
+	}
+	case 194:
+		top_most = (int)data;
+		CheckMenuItem(hMenuMainSet, IDM_TOPMOST, top_most ? MF_CHECKED : MF_UNCHECKED);
+		hWorkerCallBack(6, (LPVOID)(int)top_most, 0);
+		break;
+	case 195:
+		close_hide = (int)data;
+		CheckMenuItem(hMenuMainSet, IDM_CLOSETOHIDE, close_hide ? MF_CHECKED : MF_UNCHECKED);
+		hWorkerCallBack(6, (LPVOID)(int)close_hide, 0);
+		break;
+	case 196:
+		min_hide = (int)data;
+		CheckMenuItem(hMenuMainSet, IDM_MINHIDE, min_hide ? MF_CHECKED : MF_UNCHECKED);
+		hWorkerCallBack(7, (LPVOID)(int)min_hide, 0);
+		break;
 	default:
 		return 0;
 		break;
@@ -163,12 +212,19 @@ M_API void* MAppSetCallBack(void * cp, int id)
 		hEnumWinsCallBack = (EnumWinsCallBack)cp;
 		break;
 	case 4:
-		hGetWinsWinsCallBack = (EnumWinsCallBack)cp;
+		hGetWinsWinsCallBack = (GetWinsCallBack)cp;
+		break;
+	case 5:
+		hWorkerCallBack = (WorkerCallBack)cp;
 		break;
 	default:
 		break;
 	}
 	return NULL;
+}
+M_API void MAppMainCall(int msg, void* data1, void* data2)
+{
+	hWorkerCallBack(msg, data1, data2);
 }
 
 M_API HICON MGetWindowIcon(HWND hWnd)
@@ -337,10 +393,11 @@ M_API void MListDrawItem(HWND hWnd, HDC hdc, int x, int y, int w, int h, int sta
 	if (hTheme != NULL)CloseThemeData(hTheme);
 }
 
-void ThrowErrorAndErrorCodeX(DWORD code, LPWSTR msg, LPWSTR title)
+void ThrowErrorAndErrorCodeX(DWORD code, LPWSTR msg, LPWSTR title, BOOL ntstatus)
 {
 	wchar_t errcode[260];
-	wsprintf(errcode, L"\nCode: %d\nNTSTATUS:0x%lX", code, code);
+	if(ntstatus)wsprintf(errcode, L"\nCode : %d\nNTSTATUS : 0x%lX", code, code);
+	else wsprintf(errcode, L"\nError Code : %d", code);
 	MShowMessageDialog(hWndMain, errcode, title, msg, MB_ICONERROR, MB_OK);
 }
 
@@ -355,6 +412,30 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_COMMAND:
 		switch (wParam)
 		{
+		case IDM_TOPMOST: {
+			MAppWorkCall3(194, 0, (LPVOID)(int)!top_most);
+			break;
+		}
+		case IDM_MINHIDE: {
+			MAppWorkCall3(196, 0, (LPVOID)(int)!min_hide);
+			break;
+		}
+		case IDM_CLOSETOHIDE: {
+			MAppWorkCall3(195, 0, (LPVOID)(int)!close_hide);
+			break;
+		}
+		case IDM_REFESH_FAST:{
+			MAppWorkCall3(193, NULL, (LPVOID)2);
+			break;
+		}
+		case IDM_REFESH_PAUSED: {
+			MAppWorkCall3(193, NULL, 0);
+			break;
+		}		
+		case IDM_REFESH_SLOW: {
+			MAppWorkCall3(193, NULL, (LPVOID)1);
+			break;
+		}
 		case IDM_RUN: {
 			MRunFileDlg(hWnd, NULL, NULL, NULL, NULL, 0);
 			break;
@@ -636,17 +717,21 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			MFF_ShowFolder();
 			break;
 		}
-		case ID_SCSMALL_STOPSC: {
-
-			break;
-		}
-		case ID_SCSMALL_REBOOTSC: {
-
-			break;
-		}
+		case ID_SCMAIN_COPYPATH:
+		case ID_SCMAIN_DEL:
+		case ID_SCMAIN_DISABLE:
+		case ID_SCMAIN_AUTOSTART:
+		case ID_SCMAIN_NOAUTOSTART:
+		case ID_SCMAIN_REBOOT:
+		case ID_SCMAIN_START:
+		case ID_SCMAIN_STOP:
+		case ID_SCMAIN_REFESH:
+		case ID_SCMAIN_RESU:
+		case ID_SCMAIN_SUSP:
+		case ID_SCSMALL_STOPSC:
+		case ID_SCSMALL_REBOOTSC:
 		case ID_SCSMALL_GOTOSC: {
-
-			break;
+			return MSCM_HandleWmCommand(wParam);
 		}
 		default:
 			break;

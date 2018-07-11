@@ -2,11 +2,15 @@
 #include "schlp.h"
 #include "mapphlp.h"
 #include "StringSplit.h"
+#include "resource.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
 
 using namespace std;
+
+extern HINSTANCE hInst;
+extern "C" M_API BOOL MCopyToClipboard(const WCHAR* pszData, const int nDataLen);
 
 SC_HANDLE hSCM = NULL;
 ENUM_SERVICE_STATUS_PROCESS *pServiceInfo = NULL;
@@ -15,6 +19,8 @@ char *pBuf = NULL;                  // 缓冲区指针
 DWORD dwBufSize = 0;                // 传入的缓冲长度
 DWORD dwBufNeed = 0;                // 需要的缓冲长度
 wstring scGroupBuffer;
+WCHAR currSc[MAX_PATH];
+WCHAR currScPath[MAX_PATH];
 
 M_CAPI(BOOL) MSCM_Init()
 {
@@ -107,4 +113,227 @@ M_CAPI(BOOL) MEnumServices(EnumServicesCallBack callback)
 		}
 	}
 	return bRet;
+}
+M_CAPI(BOOL) MSCM_DeleteService(LPWSTR scname, LPWSTR errText)
+{
+	SC_HANDLE hSc = OpenService(hSCM, currSc,
+		SERVICE_QUERY_STATUS | SERVICE_ENUMERATE_DEPENDENTS | SERVICE_START | SERVICE_STOP | DELETE);
+	if (hSc)
+	{
+		SERVICE_STATUS status;
+		QueryServiceStatus(hSc, &status);
+		if (status.dwCurrentState != SERVICE_STOPPED)
+			ControlService(hSc, SERVICE_CONTROL_STOP, &status);
+		if (!DeleteService(hSc))
+			ThrowErrorAndErrorCodeX(GetLastError(), L"DeleteService", errText, FALSE);
+		else {
+			MAppMainCall(15, currSc, 0);
+		    return TRUE;
+		}
+		CloseServiceHandle(hSc);
+	}
+	else ThrowErrorAndErrorCodeX(GetLastError(), L"打开服务失败", errText, FALSE);
+	return FALSE;
+}
+M_CAPI(BOOL) MSCM_ChangeScStartType(LPWSTR scname, DWORD type, LPWSTR errText)
+{
+	SC_HANDLE hSc = OpenService(hSCM, currSc, SERVICE_QUERY_CONFIG | SERVICE_CHANGE_CONFIG);
+	if (hSc)
+	{
+		DWORD bufSize = 0;
+		LPQUERY_SERVICE_CONFIG confg = NULL;
+		QueryServiceConfig(hSc, confg, 0, &bufSize);
+		confg = (LPQUERY_SERVICE_CONFIG)malloc(bufSize);
+		QueryServiceConfig(hSc, confg, bufSize, &bufSize);
+
+		if (confg->dwStartType != type)
+			confg->dwStartType = type;
+
+		if (!ChangeServiceConfig(hSc, SERVICE_NO_CHANGE, confg->dwStartType,
+			SERVICE_NO_CHANGE, NULL, NULL, NULL, NULL, NULL, NULL, NULL))
+		{
+			ThrowErrorAndErrorCodeX(GetLastError(), L"ChangeServiceConfig", L"无法禁用服务", FALSE);
+		}
+		else return TRUE;
+
+		CloseServiceHandle(hSc);
+	}
+	else ThrowErrorAndErrorCodeX(GetLastError(), L"打开服务失败（OpenService）", L"无法禁用服务", FALSE);
+	return FALSE;
+}
+M_CAPI(BOOL) MSCM_ControlSc(LPWSTR scname, DWORD targetStatus, DWORD targetCtl, LPWSTR errText)
+{
+	SC_HANDLE hSc = OpenService(hSCM, currSc, SERVICE_ENUMERATE_DEPENDENTS |
+		SERVICE_START | SERVICE_STOP | SERVICE_PAUSE_CONTINUE | SERVICE_QUERY_STATUS);
+	if (hSc)
+	{
+		SERVICE_STATUS status;
+		QueryServiceStatus(hSc, &status);
+		if (status.dwCurrentState != targetStatus)
+		{
+			BOOL rs = ControlService(hSc, targetCtl, &status);
+			CloseServiceHandle(hSc);
+			if(!rs) ThrowErrorAndErrorCodeX(GetLastError(), L"ControlService", errText, FALSE);
+			return rs;
+		}
+		else {
+			CloseServiceHandle(hSc);
+			return TRUE;
+		}
+	}
+	else ThrowErrorAndErrorCodeX(GetLastError(), L"打开服务失败（OpenService）", errText, FALSE);
+	return FALSE;
+}
+M_CAPI(void) MSCM_SetCurrSelSc(LPWSTR scname)
+{
+	wcscpy_s(currSc, scname);
+}
+
+LRESULT MSCM_HandleWmCommand(WPARAM wParam)
+{
+	switch (wParam)
+	{
+	case ID_SCMAIN_COPYPATH: {
+		if (wcslen(currScPath) > 0 || wcscmp(currScPath, L"") != 0)
+			MCopyToClipboard(currScPath, wcslen(currScPath));
+		break;
+	}
+	case ID_SCMAIN_DEL: {
+		if (wcslen(currSc) > 0 || wcscmp(currSc, L"") != 0)
+			MSCM_DeleteService(currSc, L"删除服务失败");
+		break;
+	}
+	case ID_SCMAIN_DISABLE: {
+		if (wcslen(currSc) > 0 || wcscmp(currSc, L"") != 0)
+			MSCM_ChangeScStartType(currSc, SERVICE_DISABLED, L"");
+		break;
+	}
+	case ID_SCMAIN_AUTOSTART: {
+		if (wcslen(currSc) > 0 || wcscmp(currSc, L"") != 0) 
+			MSCM_ChangeScStartType(currSc, SERVICE_AUTO_START, L"");
+		break;
+	}
+	case ID_SCMAIN_NOAUTOSTART: {
+		if (wcslen(currSc) > 0 || wcscmp(currSc, L"") != 0)
+			MSCM_ChangeScStartType(currSc, SERVICE_DEMAND_START, L"");
+		break;
+	}
+	case ID_SCMAIN_REBOOT: 
+	case ID_SCSMALL_REBOOTSC: {
+		if (wcslen(currSc) > 0 || wcscmp(currSc, L"") != 0) {
+			SC_HANDLE hSc = OpenService(hSCM, currSc, SERVICE_ENUMERATE_DEPENDENTS |
+				SERVICE_START | SERVICE_STOP | SERVICE_PAUSE_CONTINUE | SERVICE_QUERY_STATUS);
+			if (hSc)
+			{
+				SERVICE_STATUS status;
+				QueryServiceStatus(hSc, &status);
+				if (status.dwCurrentState != SERVICE_STOPPED)
+				{
+					if (!ControlService(hSc, SERVICE_CONTROL_STOP, &status)) {
+						ThrowErrorAndErrorCodeX(GetLastError(), L"ControlService", L"无法停止服务", FALSE);
+						return FALSE;
+					}
+					else return StartService(hSc, 0, NULL);
+				}
+				else {
+					CloseServiceHandle(hSc);
+					return TRUE;
+				}
+			}
+			else ThrowErrorAndErrorCodeX(GetLastError(), L"打开服务失败（OpenService）", L"无法停止服务", FALSE);
+		}
+		break;
+	}
+	case ID_SCMAIN_START: {
+		if (wcslen(currSc) > 0 || wcscmp(currSc, L"") != 0) 
+		{
+			SC_HANDLE hSc = OpenService(hSCM, currSc, SERVICE_ENUMERATE_DEPENDENTS |
+				SERVICE_START | SERVICE_STOP | SERVICE_PAUSE_CONTINUE | SERVICE_QUERY_STATUS);
+			if (hSc)
+			{
+				SERVICE_STATUS status;
+				QueryServiceStatus(hSc, &status);
+				if (status.dwCurrentState != SERVICE_RUNNING)
+					return StartService(hSc, 0, NULL);
+				else {
+					CloseServiceHandle(hSc);
+					return TRUE;
+				}
+			}
+			else ThrowErrorAndErrorCodeX(GetLastError(), L"打开服务失败（OpenService）", L"无法启动服务", FALSE);
+		}
+		break;
+	}	
+	case ID_SCSMALL_STOPSC:
+	case ID_SCMAIN_STOP: {
+		if (wcslen(currSc) > 0 || wcscmp(currSc, L"") != 0) 
+			MSCM_ControlSc(currSc, SERVICE_STOPPED, SERVICE_CONTROL_STOP, L"无法停止服务");
+		break;
+	}
+	case ID_SCMAIN_REFESH: {
+		MAppMainCall(10, 0, 0);
+		break;
+	}
+	case ID_SCMAIN_RESU: {
+		if (wcslen(currSc) > 0 || wcscmp(currSc, L"") != 0)
+			MSCM_ControlSc(currSc, SERVICE_RUNNING, SERVICE_CONTROL_CONTINUE, L"无法恢复服务");
+		break;
+	}
+	case ID_SCMAIN_SUSP: {
+		if (wcslen(currSc) > 0 || wcscmp(currSc, L"") != 0) 
+			MSCM_ControlSc(currSc, SERVICE_PAUSED, SERVICE_CONTROL_PAUSE, L"无法暂停服务");
+		break;
+	}
+	case ID_SCSMALL_GOTOSC: {
+		MAppMainCall(9, currSc, 0);
+		break;
+	}
+	}    
+	return 0;
+}
+M_CAPI(void) MSCM_ShowMenu(HWND hDlg, LPWSTR serviceName, DWORD running, DWORD startType, LPWSTR path)
+{
+	HMENU hroot = LoadMenu(hInst, MAKEINTRESOURCE(IDR_MENUSCMAIN));
+	if (hroot) {
+		HMENU hpop = GetSubMenu(hroot, 0);
+		POINT pt;
+		GetCursorPos(&pt);
+
+		if (running == SERVICE_STOPPED)
+		{
+			EnableMenuItem(hpop, ID_SCMAIN_STOP, MF_DISABLED);
+			EnableMenuItem(hpop, ID_SCMAIN_SUSP, MF_DISABLED);
+			EnableMenuItem(hpop, ID_SCMAIN_RESU, MF_DISABLED);
+		}
+		if (running == SERVICE_RUNNING) {
+			EnableMenuItem(hpop, ID_SCMAIN_START, MF_DISABLED);
+			EnableMenuItem(hpop, ID_SCMAIN_RESU, MF_DISABLED);
+		}
+		if (running == SERVICE_PAUSED)
+			EnableMenuItem(hpop, ID_SCMAIN_SUSP, MF_DISABLED);
+
+		if (startType == SERVICE_AUTO_START)
+			EnableMenuItem(hpop, ID_SCMAIN_AUTOSTART, MF_DISABLED);
+		else if (startType == SERVICE_DEMAND_START)
+			EnableMenuItem(hpop, ID_SCMAIN_NOAUTOSTART, MF_DISABLED);
+		else if (startType == SERVICE_DISABLED)
+			EnableMenuItem(hpop, ID_SCMAIN_DISABLE, MF_DISABLED);
+			
+		if(path==NULL||wcslen(path)==0)
+			EnableMenuItem(hpop, ID_SCMAIN_COPYPATH, MF_DISABLED);
+		else
+			wcscpy_s(currScPath, path);
+
+		wcscpy_s(currSc, serviceName);
+
+		TrackPopupMenu(hpop,
+			TPM_LEFTALIGN | TPM_TOPALIGN | TPM_RIGHTBUTTON,
+			pt.x,
+			pt.y,
+			0,
+			hDlg,
+			NULL);
+
+		DestroyMenu(hroot);
+	}
 }

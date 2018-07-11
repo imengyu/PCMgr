@@ -18,13 +18,15 @@ namespace TaskMgr.Ctls
             items.HearderAdd += Items_HearderAdd;
             items.HearderRemoved += Items_HearderRemoved;
             t.Tick += T_Tick;
-            t.Interval = 100;
+            t.Interval = 40;
             if (par != null)
             {
                 HScrollBar vs = new HScrollBar();
                 vs.Name = "HScrollBarBase";
                 vs.Location = new Point(0, par.Height - 16);
-                vs.Width = par.Width - 16;
+                if (par.Width == 0)
+                    vs.Width = Width;
+                else vs.Width = par.Width - 16;
                 vs.Height = 16;
                 vs.Visible = false;
                 vs.ValueChanged += Vs_ValueChanged;
@@ -34,8 +36,15 @@ namespace TaskMgr.Ctls
 
         private void Vs_ValueChanged(object sender, EventArgs e)
         {
-            XOffiest = ((HScrollBar)sender).Value - ((HScrollBar)sender).Minimum;
-            XOffestChanged?.Invoke(this, EventArgs.Empty);
+            if (!m)
+            {
+                m = true;
+                t.Start();
+                {
+                    XOffiest = ((HScrollBar)sender).Value - ((HScrollBar)sender).Minimum;
+                    XOffestChanged?.Invoke(this, EventArgs.Empty);
+                }
+            }
         }
         private void Items_HearderRemoved(TaskMgrListHeaderItem obj)
         {
@@ -50,10 +59,7 @@ namespace TaskMgr.Ctls
         {
             if (arredItem == null)
                 if (obj.ArrowType == TaskMgrListHeaderSortArrow.Ascending || obj.ArrowType == TaskMgrListHeaderSortArrow.Descending)
-                {
-
                     arredItem = obj;
-                }
             vsed = false;
             Vsitem();
         }
@@ -240,9 +246,12 @@ namespace TaskMgr.Ctls
             if (b && parent.ishs)
             {
                 HScrollBar vs = (HScrollBar)(parent.Controls["HScrollBarBase"]);
-                if (parent.isvs)
-                    vs.Width = parent.Width - 16;
-                else vs.Width = parent.Width;
+                if (parent.Width != 0)
+                {
+                    if (parent.isvs) vs.Width = parent.Width - 16;
+                    else vs.Width = parent.Width;
+                }
+                else vs.Width = Width;
             }
             if (!vsed)
             {
@@ -253,13 +262,16 @@ namespace TaskMgr.Ctls
                     thisWidth += items[i].Width;
                 }
                 vsed = true;
+                if (thisWidth == 0) return false;
                 if (parent != null)
                 {
                     HScrollBar vs = (HScrollBar)(parent.Controls["HScrollBarBase"]);
                     if (thisWidth > Width)
                     {
                         parent.ishs = true;
-                        vs.Show();
+                        if(!vs.Visible)
+                            vs.Show();
+                        if(vs.Width==0) vs.Width = Width;
                         vs.Maximum = thisWidth;
                         vs.LargeChange = parent.Width;
                         vs.SmallChange = 5;
@@ -267,7 +279,8 @@ namespace TaskMgr.Ctls
                     else
                     {
                         parent.ishs = false;
-                        vs.Hide();
+                        if (vs.Visible)
+                            vs.Hide();
                     }
                     allWidth = thisWidth;
                     return true;
