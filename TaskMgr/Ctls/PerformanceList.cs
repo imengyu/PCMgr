@@ -68,6 +68,7 @@ namespace TaskMgr.Ctls
 
         public event EventHandler SelectedtndexChanged;
 
+        public PerformanceListItem Selectedtem { get { return selectedtem; } set { selectedtem = value;Invalidate(); } }
         public PerformanceListItemCollection Items { get { return items; } }
 
         public void UpdateAll()
@@ -246,17 +247,29 @@ namespace TaskMgr.Ctls
         public string Name { get; set; }
         public List<int> Data { get { return dataIem; } }
 
+
         public void AddData(int d)
         {
-            Data.RemoveAt(0);
-            Data.Add(d);
+            if (b)
+            {
+                dataIem.RemoveAt(0);
+                dataIem.Add(d);
+            }
+            else
+            {
+                int index = dataIem.Count - 1;
+                dataIem[index] = (dataIem[index] + d) / 2;
+            }
+            b = !b;
         }
 
+        public int PageIndex { get; set; }
         public bool Gray { get; set; }
         public int ItemY { get; set; }
         public int ItemHeight { get { return 60; } }
         public string SmallText { get; set; }
 
+        private bool b = false;
         private Pen basePen = null;
         private List<int> dataIem = null;
     }

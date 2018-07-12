@@ -284,6 +284,29 @@ namespace TaskMgr
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern void MFM_SetShowHiddenFiles(bool b);
 
+        public static String FormatFileSize(UInt64 fileSize)
+        {
+            if (fileSize < 0)
+            {
+                throw new ArgumentOutOfRangeException("fileSize");
+            }
+            else if (fileSize >= 1024 * 1024 * 1024)
+            {
+                return string.Format("{0:########0.00} GB", ((Double)fileSize) / (1024 * 1024 * 1024));
+            }
+            else if (fileSize >= 1024 * 1024)
+            {
+                return string.Format("{0:####0.00} MB", ((Double)fileSize) / (1024 * 1024));
+            }
+            else if (fileSize >= 1024)
+            {
+                return string.Format("{0:####0.00} KB", ((Double)fileSize) / 1024);
+            }
+            else
+            {
+                return string.Format("{0} B", fileSize);
+            }
+        }
         public static String FormatFileSize(Int64 fileSize)
         {
             if (fileSize < 0)
@@ -364,6 +387,7 @@ namespace TaskMgr
         private bool startListInited = false;
         private bool uwpListInited = false;
         private bool perfInited = false;
+        private bool perfMainInited = false;
 
         #region ProcessListWork
         private int sortitem = -1;
@@ -377,6 +401,9 @@ namespace TaskMgr
         public PerformanceCounter performanceCounter_ram_total = null;
         public PerformanceCounter performanceCounter_disk_total = null;
         public PerformanceCounter performanceCounter_net_total = null;
+
+        public PerformanceCounter performanceCounter_disk_system = null;
+        public PerformanceCounter performanceCounter_cpu_system = null;
 
         private class PsItem
         {
@@ -556,6 +583,23 @@ namespace TaskMgr
             return rs;
         }
 
+        private void ProcessListInitLater()
+        {
+            if (!perfMainInited)
+            {
+                performanceCounter_cpu_total = new PerformanceCounter("Processor Information", "% Processor Time", "_Total", true);
+                performanceCounter_ram_total = new PerformanceCounter("Memory", "% Committed Bytes In Use", "", true);
+                performanceCounter_disk_total = new PerformanceCounter("PhysicalDisk", "% Disk Time", "_Total", true);
+                performanceCounter_net_total = new PerformanceCounter("Network Interface", "Bytes Total/sec", "", true);
+                string[] instanceNames = new PerformanceCounterCategory(performanceCounter_net_total.CategoryName).GetInstanceNames();
+                performanceCounter_net_total.InstanceName = instanceNames[0];
+
+                performanceCounter_cpu_system = new PerformanceCounter("Process", "% Processor Time", "System", true);
+                performanceCounter_disk_system = new PerformanceCounter("Process", "IO Data Bytes/sec", "System", true);
+
+                perfMainInited = true;
+            }
+        }
         private void ProcessListInit()
         {
             if (!processListInited)
@@ -568,13 +612,6 @@ namespace TaskMgr
 
                 baseProcessRefeshTimer.Start();
                 isRunAsAdmin = MIsRunasAdmin();
-
-                performanceCounter_cpu_total = new PerformanceCounter("Processor Information", "% Processor Time", "_Total", true);
-                performanceCounter_ram_total = new PerformanceCounter("Memory", "% Committed Bytes In Use", "", true);
-                performanceCounter_disk_total = new PerformanceCounter("PhysicalDisk", "Avg. Disk Queue Length", "_Total", true);
-                performanceCounter_net_total = new PerformanceCounter("Network Interface", "Bytes Total/sec", "", true);
-                string[] instanceNames = new PerformanceCounterCategory(performanceCounter_net_total.CategoryName).GetInstanceNames();
-                performanceCounter_net_total.InstanceName = instanceNames[0];
 
                 if (!isRunAsAdmin)
                 {
@@ -616,12 +653,12 @@ namespace TaskMgr
                 */
 
                 processListInited = true;
+
                 if (MIsRunasAdmin())
-                {
                     ScMgrInit();
-                }
                 if (SysVer.IsWin8Upper())
                     UWPListInit();
+
                 ProcessListRefesh();
             }
         }
@@ -702,6 +739,8 @@ namespace TaskMgr
             TaskMgrListItem taskMgrListItem;
             if (pid == 0) taskMgrListItem = new TaskMgrListItem("系统空闲进程");
             else if (pid == 4) taskMgrListItem = new TaskMgrListItem("System");
+            else if (pid == 88 && exename == "Registry") taskMgrListItem = new TaskMgrListItem("Registry");
+            else if (exename == "Memory Compression") taskMgrListItem = new TaskMgrListItem("Memory Compression");
             else if (stringBuilder.ToString() != "")
             {
                 StringBuilder exeDescribe = new StringBuilder(256);
@@ -982,61 +1021,15 @@ namespace TaskMgr
                         }
                     }
                 }
-                //State
-                if (stateindex != -1 && ipdateOneDataCloum != stateindex)
-                {
-                    int i = MGetProcessState(pid, IntPtr.Zero);
-                    if (i == 1)
-                    {
-                        it.SubItems[stateindex].Text = "";
-                        if (p.isSvchost == false && it.Childs.Count > 0 && p.exepath.ToLower() != @"c:\windows\system32\dwm.exe")
-                        {
-                            bool hung = false;
-                            foreach (TaskMgrListItemChild c in it.Childs)
-                                if (IsHungAppWindow((IntPtr)c.Tag))
-                                {
-                                    hung = true;
-                                    break;
-                                }
-                            if (hung)
-                            {
-                                it.SubItems[stateindex].Text = "无响应";
-                                it.SubItems[stateindex].ForeColor = Color.FromArgb(219, 107, 58);
-                            }
-                        }
-                    }
-                    else if (i == 2)
-                    {
-                        it.SubItems[stateindex].Text = "已暂停";
-                        it.SubItems[stateindex].ForeColor = Color.FromArgb(22, 158, 250);
-                    }
-                }
-                IntPtr handle = p.handle;
-                if (handle != IntPtr.Zero)
-                {
-                    //Performance 
-                    if (cpuindex != -1 && ipdateOneDataCloum != cpuindex)
-                    {
-                        double ii = MPERF_GetProcessCpuUseAge(handle, p.perfData);
-                        it.SubItems[cpuindex].Text = ii.ToString("0.0") + "%";
-                        it.SubItems[cpuindex].BackColor = ProcessListGetColorFormValue(ii, 100);
-                    }
-                    if (ramindex != -1 && ipdateOneDataCloum != ramindex)
-                    {
-                        uint ii = MPERF_GetProcessRam(handle);
-                        it.SubItems[ramindex].Text = FormatFileSize1(Convert.ToInt64(ii));
-                        it.SubItems[ramindex].BackColor = ProcessListGetColorFormValue(ii / 1048576, 1024);
-                    }
-                    if (diskindex != -1 && ipdateOneDataCloum != diskindex)
-                    {
-                        ulong disk = MPERF_GetProcessDiskRate(handle, p.perfData);
-                        it.SubItems[diskindex].Text = (disk / 1024d).ToString("0.0") + " MB/秒";
-                        it.SubItems[diskindex].BackColor = ProcessListGetColorFormValue(disk, 1048576);
-                    }
-                    if (netindex != -1 && ipdateOneDataCloum != netindex)
-                    {
 
-                    }
+                if (stateindex != -1 && ipdateOneDataCloum == stateindex)
+                    ProcessListUpdate_State(pid, it, p.handle, p);
+                else
+                {
+                    if (cpuindex != -1 && ipdateOneDataCloum != cpuindex) ProcessListUpdatePerf_Cpu(pid, it, p.handle, p);
+                    if (ramindex != -1 && ipdateOneDataCloum != ramindex) ProcessListUpdatePerf_Ram(pid, it, p.handle);
+                    if (diskindex != -1 && ipdateOneDataCloum != diskindex) ProcessListUpdatePerf_Disk(pid, it, p.handle);
+                    if (netindex != -1 && ipdateOneDataCloum != netindex) ProcessListUpdatePerf_Net(pid, it, p.handle);
                 }
             }
         }
@@ -1082,63 +1075,100 @@ namespace TaskMgr
             {
                 PsItem p = ((PsItem)it.Tag);
                 if (stateindex != -1 && ipdateOneDataCloum == stateindex)
-                {
-                    int i = MGetProcessState(pid, IntPtr.Zero);
-                    if (i == 1)
-                    {
-                        it.SubItems[stateindex].Text = "";
-                        if (p.isSvchost == false && it.Childs.Count > 0)
-                        {
-                            bool hung = false;
-                            foreach (TaskMgrListItemChild c in it.Childs)
-                                if (IsHungAppWindow((IntPtr)c.Tag))
-                                {
-                                    hung = true;
-                                    break;
-                                }
-                            if (hung)
-                            {
-                                it.SubItems[stateindex].Text = "无响应";
-                                it.SubItems[stateindex].ForeColor = Color.FromArgb(219, 107, 58);
-                            }
-                        }
-                    }
-                    else if (i == 2)
-                    {
-                        it.SubItems[stateindex].Text = "已暂停";
-                        it.SubItems[stateindex].ForeColor = Color.FromArgb(22, 158, 250);
-                    }
-                }
+                    ProcessListUpdate_State(pid, it, p.handle, p);
                 else
                 {
-                    IntPtr handle = p.handle;
-                    if (handle != IntPtr.Zero)
+                    if (cpuindex != -1 && ipdateOneDataCloum == cpuindex) ProcessListUpdatePerf_Cpu(pid, it, p.handle, p);
+                    if (ramindex != -1 && ipdateOneDataCloum == ramindex) ProcessListUpdatePerf_Ram(pid, it, p.handle);
+                    if (diskindex != -1 && ipdateOneDataCloum == diskindex) ProcessListUpdatePerf_Disk(pid, it, p.handle);
+                    if (netindex != -1 && ipdateOneDataCloum == netindex) ProcessListUpdatePerf_Net(pid, it, p.handle);
+                }
+            }
+        }
+        private void ProcessListUpdate_State(uint pid, TaskMgrListItem it, IntPtr handle, PsItem p)
+        {
+            int i = MGetProcessState(pid, IntPtr.Zero);
+            if (i == 1)
+            {
+                it.SubItems[stateindex].Text = "";
+                if (p.isSvchost == false && it.Childs.Count > 0)
+                {
+                    bool hung = false;
+                    foreach (TaskMgrListItemChild c in it.Childs)
+                        if (IsHungAppWindow((IntPtr)c.Tag))
+                        {
+                            hung = true;
+                            break;
+                        }
+                    if (hung)
                     {
-                        //Performance 
-                        if (cpuindex != -1 && ipdateOneDataCloum == cpuindex)
-                        {
-                            double ii = MPERF_GetProcessCpuUseAge(handle, p.perfData);
-                            it.SubItems[cpuindex].Text = ii.ToString("0.0") + "%";
-                            it.SubItems[cpuindex].BackColor = ProcessListGetColorFormValue(ii, 100);
-                        }
-                        else if (ramindex != -1 && ipdateOneDataCloum == ramindex)
-                        {
-                            uint ii = MPERF_GetProcessRam(handle);
-                            it.SubItems[ramindex].Text = FormatFileSize1(Convert.ToInt64(ii));
-                            it.SubItems[ramindex].BackColor = ProcessListGetColorFormValue(ii / 1048576, 1024);
-                        }
-                        else if (diskindex != -1 && ipdateOneDataCloum == diskindex)
-                        {
-                            ulong disk = MPERF_GetProcessDiskRate(handle, p.perfData);
-                            it.SubItems[diskindex].Text = (disk / 1024d).ToString("0.0") + " MB/秒";
-                            it.SubItems[diskindex].BackColor = ProcessListGetColorFormValue(disk, 1048576);
-                        }
-                        else if (netindex != -1 && ipdateOneDataCloum == netindex)
-                        {
-
-                        }
+                        it.SubItems[stateindex].Text = "无响应";
+                        it.SubItems[stateindex].ForeColor = Color.FromArgb(219, 107, 58);
                     }
                 }
+            }
+            else if (i == 2)
+            {
+                it.SubItems[stateindex].Text = "已暂停";
+                it.SubItems[stateindex].ForeColor = Color.FromArgb(22, 158, 250);
+            }
+        }
+        private void ProcessListUpdatePerf_Cpu(uint pid, TaskMgrListItem it, IntPtr handle, PsItem p)
+        {
+            if (handle != IntPtr.Zero)
+            {
+                double ii = MPERF_GetProcessCpuUseAge(handle, p.perfData);
+                it.SubItems[cpuindex].Text = ii.ToString("0.0") + "%";
+                it.SubItems[cpuindex].BackColor = ProcessListGetColorFormValue(ii, 100);
+            }
+            else if (pid == 4)
+            {
+                if (performanceCounter_cpu_system != null)
+                {
+                    double ii = performanceCounter_cpu_system.NextValue();
+                    it.SubItems[cpuindex].Text = ii.ToString("0.0") + "%";
+                    it.SubItems[cpuindex].BackColor = ProcessListGetColorFormValue(ii, 100);
+                }
+            }
+        }
+        private void ProcessListUpdatePerf_Ram(uint pid, TaskMgrListItem it, IntPtr handle)
+        {
+            if (handle != IntPtr.Zero)
+            {
+                uint ii = MPERF_GetProcessRam(handle);
+                it.SubItems[ramindex].Text = FormatFileSize1(Convert.ToInt64(ii));
+                it.SubItems[ramindex].BackColor = ProcessListGetColorFormValue(ii / 1048576, 1024);
+            }
+            else if (pid == 4)
+            {
+                it.SubItems[ramindex].Text = "0.1 MB";
+                it.SubItems[ramindex].BackColor = ProcessListGetColorFormValue(0.1, 1024);
+            }
+        }
+        private void ProcessListUpdatePerf_Disk(uint pid, TaskMgrListItem it, IntPtr handle)
+        {
+            if (handle != IntPtr.Zero)
+            {
+                PsItem p = ((PsItem)it.Tag);
+                ulong disk = MPERF_GetProcessDiskRate(handle, p.perfData);
+                it.SubItems[diskindex].Text = (disk / 1024d).ToString("0.0") + " MB/秒";
+                it.SubItems[diskindex].BackColor = ProcessListGetColorFormValue(disk, 1048576);
+            }
+            else if (pid == 4)
+            {
+                if (performanceCounter_disk_system != null)
+                {
+                    double disk = performanceCounter_disk_system.NextValue();
+                    it.SubItems[diskindex].Text = ((disk / 1024) / 1024d).ToString("0.0") + " MB/秒";
+                    it.SubItems[diskindex].BackColor = ProcessListGetColorFormValue(disk / 1024, 1048576);
+                }
+            }
+        }
+        private void ProcessListUpdatePerf_Net(uint pid, TaskMgrListItem it, IntPtr handle)
+        {
+            if (handle != IntPtr.Zero)
+            {
+
             }
         }
 
@@ -1259,58 +1289,6 @@ namespace TaskMgr
             firstLoad = false;
             tabControlMain.Show();
             Cursor = Cursors.Arrow;
-        }
-
-        private void BaseProcessRefeshTimer_Tick(object sender, EventArgs e)
-        {
-            //base RefeshTimer
-            if (tabControlMain.SelectedTab == tabPageProcCtl)
-            {
-                //Refesh perfs
-                listProcess.Locked = true;
-                if (cpuindex != -1)
-                {
-                    int cpu = (int)(performanceCounter_cpu_total.NextValue());
-                    listProcess.Colunms[cpuindex].TextBig = cpu + "%";
-                    if (cpu >= 95)
-                        listProcess.Colunms[cpuindex].IsHot = true;
-                    else listProcess.Colunms[cpuindex].IsHot = false;
-                }
-                if (ramindex != -1)
-                {
-                    int ram = (int)(MGetRamUseAge() * 100);
-                    listProcess.Colunms[ramindex].TextBig = ram + "%";
-                    if (ram >= 95)
-                        listProcess.Colunms[ramindex].IsHot = true;
-                    else listProcess.Colunms[ramindex].IsHot = false;
-                }
-                if (diskindex != -1)
-                {
-                    listProcess.Colunms[diskindex].TextBig = ((int)(performanceCounter_disk_total.NextValue())) + "%";
-                }
-                if (netindex != -1)
-                {
-                    listProcess.Colunms[netindex].TextBig = ((int)(performanceCounter_net_total.NextValue() * 0.00001)) + "%";
-                }
-                //Refesh Process List
-                ProcessListRefesh2();
-                listProcess.Locked = false;
-                listProcess.Header.Invalidate();
-            }
-            else if (tabControlMain.SelectedTab == tabPagePerfCtl)
-            {
-                int cpu= (int)(performanceCounter_cpu_total.NextValue());
-                perf_cpu.SmallText = cpu + " %";
-                perf_cpu.AddData(cpu);
-
-                int ram = (int)(MGetRamUseAge() * 100);
-                perf_ram.SmallText = ram + " %";
-                perf_ram.AddData(ram);
-
-                PerfUpdate();
-
-                performanceLeftList.Invalidate();
-            }
         }
 
         private void check_showAllProcess_CheckedChanged(object sender, EventArgs e)
@@ -2363,6 +2341,15 @@ namespace TaskMgr
 
         #region PerfWork
 
+        public static Color CpuDrawColor = Color.FromArgb(17, 125, 187);
+        public static Color CpuBgColor = Color.FromArgb(241, 246, 250);
+        public static Color RamDrawColor = Color.FromArgb(139, 18, 174);
+        public static Color RamBgColor = Color.FromArgb(244, 242, 244);
+        public static Color DiskDrawColor = Color.FromArgb(77, 166, 12);
+        public static Color DiskBgColor = Color.FromArgb(239, 247, 223);
+        public static Color NetDrawColor = Color.FromArgb(167, 79, 1);
+        public static Color NetBgColor = Color.FromArgb(252, 243, 235);
+
         PerformanceListItem perf_cpu = new PerformanceListItem();
         PerformanceListItem perf_ram = new PerformanceListItem();
 
@@ -2374,22 +2361,70 @@ namespace TaskMgr
         }
 
         private List<PerfItemHeader> perfItems = new List<PerfItemHeader>();
+        private List<IPerformancePage> perfPages = new List<IPerformancePage>();
 
+        private IPerformancePage currSelectedPerformancePage = null;
+
+        private void performanceLeftList_SelectedtndexChanged(object sender, EventArgs e)
+        {
+            if (performanceLeftList.Selectedtem == perf_cpu)
+                PerfPagesTo(0);
+            else if (performanceLeftList.Selectedtem == perf_ram)
+                PerfPagesTo(1);
+            else if (performanceLeftList.Selectedtem.PageIndex != 0)
+                PerfPagesTo(performanceLeftList.Selectedtem.PageIndex);
+            else
+                PerfPagesToNull();
+        }
+        private void PerfPagesToNull()
+        {
+            if (currSelectedPerformancePage != null)
+                currSelectedPerformancePage.PageHide();
+            currSelectedPerformancePage = null;
+        }
+        private void PerfPagesTo(int index)
+        {
+            if (currSelectedPerformancePage != null)
+                currSelectedPerformancePage.PageHide();
+            currSelectedPerformancePage = null;
+            currSelectedPerformancePage = perfPages[index];
+            currSelectedPerformancePage.PageShow();
+        }
+        private void PerfPagesAddToCtl(Control c)
+        {
+            c.Visible = false;
+            splitContainerPerfCtls.Panel2.Controls.Add(c);
+            c.Size = new Size(splitContainerPerfCtls.Panel2.Width - 30, splitContainerPerfCtls.Panel2.Height - 30);
+            c.Location = new Point(15, 15);
+            c.Anchor = AnchorStyles.Left | AnchorStyles.Bottom | AnchorStyles.Right | AnchorStyles.Top;
+        }
+        private void PerfPagesInit()
+        {
+            PerformancePageCpu performanceCpu = new PerformancePageCpu(performanceCounter_cpu_total);
+            PerfPagesAddToCtl(performanceCpu);
+            perfPages.Add(performanceCpu);
+
+            PerformancePageRam performanceRam = new PerformancePageRam();
+            PerfPagesAddToCtl(performanceRam);
+            perfPages.Add(performanceRam);
+        }
         private void PerfInit()
         {
             if (!perfInited)
             {
                 perf_cpu.Name = "CPU";
                 perf_cpu.SmallText = "0 %";
-                perf_cpu.BasePen = new Pen(Color.FromArgb(17, 125, 187), 2);
-                perf_cpu.BgBrush = new SolidBrush(Color.FromArgb(241, 246, 250));
-
+                perf_cpu.BasePen = new Pen(CpuDrawColor, 2);
+                perf_cpu.BgBrush = new SolidBrush(CpuBgColor);
                 performanceLeftList.Items.Add(perf_cpu);
 
                 perf_ram.Name = "内存";
                 perf_ram.SmallText = "0 %";
-                perf_ram.BasePen = new Pen(Color.FromArgb(139, 18, 174), 2);
-                perf_ram.BgBrush = new SolidBrush(Color.FromArgb(244, 242, 244));
+                perf_ram.BasePen = new Pen(RamDrawColor, 2);
+                perf_ram.BgBrush = new SolidBrush(RamBgColor);
+                performanceLeftList.Items.Add(perf_ram);
+
+                PerfPagesInit();
 
                 string[] disk_instanceNames = new PerformanceCounterCategory("PhysicalDisk").GetInstanceNames();
                 foreach (string s in disk_instanceNames)
@@ -2401,9 +2436,16 @@ namespace TaskMgr
                         perfItemHeader.performanceCounter.InstanceName = s;
                         perfItemHeader.item = new PerformanceListItem();
                         perfItemHeader.item.Name = "磁盘 " + s;
-                        perfItemHeader.item.BasePen = new Pen(Color.FromArgb(77, 166, 12));
-                        perfItemHeader.item.BgBrush = Brushes.White;
+                        perfItemHeader.item.BasePen = new Pen(DiskDrawColor);
+                        perfItemHeader.item.BgBrush = new SolidBrush(DiskBgColor);
                         perfItems.Add(perfItemHeader);
+
+                        PerformancePageDisk performancedisk = new PerformancePageDisk(s);
+                        PerfPagesAddToCtl(performancedisk);
+                        perfPages.Add(performancedisk);
+
+                        perfItemHeader.item.PageIndex = perfPages.Count - 1;
+
 
                         performanceLeftList.Items.Add(perfItemHeader.item);
                     }
@@ -2417,32 +2459,45 @@ namespace TaskMgr
                     perfItemHeader.performanceCounter.InstanceName = s;
                     perfItemHeader.item = new PerformanceListItem();
                     perfItemHeader.item.Name = "网络 ";
-                    perfItemHeader.item.BasePen = new Pen(Color.FromArgb(167, 79, 1));
-                    perfItemHeader.item.BgBrush = Brushes.White;
-                    perfItemHeader.x = 0.00001f;
+                    perfItemHeader.item.BasePen = new Pen(NetDrawColor);
+                    perfItemHeader.item.BgBrush = new SolidBrush(NetBgColor);
+                    perfItemHeader.x = 0.0001f;
                     perfItems.Add(perfItemHeader);
+
+                    PerformancePageNet performancedisk = new PerformancePageNet(s);
+                    PerfPagesAddToCtl(performancedisk);
+                    perfPages.Add(performancedisk);
+
+                    perfItemHeader.item.PageIndex = perfPages.Count - 1;
 
                     performanceLeftList.Items.Add(perfItemHeader.item);
                 }
 
-                performanceLeftList.Items.Add(perf_ram);
                 performanceLeftList.UpdateAll();
                 performanceLeftList.Invalidate();
+
+                PerfPagesTo(0);
 
                 perfInited = true;
             }
         }
         private void PerfUpdate()
         {
-            foreach(PerfItemHeader h in perfItems)
+            foreach (PerfItemHeader h in perfItems)
             {
                 float data = (h.performanceCounter.NextValue() * h.x);
                 h.item.SmallText = data.ToString("0.0") + "%";
                 h.item.AddData((int)data);
             }
+
+            if (currSelectedPerformancePage != null)
+                currSelectedPerformancePage.PageUpdate();
         }
         private void PerfClear()
         {
+            foreach (IPerformancePage h in perfPages)
+                h.PageDelete();
+            perfPages.Clear();
             foreach (PerfItemHeader h in perfItems)
             {
                 h.performanceCounter.Close();
@@ -2452,6 +2507,64 @@ namespace TaskMgr
         }
 
         #endregion
+
+        private void BaseProcessRefeshTimer_Tick(object sender, EventArgs e)
+        {
+            if (!perfMainInited) ProcessListInitLater();
+            //base RefeshTimer
+            if (tabControlMain.SelectedTab == tabPageProcCtl)
+            {
+                //Refesh perfs
+                listProcess.Locked = true;
+                if (cpuindex != -1)
+                {
+                    int cpu = (int)(performanceCounter_cpu_total.NextValue());
+                    listProcess.Colunms[cpuindex].TextBig = cpu + "%";
+                    if (cpu >= 95)
+                        listProcess.Colunms[cpuindex].IsHot = true;
+                    else listProcess.Colunms[cpuindex].IsHot = false;
+                }
+                if (ramindex != -1)
+                {
+                    int ram = (int)(MGetRamUseAge() * 100);
+                    listProcess.Colunms[ramindex].TextBig = ram + "%";
+                    if (ram >= 95)
+                        listProcess.Colunms[ramindex].IsHot = true;
+                    else listProcess.Colunms[ramindex].IsHot = false;
+                }
+                if (diskindex != -1)
+                {
+                    listProcess.Colunms[diskindex].TextBig = ((int)(performanceCounter_disk_total.NextValue() / 10)) + "%";
+                }
+                if (netindex != -1)
+                {
+                    listProcess.Colunms[netindex].TextBig = ((int)(performanceCounter_net_total.NextValue() * 0.00001)) + "%";
+                }
+                //Refesh Process List
+                ProcessListRefesh2();
+                listProcess.Locked = false;
+                listProcess.Header.Invalidate();
+            }
+            else if (tabControlMain.SelectedTab == tabPagePerfCtl)
+            {
+                int cpu = (int)(performanceCounter_cpu_total.NextValue());
+                perf_cpu.SmallText = cpu + " %";
+                perf_cpu.AddData(cpu);
+
+                perfPages[0].PageFroceSetData(cpu);
+
+                int ram = (int)(MGetRamUseAge() * 100);
+                perf_ram.SmallText = ram + " %";
+                perf_ram.AddData(ram);
+
+                if (perfPages[1] != currSelectedPerformancePage)
+                    perfPages[1].PageFroceSetData(ram);
+
+                PerfUpdate();
+
+                performanceLeftList.Invalidate();
+            }
+        }
 
         private void AppWorkerCallBack(int msg, IntPtr lParam, IntPtr wParam)
         {
@@ -2537,6 +2650,11 @@ namespace TaskMgr
                 case 10:
                     {
                         ScMgrRefeshList();
+                        break;
+                    }
+                case 11:
+                    {
+
                         break;
                     }
             }

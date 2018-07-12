@@ -3,6 +3,8 @@
 #include "appmodel.h"
 #include "appxpackaging.h"
 
+M_CAPI(BOOL) MPERF_GetRamUseAge();
+
 struct MPerfAndProcessData
 {
 	__int64 NowCpuTime;

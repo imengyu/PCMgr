@@ -33,5 +33,8 @@
     <Image Include="..\..\..\..\图片\Res\icoPcmgr.ico">
       <Filter>资源文件</Filter>
     </Image>
+    <Image Include="..\TaskMgr\icoPcmgr.ico">
+      <Filter>资源文件</Filter>
+    </Image>
   </ItemGroup>
 </Project>

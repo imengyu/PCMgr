@@ -49,6 +49,7 @@ void MFF_Remane();
 void MFF_ShowFolder();
 EXTERN_C M_API LPWSTR MFM_GetSeledItemPath(int index);
 EXTERN_C M_API void MFM_GetSeledItemFree(void* v);
+EXTERN_C M_API BOOL MFM_GetShowHiddenFiles();
 EXTERN_C M_API void MFM_SetShowHiddenFiles(BOOL b);
 void MFM_ReSetShowHiddenFiles();
 EXTERN_C M_API int MAppWorkShowMenuFM(LPWSTR strFilePath, BOOL mutilSelect, int selectCount);

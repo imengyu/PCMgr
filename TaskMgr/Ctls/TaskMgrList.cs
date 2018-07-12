@@ -614,13 +614,18 @@ namespace TaskMgr.Ctls
                                 else if (showedItems[i].Childs.Count > 0 && showedItems[i].ChildsOpened)
                                 {
                                     showedItems[i].GlyphHoted = false;
-                                    int iii = ((e.Y - y - itemHeight - 20)) / smallItemHeight;
-                                    if (iii >= 0 && iii < showedItems[i].Childs.Count)
-                                        showedItems[i].OldSelectedItem = showedItems[i].Childs[iii];
-                                    else showedItems[i].OldSelectedItem = null;
-
-                                    if (e.Y - y - itemHeight < itemHeight)
+                                    if (e.Y - y > itemHeight)
+                                    {
+                                        int iii = ((e.Y - y - itemHeight)) / smallItemHeight;
+                                        if (iii >= 0 && iii < showedItems[i].Childs.Count)
+                                            showedItems[i].OldSelectedItem = showedItems[i].Childs[iii];
+                                        else showedItems[i].OldSelectedItem = null;
+                                    }
+                                    else
+                                    {
+                                        showedItems[i].OldSelectedItem = null;
                                         selectedChildItem = null;
+                                    }
 
                                     InvalidAItem(showedItems[i]);
                                 }

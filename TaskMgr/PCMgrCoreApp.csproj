@@ -97,11 +97,12 @@
     <Compile Include="Areo\TaskDialog\TaskDialogButton.cs" />
     <Compile Include="Areo\TaskDialog\TaskDialogIcon.cs" />
     <Compile Include="Areo\TaskDialog\TaskDialog_static.cs" />
-    <Compile Include="Ctls\PerformanceCpu.cs">
+    <Compile Include="Ctls\IPerformancePage.cs" />
+    <Compile Include="Ctls\PerformancePageCpu.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Ctls\PerformanceCpu.Designer.cs">
-      <DependentUpon>PerformanceCpu.cs</DependentUpon>
+    <Compile Include="Ctls\PerformancePageCpu.Designer.cs">
+      <DependentUpon>PerformancePageCpu.cs</DependentUpon>
     </Compile>
     <Compile Include="Ctls\PerformanceGrid.cs">
       <SubType>Component</SubType>
@@ -110,6 +111,27 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Ctls\PerformanceList.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Ctls\PerformancePageDisk.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Ctls\PerformancePageDisk.Designer.cs">
+      <DependentUpon>PerformancePageDisk.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Ctls\PerformancePageNet.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Ctls\PerformancePageNet.Designer.cs">
+      <DependentUpon>PerformancePageNet.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Ctls\PerformancePageRam.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Ctls\PerformancePageRam.Designer.cs">
+      <DependentUpon>PerformancePageRam.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Ctls\PerformanceRamPoolGrid.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Ctls\PerformanceTitle.cs">
@@ -143,8 +165,17 @@
     <Compile Include="WorkWindow\FormSpyWindow.Designer.cs">
       <DependentUpon>FormSpyWindow.cs</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="Ctls\PerformanceCpu.resx">
-      <DependentUpon>PerformanceCpu.cs</DependentUpon>
+    <EmbeddedResource Include="Ctls\PerformancePageCpu.resx">
+      <DependentUpon>PerformancePageCpu.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Ctls\PerformancePageDisk.resx">
+      <DependentUpon>PerformancePageDisk.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Ctls\PerformancePageNet.resx">
+      <DependentUpon>PerformancePageNet.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Ctls\PerformancePageRam.resx">
+      <DependentUpon>PerformancePageRam.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FormMain.resx">
       <DependentUpon>FormMain.cs</DependentUpon>

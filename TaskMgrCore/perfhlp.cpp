@@ -9,9 +9,173 @@ __int64 TimeInterval;
 FILETIME CreateTime;
 FILETIME ExitTime;
 
+PSYSTEM_LOGICAL_PROCESSOR_INFORMATION buffer = NULL;
+PSYSTEM_LOGICAL_PROCESSOR_INFORMATION ptr = NULL;
+PERFORMANCE_INFORMATION performance_info;
 
+DWORD numaNodeCount = 0;
+DWORD processorL1CacheCount = 0;
+DWORD processorL2CacheCount = 0;
+DWORD processorL3CacheCount = 0;
+DWORD processorPackageCount = 0;
+MEMORYSTATUSEX memory_statuex;
 
-int GetProcessNumber()
+void MPERF_FreeCpuInfos()
+{
+	if (buffer)
+		delete buffer;
+}
+
+M_CAPI(ULONGLONG) MPERF_GetAllRam()
+{
+	return memory_statuex.ullTotalPhys;
+}
+M_CAPI(ULONGLONG) MPERF_GetPageSize()
+{
+	return performance_info.PageSize;
+}
+M_CAPI(ULONGLONG) MPERF_GetKernelPaged()
+{
+	return performance_info.KernelPaged;
+}
+M_CAPI(ULONGLONG) MPERF_GetKernelNonpaged()
+{
+	return performance_info.KernelNonpaged;
+}
+M_CAPI(ULONGLONG) MPERF_GetSystemCacheSize()
+{
+	return performance_info.SystemCache;
+}
+M_CAPI(ULONGLONG) MPERF_GetCommitTotal()
+{
+	return performance_info.CommitTotal;
+}
+M_CAPI(ULONGLONG) MPERF_GetCommitPeak()
+{
+	return performance_info.CommitPeak;
+}
+M_CAPI(ULONGLONG) MPERF_GetRamAvail() {
+	return memory_statuex.ullAvailPhys;
+}
+M_CAPI(ULONGLONG) MPERF_GetRamAvailPageFile() {
+	return performance_info.CommitLimit*performance_info.PageSize;
+}
+M_CAPI(double) MPERF_GetRamUseAge2()
+{
+	return ((memory_statuex.ullTotalPhys - memory_statuex.ullAvailPhys) / (double)memory_statuex.ullTotalPhys);
+}
+M_CAPI(BOOL) MPERF_GetRamUseAge()
+{
+	return GlobalMemoryStatusEx(&memory_statuex);
+}
+M_CAPI(LONGLONG) MPERF_GetRunTime()
+{
+	return GetTickCount64();
+}
+M_CAPI(DWORD) MPERF_GetThreadCount() {
+	return performance_info.ThreadCount;
+}
+M_CAPI(DWORD) MPERF_GetHandleCount() {
+	return performance_info.HandleCount;
+}
+M_CAPI(DWORD) MPERF_GetProcessCount() {
+	return performance_info.ProcessCount;
+}
+M_CAPI(BOOL) MPERF_UpdatePerformance()
+{
+	return GetPerformanceInfo(&performance_info, sizeof(performance_info));
+}
+M_CAPI(DWORD) MPERF_GetCpuL1Cache()
+{
+	return processorL1CacheCount;
+}
+M_CAPI(DWORD) MPERF_GetCpuL2Cache()
+{
+	return processorL2CacheCount;
+}
+M_CAPI(DWORD) MPERF_GetCpuL3Cache()
+{
+	return processorL3CacheCount;
+}
+M_CAPI(DWORD) MPERF_GetCpuPackage()
+{
+	return processorPackageCount;
+}
+M_CAPI(DWORD) MPERF_GetCpuNodeCount()
+{
+	return numaNodeCount;
+}
+M_CAPI(BOOL) MPERF_GetCpuInfos() {
+	PCACHE_DESCRIPTOR Cache;
+	DWORD returnLength = 0;
+	DWORD byteOffset = 0;
+
+	GetLogicalProcessorInformation(NULL, &returnLength);
+	buffer = (PSYSTEM_LOGICAL_PROCESSOR_INFORMATION)malloc(returnLength);
+	if (GetLogicalProcessorInformation(buffer, &returnLength))
+	{
+		ptr = buffer;
+		while (byteOffset + sizeof(SYSTEM_LOGICAL_PROCESSOR_INFORMATION) <= returnLength)
+		{
+			switch (ptr->Relationship)
+			{
+			case RelationNumaNode: numaNodeCount++; break;
+			case RelationCache: {
+				Cache = &ptr->Cache;
+				if (Cache->Level == 1)
+					processorL1CacheCount += Cache->Size;
+				else if (Cache->Level == 2)
+					processorL2CacheCount += Cache->Size;
+				else if (Cache->Level == 3)
+					processorL3CacheCount += Cache->Size;
+				break;
+			}
+			case RelationProcessorPackage: processorPackageCount++; break;
+			}
+			byteOffset += sizeof(SYSTEM_LOGICAL_PROCESSOR_INFORMATION);
+			ptr++;
+		}
+		return TRUE;
+	}
+	return 0;
+}
+M_CAPI(BOOL) MPERF_GetCpuName(LPWSTR buf, int size)
+{
+	HKEY hKey;
+	if (ERROR_SUCCESS == RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0", 0, KEY_READ, &hKey))
+	{
+		WCHAR szValue[64];//长整型数据，如果是字符串数据用char数组  
+		DWORD dwSize = sizeof(szValue);
+		DWORD dwType = REG_SZ;
+
+		if (RegQueryValueExW(hKey, L"ProcessorNameString", 0, &dwType, (LPBYTE)&szValue, &dwSize) == ERROR_SUCCESS)
+		{
+			wcscpy_s(buf, size, szValue);
+			RegCloseKey(hKey);
+			return TRUE;
+		}
+	}
+	RegCloseKey(hKey);
+	return 0;
+}
+M_CAPI(int) MPERF_GetCpuFrequency()	//获取CPU主频
+{
+	HKEY hKey;
+	if (ERROR_SUCCESS == RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0", 0, KEY_READ, &hKey))
+	{
+		DWORD dwValue;
+		DWORD dwSize = sizeof(dwValue);
+		DWORD dwType = REG_SZ;
+
+		if (RegQueryValueEx(hKey, L"~MHz", 0, &dwType, (LPBYTE)&dwValue, &dwSize) == ERROR_SUCCESS) {
+			RegCloseKey(hKey);
+			return static_cast<int>(dwValue);
+		}
+	}
+	RegCloseKey(hKey);
+	return 0;
+}
+M_CAPI(int) MPERF_GetProcessNumber()
 {
 	SYSTEM_INFO info;
 	GetSystemInfo(&info);

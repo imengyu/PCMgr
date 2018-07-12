@@ -12,7 +12,7 @@ EXTERN_C M_API void MEnumProcess(EnumProcessCallBack calBack);
 EXTERN_C M_API void MEnumProcess2Refesh(EnumProcessCallBack2 callBack);
 EXTERN_C M_API BOOL MReUpdateProcess(DWORD pid, EnumProcessCallBack calBack);
 EXTERN_C M_API BOOL MDosPathToNtPath(LPWSTR pszDosPath, LPWSTR pszNtPath);
-EXTERN_C M_API BOOL MGetProcessFullPathEx(DWORD dwPID, LPWSTR outNter, PHANDLE phandle);
+EXTERN_C M_API BOOL MGetProcessFullPathEx(DWORD dwPID, LPWSTR outNter, PHANDLE phandle, LPWSTR pszExeName);
 EXTERN_C M_API BOOL MGetExeInfo(LPWSTR strFilePath, LPWSTR InfoItem, LPWSTR str, int maxCount);
 EXTERN_C M_API BOOL MGetExeDescribe(LPWSTR pszFullPath, LPWSTR str, int maxCount);
 EXTERN_C M_API BOOL MGetExeCompany(LPWSTR pszFullPath, LPWSTR str, int maxCount);

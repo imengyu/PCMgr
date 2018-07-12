@@ -18,6 +18,9 @@ namespace TaskMgr.Ctls
             FontText = new Font("微软雅黑", 10.5f);
             FontTitle = new Font("微软雅黑", 10.5f);
             MaxSpeicalItemsWidth = 200;
+
+            SetStyle(ControlStyles.Selectable, true);
+            SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
         }
 
         public Color ColorTitle
@@ -59,6 +62,8 @@ namespace TaskMgr.Ctls
             }
         }
         public int MaxSpeicalItemsWidth { get; set; }
+        public int ItemMargan { get; set; }
+        public int LineOffest { get; set; }
 
         private int FontTitleHeight = 0;
         private int FontTextSpeicalHeight = 0;
@@ -71,8 +76,19 @@ namespace TaskMgr.Ctls
 
         public class PerformanceInfoStaticItem
         {
+            public PerformanceInfoStaticItem()
+            {
+                LineSp = false;
+            }
+            public PerformanceInfoStaticItem(string name, string value)
+            {
+                Value = value;
+                Name = name;
+                LineSp = false;
+            }
             public string Value { get; set; }
             public string Name { get; set; }
+            public bool LineSp { get; set; }
         }
         public class PerformanceInfoSpeicalItem : PerformanceInfoStaticItem
         {
@@ -108,31 +124,42 @@ namespace TaskMgr.Ctls
             Graphics g = e.Graphics;
 
             int curY = 0;
-            int drawedX = 0;
+            int drawedX = ItemMargan;
             for (int i = 0; i < SpeicalItems.Count; i++)
             {
                 DRAWSTART:
                 PerformanceInfoSpeicalItem it = SpeicalItems[i];
-                int w = (int)(g.MeasureString(it.Name, FontTitle).Width + g.MeasureString(it.Value, FontTextSpeical).Width);
+                int w1 = (int)(g.MeasureString(it.Name, FontTitle).Width);
+                int w2 = (int)(g.MeasureString(it.Value, FontTextSpeical).Width);
+                int w = w1 > w2 ? w1 : w2;
                 if (drawedX + w < MaxSpeicalItemsWidth)
                 {
+                    if (SpeicalItems[i].LineSp)
+                    {
+                        curY += (FontTitleHeight + FontTextSpeicalHeight + 10);
+                        drawedX = ItemMargan;
+                    }
                     g.DrawString(it.Name, FontTitle, brushTitle, drawedX, curY);
                     g.DrawString(it.Value, FontTextSpeical, brushText, drawedX, curY + FontTitleHeight + 3);
-                    if(it.DrawFrontLine)
+                    if (it.DrawFrontLine)
                     {
                         using (Pen p = new Pen(it.FrontLineColor, it.FrontLineWidth))
                         {
                             if (it.FrontLineIsDotted) p.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
-                            g.DrawLine(p, drawedX, curY, drawedX, FontTitleHeight + FontTextSpeicalHeight + 5);
+                            g.DrawLine(p, drawedX - LineOffest, curY, drawedX - LineOffest, curY + FontTitleHeight + FontTextSpeicalHeight + 5);
                         }
                     }
-                    drawedX += w;
+                    drawedX += w + ItemMargan;
                 }
                 else
                 {
                     curY += (FontTitleHeight + FontTextSpeicalHeight + 10);
-                    drawedX = 0;
-                    goto DRAWSTART;
+                    if (curY < Height)
+                    {
+                        drawedX = ItemMargan;
+                        goto DRAWSTART;
+                    }
+                    else break;
                 }
             }
 

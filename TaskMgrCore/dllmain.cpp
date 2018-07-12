@@ -6,14 +6,17 @@ HINSTANCE hInst;
 
 extern HICON HIconDef;
 extern HCURSOR hCurLoading;
+extern MEMORYSTATUSEX memory_statuex;
 
 extern BOOL LoadDll();
 extern void FreeDll();
 extern void WindowEnumStart();
 extern void WindowEnumDestroy();
+extern void MPERF_FreeCpuInfos();
 
 
-extern int GetProcessNumber();
+
+M_CAPI(int) MPERF_GetProcessNumber();
 extern void ShowMainCoreStartUp();
 
 void DllDestroy();
@@ -45,10 +48,12 @@ void DllStartup() {
 	LoadDll();
 	hCurLoading = LoadCursor(NULL, IDC_WAIT);
 	ShowMainCoreStartUp();
-	GetProcessNumber();
+	MPERF_GetProcessNumber();
 	WindowEnumStart();
+	memory_statuex.dwLength = sizeof(memory_statuex);
 }
 void DllDestroy() {
 	FreeDll();
+	MPERF_FreeCpuInfos();
 	WindowEnumDestroy();
 }

@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "prochlp.h"
 #include "ntdef.h"
-
 #include "perfhlp.h"
 #include "syshlp.h"
 #include "nthlp.h"
@@ -144,7 +143,7 @@ M_API void MEnumProcess(EnumProcessCallBack calBack)
 		for (PSYSTEM_PROCESSES p = current_system_process; !done; p = PSYSTEM_PROCESSES(PCHAR(p) + p->NextEntryDelta))
 		{
 			WCHAR exeFullPath[260];
-			if (MGetProcessFullPathEx(p->ProcessId, exeFullPath, &hProcess))
+			if (MGetProcessFullPathEx(p->ProcessId, exeFullPath, &hProcess, p->ProcessName.Buffer))
 				calBack(p->ProcessId, p->InheritedFromProcessId, p->ProcessName.Buffer, exeFullPath, 1, hProcess);
 			else calBack(p->ProcessId, p->InheritedFromProcessId, p->ProcessName.Buffer, 0, 1, NULL);
 			ix++;
@@ -178,7 +177,7 @@ M_API BOOL MReUpdateProcess(DWORD pid, EnumProcessCallBack calBack)
 		{
 			HANDLE hProcess;
 			WCHAR exeFullPath[260];
-			if (MGetProcessFullPathEx(p->ProcessId, exeFullPath, &hProcess))
+			if (MGetProcessFullPathEx(p->ProcessId, exeFullPath, &hProcess, p->ProcessName.Buffer))
 				calBack(p->ProcessId, p->InheritedFromProcessId, p->ProcessName.Buffer, exeFullPath, 1, hProcess);
 			else calBack(p->ProcessId, p->InheritedFromProcessId, p->ProcessName.Buffer, 0, 1, NULL);
 			done = true;
@@ -323,16 +322,23 @@ M_API BOOL MDosPathToNtPath(LPWSTR pszDosPath, LPWSTR pszNtPath)
 	}
 	return FALSE;
 }
-M_API BOOL MGetProcessFullPathEx(DWORD dwPID, LPWSTR outNter, PHANDLE phandle)
+M_API BOOL MGetProcessFullPathEx(DWORD dwPID, LPWSTR outNter, PHANDLE phandle, LPWSTR pszExeName)
 {
 	if (dwPID == 0) {
-		wcscpy_s(outNter, 260, L"处理器空闲时间百分比"); 
+		wcscpy_s(outNter, 260, L"系统空闲进程"); 
 		MOpenProcessNt(dwPID, phandle);
 		return 1;
 	}
 	else if (dwPID == 4) {
-		wcscpy_s(outNter, 260, L"NT Kernel & System"); 
-		MOpenProcessNt(dwPID, phandle);
+		wcscpy_s(outNter, 260, L"C:\\Windows\\System32\\ntoskrnl.exe"); 
+		return 1;
+	}
+	else if (dwPID == 88 && wcscmp(pszExeName, L"Registry") == 0) {
+		wcscpy_s(outNter, 260, L"C:\\Windows\\System32\\ntoskrnl.exe");
+		return 1;
+	}
+	else if (dwPID == 88 && wcscmp(pszExeName, L"Memory Compression") == 0) {
+		wcscpy_s(outNter, 260, L"C:\\Windows\\System32\\ntoskrnl.exe");
 		return 1;
 	}
 
@@ -341,16 +347,14 @@ M_API BOOL MGetProcessFullPathEx(DWORD dwPID, LPWSTR outNter, PHANDLE phandle)
 	HANDLE hProcess;
 
 	int rs = MOpenProcessNt(dwPID, &hProcess);
-	if (!hProcess || rs != 1)
-		return FALSE;
+	if (!hProcess || rs != 1) return FALSE;
 	if (!K32GetProcessImageFileNameW(hProcess, szImagePath, MAX_PATH))
 	{
 		if (hProcess != INVALID_HANDLE_VALUE && hProcess != (HANDLE)0xCCCCCCCCL)
 			CloseHandle(hProcess);
 		return FALSE;
 	}
-	if (!MDosPathToNtPath(szImagePath, szResult))
-		return FALSE;
+	if (!MDosPathToNtPath(szImagePath, szResult)) return FALSE;
 	wcscpy_s(outNter, 260, szResult);
 	if (phandle)*phandle = hProcess;
 	else MCloseHandle(hProcess);
@@ -644,22 +648,19 @@ M_API int MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWORD 
 	return 0;
 }
 
+extern MEMORYSTATUSEX memory_statuex;
+
 //Ram
 M_API double MGetRamUseAge()
 {
-	MEMORYSTATUSEX statex;
-	statex.dwLength = sizeof(statex);
-	GlobalMemoryStatusEx(&statex);
-
-	double ram = ((statex.ullTotalPhys - statex.ullAvailPhys) / (double)statex.ullTotalPhys);
+	MPERF_GetRamUseAge();
+	double ram = ((memory_statuex.ullTotalPhys - memory_statuex.ullAvailPhys) / (double)memory_statuex.ullTotalPhys);
 	return ram;
 }
 M_API ULONG MGetAllRam()
 {
-	MEMORYSTATUSEX statex;
-	statex.dwLength = sizeof(statex);
-	GlobalMemoryStatusEx(&statex);
-	return static_cast<ULONG>(statex.ullTotalPhys / 1048576);
+	MPERF_GetRamUseAge();
+	return static_cast<ULONG>(memory_statuex.ullTotalPhys / 1048576);
 }
 
 //ntdll apis

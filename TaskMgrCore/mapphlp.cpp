@@ -737,6 +737,12 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		break;
+	case WM_SYSCOMMAND:
+		if (wParam == SC_MINIMIZE)
+		{
+			if (min_hide) ShowWindow(hWnd, SW_HIDE);
+		}
+		break;
 	default:
 		break;
 	}

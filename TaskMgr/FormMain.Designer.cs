@@ -41,11 +41,11 @@
             this.tabPageKernelCtl = new System.Windows.Forms.TabPage();
             this.lbDriversCount = new System.Windows.Forms.Label();
             this.listDrivers = new TaskMgr.Ctls.TaskMgrList();
+            this.tabPageSysCtl = new System.Windows.Forms.TabPage();
             this.tabPagePerfCtl = new System.Windows.Forms.TabPage();
             this.splitContainerPerfCtls = new System.Windows.Forms.SplitContainer();
             this.sp3 = new System.Windows.Forms.Panel();
             this.performanceLeftList = new TaskMgr.Ctls.PerformanceList();
-            this.tabPageSysCtl = new System.Windows.Forms.TabPage();
             this.tabPageUWPCtl = new System.Windows.Forms.TabPage();
             this.pl_UWPEnumFailTip = new System.Windows.Forms.Panel();
             this.lbUWPEnumFailText = new System.Windows.Forms.Label();
@@ -273,6 +273,16 @@
             this.listDrivers.Value = 0D;
             this.listDrivers.XOffest = 0;
             // 
+            // tabPageSysCtl
+            // 
+            this.tabPageSysCtl.Location = new System.Drawing.Point(4, 26);
+            this.tabPageSysCtl.Name = "tabPageSysCtl";
+            this.tabPageSysCtl.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageSysCtl.Size = new System.Drawing.Size(901, 564);
+            this.tabPageSysCtl.TabIndex = 2;
+            this.tabPageSysCtl.Text = "系统管理";
+            this.tabPageSysCtl.UseVisualStyleBackColor = true;
+            // 
             // tabPagePerfCtl
             // 
             this.tabPagePerfCtl.Controls.Add(this.splitContainerPerfCtls);
@@ -281,7 +291,7 @@
             this.tabPagePerfCtl.Padding = new System.Windows.Forms.Padding(3);
             this.tabPagePerfCtl.Size = new System.Drawing.Size(901, 564);
             this.tabPagePerfCtl.TabIndex = 7;
-            this.tabPagePerfCtl.Text = "性能";
+            this.tabPagePerfCtl.Text = "性能监视";
             this.tabPagePerfCtl.UseVisualStyleBackColor = true;
             // 
             // splitContainerPerfCtls
@@ -317,16 +327,7 @@
             this.performanceLeftList.Name = "performanceLeftList";
             this.performanceLeftList.Size = new System.Drawing.Size(234, 520);
             this.performanceLeftList.TabIndex = 0;
-            // 
-            // tabPageSysCtl
-            // 
-            this.tabPageSysCtl.Location = new System.Drawing.Point(4, 26);
-            this.tabPageSysCtl.Name = "tabPageSysCtl";
-            this.tabPageSysCtl.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageSysCtl.Size = new System.Drawing.Size(901, 564);
-            this.tabPageSysCtl.TabIndex = 2;
-            this.tabPageSysCtl.Text = "系统管理";
-            this.tabPageSysCtl.UseVisualStyleBackColor = true;
+            this.performanceLeftList.SelectedtndexChanged += new System.EventHandler(this.performanceLeftList_SelectedtndexChanged);
             // 
             // tabPageUWPCtl
             // 
