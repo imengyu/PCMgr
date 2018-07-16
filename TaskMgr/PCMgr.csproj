@@ -5,10 +5,10 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{59FEF6F8-2687-4046-8934-90A7E68B35B7}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TaskMgr</RootNamespace>
-    <AssemblyName>PCMgrCore32</AssemblyName>
+    <RootNamespace>PCMgr</RootNamespace>
+    <AssemblyName>PCMgr32</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <IsWebBootstrapper>false</IsWebBootstrapper>
@@ -70,9 +70,7 @@
     <GenerateManifests>false</GenerateManifests>
   </PropertyGroup>
   <PropertyGroup />
-  <PropertyGroup>
-    <ApplicationManifest>app.manifest</ApplicationManifest>
-  </PropertyGroup>
+  <PropertyGroup />
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -148,16 +146,44 @@
     </Compile>
     <Compile Include="Helpers\IconUtils.cs" />
     <Compile Include="Helpers\SysVer.cs" />
+    <Compile Include="Lanuages\LanuageMgr.cs" />
+    <Compile Include="Lanuages\LanuageResource_en.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>LanuageResource_en.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Lanuages\LanuageResource_zh-Hant.Designer.cs">
+      <DependentUpon>LanuageResource_zh-Hant.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Lanuages\LanuageResource_zh.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>LanuageResource_zh.resx</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Ctls\TaskMgrList.cs">
       <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="WorkWindow\FormAbout.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WorkWindow\FormAbout.Designer.cs">
+      <DependentUpon>FormAbout.cs</DependentUpon>
     </Compile>
     <Compile Include="WorkWindow\FormMainListHeaders.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="WorkWindow\FormMainListHeaders.Designer.cs">
       <DependentUpon>FormMainListHeaders.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WorkWindow\FormSettings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WorkWindow\FormSettings.Designer.cs">
+      <DependentUpon>FormSettings.cs</DependentUpon>
     </Compile>
     <Compile Include="WorkWindow\FormSpyWindow.cs">
       <SubType>Form</SubType>
@@ -177,8 +203,26 @@
     <EmbeddedResource Include="Ctls\PerformancePageRam.resx">
       <DependentUpon>PerformancePageRam.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="FormMain.en.resx">
+      <DependentUpon>FormMain.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FormMain.resx">
       <DependentUpon>FormMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormMain.zh.resx">
+      <DependentUpon>FormMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Lanuages\LanuageResource_en.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>LanuageResource_en.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <Resource Include="Lanuages\LanuageResource_zh-Hant.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>LanuageResource_zh-Hant.Designer.cs</LastGenOutput>
+    </Resource>
+    <EmbeddedResource Include="Lanuages\LanuageResource_zh.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>LanuageResource_zh.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -190,12 +234,28 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="WorkWindow\FormAbout.resx">
+      <DependentUpon>FormAbout.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormMainListHeaders.en.resx">
+      <DependentUpon>FormMainListHeaders.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="WorkWindow\FormMainListHeaders.resx">
       <DependentUpon>FormMainListHeaders.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormSettings.en.resx">
+      <DependentUpon>FormSettings.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormSettings.resx">
+      <DependentUpon>FormSettings.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormSpyWindow.en.resx">
+      <DependentUpon>FormSpyWindow.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="WorkWindow\FormSpyWindow.resx">
       <DependentUpon>FormSpyWindow.cs</DependentUpon>
     </EmbeddedResource>
+    <None Include="app.config" />
     <None Include="app.manifest" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

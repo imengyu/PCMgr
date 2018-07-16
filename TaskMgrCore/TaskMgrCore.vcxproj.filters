@@ -87,6 +87,21 @@
     <ClInclude Include="nthlp.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="lghlp.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="starthlp.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="reghlp.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="kernelhlp.cpp">
+      <Filter>源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="kernelhlp.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -138,6 +153,15 @@
       <Filter>源文件\HLPS</Filter>
     </ClCompile>
     <ClCompile Include="nthlp.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="lghlp.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="starthlp.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="reghlp.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

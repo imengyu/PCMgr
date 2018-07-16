@@ -9,8 +9,9 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using PCMgr.Lanuages;
 
-namespace TaskMgr.Ctls
+namespace PCMgr.Ctls
 {
     public partial class PerformancePageRam : UserControl, IPerformancePage
     {
@@ -107,12 +108,12 @@ namespace TaskMgr.Ctls
             item_cached = new PerformanceInfos.PerformanceInfoSpeicalItem();
             item_pagepool = new PerformanceInfos.PerformanceInfoSpeicalItem();
             item_nopagepool = new PerformanceInfos.PerformanceInfoSpeicalItem();
-            item_ramuseage.Name = "使用中 (已缓存)";
-            item_ramcanuse.Name = "可用内存";
-            item_sended.Name = "已提交";
-            item_cached.Name = "已缓存";
-            item_pagepool.Name = "分页缓冲池";
-            item_nopagepool.Name = "非分页缓冲池";
+            item_ramuseage.Name = LanuageMgr.GetStr("MemUsing");
+            item_ramcanuse.Name = LanuageMgr.GetStr("MenCanUse");
+            item_sended.Name = LanuageMgr.GetStr("Submited");
+            item_cached.Name = LanuageMgr.GetStr("Cached");
+            item_pagepool.Name = LanuageMgr.GetStr("PagedPool");
+            item_nopagepool.Name = LanuageMgr.GetStr("NonPagedPool");
             performanceInfos.SpeicalItems.Add(item_ramuseage);
             performanceInfos.SpeicalItems.Add(item_ramcanuse);
             performanceInfos.SpeicalItems.Add(item_sended);

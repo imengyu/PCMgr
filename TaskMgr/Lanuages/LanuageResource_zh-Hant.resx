@@ -1,0 +1,414 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AskTitle" xml:space="preserve">
+    <value>疑问</value>
+  </data>
+  <data name="AutoStart" xml:space="preserve">
+    <value>自动</value>
+  </data>
+  <data name="BtnEndProcess" xml:space="preserve">
+    <value>结束进程(E)</value>
+  </data>
+  <data name="BtnEndTask" xml:space="preserve">
+    <value>结束任务(E)</value>
+  </data>
+  <data name="BtnRestartText" xml:space="preserve">
+    <value>重新启动(E)</value>
+  </data>
+  <data name="CancelRun" xml:space="preserve">
+    <value>取消运行</value>
+  </data>
+  <data name="ContinueRun" xml:space="preserve">
+    <value>继续运行</value>
+  </data>
+  <data name="DemandStart" xml:space="preserve">
+    <value>手动</value>
+  </data>
+  <data name="Disabled" xml:space="preserve">
+    <value>禁用</value>
+  </data>
+  <data name="DoNotRemidMeLater" xml:space="preserve">
+    <value>不要再提醒我了</value>
+  </data>
+  <data name="DriverLoad" xml:space="preserve">
+    <value>驱动加载</value>
+  </data>
+  <data name="ErrTitle" xml:space="preserve">
+    <value>错误</value>
+  </data>
+  <data name="FailedGetPrivileges" xml:space="preserve">
+    <value>提权失败！</value>
+  </data>
+  <data name="FileCopyed" xml:space="preserve">
+    <value>文件已经复制到剪贴板</value>
+  </data>
+  <data name="FileCuted" xml:space="preserve">
+    <value>文件已经剪切到剪贴板</value>
+  </data>
+  <data name="FileSystem" xml:space="preserve">
+    <value>文件系统</value>
+  </data>
+  <data name="FolderCopyed" xml:space="preserve">
+    <value>文件夹已经复制到剪贴板</value>
+  </data>
+  <data name="FolderCuted" xml:space="preserve">
+    <value>文件夹已经剪切到剪贴板</value>
+  </data>
+  <data name="FolderHasExist" xml:space="preserve">
+    <value>指定的文件夹已经存在</value>
+  </data>
+  <data name="GetFailed" xml:space="preserve">
+    <value>获取失败</value>
+  </data>
+  <data name="InvalidFileName" xml:space="preserve">
+    <value>文件名无效。</value>
+  </data>
+  <data name="KernelDriver" xml:space="preserve">
+    <value>内核服务</value>
+  </data>
+  <data name="Loading" xml:space="preserve">
+    <value>正在加载</value>
+  </data>
+  <data name="LocalService" xml:space="preserve">
+    <value>本地服务</value>
+  </data>
+  <data name="LocalServiceAndNoImpersonation" xml:space="preserve">
+    <value>本地服务（模拟）</value>
+  </data>
+  <data name="LocalServiceNetworkRestricted" xml:space="preserve">
+    <value>本地服务（网络受限）</value>
+  </data>
+  <data name="LocalServiceNoNetwork" xml:space="preserve">
+    <value>本地服务（无网络）</value>
+  </data>
+  <data name="LocalSystem" xml:space="preserve">
+    <value>本地系统</value>
+  </data>
+  <data name="LocalSystemNetworkRestricted" xml:space="preserve">
+    <value>本地系统（网络受限）</value>
+  </data>
+  <data name="NeedAdmin" xml:space="preserve">
+    <value>软件需要更多的权限...</value>
+  </data>
+  <data name="NetworkService" xml:space="preserve">
+    <value>网络服务</value>
+  </data>
+  <data name="NetworkServiceAndNoImpersonation" xml:space="preserve">
+    <value>网络服务（模拟）</value>
+  </data>
+  <data name="NetworkServiceNetworkRestricted" xml:space="preserve">
+    <value>网络服务（网络受限）</value>
+  </data>
+  <data name="NewFolder" xml:space="preserve">
+    <value>新建文件夹</value>
+  </data>
+  <data name="NewFolderFailed" xml:space="preserve">
+    <value>新建文件夹失败</value>
+  </data>
+  <data name="NewFolderSuccess" xml:space="preserve">
+    <value>新建文件夹成功</value>
+  </data>
+  <data name="OpenAsk" xml:space="preserve">
+    <value>您想打开此文件吗？</value>
+  </data>
+  <data name="PathCopyed" xml:space="preserve">
+    <value>路径已经复制到剪贴板</value>
+  </data>
+  <data name="PathStart" xml:space="preserve">
+    <value>文件路径 : </value>
+  </data>
+  <data name="PathUnExists" xml:space="preserve">
+    <value>路径不存在！</value>
+  </data>
+  <data name="PleaseEnterPath" xml:space="preserve">
+    <value>请输入要跳转的路径！</value>
+  </data>
+  <data name="Process32Bit" xml:space="preserve">
+    <value>32位</value>
+  </data>
+  <data name="ProcessCount" xml:space="preserve">
+    <value>进程数</value>
+  </data>
+  <data name="Ready" xml:space="preserve">
+    <value>就绪</value>
+  </data>
+  <data name="ReadyStatus" xml:space="preserve">
+    <value>就绪  共</value>
+  </data>
+  <data name="ReadyStatusEnd" xml:space="preserve">
+    <value>个项目</value>
+  </data>
+  <data name="ReadyStatusEnd2" xml:space="preserve">
+    <value>个项目  选择了</value>
+  </data>
+  <data name="RequestAdminText" xml:space="preserve">
+    <value>检测到您没有赋予 PCMgr 管理员权限，这会导致一些高级功能不可用。\nPCMgr 需要管理员权限 才能对系统进行控制和管理。\n\n了解什么是&lt;A HREF=\"#\"&gt;管理员权限&lt;/A&gt;。\n了解本软件使用&lt;A HREF=\"#\"&gt;管理员权限控制和管理的详情&lt;/A&gt;。</value>
+  </data>
+  <data name="Run64" xml:space="preserve">
+    <value>运行64位版本</value>
+  </data>
+  <data name="RunAsAdmin" xml:space="preserve">
+    <value>以管理员身份重启软件</value>
+  </data>
+  <data name="Second" xml:space="preserve">
+    <value>秒</value>
+  </data>
+  <data name="ServiceCount" xml:space="preserve">
+    <value>服务数</value>
+  </data>
+  <data name="ServiceHost" xml:space="preserve">
+    <value>服务主机</value>
+  </data>
+  <data name="StartSCMFailed" xml:space="preserve">
+    <value>无法启动服务管理器</value>
+  </data>
+  <data name="StatusHang" xml:space="preserve">
+    <value>无响应</value>
+  </data>
+  <data name="StatusPaused" xml:space="preserve">
+    <value>已暂停</value>
+  </data>
+  <data name="StatusRunning" xml:space="preserve">
+    <value>正在运行</value>
+  </data>
+  <data name="StatusStopped" xml:space="preserve">
+    <value>已停止</value>
+  </data>
+  <data name="SystemIdleProcess" xml:space="preserve">
+    <value>系统空闲进程</value>
+  </data>
+  <data name="SystemService" xml:space="preserve">
+    <value>系统服务</value>
+  </data>
+  <data name="TipTitle" xml:space="preserve">
+    <value>提示</value>
+  </data>
+  <data name="TitleApp" xml:space="preserve">
+    <value>应用</value>
+  </data>
+  <data name="TitleBackGround" xml:space="preserve">
+    <value>后台进程</value>
+  </data>
+  <data name="TitleBaseAddress" xml:space="preserve">
+    <value>基地址</value>
+  </data>
+  <data name="TitleCmdLine" xml:space="preserve">
+    <value>命令行</value>
+  </data>
+  <data name="TitleContinue" xml:space="preserve">
+    <value>确定继续吗？</value>
+  </data>
+  <data name="TitleDescription" xml:space="preserve">
+    <value>说明</value>
+  </data>
+  <data name="TitleDisk" xml:space="preserve">
+    <value>磁盘</value>
+  </data>
+  <data name="TitleDriverLoadPath" xml:space="preserve">
+    <value>加载顺序</value>
+  </data>
+  <data name="TitleDriverName" xml:space="preserve">
+    <value>驱动名称</value>
+  </data>
+  <data name="TitleDriverObj" xml:space="preserve">
+    <value>驱动对象</value>
+  </data>
+  <data name="TitleDriverPath" xml:space="preserve">
+    <value>驱动路径</value>
+  </data>
+  <data name="TitleDriverScName" xml:space="preserve">
+    <value>服务名</value>
+  </data>
+  <data name="TitleDriverSize" xml:space="preserve">
+    <value>大小</value>
+  </data>
+  <data name="TitleFullName" xml:space="preserve">
+    <value>完整名称</value>
+  </data>
+  <data name="TitleInstallDir" xml:space="preserve">
+    <value>安装路径</value>
+  </data>
+  <data name="TitleLogoOff" xml:space="preserve">
+    <value>您即将注销。</value>
+  </data>
+  <data name="TitleName" xml:space="preserve">
+    <value>名称</value>
+  </data>
+  <data name="TitleNet" xml:space="preserve">
+    <value>网络</value>
+  </data>
+  <data name="TitleProcName" xml:space="preserve">
+    <value>进程名称</value>
+  </data>
+  <data name="TitleProcPath" xml:space="preserve">
+    <value>进程路径</value>
+  </data>
+  <data name="TitlePublisher" xml:space="preserve">
+    <value>发布者</value>
+  </data>
+  <data name="TitleRam" xml:space="preserve">
+    <value>内存</value>
+  </data>
+  <data name="TitleReboot" xml:space="preserve">
+    <value>您即将重启。</value>
+  </data>
+  <data name="TitleRestart" xml:space="preserve">
+    <value>您即将重启。</value>
+  </data>
+  <data name="TitleShutdown" xml:space="preserve">
+    <value>您即将关机</value>
+  </data>
+  <data name="TitleStatus" xml:space="preserve">
+    <value>状态</value>
+  </data>
+  <data name="TitleWinApp" xml:space="preserve">
+    <value>Windows进程</value>
+  </data>
+  <data name="UnistackSvcGroup" xml:space="preserve">
+    <value>Unistack 服务组</value>
+  </data>
+  <data name="UserService" xml:space="preserve">
+    <value>用户服务</value>
+  </data>
+  <data name="UWPEnumFail" xml:space="preserve">
+    <value>无法枚举通用应用</value>
+  </data>
+  <data name="VisitFolderFailed" xml:space="preserve">
+    <value>无法读取文件夹</value>
+  </data>
+  <data name="X64WarnFinded64Text" xml:space="preserve">
+    <value>\n已经在您的软件目录下找到64位的 PCMgr ，点击”启动64位版本“可以直接启动软件。</value>
+  </data>
+  <data name="X64WarnMoreText" xml:space="preserve">
+    <value>当前版本的 PCMgr 是 32位的，而您的系统版本是64位的，一些高级功能（比如内核驱动查看）必须使用64位的驱动，所以此版本无法使用这些高级功能。</value>
+  </data>
+  <data name="X64WarnText" xml:space="preserve">
+    <value>检测到您在64位系统中运行32位的 PCMgr ，这将导致某些功能不可用。您还要继续运行软件吗？</value>
+  </data>
+  <data name="X64WarnTitle" xml:space="preserve">
+    <value>检测到软件版本与系统版本不符</value>
+  </data>
+  <data name="RequestAdminTitle" xml:space="preserve">
+    <value />
+  </data>
+  <data name="LanuageChangedTip" xml:space="preserve">
+    <value>语言设置只有您重新打开软件才会生效</value>
+  </data>
+</root>

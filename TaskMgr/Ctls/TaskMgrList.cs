@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 
-namespace TaskMgr.Ctls
+namespace PCMgr.Ctls
 {
     public class TaskMgrList : Control
     {
@@ -56,6 +56,7 @@ namespace TaskMgr.Ctls
             defBgSolidBrush = new SolidBrush(Color.FromArgb(255, 249, 228));
             defTagSolidBrush = new SolidBrush(Color.FromArgb(0, 120, 215));
             errTagSolidBrush = new SolidBrush(Color.Orange);
+            defChildColorPen = new Pen(Color.FromArgb(0, 120, 215), 3);
         }
 
         private bool b1 = false;
@@ -98,6 +99,7 @@ namespace TaskMgr.Ctls
         private SolidBrush errTagSolidBrush = null;
         private SolidBrush defTagSolidBrush = null;
         private SolidBrush defBgSolidBrush = null;
+        private Pen defChildColorPen = null;
         private Pen defLineColorPen = null;
         private Pen hotLineColorPen = null;
         private VScrollBar scrol = null;
@@ -213,7 +215,7 @@ namespace TaskMgr.Ctls
             get { return locked; }
             set { locked = value; }
         }
-        public void Sort()
+        public void Sort(bool sync=true)
         {
             if (sorter != null)
             {
@@ -221,7 +223,7 @@ namespace TaskMgr.Ctls
                 {
                     sorted = true;
                     items.Sort(sorter);
-                    SyncItems(true);
+                    if(sync) SyncItems(true);
                 }
                 else sorted = false;
             }
@@ -252,10 +254,11 @@ namespace TaskMgr.Ctls
                                 groups[i].Tag = 1;
                             }
                             items[i1].YPos = allItemHeight;                       
-                            if (items[i1].IsGroup && items[i1].ChildsOpened)
+                            if ((items[i1].IsGroup || items[i1].IsAppHost) && items[i1].ChildsOpened)
                             {
                                 allItemHeight += itemHeight;
-                                TaskMgrListItemGroup t = items[i1] as TaskMgrListItemGroup;
+                                if (items[i1].IsAppHost) allItemHeight += items[i1].ChildItemsHeight;
+                               TaskMgrListItem t = items[i1];
                                 for (int i2 = 0; i2 < t.Items.Count; i2++)
                                 {
                                     t.Items[i2].YPos = allItemHeight;
@@ -274,11 +277,12 @@ namespace TaskMgr.Ctls
             {
                 for (int i1 = 0; i1 < items.Count; i1++)
                 {
-                    items[i1].YPos = allItemHeight;                
-                    if (items[i1].IsGroup && items[i1].ChildsOpened)
+                    items[i1].YPos = allItemHeight;
+                    if ((items[i1].IsGroup || items[i1].IsAppHost) && items[i1].ChildsOpened)
                     {
                         allItemHeight += itemHeight;
-                        TaskMgrListItemGroup t = items[i1] as TaskMgrListItemGroup;
+                        if (items[i1].IsAppHost) allItemHeight += items[i1].ChildItemsHeight;
+                        TaskMgrListItem t = items[i1];
                         for (int i2 = 0; i2 < t.Items.Count; i2++)
                         {
                             t.Items[i2].YPos = allItemHeight;
@@ -368,7 +372,7 @@ namespace TaskMgr.Ctls
             #endregion
 
             #region Childs
-            if (item.Childs.Count > 0 || item.IsGroup)
+            if (item.Childs.Count > 0 || item.IsGroup || item.IsAppHost)
             {
                 if (item.ChildsOpened)
                 {
@@ -404,14 +408,19 @@ namespace TaskMgr.Ctls
             if (item.Icon != null) g.DrawIcon(item.Icon, new Rectangle(7 - xOffest + 25, item.YPos - YOffest + itemHeight / 2 - 8, 16, 16));
             #endregion
         }
-        private void DrawItem(Graphics g, TaskMgrListItemGroup item, int index, Rectangle rect)
+        private void DrawItemGroup(Graphics g, TaskMgrListItem item, int index, Rectangle rect)
         {
             showedItems.Add(item);
-            DrawItem(g, item as TaskMgrListItem, index, rect);
+            DrawItem(g, item, index, rect);
             if (item.ChildsOpened)
             {
                 for (int i = 0; i < item.Items.Count; i++)
                     DrawItem(g, item.Items[i], index, rect);
+                if (item.IsAppHost)
+                {
+                    int y = item.YPos - yOffest + itemHeight;
+                    g.DrawLine(defChildColorPen, 12 - xOffest, y, 12 - xOffest, y + item.ItemHeight);
+                }
             }
         }
         private void PaintItems(Graphics g, Rectangle r)
@@ -479,10 +488,8 @@ namespace TaskMgr.Ctls
                             {
                                 if (items[i1].YPos - yOffest >= r.Top || items[i1].YPos - yOffest + items[i1].ItemHeight - header.Height <= r.Bottom)
                                 {
-                                    if (items[i1].IsGroup)
-                                        DrawItem(g, items[i1] as TaskMgrListItemGroup, i1, r);
-                                    else
-                                        DrawItem(g, items[i1], i1, r);
+                                    if (items[i1].IsGroup || items[i1].IsAppHost) DrawItemGroup(g, items[i1], i1, r);
+                                    else DrawItem(g, items[i1], i1, r);
                                     lastdrawitem = items[i1];
                                 }
                                 else if (items[i1].YPos - yOffest + items[i1].ItemHeight - header.Height > r.Bottom)
@@ -499,8 +506,8 @@ namespace TaskMgr.Ctls
                 {
                     if (items[i1].YPos - yOffest >= r.Top || items[i1].YPos - yOffest + items[i1].ItemHeight - header.Height <= r.Bottom)
                     {
-                        if (items[i1].IsGroup)
-                            DrawItem(g, items[i1] as TaskMgrListItemGroup, i1, r);
+                        if (items[i1].IsGroup || items[i1].IsAppHost)
+                            DrawItemGroup(g, items[i1], i1, r);
                         else
                             DrawItem(g, items[i1], i1, r);
                     }
@@ -718,11 +725,17 @@ namespace TaskMgr.Ctls
         {
             childs = new List<TaskMgrListItemChild>();
             subItem = new List<TaskMgrListViewSubItem>();
+            items = new TaskMgrListItemCollection();
+            items.ItemAdd += Items_ItemAdd;
+            items.ItemRemoved += Items_ItemRemoved;
         }
         public TaskMgrListItem(string a) : base(a)
         {
             childs = new List<TaskMgrListItemChild>();
             subItem = new List<TaskMgrListViewSubItem>();
+            items = new TaskMgrListItemCollection();
+            items.ItemAdd += Items_ItemAdd;
+            items.ItemRemoved += Items_ItemRemoved;
         }
 
         private List<TaskMgrListItemChild> childs;
@@ -739,14 +752,14 @@ namespace TaskMgr.Ctls
         {
             private SolidBrush _ForeColorSolidBrush = null;
 
-            public uint CustomData { get; set; }
+            public double CustomData { get; set; }
             public new Color ForeColor
             {
                 get { return base.ForeColor; }
                 set
                 {
                     base.ForeColor = value;
-                    if(_ForeColorSolidBrush!=null)
+                    if (_ForeColorSolidBrush != null)
                         _ForeColorSolidBrush.Dispose();
                     _ForeColorSolidBrush = new SolidBrush(value);
                 }
@@ -755,20 +768,38 @@ namespace TaskMgr.Ctls
             {
                 get
                 {
-                    if(_ForeColorSolidBrush == null)
+                    if (_ForeColorSolidBrush == null)
                         _ForeColorSolidBrush = new SolidBrush(ForeColor);
                     return _ForeColorSolidBrush;
                 }
             }
         }
 
-        public virtual int ItemHeight { get { return TaskMgrList.itemHeight + (childsOpened ? (childs.Count * TaskMgrList.smallItemHeight) : 0); } }
+        public virtual int ChildItemsHeight
+        {
+            get
+            {
+                return childs.Count * TaskMgrList.smallItemHeight;
+            }
+        }
+        public virtual int ItemHeight
+        {
+            get
+            {
+                if (IsGroup) return (TaskMgrList.itemHeight * ((ChildsOpened ? Items.Count : 0) + 1));
+                else if (IsAppHost) return (TaskMgrList.itemHeight + TaskMgrList.itemHeight * (ChildsOpened ? Items.Count : 0) + (childsOpened ? (childs.Count * TaskMgrList.smallItemHeight) : 0));
+                else return TaskMgrList.itemHeight + (childsOpened ? (childs.Count * TaskMgrList.smallItemHeight) : 0);
+            }
+        }
         public new List<TaskMgrListViewSubItem> SubItems { get { return subItem; } }
         public Rectangle GlyphRect { get; set; }
         public new TaskMgrListGroup Group
         {
             get { return group; }
-            set { group = value; }
+            set
+            {
+                group = value;
+            }
         }
         public uint PID
         {
@@ -780,9 +811,17 @@ namespace TaskMgr.Ctls
             get { return icon; }
             set { icon = value; }
         }
-        public bool IsGroup { get { return isGroup; } set { isGroup = value; } }
+        public bool IsGroup
+        {
+            get { return isGroup; }
+            set
+            {
+                isGroup = value;
+            }
+        }
+        public bool IsAppHost { get; set; }
         public bool IsUWPICO { get; set; }
-        public TaskMgrListItemGroup Parent { get; set; }
+        public TaskMgrListItem Parent { get; set; }
         public bool IsUWP { get; set; }
         public bool IsUWPButErrInfo { get; set; }
         public bool GlyphHoted
@@ -812,23 +851,6 @@ namespace TaskMgr.Ctls
                 if ((IntPtr)c.Tag== tag) return true;
             return rs;
         }
-    }
-    public class TaskMgrListItemGroup : TaskMgrListItem
-    {
-        public TaskMgrListItemGroup(string a) : base(a)
-        {
-            items = new TaskMgrListItemCollection();
-            items.ItemAdd += Items_ItemAdd;
-            items.ItemRemoved += Items_ItemRemoved;
-            IsGroup = true;
-        }
-        public TaskMgrListItemGroup()
-        {
-            items = new TaskMgrListItemCollection();
-            IsGroup = true;
-            items.ItemAdd += Items_ItemAdd;
-            items.ItemRemoved += Items_ItemRemoved;
-        }
 
         private void Items_ItemRemoved(TaskMgrListItem obj)
         {
@@ -841,11 +863,23 @@ namespace TaskMgr.Ctls
 
         private TaskMgrListItemCollection items = null;
 
-        public override int ItemHeight { get { return (TaskMgrList.itemHeight * ((ChildsOpened ? Items.Count : 0) + 1)); } }
         public TaskMgrListItemCollection Items
         {
             get { return items; }
         }
+    }
+    public class TaskMgrListItemGroup : TaskMgrListItem
+    {
+        public TaskMgrListItemGroup(string a) : base(a)
+        {
+            IsGroup = true;
+        }
+        public TaskMgrListItemGroup()
+        {
+            IsGroup = true;
+        }
+
+        public override int ItemHeight { get { return (TaskMgrList.itemHeight * ((ChildsOpened ? Items.Count : 0) + 1)); } }
     }
     public class TaskMgrListGroup 
     {

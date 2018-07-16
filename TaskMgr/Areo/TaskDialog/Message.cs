@@ -13,7 +13,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Runtime.InteropServices;
 
-namespace TaskMgr.Aero.TaskDialog {
+namespace PCMgr.Aero.TaskDialog {
 
     /// <summary>Stores a Task Dialog message that will be sent to a dialog in order to update its state.</summary>
     internal class Message : IDisposable {

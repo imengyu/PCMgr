@@ -7,6 +7,7 @@
 #include "syshlp.h"
 #include "fmhlp.h"
 #include "ntdef.h"
+#include "lghlp.h"
 #include "StringHlp.h"
 
 #include <list>
@@ -20,7 +21,7 @@ HWND selectItem3 = 0;
 HWND hListModuls = NULL, hListWins = NULL, hListThreads = NULL, hListHandles = NULL;
 HMODULE selectHModule = NULL;
 extern HANDLE hMainDevice;
-extern HINSTANCE hInst;
+extern HINSTANCE hInstRs;
 LPWSTR curretProcName = 0;
 HIMAGELIST hImgListWinSm;
 HCURSOR hCurLoading;
@@ -71,22 +72,14 @@ LPARAM SetItemData(HWND hList, int nItem, LPARAM dwData)
 	return NULL;
 }
 
-void ThrowErrorAndErrorCode(DWORD code, LPWSTR msg, LPWSTR title)
-{
-	wchar_t errcode[260];
-	wsprintf(errcode, L"Code: %d\nNTSTATUS : 0x%lX", code, code);
-
-	LPWSTR l = MStrAddW(msg, errcode);
-	MessageBox(NULL, l, title, MB_OK | MB_ICONERROR);
-	delete l;
-}
+extern void ThrowErrorAndErrorCodeX(DWORD code, LPWSTR msg, LPWSTR title, BOOL ntstatus);
 
 BOOL FreeLibraryEx()
 {
 	HANDLE hProcess;
 	DWORD rs = MOpenProcessNt(currentPid, &hProcess);
 	if (rs == -1) {
-		MessageBox(NULL, L"无法Free模块，进程已退出。", L"卸载模块错误", MB_OK | MB_ICONWARNING);
+		MessageBox(NULL, str_item_freeinvproc, str_item_freefailed, MB_OK | MB_ICONWARNING);
 	}
 	else if (hProcess) {
 		TCHAR address[128];
@@ -100,14 +93,10 @@ BOOL FreeLibraryEx()
 		if (rs2 == 0)
 			return TRUE;
 		else if (rs2 == 0xC000010A)
-			MessageBox(NULL, L"无法Free模块，进程已退出。", L"卸载模块错误", MB_OK | MB_ICONWARNING);
-		else {
-			ThrowErrorAndErrorCode(rs2, L"无法Free模块，错误代码：", L"卸载模块错误");
-		}
+			MessageBox(NULL, str_item_freeinvproc, str_item_freefailed, MB_OK | MB_ICONWARNING);
+		else ThrowErrorAndErrorCodeX(rs2, L"", str_item_freefailed);
 	}
-	else {
-		ThrowErrorAndErrorCode(rs, L"无法打开进程，错误代码：", L"卸载模块错误");
-	}
+	else ThrowErrorAndErrorCodeX(rs, str_item_openprocfailed, str_item_freefailed);
 	return FALSE;
 }
 
@@ -115,12 +104,10 @@ void KillThreadKernel(bool a = false);
 
 bool KillThread()
 {
-	if (MShowMessageDialog(NULL, L"那么，确定强制结束线程？", L"警告", L"不建议强制结束线程，因为结束线程极易发生死锁等其他问题，如果您不是在调试程序，请不要使用该方法。", MB_ICONWARNING, MB_YESNO) == IDNO)
-		return false;
 	HANDLE hThread;
 	DWORD rs = MOpenThreadNt(selectItem1, &hThread, currentShowThreadPid);
 	if (rs == -1) {
-		MessageBox(NULL, L"无法结束线程，无效线程。", L"结束线程", MB_OK);
+		MessageBox(NULL, str_item_killinvthread, str_item_killthreaderr, MB_OK);
 		return true;
 	}
 	if (hThread) {
@@ -130,38 +117,35 @@ bool KillThread()
 		else {
 			
 		}
-		ThrowErrorAndErrorCode(rs, L"无法结束线程。\n错误代码：", L"结束线程");
+		ThrowErrorAndErrorCodeX(rs, L"", str_item_killthreaderr);
 		return true;
 	}
 	else {
 		
 	}
-	ThrowErrorAndErrorCode(rs, L"无法打开线程。\n错误代码：", L"结束线程");
+	ThrowErrorAndErrorCodeX(rs, str_item_openthreaderr, str_item_killthreaderr);
 	return false;
 }
 
 void KillThreadKernel(bool a)
 {
-	if (!a)
-		if (MShowMessageDialog(NULL, L"那么，确定强制结束线程？", L"警告", L"不建议强制结束线程，因为结束线程极易发生死锁等其他问题，如果您不是在调试程序，请不要使用该方法。", MB_ICONWARNING, MB_YESNO) == IDNO)
-			return;
 	HANDLE hThread;
 	int rs = MOpenThreadNt(selectItem1, &hThread, currentShowThreadPid);
 	if (rs == -1)
-		MessageBox(NULL, L"无法结束线程，无效线程。", L"内核结束线程", MB_OK);
+		MessageBox(NULL, str_item_killinvthread, str_item_killthreaderr, MB_OK);
 	else {
-		MessageBox(NULL, L"无法强制结束线程。\n内核没有启动。", L"内核结束线程", MB_OK | MB_ICONERROR);
+		MessageBox(NULL, str_item_kernelnotload, str_item_killthreaderr, MB_OK | MB_ICONERROR);
 	}
 }
 
 bool SuspendThread()
 {
-	if (MShowMessageDialog(NULL, L"", L"警告", L"不建议强制挂起线程，因为挂起线程极易发生死锁等其他问题，如果您不是在调试程序，请不要使用该方法。\n那么，确定强制挂起线程？", MB_ICONWARNING, MB_YESNO) == IDNO)
+	if (MShowMessageDialog(NULL, str_item_suthreadwarn, str_item_question, L"", MB_ICONWARNING, MB_YESNO) == IDNO)
 		return false;
 	HANDLE hThread;
 	DWORD rs = MOpenThreadNt(selectItem1, &hThread, currentShowThreadPid);
 	if (rs == -1) {
-		MessageBox(NULL, L"无法挂起线程，无效线程。", L"暂停线程运行", MB_OK);
+		MessageBox(NULL, str_item_invthread, str_item_suthreaderr, MB_OK);
 		return true;
 	}
 	if (hThread) {
@@ -169,9 +153,9 @@ bool SuspendThread()
 		if (rs == 1) {
 			return true;
 		}
-		else ThrowErrorAndErrorCode(rs, L"无法挂起线程，\n错误代码：", L"暂停线程运行");
+		else ThrowErrorAndErrorCodeX(rs, L"", str_item_suthreaderr);
 	}
-	else ThrowErrorAndErrorCode(rs, L"无法打开线程。\n错误代码：", L"暂停线程运行");
+	else ThrowErrorAndErrorCodeX(rs, str_item_openthreaderr, str_item_suthreaderr);
 	return false;
 }
 
@@ -180,7 +164,7 @@ bool ResusemeThread()
 	HANDLE hThread;
 	DWORD rs = MOpenThreadNt(selectItem1, &hThread, currentShowThreadPid);
 	if (rs == -1) {
-		MessageBox(NULL, L"无法取消挂起线程，无效线程。", L"继续线程运行", MB_OK);
+		MessageBox(NULL, str_item_invthread, str_item_rethreaderr, MB_OK);
 		return true;
 	}
 	if (hThread) {
@@ -188,9 +172,9 @@ bool ResusemeThread()
 		if (rs == 1) {
 			return true;
 		}
-		else ThrowErrorAndErrorCode(rs, L"无法继续线程运行，\n错误代码：", L"暂停线程运行");
+		else ThrowErrorAndErrorCodeX(rs, L"", str_item_rethreaderr);
 	}
-	else ThrowErrorAndErrorCode(rs, L"无法打开线程。\n错误代码：", L"继续线程运行");
+	else ThrowErrorAndErrorCodeX(rs, str_item_openthreaderr, str_item_rethreaderr);
 	return false;
 }
 
@@ -234,10 +218,8 @@ BOOL CALLBACK lpEnumFunc(HWND hWnd, LPARAM lParam)
 		vitem.pszText = clsmame;
 		ListView_SetItem(hListWins, &vitem);
 		vitem.iSubItem++;
-		if (visible)
-			vitem.pszText = L"可见";
-		else
-			vitem.pszText = L"-";
+		if (visible) vitem.pszText = str_item_visible;
+		else vitem.pszText = L"-";
 		ListView_SetItem(hListWins, &vitem);
 		vitem.iSubItem++;
 		vitem.pszText = L"-";
@@ -257,14 +239,14 @@ BOOL CALLBACK lpEnumFunc2(HWND hWnd, LPARAM lParam)
 		GetClassName(hWnd, clsn, 50);
 		if (wcscmp(clsn, L"ApplicationFrameWindow") != 0)
 		{
-			if ((l & WS_EX_APPWINDOW) == WS_EX_APPWINDOW)
+			if ((l & WS_EX_APPWINDOW) == WS_EX_APPWINDOW || (l & WS_EX_OVERLAPPEDWINDOW) == WS_EX_OVERLAPPEDWINDOW)
 				hAllWins->push_back(hWnd);
 			else if ((ls & WS_CAPTION) == WS_CAPTION)
 				hAllWins->push_back(hWnd);
 		}
 		else 
 		{
-			if ((l & WS_EX_APPWINDOW) == WS_EX_APPWINDOW)
+			if ((l & WS_EX_APPWINDOW) == WS_EX_APPWINDOW || (l & WS_EX_OVERLAPPEDWINDOW) == WS_EX_OVERLAPPEDWINDOW)
 				hUWPWins->push_back(hWnd);
 			else if ((ls & WS_CAPTION) == WS_CAPTION)
 				hUWPWins->push_back(hWnd);
@@ -322,11 +304,11 @@ M_API BOOL MAppVProcessMsg(DWORD dwPID, HWND hDlg, int type, LPWSTR procName)
 {
 	currentPid = dwPID;	curretProcName = procName;
 	if (type == 1)
-		DialogBoxW(hInst, MAKEINTRESOURCE(IDD_VTHEADS), hDlg, VThreadsDlgProc);
+		DialogBoxW(hInstRs, MAKEINTRESOURCE(IDD_VTHEADS), hDlg, VThreadsDlgProc);
 	else if (type == 2)
-		DialogBoxW(hInst, MAKEINTRESOURCE(IDD_VMODULS), hDlg, VModulsDlgProc);
+		DialogBoxW(hInstRs, MAKEINTRESOURCE(IDD_VMODULS), hDlg, VModulsDlgProc);
 	else if (type == 3)
-		DialogBoxW(hInst, MAKEINTRESOURCE(IDD_VWINS), hDlg, VWinsDlgProc);
+		DialogBoxW(hInstRs, MAKEINTRESOURCE(IDD_VWINS), hDlg, VWinsDlgProc);
 	else return FALSE;
 
 	/*MSG msg;
@@ -340,19 +322,19 @@ M_API BOOL MAppVProcessMsg(DWORD dwPID, HWND hDlg, int type, LPWSTR procName)
 M_API BOOL MAppVProcessModuls(DWORD dwPID, HWND hDlg, LPWSTR procName)
 {
 	currentPid = dwPID;	curretProcName = procName;
-	DialogBoxW(hInst, MAKEINTRESOURCE(IDD_VMODULS), hDlg, VModulsDlgProc);
+	DialogBoxW(hInstRs, MAKEINTRESOURCE(IDD_VMODULS), hDlg, VModulsDlgProc);
 	return TRUE;
 }
 M_API BOOL MAppVProcessThreads(DWORD dwPID, HWND hDlg, LPWSTR procName)
 {
 	currentPid = dwPID;	curretProcName = procName;
-	DialogBoxW(hInst, MAKEINTRESOURCE(IDD_VTHEADS), hDlg, VThreadsDlgProc);
+	DialogBoxW(hInstRs, MAKEINTRESOURCE(IDD_VTHEADS), hDlg, VThreadsDlgProc);
 	return TRUE;
 }
 M_API BOOL MAppVProcessWindows(DWORD dwPID, HWND hDlg, LPWSTR procName)
 {
 	currentPid = dwPID;	curretProcName = procName;
-	DialogBoxW(hInst, MAKEINTRESOURCE(IDD_VWINS), hDlg, VWinsDlgProc);
+	DialogBoxW(hInstRs, MAKEINTRESOURCE(IDD_VWINS), hDlg, VWinsDlgProc);
 	return TRUE;
 }
 M_API BOOL MAppVProcess(HWND hWndParent)
@@ -377,11 +359,11 @@ BOOL MAppVModuls(DWORD dwPID, HWND hDlg, LPWSTR procName)
 	HWND htitle = GetDlgItem(hDlg, IDC_TITLE);
 	int rs = MOpenProcessNt(dwPID, &hProcess);
 	if (rs == -1) {
-		SetWindowText(htitle, L"枚举模块失败。\n无效进程。");
+		SetWindowText(htitle, (LPWSTR)str_item_invalidproc.c_str());
 		return -1;
 	}	
 	else if (rs == 0xC0000022) {
-		SetWindowText(htitle, L"枚举模块失败。\n拒绝访问。");
+		SetWindowText(htitle, (LPWSTR)str_item_access_denied.c_str());
 		return -1;
 	}
 	else if (rs == 1 && hProcess) {
@@ -390,12 +372,11 @@ BOOL MAppVModuls(DWORD dwPID, HWND hDlg, LPWSTR procName)
 		HANDLE hModuleSnap = NULL;
 		MODULEENTRY32 me32 = { 0 };
 
-
 		hModuleSnap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, dwPID);
 		if (hModuleSnap == INVALID_HANDLE_VALUE) {
-			if (GetLastError() == 299) SetWindowText(htitle, L"枚举模块失败。\n无效进程。");
+			if (GetLastError() == 299) SetWindowText(htitle, (LPWSTR)str_item_invalidproc.c_str());
 			else {
-				wstring str = FormatString(L"无法枚举模块。\n错误代码 : 0x%08x", GetLastError());
+				wstring str = FormatString(L"%s\nLast Error : 0x%08x", str_item_enum_modulefailed, GetLastError());
 				SetWindowText(htitle, str.c_str());
 			}
 			return FALSE;
@@ -439,13 +420,13 @@ BOOL MAppVModuls(DWORD dwPID, HWND hDlg, LPWSTR procName)
 
 			i++;
 		}
-		wstring str = FormatString(L"进程 %s [%d] 的所有模块：%d", procName, dwPID, i);
+		wstring str = FormatString(str_item_vmodulestitle, procName, dwPID, i);
 		SetWindowText(hDlg, str.c_str());
 		CloseHandle(hModuleSnap);
 		return TRUE;
 	}
 	else {
-		wstring str = FormatString(L"无法枚举模块，无法打开进程。\n错误代码 : 0x%08x", rs);
+		wstring str = FormatString(L"%d , %d\nError Code : 0x%08x", str_item_enum_modulefailed, str_item_openprocfailed, rs);
 		SetWindowText(htitle, str.c_str());
 		return 0;
 	}
@@ -458,11 +439,11 @@ BOOL MAppVThreads(DWORD dwPID, HWND hDlg, LPWSTR procName)
 	HWND htitle = GetDlgItem(hDlg, IDC_TITLE);
 	DWORD rs = MOpenProcessNt(dwPID, &hProcess);
 	if (rs == -1) {
-		SetWindowText(htitle, L"枚举线程失败。\n无效进程。");
+		SetWindowText(htitle, (LPWSTR)str_item_invalidproc.c_str());
 		return -1;
 	}
 	else if (rs == 0xC0000022) {
-		SetWindowText(htitle, L"枚举线程失败。\n拒绝访问。");
+		SetWindowText(htitle, (LPWSTR)str_item_access_denied.c_str());
 		return -1;
 	}
 	else if (hProcess && rs == 1) {
@@ -555,7 +536,7 @@ BOOL MAppVThreads(DWORD dwPID, HWND hDlg, LPWSTR procName)
 				threadscount = i;
 			}
 
-			wstring str = FormatString(L"进程 %s [%d] 的所有线程：%d", procName, dwPID, threadscount);
+			wstring str = FormatString(str_item_vthreadtitle, procName, dwPID, threadscount);
 			SetWindowText(hDlg, str.c_str());
 			currentShowThreadPid = dwPID;
 			CloseHandle(hSnapThread);
@@ -564,14 +545,14 @@ BOOL MAppVThreads(DWORD dwPID, HWND hDlg, LPWSTR procName)
 		}
 		else
 		{
-			wstring str = FormatString(L"枚举线程失败。\n错误代码 : 0x%x", GetLastError());
+			wstring str = FormatString(L"%s\nLast Error : 0x%x", str_item_enum_threadfailed, GetLastError());
 			SetWindowText(htitle, str.c_str());
 			return FALSE;
 		}
 	}
 	else
 	{
-		wstring str = FormatString(L"枚举线程失败，无法打开进程。\n错误代码 : 0x%08x", rs);
+		wstring str = FormatString(L"%s , %s\nLast Error : 0x%08x", str_item_enum_threadfailed, str_item_openprocfailed,rs);
 		SetWindowText(htitle, str.c_str());
 		return FALSE;
 	}
@@ -583,16 +564,16 @@ BOOL MAppVWins(DWORD dwPID, HWND hDlg, LPWSTR procName)
 	ImageList_Destroy(hImgListWinSm);
 	hImgListWinSm = ImageList_Create(16, 16, ILC_COLOR32, 1, 0);
 	HICON hIcoDefH, hIcoDefS;
-	hIcoDefS = LoadIcon(hInst, MAKEINTRESOURCE(IDI_ICONACTIVEDWIN));
-	hIcoDefH = LoadIcon(hInst, MAKEINTRESOURCE(IDI_ICONHIDEDWIN));
+	hIcoDefS = LoadIcon(hInstRs, MAKEINTRESOURCE(IDI_ICONACTIVEDWIN));
+	hIcoDefH = LoadIcon(hInstRs, MAKEINTRESOURCE(IDI_ICONHIDEDWIN));
 	ImageList_AddIcon(hImgListWinSm, hIcoDefS);
 	ImageList_AddIcon(hImgListWinSm, hIcoDefH);
 	ListView_SetImageList(hListWins, hImgListWinSm, LVSIL_SMALL);
 	HWND htitle = GetDlgItem(hDlg, IDC_RESULT);
 	if (EnumWindows(lpEnumFunc, dwPID))
 	{
-		wstring str = FormatString(L"进程 %s [%d] 的所有窗口：%d", procName, dwPID, winscount);
-		SetWindowText(hDlg, str.c_str());
+		wstring str = FormatString(str_item_vwinstitle, procName, dwPID, winscount);
+		SetWindowText(htitle, str.c_str());
 		return TRUE;
 	}
 	return FALSE;
@@ -674,23 +655,23 @@ INT_PTR CALLBACK VWinsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 	switch (msg)
 	{
 	case WM_INITDIALOG:
-		SendMessage(hDlg, WM_SETICON, ICON_SMALL, (LPARAM)LoadIcon(hInst, MAKEINTRESOURCE(IDI_ICONAPP)));
+		SendMessage(hDlg, WM_SETICON, ICON_SMALL, (LPARAM)LoadIcon(hInstRs, MAKEINTRESOURCE(IDI_ICONAPP)));
 		hListWins = GetDlgItem(hDlg, IDC_WINSLIST);
 		LV_COLUMN lvc;
 		lvc.mask = LVCF_TEXT | LVCF_WIDTH;
-		lvc.pszText = L"所属线程";
+		lvc.pszText = str_item_wndbthread;
 		lvc.cx = 60;
 		SendMessageW(hListWins, LVM_INSERTCOLUMN, 0, (LPARAM)&lvc);
-		lvc.pszText = L"可见";
+		lvc.pszText = str_item_visible;
 		lvc.cx = 40;
 		SendMessage(hListWins, LVM_INSERTCOLUMN, 0, (LPARAM)&lvc);
-		lvc.pszText = L"窗口类名";
+		lvc.pszText = str_item_wndclass;
 		lvc.cx = 150;
 		SendMessage(hListWins, LVM_INSERTCOLUMN, 0, (LPARAM)&lvc);
-		lvc.pszText = L"窗口句柄";
+		lvc.pszText = str_item_windowhandle;
 		lvc.cx = 85;
 		SendMessage(hListWins, LVM_INSERTCOLUMN, 0, (LPARAM)&lvc);
-		lvc.pszText = L"窗口文字";
+		lvc.pszText = str_item_windowtext;
 		lvc.cx = 180;
 		SendMessage(hListWins, LVM_INSERTCOLUMN, 0, (LPARAM)&lvc);
 		ListView_SetExtendedListViewStyleEx(hListWins, 0, LVS_EX_FULLROWSELECT | LVS_EX_TWOCLICKACTIVATE);
@@ -726,8 +707,7 @@ INT_PTR CALLBACK VWinsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 		case ID_WINSMENU_SHOWWND:
 			if (IsWindow(selectItem3)) {
 				ShowWindow(selectItem3, SW_SHOW);
-				LPWSTR text = L"可见";
-				ListView_SetItemText(hListWins, ListView_GetSelectionMark(hListWins), 3, text);
+				ListView_SetItemText(hListWins, ListView_GetSelectionMark(hListWins), 3, str_item_visible);
 			}
 			break;
 		case ID_WINSMENU_HIDEWINDOW:
@@ -827,7 +807,7 @@ INT_PTR CALLBACK VWinsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 				WCHAR hwnd[32];
 				ListView_GetItemText(hListWins, ListView_GetSelectionMark(hListWins), 1, hwnd, 32);
 				selectItem3 = (HWND)LongToHandle(MHexStrToIntW(hwnd));
-				HMENU hroot = LoadMenu(hInst, MAKEINTRESOURCE(IDR_WINSMENU));
+				HMENU hroot = LoadMenu(hInstRs, MAKEINTRESOURCE(IDR_WINSMENU));
 				if (hroot) {
 					HMENU hpop = GetSubMenu(hroot, 0);
 					POINT pt;
@@ -867,23 +847,23 @@ INT_PTR CALLBACK VModulsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 	switch (msg)
 	{
 	case WM_INITDIALOG:
-		SendMessage(hDlg, WM_SETICON, ICON_SMALL, (LPARAM)LoadIcon(hInst, MAKEINTRESOURCE(IDI_ICONAPP)));
+		SendMessage(hDlg, WM_SETICON, ICON_SMALL, (LPARAM)LoadIcon(hInstRs, MAKEINTRESOURCE(IDI_ICONAPP)));
 		hListModuls = GetDlgItem(hDlg, IDC_MODULLIST);
 		LV_COLUMN lvc;
 		lvc.mask = LVCF_TEXT | LVCF_WIDTH;
-		lvc.pszText = L"文件公司";
+		lvc.pszText = str_item_publisher;
 		lvc.cx = 130;
 		SendMessage(hListModuls, LVM_INSERTCOLUMN, 0, (LPARAM)&lvc);
-		lvc.pszText = L"大小";
+		lvc.pszText = str_item_size;
 		lvc.cx = 80;
 		SendMessage(hListModuls, LVM_INSERTCOLUMN, 0, (LPARAM)&lvc);
-		lvc.pszText = L"地址";
+		lvc.pszText = str_item_address;
 		lvc.cx = 80;
 		SendMessage(hListModuls, LVM_INSERTCOLUMN, 0, (LPARAM)&lvc);
-		lvc.pszText = L"模块路径";
+		lvc.pszText = str_item_modulepath;
 		lvc.cx = 300;
 		SendMessageW(hListModuls, LVM_INSERTCOLUMN, 0, (LPARAM)&lvc);
-		lvc.pszText = L"模块名";
+		lvc.pszText = str_item_modulename;
 		lvc.cx = 80;
 		SendMessage(hListModuls, LVM_INSERTCOLUMN, 0, (LPARAM)&lvc);
 		SetWindowTheme(hListModuls, L"explorer", NULL);
@@ -924,7 +904,7 @@ INT_PTR CALLBACK VModulsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 		case ID_MODULSMENU_FREELIB:
 			SetCursor(hCurLoading);
 			if (FreeLibraryEx())
-				MessageBox(NULL, L"卸载模块成功。", L"", MB_OK);
+				MessageBox(NULL, str_item_freesuccess, L"", MB_OK);
 			break;
 		case ID_MODULSMENU_FILEPROP: {
 			SetCursor(hCurLoading);
@@ -942,7 +922,7 @@ INT_PTR CALLBACK VModulsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 				LPWSTR lparm = MStrAddW(L"/select,", path);
 				ShellExecuteW(NULL, NULL, L"explorer.exe", lparm, NULL, SW_SHOWDEFAULT);
 			}
-			else MessageBox(hDlg, L"无法获取路径。", L"错误", MB_ICONERROR | MB_OK);
+			else MessageBox(hDlg, str_item_cantgetpath, L"", MB_ICONERROR | MB_OK);
 			break;
 		}
 		break;
@@ -972,7 +952,7 @@ INT_PTR CALLBACK VModulsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 			{
 				selectItem2 = ListView_GetSelectionMark(hListModuls);
 				selectHModule = (HMODULE)GetItemData(hListModuls, ListView_GetSelectionMark(hListModuls));
-				HMENU hroot = LoadMenu(hInst, MAKEINTRESOURCE(IDR_MODULSMENU));
+				HMENU hroot = LoadMenu(hInstRs, MAKEINTRESOURCE(IDR_MODULSMENU));
 				if (hroot) {
 					HMENU hpop = GetSubMenu(hroot, 0);
 					POINT pt;
@@ -999,7 +979,7 @@ INT_PTR CALLBACK VThreadsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPar
 	switch (msg)
 	{
 	case WM_INITDIALOG:
-		SendMessage(hDlg, WM_SETICON, ICON_SMALL, (LPARAM)LoadIcon(hInst, MAKEINTRESOURCE(IDI_ICONAPP)));
+		SendMessage(hDlg, WM_SETICON, ICON_SMALL, (LPARAM)LoadIcon(hInstRs, MAKEINTRESOURCE(IDI_ICONAPP)));
 		hListThreads = GetDlgItem(hDlg, IDC_THREADLIST);
 		SetWindowTheme(hListThreads, L"explorer", NULL);
 		ListView_SetExtendedListViewStyleEx(hListThreads, 0, LVS_EX_FULLROWSELECT | LVS_EX_TWOCLICKACTIVATE);
@@ -1007,19 +987,19 @@ INT_PTR CALLBACK VThreadsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPar
 		LV_COLUMN lvc;
 		lvc.mask = LVCF_TEXT | LVCF_WIDTH;
 
-		lvc.pszText = L"切换次数";
+		lvc.pszText = str_item_contextswitch;
 		lvc.cx = 60;
 		SendMessage(hListThreads, LVM_INSERTCOLUMN, 0, (LPARAM)&lvc);
-		lvc.pszText = L"状态";
+		lvc.pszText = str_item_state;
 		lvc.cx = 160;
 		SendMessage(hListThreads, LVM_INSERTCOLUMN, 0, (LPARAM)&lvc);
-		lvc.pszText = L"模块";
+		lvc.pszText = str_item_modulename;
 		lvc.cx = 270;
 		SendMessage(hListThreads, LVM_INSERTCOLUMN, 0, (LPARAM)&lvc);
-		lvc.pszText = L"入口点";
+		lvc.pszText = str_item_entrypoint;
 		lvc.cx = 80;
 		SendMessage(hListThreads, LVM_INSERTCOLUMN, 0, (LPARAM)&lvc);
-		lvc.pszText = L"优先级";
+		lvc.pszText = str_item_proerty;
 		lvc.cx = 60;
 		SendMessage(hListThreads, LVM_INSERTCOLUMN, 0, (LPARAM)&lvc);
 		lvc.pszText = L"Teb";
@@ -1028,7 +1008,7 @@ INT_PTR CALLBACK VThreadsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPar
 		lvc.pszText = L"ETHREAD";
 		lvc.cx = 80;
 		SendMessage(hListThreads, LVM_INSERTCOLUMN, 0, (LPARAM)&lvc);
-		lvc.pszText = L"线程ID";
+		lvc.pszText = L"ID";
 		lvc.cx = 60;
 		SendMessage(hListThreads, LVM_INSERTCOLUMN, 0, (LPARAM)&lvc);
 		SendMessage(hDlg, WM_COMMAND, 16765, 0);
@@ -1058,7 +1038,6 @@ INT_PTR CALLBACK VThreadsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPar
 			if (MAppVThreads(currentPid, hDlg, curretProcName) == 1) {
 				ShowWindow(hListThreads, SW_SHOW);
 				ShowWindow(GetDlgItem(hDlg, IDC_TITLE), SW_HIDE);
-				MessageBox(NULL, L"刷新成功。", L"", MB_OK);
 			}
 			else {
 				ShowWindow(hListThreads, SW_HIDE);
@@ -1115,7 +1094,7 @@ INT_PTR CALLBACK VThreadsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPar
 				TCHAR id[20];
 				ListView_GetItemText(hListThreads, ListView_GetSelectionMark(hListThreads), 0, id, 20);
 				selectItem1 = _wtoi(id);
-				HMENU hroot = LoadMenu(hInst, MAKEINTRESOURCE(IDR_THREADMENU));
+				HMENU hroot = LoadMenu(hInstRs, MAKEINTRESOURCE(IDR_THREADMENU));
 				if (hroot) {
 					HMENU hpop = GetSubMenu(hroot, 0);
 					POINT pt;

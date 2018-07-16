@@ -15,6 +15,5 @@
 #define M_CAPI(x) extern "C" M_API x
 
 #define DEFDIALOGGTITLE L"PC Manager"
-#define ENDTASKASKTEXT L"如果某个打开的程序与此进程关联，则会关闭此程序并且将丢失所有未保存的数据。如果结束某个系统进程，则可能导致系统不稳定。你确定要继续吗 ?"
 
 // TODO:  在此处引用程序需要的其他头文件

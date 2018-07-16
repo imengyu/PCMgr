@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 
-namespace TaskMgr.WorkWindow
+namespace PCMgr.WorkWindow
 {
     public partial class FormSpyWindow : Form
     {
@@ -116,9 +116,6 @@ namespace TaskMgr.WorkWindow
         }
         #endregion
 
-
-
-
         public class WindowInfo
         {
             private IntPtr _Hwnd;
@@ -226,66 +223,66 @@ namespace TaskMgr.WorkWindow
 
             #region LoadIcon
             int i = 0;
-            mainImageList.Images.Add(Properties.Resources.icoShowedWindow);
-            mainImageList.Images.Add(Properties.Resources.icoHidedWindow);
+            mainImageList.Images.Add(PCMgr.Properties.Resources.icoShowedWindow);
+            mainImageList.Images.Add(PCMgr.Properties.Resources.icoHidedWindow);
             i++;//1
-            mainImageList.Images.Add(Properties.Resources.icoWins);
+            mainImageList.Images.Add(PCMgr.Properties.Resources.icoWins);
             i++;
-            mainImageList.Images.Add(Properties.Resources.System_Windows_Forms_CheckBox);
+            mainImageList.Images.Add(PCMgr.Properties.Resources.System_Windows_Forms_CheckBox);
             i++;
-            mainImageList.Images.Add(Properties.Resources.System_Windows_Forms_RadioButton);
+            mainImageList.Images.Add(PCMgr.Properties.Resources.System_Windows_Forms_RadioButton);
             i++;
-            mainImageList.Images.Add(Properties.Resources.System_Windows_Forms_PictureBox);
+            mainImageList.Images.Add(PCMgr.Properties.Resources.System_Windows_Forms_PictureBox);
             i++;
-            mainImageList.Images.Add(Properties.Resources.System_Windows_Forms_Button);
+            mainImageList.Images.Add(PCMgr.Properties.Resources.System_Windows_Forms_Button);
             i++;
             mainImageList.Images.SetKeyName(i, "button");
-            mainImageList.Images.Add(Properties.Resources.System_Windows_Forms_ComboBox);
+            mainImageList.Images.Add(PCMgr.Properties.Resources.System_Windows_Forms_ComboBox);
             i++;
             mainImageList.Images.SetKeyName(i, "combobox");
-            mainImageList.Images.Add(Properties.Resources.System_Windows_Forms_TextBox);
+            mainImageList.Images.Add(PCMgr.Properties.Resources.System_Windows_Forms_TextBox);
             i++;
             mainImageList.Images.SetKeyName(i, "edit");
-            mainImageList.Images.Add(Properties.Resources.System_Windows_Forms_Form);
+            mainImageList.Images.Add(PCMgr.Properties.Resources.System_Windows_Forms_Form);
             i++;
             mainImageList.Images.SetKeyName(i, "none");
-            mainImageList.Images.Add(Properties.Resources.System_Windows_Forms_ProgressBar);
+            mainImageList.Images.Add(PCMgr.Properties.Resources.System_Windows_Forms_ProgressBar);
             i++;
             mainImageList.Images.SetKeyName(i, "progress");
-            mainImageList.Images.Add(Properties.Resources.System_Windows_Forms_RichTextBox);
+            mainImageList.Images.Add(PCMgr.Properties.Resources.System_Windows_Forms_RichTextBox);
             i++;
             mainImageList.Images.SetKeyName(i, "richedit");
-            mainImageList.Images.Add(Properties.Resources.System_Windows_Forms_VScrollBar);
+            mainImageList.Images.Add(PCMgr.Properties.Resources.System_Windows_Forms_VScrollBar);
             i++;
             mainImageList.Images.SetKeyName(i, "scrollbar");
-            mainImageList.Images.Add(Properties.Resources.System_Windows_Forms_Label);
+            mainImageList.Images.Add(PCMgr.Properties.Resources.System_Windows_Forms_Label);
             i++;
             mainImageList.Images.SetKeyName(i, "static");
-            mainImageList.Images.Add(Properties.Resources.System_Windows_Forms_StatusStrip);
+            mainImageList.Images.Add(PCMgr.Properties.Resources.System_Windows_Forms_StatusStrip);
             i++;
             mainImageList.Images.SetKeyName(i, "statusbar");
-            mainImageList.Images.Add(Properties.Resources.System_Windows_Forms_DateTimePicker);
+            mainImageList.Images.Add(PCMgr.Properties.Resources.System_Windows_Forms_DateTimePicker);
             i++;
             mainImageList.Images.SetKeyName(i, "sysdatetimepick32");
-            mainImageList.Images.Add(Properties.Resources.System_Windows_Forms_LinkLabel);
+            mainImageList.Images.Add(PCMgr.Properties.Resources.System_Windows_Forms_LinkLabel);
             i++;
             mainImageList.Images.SetKeyName(i, "syslink");
-            mainImageList.Images.Add(Properties.Resources.System_Windows_Forms_ListView);
+            mainImageList.Images.Add(PCMgr.Properties.Resources.System_Windows_Forms_ListView);
             i++;//15
             mainImageList.Images.SetKeyName(i, "listview");
-            mainImageList.Images.Add(Properties.Resources.System_Windows_Forms_TabControl);
+            mainImageList.Images.Add(PCMgr.Properties.Resources.System_Windows_Forms_TabControl);
             i++;
             mainImageList.Images.SetKeyName(i, "systabcontrol32");
-            mainImageList.Images.Add(Properties.Resources.System_Windows_Forms_TreeView);
+            mainImageList.Images.Add(PCMgr.Properties.Resources.System_Windows_Forms_TreeView);
             i++;
             mainImageList.Images.SetKeyName(i, "systreeview32");
-            mainImageList.Images.Add(Properties.Resources.System_Windows_Forms_ToolBar);
+            mainImageList.Images.Add(PCMgr.Properties.Resources.System_Windows_Forms_ToolBar);
             i++;
             mainImageList.Images.SetKeyName(i, "toolbar");
-            mainImageList.Images.Add(Properties.Resources.System_Windows_Forms_TrackBar);
+            mainImageList.Images.Add(PCMgr.Properties.Resources.System_Windows_Forms_TrackBar);
             i++;
             mainImageList.Images.SetKeyName(i, "trackbar");
-            mainImageList.Images.Add(Properties.Resources.System_Windows_Forms_Form);
+            mainImageList.Images.Add(PCMgr.Properties.Resources.System_Windows_Forms_Form);
             i++;
             mainImageList.Images.SetKeyName(i, "window");
             #endregion
@@ -303,7 +300,7 @@ namespace TaskMgr.WorkWindow
                     treeViewMain.Nodes.Clear();
 
                     WindowInfo wi = this.GetWindowInfo(hWnd);
-                    Text = "窗口 " + wi.WindowText + " 的详细探测 - TaskManager Spy";
+                    Text = "[" + wi.WindowText + "] TaskManager Spy";
 
                     TreeNode nd = new TreeNode(wi.Hwnd.ToString("X").PadLeft(8, '0') + " | " + wi.WindowText + " | " + wi.ClassName);
                     IntPtr hIcon = MGetWindowIcon(hWnd);
@@ -314,7 +311,7 @@ namespace TaskMgr.WorkWindow
                     }
                     else
                     {
-                        if(IsWindowVisible(wi.Hwnd))
+                        if (IsWindowVisible(wi.Hwnd))
                             nd.ImageIndex = 1;
                         else
                             nd.ImageIndex = 0;
@@ -324,7 +321,7 @@ namespace TaskMgr.WorkWindow
                     d.loaded = false;
                     d.info = wi;
                     nd.Tag = d;
-                    TreeNode ndnull = new TreeNode("正在加载……");
+                    TreeNode ndnull = new TreeNode(FormMain.str_loading);
                     ndnull.Name = "ndnull";
                     nd.Nodes.Add(ndnull);
                     treeViewMain.Nodes.Add(nd);
@@ -332,11 +329,11 @@ namespace TaskMgr.WorkWindow
                     labelState.Hide();
                     panelMain.Show();
 
-                    if (re) MessageBox.Show("刷新成功。");
+                    if (re) MessageBox.Show(FormMain.str_RefeshSuccess);
                 }
-                else labelState.Text = "无效窗口";
+                else labelState.Text = FormMain.str_InvalidHwnd;
             }
-            else labelState.Text = "无效窗口";
+            else labelState.Text = FormMain.str_InvalidHwnd;
             return false;
         }
         private void LoadChilds(IntPtr hWnd, TreeNode treeNode)
@@ -498,7 +495,7 @@ namespace TaskMgr.WorkWindow
         {
             if (e.KeyData == Keys.Enter)
             {
-                if (MessageBox.Show("您更改了窗口文字，要把文字设置到窗口上吗？", Text, MessageBoxButtons.YesNo, MessageBoxIcon.Information) == DialogResult.Yes)
+                if (MessageBox.Show(FormMain.str_ChangeWindowTextAsk, Text, MessageBoxButtons.YesNo, MessageBoxIcon.Information) == DialogResult.Yes)
                 {
                     textBoxText.Text.Remove(textBoxText.Text.Length - 1);
                     SetWindowText(selectHwnd, textBoxText.Text);

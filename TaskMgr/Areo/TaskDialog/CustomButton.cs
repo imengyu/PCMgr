@@ -13,7 +13,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Runtime.InteropServices;
 
-namespace TaskMgr.Aero.TaskDialog {
+namespace PCMgr.Aero.TaskDialog {
 
     /// <summary>Represents a custom button shown on a Task Dialog.</summary>
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode, Pack = 1)]

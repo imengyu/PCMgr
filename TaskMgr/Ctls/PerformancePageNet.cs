@@ -8,8 +8,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Diagnostics;
+using PCMgr.Lanuages;
 
-namespace TaskMgr.Ctls
+namespace PCMgr.Ctls
 {
     public partial class PerformancePageNet : UserControl, IPerformancePage
     {
@@ -49,8 +50,8 @@ namespace TaskMgr.Ctls
         {
             float sent = performanceCounter_sent.NextValue();
             float receive = performanceCounter_receive.NextValue();
-            item_readSpeed.Value= FormMain.FormatFileSize(Convert.ToInt64(sent)) + "/秒";
-            item_writeSpeed.Value = FormMain.FormatFileSize(Convert.ToInt64(receive)) + "/秒";
+            item_readSpeed.Value= FormMain.FormatFileSize(Convert.ToInt64(sent)) + "/" + FormMain.str_sec;
+            item_writeSpeed.Value = FormMain.FormatFileSize(Convert.ToInt64(receive)) + "/" + FormMain.str_sec;
 
             performanceGrid.AddData((int)(sent * 0.0001));
             performanceGrid.AddData2((int)(receive * 0.0001));
@@ -71,8 +72,8 @@ namespace TaskMgr.Ctls
             item_readSpeed = new PerformanceInfos.PerformanceInfoSpeicalItem();
             item_writeSpeed = new PerformanceInfos.PerformanceInfoSpeicalItem();
             item_writeSpeed.LineSp = true;
-            item_readSpeed.Name = "发送";
-            item_writeSpeed.Name = "接收";
+            item_readSpeed.Name = LanuageMgr.GetStr("Send");
+            item_writeSpeed.Name = LanuageMgr.GetStr("Receive");
             item_readSpeed.DrawFrontLine = true;
             item_readSpeed.FrontLineColor = FormMain.NetDrawColor;
             item_writeSpeed.DrawFrontLine = true;

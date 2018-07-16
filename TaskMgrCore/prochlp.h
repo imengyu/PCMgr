@@ -24,6 +24,8 @@ EXTERN_C M_API DWORD MRusemeProcessNt(DWORD dwPId, HANDLE handle);
 EXTERN_C M_API DWORD MOpenProcessNt(DWORD dwId, PHANDLE pLandle);
 EXTERN_C M_API DWORD MTerminateProcessNt(DWORD dwId, HANDLE handle);
 
+EXTERN_C M_API int MAppWorkShowMenuProcessPrepare(LPWSTR strFilePath, LPWSTR strFileName, DWORD pid);
+
 EXTERN_C M_API BOOL MGetProcessCommandLine(HANDLE handle, LPWSTR l, int maxcount);
 EXTERN_C M_API BOOL MGetProcessIsUWP(HANDLE handle);
 EXTERN_C M_API BOOL MGetProcessIs32Bit(HANDLE handle);

@@ -11,7 +11,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace TaskMgr.Aero
+namespace PCMgr.Aero
 {
     /// <summary>
     /// Control style and notification constants

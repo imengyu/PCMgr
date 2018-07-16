@@ -13,7 +13,7 @@ extern void FreeDll();
 extern void WindowEnumStart();
 extern void WindowEnumDestroy();
 extern void MPERF_FreeCpuInfos();
-
+extern void MLG_SetLanuageItems_Destroy();
 
 
 M_CAPI(int) MPERF_GetProcessNumber();
@@ -54,6 +54,7 @@ void DllStartup() {
 }
 void DllDestroy() {
 	FreeDll();
+	MLG_SetLanuageItems_Destroy();
 	MPERF_FreeCpuInfos();
 	WindowEnumDestroy();
 }

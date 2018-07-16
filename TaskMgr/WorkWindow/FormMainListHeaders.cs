@@ -1,7 +1,8 @@
-﻿using System;
+﻿using PCMgr.Lanuages;
+using System;
 using System.Windows.Forms;
 
-namespace TaskMgr.WorkWindow
+namespace PCMgr.WorkWindow
 {
     public partial class FormMainListHeaders : Form
     {
@@ -21,7 +22,7 @@ namespace TaskMgr.WorkWindow
             string headers = "";
             for (int i = 0; i < listView1.Items.Count; i++)
                 if (listView1.Items[i].Checked)
-                    headers = headers + "#" + listView1.Items[i].Text + "-" + (int)listView1.Items[i].Tag;
+                    headers = headers + "#" + ((aa)listView1.Items[i].Tag).a + "-" + ((aa)listView1.Items[i].Tag).b;
             FormMain.SetConfig("MainHeaders", "AppSetting", headers);
             f.saveheader = false;
         }
@@ -53,23 +54,34 @@ namespace TaskMgr.WorkWindow
             }
         }
 
+        private struct aa
+        {
+            public string a;
+            public int b;
+        }
         private void Add(string name, int defw, bool en = true)
         {
-            ListViewItem li = new ListViewItem(name);
+            ListViewItem li = new ListViewItem(LanuageMgr.GetStr(name));
             if (en)
             {
                 FormMain.itemheader i = f.listProcessGetListHeaderItem(name);
                 if (i != null)
                 {
+                    aa a = new aa();
+                    a.b = i.width;
+                    a.a = name;
                     li.Checked = i.show;
-                    li.Tag = i.width;
+                    li.Tag = a;
                     if (i.index > listView1.Items.Count)
                         listView1.Items.Insert(listView1.Items.Count, li);
                     else listView1.Items.Insert(i.index, li);
                 }
                 else
                 {
-                    li.Tag = defw;
+                    aa a = new aa();
+                    a.b = defw;
+                    a.a = name;
+                    li.Tag = a;
                     listView1.Items.Add(li);
                 }
             }
@@ -77,16 +89,16 @@ namespace TaskMgr.WorkWindow
 
         private void FormMainListHeaders_Load(object sender, EventArgs e)
         {
-            Add("进程名称", 170);
-            Add("发布者", 100);
-            Add("状态", 70);
-            Add("PID", 50);
-            Add("CPU", 75);
-            Add("内存", 75);
-            Add("磁盘", 75);
-            Add("网络", 75);
-            Add("进程路径", 240);
-            Add("命令行", 200);
+            Add("TitleProcName", 170);
+            Add("TitlePublisher", 100);
+            Add("TitleStatus", 70);
+            Add("TitlePID", 50);
+            Add("TitleCPU", 75);
+            Add("TitleRam", 75);
+            Add("TitleDisk", 75);
+            Add("TitleNet", 75);
+            Add("TitleProcPath", 240);
+            Add("TitleCmdLine", 200);
             //DialogResult = DialogResult.Cancel;
         }
     }

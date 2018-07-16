@@ -8,8 +8,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Diagnostics;
+using PCMgr.Lanuages;
 
-namespace TaskMgr.Ctls
+namespace PCMgr.Ctls
 {
     public partial class PerformancePageDisk : UserControl, IPerformancePage
     {
@@ -59,8 +60,8 @@ namespace TaskMgr.Ctls
             float readbytes = performanceCounter_readSpeed.NextValue();
             float writebytes = performanceCounter_writeSpeed.NextValue();
 
-            item_readSpeed.Value = FormMain.FormatFileSize(Convert.ToInt64(readbytes)) + "/秒";
-            item_writeSpeed.Value = FormMain.FormatFileSize(Convert.ToInt64(writebytes)) + "/秒";
+            item_readSpeed.Value = FormMain.FormatFileSize(Convert.ToInt64(readbytes)) + "/" + FormMain.str_sec;
+            item_writeSpeed.Value = FormMain.FormatFileSize(Convert.ToInt64(writebytes)) + "/" + FormMain.str_sec;
 
             item_responseTime.Value = performanceCounter_avgQue.NextValue().ToString("0.0") + "%";
 
@@ -92,7 +93,7 @@ namespace TaskMgr.Ctls
             item_readSpeed = new PerformanceInfos.PerformanceInfoSpeicalItem();
             item_writeSpeed = new PerformanceInfos.PerformanceInfoSpeicalItem();
 
-            performanceTitle1.Title = "磁盘" + currDisk;
+            performanceTitle1.Title = LanuageMgr.GetStr("TitleDisk") + currDisk;
             performanceTitle1.SmallTitle = "";
 
             performanceCounter_read = new PerformanceCounter("PhysicalDisk", "Disk Reads/sec", currDisk, true);
@@ -101,11 +102,11 @@ namespace TaskMgr.Ctls
             performanceCounter_writeSpeed = new PerformanceCounter("PhysicalDisk", "Disk Write Bytes/sec", currDisk, true);
             performanceCounter_avgQue = new PerformanceCounter("PhysicalDisk", "Avg. Disk Queue Length", currDisk, true);
 
-            item_diskTime.Name = "活动时间";
-            item_responseTime.Name = "队列时间";
+            item_diskTime.Name = LanuageMgr.GetStr("ActiveTime");
+            item_responseTime.Name = LanuageMgr.GetStr("QueueTime");
             item_readSpeed.LineSp = true;
-            item_readSpeed.Name = "读取速度";
-            item_writeSpeed.Name = "写入速度";
+            item_readSpeed.Name = LanuageMgr.GetStr("ReadSpeed");
+            item_writeSpeed.Name = LanuageMgr.GetStr("WriteSpeed");
             item_readSpeed.DrawFrontLine = true;
             item_readSpeed.FrontLineColor = FormMain.DiskDrawColor;
             item_writeSpeed.DrawFrontLine = true;

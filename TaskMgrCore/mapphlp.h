@@ -12,6 +12,7 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 void MPrintErrorMessage(LPWSTR str, int icon = MB_OK);
 int MShowMessageDialog(HWND hwnd, LPWSTR text, LPWSTR title, LPWSTR apptl, int i=0, int button=0);
 int MShowErrorMessage(LPWSTR text, LPWSTR intr, int ico=0, int btn=0);
+int MShowErrorMessageWithLastErr(LPWSTR text, LPWSTR intr, int ico, int btn);
 
 EXTERN_C M_API BOOL MIsSystemSupport();
 EXTERN_C M_API BOOL MAppMainLoad();
@@ -23,6 +24,7 @@ EXTERN_C M_API DWORD MAppMainSetExitCode(DWORD ex);
 
 EXTERN_C M_API void* MAppSetCallBack(void* cp, int id);
 EXTERN_C M_API void MAppMainCall(int msg, void * data1, void * data2);
+EXTERN_C M_API void MAppSetLanuageItems(int in, int ind, LPWSTR msg, int size);
 EXTERN_C M_API void MAppExit();
 EXTERN_C M_API void MAppRebot();
 EXTERN_C M_API void MAppRebotAdmin();

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TaskMgr.Ctls
+namespace PCMgr.Ctls
 {
     interface IPerformancePage
     {

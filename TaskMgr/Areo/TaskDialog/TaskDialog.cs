@@ -15,7 +15,7 @@ using System.Windows.Forms;
 using System.Drawing;
 using System.Runtime.InteropServices;
 
-namespace TaskMgr.Aero.TaskDialog {
+namespace PCMgr.Aero.TaskDialog {
 
     /// <summary>Displays a dialog box that can contain text, icons, buttons, command links, radio buttons and/or a progress bar.</summary>
     public partial class TaskDialog {
@@ -183,7 +183,7 @@ namespace TaskMgr.Aero.TaskDialog {
 		int _ProgressBarPosition = 0,
 			_ProgressBarMinRange = 0,
 			_ProgressBarMaxRange = defaultProgressBarMax;
-        TaskMgr.Aero.ProgressBar.States _ProgressBarState = ProgressBar.States.Normal;
+        PCMgr.Aero.ProgressBar.States _ProgressBarState = ProgressBar.States.Normal;
 
         #endregion
 
@@ -272,19 +272,19 @@ namespace TaskMgr.Aero.TaskDialog {
 
 		/// <summary>Gets or sets the current Progress bar state.</summary>
 		/// <remarks>Determines the bar's color and behavior.</remarks>
-        public TaskMgr.Aero.ProgressBar.States ProgressBarState {
+        public PCMgr.Aero.ProgressBar.States ProgressBarState {
             get { return _ProgressBarState; }
             set {
                 int iValue = 0;
                 switch (value) {
                     case ProgressBar.States.Normal:
-                        iValue = TaskMgr.Aero.NativeMethods.PBST_NORMAL; break;
+                        iValue = PCMgr.Aero.NativeMethods.PBST_NORMAL; break;
 
                     case ProgressBar.States.Error:
-                        iValue = TaskMgr.Aero.NativeMethods.PBST_ERROR; break;
+                        iValue = PCMgr.Aero.NativeMethods.PBST_ERROR; break;
 
                     case ProgressBar.States.Paused:
-                        iValue = TaskMgr.Aero.NativeMethods.PBST_PAUSED; break;
+                        iValue = PCMgr.Aero.NativeMethods.PBST_PAUSED; break;
                 }
 
                 PostMessage(new Message(NativeMethods.TaskDialogMessages.TDM_SET_PROGRESS_BAR_STATE, iValue, 0));
@@ -398,7 +398,7 @@ namespace TaskMgr.Aero.TaskDialog {
             while (IsShowing && _msgQueue.Count > 0) {
                 Message msg = _msgQueue.Peek();
 
-                TaskMgr.Aero.NativeMethods.SendMessage(_hwnd, (uint)msg.MessageType, msg.wParam, msg.lParam);
+                PCMgr.Aero.NativeMethods.SendMessage(_hwnd, (uint)msg.MessageType, msg.wParam, msg.lParam);
 
                 //Delete the message (may contain unmanaged memory pointers)
                 msg.Dispose();
@@ -408,7 +408,7 @@ namespace TaskMgr.Aero.TaskDialog {
 
         private void PostMessage(Message msg) {
             if (IsShowing) {
-                TaskMgr.Aero.NativeMethods.SendMessage(_hwnd, (uint)msg.MessageType, msg.wParam, msg.lParam);
+                PCMgr.Aero.NativeMethods.SendMessage(_hwnd, (uint)msg.MessageType, msg.wParam, msg.lParam);
             }
             else {
                 _msgQueue.Enqueue(msg);

@@ -9,8 +9,9 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
+using PCMgr.Lanuages;
 
-namespace TaskMgr.Ctls
+namespace PCMgr.Ctls
 {
     public partial class PerformancePageCpu : UserControl, IPerformancePage
     {
@@ -121,32 +122,32 @@ namespace TaskMgr.Ctls
 
             cpuCount = MPERF_GetProcessNumber();
 
-            performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem("最大速度：", MPERF_GetCpuFrequency().ToString() + " MHz"));
-            performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem("逻辑处理器：", cpuCount.ToString()));
+            performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem(LanuageMgr.GetStr("MaxSpeed"), MPERF_GetCpuFrequency().ToString() + " MHz"));
+            performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem(LanuageMgr.GetStr("CpuCpunt"), cpuCount.ToString()));
 
             if (MPERF_GetCpuInfos())
             {
-                performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem("内核：", MPERF_GetCpuPackage().ToString()));
-                performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem("L1 缓存：", FormMain.FormatFileSize1(Convert.ToInt32(MPERF_GetCpuL1Cache()))));
-                performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem("L2 缓存：", FormMain.FormatFileSize1(Convert.ToInt32(MPERF_GetCpuL2Cache()))));
-                if (MPERF_GetCpuL3Cache() != 0) performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem("L3 缓存：", FormMain.FormatFileSize1(Convert.ToInt32(MPERF_GetCpuL3Cache()))));
+                performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem(LanuageMgr.GetStr("CpuPackageCount"), MPERF_GetCpuPackage().ToString()));
+                performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem("L" + 1 + LanuageMgr.GetStr("Cache"), FormMain.FormatFileSize1(Convert.ToInt32(MPERF_GetCpuL1Cache()))));
+                performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem("L" + 2 + LanuageMgr.GetStr("Cache"), FormMain.FormatFileSize1(Convert.ToInt32(MPERF_GetCpuL2Cache()))));
+                if (MPERF_GetCpuL3Cache() != 0) performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem("L" + 3 + LanuageMgr.GetStr("Cache"), FormMain.FormatFileSize1(Convert.ToInt32(MPERF_GetCpuL3Cache()))));
             }
         }
         private void InitRuntimeInfo()
         {
             item_cpuuseage = new PerformanceInfos.PerformanceInfoSpeicalItem();
-            item_cpuuseage.Name = "利用率";
+            item_cpuuseage.Name = LanuageMgr.GetStr("Useage");
             item_cpuuseage_freq = new PerformanceInfos.PerformanceInfoSpeicalItem();
             item_cpuuseage_freq.Name = "";
             item_cpuuseage_freq.Value = "              ";
             item_process_count = new PerformanceInfos.PerformanceInfoSpeicalItem();
-            item_process_count.Name = "进程数";
+            item_process_count.Name = FormMain.str_proc_count;
             item_thread_count = new PerformanceInfos.PerformanceInfoSpeicalItem();
-            item_thread_count.Name = "线程数";
+            item_thread_count.Name = LanuageMgr.GetStr("ThreadCount");
             item_handle_count = new PerformanceInfos.PerformanceInfoSpeicalItem();
-            item_handle_count.Name = "句柄数";
-            item_run_time = new PerformanceInfos.PerformanceInfoSpeicalItem();
-            item_run_time.Name = "正常运行时间";
+            item_handle_count.Name = LanuageMgr.GetStr("HandleCount"); 
+             item_run_time = new PerformanceInfos.PerformanceInfoSpeicalItem();
+            item_run_time.Name = LanuageMgr.GetStr("RunTime");
             performanceInfos.SpeicalItems.Add(item_cpuuseage);
             performanceInfos.SpeicalItems.Add(item_cpuuseage_freq);
             performanceInfos.SpeicalItems.Add(item_process_count);

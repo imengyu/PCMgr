@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TaskMgr.Helpers
+namespace PCMgr.Helpers
 {
     class IconUtils
     {

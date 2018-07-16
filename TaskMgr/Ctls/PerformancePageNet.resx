@@ -117,4 +117,100 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <assembly alias="mscorlib" name="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="performanceGrid.TabIndex" type="System.Int32, mscorlib">
+    <value>0</value>
+  </data>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="performanceTitle.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
+    <value>Top</value>
+  </data>
+  <data name="&gt;&gt;performanceInfos.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;performanceTitle.Name" xml:space="preserve">
+    <value>performanceTitle</value>
+  </data>
+  <data name="&gt;&gt;performanceTitle.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;$this.Type" xml:space="preserve">
+    <value>System.Windows.Forms.UserControl, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;performanceGrid.Type" xml:space="preserve">
+    <value>PCMgr.Ctls.PerformanceGrid, PCMgr32, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+  </data>
+  <data name="&gt;&gt;$this.Name" xml:space="preserve">
+    <value>PerformancePageNet</value>
+  </data>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="performanceInfos.Size" type="System.Drawing.Size, System.Drawing">
+    <value>506, 114</value>
+  </data>
+  <data name="performanceGrid.Size" type="System.Drawing.Size, System.Drawing">
+    <value>503, 257</value>
+  </data>
+  <data name="&gt;&gt;performanceTitle.Type" xml:space="preserve">
+    <value>PCMgr.Ctls.PerformanceTitle, PCMgr32, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+  </data>
+  <data name="performanceInfos.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
+    <value>Bottom</value>
+  </data>
+  <data name="&gt;&gt;performanceGrid.Name" xml:space="preserve">
+    <value>performanceGrid</value>
+  </data>
+  <data name="&gt;&gt;performanceGrid.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;performanceInfos.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="performanceTitle.Location" type="System.Drawing.Point, System.Drawing">
+    <value>0, 0</value>
+  </data>
+  <data name="performanceInfos.Location" type="System.Drawing.Point, System.Drawing">
+    <value>0, 307</value>
+  </data>
+  <data name="performanceGrid.Location" type="System.Drawing.Point, System.Drawing">
+    <value>3, 44</value>
+  </data>
+  <data name="&gt;&gt;performanceTitle.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="performanceGrid.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
+    <value>Top, Bottom, Left, Right</value>
+  </data>
+  <data name="performanceInfos.TabIndex" type="System.Int32, mscorlib">
+    <value>2</value>
+  </data>
+  <data name="$this.AutoScaleDimensions" type="System.Drawing.SizeF, System.Drawing">
+    <value>6, 12</value>
+  </data>
+  <data name="&gt;&gt;performanceGrid.ZOrder" xml:space="preserve">
+    <value>2</value>
+  </data>
+  <data name="performanceTitle.TabIndex" type="System.Int32, mscorlib">
+    <value>1</value>
+  </data>
+  <data name="performanceTitle.Size" type="System.Drawing.Size, System.Drawing">
+    <value>506, 38</value>
+  </data>
+  <data name="performanceInfos.Text" xml:space="preserve">
+    <value>performanceInfos1</value>
+  </data>
+  <data name="&gt;&gt;performanceInfos.Type" xml:space="preserve">
+    <value>PCMgr.Ctls.PerformanceInfos, PCMgr32, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+  </data>
+  <data name="$this.Size" type="System.Drawing.Size, System.Drawing">
+    <value>506, 421</value>
+  </data>
+  <data name="&gt;&gt;performanceInfos.Name" xml:space="preserve">
+    <value>performanceInfos</value>
+  </data>
+  <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>True</value>
+  </metadata>
+  <metadata name="$this.Language" type="System.Globalization.CultureInfo, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>en</value>
+  </metadata>
 </root>

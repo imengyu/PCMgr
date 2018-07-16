@@ -12,7 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace TaskMgr.Aero.TaskDialog {
+namespace PCMgr.Aero.TaskDialog {
 	public partial class TaskDialog {
 
 		#region Static display methods

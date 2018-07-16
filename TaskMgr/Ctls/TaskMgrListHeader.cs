@@ -5,7 +5,7 @@ using System.Drawing.Drawing2D;
 using System.Text;
 using System.Windows.Forms;
 
-namespace TaskMgr.Ctls
+namespace PCMgr.Ctls
 {
     public class TaskMgrListHeader : Control
     {
@@ -228,13 +228,13 @@ namespace TaskMgr.Ctls
                     if (items[i].ArrowType == TaskMgrListHeaderSortArrow.Ascending)
                     {
                         int posx = thisWidth + Items[i].Width / 2 - 4;
-                        g.DrawImage(Properties.Resources.listHeaderArrowAscending, posx, 0, 9, 5);
+                        g.DrawImage(PCMgr.Properties.Resources.listHeaderArrowAscending, posx, 0, 9, 5);
                         arrdrawed = true;
                     }
                     else if (items[i].ArrowType == TaskMgrListHeaderSortArrow.Descending)
                     {
                         int posx = thisWidth + Items[i].Width / 2 - 4;
-                        g.DrawImage(Properties.Resources.listHeaderArrowDisascending, posx, 0, 9, 5);
+                        g.DrawImage(PCMgr.Properties.Resources.listHeaderArrowDisascending, posx, 0, 9, 5);
                         arrdrawed = true;
                     }
                 thisWidth += items[i].Width;
@@ -404,6 +404,7 @@ namespace TaskMgr.Ctls
         StringFormat format = null;
         bool m1 = false;
 
+        public string FuckYou { get; set; }
         public bool IsNum { get; set; }
         public bool IsHot
         {

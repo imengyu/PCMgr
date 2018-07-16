@@ -4,6 +4,7 @@
 #include "perfhlp.h"
 #include "syshlp.h"
 #include "nthlp.h"
+#include "lghlp.h"
 #include "resource.h"
 #include <Psapi.h>
 #include <process.h>
@@ -12,7 +13,7 @@
 #include <tchar.h>
 #include <shellapi.h>
 
-extern HINSTANCE hInst;
+extern HINSTANCE hInstRs;
 
 LPWSTR thisCommandPath = NULL;
 LPWSTR thisCommandName = NULL;
@@ -325,7 +326,7 @@ M_API BOOL MDosPathToNtPath(LPWSTR pszDosPath, LPWSTR pszNtPath)
 M_API BOOL MGetProcessFullPathEx(DWORD dwPID, LPWSTR outNter, PHANDLE phandle, LPWSTR pszExeName)
 {
 	if (dwPID == 0) {
-		wcscpy_s(outNter, 260, L"系统空闲进程"); 
+		wcscpy_s(outNter, 260, str_item_systemidleproc);
 		MOpenProcessNt(dwPID, phandle);
 		return 1;
 	}
@@ -566,13 +567,32 @@ M_API DWORD MTerminateProcessNt(DWORD dwId, HANDLE handle)
 	}
 }
 
+M_API int MAppWorkShowMenuProcessPrepare(LPWSTR strFilePath, LPWSTR strFileName, DWORD pid)
+{
+	thisCommandPid = pid;
+	if (pid > 0)
+	{
+		if (wcscmp(strFilePath, L"") != 0 && wcslen(strFilePath) < 260) {
+			wcscpy_s(thisCommandPath, 260, strFilePath);
+			if (wcslen(strFileName) < 260)
+				wcscpy_s(thisCommandName, 260, strFileName);
+		}
+		return 0;
+	}
+	else if (pid == 0)
+	{
+		if (wcslen(strFilePath) < 260)
+			wcscpy_s(thisCommandPath, 260, strFilePath);
+	}
+	return 0;
+}
 //MENU
 M_API int MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWORD pid, HWND hDlg, int data)
 {
 	thisCommandPid = pid;
 	if (pid > 0)
 	{
-		HMENU hroot = LoadMenu(hInst, MAKEINTRESOURCE(IDR_MENUTASK));
+		HMENU hroot = LoadMenu(hInstRs, MAKEINTRESOURCE(IDR_MENUTASK));
 		if (hroot) {
 			HMENU hpop = GetSubMenu(hroot, 0);
 			POINT pt;
@@ -587,6 +607,7 @@ M_API int MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWORD 
 				EnableMenuItem(hpop, IDM_VHANDLES, MF_DISABLED);
 				EnableMenuItem(hpop, IDM_VMODULS, MF_DISABLED);
 				EnableMenuItem(hpop, IDM_VWINS, MF_DISABLED);
+				EnableMenuItem(hpop, IDM_KILL, MF_DISABLED);
 			}
 			if (wcscmp(strFilePath, L"") == 0 || wcscmp(strFilePath, L"-") == 0) {
 				EnableMenuItem(hpop, IDM_OPENPATH, MF_DISABLED);
@@ -609,7 +630,7 @@ M_API int MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWORD 
 	}
 	else if(pid==0)
 	{
-		HMENU hroot = LoadMenu(hInst, MAKEINTRESOURCE(IDR_MENUTASK));
+		HMENU hroot = LoadMenu(hInstRs, MAKEINTRESOURCE(IDR_MENUTASK));
 		if (hroot) {
 			HMENU hpop = GetSubMenu(hroot, 0);
 			POINT pt;
@@ -672,7 +693,6 @@ HINSTANCE hUser32;
 
 BOOL LoadDll()
 {
-	
 	hNtDll = LoadLibrary(L"ntdll.dll");
 	hShell32 = LoadLibrary(L"shell32.dll");
 	hKernel32 = GetModuleHandle(L"kernel32.dll");
@@ -681,7 +701,7 @@ BOOL LoadDll()
 	thisCommandName = new WCHAR[260];
 	if (hNtDll == NULL) {
 		FreeLibrary(hNtDll);
-		MessageBox(NULL, L"无法加载NTDLL，程序将退出。", L"发生了未知错误", MB_OK | MB_ICONERROR);
+		MessageBox(NULL, L"Load NTDLL ERROR", L"ERROR !", MB_OK | MB_ICONERROR);
 		return FALSE;
 	}
 	else {

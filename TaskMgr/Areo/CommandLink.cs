@@ -15,7 +15,7 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
-namespace TaskMgr.Aero
+namespace PCMgr.Aero
 {
     [ToolboxBitmap(typeof(Button))]
     public class CommandLink: System.Windows.Forms.Button

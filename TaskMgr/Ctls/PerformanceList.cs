@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
-namespace TaskMgr.Ctls
+namespace PCMgr.Ctls
 {
     public class PerformanceList : Control
     {

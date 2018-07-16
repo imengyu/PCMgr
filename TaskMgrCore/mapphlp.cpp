@@ -7,6 +7,8 @@
 #include "fmhlp.h"
 #include "syshlp.h"
 #include "schlp.h"
+#include "lghlp.h"
+#include "starthlp.h"
 #include "VersionHelpers.h"
 #include "StringHlp.h"
 #include <shellapi.h>
@@ -21,7 +23,7 @@
 name = 'Microsoft.Windows.Common-Controls' version = '6.0.0.0' \
 processorArchitecture = '*' publicKeyToken = '6595b64144ccf1df' language = '*'\"")
 
-extern HINSTANCE hInst;
+extern HINSTANCE hInstRs;
 
 extern LPWSTR fmCurrectSelectFilePath0;
 extern bool fmMutilSelect;
@@ -69,12 +71,12 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 		SetWindowTheme(hWnd, L"Explorer", NULL);
 		return 1;
 	case 183: {
-		hMenuMain = LoadMenu(hInst, MAKEINTRESOURCE(IDR_MENUMAIN));
+		hMenuMain = LoadMenu(hInstRs, MAKEINTRESOURCE(IDR_MENUMAIN));
 		HMENU hR = GetSubMenu(hMenuMain, 0);
 		hMenuMainSet = GetSubMenu(hMenuMain, 1);
 		hMenuMainView = GetSubMenu(hMenuMain, 2);
 		if (!MIsRunasAdmin())
-			InsertMenu(hR, 1, MF_BYPOSITION, IDM_REBOOT_AS_ADMIN, L"以管理员模式重启程序");
+			InsertMenu(hR, 1, MF_BYPOSITION, IDM_REBOOT_AS_ADMIN, str_item_rebootasadmin);
 		SetMenu(hWnd, hMenuMain);
 		hWndMain = hWnd;
 		return 1;
@@ -82,7 +84,7 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 	case 184: {
 		if (data) {
 			MSCM_SetCurrSelSc((LPWSTR)data);
-			HMENU hroot = LoadMenu(hInst, MAKEINTRESOURCE(IDR_MENUSCSMALL));
+			HMENU hroot = LoadMenu(hInstRs, MAKEINTRESOURCE(IDR_MENUSCSMALL));
 			if (hroot) {
 				HMENU hpop = GetSubMenu(hroot, 0);
 				POINT pt;
@@ -116,7 +118,7 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 		break;
 	case 189: {
 		selectItem4 = (HWND)data;
-		HMENU hroot = LoadMenu(hInst, MAKEINTRESOURCE(IDR_MENUWINMAIN));
+		HMENU hroot = LoadMenu(hInstRs, MAKEINTRESOURCE(IDR_MENUWINMAIN));
 		if (hroot) {
 			HMENU hpop = GetSubMenu(hroot, 0);
 			POINT pt;
@@ -189,6 +191,15 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 		CheckMenuItem(hMenuMainSet, IDM_MINHIDE, min_hide ? MF_CHECKED : MF_UNCHECKED);
 		hWorkerCallBack(7, (LPVOID)(int)min_hide, 0);
 		break;
+	case 197:
+		if (data)
+			MSCM_SetCurrSelSc((LPWSTR)data);
+		break;
+	case 198:
+		selectItem4 = (HWND)data;
+		break;
+	case 199:
+		break;
 	default:
 		return 0;
 		break;
@@ -225,6 +236,23 @@ M_API void* MAppSetCallBack(void * cp, int id)
 M_API void MAppMainCall(int msg, void* data1, void* data2)
 {
 	hWorkerCallBack(msg, data1, data2);
+}
+M_API void MAppSetLanuageItems(int in, int ind, LPWSTR msg, int size)
+{
+	switch (in)
+	{
+	case 0:
+		MLG_SetLanuageItems_0(ind, msg, size);
+		break;
+	case 1:
+		MLG_SetLanuageItems_1(ind, msg, size);
+		break;
+	case 2:
+		MLG_SetLanuageItems_2(ind, msg, size);
+		break;
+	default:
+		break;
+	}
 }
 
 M_API HICON MGetWindowIcon(HWND hWnd)
@@ -342,7 +370,7 @@ M_API void MAppRebotAdmin() {
 	}
 	else {
 		if (GetLastError() == ERROR_CANCELLED) {
-			MShowMessageDialog(hWndMain, L"请在刚才的对话框中选择”是“或者”确定“来赋予本程序管理员权限。", L"提示", L"您拒绝了权限赋予。");
+			MShowMessageDialog(hWndMain, str_item_noadmin1, str_item_tip, str_item_noadmin2);
 		}
 	}
 }
@@ -445,7 +473,7 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		case IDM_ABOUT: {
-			DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+			DialogBox(hInstRs, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
 			break;
 		}
 		case IDM_TEXIT: {
@@ -459,9 +487,8 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		case IDM_KILL: {
 			if (thisCommandPid > 4)
 			{
-				LPWSTR t1 = MStrAdd(L"你希望结束 ", thisCommandName);
-				LPWSTR t2 = MStrAdd(t1, L" 吗？");
-				if (MShowMessageDialog(hWndMain, ENDTASKASKTEXT, DEFDIALOGGTITLE, t2, NULL, MB_YESNO) == IDYES)
+				if (MShowMessageDialog(hWndMain, (LPWSTR)str_item_kill_ast_content.c_str(), DEFDIALOGGTITLE,
+					(LPWSTR)(str_item_kill_ask_start + thisCommandName + str_item_kill_ask_end).c_str(), NULL, MB_YESNO) == IDYES)
 				{
 					HANDLE hProcess;
 					int rs = MOpenProcessNt(thisCommandPid, &hProcess);
@@ -469,28 +496,25 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 					{
 						rs = MTerminateProcessNt(0, hProcess);
 						if (rs == 0xC0000022)
-							MShowErrorMessage(L"拒绝访问。", L"无法结束进程", MB_ICONERROR, MB_OK);
+							MShowErrorMessage((LPWSTR)str_item_access_denied.c_str(), (LPWSTR)str_item_kill_failed.c_str(), MB_ICONERROR, MB_OK);
 						else if (rs != 1)
-							ThrowErrorAndErrorCodeX(rs, L"无法结束进程，错误代码：", L"无法结束进程");
+							ThrowErrorAndErrorCodeX(rs, str_item_endprocfailed, (LPWSTR)str_item_kill_failed.c_str());
 						else SendMessage(hWndMain, WM_COMMAND, 41012, 0);
 					}
 					else if (rs == 0xC0000022)
-						MShowErrorMessage(L"拒绝访问。", L"无法结束进程", MB_ICONERROR, MB_OK);
+						MShowErrorMessage((LPWSTR)str_item_access_denied.c_str(), (LPWSTR)str_item_kill_failed.c_str(), MB_ICONERROR, MB_OK);
 					else if (rs == -1) {
-						MShowErrorMessage(L"无效进程。", L"无法结束进程", MB_ICONWARNING, MB_OK);
+						MShowErrorMessage((LPWSTR)str_item_invalidproc.c_str(), (LPWSTR)str_item_kill_failed.c_str(), MB_ICONWARNING, MB_OK);
 						SendMessage(hWndMain, WM_COMMAND, 41012, 0);
 					}
-					else ThrowErrorAndErrorCodeX(rs, L"无法打开进程，错误代码：", L"无法结束进程");
+					else ThrowErrorAndErrorCodeX(rs, str_item_openprocfailed, (LPWSTR)str_item_kill_failed.c_str());
 				}
-				delete t1;
-				delete t2;
 			}
 			break;
 		}
 		case IDM_FILEPROP: {
 			if (thisCommandPath)
 				MShowFileProp(thisCommandPath);
-			else MShowErrorMessage(L"无法获取路径。", L"无法完成该操作", MB_ICONERROR, MB_OK);
 			break;
 		}
 		case IDM_OPENPATH: {
@@ -500,7 +524,6 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				ShellExecuteW(NULL, NULL, L"explorer.exe", lparm, NULL, SW_SHOWDEFAULT);
 				delete lparm;
 			}
-			else MShowErrorMessage(L"无法获取路径。", L"无法完成该操作", MB_ICONERROR, MB_OK);
 			break;
 		}
 		case IDM_VMODULS: {
@@ -523,10 +546,12 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			{
 				int rs = MSuspendProcessNt(thisCommandPid, NULL);
 				if (rs == -1) {
-					MShowErrorMessage(L"无效进程。", L"无法完成该操作", MB_ICONWARNING, MB_OK);
+					MShowErrorMessage((LPWSTR)str_item_invalidproc.c_str(), (LPWSTR)str_item_op_failed.c_str(), MB_ICONWARNING, MB_OK);
 					SendMessage(hWndMain, WM_COMMAND, 41012, 0);
 				}
-				else if (rs != 1) ThrowErrorAndErrorCodeX(rs, L"无法暂停进程运行进程，错误代码：", L"无法完成该操作");
+				else if (rs == 0xC0000022)
+					MShowErrorMessage((LPWSTR)str_item_access_denied.c_str(), (LPWSTR)str_item_kill_failed.c_str(), MB_ICONERROR, MB_OK);
+				else if (rs != 1) ThrowErrorAndErrorCodeX(rs, str_item_susprocfailed, (LPWSTR)str_item_op_failed.c_str());
 				else SendMessage(hWndMain, WM_COMMAND, 41012, 0);
 			}
 			break;
@@ -536,10 +561,12 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			{
 				int rs = MRusemeProcessNt(thisCommandPid, NULL);
 				if (rs == -1) {
-					MShowErrorMessage(L"无效进程。", L"无法完成该操作", MB_ICONWARNING, MB_OK);
+					MShowErrorMessage((LPWSTR)str_item_invalidproc.c_str(), (LPWSTR)str_item_op_failed.c_str(), MB_ICONWARNING, MB_OK);
 					SendMessage(hWndMain, WM_COMMAND, 41012, 0);
 				} 
-				else if (rs != 1)ThrowErrorAndErrorCodeX(rs, L"无法继续进程运行进程，错误代码：", L"无法完成该操作");
+				else if (rs == 0xC0000022)
+					MShowErrorMessage((LPWSTR)str_item_access_denied.c_str(), (LPWSTR)str_item_op_failed.c_str(), MB_ICONERROR, MB_OK);
+				else if (rs != 1)ThrowErrorAndErrorCodeX(rs, str_item_resprocfailed, (LPWSTR)str_item_op_failed.c_str());
 				else SendMessage(hWndMain, WM_COMMAND, 41012, 0);
 			}
 			break;
@@ -607,12 +634,12 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 		case ID_FMMAIN_COPYTO: {
 			if (!MFM_CopyFileToUser())
-				MShowErrorMessage(fmCurrectSelectFilePath0, L"无法复制文件", MB_ICONWARNING, MB_OK);
+				MShowErrorMessage(fmCurrectSelectFilePath0, (LPWSTR)(str_item_cantcopyfile.c_str()), MB_ICONWARNING, MB_OK);
 			break;
 		}
 		case ID_FMMAIN_MOVETO: {
 			if (!MFM_MoveFileToUser())
-				MShowErrorMessage(fmCurrectSelectFilePath0, L"无法移动文件", MB_ICONWARNING, MB_OK);
+				MShowErrorMessage(fmCurrectSelectFilePath0, (LPWSTR)(str_item_cantmovefile.c_str()), MB_ICONWARNING, MB_OK);
 			break;
 		}
 		case ID_FMMAIN_COPYPATH: {
@@ -733,6 +760,14 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		case ID_SCSMALL_GOTOSC: {
 			return MSCM_HandleWmCommand(wParam);
 		}
+		case IDC_MENUSTART_DELREG:
+		case IDC_MENUSTART_DELREGANDFILE:
+        case IDC_MENUSTART_COPYPATH :
+        case IDC_MENUSTART_COPYREGPATH:
+		case IDC_MENUSTART_OPENPATH :
+		case IDC_MENUSTART_OPENREGPATH: {
+			return MSM_HandleWmCommand(wParam);
+		}
 		default:
 			break;
 		}
@@ -754,7 +789,7 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	switch (message)
 	{
 	case WM_INITDIALOG:
-		SendMessage(hDlg, WM_SETICON, ICON_SMALL, (LPARAM)LoadIcon(hInst, MAKEINTRESOURCE(IDI_ICONAPP)));
+		SendMessage(hDlg, WM_SETICON, ICON_SMALL, (LPARAM)LoadIcon(hInstRs, MAKEINTRESOURCE(IDI_ICONAPP)));
 		return (INT_PTR)TRUE;
 	case WM_SYSCOMMAND:
 		if (wParam == SC_CLOSE)
@@ -798,6 +833,12 @@ int MShowMessageDialog(HWND hwnd, LPWSTR text, LPWSTR title, LPWSTR apptl, int i
 int MShowErrorMessage(LPWSTR text, LPWSTR intr, int ico, int btn)
 {
 	return MShowMessageDialog(hWndMain, text, DEFDIALOGGTITLE, intr, ico, btn);
+}
+int MShowErrorMessageWithLastErr(LPWSTR text, LPWSTR intr, int ico, int btn)
+{
+	std::wstring w = text;
+	w += FormatString(L"\nLastError : %d", GetLastError());
+	return MShowMessageDialog(hWndMain, (LPWSTR)w.c_str(), DEFDIALOGGTITLE, intr, ico, btn);
 }
 
 EXTERN_C M_API HRESULT MTaskDialogIndirect(_In_ const TASKDIALOGCONFIG *pTaskConfig, _Out_opt_ int *pnButton, _Out_opt_ int *pnRadioButton, _Out_opt_ BOOL *pfVerificationFlagChecked)

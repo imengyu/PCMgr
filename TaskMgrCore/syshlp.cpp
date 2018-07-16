@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "syshlp.h"
+#include "shellapi.h"
 
 BOOL _Is64BitOS = -1;
 BOOL _IsRunasAdmin = -1;
@@ -152,4 +153,18 @@ M_CAPI(PVOID) MGetProcAddress(_In_ PVOID DllHandle, _In_opt_ PSTR ProcedureName)
 {
 	return GetProcAddress((HMODULE)DllHandle, ProcedureName);
 }
-
+M_CAPI(BOOL) MCommandLineToFilePath(LPWSTR cmdline, LPWSTR buffer, int size)
+{
+	if (cmdline && buffer)
+	{
+		int argc = 0;
+		LPWSTR *szArglist = CommandLineToArgvW(cmdline, &argc);
+		if (szArglist)
+		{
+			wcscpy_s(buffer, size, szArglist[0]);
+			LocalFree(szArglist);
+			return  TRUE;
+		}
+	}
+	return  FALSE;
+}

@@ -100,6 +100,9 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)$(TargetName)_PCMgrCore.pdb</ProgramDatabaseFile>
     </Link>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>$(VC_IncludePath);$(WindowsSDK_IncludePath);</AdditionalIncludeDirectories>
+    </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -157,6 +160,9 @@
     <ClInclude Include="comdlghlp.h" />
     <ClInclude Include="DirectoryHelper.h" />
     <ClInclude Include="fmhlp.h" />
+    <ClInclude Include="kernelhlp.cpp" />
+    <ClInclude Include="kernelhlp.h" />
+    <ClInclude Include="lghlp.h" />
     <ClInclude Include="mainprocs.h" />
     <ClInclude Include="mapphlp.h" />
     <ClInclude Include="ntdef.h" />
@@ -164,8 +170,10 @@
     <ClInclude Include="PathHelper.h" />
     <ClInclude Include="perfhlp.h" />
     <ClInclude Include="prochlp.h" />
+    <ClInclude Include="reghlp.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="schlp.h" />
+    <ClInclude Include="starthlp.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="StringHlp.h" />
     <ClInclude Include="StringSplit.h" />
@@ -194,13 +202,16 @@
       </PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="fmhlp.cpp" />
+    <ClCompile Include="lghlp.cpp" />
     <ClCompile Include="mainprocs.cpp" />
     <ClCompile Include="mapphlp.cpp" />
     <ClCompile Include="nthlp.cpp" />
     <ClCompile Include="PathHelper.cpp" />
     <ClCompile Include="perfhlp.cpp" />
     <ClCompile Include="prochlp.cpp" />
+    <ClCompile Include="reghlp.cpp" />
     <ClCompile Include="schlp.cpp" />
+    <ClCompile Include="starthlp.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

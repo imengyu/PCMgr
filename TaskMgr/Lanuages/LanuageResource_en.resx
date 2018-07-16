@@ -1,0 +1,669 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AskTitle" xml:space="preserve">
+    <value>Question</value>
+  </data>
+  <data name="AutoStart" xml:space="preserve">
+    <value>Auto Start</value>
+  </data>
+  <data name="BtnEndProcess" xml:space="preserve">
+    <value>&amp;End Process</value>
+  </data>
+  <data name="BtnEndTask" xml:space="preserve">
+    <value>&amp;End Task</value>
+  </data>
+  <data name="BtnRestartText" xml:space="preserve">
+    <value>Restart (E)</value>
+  </data>
+  <data name="CancelRun" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="ContinueRun" xml:space="preserve">
+    <value>Continue</value>
+  </data>
+  <data name="DemandStart" xml:space="preserve">
+    <value>Demand Start</value>
+  </data>
+  <data name="Disabled" xml:space="preserve">
+    <value>Disabled</value>
+  </data>
+  <data name="DoNotRemidMeLater" xml:space="preserve">
+    <value>Don't remind me again</value>
+  </data>
+  <data name="DriverLoad" xml:space="preserve">
+    <value>DriverLoad</value>
+  </data>
+  <data name="ErrTitle" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="FailedGetPrivileges" xml:space="preserve">
+    <value>Failed Get Privileges!</value>
+  </data>
+  <data name="FileCopyed" xml:space="preserve">
+    <value>The file has been copied to the clipboard</value>
+  </data>
+  <data name="FileCuted" xml:space="preserve">
+    <value>The file has been cut to the clipboard</value>
+  </data>
+  <data name="FileSystem" xml:space="preserve">
+    <value>FileSystem</value>
+  </data>
+  <data name="FolderCopyed" xml:space="preserve">
+    <value>The folder has been copied to the clipboard</value>
+  </data>
+  <data name="FolderCuted" xml:space="preserve">
+    <value>The folder has been cut to the clipboard</value>
+  </data>
+  <data name="FolderHasExist" xml:space="preserve">
+    <value>The specified folder already exists</value>
+  </data>
+  <data name="GetFailed" xml:space="preserve">
+    <value>Get Failed</value>
+  </data>
+  <data name="InvalidFileName" xml:space="preserve">
+    <value>Invalid file name.</value>
+  </data>
+  <data name="KernelDriver" xml:space="preserve">
+    <value>KernelDriver</value>
+  </data>
+  <data name="LanuageChangedTip" xml:space="preserve">
+    <value>Language settings will only take effect when you open the software next time.</value>
+  </data>
+  <data name="Loading" xml:space="preserve">
+    <value>Loading</value>
+  </data>
+  <data name="LocalService" xml:space="preserve">
+    <value>Local Service</value>
+  </data>
+  <data name="LocalServiceAndNoImpersonation" xml:space="preserve">
+    <value>Local Service (And No Impersonation)</value>
+  </data>
+  <data name="LocalServiceNetworkRestricted" xml:space="preserve">
+    <value>Local Service (Network Restricted)</value>
+  </data>
+  <data name="LocalServiceNoNetwork" xml:space="preserve">
+    <value>Local Service (No Network)</value>
+  </data>
+  <data name="LocalSystem" xml:space="preserve">
+    <value>Local System</value>
+  </data>
+  <data name="LocalSystemNetworkRestricted" xml:space="preserve">
+    <value>Local System (Network Restricted)</value>
+  </data>
+  <data name="NeedAdmin" xml:space="preserve">
+    <value>Software needs more permissions...</value>
+  </data>
+  <data name="NetworkService" xml:space="preserve">
+    <value>Network Service</value>
+  </data>
+  <data name="NetworkServiceAndNoImpersonation" xml:space="preserve">
+    <value>Network Service (And No Impersonation)</value>
+  </data>
+  <data name="NetworkServiceNetworkRestricted" xml:space="preserve">
+    <value>Network Service (Network Restricted)</value>
+  </data>
+  <data name="NewFolder" xml:space="preserve">
+    <value>New folder</value>
+  </data>
+  <data name="NewFolderFailed" xml:space="preserve">
+    <value>Create New folder failed</value>
+  </data>
+  <data name="NewFolderSuccess" xml:space="preserve">
+    <value>Create New folder succeed</value>
+  </data>
+  <data name="OpenAsk" xml:space="preserve">
+    <value>Do you want to open this file?</value>
+  </data>
+  <data name="PathCopyed" xml:space="preserve">
+    <value>The path has been copied to the clipboard</value>
+  </data>
+  <data name="PathStart" xml:space="preserve">
+    <value>Path : </value>
+  </data>
+  <data name="PathUnExists" xml:space="preserve">
+    <value>The path does not exist!</value>
+  </data>
+  <data name="PleaseEnterPath" xml:space="preserve">
+    <value>Please enter the path to go!</value>
+  </data>
+  <data name="Process32Bit" xml:space="preserve">
+    <value>32 Bit</value>
+  </data>
+  <data name="ProcessCount" xml:space="preserve">
+    <value>Process Count</value>
+  </data>
+  <data name="Ready" xml:space="preserve">
+    <value>Ready</value>
+  </data>
+  <data name="ReadyStatus" xml:space="preserve">
+    <value>Ready </value>
+  </data>
+  <data name="ReadyStatusEnd" xml:space="preserve">
+    <value> files</value>
+  </data>
+  <data name="ReadyStatusEnd2" xml:space="preserve">
+    <value> files  choosed </value>
+  </data>
+  <data name="RequestAdminText" xml:space="preserve">
+    <value>It is detected that you did not grant PCMgr administrator permission, which could result in some advanced functions unavailable. \nPCMgr requires administrator authority to control and manage the system. \n\n knows what &lt;A HREF=\ "HREF=\" &gt; administrator authority &lt;/A&gt;. \n understand the details of the software using &lt;A HREF=\ "HREF=\" &gt; administrator rights control and management.</value>
+  </data>
+  <data name="RequestAdminTitle" xml:space="preserve">
+    <value>I need more permissions</value>
+  </data>
+  <data name="Run64" xml:space="preserve">
+    <value>Start 64 - bit version</value>
+  </data>
+  <data name="RunAsAdmin" xml:space="preserve">
+    <value>Reboot the software as an administrator</value>
+  </data>
+  <data name="Second" xml:space="preserve">
+    <value>s</value>
+  </data>
+  <data name="ServiceCount" xml:space="preserve">
+    <value>Service Count</value>
+  </data>
+  <data name="ServiceHost" xml:space="preserve">
+    <value>Service Host</value>
+  </data>
+  <data name="StartSCMFailed" xml:space="preserve">
+    <value>Unable to start the service manager</value>
+  </data>
+  <data name="StatusHang" xml:space="preserve">
+    <value>Not response</value>
+  </data>
+  <data name="StatusPaused" xml:space="preserve">
+    <value>Paused</value>
+  </data>
+  <data name="StatusRunning" xml:space="preserve">
+    <value>Running</value>
+  </data>
+  <data name="StatusStopped" xml:space="preserve">
+    <value>Stopped</value>
+  </data>
+  <data name="SystemIdleProcess" xml:space="preserve">
+    <value>System Idle Process</value>
+  </data>
+  <data name="SystemService" xml:space="preserve">
+    <value>System Service</value>
+  </data>
+  <data name="TipTitle" xml:space="preserve">
+    <value>Tip</value>
+  </data>
+  <data name="TitleApp" xml:space="preserve">
+    <value>Apps</value>
+  </data>
+  <data name="TitleBackGround" xml:space="preserve">
+    <value>Background processes</value>
+  </data>
+  <data name="TitleBaseAddress" xml:space="preserve">
+    <value>Base adress</value>
+  </data>
+  <data name="TitleCmdLine" xml:space="preserve">
+    <value>Command Line</value>
+  </data>
+  <data name="TitleContinue" xml:space="preserve">
+    <value>Is it sure to continue?</value>
+  </data>
+  <data name="TitleDescription" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="TitleDisk" xml:space="preserve">
+    <value>Disk</value>
+  </data>
+  <data name="TitleDriverLoadPath" xml:space="preserve">
+    <value>Laod Order</value>
+  </data>
+  <data name="TitleDriverName" xml:space="preserve">
+    <value>Driver Name</value>
+  </data>
+  <data name="TitleDriverObj" xml:space="preserve">
+    <value>Driver Obj</value>
+  </data>
+  <data name="TitleDriverPath" xml:space="preserve">
+    <value>Driver Path</value>
+  </data>
+  <data name="TitleDriverScName" xml:space="preserve">
+    <value>Driver Service Name</value>
+  </data>
+  <data name="TitleDriverSize" xml:space="preserve">
+    <value>Driver Size</value>
+  </data>
+  <data name="TitleFullName" xml:space="preserve">
+    <value>Full name</value>
+  </data>
+  <data name="TitleInstallDir" xml:space="preserve">
+    <value>Install Dir</value>
+  </data>
+  <data name="TitleLogoOff" xml:space="preserve">
+    <value>You will be log off.</value>
+  </data>
+  <data name="TitleName" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="TitleNet" xml:space="preserve">
+    <value>Network</value>
+  </data>
+  <data name="TitleProcName" xml:space="preserve">
+    <value>Process name</value>
+  </data>
+  <data name="TitleProcPath" xml:space="preserve">
+    <value>Process path</value>
+  </data>
+  <data name="TitlePublisher" xml:space="preserve">
+    <value>Publisher</value>
+  </data>
+  <data name="TitleRam" xml:space="preserve">
+    <value>Ram</value>
+  </data>
+  <data name="TitleReboot" xml:space="preserve">
+    <value>Computer will be reboot.</value>
+  </data>
+  <data name="TitleRestart" xml:space="preserve">
+    <value>Computer will be restart.</value>
+  </data>
+  <data name="TitleShutdown" xml:space="preserve">
+    <value>Computer will be shutdown.</value>
+  </data>
+  <data name="TitleStatus" xml:space="preserve">
+    <value>State</value>
+  </data>
+  <data name="TitleWinApp" xml:space="preserve">
+    <value>Windows Process</value>
+  </data>
+  <data name="UnistackSvcGroup" xml:space="preserve">
+    <value>Unistack Service Group</value>
+  </data>
+  <data name="UserService" xml:space="preserve">
+    <value>User Service</value>
+  </data>
+  <data name="UWPEnumFail" xml:space="preserve">
+    <value>Unable to enumerate Universal applications</value>
+  </data>
+  <data name="VisitFolderFailed" xml:space="preserve">
+    <value>Unable to open folder</value>
+  </data>
+  <data name="X64WarnFinded64Text" xml:space="preserve">
+    <value>\n has found 64 bits of PCMgr in your software directory, clicking "start the 64 bit version", you can start the software directly.</value>
+  </data>
+  <data name="X64WarnMoreText" xml:space="preserve">
+    <value>The current version of PCMgr is 32 - bit, and your system version is 64 - bit, and some advanced features, such as kernel - driven view, must use a 64 bit driver, so this version can't use these advanced functions.</value>
+  </data>
+  <data name="X64WarnText" xml:space="preserve">
+    <value>It is detected that you run 32 bit PCMgr in the 64 bit system, which will result in some functions unavailable. Do you want to continue to run the software?</value>
+  </data>
+  <data name="X64WarnTitle" xml:space="preserve">
+    <value>The software version is not in conformity with the system version</value>
+  </data>
+  <data name="TitleCPU" xml:space="preserve">
+    <value>CPU</value>
+  </data>
+  <data name="TitlePID" xml:space="preserve">
+    <value>PID</value>
+  </data>
+  <data name="AccessDenied" xml:space="preserve">
+    <value>Access Denied</value>
+  </data>
+  <data name="InvalidProcess" xml:space="preserve">
+    <value>Invalid Process.</value>
+  </data>
+  <data name="KillAskContent" xml:space="preserve">
+    <value>If an open program is associated with this process, it will close the program and lose all unsaved data. If you end a system process, you may cause the system to be unstable. Are you sure you want to continue?</value>
+  </data>
+  <data name="KillAskEnd" xml:space="preserve">
+    <value> ?</value>
+  </data>
+  <data name="KillAskStart" xml:space="preserve">
+    <value>Do you want to kill </value>
+  </data>
+  <data name="KillFailed" xml:space="preserve">
+    <value>Failed to terminate process.</value>
+  </data>
+  <data name="OpFailed" xml:space="preserve">
+    <value>Unable to complete this operation</value>
+  </data>
+  <data name="Address" xml:space="preserve">
+    <value>Base Address</value>
+  </data>
+  <data name="BelongThread" xml:space="preserve">
+    <value>Window Thread</value>
+  </data>
+  <data name="CantCopyFile" xml:space="preserve">
+    <value>Copy file failed.</value>
+  </data>
+  <data name="CantGetPath" xml:space="preserve">
+    <value>Get process failed</value>
+  </data>
+  <data name="CantMoveFile" xml:space="preserve">
+    <value>Move file failed.</value>
+  </data>
+  <data name="ChooseTargetDir" xml:space="preserve">
+    <value>Choose target directory</value>
+  </data>
+  <data name="ContextSwitch" xml:space="preserve">
+    <value>Context Switch time</value>
+  </data>
+  <data name="Copying" xml:space="preserve">
+    <value>Copying files</value>
+  </data>
+  <data name="DelAsk1" xml:space="preserve">
+    <value>Do you really want to delete this file?</value>
+  </data>
+  <data name="DelAsk2" xml:space="preserve">
+    <value>Do you really want to delete these %d files?</value>
+  </data>
+  <data name="DelAsk3" xml:space="preserve">
+    <value>Do you really want to delete this folder?</value>
+  </data>
+  <data name="DeleteIng" xml:space="preserve">
+    <value>Delete in...</value>
+  </data>
+  <data name="DelFailed" xml:space="preserve">
+    <value>Delete failed</value>
+  </data>
+  <data name="DelSure" xml:space="preserve">
+    <value>Delete confirmation</value>
+  </data>
+  <data name="EndProcFailed" xml:space="preserve">
+    <value>End process failed</value>
+  </data>
+  <data name="EntryPoint" xml:space="preserve">
+    <value>Entry Point</value>
+  </data>
+  <data name="EnumModuleFailed" xml:space="preserve">
+    <value>Failed Enum Module</value>
+  </data>
+  <data name="EnumThreadFailed" xml:space="preserve">
+    <value>Failed Enum Thread</value>
+  </data>
+  <data name="FileExist" xml:space="preserve">
+    <value>File already exists</value>
+  </data>
+  <data name="FileExist2" xml:space="preserve">
+    <value>File have already exists, cover it ?</value>
+  </data>
+  <data name="FreeLibSuccess" xml:space="preserve">
+    <value>Free success.</value>
+  </data>
+  <data name="MenuRebootAsAdmin" xml:space="preserve">
+    <value>Restart as administrator</value>
+  </data>
+  <data name="ModuleName" xml:space="preserve">
+    <value>Module Name</value>
+  </data>
+  <data name="ModulePath" xml:space="preserve">
+    <value>Module Path</value>
+  </data>
+  <data name="Moveing" xml:space="preserve">
+    <value>Moving the file...</value>
+  </data>
+  <data name="NoAdminTipText" xml:space="preserve">
+    <value>Please select "Yes" or "OK" to give the program administrator permission in the dialog box just now.</value>
+  </data>
+  <data name="NoAdminTipTitle" xml:space="preserve">
+    <value>You refuse to give permission.</value>
+  </data>
+  <data name="OpenProcFailed" xml:space="preserve">
+    <value>Unable to open the process</value>
+  </data>
+  <data name="Priority" xml:space="preserve">
+    <value>Priority</value>
+  </data>
+  <data name="ResProcFailed" xml:space="preserve">
+    <value>Unable to resume process</value>
+  </data>
+  <data name="Size" xml:space="preserve">
+    <value>Size</value>
+  </data>
+  <data name="State" xml:space="preserve">
+    <value>State</value>
+  </data>
+  <data name="SusProcFailed" xml:space="preserve">
+    <value>Unable to suspend process</value>
+  </data>
+  <data name="TitleQuestion" xml:space="preserve">
+    <value>Question</value>
+  </data>
+  <data name="Visible" xml:space="preserve">
+    <value>Visible</value>
+  </data>
+  <data name="VModulTitle" xml:space="preserve">
+    <value>Process : %s [%d] All modules : %d</value>
+  </data>
+  <data name="VThreadTitle" xml:space="preserve">
+    <value>All threads of the process %s [%d]: %d</value>
+  </data>
+  <data name="VWinTitle" xml:space="preserve">
+    <value>Process : %s [%d] All windows : %d</value>
+  </data>
+  <data name="WindowClassName" xml:space="preserve">
+    <value>Window Class Name</value>
+  </data>
+  <data name="WindowHandle" xml:space="preserve">
+    <value>Window Handle</value>
+  </data>
+  <data name="WindowText" xml:space="preserve">
+    <value>Window Text</value>
+  </data>
+  <data name="FreeFailed" xml:space="preserve">
+    <value>Free module failed</value>
+  </data>
+  <data name="FreeInvalidProc" xml:space="preserve">
+    <value>Unable to Free module,  the process has exited.</value>
+  </data>
+  <data name="InvThread" xml:space="preserve">
+    <value>invalid thread.</value>
+  </data>
+  <data name="KernelNotLoad" xml:space="preserve">
+    <value>Kernel driver not load.</value>
+  </data>
+  <data name="KillThreadError" xml:space="preserve">
+    <value>Unable to Terminate thread</value>
+  </data>
+  <data name="KillThreadInvThread" xml:space="preserve">
+    <value>Unable to Terminate thread, invalid thread.</value>
+  </data>
+  <data name="OpenThreadFailed" xml:space="preserve">
+    <value>Unable to open thread</value>
+  </data>
+  <data name="ReThreadErr" xml:space="preserve">
+    <value>Unable to resume thread</value>
+  </data>
+  <data name="SuThreadErr" xml:space="preserve">
+    <value>Unable to suspend thread</value>
+  </data>
+  <data name="SuThreadWarn" xml:space="preserve">
+    <value>It is not recommended to force threads to hang up, because suspending threads are prone to other problems such as life and death locks. If you are not debugging programs, do not use this method. \n then, make sure that the thread is forced to hang?</value>
+  </data>
+  <data name="InvalidHwnd" xml:space="preserve">
+    <value>Invalid Hwnd.</value>
+  </data>
+  <data name="RefeshSuccess" xml:space="preserve">
+    <value>Refresh successfuly.</value>
+  </data>
+  <data name="ChangeWindowTextAsk" xml:space="preserve">
+    <value>You change the window text, to set the text to the window?</value>
+  </data>
+  <data name="ActiveTime" xml:space="preserve">
+    <value>Active time</value>
+  </data>
+  <data name="Cache" xml:space="preserve">
+    <value> Cache :</value>
+  </data>
+  <data name="Cached" xml:space="preserve">
+    <value>Cached</value>
+  </data>
+  <data name="CpuCpunt" xml:space="preserve">
+    <value>Logic processors :</value>
+  </data>
+  <data name="CpuPackageCount" xml:space="preserve">
+    <value>Cpu packages :</value>
+  </data>
+  <data name="HandleCount" xml:space="preserve">
+    <value>Handle Count</value>
+  </data>
+  <data name="MaxSpeed" xml:space="preserve">
+    <value>Maximum speed : </value>
+  </data>
+  <data name="MemUsing" xml:space="preserve">
+    <value>In use</value>
+  </data>
+  <data name="MenCanUse" xml:space="preserve">
+    <value>Available</value>
+  </data>
+  <data name="NonPagedPool" xml:space="preserve">
+    <value>Non-paged pool</value>
+  </data>
+  <data name="PagedPool" xml:space="preserve">
+    <value>Paged pool</value>
+  </data>
+  <data name="QueueTime" xml:space="preserve">
+    <value>Queue time</value>
+  </data>
+  <data name="ReadSpeed" xml:space="preserve">
+    <value>Read speed</value>
+  </data>
+  <data name="Receive" xml:space="preserve">
+    <value>Receive</value>
+  </data>
+  <data name="RunTime" xml:space="preserve">
+    <value>Up time</value>
+  </data>
+  <data name="Send" xml:space="preserve">
+    <value>Send</value>
+  </data>
+  <data name="Submited" xml:space="preserve">
+    <value>Committed</value>
+  </data>
+  <data name="ThreadCount" xml:space="preserve">
+    <value>Thread Count</value>
+  </data>
+  <data name="Useage" xml:space="preserve">
+    <value>Useage</value>
+  </data>
+  <data name="WriteSpeed" xml:space="preserve">
+    <value>Write speed</value>
+  </data>
+  <data name="DelStartupItemAsk" xml:space="preserve">
+    <value>Deleting this startup is not recoverable, and you need to determine that the startup item is not a system must, otherwise the deletion may cause the problem to run normally on your system.</value>
+  </data>
+  <data name="DelStartupItemAsk2" xml:space="preserve">
+    <value>Delete this startup item and the file is not recoverable. You need to make sure that the file is not a system required file. Otherwise, the deletion may cause damage to your system.</value>
+  </data>
+</root>

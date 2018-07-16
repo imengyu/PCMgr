@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "schlp.h"
 #include "mapphlp.h"
+#include "lghlp.h"
 #include "StringSplit.h"
 #include "resource.h"
 #include <stdio.h>
@@ -9,7 +10,7 @@
 
 using namespace std;
 
-extern HINSTANCE hInst;
+extern HINSTANCE hInstRs;
 extern "C" M_API BOOL MCopyToClipboard(const WCHAR* pszData, const int nDataLen);
 
 SC_HANDLE hSCM = NULL;
@@ -293,7 +294,7 @@ LRESULT MSCM_HandleWmCommand(WPARAM wParam)
 }
 M_CAPI(void) MSCM_ShowMenu(HWND hDlg, LPWSTR serviceName, DWORD running, DWORD startType, LPWSTR path)
 {
-	HMENU hroot = LoadMenu(hInst, MAKEINTRESOURCE(IDR_MENUSCMAIN));
+	HMENU hroot = LoadMenu(hInstRs, MAKEINTRESOURCE(IDR_MENUSCMAIN));
 	if (hroot) {
 		HMENU hpop = GetSubMenu(hroot, 0);
 		POINT pt;

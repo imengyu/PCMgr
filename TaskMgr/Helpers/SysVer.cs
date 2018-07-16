@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace TaskMgr.Helpers
+namespace PCMgr.Helpers
 {
     static class SysVer
     {

@@ -5,8 +5,9 @@
 #include "comdlghlp.h"
 #include "PathHelper.h"
 #include "mapphlp.h"
+#include "lghlp.h"
 
-extern HINSTANCE hInst;
+extern HINSTANCE hInstRs;
 extern HWND hWndMain;
 
 LPWSTR fmCurrectSelectFilePath0;
@@ -424,7 +425,7 @@ BOOL MFM_RenameFile() {
 BOOL MFM_MoveFileToUser()
 {
 	WCHAR targetDir[MAX_PATH];
-	if (MChooseDir(hWndMain, NULL, L"选择移动目标文件夹", (LPWSTR*)&targetDir, sizeof(targetDir)))
+	if (MChooseDir(hWndMain, NULL, (LPWSTR)str_item_choose_target_dir.c_str(), (LPWSTR*)&targetDir, sizeof(targetDir)))
 	{
 		if (fmMutilSelect) {
 			std::wstring paths(fmCurrectSelectFilePath0);
@@ -450,7 +451,7 @@ BOOL MFM_MoveFileToUser()
 			FileOp.pTo = target_paths.c_str();
 			FileOp.fFlags = FOF_NOCONFIRMMKDIR;
 			FileOp.hNameMappings = NULL;
-			FileOp.lpszProgressTitle = L"正在移动文件...";
+			FileOp.lpszProgressTitle = str_item_moveing;
 			return SHFileOperation(&FileOp);
 		}
 		else {
@@ -466,7 +467,7 @@ BOOL MFM_MoveFileToUser()
 BOOL MFM_CopyFileToUser()
 {
 	WCHAR targetDir[MAX_PATH];
-	if (MChooseDir(hWndMain, NULL, L"选择复制目标文件夹", (LPWSTR*)&targetDir, sizeof(targetDir)))
+	if (MChooseDir(hWndMain, NULL, (LPWSTR)str_item_choose_target_dir.c_str(), (LPWSTR*)&targetDir, sizeof(targetDir)))
 	{
 		if (fmMutilSelect) {
 			std::wstring paths(fmCurrectSelectFilePath0);
@@ -492,14 +493,14 @@ BOOL MFM_CopyFileToUser()
 			FileOp.pTo = target_paths.c_str();
 			FileOp.fFlags = FOF_NOCONFIRMMKDIR;
 			FileOp.hNameMappings = NULL;
-			FileOp.lpszProgressTitle = L"正在复制文件...";
+			FileOp.lpszProgressTitle = str_item_copying;
 			return SHFileOperation(&FileOp);
 		}
 		else {
 			std::wstring *w = Path::GetFileName((LPWSTR)fmCurrectSelectFilePath0);
 			*w = targetDir + (L"\\" + *w);
 			bool replace = false;
-			if (MShowMessageDialog(hWndMain, (LPWSTR)w->c_str(), L"文件已经存在，覆盖吗？", L"复制文件疑问", MB_ICONEXCLAMATION, MB_YESNO) == IDOK)
+			if (MShowMessageDialog(hWndMain, (LPWSTR)w->c_str(), str_item_fileexisted_ask, str_item_question, MB_ICONEXCLAMATION, MB_YESNO) == IDOK)
 				replace = true;
 			BOOL rs = CopyFile(fmCurrectSelectFilePath0, w->c_str(), !replace);
 			delete w;
@@ -507,7 +508,7 @@ BOOL MFM_CopyFileToUser()
 			{
 				if (GetLastError() == ERROR_ALREADY_EXISTS)
 				{
-					MShowErrorMessage(L"文件已经存在", L"复制文件错误", MB_ICONEXCLAMATION, 0);
+					MShowErrorMessage(str_item_fileexisted, (LPWSTR)(str_item_cantcopyfile.c_str()), MB_ICONEXCLAMATION, 0);
 					return TRUE;
 				}
 			}
@@ -520,7 +521,7 @@ BOOL MFM_CopyFileToUser()
 BOOL MFM_DelFileToRecBinUser()
 {
 	if (fmMutilSelect) {
-		if (MShowMessageDialog(hWndMain, fmCurrectSelectFilePath0, L"删除确认", (LPWSTR)FormatString(L"真的要删除这 %d 个文件？").c_str(), MB_ICONEXCLAMATION, MB_YESNO) == IDYES)
+		if (MShowMessageDialog(hWndMain, fmCurrectSelectFilePath0, str_item_delsure, (LPWSTR)FormatString(str_item_ask2).c_str(), MB_ICONEXCLAMATION, MB_YESNO) == IDYES)
 		{
 			std::wstring paths;
 			LPWSTR buf;
@@ -539,14 +540,14 @@ BOOL MFM_DelFileToRecBinUser()
 			FileOp.pTo = paths.c_str();
 			FileOp.fFlags = FOF_ALLOWUNDO;//此标志使删除文件备份到Windows回收站
 			FileOp.hNameMappings = NULL;
-			FileOp.lpszProgressTitle = L"删除文件...";
+			FileOp.lpszProgressTitle = str_item_deling;
 			return SHFileOperation(&FileOp);
 		}
 		else return 1;
 	}
 	else {
 		if (_waccess(fmCurrectSelectFilePath0, 0) == 0) {
-			if (MShowMessageDialog(hWndMain, fmCurrectSelectFilePath0, L"删除确认" , L"真的要删除这个文件？", MB_ICONEXCLAMATION, MB_YESNO) == IDYES)
+			if (MShowMessageDialog(hWndMain, fmCurrectSelectFilePath0, str_item_delsure, str_item_ask1, MB_ICONEXCLAMATION, MB_YESNO) == IDYES)
 			{
 				SHFILEOPSTRUCT FileOp;//定义SHFILEOPSTRUCT结构对象;
 				FileOp.hwnd = hWndMain;
@@ -555,7 +556,7 @@ BOOL MFM_DelFileToRecBinUser()
 				FileOp.pTo = fmCurrectSelectFilePath0;
 				FileOp.fFlags = FOF_ALLOWUNDO;//此标志使删除文件备份到Windows回收站
 				FileOp.hNameMappings = NULL;
-				FileOp.lpszProgressTitle = L"删除文件...";
+				FileOp.lpszProgressTitle = str_item_deling;
 				return SHFileOperation(&FileOp);
 			}
 			else return 1;
@@ -566,7 +567,7 @@ BOOL MFM_DelFileToRecBinUser()
 BOOL MFM_DelFileBinUser()
 {
 	if (fmMutilSelect) {
-		if (MShowMessageDialog(hWndMain, fmCurrectSelectFilePath0, (LPWSTR)FormatString(L"真的要删除这 %d 个文件？", fmMutilSelectCount).c_str(), L"删除确认", MB_ICONEXCLAMATION, MB_YESNO) == IDYES)
+		if (MShowMessageDialog(hWndMain, fmCurrectSelectFilePath0, (LPWSTR)FormatString(str_item_ask2, fmMutilSelectCount).c_str(), str_item_delsure, MB_ICONEXCLAMATION, MB_YESNO) == IDYES)
 		{
 			LPWSTR buf;
 			for (int i = 0; i < fmMutilSelectCount; i++)
@@ -574,7 +575,7 @@ BOOL MFM_DelFileBinUser()
 				if (i == 0)buf = fmCurrectSelectFilePath0;
 				else buf = MFM_GetSeledItemPath(i);
 
-				if (!DeleteFile(buf)) MShowErrorMessage(buf, (LPWSTR)FormatString(L"删除文件失败\nLastError : %d", GetLastError()).c_str(), MB_ICONEXCLAMATION, 0);
+				if (!DeleteFile(buf)) MShowErrorMessageWithLastErr(buf, str_item_delfailed, MB_ICONEXCLAMATION, 0);
 
 				if (i != 0)MFM_GetSeledItemFree(buf);
 			}
@@ -583,9 +584,9 @@ BOOL MFM_DelFileBinUser()
 	}
 	else {
 		if (_waccess(fmCurrectSelectFilePath0, 0) == 0) {
-			if (MShowMessageDialog(hWndMain, fmCurrectSelectFilePath0, L"真的要删除这个文件？", L"删除确认", MB_ICONEXCLAMATION, MB_YESNO) == IDYES)
+			if (MShowMessageDialog(hWndMain, fmCurrectSelectFilePath0, str_item_ask1, str_item_delsure, MB_ICONEXCLAMATION, MB_YESNO) == IDYES)
 				if (!MFM_DeleteDirOrFile(fmCurrectSelectFilePath0))
-					MShowErrorMessage(fmCurrectSelectFilePath0, (LPWSTR)FormatString(L"删除文件失败\nLastError : %d", GetLastError()).c_str(), MB_ICONEXCLAMATION, 0);
+					MShowErrorMessageWithLastErr(fmCurrectSelectFilePath0, str_item_delfailed, MB_ICONEXCLAMATION, 0);
 		}
 	}
 	return 1;
@@ -601,7 +602,7 @@ void MFF_ShowInExplorer() {
 BOOL MFF_DelToRecBin() {
 	if (_waccess(fmCurrectSelectFolderPath0, 0) == 0)
 	{
-		if (MShowMessageDialog(hWndMain, fmCurrectSelectFilePath0, L"删除确认", L"真的要删除这个文件夹？", MB_ICONEXCLAMATION, MB_YESNO) == IDYES)
+		if (MShowMessageDialog(hWndMain, fmCurrectSelectFilePath0, str_item_delsure, str_item_ask3, MB_ICONEXCLAMATION, MB_YESNO) == IDYES)
 		{
 			SHFILEOPSTRUCT FileOp;//定义SHFILEOPSTRUCT结构对象;
 			FileOp.hwnd = hWndMain;
@@ -610,7 +611,7 @@ BOOL MFF_DelToRecBin() {
 			FileOp.pTo = fmCurrectSelectFolderPath0;
 			FileOp.fFlags = FOF_ALLOWUNDO;//此标志使删除文件备份到Windows回收站
 			FileOp.hNameMappings = NULL;
-			FileOp.lpszProgressTitle = L"删除文件...";
+			FileOp.lpszProgressTitle = str_item_deling;
 			return SHFileOperation(&FileOp);
 		}
 		else return 1;
@@ -620,7 +621,7 @@ BOOL MFF_DelToRecBin() {
 BOOL MFF_Del() {
 	if (_waccess(fmCurrectSelectFolderPath0, 0) == 0)
 	{
-		if (MShowMessageDialog(hWndMain, fmCurrectSelectFilePath0, L"删除确认", L"真的要删除这个文件夹？", MB_ICONEXCLAMATION, MB_YESNO) == IDYES)
+		if (MShowMessageDialog(hWndMain, fmCurrectSelectFilePath0, str_item_delsure, str_item_ask3, MB_ICONEXCLAMATION, MB_YESNO) == IDYES)
 		{
 			SHFILEOPSTRUCT FileOp;//定义SHFILEOPSTRUCT结构对象;
 			FileOp.hwnd = hWndMain;
@@ -628,7 +629,7 @@ BOOL MFF_Del() {
 			FileOp.pFrom = fmCurrectSelectFolderPath0;
 			FileOp.pTo = 0;
 			FileOp.hNameMappings = NULL;
-			FileOp.lpszProgressTitle = L"删除文件...";
+			FileOp.lpszProgressTitle = str_item_deling;
 			return SHFileOperation(&FileOp);
 		}
 		else return 1;
@@ -662,7 +663,7 @@ M_API int MAppWorkShowMenuFM(LPWSTR strFilePath, BOOL mutilSelect, int selectCou
 	fmMutilSelectCount = selectCount;
 	fmMutilSelect = mutilSelect;
 	fmCurrectSelectFilePath0 = strFilePath;
-	HMENU hroot = LoadMenu(hInst, MAKEINTRESOURCE(IDR_MENUFMMAIN));
+	HMENU hroot = LoadMenu(hInstRs, MAKEINTRESOURCE(IDR_MENUFMMAIN));
 	if (hroot) {
 		HMENU hpop = GetSubMenu(hroot, 0);
 		DWORD attr = GetFileAttributesW(strFilePath);
@@ -693,7 +694,7 @@ M_API int MAppWorkShowMenuFMF(LPWSTR strfolderPath)
 {
 	fmCurrectSelectFolderPath0 = strfolderPath;
 	if (wcscmp(fmCurrectSelectFolderPath0, L"\\\\") != 0 && wcscmp(fmCurrectSelectFolderPath0, L"mycp") != 0) {
-		HMENU hroot = LoadMenu(hInst, MAKEINTRESOURCE(IDR_MENUFMFOLDER));
+		HMENU hroot = LoadMenu(hInstRs, MAKEINTRESOURCE(IDR_MENUFMFOLDER));
 		if (hroot) {
 			HMENU hpop = GetSubMenu(hroot, 0);
 
