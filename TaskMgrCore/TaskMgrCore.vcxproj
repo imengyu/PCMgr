@@ -74,16 +74,23 @@
     <LinkIncremental>true</LinkIncremental>
     <TargetName>PCMgr32</TargetName>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\Program Files (x86)\Windows Kits\NETFXSDK\4.6.1\Include\um;</IncludePath>
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <TargetName>PCMgr64</TargetName>
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\Program Files (x86)\Windows Kits\NETFXSDK\4.6.1\Include\um;</IncludePath>
+    <TargetName>PCMgr32</TargetName>
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <TargetName>PCMgr64</TargetName>
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -92,8 +99,8 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;TASKMGRCORE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <ProgramDataBaseFileName>$(IntDir)vc$(PlatformToolsetVersion)_PCMgrCore.pdb</ProgramDataBaseFileName>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -109,8 +116,9 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_DEBUG;_WINDOWS;_USRDLL;TASKMGRCORE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_X64_;_DEBUG;_WINDOWS;_USRDLL;TASKMGRCORE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -127,6 +135,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;TASKMGRCORE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <ProgramDataBaseFileName>$(IntDir)vc$(PlatformToolsetVersion)_PCMgrCore.pdb</ProgramDataBaseFileName>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -143,8 +152,9 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>NDEBUG;_WINDOWS;_USRDLL;TASKMGRCORE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_X64_;NDEBUG;_WINDOWS;_USRDLL;TASKMGRCORE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -160,7 +170,6 @@
     <ClInclude Include="comdlghlp.h" />
     <ClInclude Include="DirectoryHelper.h" />
     <ClInclude Include="fmhlp.h" />
-    <ClInclude Include="kernelhlp.cpp" />
     <ClInclude Include="kernelhlp.h" />
     <ClInclude Include="lghlp.h" />
     <ClInclude Include="mainprocs.h" />
@@ -177,6 +186,7 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="StringHlp.h" />
     <ClInclude Include="StringSplit.h" />
+    <ClInclude Include="suact.h" />
     <ClInclude Include="sysfuns.h" />
     <ClInclude Include="syshlp.h" />
     <ClInclude Include="targetver.h" />
@@ -202,6 +212,7 @@
       </PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="fmhlp.cpp" />
+    <ClCompile Include="kernelhlp.cpp" />
     <ClCompile Include="lghlp.cpp" />
     <ClCompile Include="mainprocs.cpp" />
     <ClCompile Include="mapphlp.cpp" />
@@ -220,6 +231,7 @@
     </ClCompile>
     <ClCompile Include="StringHlp.cpp" />
     <ClCompile Include="StringSplit.cpp" />
+    <ClCompile Include="suact.cpp" />
     <ClCompile Include="syshlp.cpp" />
     <ClCompile Include="thdhlp.cpp" />
     <ClCompile Include="vprocx.cpp" />

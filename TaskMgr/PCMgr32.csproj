@@ -1,0 +1,416 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{59FEF6F8-2687-4046-8934-90A7E68B35B7}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>PCMgr</RootNamespace>
+    <AssemblyName>PCMgr32</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>icoPcmgr.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <TargetZone>LocalIntranet</TargetZone>
+  </PropertyGroup>
+  <PropertyGroup>
+    <GenerateManifests>false</GenerateManifests>
+  </PropertyGroup>
+  <PropertyGroup />
+  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>..\Debug\app\x86\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>..\Release\app\x86\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>..\Debug\app\x64\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>..\Release\app\x64\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Areo\CommandLink.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Areo\NativeMethods.cs" />
+    <Compile Include="Areo\Progressbar.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Areo\TaskDialog\CustomButton.cs" />
+    <Compile Include="Areo\TaskDialog\EventArgs.cs" />
+    <Compile Include="Areo\TaskDialog\Message.cs" />
+    <Compile Include="Areo\TaskDialog\NativeMethods.cs" />
+    <Compile Include="Areo\TaskDialog\Results.cs" />
+    <Compile Include="Areo\TaskDialog\TaskDialog.cs" />
+    <Compile Include="Areo\TaskDialog\TaskDialogButton.cs" />
+    <Compile Include="Areo\TaskDialog\TaskDialogIcon.cs" />
+    <Compile Include="Areo\TaskDialog\TaskDialog_static.cs" />
+    <Compile Include="Ctls\IPerformancePage.cs" />
+    <Compile Include="Ctls\PerformancePageCpu.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Ctls\PerformancePageCpu.Designer.cs">
+      <DependentUpon>PerformancePageCpu.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Ctls\PerformanceGrid.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Ctls\PerformanceInfos.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Ctls\PerformanceList.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Ctls\PerformancePageDisk.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Ctls\PerformancePageDisk.Designer.cs">
+      <DependentUpon>PerformancePageDisk.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Ctls\PerformancePageNet.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Ctls\PerformancePageNet.Designer.cs">
+      <DependentUpon>PerformancePageNet.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Ctls\PerformancePageRam.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Ctls\PerformancePageRam.Designer.cs">
+      <DependentUpon>PerformancePageRam.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Ctls\PerformanceRamPoolGrid.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Ctls\PerformanceTitle.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Ctls\TaskMgrListHeader.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="FormMain.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormMain.Designer.cs">
+      <DependentUpon>FormMain.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Helpers\IconUtils.cs" />
+    <Compile Include="Helpers\SysVer.cs" />
+    <Compile Include="Lanuages\LanuageMgr.cs" />
+    <Compile Include="Lanuages\LanuageResource_en.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>LanuageResource_en.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Lanuages\LanuageResource_zh-Hant.Designer.cs">
+      <DependentUpon>LanuageResource_zh-Hant.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Lanuages\LanuageResource_zh.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>LanuageResource_zh.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Ctls\TaskMgrList.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="WorkWindow\FormAbout.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WorkWindow\FormAbout.Designer.cs">
+      <DependentUpon>FormAbout.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WorkWindow\FormCheckFileUse.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WorkWindow\FormCheckFileUse.Designer.cs">
+      <DependentUpon>FormCheckFileUse.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WorkWindow\FormDelFileProgress.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WorkWindow\FormDelFileProgress.Designer.cs">
+      <DependentUpon>FormDelFileProgress.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WorkWindow\FormFileTool.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WorkWindow\FormFileTool.Designer.cs">
+      <DependentUpon>FormFileTool.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WorkWindow\FormFillWithData.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WorkWindow\FormFillWithData.Designer.cs">
+      <DependentUpon>FormFillWithData.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WorkWindow\FormMainListHeaders.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WorkWindow\FormMainListHeaders.Designer.cs">
+      <DependentUpon>FormMainListHeaders.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WorkWindow\FormSettings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WorkWindow\FormSettings.Designer.cs">
+      <DependentUpon>FormSettings.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WorkWindow\FormSpyWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WorkWindow\FormSpyWindow.Designer.cs">
+      <DependentUpon>FormSpyWindow.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="Ctls\PerformancePageCpu.resx">
+      <DependentUpon>PerformancePageCpu.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Ctls\PerformancePageDisk.resx">
+      <DependentUpon>PerformancePageDisk.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Ctls\PerformancePageNet.resx">
+      <DependentUpon>PerformancePageNet.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Ctls\PerformancePageRam.resx">
+      <DependentUpon>PerformancePageRam.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormMain.en.resx">
+      <DependentUpon>FormMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormMain.resx">
+      <DependentUpon>FormMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormMain.zh.resx">
+      <DependentUpon>FormMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Lanuages\LanuageResource_en.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>LanuageResource_en.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <Resource Include="Lanuages\LanuageResource_zh-Hant.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>LanuageResource_zh-Hant.Designer.cs</LastGenOutput>
+    </Resource>
+    <EmbeddedResource Include="Lanuages\LanuageResource_zh.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>LanuageResource_zh.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <EmbeddedResource Include="WorkWindow\FormAbout.resx">
+      <DependentUpon>FormAbout.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormCheckFileUse.en.resx">
+      <DependentUpon>FormCheckFileUse.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormCheckFileUse.resx">
+      <DependentUpon>FormCheckFileUse.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormDelFileProgress.resx">
+      <DependentUpon>FormDelFileProgress.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormFileTool.en.resx">
+      <DependentUpon>FormFileTool.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormFileTool.resx">
+      <DependentUpon>FormFileTool.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormFillWithData.en.resx">
+      <DependentUpon>FormFillWithData.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormFillWithData.resx">
+      <DependentUpon>FormFillWithData.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormMainListHeaders.en.resx">
+      <DependentUpon>FormMainListHeaders.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormMainListHeaders.resx">
+      <DependentUpon>FormMainListHeaders.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormSettings.en.resx">
+      <DependentUpon>FormSettings.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormSettings.resx">
+      <DependentUpon>FormSettings.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormSpyWindow.en.resx">
+      <DependentUpon>FormSpyWindow.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormSpyWindow.resx">
+      <DependentUpon>FormSpyWindow.cs</DependentUpon>
+    </EmbeddedResource>
+    <None Include="app.config" />
+    <None Include="app.manifest" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="icoPcmgr.ico" />
+    <None Include="Resources\icoServiceHost.ico" />
+    <None Include="Resources\icoService.ico" />
+    <None Include="Resources\application_view_list.png" />
+    <None Include="Resources\System.Windows.Forms.LinkLabel.bmp" />
+    <None Include="Resources\System.Windows.Forms.RichTextBox.bmp" />
+    <None Include="Resources\System.Windows.Forms.Panel.bmp" />
+    <None Include="Resources\System.Windows.Forms.VScrollBar.bmp" />
+    <None Include="Resources\System.Windows.Forms.TreeView.bmp" />
+    <None Include="Resources\System.Windows.Forms.TrackBar.bmp" />
+    <None Include="Resources\System.Windows.Forms.ToolTip.bmp" />
+    <None Include="Resources\System.Windows.Forms.ToolBar.bmp" />
+    <None Include="Resources\System.Windows.Forms.TextBox.bmp" />
+    <None Include="Resources\System.Windows.Forms.TabPage.bmp" />
+    <None Include="Resources\System.Windows.Forms.TabControl.bmp" />
+    <None Include="Resources\System.Windows.Forms.StatusStrip.bmp" />
+    <None Include="Resources\System.Windows.Forms.RadioButton.bmp" />
+    <None Include="Resources\System.Windows.Forms.ProgressBar.bmp" />
+    <None Include="Resources\System.Windows.Forms.PictureBox.bmp" />
+    <None Include="Resources\System.Windows.Forms.ListView.bmp" />
+    <None Include="Resources\System.Windows.Forms.ListBox.bmp" />
+    <None Include="Resources\System.Windows.Forms.Label.bmp" />
+    <None Include="Resources\System.Windows.Forms.HScrollBar.bmp" />
+    <None Include="Resources\System.Windows.Forms.GroupBox.bmp" />
+    <None Include="Resources\System.Windows.Forms.Form.bmp" />
+    <None Include="Resources\System.Windows.Forms.DomainUpDown.bmp" />
+    <None Include="Resources\System.Windows.Forms.DateTimePicker.bmp" />
+    <None Include="Resources\System.Windows.Forms.ContextMenu.bmp" />
+    <None Include="Resources\System.Windows.Forms.ComboBox.bmp" />
+    <None Include="Resources\System.Windows.Forms.CheckBox.bmp" />
+    <None Include="Resources\System.Windows.Forms.Button.bmp" />
+    <None Include="Resources\ico30665.ico" />
+    <None Include="Resources\ico30656.ico" />
+    <None Include="Resources\ico30655.ico" />
+    <None Include="Resources\ico148.ico" />
+    <None Include="Resources\ico131.ico" />
+    <None Include="Resources\listHeaderArrowDisascending.png" />
+    <None Include="Resources\listHeaderArrowAscending.png" />
+    <None Include="Resources\listHeaderArrowDisa.png" />
+    <None Include="Resources\listHeaderArrowA.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\PCMgrUWP\PCMgrUWP.csproj">
+      <Project>{70682f19-24fd-4717-95d3-cfbfb4e02f00}</Project>
+      <Name>PCMgrUWP</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

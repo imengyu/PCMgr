@@ -262,7 +262,10 @@
     <value> files  choosed </value>
   </data>
   <data name="RequestAdminText" xml:space="preserve">
-    <value>It is detected that you did not grant PCMgr administrator permission, which could result in some advanced functions unavailable. \nPCMgr requires administrator authority to control and manage the system. \n\n knows what &lt;A HREF=\ "HREF=\" &gt; administrator authority &lt;/A&gt;. \n understand the details of the software using &lt;A HREF=\ "HREF=\" &gt; administrator rights control and management.</value>
+    <value>It is detected that you did not grant PCMgr administrator permission, which could result in some advanced functions unavailable. 
+PCMgr requires administrator authority to control and manage the system. 
+knows what &lt;A HREF="#"&gt; administrator authority &lt;/A&gt;. 
+understand the details of the software using &lt;A HREF="#"&gt; administrator rights control and management.&lt;/A&gt;</value>
   </data>
   <data name="RequestAdminTitle" xml:space="preserve">
     <value>I need more permissions</value>
@@ -400,7 +403,8 @@
     <value>Unable to open folder</value>
   </data>
   <data name="X64WarnFinded64Text" xml:space="preserve">
-    <value>\n has found 64 bits of PCMgr in your software directory, clicking "start the 64 bit version", you can start the software directly.</value>
+    <value>
+has found 64 bits of PCMgr in your software directory, clicking "start the 64 bit version", you can start the software directly.</value>
   </data>
   <data name="X64WarnMoreText" xml:space="preserve">
     <value>The current version of PCMgr is 32 - bit, and your system version is 64 - bit, and some advanced features, such as kernel - driven view, must use a 64 bit driver, so this version can't use these advanced functions.</value>
@@ -589,7 +593,8 @@
     <value>Unable to suspend thread</value>
   </data>
   <data name="SuThreadWarn" xml:space="preserve">
-    <value>It is not recommended to force threads to hang up, because suspending threads are prone to other problems such as life and death locks. If you are not debugging programs, do not use this method. \n then, make sure that the thread is forced to hang?</value>
+    <value>It is not recommended to force threads to hang up, because suspending threads are prone to other problems such as life and death locks. If you are not debugging programs, do not use this method. 
+Then, make sure that the thread is forced to hang?</value>
   </data>
   <data name="InvalidHwnd" xml:space="preserve">
     <value>Invalid Hwnd.</value>
@@ -665,5 +670,41 @@
   </data>
   <data name="DelStartupItemAsk2" xml:space="preserve">
     <value>Delete this startup item and the file is not recoverable. You need to make sure that the file is not a system required file. Otherwise, the deletion may cause damage to your system.</value>
+  </data>
+  <data name="TitleEProcess" xml:space="preserve">
+    <value>EPROCESS</value>
+  </data>
+  <data name="LoadDriverErr" xml:space="preserve">
+    <value>Failed to load kernel driver!</value>
+  </data>
+  <data name="FroceDelSuccess" xml:space="preserve">
+    <value>Froce delete Succeed.</value>
+  </data>
+  <data name="FillFileFailed" xml:space="preserve">
+    <value>Fill file failed.</value>
+  </data>
+  <data name="FillFileNeedSize" xml:space="preserve">
+    <value>The file size can not be 0 !</value>
+  </data>
+  <data name="FillFileSuccess" xml:space="preserve">
+    <value>Fill file success.</value>
+  </data>
+  <data name="GetFileInfoFailed" xml:space="preserve">
+    <value>Failed get file info.</value>
+  </data>
+  <data name="OpSuccess" xml:space="preserve">
+    <value>Success.</value>
+  </data>
+  <data name="UnlockFileFailed" xml:space="preserve">
+    <value>Unlock file failed.</value>
+  </data>
+  <data name="UnlockFileSuccess" xml:space="preserve">
+    <value>Unlock file successed.</value>
+  </data>
+  <data name="CollectingFiles" xml:space="preserve">
+    <value>Calculating the files need to delete...</value>
+  </data>
+  <data name="DeleteFiles" xml:space="preserve">
+    <value>Deleting...</value>
   </data>
 </root>

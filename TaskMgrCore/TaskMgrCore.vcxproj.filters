@@ -96,10 +96,10 @@
     <ClInclude Include="reghlp.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="kernelhlp.cpp">
-      <Filter>源文件</Filter>
-    </ClInclude>
     <ClInclude Include="kernelhlp.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="suact.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -162,6 +162,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="reghlp.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="kernelhlp.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="suact.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

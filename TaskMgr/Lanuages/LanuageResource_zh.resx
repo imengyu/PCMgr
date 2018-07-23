@@ -259,7 +259,10 @@
     <value>个项目  选择了</value>
   </data>
   <data name="RequestAdminText" xml:space="preserve">
-    <value>检测到您没有赋予 PCMgr 管理员权限，这会导致一些高级功能不可用。\nPCMgr 需要管理员权限 才能对系统进行控制和管理。\n\n了解什么是&lt;A HREF=\"#\"&gt;管理员权限&lt;/A&gt;。\n了解本软件使用&lt;A HREF=\"#\"&gt;管理员权限控制和管理的详情&lt;/A&gt;。</value>
+    <value>检测到您没有赋予 PCMgr 管理员权限，这会导致一些高级功能不可用。
+PCMgr 需要管理员权限 才能对系统进行控制和管理。
+了解什么是&lt;A HREF="#"&gt;管理员权限&lt;/A&gt;。
+了解本软件使用&lt;A HREF="#"&gt;管理员权限控制和管理的详情&lt;/A&gt;。</value>
   </data>
   <data name="Run64" xml:space="preserve">
     <value>运行64位版本</value>
@@ -394,7 +397,8 @@
     <value>无法读取文件夹</value>
   </data>
   <data name="X64WarnFinded64Text" xml:space="preserve">
-    <value>\n已经在您的软件目录下找到64位的 PCMgr ，点击”启动64位版本“可以直接启动软件。</value>
+    <value>
+已经在您的软件目录下找到64位的 PCMgr ，点击”启动64位版本“可以直接启动软件。</value>
   </data>
   <data name="X64WarnMoreText" xml:space="preserve">
     <value>当前版本的 PCMgr 是 32位的，而您的系统版本是64位的，一些高级功能（比如内核驱动查看）必须使用64位的驱动，所以此版本无法使用这些高级功能。</value>
@@ -589,7 +593,8 @@
     <value>无法挂起线程</value>
   </data>
   <data name="SuThreadWarn" xml:space="preserve">
-    <value>不建议强制挂起线程，因为挂起线程极易发生死锁等其他问题，如果您不是在调试程序，请不要使用该方法。\n那么，确定强制挂起线程？</value>
+    <value>不建议强制挂起线程，因为挂起线程极易发生死锁等其他问题，如果您不是在调试程序，请不要使用该方法。
+那么，确定强制挂起线程？</value>
   </data>
   <data name="ChangeWindowTextAsk" xml:space="preserve">
     <value>您更改了窗口文字，要把文字设置到窗口上吗？</value>
@@ -668,5 +673,41 @@
   </data>
   <data name="DelStartupItemAsk2" xml:space="preserve">
     <value>删除此启动项以及文件不可恢复，您需要确定此文件不是系统必须文件，否则删除可能会对您的系统造成破坏。</value>
+  </data>
+  <data name="TitleEProcess" xml:space="preserve">
+    <value>EPROCESS</value>
+  </data>
+  <data name="LoadDriverErr" xml:space="preserve">
+    <value>加载驱动失败！</value>
+  </data>
+  <data name="FroceDelSuccess" xml:space="preserve">
+    <value>强制删除成功</value>
+  </data>
+  <data name="FillFileFailed" xml:space="preserve">
+    <value>填充文件失败</value>
+  </data>
+  <data name="FillFileNeedSize" xml:space="preserve">
+    <value>填充文件的大小不能为 0 ！</value>
+  </data>
+  <data name="FillFileSuccess" xml:space="preserve">
+    <value>填充文件成功</value>
+  </data>
+  <data name="GetFileInfoFailed" xml:space="preserve">
+    <value>获取文件信息失败</value>
+  </data>
+  <data name="OpSuccess" xml:space="preserve">
+    <value>操作成功</value>
+  </data>
+  <data name="UnlockFileFailed" xml:space="preserve">
+    <value>解除文件占用失败</value>
+  </data>
+  <data name="UnlockFileSuccess" xml:space="preserve">
+    <value>解除文件占用成功</value>
+  </data>
+  <data name="CollectingFiles" xml:space="preserve">
+    <value>正在计算删除项目...</value>
+  </data>
+  <data name="DeleteFiles" xml:space="preserve">
+    <value>正在删除...</value>
   </data>
 </root>

@@ -89,6 +89,7 @@ namespace PCMgr.WorkWindow
 
         private void FormMainListHeaders_Load(object sender, EventArgs e)
         {
+
             Add("TitleProcName", 170);
             Add("TitlePublisher", 100);
             Add("TitleStatus", 70);
@@ -99,6 +100,7 @@ namespace PCMgr.WorkWindow
             Add("TitleNet", 75);
             Add("TitleProcPath", 240);
             Add("TitleCmdLine", 200);
+            Add("TitleEProcess", 100);
             //DialogResult = DialogResult.Cancel;
         }
     }

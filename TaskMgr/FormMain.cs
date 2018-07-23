@@ -20,12 +20,13 @@ namespace PCMgr
         public const string COREDLLNAME = "PCMgr32.dll";
         public const string DEFAPPTITLE = "PCMgr";
 
-        public FormMain()
+        public FormMain(string[] agrs)
         {
             InitializeComponent();
             baseProcessRefeshTimer.Interval = 1000;
             baseProcessRefeshTimer.Tick += BaseProcessRefeshTimer_Tick;
             listProcess.Header.CloumClick += Header_CloumClick;
+            this.agrs = agrs;
         }
 
         #region Config
@@ -34,13 +35,19 @@ namespace PCMgr
             long OpStation = WritePrivateProfileString(configSection, configkey, configData, Application.StartupPath + "\\" + currentProcessName + ".ini");
             return (OpStation != 0);
         }
-        public static string GetConfig(string configkey, string configSection)
+        public static string GetConfig(string configkey, string configSection, string configDefData = "")
         {
             StringBuilder temp = new StringBuilder(1024);
-            GetPrivateProfileString(configSection, configkey, "", temp, 1024, Application.StartupPath + "\\" + currentProcessName + ".ini");
+            GetPrivateProfileString(configSection, configkey, configDefData, temp, 1024, Application.StartupPath + "\\" + currentProcessName + ".ini");
             return temp.ToString();
         }
-
+        public static bool GetConfigBool(string configkey, string configSection, bool defaultValue = false)
+        {
+            string s = GetConfig(configkey, configSection, defaultValue.ToString());
+            if (s == "TRUE" || s == "True" || s == "true" || s == "1" || s.ToLower() == "true")
+                return true;
+            return false;
+        }
 
         //private bool showSystemProcess = false;
         private bool showHiddenFiles = false;
@@ -70,6 +77,8 @@ namespace PCMgr
         private static extern long GetPrivateProfileString(string section, string key, string def, StringBuilder retVal, int size, string filePath);
         [DllImport("user32")]
         private static extern bool IsHungAppWindow(IntPtr hWnd);
+        [DllImport("user32")]
+        private static extern IntPtr GetDesktopWindow();
 
         private int TaskDialogCallback(IntPtr hwnd, string text, string title, string apptl, int ico, int button)
         {
@@ -163,6 +172,10 @@ namespace PCMgr
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate void GetWinsCallBack(IntPtr hWnd, IntPtr hWndParent, int i);
 
+        private const int MENU_SELECTED_PROCESS_KILL_ACT_KILL = 0;
+        private const int MENU_SELECTED_PROCESS_KILL_ACT_REBOOT = 1;
+        private const int MENU_SELECTED_PROCESS_KILL_ACT_RESENT_BACK = 2;
+
         private EnumProcessCallBack enumProcessCallBack;
         private EnumProcessCallBack2 enumProcessCallBack2;
         private EnumWinsCallBack enumWinsCallBack;
@@ -190,7 +203,7 @@ namespace PCMgr
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern double MGetDiskUseAge();
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern int MAppWorkShowMenuProcess([MarshalAs(UnmanagedType.LPWStr)]string strFilePath, [MarshalAs(UnmanagedType.LPWStr)]string strFileName, long pid, IntPtr hWnd, int data);
+        private static extern int MAppWorkShowMenuProcess([MarshalAs(UnmanagedType.LPWStr)]string strFilePath, [MarshalAs(UnmanagedType.LPWStr)]string strFileName, long pid, IntPtr hWnd, int data, int type);
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern int MAppWorkShowMenuProcessPrepare([MarshalAs(UnmanagedType.LPWStr)]string strFilePath, [MarshalAs(UnmanagedType.LPWStr)]string strFileName, long pid);
 
@@ -240,6 +253,12 @@ namespace PCMgr
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         private static extern void MAppVProcessAllWindowsUWP();
 
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        private static extern bool MCanUseKernel();
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        private static extern bool MUninitKernel();
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        private static extern bool MInitKernel(string currDir);
 
         #endregion
 
@@ -418,6 +437,8 @@ namespace PCMgr
 
         #endregion
 
+        private string[] agrs = null;
+
         private bool processListInited = false;
         private bool driverListInited = false;
         private bool scListInited = false;
@@ -428,6 +449,8 @@ namespace PCMgr
         private bool perfMainInited = false;
 
         #region ProcessListWork
+
+        private int nextSecType = -1;
         private int sortitem = -1;
         private bool sorta = false;
         private bool isFirstLoad = true;
@@ -565,11 +588,11 @@ namespace PCMgr
             if (d <= 0)
                 return Color.FromArgb(255, 244, 196);
             else if (d > 0 && d <= 0.1)
-                return Color.FromArgb(255, 228, 135);
-            else if (d > 0.1 && d <= 0.3)
                 return Color.FromArgb(249, 236, 168);
+            else if (d > 0.1 && d <= 0.3)
+                return Color.FromArgb(255, 228, 135);
             else if (d > 0.3 && d <= 0.6)
-                return Color.FromArgb(255, 198, 61);
+                return Color.FromArgb(252, 207, 23);
             else if (d > 0.6 && d <= 0.8)
                 return Color.FromArgb(252, 184, 22);
             else if (d > 0.8 && d <= 0.9)
@@ -666,8 +689,6 @@ namespace PCMgr
         }
         private void ProcessListInit()
         {
-
-
             if (!processListInited)
             {
                 enumProcessCallBack = ProcessListHandle;
@@ -1038,6 +1059,10 @@ namespace PCMgr
                     StringBuilder exeCompany = new StringBuilder(256);
                     if (MGetExeCompany(stringBuilder.ToString(), exeCompany, 256)) taskMgrListItem.SubItems[companyindex].Text = exeCompany.ToString();
                 }
+            }
+            if (eprocessindex != -1)
+            {
+
             }
 
             //Init performance
@@ -1474,6 +1499,27 @@ namespace PCMgr
             tabControlMain.Show();
             Cursor = Cursors.Arrow;
         }
+        private void ProcessListEndTask(uint pid, TaskMgrListItem taskMgrListItem)
+        {
+            if (taskMgrListItem == null) taskMgrListItem = ProcessListFindItem(pid);
+            if (taskMgrListItem != null)
+            {
+                PsItem p = taskMgrListItem.Tag as PsItem;
+                if (p.isWindowShow && !p.isSvchost)
+                {
+                    if (taskMgrListItem.Childs.Count > 0)
+                    {
+                        foreach (TaskMgrListItemChild c in taskMgrListItem.Childs)
+                            if (c.Tag != null)
+                            {
+                                IntPtr handle = (IntPtr)c.Tag;
+                                MAppWorkCall3(192, IntPtr.Zero, handle);
+                            }
+                        return;
+                    }
+                }
+            }
+        }
 
         private void check_showAllProcess_CheckedChanged(object sender, EventArgs e)
         {
@@ -1491,83 +1537,91 @@ namespace PCMgr
 
         private void listProcess_MouseUp(object sender, MouseEventArgs e)
         {
-            if (listProcess.SelectedItem != null)
-            {
-                if (listProcess.SelectedItem.OldSelectedItem == null)
-                {
-                    if (e.Button == MouseButtons.Left)
-                    {
-                        if (!listProcess.SelectedItem.IsGroup)
-                        {
-                            PsItem t = (PsItem)listProcess.SelectedItem.Tag;
-                            if (t.pid > 4)
-                            {
-                                btnEndProcess.Enabled = true;
-                                MAppWorkShowMenuProcessPrepare(t.exepath, t.exename, t.pid);
+            if (listProcess.SelectedItem == null) return;
 
-                                if (t.exename.ToLower() == "explorer.exe")
+            if (listProcess.SelectedItem.OldSelectedItem == null)
+            {
+                if (e.Button == MouseButtons.Left)
+                {
+                    if (!listProcess.SelectedItem.IsGroup)
+                    {
+                        PsItem t = (PsItem)listProcess.SelectedItem.Tag;
+                        if (t.pid > 4)
+                        {
+                            btnEndProcess.Enabled = true;
+                            MAppWorkShowMenuProcessPrepare(t.exepath, t.exename, t.pid);
+
+                            if (t.exename.ToLower() == "explorer.exe")
+                            {
+                                nextSecType = MENU_SELECTED_PROCESS_KILL_ACT_REBOOT;
+                                btnEndProcess.Text = str_resrat;
+                                isSelectExplorer = true;
+                            }
+                            else
+                            {
+                                if (t.isWindowShow)
                                 {
-                                    btnEndProcess.Text = str_resrat;
-                                    isSelectExplorer = true;
+                                    btnEndProcess.Text = str_endtask;
+                                    nextSecType = MENU_SELECTED_PROCESS_KILL_ACT_RESENT_BACK;
                                 }
                                 else
                                 {
-                                    if (t.isWindowShow) btnEndProcess.Text = str_endtask;
-                                    else btnEndProcess.Text = str_endproc;
-                                    isSelectExplorer = false;
+                                    btnEndProcess.Text = str_endproc;
+                                    nextSecType = MENU_SELECTED_PROCESS_KILL_ACT_KILL;
                                 }
+                                isSelectExplorer = false;
                             }
-                            else btnEndProcess.Enabled = false;
                         }
-                        else
-                        {
-                            string exepath = listProcess.SelectedItem.Tag.ToString();
-                            MAppWorkShowMenuProcessPrepare(exepath, null, 0);
-                            btnEndProcess.Enabled = false;
-                        }
+                        else btnEndProcess.Enabled = false;
                     }
-                    else if (e.Button == MouseButtons.Right)
+                    else
                     {
-                        if (listProcess.SelectedItem.IsGroup)
-                            MAppWorkShowMenuProcess(listProcess.SelectedItem.Tag.ToString(), null, 0, Handle, 0);
-                        else
-                        {
-                            PsItem t = (PsItem)listProcess.SelectedItem.Tag;
-                            int rs = MAppWorkShowMenuProcess(t.exepath, t.exename, t.pid, Handle, isSelectExplorer ? 1 : 0);
-                        }
-                    }
-                }
-                else if (listProcess.SelectedItem.OldSelectedItem != null)
-                {
-                    if (e.Button == MouseButtons.Right)
-                    {
-                        PsItem t = (PsItem)listProcess.SelectedItem.Tag;
-                        if (t.isSvchost)
-                        {
-                            IntPtr scname = Marshal.StringToHGlobalUni((string)listProcess.SelectedItem.OldSelectedItem.Tag);
-                            MAppWorkCall3(184, Handle, scname);
-                            Marshal.FreeHGlobal(scname);
-                        }
-                        else
-                        {
-                            MAppWorkCall3(189, Handle, (IntPtr)listProcess.SelectedItem.OldSelectedItem.Tag);
-                        }
-                    }
-                    else if (e.Button == MouseButtons.Left)
-                    {
+                        string exepath = listProcess.SelectedItem.Tag.ToString();
+                        MAppWorkShowMenuProcessPrepare(exepath, null, 0);
                         btnEndProcess.Enabled = false;
-                        PsItem t = (PsItem)listProcess.SelectedItem.Tag;
-                        if (t.isSvchost)
-                        {
-                            IntPtr scname = Marshal.StringToHGlobalUni((string)listProcess.SelectedItem.OldSelectedItem.Tag);
-                            MAppWorkCall3(197, IntPtr.Zero, scname);
-                            Marshal.FreeHGlobal(scname);
-                        }
-                        else MAppWorkCall3(198, IntPtr.Zero, (IntPtr)listProcess.SelectedItem.OldSelectedItem.Tag);
                     }
                 }
-                else btnEndProcess.Enabled = false;
+                else if (e.Button == MouseButtons.Right)
+                {
+                    if (listProcess.SelectedItem.IsGroup)
+                        MAppWorkShowMenuProcess(listProcess.SelectedItem.Tag.ToString(), null, 0, Handle, 0, nextSecType);
+                    else
+                    {
+                        PsItem t = (PsItem)listProcess.SelectedItem.Tag;
+                        int rs = MAppWorkShowMenuProcess(t.exepath, t.exename, t.pid, Handle, isSelectExplorer ? 1 : 0, nextSecType);
+                    }
+                }
             }
+            else if (listProcess.SelectedItem.OldSelectedItem != null)
+            {
+                if (e.Button == MouseButtons.Right)
+                {
+                    PsItem t = (PsItem)listProcess.SelectedItem.Tag;
+                    if (t.isSvchost)
+                    {
+                        IntPtr scname = Marshal.StringToHGlobalUni((string)listProcess.SelectedItem.OldSelectedItem.Tag);
+                        MAppWorkCall3(184, Handle, scname);
+                        Marshal.FreeHGlobal(scname);
+                    }
+                    else
+                    {
+                        MAppWorkCall3(189, Handle, (IntPtr)listProcess.SelectedItem.OldSelectedItem.Tag);
+                    }
+                }
+                else if (e.Button == MouseButtons.Left)
+                {
+                    btnEndProcess.Enabled = false;
+                    PsItem t = (PsItem)listProcess.SelectedItem.Tag;
+                    if (t.isSvchost)
+                    {
+                        IntPtr scname = Marshal.StringToHGlobalUni((string)listProcess.SelectedItem.OldSelectedItem.Tag);
+                        MAppWorkCall3(197, IntPtr.Zero, scname);
+                        Marshal.FreeHGlobal(scname);
+                    }
+                    else MAppWorkCall3(198, IntPtr.Zero, (IntPtr)listProcess.SelectedItem.OldSelectedItem.Tag);
+                }
+            }
+            else btnEndProcess.Enabled = false;
         }
         private void listProcess_SelectItemChanged(object sender, EventArgs e)
         {
@@ -1618,22 +1672,7 @@ namespace PCMgr
         {
             TaskMgrListItem taskMgrListItem = listProcess.SelectedItem;
             if (taskMgrListItem != null)
-            {
-                PsItem p = taskMgrListItem.Tag as PsItem;
-                if (p.isWindowShow && !p.isSvchost)
-                {
-                    if (taskMgrListItem.Childs.Count > 0)
-                    {
-                        foreach (TaskMgrListItemChild c in taskMgrListItem.Childs)
-                            if (c.Tag != null)
-                            {
-                                IntPtr handle = (IntPtr)c.Tag;
-                                MAppWorkCall3(192, IntPtr.Zero, handle);
-                            }
-                        return;
-                    }
-                }
-            }
+                ProcessListEndTask(0, taskMgrListItem);
             MAppWorkCall3(190, Handle, IntPtr.Zero);
         }
         private void lbShowDetals_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -1744,6 +1783,7 @@ namespace PCMgr
         int netindex = 0;
         int pathindex = 0;
         int cmdindex = 0;
+        int eprocessindex = 0;
         #endregion
 
         #endregion
@@ -2071,18 +2111,28 @@ namespace PCMgr
         }
         private void btnFmAddGoto_Click(object sender, EventArgs e)
         {
+
             if (textBoxFmCurrent.Text == "")
                 TaskDialog.Show(str_PleaseEnterPath, str_TipTitle);
-            else if (Directory.Exists(textBoxFmCurrent.Text))
-                FileMgrShowFiles(textBoxFmCurrent.Text);
-            else if (File.Exists(textBoxFmCurrent.Text)) {
-                string d = Path.GetDirectoryName(textBoxFmCurrent.Text);
-                string f = Path.GetFileName(textBoxFmCurrent.Text);
-                FileMgrShowFiles(d);
-                ListViewItem[] lis = listFm.Items.Find(f, false);
-                if (lis.Length > 0) lis[0].Selected = true;
+            else
+            {
+                if (textBoxFmCurrent.Text.StartsWith("\"") && textBoxFmCurrent.Text.EndsWith("\""))
+                {
+                    textBoxFmCurrent.Text = textBoxFmCurrent.Text.Remove(textBoxFmCurrent.Text.Length - 1, 1);
+                    textBoxFmCurrent.Text = textBoxFmCurrent.Text.Remove(0, 1);
+                }
+                if (Directory.Exists(textBoxFmCurrent.Text))
+                    FileMgrShowFiles(textBoxFmCurrent.Text);
+                else if (File.Exists(textBoxFmCurrent.Text))
+                {
+                    string d = Path.GetDirectoryName(textBoxFmCurrent.Text);
+                    string f = Path.GetFileName(textBoxFmCurrent.Text);
+                    FileMgrShowFiles(d);
+                    ListViewItem[] lis = listFm.Items.Find(f, false);
+                    if (lis.Length > 0) lis[0].Selected = true;
+                }
+                else TaskDialog.Show(str_PathUnExists, str_TipTitle);
             }
-            else TaskDialog.Show(str_PathUnExists, str_TipTitle);
         }
         private void treeFmLeft_BeforeExpand(object sender, TreeViewCancelEventArgs e)
         {
@@ -2726,6 +2776,12 @@ namespace PCMgr
         private static string str_get_failed = "";
         public static string str_sec = "";
         public static string str_loading = "";
+        public static string str_frocedelsuccess = "";
+        public static string str_filldatasuccess = "";
+        public static string str_filldatafailed = "";
+        public static string str_getfileinfofailed = "";
+        public static string str_filenotexist = "";
+        public static string str_failed = "";
 
         private static string str_endproc = "";
         private static string str_endtask = "";
@@ -2763,7 +2819,10 @@ namespace PCMgr
         public static string str_RefeshSuccess = "";
         public static string str_InvalidHwnd = "";
         public static string str_ChangeWindowTextAsk = "";
-
+        public static string str_UnlockFileSuccess = "";
+        public static string str_UnlockFileFailed = "";
+        public static string str_CollectingFiles = "";
+        public static string str_DeleteFiles = "";
 
         public static void InitLanuage()
         {
@@ -2793,6 +2852,16 @@ namespace PCMgr
         {
             try
             {
+                str_DeleteFiles = LanuageMgr.GetStr("DeleteFiles");
+                str_CollectingFiles = LanuageMgr.GetStr("CollectingFiles");
+                str_UnlockFileSuccess = LanuageMgr.GetStr("UnlockFileSuccess");
+                str_UnlockFileFailed = LanuageMgr.GetStr("UnlockFileFailed");
+                str_filenotexist = LanuageMgr.GetStr("PathUnExists");
+                str_failed = LanuageMgr.GetStr("OpFailed");
+                str_getfileinfofailed = LanuageMgr.GetStr("GetFileInfoFailed");
+                str_filldatasuccess = LanuageMgr.GetStr("FillFileSuccess");
+                str_filldatafailed = LanuageMgr.GetStr("FillFileFailed");
+                str_frocedelsuccess = LanuageMgr.GetStr("FroceDelSuccess");
                 str_idle_process = LanuageMgr.GetStr("SystemIdleProcess");
                 str_service_host = LanuageMgr.GetStr("ServiceHost");
                 str_status_paused = LanuageMgr.GetStr("StatusPaused");
@@ -2905,6 +2974,8 @@ namespace PCMgr
 
                 MAppSetLanuageItems(2, 0, LanuageMgr.GetStr2("DelStartupItemAsk", out size), size);
                 MAppSetLanuageItems(2, 1, LanuageMgr.GetStr2("DelStartupItemAsk2", out size), size);
+                MAppSetLanuageItems(2, 2, str_endtask, str_endtask.Length + 1);
+                MAppSetLanuageItems(2, 3, str_resrat, str_resrat.Length + 1);
             }
             catch (Exception e)
             {
@@ -3010,6 +3081,77 @@ namespace PCMgr
 
         #endregion
 
+        #region KernelMWork
+
+        private void KernelListInit()
+        {
+            if(!driverListInited)
+            {
+                if (MCanUseKernel())
+                {
+                    KernelLisRefesh();
+                }
+                else
+                {
+                    listDrivers.Hide();
+                    pl_driverNotLoadTip.Show();
+                    linkRestartAsAdminDriver.Visible = !MIsRunasAdmin();
+                }
+                driverListInited = true;
+            }
+        }
+        private void KernelLisRefesh()
+        {
+            if (MCanUseKernel())
+            {
+
+            }
+        }
+
+        private void linkRestartAsAdminDriver_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            SetConfig("LoadKernelDriver", "AppSettings", "TRUE");
+            linkRebootAsAdmin_LinkClicked(sender, e);
+        }
+
+        #endregion
+
+        #region NotifyWork
+
+        private FormDelFileProgress delingdialog = null;
+
+        private void DelingDialogInit()
+        {
+            delingdialog = new FormDelFileProgress();
+            delingdialog.Show();
+            MAppWorkCall3(200, delingdialog.Handle, IntPtr.Zero);
+        }
+        private void DelingDialogClose()
+        {
+            delingdialog.Close();
+            delingdialog = null;
+        }
+        private void ShowHideDelingDialog(bool show)
+        {
+            delingdialog.Visible = show;
+        }
+        private void DelingDialogUpdate(string path, int value)
+        {
+            delingdialog.label.Text = path;
+            if (value == -1)
+            {
+                delingdialog.progressBar.Style = ProgressBarStyle.Marquee;
+            }
+            else
+            {
+                delingdialog.progressBar.Style = ProgressBarStyle.Blocks;
+                if (value >= 0 && value <= 100)
+                    delingdialog.progressBar.Value = value;
+            }
+        }
+
+        #endregion
+
         private void BaseProcessRefeshTimer_Tick(object sender, EventArgs e)
         {
             if (!perfMainInited) ProcessListInitLater();
@@ -3068,13 +3210,13 @@ namespace PCMgr
             }
         }
 
-        private void AppWorkerCallBack(int msg, IntPtr lParam, IntPtr wParam)
+        private void AppWorkerCallBack(int msg, IntPtr wParam, IntPtr lParam)
         {
             switch(msg)
             {
                 case 5:
                     {
-                        int c = lParam.ToInt32();
+                        int c = wParam.ToInt32();
                         if (c == 0)
                         {
                             baseProcessRefeshTimer.Stop();
@@ -3090,7 +3232,7 @@ namespace PCMgr
                     }
                 case 6:
                     {
-                        int c = lParam.ToInt32();
+                        int c = wParam.ToInt32();
                         if(c==0)
                         {
                             SetConfig("TopMost", "AppSetting", "FALSE");
@@ -3105,7 +3247,7 @@ namespace PCMgr
                     }
                 case 7:
                     {
-                        int c = lParam.ToInt32();
+                        int c = wParam.ToInt32();
                         if (c == 0)
                         {
                             SetConfig("CloseHideToNotfication", "AppSetting", "FALSE");
@@ -3120,7 +3262,7 @@ namespace PCMgr
                     }
                 case 8:
                     {
-                        int c = lParam.ToInt32();
+                        int c = wParam.ToInt32();
                         if (c == 0)
                         {
                             SetConfig("MinHide", "AppSetting", "FALSE");
@@ -3135,7 +3277,7 @@ namespace PCMgr
                     }
                 case 9:
                     {
-                        string scname = Marshal.PtrToStringUni(lParam);
+                        string scname = Marshal.PtrToStringUni(wParam);
                         tabControlMain.SelectedTab = tabPageScCtl;
                         foreach (ListViewItem it in listService.Items)
                         {
@@ -3157,6 +3299,58 @@ namespace PCMgr
                 case 11:
                     {
 
+                        break;
+                    }
+                case 12:
+                    {
+                        new FormSpyWindow(wParam).ShowDialog();
+                        break;
+                    }
+                case 13:
+                    {
+                        new FormFileTool().ShowDialog();
+                        break;
+                    }
+                case 14:
+                    {
+                        new FormAbout().ShowDialog();
+                        break;
+                    }
+                case 15:
+                    {
+                        uint pid = Convert.ToUInt32(wParam.ToInt32());
+                        ProcessListEndTask(pid, null);
+                        break;
+                    }
+                case 16:
+                    {
+
+                        break;
+                    }
+                case 17:
+                    {
+
+                        break;
+                    }
+                case 18:
+                    {
+                        ShowHideDelingDialog(true);
+                        break;
+                    }
+                case 19:
+                    {
+                        ShowHideDelingDialog(false);
+                        DelingDialogUpdate(str_DeleteFiles, 0);
+                        break;
+                    }
+                case 20:
+                    {
+                        DelingDialogUpdate(Marshal.PtrToStringUni(wParam), lParam.ToInt32());
+                        break;
+                    }
+                case 21:
+                    {
+                        DelingDialogUpdate(str_CollectingFiles, -1);
                         break;
                     }
             }
@@ -3330,6 +3524,7 @@ namespace PCMgr
             netindex = listProcessGetListIndex("TitleNet");
             pathindex = listProcessGetListIndex("TitleProcPath");
             cmdindex = listProcessGetListIndex("TitleCmdLine");
+            eprocessindex = listProcessGetListIndex("TitleEProcess");
 
             if (pidindex != -1) listProcess.Header.Items[pidindex].Alignment = StringAlignment.Far;
             if (cpuindex != -1)
@@ -3355,10 +3550,46 @@ namespace PCMgr
 
             #endregion
 
-            ProcessListInit();
+            if (MIsRunasAdmin())
+                AppLoadKernel();
+
+            DelingDialogInit();
+
+            int id = AppRunAgrs();
+            switch (id)
+            {
+                case 1:
+                    tabControlMain.SelectedTab = tabPageKernelCtl;
+                    break;
+                case 2:
+                    tabControlMain.SelectedTab = tabPageSysCtl;
+                    break;
+                case 3:
+                    tabControlMain.SelectedTab = tabPagePerfCtl;
+                    break;
+                case 4:
+                    tabControlMain.SelectedTab = tabPageUWPCtl;
+                    break;
+                case 5:
+                    tabControlMain.SelectedTab = tabPageScCtl;
+                    break;
+                case 6:
+                    tabControlMain.SelectedTab = tabPageStartCtl;
+                    break;
+                case 7:
+                    tabControlMain.SelectedTab = tabPageFileCtl;
+                    break;
+                case 8:
+                    return;
+                case 0:
+                default:
+                    ProcessListInit();
+                    break;
+            }
         }
         private void AppExit()
         {
+            DelingDialogClose();
             PerfClear();
             ProcessListFreeAll();
             MSCM_Exit();
@@ -3366,6 +3597,59 @@ namespace PCMgr
             fileSystemWatcher.EnableRaisingEvents = false;
 
             Application.Exit();
+        }
+        private void AppLoadKernel()
+        {
+            if (GetConfigBool("LoadKernelDriver", "AppSettings"))
+            {
+                if (!MInitKernel(Application.StartupPath))
+                {
+                    if (eprocessindex != -1)
+                    {
+                        listProcess.Colunms.Remove(listProcess.Colunms[eprocessindex]);
+                        eprocessindex = -1;
+                    }
+
+                    TaskDialog.Show(LanuageMgr.GetStr("LoadDriverErr"), LanuageMgr.GetStr("ErrTitle"), "", TaskDialogButton.OK, TaskDialogIcon.None);
+                }
+            }
+            else
+            {
+                if (eprocessindex != -1)
+                {
+                    listProcess.Colunms.Remove(listProcess.Colunms[eprocessindex]);
+                    eprocessindex = -1;
+                }
+            }
+        }
+        private int AppRunAgrs()
+        {
+            if (agrs.Length > 0)
+            {
+                if (agrs[0] == "select" && agrs.Length > 1)
+                {
+                    if (agrs[1] == "kernel")
+                        return 1;
+                    if (agrs[1] == "system")
+                        return 2;
+                    if (agrs[1] == "perf")
+                        return 3;
+                    if (agrs[1] == "uwpapps")
+                        return 4;
+                    if (agrs[1] == "services")
+                        return 5;
+                    if (agrs[1] == "startmgr")
+                        return 6;
+                    if (agrs[1] == "filemgr")
+                        return 7;
+                }
+                else if (agrs[0] == "spy")
+                    new FormSpyWindow(GetDesktopWindow()).ShowDialog();
+                else if (agrs[0] == "filetool")
+                    new FormFileTool().ShowDialog();
+
+            }
+            return 0;
         }
 
         #region FormEvent
@@ -3407,15 +3691,6 @@ namespace PCMgr
                 catch { }
             }
             #endregion
-
-            bool run = true;
-
-            if (!FormMain.MIsRunasAdmin())
-                run = ShowNOADMINWarn();
-            if (FormMain.MIs64BitOS())
-                run = Show64Warn();
-
-            if (!run) Environment.Exit(0);
         }
         protected override void WndProc(ref System.Windows.Forms.Message m)
         {
@@ -3462,7 +3737,7 @@ namespace PCMgr
                         if (tabControlMain.SelectedTab == tabPageProcCtl)
                             ProcessListRefesh();
                         else if (tabControlMain.SelectedTab == tabPageKernelCtl)
-                            ;
+                            KernelLisRefesh();
                         else if (tabControlMain.SelectedTab == tabPageStartCtl)
                             StartMListRefesh();
                         else if (tabControlMain.SelectedTab == tabPageScCtl)
@@ -3522,83 +3797,6 @@ namespace PCMgr
             SetConfig("MainHeaders1", "AppSetting", listProcess.Colunms[0].Width.ToString());
         }
 
-        private static bool Show64Warn()
-        {
-            if (FormMain.GetConfig("X32Warning", "AppSetting") == "TRUE")
-            {
-                bool has64 = FormMain.MIsFinded64();
-                TaskDialog t = new TaskDialog(LanuageMgr.GetStr("X64WarnTitle"), FormMain.DEFAPPTITLE);
-                t.Content = LanuageMgr.GetStr("X64WarnText");
-                t.ExpandedInformation = LanuageMgr.GetStr("X64WarnMoreText") + (has64 ? LanuageMgr.GetStr("X64WarnFinded64Text") : "");
-                t.CommonIcon = TaskDialogIcon.Warning;
-                t.VerificationText = LanuageMgr.GetStr("DoNotRemidMeLater");
-                t.VerificationClick += T_TaskDialog_64Warn_VerificationClick;
-                if (has64)
-                {
-                    CustomButton[] btns = new CustomButton[3];
-                    btns[0] = new CustomButton(Result.Yes, LanuageMgr.GetStr("ContinueRun"));
-                    btns[1] = new CustomButton(Result.No, LanuageMgr.GetStr("CancelRun"));
-                    btns[2] = new CustomButton(Result.Abort, LanuageMgr.GetStr("Run64"));
-                    t.CustomButtons = btns;
-                }
-                else
-                {
-                    CustomButton[] btns = new CustomButton[2];
-                    btns[0] = new CustomButton(Result.Yes, LanuageMgr.GetStr("ContinueRun"));
-                    btns[1] = new CustomButton(Result.No, LanuageMgr.GetStr("CancelRun"));
-                    t.CustomButtons = btns;
-                }
-                t.CanBeMinimized = true;
-                t.EnableHyperlinks = true;
-                Results rs = t.Show();
-                if (rs.CommonButton == Result.No) return false;
-                else if (rs.CommonButton == Result.Abort)
-                {
-                    FormMain.MRun64();
-                    return false;
-                }
-            }
-            return true;
-        }
-        private static bool ShowNOADMINWarn()
-        {
-            if (FormMain.GetConfig("NOAdminWarning", "AppSetting") == "TRUE")
-            {
-                TaskDialog t = new TaskDialog("NeedAdmin", FormMain.DEFAPPTITLE, LanuageMgr.GetStr("RequestAdminText"));
-                t.CommonIcon = TaskDialogIcon.Warning;
-                t.VerificationText = LanuageMgr.GetStr("DoNotRemidMeLater");
-                t.VerificationClick += T_TaskDialog_NOADMINWarn_VerificationClick;
-                CustomButton[] btns = new CustomButton[3];
-                btns[0] = new CustomButton(Result.Yes, LanuageMgr.GetStr("ContinueRun"));
-                btns[1] = new CustomButton(Result.No, LanuageMgr.GetStr("CancelRun"));
-                btns[2] = new CustomButton(Result.Abort, LanuageMgr.GetStr("RunAsAdmin"));
-                t.CustomButtons = btns;
-                t.CanBeMinimized = true;
-                t.EnableHyperlinks = true;
-                Results rs = t.Show();
-                if (rs.CommonButton == Result.No) return false;
-                else if (rs.CommonButton == Result.Abort)
-                {
-                    FormMain.MAppRebotAdmin();
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        private static void T_TaskDialog_NOADMINWarn_VerificationClick(object sender, CheckEventArgs e)
-        {
-            if (e.IsChecked)
-                FormMain.SetConfig("NOAdminWarning", "AppSetting", "FALSE");
-            else FormMain.SetConfig("NOAdminWarning", "AppSetting", "TRUE");
-        }
-        private static void T_TaskDialog_64Warn_VerificationClick(object sender, CheckEventArgs e)
-        {
-            if (e.IsChecked)
-                FormMain.SetConfig("X32Warning", "AppSetting", "FALSE");
-            else FormMain.SetConfig("X32Warning", "AppSetting", "TRUE");
-        }
-
         #endregion
 
         private void tabControlMain_Selected(object sender, TabControlEventArgs e)
@@ -3626,6 +3824,10 @@ namespace PCMgr
             else if (e.TabPage == tabPageStartCtl)
             {
                 StartMListInit();
+            }
+            else if (e.TabPage == tabPageKernelCtl)
+            {
+                KernelListInit();
             }
         }
 

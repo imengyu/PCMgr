@@ -5,7 +5,9 @@
 #include "syshlp.h"
 #include "nthlp.h"
 #include "lghlp.h"
+#include "mapphlp.h"
 #include "resource.h"
+#include "StringHlp.h"
 #include <Psapi.h>
 #include <process.h>
 #include <tlhelp32.h>
@@ -22,6 +24,8 @@ HICON HIconDef;
 HWND hWndMain;
 PSYSTEM_PROCESSES current_system_process = NULL;
 
+BOOL killCmdSendBack = FALSE;
+BOOL isKillingExplorer = FALSE;
 
 //Api s
 
@@ -31,11 +35,12 @@ _RunFileDlg RunFileDlg;
 ZwSuspendThreadFun ZwSuspendThread;
 ZwResumeThreadFun ZwResumeThread;
 ZwTerminateThreadFun ZwTerminateThread;
+ZwTerminateProcessFun ZwTerminateProcess;
 ZwOpenThreadFun ZwOpenThread;
 ZwQueryInformationThreadFun ZwQueryInformationThread;
 ZwSuspendProcessFun ZwSuspendProcess;
 ZwResumeProcessFun ZwResumeProcess;
-ZwTerminateProcessFun ZwTerminateProcess;
+
 ZwOpenProcessFun ZwOpenProcess;
 NtQuerySystemInformationFun NtQuerySystemInformation;
 NtUnmapViewOfSectionFun NtUnmapViewOfSection;
@@ -44,8 +49,10 @@ LdrGetProcedureAddressFun LdrGetProcedureAddress;
 RtlInitAnsiStringFun RtlInitAnsiString;
 RtlNtStatusToDosErrorFun RtlNtStatusToDosError;
 RtlGetLastWin32ErrorFun RtlGetLastWin32Error;
-_IsWow64Process dIsWow64Process;
+NtQueryObjectFun NtQueryObject;
+
 //K32 api
+_IsWow64Process dIsWow64Process;
 _IsImmersiveProcess dIsImmersiveProcess;
 _GetPackageFullName dGetPackageFullName;
 _GetPackageInfo dGetPackageInfo;
@@ -56,6 +63,34 @@ _GetPackageId dGetPackageId;
 //Enum apis
 EXTERN_C BOOL MAppVProcessAllWindows();
 
+M_API void MKillProcessUser()
+{
+	if (thisCommandPid > 4)
+	{
+		if (isKillingExplorer || (MShowMessageDialog(hWndMain, (LPWSTR)str_item_kill_ast_content.c_str(), DEFDIALOGGTITLE,
+			(LPWSTR)(str_item_kill_ask_start + thisCommandName + str_item_kill_ask_end).c_str(), NULL, MB_YESNO) == IDYES))
+		{
+			HANDLE hProcess;
+			int rs = MOpenProcessNt(thisCommandPid, &hProcess);
+			if (rs == 1)
+			{
+				rs = MTerminateProcessNt(0, hProcess);
+				if (rs == 0xC0000022)
+					MShowErrorMessage((LPWSTR)str_item_access_denied.c_str(), (LPWSTR)str_item_kill_failed.c_str(), MB_ICONERROR, MB_OK);
+				else if (rs != 1)
+					ThrowErrorAndErrorCodeX(rs, str_item_endprocfailed, (LPWSTR)str_item_kill_failed.c_str());
+				else SendMessage(hWndMain, WM_COMMAND, 41012, 0);
+			}
+			else if (rs == 0xC0000022)
+				MShowErrorMessage((LPWSTR)str_item_access_denied.c_str(), (LPWSTR)str_item_kill_failed.c_str(), MB_ICONERROR, MB_OK);
+			else if (rs == -1) {
+				MShowErrorMessage((LPWSTR)str_item_invalidproc.c_str(), (LPWSTR)str_item_kill_failed.c_str(), MB_ICONWARNING, MB_OK);
+				SendMessage(hWndMain, WM_COMMAND, 41012, 0);
+			}
+			else ThrowErrorAndErrorCodeX(rs, str_item_openprocfailed, (LPWSTR)str_item_kill_failed.c_str());
+		}
+	}
+}
 M_API BOOL MGetPrivileges2()
 {
 	HANDLE hToken;
@@ -284,7 +319,7 @@ M_API HICON MGetExeIcon(LPWSTR pszFullPath)
 TCHAR szDriveStr[500];
 BOOL driveStrGeted = FALSE;
 
-//Process information
+//Kernel path
 M_API BOOL MDosPathToNtPath(LPWSTR pszDosPath, LPWSTR pszNtPath)
 {
 	TCHAR            szDrive[3];
@@ -323,6 +358,112 @@ M_API BOOL MDosPathToNtPath(LPWSTR pszDosPath, LPWSTR pszNtPath)
 	}
 	return FALSE;
 }
+M_API DWORD MGetNtPathFromHandle(HANDLE hFile, LPWSTR ps_NTPath, UINT szDosPathSize)
+{
+	if (hFile == 0 || hFile == INVALID_HANDLE_VALUE)
+		return ERROR_INVALID_HANDLE;
+
+	// NtQueryObject() returns STATUS_INVALID_HANDLE for Console handles
+	if (IsConsoleHandle(hFile))
+	{
+		std::wstring s = FormatString(_T("\\Device\\Console%04X"), (DWORD)(DWORD_PTR)hFile);
+		wcscpy_s(ps_NTPath, szDosPathSize, s.c_str());
+		return ERROR_SUCCESS;
+	}
+
+	BYTE  u8_Buffer[2000];
+	DWORD u32_ReqLength = 0;
+
+	UNICODE_STRING* pk_Info = &((OBJECT_NAME_INFORMATION*)u8_Buffer)->Name;
+	pk_Info->Buffer = 0;
+	pk_Info->Length = 0;
+
+	// IMPORTANT: The return value from NtQueryObject is bullshit! (driver bug?)
+	// - The function may return STATUS_NOT_SUPPORTED although it has successfully written to the buffer.
+	// - The function returns STATUS_SUCCESS although h_File == 0xFFFFFFFF
+	NtQueryObject(hFile, OBJECT_INFORMATION_CLASS(ObjectNameInformation), u8_Buffer, sizeof(u8_Buffer), &u32_ReqLength);
+
+	// On error pk_Info->Buffer is NULL
+	if (!pk_Info->Buffer || !pk_Info->Length)
+		return ERROR_FILE_NOT_FOUND;
+
+	pk_Info->Buffer[pk_Info->Length / 2] = 0; // Length in Bytes!
+	wcscpy_s(ps_NTPath, szDosPathSize, pk_Info->Buffer);
+	return ERROR_SUCCESS;
+}
+M_API DWORD MNtPathToDosPath(LPWSTR pszNtPath, LPWSTR pszDosPath, UINT szDosPathSize)
+{
+	DWORD u32_Error;
+
+	if (_tcsnicmp(pszNtPath, _T("\\Device\\Serial"), 14) == 0 || // e.g. "Serial1"
+		_tcsnicmp(pszNtPath, _T("\\Device\\UsbSer"), 14) == 0)   // e.g. "USBSER000"
+	{
+		HKEY h_Key;
+		if (u32_Error = RegOpenKeyEx(HKEY_LOCAL_MACHINE, _T("Hardware\\DeviceMap\\SerialComm"), 0, KEY_QUERY_VALUE, &h_Key))
+			return u32_Error;
+
+		TCHAR u16_ComPort[50];
+
+		DWORD u32_Type;
+		DWORD u32_Size = sizeof(u16_ComPort);
+		if (u32_Error = RegQueryValueEx(h_Key, pszNtPath, 0, &u32_Type, (BYTE*)u16_ComPort, &u32_Size))
+		{
+			RegCloseKey(h_Key);
+			return ERROR_UNKNOWN_PORT;
+		}
+
+		wcscpy_s(pszDosPath, szDosPathSize, u16_ComPort);
+		RegCloseKey(h_Key);
+		return ERROR_SUCCESS;
+	}
+
+	if (_tcsnicmp(pszNtPath, _T("\\Device\\LanmanRedirector\\"), 25) == 0) // Win XP
+	{
+		wcscpy_s(pszDosPath, szDosPathSize, _T("\\\\"));
+		wcscat_s(pszDosPath, szDosPathSize, (pszNtPath + 25));
+		return ERROR_SUCCESS;
+	}
+
+	if (_tcsnicmp(pszNtPath, _T("\\Device\\Mup\\"), 12) == 0) // Win 7
+	{
+		wcscpy_s(pszDosPath, szDosPathSize, _T("\\\\"));
+		wcscat_s(pszDosPath, szDosPathSize, (pszNtPath + 12));
+		return ERROR_SUCCESS;
+	}
+
+	TCHAR u16_Drives[300];
+	if (!GetLogicalDriveStrings(300, u16_Drives))
+		return GetLastError();
+
+	TCHAR* u16_Drv = u16_Drives;
+	while (u16_Drv[0])
+	{
+		TCHAR* u16_Next = u16_Drv + _tcslen(u16_Drv) + 1;
+
+		u16_Drv[2] = 0; // the backslash is not allowed for QueryDosDevice()
+
+		TCHAR u16_NtVolume[1000];
+		u16_NtVolume[0] = 0;
+
+		// may return multiple strings!
+		// returns very weird strings for network shares
+		if (!QueryDosDevice(u16_Drv, u16_NtVolume, sizeof(u16_NtVolume) / sizeof(TCHAR)))
+			return GetLastError();
+
+		int s32_Len = (int)_tcslen(u16_NtVolume);
+		if (s32_Len > 0 && _tcsnicmp(pszNtPath, u16_NtVolume, s32_Len) == 0)
+		{
+			wcscpy_s(pszDosPath, szDosPathSize, u16_Drv);
+			wcscat_s(pszDosPath, szDosPathSize, (pszNtPath + s32_Len));
+			return ERROR_SUCCESS;
+		}
+
+		u16_Drv = u16_Next;
+	}
+	return ERROR_BAD_PATHNAME;
+}
+
+//Process information
 M_API BOOL MGetProcessFullPathEx(DWORD dwPID, LPWSTR outNter, PHANDLE phandle, LPWSTR pszExeName)
 {
 	if (dwPID == 0) {
@@ -567,6 +708,8 @@ M_API DWORD MTerminateProcessNt(DWORD dwId, HANDLE handle)
 	}
 }
 
+
+
 M_API int MAppWorkShowMenuProcessPrepare(LPWSTR strFilePath, LPWSTR strFileName, DWORD pid)
 {
 	thisCommandPid = pid;
@@ -587,7 +730,7 @@ M_API int MAppWorkShowMenuProcessPrepare(LPWSTR strFilePath, LPWSTR strFileName,
 	return 0;
 }
 //MENU
-M_API int MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWORD pid, HWND hDlg, int data)
+M_API int MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWORD pid, HWND hDlg, int data, int type)
 {
 	thisCommandPid = pid;
 	if (pid > 0)
@@ -617,6 +760,25 @@ M_API int MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWORD 
 				wcscpy_s(thisCommandPath, 260, strFilePath);
 			if (wcslen(strFileName) < 260)
 				wcscpy_s(thisCommandName, 260, strFileName);
+
+			killCmdSendBack = type == 2;
+			isKillingExplorer = type == 1;
+
+			if (type == 1) {
+				MENUITEMINFO info = MENUITEMINFO();
+				info.cbSize = sizeof(MENUITEMINFO);
+				info.fMask = MIIM_STRING;
+				info.dwTypeData = str_item_rebootexplorer;
+				SetMenuItemInfo(hpop, IDM_KILL, FALSE, &info);
+			}			
+			else if (type == 2) {
+				MENUITEMINFO info = MENUITEMINFO();
+				info.cbSize = sizeof(MENUITEMINFO);
+				info.fMask = MIIM_STRING;
+				info.dwTypeData = str_item_endtask;
+				SetMenuItemInfo(hpop, IDM_KILL, FALSE, &info);
+			}
+
 			TrackPopupMenu(hpop,
 				TPM_LEFTALIGN | TPM_TOPALIGN | TPM_RIGHTBUTTON,
 				pt.x,
@@ -735,6 +897,7 @@ BOOL LoadDll()
 		NtQueryInformationProcess = (NtQueryInformationProcessFun)GetProcAddress(hNtDll, "NtQueryInformationProcess");
 		LdrGetProcedureAddress = (LdrGetProcedureAddressFun)GetProcAddress(hNtDll, "LdrGetProcedureAddress");
 		RtlInitAnsiString = (RtlInitAnsiStringFun)GetProcAddress(hNtDll, "RtlInitAnsiString");
+		NtQueryObject = (NtQueryObjectFun)GetProcAddress(hNtDll, "NtQueryObject");
 		//shell32
 		RunFileDlg = (_RunFileDlg)MGetProcedureAddress(hShell32, NULL, 61);
 		//k32

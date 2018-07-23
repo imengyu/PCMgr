@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "lghlp.h"
+#include "syshlp.h"
 #include <string>
 #include "StringHlp.h"
 
@@ -89,6 +90,8 @@ LPWSTR str_item_kernelnotload;
 
 LPWSTR str_item_delscask;
 LPWSTR str_item_delsc2ask;
+LPWSTR str_item_endtask;
+LPWSTR str_item_rebootexplorer;
 
 #define HASSTR(x) x=(LPWSTR)malloc(size*sizeof(WCHAR));wcscpy_s(x, size, msg)
 
@@ -99,7 +102,11 @@ M_CAPI(void) MLG_SetLanuageRes(LPWSTR appstarppath, LPWSTR name)
 {
 	if (wcscmp(name, L"zh") != 0 && wcscmp(name, L"zh-CN") != 0)
 	{
-		std::wstring  s = FormatString(L"%s\\%s\\PCMgrCore.dll", appstarppath,  name);
+#if _X64_
+		std::wstring  s = FormatString(L"%s\\app\\x64\\%s\\PCMgr64.resource2.dll", appstarppath, name);
+#else
+		std::wstring  s = FormatString(L"%s\\app\\x86\\%s\\PCMgr32.resource2.dll", appstarppath, name);
+#endif
 		hInstRs = LoadLibrary((LPWSTR)s.c_str());
 		if(!hInstRs) hInstRs = hInst;
 	}
@@ -168,6 +175,9 @@ void MLG_SetLanuageItems_Destroy()
 	delete str_item_kernelnotload;
 	delete str_item_delscask;
 	delete str_item_delsc2ask;
+	delete str_item_endtask;
+	delete str_item_rebootexplorer;
+
 }
 void MLG_SetLanuageItems_1(int id, LPWSTR msg, int size)
 {
@@ -232,5 +242,7 @@ void MLG_SetLanuageItems_2(int id, LPWSTR msg, int size)
 	{
 	case 0: HASSTR(str_item_delscask); break;
 	case 1: HASSTR(str_item_delsc2ask); break;
+	case 2: HASSTR(str_item_endtask); break;
+	case 3: HASSTR(str_item_rebootexplorer); break;
 	}
 }

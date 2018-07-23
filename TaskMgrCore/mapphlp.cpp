@@ -51,6 +51,7 @@ HMENU hMenuMainSet;
 HMENU hMenuMainView;
 HWND selectItem4;
 
+extern BOOL killCmdSendBack;
 bool refesh_fast = false;
 bool refesh_paused = false;
 bool min_hide = false;
@@ -199,6 +200,9 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 		selectItem4 = (HWND)data;
 		break;
 	case 199:
+		break;
+	case 200:
+		ShowWindow(hWnd, SW_HIDE);
 		break;
 	default:
 		return 0;
@@ -421,6 +425,21 @@ M_API void MListDrawItem(HWND hWnd, HDC hdc, int x, int y, int w, int h, int sta
 	if (hTheme != NULL)CloseThemeData(hTheme);
 }
 
+void MAppWmCommandTools(WPARAM wParam)
+{
+	switch (wParam)
+	{
+	case IDC_SOFTACT_SHOWSPY:
+		MAppMainCall(12, GetDesktopWindow(), 0);
+		break;
+	case IDC_SOFTACT_SHOWFILETOOL:
+		MAppMainCall(13, 0, 0);
+		break;
+	default:
+		break;
+	}
+}
+
 void ThrowErrorAndErrorCodeX(DWORD code, LPWSTR msg, LPWSTR title, BOOL ntstatus)
 {
 	wchar_t errcode[260];
@@ -473,7 +492,8 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		case IDM_ABOUT: {
-			DialogBox(hInstRs, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+			//DialogBox(hInstRs, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+			MAppMainCall(14, 0, 0);
 			break;
 		}
 		case IDM_TEXIT: {
@@ -485,31 +505,9 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		case IDM_KILL: {
-			if (thisCommandPid > 4)
-			{
-				if (MShowMessageDialog(hWndMain, (LPWSTR)str_item_kill_ast_content.c_str(), DEFDIALOGGTITLE,
-					(LPWSTR)(str_item_kill_ask_start + thisCommandName + str_item_kill_ask_end).c_str(), NULL, MB_YESNO) == IDYES)
-				{
-					HANDLE hProcess;
-					int rs = MOpenProcessNt(thisCommandPid, &hProcess);
-					if (rs == 1)
-					{
-						rs = MTerminateProcessNt(0, hProcess);
-						if (rs == 0xC0000022)
-							MShowErrorMessage((LPWSTR)str_item_access_denied.c_str(), (LPWSTR)str_item_kill_failed.c_str(), MB_ICONERROR, MB_OK);
-						else if (rs != 1)
-							ThrowErrorAndErrorCodeX(rs, str_item_endprocfailed, (LPWSTR)str_item_kill_failed.c_str());
-						else SendMessage(hWndMain, WM_COMMAND, 41012, 0);
-					}
-					else if (rs == 0xC0000022)
-						MShowErrorMessage((LPWSTR)str_item_access_denied.c_str(), (LPWSTR)str_item_kill_failed.c_str(), MB_ICONERROR, MB_OK);
-					else if (rs == -1) {
-						MShowErrorMessage((LPWSTR)str_item_invalidproc.c_str(), (LPWSTR)str_item_kill_failed.c_str(), MB_ICONWARNING, MB_OK);
-						SendMessage(hWndMain, WM_COMMAND, 41012, 0);
-					}
-					else ThrowErrorAndErrorCodeX(rs, str_item_openprocfailed, (LPWSTR)str_item_kill_failed.c_str());
-				}
-			}
+			if (killCmdSendBack)
+				MAppMainCall(15, (LPVOID)thisCommandPid, 0);
+			else MKillProcessUser();
 			break;
 		}
 		case IDM_FILEPROP: {
@@ -661,7 +659,7 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		case ID_FMMAIN_PROP: {
-			if (_waccess(fmCurrectSelectFilePath0, 0) == 0)
+			if (MFM_FileExist(fmCurrectSelectFilePath0))
 				MShowFileProp(fmCurrectSelectFilePath0);
 			break;
 		}
@@ -678,7 +676,7 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		case ID_FMMAIN_CUT: {
-			if (_waccess(fmCurrectSelectFilePath0, 0) == 0) {
+			if (MFM_FileExist(fmCurrectSelectFilePath0)) {
 				MFM_CopyOrCutFileToClipboard(fmCurrectSelectFilePath0, FALSE);
 				MFM_SetStatus2(5);
 			}
@@ -689,19 +687,31 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		case ID_FMMAIN_COPY: {
-			if (_waccess(fmCurrectSelectFilePath0, 0) == 0) {
+			if (MFM_FileExist(fmCurrectSelectFilePath0)) {
 				MFM_CopyOrCutFileToClipboard(fmCurrectSelectFilePath0, FALSE);
 				MFM_SetStatus2(6);
 			}
 			break;
 		}
+		case ID_FMMAIN_FORCE_REMOVE: {
+			if (MFM_FileExist(fmCurrectSelectFilePath0)) {
+				MFM_DeleteFileForce(fmCurrectSelectFilePath0);
+			}
+			break; 
+		}
 		case ID_FMM_READONLY: {
+			if (MFM_FileExist(fmCurrectSelectFilePath0))
+				MFM_SetFileArrtibute(fmCurrectSelectFilePath0, FILE_ATTRIBUTE_READONLY);
 			break;
 		}
 		case ID_FMM_HIDDEN: {
+			if (MFM_FileExist(fmCurrectSelectFilePath0))
+				MFM_SetFileArrtibute(fmCurrectSelectFilePath0, FILE_ATTRIBUTE_HIDDEN);
 			break;
 		}
 		case ID_FMM_SYSTEM: {
+			if (MFM_FileExist(fmCurrectSelectFilePath0))
+				MFM_SetFileArrtibute(fmCurrectSelectFilePath0, FILE_ATTRIBUTE_SYSTEM);
 			break;
 		}
 		case ID_FMFOLDER_PROP: {
@@ -744,6 +754,10 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			MFF_ShowFolder();
 			break;
 		}
+		case ID_FMFOLDER_FORCE_REMOVE: {
+			MFF_ForceDel();
+			break;
+		}
 		case ID_SCMAIN_COPYPATH:
 		case ID_SCMAIN_DEL:
 		case ID_SCMAIN_DISABLE:
@@ -767,6 +781,10 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		case IDC_MENUSTART_OPENPATH :
 		case IDC_MENUSTART_OPENREGPATH: {
 			return MSM_HandleWmCommand(wParam);
+		}
+		case IDC_SOFTACT_SHOWSPY:
+		case IDC_SOFTACT_SHOWFILETOOL: {
+			MAppWmCommandTools(wParam);
 		}
 		default:
 			break;

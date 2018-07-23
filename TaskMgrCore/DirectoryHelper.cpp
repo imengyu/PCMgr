@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "DirectoryHelper.h"
-
+#include "fmhlp.h"
 
 
 Directory::Directory()
@@ -14,7 +14,7 @@ bool Directory::Exists(std::wstring * path)
 {
 	if (path != nullptr)
 	{
-		if (_waccess(path->c_str(), 0) == 0)
+		if (MFM_FileExist(path->c_str()))
 			return true;
 	}
 	return false;
@@ -23,7 +23,7 @@ bool Directory::Exists(WCHAR * path)
 {
 	if (path != nullptr)
 	{
-		if (_waccess(path, 0) == 0)
+		if (MFM_FileExist(path))
 			return true;
 	}
 	return false;
@@ -42,7 +42,7 @@ bool Directory::Create(std::wstring * path)
 {
 	if (path != nullptr)
 	{
-		if (_waccess(path->c_str(), 0) == 0)
+		if (MFM_FileExist(path->c_str()))
 			return true;
 		else {
 			return CreateDirectory(path->c_str(), 0);
@@ -54,7 +54,7 @@ bool Directory::Create(WCHAR * path)
 {
 	if (path != nullptr)
 	{
-		if (_waccess(path, 0) == 0)
+		if (MFM_FileExist(path))
 			return true;
 		else
 			return CreateDirectory(path, 0);

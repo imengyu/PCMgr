@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+//#include <winternl.h>
 
 typedef DWORD NTSTATUS;
 
@@ -50,11 +51,7 @@ typedef struct _RTL_USER_PROCESS_PARAMETERS {
 	UNICODE_STRING CommandLine;
 } RTL_USER_PROCESS_PARAMETERS, *PRTL_USER_PROCESS_PARAMETERS;
 
-typedef
-VOID
-(NTAPI *PPS_POST_PROCESS_INIT_ROUTINE) (
-	VOID
-	);
+typedef VOID(NTAPI *PPS_POST_PROCESS_INIT_ROUTINE) (VOID);
 
 typedef struct _PEB_LDR_DATA {
 	BYTE Reserved1[8];
@@ -148,14 +145,13 @@ typedef struct _VM_COUNTERS {
 	ULONG PeakPagefileUsage;
 } VM_COUNTERS, *PVM_COUNTERS;
 
-
 typedef struct _CLIENT_ID
 {
 	PVOID UniqueProcess;
 	PVOID UniqueThread;
 } CLIENT_ID, *PCLIENT_ID;
 
-#ifndef _AMD64_
+#ifndef _X64_
 typedef struct _SYSTEM_THREADS {
 	LARGE_INTEGER KernelTime;
 	LARGE_INTEGER UserTime;
@@ -191,7 +187,7 @@ typedef struct _SYSTEM_THREADS
 } SYSTEM_THREADS, *PSYSTEM_THREADS;
 #endif
 
-#ifndef _AMD64_
+#ifndef _X64_
 typedef struct _SYSTEM_PROCESSES { // Information Class 5
 	ULONG NextEntryDelta;
 	ULONG ThreadCount;
@@ -232,6 +228,11 @@ typedef struct _SYSTEM_PROCESSES
 	_SYSTEM_THREADS Threads[1]; //进程相关线程的结构数组
 }SYSTEM_PROCESSES, *PSYSTEM_PROCESSES;
 #endif
+
+typedef enum _OBJECT_INFORMATION_CLASS {
+	ObjectBasicInformation = 0,
+	ObjectTypeInformation = 2
+} OBJECT_INFORMATION_CLASS;
 
 typedef struct _OBJECT_ATTRIBUTES {
 	ULONG Length;
@@ -411,6 +412,28 @@ typedef struct _THREAD_BASIC_INFORMATION { // Information Class 0
 	LONG BasePriority;
 } THREAD_BASIC_INFORMATION, *PTHREAD_BASIC_INFORMATION;
 
+struct OBJECT_NAME_INFORMATION
+{
+	UNICODE_STRING Name; // defined in winternl.h
+	WCHAR NameBuffer;
+};
+
+typedef struct _SYSTEM_HANDLE
+{
+	DWORD       dwProcessId;
+	BYTE        bObjectType;
+	BYTE        bFlags;
+	WORD        wValue;
+	PVOID       pAddress;
+	DWORD GrantedAccess;
+}SYSTEM_HANDLE;
+
+typedef struct _SYSTEM_HANDLE_INFORMATION
+{
+	DWORD         dwCount;
+	SYSTEM_HANDLE Handles[1];
+} SYSTEM_HANDLE_INFORMATION, *PSYSTEM_HANDLE_INFORMATION, **PPSYSTEM_HANDLE_INFORMATION;
+
 typedef LONG(WINAPI * ZwQueryInformationThreadFun)(HANDLE ThreadHandle, THREADINFOCLASS ThreadInformationClass, PVOID ThreadInformation, ULONG ThreadInformationLength, PULONG ReturnLength OPTIONAL);
 typedef LONG(WINAPI * RtlNtStatusToDosErrorFun)(ULONG status);
 typedef DWORD(WINAPI * RtlGetLastWin32ErrorFun)();
@@ -427,10 +450,12 @@ typedef DWORD(WINAPI *ZwResumeProcessFun)(HANDLE);
 typedef DWORD(WINAPI *ZwTerminateProcessFun)(HANDLE, DWORD);
 typedef DWORD(WINAPI *ZwOpenProcessFun)(PHANDLE ProcessHandle, ACCESS_MASK DesiredAccess, POBJECT_ATTRIBUTES ObjectAttributes, PCLIENT_ID ClientId);
 typedef DWORD(WINAPI *NtUnmapViewOfSectionFun)(IN HANDLE ProcessHandle, IN PVOID BaseAddress);
-
+typedef DWORD(NTAPI* NtQueryObjectFun)(HANDLE Handle, OBJECT_INFORMATION_CLASS Info, PVOID Buffer, ULONG BufferSize, PULONG ReturnLength);
 
 typedef DWORD(WINAPI *LdrGetProcedureAddressFun)(_In_ PVOID DllHandle, _In_opt_ PANSI_STRING ProcedureName, _In_opt_ ULONG ProcedureNumber, _Out_ PVOID* ProcedureAddress);
 typedef VOID(WINAPI *RtlInitAnsiStringFun)(_Out_ PANSI_STRING DestinationString, _In_opt_ PSTR SourceString);
+
+
 
 /*typedef BOOL(*KsGetStateFun)();
 typedef BOOL(*KsOpenProcessHandleFun)(DWORD dwPID, PHANDLE pHandle);
@@ -439,6 +464,9 @@ typedef BOOL(*KsTerminateProcessFun)(DWORD dwPID);
 typedef BOOL(*KsTerminateThreadFun)(DWORD dwTID);
 typedef BOOL(*KsSuspendProcessFun)(DWORD dwPID);
 typedef BOOL(*KsResusemeProcessFun)(DWORD dwPID);*/
+
+#define IsConsoleHandle(h) (((((ULONG_PTR)h) & 0x10000003) == 0x3) ? TRUE : FALSE)
+#define ObjectNameInformation (ObjectTypeInformation - 1)
 
 #define OBJ_INHERIT             0x00000002L
 #define OBJ_PERMANENT           0x00000010L

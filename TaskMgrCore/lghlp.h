@@ -72,6 +72,8 @@ extern LPWSTR str_item_kernelnotload;
 
 extern LPWSTR str_item_delscask;
 extern LPWSTR str_item_delsc2ask;
+extern LPWSTR str_item_endtask;
+extern LPWSTR str_item_rebootexplorer;
 
 
 

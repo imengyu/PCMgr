@@ -2,6 +2,7 @@
 #include "kernelhlp.h"
 #include "mapphlp.h"
 #include "syshlp.h"
+#include "fmhlp.h"
 #include <io.h>
 
 BOOL isKernelDriverLoaded = FALSE;
@@ -116,8 +117,9 @@ M_CAPI(BOOL) MInitKernel(LPWSTR currentPath)
 	if (!isKernelDriverLoaded)
 	{
 		wchar_t path[MAX_PATH];
-		wsprintf(path, L"%s\\PCMgrKernel32.sys", currentPath);
-		if (_waccess(path, 0) == 0) 
+		if(MIs64BitOS()) wsprintf(path, L"%s\\PCMgrKernel64.sys", currentPath);
+		else wsprintf(path, L"%s\\PCMgrKernel32.sys", currentPath);
+		if (MFM_FileExist(path))
 		{
 			if (MLoadKernelDriver(L"PCMgrKernel", path, L"PCMgr kernel driver"))
 			{

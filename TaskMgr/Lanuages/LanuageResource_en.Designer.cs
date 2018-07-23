@@ -214,6 +214,15 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 Calculating the files need to delete... 的本地化字符串。
+        /// </summary>
+        internal static string CollectingFiles {
+            get {
+                return ResourceManager.GetString("CollectingFiles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Context Switch time 的本地化字符串。
         /// </summary>
         internal static string ContextSwitch {
@@ -282,6 +291,15 @@ namespace PCMgr.Lanuages {
         internal static string DelAsk3 {
             get {
                 return ResourceManager.GetString("DelAsk3", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Deleting... 的本地化字符串。
+        /// </summary>
+        internal static string DeleteFiles {
+            get {
+                return ResourceManager.GetString("DeleteFiles", resourceCulture);
             }
         }
         
@@ -466,6 +484,33 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 Fill file failed. 的本地化字符串。
+        /// </summary>
+        internal static string FillFileFailed {
+            get {
+                return ResourceManager.GetString("FillFileFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 The file size can not be 0 ! 的本地化字符串。
+        /// </summary>
+        internal static string FillFileNeedSize {
+            get {
+                return ResourceManager.GetString("FillFileNeedSize", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Fill file success. 的本地化字符串。
+        /// </summary>
+        internal static string FillFileSuccess {
+            get {
+                return ResourceManager.GetString("FillFileSuccess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 The folder has been copied to the clipboard 的本地化字符串。
         /// </summary>
         internal static string FolderCopyed {
@@ -520,11 +565,29 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 Froce delete Succeed. 的本地化字符串。
+        /// </summary>
+        internal static string FroceDelSuccess {
+            get {
+                return ResourceManager.GetString("FroceDelSuccess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Get Failed 的本地化字符串。
         /// </summary>
         internal static string GetFailed {
             get {
                 return ResourceManager.GetString("GetFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Failed get file info. 的本地化字符串。
+        /// </summary>
+        internal static string GetFileInfoFailed {
+            get {
+                return ResourceManager.GetString("GetFileInfoFailed", resourceCulture);
             }
         }
         
@@ -651,6 +714,15 @@ namespace PCMgr.Lanuages {
         internal static string LanuageChangedTip {
             get {
                 return ResourceManager.GetString("LanuageChangedTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Failed to load kernel driver! 的本地化字符串。
+        /// </summary>
+        internal static string LoadDriverErr {
+            get {
+                return ResourceManager.GetString("LoadDriverErr", resourceCulture);
             }
         }
         
@@ -907,6 +979,15 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 Success. 的本地化字符串。
+        /// </summary>
+        internal static string OpSuccess {
+            get {
+                return ResourceManager.GetString("OpSuccess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Paged pool 的本地化字符串。
         /// </summary>
         internal static string PagedPool {
@@ -1051,7 +1132,10 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
-        ///   查找类似 It is detected that you did not grant PCMgr administrator permission, which could result in some advanced functions unavailable. \nPCMgr requires administrator authority to control and manage the system. \n\n knows what &lt;A HREF=\ &quot;HREF=\&quot; &gt; administrator authority &lt;/A&gt;. \n understand the details of the software using &lt;A HREF=\ &quot;HREF=\&quot; &gt; administrator rights control and management. 的本地化字符串。
+        ///   查找类似 It is detected that you did not grant PCMgr administrator permission, which could result in some advanced functions unavailable. 
+        ///PCMgr requires administrator authority to control and manage the system. 
+        ///knows what &lt;A HREF=&quot;#&quot;&gt; administrator authority &lt;/A&gt;. 
+        ///understand the details of the software using &lt;A HREF=&quot;#&quot;&gt; administrator rights control and management.&lt;/A&gt; 的本地化字符串。
         /// </summary>
         internal static string RequestAdminText {
             get {
@@ -1240,7 +1324,8 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
-        ///   查找类似 It is not recommended to force threads to hang up, because suspending threads are prone to other problems such as life and death locks. If you are not debugging programs, do not use this method. \n then, make sure that the thread is forced to hang? 的本地化字符串。
+        ///   查找类似 It is not recommended to force threads to hang up, because suspending threads are prone to other problems such as life and death locks. If you are not debugging programs, do not use this method. 
+        ///Then, make sure that the thread is forced to hang? 的本地化字符串。
         /// </summary>
         internal static string SuThreadWarn {
             get {
@@ -1411,6 +1496,15 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 EPROCESS 的本地化字符串。
+        /// </summary>
+        internal static string TitleEProcess {
+            get {
+                return ResourceManager.GetString("TitleEProcess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Full name 的本地化字符串。
         /// </summary>
         internal static string TitleFullName {
@@ -1564,6 +1658,24 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 Unlock file failed. 的本地化字符串。
+        /// </summary>
+        internal static string UnlockFileFailed {
+            get {
+                return ResourceManager.GetString("UnlockFileFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Unlock file successed. 的本地化字符串。
+        /// </summary>
+        internal static string UnlockFileSuccess {
+            get {
+                return ResourceManager.GetString("UnlockFileSuccess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Useage 的本地化字符串。
         /// </summary>
         internal static string Useage {
@@ -1672,7 +1784,8 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
-        ///   查找类似 \n has found 64 bits of PCMgr in your software directory, clicking &quot;start the 64 bit version&quot;, you can start the software directly. 的本地化字符串。
+        ///   查找类似 
+        ///has found 64 bits of PCMgr in your software directory, clicking &quot;start the 64 bit version&quot;, you can start the software directly. 的本地化字符串。
         /// </summary>
         internal static string X64WarnFinded64Text {
             get {

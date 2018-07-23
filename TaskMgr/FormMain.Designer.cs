@@ -53,6 +53,9 @@
             this.listProcess = new PCMgr.Ctls.TaskMgrList();
             this.lbProcessCount = new System.Windows.Forms.Label();
             this.tabPageKernelCtl = new System.Windows.Forms.TabPage();
+            this.pl_driverNotLoadTip = new System.Windows.Forms.Panel();
+            this.linkRestartAsAdminDriver = new System.Windows.Forms.LinkLabel();
+            this.lbRestartAsAdminDriver = new System.Windows.Forms.Label();
             this.lbDriversCount = new System.Windows.Forms.Label();
             this.listDrivers = new PCMgr.Ctls.TaskMgrList();
             this.tabPageSysCtl = new System.Windows.Forms.TabPage();
@@ -104,6 +107,7 @@
             this.tabPageProcCtl.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.spl1)).BeginInit();
             this.tabPageKernelCtl.SuspendLayout();
+            this.pl_driverNotLoadTip.SuspendLayout();
             this.tabPagePerfCtl.SuspendLayout();
             this.tabPageUWPCtl.SuspendLayout();
             this.pl_UWPEnumFailTip.SuspendLayout();
@@ -330,11 +334,37 @@
             // tabPageKernelCtl
             // 
             resources.ApplyResources(this.tabPageKernelCtl, "tabPageKernelCtl");
+            this.tabPageKernelCtl.Controls.Add(this.pl_driverNotLoadTip);
             this.tabPageKernelCtl.Controls.Add(this.lbDriversCount);
             this.tabPageKernelCtl.Controls.Add(this.listDrivers);
             this.tabPageKernelCtl.Name = "tabPageKernelCtl";
             this.toolTip.SetToolTip(this.tabPageKernelCtl, resources.GetString("tabPageKernelCtl.ToolTip"));
             this.tabPageKernelCtl.UseVisualStyleBackColor = true;
+            // 
+            // pl_driverNotLoadTip
+            // 
+            resources.ApplyResources(this.pl_driverNotLoadTip, "pl_driverNotLoadTip");
+            this.pl_driverNotLoadTip.Controls.Add(this.linkRestartAsAdminDriver);
+            this.pl_driverNotLoadTip.Controls.Add(this.lbRestartAsAdminDriver);
+            this.pl_driverNotLoadTip.Name = "pl_driverNotLoadTip";
+            this.toolTip.SetToolTip(this.pl_driverNotLoadTip, resources.GetString("pl_driverNotLoadTip.ToolTip"));
+            // 
+            // linkRestartAsAdminDriver
+            // 
+            resources.ApplyResources(this.linkRestartAsAdminDriver, "linkRestartAsAdminDriver");
+            this.linkRestartAsAdminDriver.DisabledLinkColor = System.Drawing.SystemColors.MenuHighlight;
+            this.linkRestartAsAdminDriver.LinkBehavior = System.Windows.Forms.LinkBehavior.HoverUnderline;
+            this.linkRestartAsAdminDriver.LinkColor = System.Drawing.SystemColors.MenuHighlight;
+            this.linkRestartAsAdminDriver.Name = "linkRestartAsAdminDriver";
+            this.linkRestartAsAdminDriver.TabStop = true;
+            this.toolTip.SetToolTip(this.linkRestartAsAdminDriver, resources.GetString("linkRestartAsAdminDriver.ToolTip"));
+            this.linkRestartAsAdminDriver.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkRestartAsAdminDriver_LinkClicked);
+            // 
+            // lbRestartAsAdminDriver
+            // 
+            resources.ApplyResources(this.lbRestartAsAdminDriver, "lbRestartAsAdminDriver");
+            this.lbRestartAsAdminDriver.Name = "lbRestartAsAdminDriver";
+            this.toolTip.SetToolTip(this.lbRestartAsAdminDriver, resources.GetString("lbRestartAsAdminDriver.ToolTip"));
             // 
             // lbDriversCount
             // 
@@ -654,6 +684,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.spl1)).EndInit();
             this.tabPageKernelCtl.ResumeLayout(false);
             this.tabPageKernelCtl.PerformLayout();
+            this.pl_driverNotLoadTip.ResumeLayout(false);
             this.tabPagePerfCtl.ResumeLayout(false);
             this.tabPageUWPCtl.ResumeLayout(false);
             this.pl_UWPEnumFailTip.ResumeLayout(false);
@@ -736,6 +767,9 @@
         private System.Windows.Forms.ColumnHeader columnHeader18;
         private System.Windows.Forms.ColumnHeader columnHeader19;
         private System.Windows.Forms.ColumnHeader columnHeader20;
+        private System.Windows.Forms.Panel pl_driverNotLoadTip;
+        private System.Windows.Forms.LinkLabel linkRestartAsAdminDriver;
+        private System.Windows.Forms.Label lbRestartAsAdminDriver;
     }
 }
 
