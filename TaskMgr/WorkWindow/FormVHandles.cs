@@ -93,6 +93,7 @@ namespace PCMgr.WorkWindow
             public int Compare(object x, object y)
             {
                 int returnVal = -1;
+                if (((ListViewItem)x).SubItems[col].Text == ((ListViewItem)y).SubItems[col].Text) return -1;
                 returnVal = String.Compare(((ListViewItem)x).SubItems[col].Text, ((ListViewItem)y).SubItems[col].Text);
                 if (asdening) returnVal = -returnVal;
                 return returnVal;

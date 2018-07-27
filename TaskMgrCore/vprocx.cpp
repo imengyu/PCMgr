@@ -362,6 +362,8 @@ M_API BOOL MAppVProcessAllWindows()
 	return 0;
 }
 
+extern PSYSTEM_PROCESSES current_system_process;
+
 BOOL MAppVModuls(DWORD dwPID, HWND hDlg, LPWSTR procName)
 {
 	BOOL bFound = FALSE;
@@ -447,6 +449,119 @@ BOOL MAppVThreads(DWORD dwPID, HWND hDlg, LPWSTR procName)
 	BOOL bFound = FALSE;
 	HANDLE hProcess;
 	HWND htitle = GetDlgItem(hDlg, IDC_TITLE);
+	threadscount = 0;
+
+	bool done = false;
+	for (PSYSTEM_PROCESSES p = current_system_process; !done;
+		p = PSYSTEM_PROCESSES(PCHAR(p) + p->NextEntryDelta))
+	{
+		if (static_cast<DWORD>((ULONG_PTR)p->ProcessId) == dwPID)
+		{
+			for (ULONG i = 0; i<p->ThreadCount; i++)
+			{
+				SYSTEM_THREADS systemThread = p->Threads[i];
+				ULONG_PTR tid = (ULONG_PTR)systemThread.ClientId.UniqueThread;
+
+				LVITEM vitem;
+				vitem.mask = LVIF_TEXT;
+				vitem.iSubItem = 0;
+				vitem.iItem = 0;
+				vitem.iSubItem = 0;
+				wchar_t c[16];
+				wsprintf(c, L"%d", tid);
+				vitem.pszText = c;
+				ListView_InsertItem(hListThreads, &vitem);
+				vitem.iSubItem++;
+
+				ULONG_PTR ethread = 0;
+				if (M_SU_GetETHREAD(tid, &ethread))
+				{
+					wchar_t x[32];
+#ifdef _X64_
+					swprintf_s(x, L"0x%I64X", ethread);
+#else
+					swprintf_s(x, L"0x%08X", ethread);
+#endif
+					vitem.pszText = x;
+				}
+				else vitem.pszText = L"-";
+				ListView_SetItem(hListThreads, &vitem);
+
+				vitem.iSubItem++;
+				LPWSTR result0 = 0;
+				if (MGetThreadInfoNt(tid, 3, &result0))
+					vitem.pszText = result0;
+				else
+					vitem.pszText = L"!3";
+
+				ListView_SetItem(hListThreads, &vitem);
+				vitem.iSubItem++;
+
+				WCHAR basePri[10];
+				wsprintf(basePri, L"%d", systemThread.BasePriority);
+				vitem.pszText = basePri;
+				ListView_SetItem(hListThreads, &vitem);
+				vitem.iSubItem++;
+				LPWSTR result = 0;
+				if (MGetThreadInfoNt(tid, 2, &result))
+					vitem.pszText = result;
+				else vitem.pszText = L"!2";
+				ListView_SetItem(hListThreads, &vitem);
+				vitem.iSubItem++;
+				wchar_t result1[260];
+				wchar_t modname[260];
+				LPWSTR rs = 0;
+				if (MGetThreadInfoNt(tid, 1, &rs)) {
+					lstrcpy(result1, rs);
+					MDosPathToNtPath(result1, modname);
+					vitem.pszText = modname;
+				}
+				else vitem.pszText = L"!1";
+				ListView_SetItem(hListThreads, &vitem);
+				vitem.iSubItem++;
+				THREAD_STATE ts = systemThread.ThreadState;
+				switch (ts)
+				{
+				case THREAD_STATE::StateReady:
+					vitem.pszText = L"就绪 (StateReady)";
+					break;
+				case THREAD_STATE::StateRunning:
+					vitem.pszText = L"运行 (StateRunning)";
+					break;
+				case THREAD_STATE::StateWait:
+					vitem.pszText = L"等待 (StateWait)";
+					break;
+				case THREAD_STATE::StateTerminated:
+					vitem.pszText = L"终止 (StateTerminated)";
+					break;
+				case 9:
+					vitem.pszText = L"等待 (StateWait 已挂起)";
+					break;
+				default:
+					vitem.pszText = L"0";
+					break;
+				}
+				ListView_SetItem(hListThreads, &vitem);
+				vitem.iSubItem++;
+				LPWSTR result4 = 0;
+				if (MGetThreadInfoNt(tid, 4, &result4))
+					vitem.pszText = result4;
+				else vitem.pszText = L"!2";
+				ListView_SetItem(hListThreads, &vitem);
+				threadscount++;
+			}
+
+			wstring str = FormatString(str_item_vthreadtitle, procName, dwPID, threadscount);
+			SetWindowText(hDlg, str.c_str());
+			currentShowThreadPid = static_cast<DWORD>(dwPID);
+
+			return TRUE;
+		}
+		done = p->NextEntryDelta == 0;
+	}
+	return 0;
+
+	/*
 	NTSTATUS rs = MOpenProcessNt(dwPID, &hProcess);
 	if (rs == 0xC0000008 || rs == 0xC000000B) {
 		SetWindowText(htitle, (LPWSTR)str_item_invalidproc.c_str());
@@ -467,100 +582,12 @@ BOOL MAppVThreads(DWORD dwPID, HWND hDlg, LPWSTR procName)
 			for (fOk = Thread32First(hSnapThread, &th32); fOk; fOk = Thread32Next(hSnapThread, &th32)) {
 				if (th32.th32OwnerProcessID == dwPID)
 				{
-					LVITEM vitem;
-					vitem.mask = LVIF_TEXT;
-					vitem.iSubItem = 0;
-					vitem.iItem = 0;
-					vitem.iSubItem = 0;
-					wchar_t c[16];
-					wsprintf(c, L"%d", th32.th32ThreadID);
-					vitem.pszText = c;
-					ListView_InsertItem(hListThreads, &vitem);
-					vitem.iSubItem++;
-
-					ULONG_PTR ethread = 0;
-					if (M_SU_GetETHREAD(th32.th32ThreadID, &ethread))
-					{
-						wchar_t x[32];
-#ifdef _X64_
-						swprintf_s(x, L"0x%I64X", ethread);
-#else
-						swprintf_s(x, L"0x%08X", ethread);
-#endif
-						vitem.pszText = x;
-					}
-					else vitem.pszText = L"-";
-					ListView_SetItem(hListThreads, &vitem);
-
-					vitem.iSubItem++;
-					LPWSTR result0 = 0;
-					if (MGetThreadInfoNt(th32.th32ThreadID, 3, &result0))
-						vitem.pszText = result0;
-					else 
-						vitem.pszText = L"!3";
-
-					ListView_SetItem(hListThreads, &vitem);
-					vitem.iSubItem++;
-
-					WCHAR basePri[10];
-					wsprintf(basePri, L"%d", th32.tpBasePri);
-					vitem.pszText = basePri;
-					ListView_SetItem(hListThreads, &vitem);
-					vitem.iSubItem++;
-					LPWSTR result = 0;
-					if (MGetThreadInfoNt(th32.th32ThreadID, 2, &result))
-						vitem.pszText = result;
-					else vitem.pszText = L"!2";
-					ListView_SetItem(hListThreads, &vitem);
-					vitem.iSubItem++;
-					wchar_t result1[260];
-					wchar_t modname[260];
-					LPWSTR rs = 0;
-					if (MGetThreadInfoNt(th32.th32ThreadID, 1, &rs)) {
-						lstrcpy(result1, rs);
-						MDosPathToNtPath(result1, modname);
-						vitem.pszText = modname;
-					}
-					else vitem.pszText = L"!1";
-					ListView_SetItem(hListThreads, &vitem);
-					vitem.iSubItem++;
-					THREAD_STATE ts = (THREAD_STATE)MGetThreadState(th32.th32OwnerProcessID, th32.th32ThreadID);
-					switch (ts)
-					{
-					case THREAD_STATE::StateReady:
-						vitem.pszText = L"就绪 (StateReady)";
-						break;
-					case THREAD_STATE::StateRunning:
-						vitem.pszText = L"运行 (StateRunning)";
-						break;
-					case THREAD_STATE::StateWait:
-						vitem.pszText = L"等待 (StateWait)";
-						break;
-					case THREAD_STATE::StateTerminated:
-						vitem.pszText = L"终止 (StateTerminated)";
-						break;
-					case 9:
-						vitem.pszText = L"等待 (StateWait 已挂起)";
-						break;
-					default:
-						vitem.pszText = L"0";
-						break;
-					}
-					ListView_SetItem(hListThreads, &vitem);
-					vitem.iSubItem++;
-					LPWSTR result4 = 0;
-					if (MGetThreadInfoNt(th32.th32ThreadID, 4, &result4))
-						vitem.pszText = result4;
-					else vitem.pszText = L"!2";
-					ListView_SetItem(hListThreads, &vitem);
-					i++;
+					
 				}
 				threadscount = i;
 			}
 
-			wstring str = FormatString(str_item_vthreadtitle, procName, dwPID, threadscount);
-			SetWindowText(hDlg, str.c_str());
-			currentShowThreadPid = static_cast<DWORD>(dwPID);
+			
 			CloseHandle(hSnapThread);
 
 			return TRUE;
@@ -577,7 +604,7 @@ BOOL MAppVThreads(DWORD dwPID, HWND hDlg, LPWSTR procName)
 		wstring str = FormatString(L"%s , %s\nLast Error : 0x%08x", str_item_enum_threadfailed, str_item_openprocfailed,rs);
 		SetWindowText(htitle, str.c_str());
 		return FALSE;
-	}
+	}*/
 }
 
 BOOL MAppVWins(DWORD dwPID, HWND hDlg, LPWSTR procName)

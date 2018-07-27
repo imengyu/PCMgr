@@ -72,7 +72,9 @@ M_CAPI(BOOL) MEnumProcessHandles(DWORD pid, EHCALLBACK callback)
 						}
 						else wsprintf(strType, L"2:0x%08X", status);
 					}
-					else wsprintf(strType, L"1:0x%08X", status);				
+					else if (status != 0xC0000008) {
+						wsprintf(strType, L"1:0x%08X", status);
+					}
 					free(lpTypeInfo);
 
 

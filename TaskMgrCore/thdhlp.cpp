@@ -88,6 +88,7 @@ M_API NTSTATUS MSuspendThreadNt(HANDLE handle)
 
 M_API BOOL MGetThreadInfoNt(DWORD tid, int i, LPWSTR *str)
 {
+	BOOL rs = FALSE;
 	THREAD_BASIC_INFORMATION    tbi;
 	PVOID                       startaddr;
 	LONG                        status;
@@ -109,12 +110,13 @@ M_API BOOL MGetThreadInfoNt(DWORD tid, int i, LPWSTR *str)
 	if (i == 1)
 	{
 		status = ZwQueryInformationThread(thread, ThreadQuerySetWin32StartAddress, &startaddr, sizeof(startaddr), NULL);
-		if (status == 0) {
+		if (status == STATUS_SUCCESS) {
 			if (MOpenProcessNt(static_cast<DWORD>((ULONG_PTR)tbi.ClientId.UniqueProcess), &process) == STATUS_SUCCESS)
 			{
 				TCHAR* modname = new TCHAR[260];
 				K32GetMappedFileNameW(process, startaddr, modname, 260);
 				*str = modname;
+				rs = TRUE;
 			}
 			CloseHandle(process);
 		}
@@ -127,10 +129,11 @@ M_API BOOL MGetThreadInfoNt(DWORD tid, int i, LPWSTR *str)
 	else if (i == 2)
 	{
 		status = ZwQueryInformationThread(thread, ThreadQuerySetWin32StartAddress, &startaddr, sizeof(startaddr), NULL);
-		if (status == 0) {
+		if (status == STATUS_SUCCESS) {
 			TCHAR* modname1 = new TCHAR[0x100];
 			wsprintf(modname1, L"0x%08X", startaddr);
 			*str = modname1;
+			rs = TRUE;
 		}
 		else {
 			TCHAR* err = new TCHAR[18];
@@ -140,10 +143,11 @@ M_API BOOL MGetThreadInfoNt(DWORD tid, int i, LPWSTR *str)
 	}
 	else if (i == 3)
 	{
-		if (status == 0) {
+		if (status == STATUS_SUCCESS) {
 			TCHAR* modname1 = new TCHAR[0x100];
 			wsprintf(modname1, L"0x%08X", tbi.TebBaseAddress);
 			*str = modname1;
+			rs = TRUE;
 		}
 		else {
 			TCHAR* err = new TCHAR[18];
@@ -152,17 +156,24 @@ M_API BOOL MGetThreadInfoNt(DWORD tid, int i, LPWSTR *str)
 		}
 	}
 	else if (i == 4) {
-		LONG count = 0;
+		LARGE_INTEGER count;
 		status = ZwQueryInformationThread(thread, ThreadPerformanceCount, &count, sizeof(count), NULL);
-		if (status)
+		if (status == STATUS_SUCCESS)
 		{
 			TCHAR* modname1 = new TCHAR[0x100];
-			wsprintf(modname1, L"%ld", count);
+			wsprintf(modname1, L"%ld", count.LowPart);
 			*str = modname1;
+			rs = TRUE;
+		}
+		else {
+			TCHAR* err = new TCHAR[18];
+			wsprintf(err, L"ERROR:0x%08X", status);
+			*str = err; 
+			rs = TRUE;
 		}
 	}
 
 	CloseHandle(thread);
-	return TRUE;
+	return rs;
 }
 
