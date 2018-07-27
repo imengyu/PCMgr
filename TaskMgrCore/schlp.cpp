@@ -2,20 +2,23 @@
 #include "schlp.h"
 #include "mapphlp.h"
 #include "lghlp.h"
+#include "loghlp.h"
 #include "StringSplit.h"
 #include "resource.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
+#include <algorithm>  
 
 using namespace std;
 
 extern HINSTANCE hInstRs;
-extern "C" M_API BOOL MCopyToClipboard(const WCHAR* pszData, const int nDataLen);
+extern "C" M_API BOOL MCopyToClipboard(const WCHAR* pszData, const size_t nDataLen);
 
 SC_HANDLE hSCM = NULL;
 ENUM_SERVICE_STATUS_PROCESS *pServiceInfo = NULL;
 DWORD dwNumberOfService = 0;
+DWORD dwNumberOfDriverService = 0;
 char *pBuf = NULL;                  // 缓冲区指针
 DWORD dwBufSize = 0;                // 传入的缓冲长度
 DWORD dwBufNeed = 0;                // 需要的缓冲长度
@@ -23,27 +26,40 @@ wstring scGroupBuffer;
 WCHAR currSc[MAX_PATH];
 WCHAR currScPath[MAX_PATH];
 
+
+
+LPENUM_SERVICE_STATUS_PROCESS pBufDrvscs = NULL;
+LPSERVICE_STORAGE pDrvscsNames = NULL;
+
 M_CAPI(BOOL) MSCM_Init()
 {
 	hSCM = OpenSCManager(NULL, NULL, SC_MANAGER_CONNECT | SC_MANAGER_ENUMERATE_SERVICE);
-	if (NULL == hSCM)
+	if (NULL == hSCM) {
+		LogErr(L"OpenSCManager failed ! Last error : %d .", GetLastError());
 		return FALSE;
+	}
 	return TRUE;
 }
 M_CAPI(void) MSCM_Exit()
 {
-	CloseServiceHandle(hSCM);
+	if(hSCM) CloseServiceHandle(hSCM);
 	if (pBuf) { free(pBuf); pBuf = NULL; }
+	if (pBufDrvscs) { free(pBufDrvscs); pBufDrvscs = NULL; }
+	if (pDrvscsNames) { free(pDrvscsNames); pDrvscsNames = NULL; }
 }
 M_CAPI(LPWSTR) MSCM_GetScGroup(LPWSTR path)
 {
-	wstring str; str = path;
+	wstring str; 
+	str = path;
+	wstring strOld;
+	strOld = path;
 	if (str != L"")
 	{
-		if (str.find(L"C:\\WINDOWS\\system32\\svchost.exe -k") != string::npos)
+		transform(str.begin(), str.end(), str.begin(), tolower);
+		if (str.find(L"c:\\windows\\system32\\svchost.exe -k") != string::npos)
 		{
 			std::vector<std::wstring> buf;
-			SplitString(str, buf, L" ");
+			SplitString(strOld, buf, L" ");
 			if (buf.size() >= 2)
 			{
 				wstring w = buf[buf.size() - 1];
@@ -51,6 +67,94 @@ M_CAPI(LPWSTR) MSCM_GetScGroup(LPWSTR path)
 					scGroupBuffer = buf[buf.size() - 2];
 				else scGroupBuffer = w;
 				return (LPWSTR)scGroupBuffer.c_str();
+			}
+		}
+	}
+	return 0;
+}
+
+BOOL MSCM_EnumDriverServicesFreeAll() {
+	if (pBufDrvscs) {
+		free(pBufDrvscs); 
+		pBufDrvscs = NULL;
+	}
+	if (pDrvscsNames)
+	{
+		for (unsigned int i = 0; i < dwNumberOfDriverService; i++)
+		{
+			if (pDrvscsNames[i].ServiceHandle)
+				CloseServiceHandle(pDrvscsNames[i].ServiceHandle);
+		}
+		free(pDrvscsNames);
+		pDrvscsNames = NULL;
+	}
+	return TRUE;
+}
+M_CAPI(BOOL) MSCM_CheckDriverServices(LPWSTR fileName, LPWSTR outName, LPSERVICE_STORAGE*pScInfo)
+{
+	for (unsigned int i = 0; i < dwNumberOfDriverService; i++)
+	{
+		if (MStrEqualW(pDrvscsNames[i].ServiceImagePath, fileName))
+		{
+			pDrvscsNames[i].DriverServiceFounded = TRUE;
+			if (outName) wcscpy_s(outName,MAX_PATH,pDrvscsNames[i].lpServiceName);
+			if (pScInfo)*pScInfo = &pDrvscsNames[i];
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+M_CAPI(BOOL) MSCM_EnumDriverServices() {
+	if (hSCM)
+	{
+		DWORD dwBufSize = 0;
+		DWORD dwBufNeed = 0;
+
+		MSCM_EnumDriverServicesFreeAll();
+
+		// 获取需要的缓冲区大小
+		EnumServicesStatusEx(hSCM, SC_ENUM_PROCESS_INFO, SERVICE_DRIVER, SERVICE_STATE_ALL,
+			NULL, dwBufSize, &dwBufNeed, &dwNumberOfDriverService, NULL, NULL);
+
+		dwBufSize = dwBufNeed + sizeof(ENUM_SERVICE_STATUS_PROCESS);
+		pBufDrvscs = (LPENUM_SERVICE_STATUS_PROCESS)malloc(dwBufSize);
+		if (NULL == pBufDrvscs)
+			return FALSE;
+		memset(pBufDrvscs, 0, dwBufSize);
+
+		BOOL bRet = EnumServicesStatusEx(hSCM, SC_ENUM_PROCESS_INFO, SERVICE_DRIVER, SERVICE_STATE_ALL,
+			(LPBYTE)pBufDrvscs, dwBufSize, &dwBufNeed, &dwNumberOfDriverService, NULL, NULL);
+		if (bRet == FALSE) {
+			LogErr(L"EnumServicesStatusEx error : %d", GetLastError());
+			free(pBufDrvscs);
+			pBufDrvscs = NULL;
+			return FALSE;
+		}
+
+		if (dwNumberOfDriverService > 0) {
+			size_t size = (dwNumberOfDriverService + 1) * sizeof(SERVICE_STORAGE);
+			pDrvscsNames = (LPSERVICE_STORAGE)malloc(size);
+			memset(pDrvscsNames, 0, size);
+			if (pDrvscsNames) {
+				for (unsigned int i = 0; i < dwNumberOfDriverService; i++)
+				{
+					pDrvscsNames[i].DriverServiceFounded = FALSE;
+					pDrvscsNames[i].lpServiceName = pBufDrvscs[i].lpServiceName;
+					pDrvscsNames[i].lpSvc = &pBufDrvscs[i];
+					SC_HANDLE hSc = OpenService(hSCM, pBufDrvscs[i].lpServiceName, SERVICE_QUERY_CONFIG | SERVICE_CHANGE_CONFIG);
+					if (hSc) {
+						pDrvscsNames[i].ServiceHandle = hSc;
+						DWORD sizeneed;
+						QueryServiceConfig(hSc, NULL, 0, &sizeneed);
+						LPQUERY_SERVICE_CONFIG cfg = (LPQUERY_SERVICE_CONFIG)malloc(sizeneed);
+						if (QueryServiceConfig(hSc, cfg, sizeneed, &sizeneed)) {
+							wcscpy_s(pDrvscsNames[i].ServiceImagePath, cfg->lpBinaryPathName);
+							pDrvscsNames[i].ServiceStartType = cfg->dwStartType;
+						}
+						free(cfg);
+					}
+				}
+				return TRUE;
 			}
 		}
 	}
@@ -77,6 +181,7 @@ M_CAPI(BOOL) MEnumServices(EnumServicesCallBack callback)
 		bRet = EnumServicesStatusEx(hSCM, SC_ENUM_PROCESS_INFO, SERVICE_WIN32, SERVICE_STATE_ALL,
 			(LPBYTE)pBuf, dwBufSize, &dwBufNeed, &dwNumberOfService, NULL, NULL);
 		if (bRet == FALSE) {
+			LogErr(L"EnumServicesStatusEx error : %d", GetLastError());
 			free(pBuf);
 			pBuf = NULL;
 			return -1;
@@ -111,6 +216,7 @@ M_CAPI(BOOL) MEnumServices(EnumServicesCallBack callback)
 			callback(pServiceInfo[i].lpDisplayName, pServiceInfo[i].lpServiceName, pServiceInfo[i].ServiceStatusProcess.dwServiceType,
 				pServiceInfo[i].ServiceStatusProcess.dwCurrentState, pServiceInfo[i].ServiceStatusProcess.dwProcessId, 
 				pServiceInfo[i].ServiceStatusProcess.dwServiceFlags == 1, 0x80, err, NULL);
+		
 		}
 	}
 	return bRet;
@@ -125,20 +231,25 @@ M_CAPI(BOOL) MSCM_DeleteService(LPWSTR scname, LPWSTR errText)
 		QueryServiceStatus(hSc, &status);
 		if (status.dwCurrentState != SERVICE_STOPPED)
 			ControlService(hSc, SERVICE_CONTROL_STOP, &status);
-		if (!DeleteService(hSc))
+		if (!DeleteService(hSc)) {
+			LogErr(L"DeleteService error : %d (%s)", GetLastError(), scname);
 			ThrowErrorAndErrorCodeX(GetLastError(), L"DeleteService", errText, FALSE);
+		}
 		else {
 			MAppMainCall(15, currSc, 0);
 		    return TRUE;
 		}
 		CloseServiceHandle(hSc);
 	}
-	else ThrowErrorAndErrorCodeX(GetLastError(), L"打开服务失败", errText, FALSE);
+	else {
+		LogErr(L"OpenService error : %d (%s)", GetLastError(), scname);
+		ThrowErrorAndErrorCodeX(GetLastError(), L"打开服务失败", errText, FALSE);
+	}
 	return FALSE;
 }
 M_CAPI(BOOL) MSCM_ChangeScStartType(LPWSTR scname, DWORD type, LPWSTR errText)
 {
-	SC_HANDLE hSc = OpenService(hSCM, currSc, SERVICE_QUERY_CONFIG | SERVICE_CHANGE_CONFIG);
+	SC_HANDLE hSc = OpenService(hSCM, currSc, SERVICE_QUERY_CONFIG);
 	if (hSc)
 	{
 		DWORD bufSize = 0;
@@ -153,13 +264,17 @@ M_CAPI(BOOL) MSCM_ChangeScStartType(LPWSTR scname, DWORD type, LPWSTR errText)
 		if (!ChangeServiceConfig(hSc, SERVICE_NO_CHANGE, confg->dwStartType,
 			SERVICE_NO_CHANGE, NULL, NULL, NULL, NULL, NULL, NULL, NULL))
 		{
-			ThrowErrorAndErrorCodeX(GetLastError(), L"ChangeServiceConfig", L"无法禁用服务", FALSE);
+			LogErr(L"ChangeServiceConfig error : %d", GetLastError());
+			ThrowErrorAndErrorCodeX(GetLastError(), L"ChangeServiceConfig ERROR", errText, FALSE);
 		}
 		else return TRUE;
 
 		CloseServiceHandle(hSc);
 	}
-	else ThrowErrorAndErrorCodeX(GetLastError(), L"打开服务失败（OpenService）", L"无法禁用服务", FALSE);
+	else {
+		LogErr(L"OpenService error : %d (%s)", GetLastError(), scname);
+		ThrowErrorAndErrorCodeX(GetLastError(), L"打开服务失败（OpenService error）", errText, FALSE);
+	}
 	return FALSE;
 }
 M_CAPI(BOOL) MSCM_ControlSc(LPWSTR scname, DWORD targetStatus, DWORD targetCtl, LPWSTR errText)
@@ -174,7 +289,10 @@ M_CAPI(BOOL) MSCM_ControlSc(LPWSTR scname, DWORD targetStatus, DWORD targetCtl, 
 		{
 			BOOL rs = ControlService(hSc, targetCtl, &status);
 			CloseServiceHandle(hSc);
-			if(!rs) ThrowErrorAndErrorCodeX(GetLastError(), L"ControlService", errText, FALSE);
+			if (!rs) {
+				LogErr(L"ControlService error : %d", GetLastError());
+				ThrowErrorAndErrorCodeX(GetLastError(), L"ControlService", errText, FALSE);
+			}
 			return rs;
 		}
 		else {
@@ -182,7 +300,10 @@ M_CAPI(BOOL) MSCM_ControlSc(LPWSTR scname, DWORD targetStatus, DWORD targetCtl, 
 			return TRUE;
 		}
 	}
-	else ThrowErrorAndErrorCodeX(GetLastError(), L"打开服务失败（OpenService）", errText, FALSE);
+	else {
+		LogErr(L"OpenService error : %d (%s)", GetLastError(), scname);
+		ThrowErrorAndErrorCodeX(GetLastError(), L"打开服务失败（OpenService error）", errText, FALSE);
+	}
 	return FALSE;
 }
 M_CAPI(void) MSCM_SetCurrSelSc(LPWSTR scname)
@@ -195,33 +316,33 @@ LRESULT MSCM_HandleWmCommand(WPARAM wParam)
 	switch (wParam)
 	{
 	case ID_SCMAIN_COPYPATH: {
-		if (wcslen(currScPath) > 0 || wcscmp(currScPath, L"") != 0)
+		if (wcslen(currScPath) > 0 || !MStrEqualW(currScPath, L""))
 			MCopyToClipboard(currScPath, wcslen(currScPath));
 		break;
 	}
 	case ID_SCMAIN_DEL: {
-		if (wcslen(currSc) > 0 || wcscmp(currSc, L"") != 0)
+		if (wcslen(currSc) > 0 || !MStrEqualW(currSc, L""))
 			MSCM_DeleteService(currSc, L"删除服务失败");
 		break;
 	}
 	case ID_SCMAIN_DISABLE: {
-		if (wcslen(currSc) > 0 || wcscmp(currSc, L"") != 0)
+		if (wcslen(currSc) > 0 || !MStrEqualW(currSc, L""))
 			MSCM_ChangeScStartType(currSc, SERVICE_DISABLED, L"");
 		break;
 	}
 	case ID_SCMAIN_AUTOSTART: {
-		if (wcslen(currSc) > 0 || wcscmp(currSc, L"") != 0) 
+		if (wcslen(currSc) > 0 || !MStrEqualW(currSc, L"")) 
 			MSCM_ChangeScStartType(currSc, SERVICE_AUTO_START, L"");
 		break;
 	}
 	case ID_SCMAIN_NOAUTOSTART: {
-		if (wcslen(currSc) > 0 || wcscmp(currSc, L"") != 0)
+		if (wcslen(currSc) > 0 || !MStrEqualW(currSc, L""))
 			MSCM_ChangeScStartType(currSc, SERVICE_DEMAND_START, L"");
 		break;
 	}
 	case ID_SCMAIN_REBOOT: 
 	case ID_SCSMALL_REBOOTSC: {
-		if (wcslen(currSc) > 0 || wcscmp(currSc, L"") != 0) {
+		if (wcslen(currSc) > 0 || !MStrEqualW(currSc, L"")) {
 			SC_HANDLE hSc = OpenService(hSCM, currSc, SERVICE_ENUMERATE_DEPENDENTS |
 				SERVICE_START | SERVICE_STOP | SERVICE_PAUSE_CONTINUE | SERVICE_QUERY_STATUS);
 			if (hSc)
@@ -241,12 +362,12 @@ LRESULT MSCM_HandleWmCommand(WPARAM wParam)
 					return TRUE;
 				}
 			}
-			else ThrowErrorAndErrorCodeX(GetLastError(), L"打开服务失败（OpenService）", L"无法停止服务", FALSE);
+			else ThrowErrorAndErrorCodeX(GetLastError(), L"打开服务失败（OpenService）", (LPWSTR)str_item_op_failed.c_str(), FALSE);
 		}
 		break;
 	}
 	case ID_SCMAIN_START: {
-		if (wcslen(currSc) > 0 || wcscmp(currSc, L"") != 0) 
+		if (wcslen(currSc) > 0 || !MStrEqualW(currSc, L"")) 
 		{
 			SC_HANDLE hSc = OpenService(hSCM, currSc, SERVICE_ENUMERATE_DEPENDENTS |
 				SERVICE_START | SERVICE_STOP | SERVICE_PAUSE_CONTINUE | SERVICE_QUERY_STATUS);
@@ -261,14 +382,14 @@ LRESULT MSCM_HandleWmCommand(WPARAM wParam)
 					return TRUE;
 				}
 			}
-			else ThrowErrorAndErrorCodeX(GetLastError(), L"打开服务失败（OpenService）", L"无法启动服务", FALSE);
+			else ThrowErrorAndErrorCodeX(GetLastError(), L"打开服务失败（OpenService）", (LPWSTR)str_item_op_failed.c_str(), FALSE);
 		}
 		break;
 	}	
 	case ID_SCSMALL_STOPSC:
 	case ID_SCMAIN_STOP: {
-		if (wcslen(currSc) > 0 || wcscmp(currSc, L"") != 0) 
-			MSCM_ControlSc(currSc, SERVICE_STOPPED, SERVICE_CONTROL_STOP, L"无法停止服务");
+		if (wcslen(currSc) > 0 || !MStrEqualW(currSc, L"")) 
+			MSCM_ControlSc(currSc, SERVICE_STOPPED, SERVICE_CONTROL_STOP, (LPWSTR)str_item_op_failed.c_str());
 		break;
 	}
 	case ID_SCMAIN_REFESH: {
@@ -276,13 +397,13 @@ LRESULT MSCM_HandleWmCommand(WPARAM wParam)
 		break;
 	}
 	case ID_SCMAIN_RESU: {
-		if (wcslen(currSc) > 0 || wcscmp(currSc, L"") != 0)
-			MSCM_ControlSc(currSc, SERVICE_RUNNING, SERVICE_CONTROL_CONTINUE, L"无法恢复服务");
+		if (wcslen(currSc) > 0 || !MStrEqualW(currSc, L""))
+			MSCM_ControlSc(currSc, SERVICE_RUNNING, SERVICE_CONTROL_CONTINUE, (LPWSTR)str_item_op_failed.c_str());
 		break;
 	}
 	case ID_SCMAIN_SUSP: {
-		if (wcslen(currSc) > 0 || wcscmp(currSc, L"") != 0) 
-			MSCM_ControlSc(currSc, SERVICE_PAUSED, SERVICE_CONTROL_PAUSE, L"无法暂停服务");
+		if (wcslen(currSc) > 0 || !MStrEqualW(currSc, L"")) 
+			MSCM_ControlSc(currSc, SERVICE_PAUSED, SERVICE_CONTROL_PAUSE, (LPWSTR)str_item_op_failed.c_str());
 		break;
 	}
 	case ID_SCSMALL_GOTOSC: {

@@ -74,6 +74,18 @@ extern LPWSTR str_item_delscask;
 extern LPWSTR str_item_delsc2ask;
 extern LPWSTR str_item_endtask;
 extern LPWSTR str_item_rebootexplorer;
+extern LPWSTR str_item_loaddriver;
+extern LPWSTR str_item_unloaddriver;
+extern LPWSTR str_item_filenotexist;
+extern LPWSTR str_item_filetrusted;
+extern LPWSTR str_item_filenottrust;
+
+
+
+
+
+
+
 
 
 

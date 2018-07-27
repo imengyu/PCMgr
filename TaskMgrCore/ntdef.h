@@ -2,12 +2,16 @@
 #include "stdafx.h"
 //#include <winternl.h>
 
-typedef DWORD NTSTATUS;
+typedef LONG NTSTATUS;
+typedef ULONG KPRIORITY;
 
-#define STATUS_SUCCESS ((NTSTATUS)0x00000000L)
+#define STATUS_SUCCESS                         ((NTSTATUS)0x00000000L)
+#define STATUS_UNSUCCESSFUL                ((NTSTATUS)0xC0000001L)
 #define STATUS_INFO_LENGTH_MISMATCH ((NTSTATUS)0xC0000004L)
 #define STATUS_BUFFER_OVERFLOW           ((NTSTATUS)0x80000005L)
+#define STATUS_ACCESS_DENIED                 ((NTSTATUS)0xC0000022L)
 #define STATUS_BUFFER_TOO_SMALL          ((NTSTATUS)0xC0000023L)
+
 
 #define NT_SUCCESS(status) ((NTSTATUS)(status)>=0)
 
@@ -24,25 +28,8 @@ typedef struct _UNICODE_STRING {
 #else // MIDL_PASS
 	_Field_size_bytes_part_(MaximumLength, Length) PWCH   Buffer;
 #endif // MIDL_PASS
-} UNICODE_STRING;
-typedef UNICODE_STRING *PUNICODE_STRING;
+} UNICODE_STRING, *PUNICODE_STRING;
 
-typedef struct _SYSTEM_MODULE_INFORMATION {
-	ULONG Reserved[2];
-	PVOID Base;
-	ULONG Size;
-	ULONG Flags;
-	USHORT Index;
-	USHORT Unknown;
-	USHORT LoadCount;
-	USHORT ModuleNameOffset;
-	CHAR ImageName[256];
-} SYSTEM_MODULE_INFORMATION, *PSYSTEM_MODULE_INFORMATION;
-//存放系统模块列表
-typedef struct _SystemModuleList {
-	ULONG ulCount;
-	SYSTEM_MODULE_INFORMATION smi[1];
-} SYSTEMMODULELIST, *PSYSTEMMODULELIST;
 
 typedef struct _RTL_USER_PROCESS_PARAMETERS {
 	BYTE Reserved1[16];
@@ -58,7 +45,6 @@ typedef struct _PEB_LDR_DATA {
 	PVOID Reserved2[3];
 	LIST_ENTRY InMemoryOrderModuleList;
 } PEB_LDR_DATA, *PPEB_LDR_DATA;
-
 typedef struct _PEB {
 	BYTE Reserved1[2];
 	BYTE BeingDebugged;
@@ -81,14 +67,23 @@ typedef struct _PEB {
 	ULONG SessionId;
 } PEB, *PPEB;
 
-typedef struct _PROCESS_BASIC_INFORMATION {
-	PVOID Reserved1;
-	PPEB PebBaseAddress;
-	PVOID Reserved2[2];
-	ULONG_PTR UniqueProcessId;
-	PVOID Reserved3;
-} PROCESS_BASIC_INFORMATION;
-typedef PROCESS_BASIC_INFORMATION *PPROCESS_BASIC_INFORMATION;
+typedef struct _CLIENT_ID
+{
+	PVOID UniqueProcess;
+	PVOID UniqueThread;
+} CLIENT_ID, *PCLIENT_ID;
+
+typedef struct _OBJECT_ATTRIBUTES {
+	ULONG Length;
+	HANDLE RootDirectory;
+	PUNICODE_STRING ObjectName;
+	ULONG Attributes;
+	PVOID SecurityDescriptor;        // Points to type SECURITY_DESCRIPTOR
+	PVOID SecurityQualityOfService;  // Points to type SECURITY_QUALITY_OF_SERVICE
+} OBJECT_ATTRIBUTES;
+typedef OBJECT_ATTRIBUTES *POBJECT_ATTRIBUTES;
+
+
 
 typedef enum _THREAD_STATE {
 	StateInitialized,
@@ -100,7 +95,6 @@ typedef enum _THREAD_STATE {
 	StateTransition,
 	StateUnknown
 } THREAD_STATE;
-
 typedef enum _KWAIT_REASON {
 	Executive,
 	FreePage,
@@ -131,119 +125,6 @@ typedef enum _KWAIT_REASON {
 	WrKernel
 } KWAIT_REASON;
 
-typedef struct _VM_COUNTERS {
-	ULONG PeakVirtualSize;
-	ULONG VirtualSize;
-	ULONG PageFaultCount;
-	ULONG PeakWorkingSetSize;
-	ULONG WorkingSetSize;
-	ULONG QuotaPeakPagedPoolUsage;
-	ULONG QuotaPagedPoolUsage;
-	ULONG QuotaPeakNonPagedPoolUsage;
-	ULONG QuotaNonPagedPoolUsage;
-	ULONG PagefileUsage;
-	ULONG PeakPagefileUsage;
-} VM_COUNTERS, *PVM_COUNTERS;
-
-typedef struct _CLIENT_ID
-{
-	PVOID UniqueProcess;
-	PVOID UniqueThread;
-} CLIENT_ID, *PCLIENT_ID;
-
-#ifndef _X64_
-typedef struct _SYSTEM_THREADS {
-	LARGE_INTEGER KernelTime;
-	LARGE_INTEGER UserTime;
-	LARGE_INTEGER CreateTime;
-	ULONG WaitTime;
-	PVOID StartAddress;
-	CLIENT_ID ClientId;
-	//KPRIORITY Priority;
-	LONG Priority;
-	//KPRIORITY BasePriority;
-	LONG BasePriority;
-	ULONG ContextSwitchCount;
-	THREAD_STATE ThreadState;
-	//DWORD dwState;
-	KWAIT_REASON WaitReason;
-	//DWORD dwWaitReason;
-} SYSTEM_THREADS, *PSYSTEM_THREADS;
-#else
-typedef struct _SYSTEM_THREADS
-{
-	LARGE_INTEGER KernelTime;
-	LARGE_INTEGER UserTime;
-	LARGE_INTEGER CreateTime;
-	ULONG WaitTime;
-	PVOID StartAddress;
-	CLIENT_ID ClientId;
-	LONG Priority;
-	LONG BasePriority;
-	ULONG ContextSwitchCount;
-	THREAD_STATE ThreadState;
-	KWAIT_REASON WaitReason;
-	ULONG Reserved;
-} SYSTEM_THREADS, *PSYSTEM_THREADS;
-#endif
-
-#ifndef _X64_
-typedef struct _SYSTEM_PROCESSES { // Information Class 5
-	ULONG NextEntryDelta;
-	ULONG ThreadCount;
-	ULONG Reserved1[6];
-	LARGE_INTEGER CreateTime;
-	LARGE_INTEGER UserTime;
-	LARGE_INTEGER KernelTime;
-	UNICODE_STRING ProcessName;
-	//KPRIORITY BasePriority;
-	LONG BasePriority;
-	ULONG ProcessId;
-	ULONG InheritedFromProcessId;
-	ULONG HandleCount;
-	ULONG Reserved2[2];
-	VM_COUNTERS VmCounters;
-	IO_COUNTERS IoCounters; // Windows 2000 only
-	SYSTEM_THREADS Threads[1];
-} SYSTEM_PROCESSES, *PSYSTEM_PROCESSES;
-#else
-typedef struct _SYSTEM_PROCESSES
-{
-	ULONG NextEntryDelta; //构成结构序列的偏移量;
-	ULONG ThreadCount; //线程数目;
-	ULONG Reserved1[6];
-	LARGE_INTEGER CreateTime; //创建时间;
-	LARGE_INTEGER UserTime;//用户模式(Ring 3)的CPU时间;
-	LARGE_INTEGER KernelTime; //内核模式(Ring 0)的CPU时间;
-	UNICODE_STRING ProcessName; //进程名称;
-	LONG BasePriority;//进程优先权;
-	long long ProcessId; //进程标识符;
-	HANDLE InheritedFromProcessId; //父进程的标识符;
-	ULONG HandleCount; //句柄数目;
-	ULONG Reserved2[2];
-	ULONG_PTR PageDirectoryBase;
-	VM_COUNTERS  VmCounters; //虚拟存储器的结构，见下;
-	SIZE_T PrivatePageCount;
-	IO_COUNTERS IoCounters; //IO计数结构，见下;
-	_SYSTEM_THREADS Threads[1]; //进程相关线程的结构数组
-}SYSTEM_PROCESSES, *PSYSTEM_PROCESSES;
-#endif
-
-typedef enum _OBJECT_INFORMATION_CLASS {
-	ObjectBasicInformation = 0,
-	ObjectTypeInformation = 2
-} OBJECT_INFORMATION_CLASS;
-
-typedef struct _OBJECT_ATTRIBUTES {
-	ULONG Length;
-	HANDLE RootDirectory;
-	PUNICODE_STRING ObjectName;
-	ULONG Attributes;
-	PVOID SecurityDescriptor;        // Points to type SECURITY_DESCRIPTOR
-	PVOID SecurityQualityOfService;  // Points to type SECURITY_QUALITY_OF_SERVICE
-} OBJECT_ATTRIBUTES;
-typedef OBJECT_ATTRIBUTES *POBJECT_ATTRIBUTES;
-
 typedef enum _THREADINFOCLASS {
 	ThreadBasicInformation,
 	ThreadTimes,
@@ -266,7 +147,6 @@ typedef enum _THREADINFOCLASS {
 	ThreadBreakOnTermination,
 	MaxThreadInfoClass
 }   THREADINFOCLASS;
-
 typedef enum _SYSTEM_INFORMATION_CLASS {
 	SystemBasicInformation,                // 0 Y N
 	SystemProcessorInformation,            // 1 Y N
@@ -323,7 +203,6 @@ typedef enum _SYSTEM_INFORMATION_CLASS {
 	SystemAddVerifier,                    // 52 N Y
 	SystemSessionProcessesInformation    // 53 Y N
 } SYSTEM_INFORMATION_CLASS;
-
 typedef enum _PROCESSINFOCLASS
 {
 	ProcessBasicInformation, // q: PROCESS_BASIC_INFORMATION, PROCESS_EXTENDED_BASIC_INFORMATION
@@ -402,6 +281,21 @@ typedef enum _PROCESSINFOCLASS
 	ProcessRaiseUMExceptionOnInvalidHandleClose,
 	MaxProcessInfoClass
 } PROCESSINFOCLASS;
+typedef enum _OBJECT_INFORMATION_CLASS {
+	ObjectBasicInformation = 0,
+	ObjectNameInformation = 1,
+	ObjectTypeInformation = 2
+} OBJECT_INFORMATION_CLASS;
+
+
+typedef struct _PROCESS_BASIC_INFORMATION {
+	PVOID Reserved1;
+	PPEB PebBaseAddress;
+	PVOID Reserved2[2];
+	ULONG_PTR UniqueProcessId;
+	PVOID Reserved3;
+} PROCESS_BASIC_INFORMATION,*PPROCESS_BASIC_INFORMATION;
+
 
 typedef struct _THREAD_BASIC_INFORMATION { // Information Class 0
 	LONG     ExitStatus;
@@ -412,27 +306,206 @@ typedef struct _THREAD_BASIC_INFORMATION { // Information Class 0
 	LONG BasePriority;
 } THREAD_BASIC_INFORMATION, *PTHREAD_BASIC_INFORMATION;
 
-struct OBJECT_NAME_INFORMATION
+typedef struct _SYSTEM_MODULE_INFORMATION {
+	ULONG Reserved[2];
+	PVOID Base;
+	ULONG Size;
+	ULONG Flags;
+	USHORT Index;
+	USHORT Unknown;
+	USHORT LoadCount;
+	USHORT ModuleNameOffset;
+	CHAR ImageName[256];
+} SYSTEM_MODULE_INFORMATION, *PSYSTEM_MODULE_INFORMATION;
+
+typedef struct _OBJECT_NAME_INFORMATION
 {
 	UNICODE_STRING Name; // defined in winternl.h
 	WCHAR NameBuffer;
-};
-
-typedef struct _SYSTEM_HANDLE
+}OBJECT_NAME_INFORMATION, *POBJECT_NAME_INFORMATION;
+typedef struct _OBJECT_TYPE_INFORMATION
 {
-	DWORD       dwProcessId;
-	BYTE        bObjectType;
-	BYTE        bFlags;
-	WORD        wValue;
-	PVOID       pAddress;
-	DWORD GrantedAccess;
-}SYSTEM_HANDLE;
+	UNICODE_STRING TypeName;
+	ULONG TotalNumberOfObjects;
+	ULONG TotalNumberOfHandles;
+	ULONG TotalPagedPoolUsage;
+	ULONG TotalNonPagedPoolUsage;
+	ULONG TotalNamePoolUsage;
+	ULONG TotalHandleTableUsage;
+	ULONG HighWaterNumberOfObjects;
+	ULONG HighWaterNumberOfHandles;
+	ULONG HighWaterPagedPoolUsage;
+	ULONG HighWaterNonPagedPoolUsage;
+	ULONG HighWaterNamePoolUsage;
+	ULONG HighWaterHandleTableUsage;
+	ULONG InvalidAttributes;
+	GENERIC_MAPPING GenericMapping;
+	ULONG ValidAccessMask;
+	BOOLEAN SecurityRequired;
+	BOOLEAN MaintainHandleCount;
+	ULONG PoolType;
+	ULONG DefaultPagedPoolCharge;
+	ULONG DefaultNonPagedPoolCharge;
+} OBJECT_TYPE_INFORMATION, *POBJECT_TYPE_INFORMATION;
+typedef struct _OBJECT_BASIC_INFORMATION {
+	ULONG                   Attributes;
+	ACCESS_MASK             DesiredAccess;
+	ULONG                   HandleCount;
+	ULONG                   ReferenceCount;
+	ULONG                   PagedPoolUsage;
+	ULONG                   NonPagedPoolUsage;
+	ULONG                   Reserved[3];
+	ULONG                   NameInformationLength;
+	ULONG                   TypeInformationLength;
+	ULONG                   SecurityDescriptorLength;
+	LARGE_INTEGER           CreationTime;
+} OBJECT_BASIC_INFORMATION, *POBJECT_BASIC_INFORMATION;
 
-typedef struct _SYSTEM_HANDLE_INFORMATION
+
+
+typedef struct _SYSTEMMODULELIST {
+	ULONG ulCount;
+	SYSTEM_MODULE_INFORMATION smi[1];
+} SYSTEMMODULELIST, *PSYSTEMMODULELIST;
+
+#ifndef _X64_
+typedef struct _VM_COUNTERS {
+	ULONG PeakVirtualSize;
+	ULONG VirtualSize;
+	ULONG PageFaultCount;
+	ULONG PeakWorkingSetSize;
+	ULONG WorkingSetSize;
+	ULONG QuotaPeakPagedPoolUsage;
+	ULONG QuotaPagedPoolUsage;
+	ULONG QuotaPeakNonPagedPoolUsage;
+	ULONG QuotaNonPagedPoolUsage;
+	ULONG PagefileUsage;
+	ULONG PeakPagefileUsage;
+} VM_COUNTERS, *PVM_COUNTERS;
+
+typedef struct _SYSTEM_THREADS {
+	LARGE_INTEGER KernelTime;
+	LARGE_INTEGER UserTime;
+	LARGE_INTEGER CreateTime;
+	ULONG WaitTime;
+	PVOID StartAddress;
+	CLIENT_ID ClientId;
+	//KPRIORITY Priority;
+	LONG Priority;
+	//KPRIORITY BasePriority;
+	LONG BasePriority;
+	ULONG ContextSwitchCount;
+	THREAD_STATE ThreadState;
+	//DWORD dwState;
+	KWAIT_REASON WaitReason;
+	//DWORD dwWaitReason;
+} SYSTEM_THREADS, *PSYSTEM_THREADS;
+
+typedef struct _SYSTEM_PROCESSES { // Information Class 5
+	ULONG NextEntryDelta;
+	ULONG ThreadCount;
+	ULONG Reserved1[6];
+	LARGE_INTEGER CreateTime;
+	LARGE_INTEGER UserTime;
+	LARGE_INTEGER KernelTime;
+	UNICODE_STRING ProcessName;
+	//KPRIORITY BasePriority;
+	LONG BasePriority;
+	ULONG ProcessId;
+	ULONG InheritedFromProcessId;
+	ULONG HandleCount;
+	ULONG Reserved2[2];
+	VM_COUNTERS VmCounters;
+	IO_COUNTERS IoCounters; // Windows 2000 only
+	SYSTEM_THREADS Threads[1];
+} SYSTEM_PROCESSES, *PSYSTEM_PROCESSES;
+
+typedef struct _SYSTEM_HANDLE_TABLE_ENTRY_INFO {
+    USHORT	UniqueProcessId;
+    USHORT	CreatorBackTraceIndex;
+    UCHAR	ObjectTypeIndex;
+    UCHAR	HandleAttributes;
+    USHORT	HandleValue;
+    PVOID	Object;
+    ULONG	GrantedAccess;
+}SYSTEM_HANDLE_TABLE_ENTRY_INFO;
+
+typedef struct _SYSTEM_HANDLE_INFORMATION {
+	DWORD NumberOfHandles;
+	SYSTEM_HANDLE_TABLE_ENTRY_INFO Handles[1];
+} SYSTEM_HANDLE_INFORMATION, *PSYSTEM_HANDLE_INFORMATION;
+
+#else
+typedef struct _VM_COUNTERS
 {
-	DWORD         dwCount;
-	SYSTEM_HANDLE Handles[1];
-} SYSTEM_HANDLE_INFORMATION, *PSYSTEM_HANDLE_INFORMATION, **PPSYSTEM_HANDLE_INFORMATION;
+	SIZE_T PeakVirtualSize;
+	SIZE_T VirtualSize;
+	ULONG PageFaultCount;
+	SIZE_T PeakWorkingSetSize;
+	SIZE_T WorkingSetSize;
+	SIZE_T QuotaPeakPagedPoolUsage;
+	SIZE_T QuotaPagedPoolUsage;
+	SIZE_T QuotaPeakNonPagedPoolUsage;
+	SIZE_T QuotaNonPagedPoolUsage;
+	SIZE_T PagefileUsage;
+	SIZE_T PeakPagefileUsage;
+} VM_COUNTERS, *PVM_COUNTERS;
+
+typedef struct _SYSTEM_THREADS
+{
+	LARGE_INTEGER KernelTime;
+	LARGE_INTEGER UserTime;
+	LARGE_INTEGER CreateTime;
+	ULONG WaitTime;
+	PVOID StartAddress;
+	CLIENT_ID ClientId;
+	KPRIORITY Priority;
+	KPRIORITY BasePriority;
+	ULONG ContextSwitchCount;
+	THREAD_STATE ThreadState;
+	KWAIT_REASON WaitReason;
+	ULONG Reserved;
+} SYSTEM_THREADS, *PSYSTEM_THREADS;
+
+typedef struct _SYSTEM_PROCESSES
+{
+	ULONG    NextEntryDelta;
+	ULONG    ThreadCount;
+	ULONG    Reserved[6];
+	LARGE_INTEGER  CreateTime;
+	LARGE_INTEGER  UserTime;
+	LARGE_INTEGER  KernelTime;
+	UNICODE_STRING  ProcessName;
+	KPRIORITY   BasePriority;
+	HANDLE   ProcessId;  //Modify
+	HANDLE   InheritedFromProcessId;//Modify
+	ULONG    HandleCount;
+	ULONG    SessionId;
+	ULONG_PTR  PageDirectoryBase;
+	VM_COUNTERS VmCounters;
+	SIZE_T    PrivatePageCount;//Add
+	IO_COUNTERS  IoCounters; //windows 2000 only
+	struct _SYSTEM_THREADS Threads[1];
+}SYSTEM_PROCESSES, *PSYSTEM_PROCESSES;
+
+typedef struct _SYSTEM_HANDLE_TABLE_ENTRY_INFO {
+	USHORT	UniqueProcessId;
+	USHORT	CreatorBackTraceIndex;
+	UCHAR	ObjectTypeIndex;
+	UCHAR	HandleAttributes;
+	USHORT	HandleValue;
+	PVOID	Object;
+	ULONG	GrantedAccess;
+} SYSTEM_HANDLE_TABLE_ENTRY_INFO, *PSYSTEM_HANDLE_TABLE_ENTRY_INFO;
+
+typedef struct _SYSTEM_HANDLE_INFORMATION {
+	ULONG NumberOfHandles;
+	SYSTEM_HANDLE_TABLE_ENTRY_INFO Handles[1];
+} SYSTEM_HANDLE_INFORMATION, *PSYSTEM_HANDLE_INFORMATION;
+
+
+#endif
+
 
 typedef LONG(WINAPI * ZwQueryInformationThreadFun)(HANDLE ThreadHandle, THREADINFOCLASS ThreadInformationClass, PVOID ThreadInformation, ULONG ThreadInformationLength, PULONG ReturnLength OPTIONAL);
 typedef LONG(WINAPI * RtlNtStatusToDosErrorFun)(ULONG status);
@@ -466,7 +539,6 @@ typedef BOOL(*KsSuspendProcessFun)(DWORD dwPID);
 typedef BOOL(*KsResusemeProcessFun)(DWORD dwPID);*/
 
 #define IsConsoleHandle(h) (((((ULONG_PTR)h) & 0x10000003) == 0x3) ? TRUE : FALSE)
-#define ObjectNameInformation (ObjectTypeInformation - 1)
 
 #define OBJ_INHERIT             0x00000002L
 #define OBJ_PERMANENT           0x00000010L

@@ -5,8 +5,12 @@
 #include "syshlp.h"
 #include "nthlp.h"
 #include "lghlp.h"
+#include "loghlp.h"
 #include "mapphlp.h"
 #include "resource.h"
+#include "kernelhlp.h"
+#include "suact.h"
+#include "fmhlp.h"
 #include "StringHlp.h"
 #include <Psapi.h>
 #include <process.h>
@@ -14,6 +18,8 @@
 #include <Shlobj.h>
 #include <tchar.h>
 #include <shellapi.h>
+#include <wintrust.h>
+#include <mscat.h>
 
 extern HINSTANCE hInstRs;
 
@@ -26,6 +32,8 @@ PSYSTEM_PROCESSES current_system_process = NULL;
 
 BOOL killCmdSendBack = FALSE;
 BOOL isKillingExplorer = FALSE;
+
+extern bool use_apc;
 
 //Api s
 
@@ -63,31 +71,46 @@ _GetPackageId dGetPackageId;
 //Enum apis
 EXTERN_C BOOL MAppVProcessAllWindows();
 
-M_API void MKillProcessUser()
+M_API void MFroceKillProcessUser()
 {
 	if (thisCommandPid > 4)
 	{
-		if (isKillingExplorer || (MShowMessageDialog(hWndMain, (LPWSTR)str_item_kill_ast_content.c_str(), DEFDIALOGGTITLE,
+		if ((MShowMessageDialog(hWndMain, (LPWSTR)str_item_kill_ast_content.c_str(), DEFDIALOGGTITLE,
+			(LPWSTR)(str_item_kill_ask_start + thisCommandName + str_item_kill_ask_end).c_str(), NULL, MB_YESNO) == IDYES))
+		{
+			NTSTATUS status = 0;	
+			if (!M_SU_TerminateProcessPID(thisCommandPid, 0, &status, use_apc))
+				ThrowErrorAndErrorCodeX(status, str_item_endprocfailed, (LPWSTR)str_item_kill_failed.c_str());
+			else if (status == STATUS_ACCESS_DENIED)
+				MShowErrorMessage((LPWSTR)str_item_access_denied.c_str(), (LPWSTR)str_item_kill_failed.c_str(), MB_ICONERROR, MB_OK);
+			else if (status == 0xC0000008 || status == 0xC000000B)
+				MShowErrorMessage((LPWSTR)str_item_invalidproc.c_str(), (LPWSTR)str_item_kill_failed.c_str(), MB_ICONWARNING, MB_OK);
+			else ThrowErrorAndErrorCodeX(status, str_item_openprocfailed, (LPWSTR)str_item_kill_failed.c_str());
+		}
+	}
+}
+M_API void MKillProcessUser(BOOL ask)
+{
+	if (thisCommandPid > 4)
+	{
+		if (isKillingExplorer || !ask || (MShowMessageDialog(hWndMain, (LPWSTR)str_item_kill_ast_content.c_str(), DEFDIALOGGTITLE,
 			(LPWSTR)(str_item_kill_ask_start + thisCommandName + str_item_kill_ask_end).c_str(), NULL, MB_YESNO) == IDYES))
 		{
 			HANDLE hProcess;
-			int rs = MOpenProcessNt(thisCommandPid, &hProcess);
-			if (rs == 1)
+			NTSTATUS status = MOpenProcessNt(thisCommandPid, &hProcess);
+			if (status == STATUS_SUCCESS)
 			{
-				rs = MTerminateProcessNt(0, hProcess);
-				if (rs == 0xC0000022)
+				status = MTerminateProcessNt(0, hProcess);
+				if (status == STATUS_ACCESS_DENIED)
 					MShowErrorMessage((LPWSTR)str_item_access_denied.c_str(), (LPWSTR)str_item_kill_failed.c_str(), MB_ICONERROR, MB_OK);
-				else if (rs != 1)
-					ThrowErrorAndErrorCodeX(rs, str_item_endprocfailed, (LPWSTR)str_item_kill_failed.c_str());
-				else SendMessage(hWndMain, WM_COMMAND, 41012, 0);
+				else if (status != STATUS_SUCCESS)
+					ThrowErrorAndErrorCodeX(status, str_item_endprocfailed, (LPWSTR)str_item_kill_failed.c_str());
 			}
-			else if (rs == 0xC0000022)
+			else if (status == STATUS_ACCESS_DENIED)
 				MShowErrorMessage((LPWSTR)str_item_access_denied.c_str(), (LPWSTR)str_item_kill_failed.c_str(), MB_ICONERROR, MB_OK);
-			else if (rs == -1) {
+			else if (status == 0xC0000008 || status == 0xC000000B)
 				MShowErrorMessage((LPWSTR)str_item_invalidproc.c_str(), (LPWSTR)str_item_kill_failed.c_str(), MB_ICONWARNING, MB_OK);
-				SendMessage(hWndMain, WM_COMMAND, 41012, 0);
-			}
-			else ThrowErrorAndErrorCodeX(rs, str_item_openprocfailed, (LPWSTR)str_item_kill_failed.c_str());
+			else ThrowErrorAndErrorCodeX(status, str_item_openprocfailed, (LPWSTR)str_item_kill_failed.c_str());
 		}
 	}
 }
@@ -179,9 +202,9 @@ M_API void MEnumProcess(EnumProcessCallBack calBack)
 		for (PSYSTEM_PROCESSES p = current_system_process; !done; p = PSYSTEM_PROCESSES(PCHAR(p) + p->NextEntryDelta))
 		{
 			WCHAR exeFullPath[260];
-			if (MGetProcessFullPathEx(p->ProcessId, exeFullPath, &hProcess, p->ProcessName.Buffer))
-				calBack(p->ProcessId, p->InheritedFromProcessId, p->ProcessName.Buffer, exeFullPath, 1, hProcess);
-			else calBack(p->ProcessId, p->InheritedFromProcessId, p->ProcessName.Buffer, 0, 1, NULL);
+			if (MGetProcessFullPathEx(static_cast<DWORD>((ULONG_PTR)p->ProcessId), exeFullPath, &hProcess, p->ProcessName.Buffer))
+				calBack(static_cast<DWORD>((ULONG_PTR)p->ProcessId), static_cast<DWORD>((ULONG_PTR)p->InheritedFromProcessId), p->ProcessName.Buffer, exeFullPath, 1, hProcess);
+			else calBack(static_cast<DWORD>((ULONG_PTR)p->ProcessId), static_cast<DWORD>((ULONG_PTR)p->InheritedFromProcessId), p->ProcessName.Buffer, 0, 1, NULL);
 			ix++;
 			done = p->NextEntryDelta == 0;
 		}
@@ -197,7 +220,7 @@ M_API void MEnumProcess2Refesh(EnumProcessCallBack2 callBack)
 		bool done = false;
 		for (PSYSTEM_PROCESSES p = current_system_process; !done; p = PSYSTEM_PROCESSES(PCHAR(p) + p->NextEntryDelta))
 		{
-			callBack(p->ProcessId);
+			callBack(static_cast<DWORD>((ULONG_PTR)p->ProcessId));
 			done = p->NextEntryDelta == 0;
 		}
 	}
@@ -209,13 +232,13 @@ M_API BOOL MReUpdateProcess(DWORD pid, EnumProcessCallBack calBack)
 	for (PSYSTEM_PROCESSES p = current_system_process; !done;
 		p = PSYSTEM_PROCESSES(PCHAR(p) + p->NextEntryDelta))
 	{
-		if (p->ProcessId == pid)
+		if (static_cast<DWORD>((ULONG_PTR)p->ProcessId) == pid)
 		{
 			HANDLE hProcess;
 			WCHAR exeFullPath[260];
-			if (MGetProcessFullPathEx(p->ProcessId, exeFullPath, &hProcess, p->ProcessName.Buffer))
-				calBack(p->ProcessId, p->InheritedFromProcessId, p->ProcessName.Buffer, exeFullPath, 1, hProcess);
-			else calBack(p->ProcessId, p->InheritedFromProcessId, p->ProcessName.Buffer, 0, 1, NULL);
+			if (MGetProcessFullPathEx(static_cast<DWORD>((ULONG_PTR)p->ProcessId), exeFullPath, &hProcess, p->ProcessName.Buffer))
+				calBack(static_cast<DWORD>((ULONG_PTR)p->ProcessId), static_cast<DWORD>((ULONG_PTR)p->InheritedFromProcessId), p->ProcessName.Buffer, exeFullPath, 1, hProcess);
+			else calBack(static_cast<DWORD>((ULONG_PTR)p->ProcessId), static_cast<DWORD>((ULONG_PTR)p->InheritedFromProcessId), p->ProcessName.Buffer, 0, 1, NULL);
 			done = true;
 			return TRUE;
 		}
@@ -298,7 +321,7 @@ M_API HICON MGetExeIcon(LPWSTR pszFullPath)
 	HICON hIcon = NULL;
 	if (pszFullPath != NULL)
 	{
-		if (wcscmp(pszFullPath, L"") == 0) {
+		if (MStrEqualW(pszFullPath, L"")) {
 			hIcon = HIconDef;
 			return hIcon;
 		}
@@ -315,11 +338,121 @@ M_API HICON MGetExeIcon(LPWSTR pszFullPath)
 		hIcon = HIconDef;
 	return hIcon;
 }
+M_API BOOL MGetExeFileTrust(LPCWSTR lpFileName)
+{
+	BOOL bRet = FALSE;
+	if (MFM_FileExist(lpFileName)) {
+		WINTRUST_DATA wd = { 0 };
+		WINTRUST_FILE_INFO wfi = { 0 };
+		WINTRUST_CATALOG_INFO wci = { 0 };
+		CATALOG_INFO ci = { 0 };
+		HCATADMIN hCatAdmin = NULL;
+		if (!CryptCATAdminAcquireContext(&hCatAdmin, NULL, 0))
+		{
+			return FALSE;
+		}
+		HANDLE hFile = CreateFileW(lpFileName, GENERIC_READ, FILE_SHARE_READ,
+			NULL, OPEN_EXISTING, 0, NULL);
+		if (INVALID_HANDLE_VALUE == hFile)
+		{
+			CryptCATAdminReleaseContext(hCatAdmin, 0);
+			return FALSE;
+		}
+		DWORD dwCnt = 100;
+		BYTE byHash[100];
+		CryptCATAdminCalcHashFromFileHandle(hFile, &dwCnt, byHash, 0);
+		CloseHandle(hFile);
+		LPWSTR pszMemberTag = new WCHAR[dwCnt * 2 + 1];
+		for (DWORD dw = 0; dw < dwCnt; ++dw)
+		{
+			wsprintfW(&pszMemberTag[dw * 2], L"%02X", byHash[dw]);
+		}
+		HCATINFO hCatInfo = CryptCATAdminEnumCatalogFromHash(hCatAdmin,
+			byHash, dwCnt, 0, NULL);
+		if (NULL == hCatInfo)
+		{
+			wfi.cbStruct = sizeof(WINTRUST_FILE_INFO);
+			wfi.pcwszFilePath = lpFileName;
+			wfi.hFile = NULL;
+			wfi.pgKnownSubject = NULL;
+			wd.cbStruct = sizeof(WINTRUST_DATA);
+			wd.dwUnionChoice = WTD_CHOICE_FILE;
+			wd.pFile = &wfi;
+			wd.dwUIChoice = WTD_UI_NONE;
+			wd.fdwRevocationChecks = WTD_REVOKE_NONE;
+			wd.dwStateAction = WTD_STATEACTION_IGNORE;
+			wd.dwProvFlags = WTD_SAFER_FLAG;
+			wd.hWVTStateData = NULL;
+			wd.pwszURLReference = NULL;
+		}
+		else
+		{
+			CryptCATCatalogInfoFromContext(hCatInfo, &ci, 0);
+			wci.cbStruct = sizeof(WINTRUST_CATALOG_INFO);
+			wci.pcwszCatalogFilePath = ci.wszCatalogFile;
+			wci.pcwszMemberFilePath = lpFileName;
+			wci.pcwszMemberTag = pszMemberTag;
+			wd.cbStruct = sizeof(WINTRUST_DATA);
+			wd.dwUnionChoice = WTD_CHOICE_CATALOG;
+			wd.pCatalog = &wci;
+			wd.dwUIChoice = WTD_UI_NONE;
+			wd.fdwRevocationChecks = WTD_STATEACTION_VERIFY;
+			wd.dwProvFlags = 0;
+			wd.hWVTStateData = NULL;
+			wd.pwszURLReference = NULL;
+		}
+		GUID action = GUID{ 0x00AAC56B, 0xCD44, 0x11d0, 0x8C, 0xC2, 0x00, 0xC0, 0x4F, 0xC2, 0x95, 0xEE };
+		HRESULT hr = WinVerifyTrust(NULL, &action, &wd);
+		bRet = SUCCEEDED(hr);
+		if (NULL != hCatInfo)
+		{
+			CryptCATAdminReleaseCatalogContext(hCatAdmin, hCatInfo, 0);
+		}
+		CryptCATAdminReleaseContext(hCatAdmin, 0);
+		delete[] pszMemberTag;
+	}
+	return bRet;
+}
 
 TCHAR szDriveStr[500];
 BOOL driveStrGeted = FALSE;
 
 //Kernel path
+M_API BOOL MNtPathToFilePath(LPWSTR pszNtPath, LPWSTR pszFilePath, size_t bufferSize)
+{
+	//¼ì²é²ÎÊý
+	if (!pszFilePath || !pszNtPath)
+		return FALSE;
+
+	if (wcscmp(pszNtPath, L"") == 0 || wcsnlen_s(pszNtPath, 260) <= 12) {
+		wcscpy_s(pszFilePath, bufferSize, pszNtPath);
+		return TRUE;
+	}
+
+	if (wcsncmp(pszNtPath, L"\\SystemRoot\\", 12) == 0)
+	{
+		wcscpy_s(pszFilePath, bufferSize, L"C:\\Windows\\");
+		wcscat_s(pszFilePath, bufferSize, pszNtPath + 12);
+		return TRUE;
+	}
+
+	if (wcsncmp(pszNtPath, L"\\??\\", 4) == 0)
+	{
+		wcscpy_s(pszFilePath, bufferSize, pszNtPath + 4);
+		return TRUE;
+	}
+
+	if (wcsncmp(pszNtPath, L"system32\\", 8) == 0)
+	{
+		wcscpy_s(pszFilePath, bufferSize, L"C:\\Windows\\");
+		wcscat_s(pszFilePath, bufferSize, pszNtPath);
+		return TRUE;
+	}
+
+	wcscpy_s(pszFilePath, bufferSize, pszNtPath);
+
+	return FALSE;
+}
 M_API BOOL MDosPathToNtPath(LPWSTR pszDosPath, LPWSTR pszNtPath)
 {
 	TCHAR            szDrive[3];
@@ -475,11 +608,11 @@ M_API BOOL MGetProcessFullPathEx(DWORD dwPID, LPWSTR outNter, PHANDLE phandle, L
 		wcscpy_s(outNter, 260, L"C:\\Windows\\System32\\ntoskrnl.exe"); 
 		return 1;
 	}
-	else if (dwPID == 88 && wcscmp(pszExeName, L"Registry") == 0) {
+	else if (dwPID == 88 && MStrEqualW(pszExeName, L"Registry")) {
 		wcscpy_s(outNter, 260, L"C:\\Windows\\System32\\ntoskrnl.exe");
 		return 1;
 	}
-	else if (dwPID == 88 && wcscmp(pszExeName, L"Memory Compression") == 0) {
+	else if (dwPID == 88 && MStrEqualW(pszExeName, L"Memory Compression")) {
 		wcscpy_s(outNter, 260, L"C:\\Windows\\System32\\ntoskrnl.exe");
 		return 1;
 	}
@@ -488,11 +621,11 @@ M_API BOOL MGetProcessFullPathEx(DWORD dwPID, LPWSTR outNter, PHANDLE phandle, L
 	TCHAR szImagePath[MAX_PATH];
 	HANDLE hProcess;
 
-	int rs = MOpenProcessNt(dwPID, &hProcess);
-	if (!hProcess || rs != 1) return FALSE;
+	NTSTATUS rs = MOpenProcessNt(dwPID, &hProcess);
+	if (!hProcess || rs != STATUS_SUCCESS) return FALSE;
 	if (!K32GetProcessImageFileNameW(hProcess, szImagePath, MAX_PATH))
 	{
-		if (hProcess != INVALID_HANDLE_VALUE && hProcess != (HANDLE)0xCCCCCCCCL)
+		if (hProcess != INVALID_HANDLE_VALUE && hProcess != (HANDLE)0xCCCCCCCCULL)
 			CloseHandle(hProcess);
 		return FALSE;
 	}
@@ -509,18 +642,12 @@ M_API int MGetProcessState(DWORD pid, HWND hWnd)
 	for (PSYSTEM_PROCESSES p = current_system_process; !done;
 	p = PSYSTEM_PROCESSES(PCHAR(p) + p->NextEntryDelta))
 	{
-		if (p->ProcessId == pid)
+		if (static_cast<DWORD>((ULONG_PTR)p->ProcessId) == pid)
 		{
 			SYSTEM_THREADS systemThread = p->Threads[0];
 			if (systemThread.ThreadState == THREAD_STATE::StateWait && systemThread.WaitReason == Suspended)
-			{
 				return 2;
-			}
-			else
-			{
-				return 1;
-			}
-			done = true;
+			else return 1;		
 		}
 		done = p->NextEntryDelta == 0;
 	}
@@ -533,7 +660,7 @@ M_API VOID* MGetProcessThreads(DWORD pid)
 	for (PSYSTEM_PROCESSES p = current_system_process; !done;
 		p = PSYSTEM_PROCESSES(PCHAR(p) + p->NextEntryDelta))
 	{
-		if (p->ProcessId == pid)
+		if (static_cast<DWORD>((ULONG_PTR)p->ProcessId) == pid)
 			return p->Threads;
 		done = p->NextEntryDelta == 0; 
 	}
@@ -566,6 +693,20 @@ M_API BOOL MGetProcessIs32Bit(HANDLE handle) {
 	BOOL rs = TRUE;
 	IsWow64Process(handle, &rs);
 	return rs;
+}
+M_API BOOL MGetProcessEprocess(DWORD pid, LPWSTR l, int maxcount)
+{
+	ULONG_PTR outEprocess = 0;
+	if (M_SU_GetEPROCESS(pid, &outEprocess))
+	{
+#ifdef _X64_
+		swprintf_s(l, maxcount, L"0x%I64X", outEprocess);
+#else
+		swprintf_s(l, maxcount, L"0x%08X", outEprocess);
+#endif
+		return TRUE;
+	}
+	return FALSE;
 }
 
 //UWP Process information
@@ -609,51 +750,82 @@ M_API BOOL MCloseHandle(HANDLE handle)
 	return CloseHandle(handle);
 }
 //Process Control
-M_API DWORD MSuspendProcessNt(DWORD dwPId, HANDLE handle)
+M_API NTSTATUS MSuspendProcessNt(DWORD dwPId, HANDLE handle)
 {
 	if (dwPId != 0 && dwPId != 4 && dwPId > 0) {
 		HANDLE hProcess;
-		DWORD rs = MOpenProcessNt(dwPId, &hProcess);
+		NTSTATUS rs = MOpenProcessNt(dwPId, &hProcess);
 		if (hProcess) {
 			rs = ZwSuspendProcess(hProcess);
 			MCloseHandle(hProcess);
-			if (rs == 0)
-				return TRUE;
-			else return rs;
+			if (rs == STATUS_SUCCESS)
+				return STATUS_SUCCESS;
+			else {
+				LogErr(L"SuspendProcess failed (PID : %d) NTSTATUS : 0x%08X", dwPId, rs);
+				return rs;
+			}
+		}
+		else {
+			if (rs == STATUS_ACCESS_DENIED && MCanUseKernel()) {
+				LogWarn(L"SuspendProcess failed in OpenProcess : (PID : %d) , Use kernel mode to Suspend it.");
+				M_SU_SuspendProcess(dwPId, 0, &rs);
+				if(rs != STATUS_SUCCESS)
+					LogErr(L"SuspendProcess failed in kernel : (PID : %d) NTSTATUS : 0x%08X", dwPId, rs);
+			}
+			else LogErr(L"SuspendProcess failed in OpenProcess : (PID : %d) NTSTATUS : 0x%08X", dwPId, rs);
 		}
 		return rs;
 	}
 	else if (handle)
 	{
-		DWORD  rs = ZwSuspendProcess(handle);
+		NTSTATUS  rs = ZwSuspendProcess(handle);
 		if (rs == 0)
 			return TRUE;
-		else return rs;
+		else {
+			LogErr(L"SuspendProcess failed NTSTATUS : 0x%08X", rs);
+			return rs;
+		}
 	}
 	return FALSE;
 }
-M_API DWORD MRusemeProcessNt(DWORD dwPId, HANDLE handle)
+M_API NTSTATUS MRusemeProcessNt(DWORD dwPId, HANDLE handle)
 {
 	if (dwPId != 0 && dwPId != 4 && dwPId > 0) {
 		HANDLE hProcess;
-		MOpenProcessNt(dwPId, &hProcess);
+		NTSTATUS rs = MOpenProcessNt(dwPId, &hProcess);
 		if (hProcess)
 		{
-			DWORD rs = ZwResumeProcess(hProcess);
+			rs = ZwResumeProcess(hProcess);
 			MCloseHandle(hProcess);
-			if (rs == 0) return TRUE;
-			else return rs;
+			if (rs == STATUS_SUCCESS) return STATUS_SUCCESS;
+			else {
+				LogErr(L"RusemeProcess failed (PID : %d) NTSTATUS : 0x%08X", dwPId, rs);
+				return rs;
+			}
+		}
+		else {
+			if (rs == STATUS_ACCESS_DENIED && MCanUseKernel()) {
+				LogWarn(L"RusemeProcess failed in OpenProcess : (PID : %d) , Use kernel mode to Ruseme it.");
+				M_SU_ResumeProcess(dwPId, 0, &rs);
+				if (rs != STATUS_SUCCESS)
+					LogErr(L"RusemeProcess failed in kernel : (PID : %d) NTSTATUS : 0x%08X", dwPId, rs);
+			}
+			else LogErr(L"RusemeProcess failed in OpenProcess : (PID : %d) NTSTATUS : 0x%08X", dwPId, rs);
 		}
 	}
 	else if (handle)
 	{
-		DWORD rs = ZwResumeProcess(handle);
-		if (rs == 0) return TRUE;
-		else return rs;
+		NTSTATUS rs = ZwResumeProcess(handle);
+		if (rs == 0)return TRUE;
+		else
+		{
+			LogErr(L"RusemeProcess failed NTSTATUS : 0x%08X", rs);
+			return rs;
+		}
 	}
 	return FALSE;
 }
-M_API DWORD MOpenProcessNt(DWORD dwId, PHANDLE pLandle)
+M_API NTSTATUS MOpenProcessNt(DWORD dwId, PHANDLE pLandle)
 {
 	HANDLE hProcess;
 	OBJECT_ATTRIBUTES ObjectAttributes;
@@ -669,45 +841,54 @@ M_API DWORD MOpenProcessNt(DWORD dwId, PHANDLE pLandle)
 	ClientId.UniqueThread = 0;
 	ClientId.UniqueProcess = (HANDLE)(long long)dwId;
 
-	DWORD NtStatus = ZwOpenProcess(
+	NTSTATUS NtStatus = ZwOpenProcess(
 		&hProcess,
 		PROCESS_ALL_ACCESS,
 		&ObjectAttributes,
 		&ClientId);
 
-	if (NtStatus == 0) {
+	if (NtStatus == STATUS_SUCCESS) {
 		*pLandle = hProcess;
-		return 1;
+		return STATUS_SUCCESS;
 	}
-	else if (NtStatus == 0xC0000008 || NtStatus == 0xC000000B)
-		return -1;
 	else return NtStatus;
 }
-M_API DWORD MTerminateProcessNt(DWORD dwId, HANDLE handle)
+M_API NTSTATUS MTerminateProcessNt(DWORD dwId, HANDLE handle)
 {
 	if (handle) {
-		DWORD rs = ZwTerminateProcess(handle, 0);
-		if (rs == 0) return TRUE;
-		else return rs;
+		NTSTATUS rs = ZwTerminateProcess(handle, 0);
+		if (rs == 0) return STATUS_SUCCESS;
+		else {
+			LogErr(L"TerminateProcess failed NTSTATUS : 0x%08X", rs);
+			return rs;
+		}
 	}
 	else
 	{
 		if (dwId != 0 && dwId != 4 && dwId > 0) {
 			HANDLE hProcess;
-			MOpenProcessNt(dwId, &hProcess);
+			NTSTATUS rs = MOpenProcessNt(dwId, &hProcess);
 			if (hProcess)
 			{
-				DWORD rs = ZwTerminateProcess(hProcess, 0);
+				rs = ZwTerminateProcess(hProcess, 0);
 				MCloseHandle(hProcess);
-				if (rs == 0) return TRUE;
-				else return rs;
+				if (rs == 0) return STATUS_SUCCESS;
+				else {
+					LogErr(L"TerminateProcess failed : (PID : %d) NTSTATUS : 0x%08X", dwId, rs);
+					return rs;
+				}
 			}
-			else return 0xC0000022;
+			else {
+				if (rs == STATUS_ACCESS_DENIED && MCanUseKernel())
+					LogWarn(L"TerminateProcess failed in OpenProcess : (PID : %d) NTSTATUS : STATUS_ACCESS_DENIED\n\
+                    You can Terminate it in kernel mode.", dwId, rs);
+				else LogErr(L"TerminateProcess failed in OpenProcess : (PID : %d) NTSTATUS : 0x%08X", dwId, rs);
+			}
+			return rs;
 		}
-		else return 0xC0000022;
+		else return STATUS_ACCESS_DENIED;
 	}
 }
-
 
 
 M_API int MAppWorkShowMenuProcessPrepare(LPWSTR strFilePath, LPWSTR strFileName, DWORD pid)
@@ -715,7 +896,7 @@ M_API int MAppWorkShowMenuProcessPrepare(LPWSTR strFilePath, LPWSTR strFileName,
 	thisCommandPid = pid;
 	if (pid > 0)
 	{
-		if (wcscmp(strFilePath, L"") != 0 && wcslen(strFilePath) < 260) {
+		if (!MStrEqualW(strFilePath, L"") && wcslen(strFilePath) < 260) {
 			wcscpy_s(thisCommandPath, 260, strFilePath);
 			if (wcslen(strFileName) < 260)
 				wcscpy_s(thisCommandName, 260, strFileName);
@@ -752,7 +933,7 @@ M_API int MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWORD 
 				EnableMenuItem(hpop, IDM_VWINS, MF_DISABLED);
 				EnableMenuItem(hpop, IDM_KILL, MF_DISABLED);
 			}
-			if (wcscmp(strFilePath, L"") == 0 || wcscmp(strFilePath, L"-") == 0) {
+			if (MStrEqualW(strFilePath, L"") || MStrEqualW(strFilePath, L"-")) {
 				EnableMenuItem(hpop, IDM_OPENPATH, MF_DISABLED);
 				EnableMenuItem(hpop, IDM_FILEPROP, MF_DISABLED);
 			}
@@ -809,7 +990,7 @@ M_API int MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWORD 
 			EnableMenuItem(hpop, IDM_VMODULS, MF_DISABLED);
 			EnableMenuItem(hpop, IDM_VWINS, MF_DISABLED);
 
-			if (wcscmp(strFilePath, L"") == 0 || wcscmp(strFilePath, L"-") == 0) {
+			if (MStrEqualW(strFilePath, L"") || MStrEqualW(strFilePath, L"-")) {
 				EnableMenuItem(hpop, IDM_OPENPATH, MF_DISABLED);
 				EnableMenuItem(hpop, IDM_FILEPROP, MF_DISABLED);
 			}

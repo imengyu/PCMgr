@@ -8,7 +8,7 @@
 typedef void* (__cdecl*MFCALLBACK)(int msg, void* lParam, void* wParam);
 
 EXTERN_C M_API VOID MShowFileProp(LPWSTR file);
-EXTERN_C M_API BOOL MCopyToClipboard(const WCHAR * pszData, const int nDataLen);
+EXTERN_C M_API BOOL MCopyToClipboard(const WCHAR * pszData, const size_t nDataLen);
 
 EXTERN_C M_API HICON MFM_GetFileIcon(LPWSTR extention, LPWSTR s, int count);
 EXTERN_C M_API HICON MFM_GetFolderIcon();
@@ -37,12 +37,12 @@ BOOL MFM_RenameFile();
 BOOL MFM_MoveFileToUser();
 BOOL MFM_CopyFileToUser();
 BOOL MFM_DelFileToRecBinUser();
-BOOL MFM_DelFileBinUser();
+BOOL MFM_DelFileForeverUser();
 void MFF_ShowFolderProp();
 void MFF_CopyPath();
 void MFF_ShowInExplorer();
 BOOL MFF_DelToRecBin();
-BOOL MFF_Del();
+BOOL MFF_DelForever();
 BOOL MFF_ForceDel();
 void MFF_Copy();
 void MFF_Patse();
@@ -61,6 +61,9 @@ EXTERN_C M_API BOOL MFM_SetFileArrtibute(const wchar_t * szFileDir, DWORD attr);
 EXTERN_C M_API BOOL MFM_FillData(const wchar_t* szFileDir, BOOL force, UINT fileSize);
 EXTERN_C M_API BOOL MFM_EmeptyFile(const wchar_t* szFileDir, BOOL force);
 EXTERN_C M_API BOOL MFM_GetFileInformationString(const wchar_t * szFile, LPWSTR strbuf, UINT bufsize);
+EXTERN_C M_API BOOL MFM_ShowInExplorer(const wchar_t * szFile);
+DWORD WINAPI MFM_DeleteDirThread(LPVOID lpThreadParameter);
+BOOL MFM_DeleteDirInnern(const wchar_t * szFileDir);
 void MFM_ReSetShowHiddenFiles();
 EXTERN_C M_API int MAppWorkShowMenuFM(LPWSTR strFilePath, BOOL mutilSelect, int selectCount);
 EXTERN_C M_API int MAppWorkShowMenuFMF(LPWSTR strfolderPath);

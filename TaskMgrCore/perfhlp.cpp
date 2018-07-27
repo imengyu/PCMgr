@@ -226,7 +226,7 @@ M_CAPI(double) MPERF_GetProcessCpuUseAge(HANDLE hProcess, MPerfAndProcessData*da
 	}
 	return -1;
 }
-M_CAPI(DWORD) MPERF_GetProcessRam(HANDLE hProcess)
+M_CAPI(SIZE_T) MPERF_GetProcessRam(HANDLE hProcess)
 {
 	if (hProcess)
 	{
@@ -249,7 +249,10 @@ M_CAPI(DWORD) MPERF_GetProcessDiskRate(HANDLE hProcess, MPerfAndProcessData*data
 			data->LastRead = io_counter.ReadTransferCount;
 			data->LastWrite = io_counter.WriteTransferCount;
 
-			return static_cast<DWORD>((outRead + outWrite) / 1024);
+			DWORD interval = static_cast<DWORD>(TimeInterval / 10000000);
+			if (interval <= 0)interval = 1;
+
+			return static_cast<DWORD>(((outRead + outWrite) / 1024) / interval);
 		}
 	}
 	return 0;

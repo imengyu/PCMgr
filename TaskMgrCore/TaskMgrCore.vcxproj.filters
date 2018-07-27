@@ -102,6 +102,18 @@
     <ClInclude Include="suact.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="loghlp.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="handlehlp.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ioctls.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="sysstructs.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -168,6 +180,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="suact.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="loghlp.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="handlehlp.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

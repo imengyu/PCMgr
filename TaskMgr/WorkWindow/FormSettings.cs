@@ -62,6 +62,25 @@ namespace PCMgr.WorkWindow
 
             }
 
+            checkBoxTop.Checked = FormMain.GetConfigBool("TopMost", "AppSetting", false);
+            checkBoxCloseHide.Checked = FormMain.GetConfigBool("CloseHideToNotfication", "AppSetting", false);
+            checkBoxSelfProtect.Checked = FormMain.GetConfigBool("SelfProtect", "AppSetting", false);
+
+            labelDriverLoadStatus.Text = FormMain.MCanUseKernel() ? "Driver Loaded" : "Driver not load";
+
+            checkBoxAutoLoadDriver.Checked = FormMain.GetConfigBool("LoadKernelDriver", "Configure", false);
+            checkBoxHighLightNoSystetm.Checked = FormMain.GetConfigBool("HighLightNoSystetm", "Configure", false);
+            checkBoxShowDebugWindow.Checked = FormMain.GetConfigBool("ShowDebugWindow", "Configure", true);
+
+            textBoxTitle.Text = FormMain.GetConfig("Title", "AppSetting", "");
+
+            checkBoxShowHotKey.Checked = FormMain.GetConfigBool("HotKey", "AppSetting", true);
+            comboBoxShowHotKey1.SelectedItem = FormMain.GetConfig("HotKey1", "AppSetting", "(None)");
+            comboBoxShowHotKey2.SelectedItem = FormMain.GetConfig("HotKey2", "AppSetting", "T");
+
+            string terproc = FormMain.GetConfig("TerProcFun", "Configure", "PspTerProc");
+            radioButtonPspTerProc.Checked = terproc == "PspTerProc";
+            radioButtonApcPspTerProc.Checked = terproc == "ApcPspTerProc";
         }
         private void save_settings()
         {
@@ -78,12 +97,39 @@ namespace PCMgr.WorkWindow
                     break;
 
             }
+
+            if (radioButtonPspTerProc.Checked)
+                FormMain.SetConfig("TerProcFun", "Configure", "PspTerProc");
+            else if (radioButtonPspTerProc.Checked)
+                FormMain.SetConfig("TerProcFun", "Configure", "ApcPspTerProc");
+
+            FormMain.SetConfigBool("LoadKernelDriver", "Configure", checkBoxAutoLoadDriver.Checked);
+            FormMain.SetConfigBool("HighLightNoSystetm", "Configure", checkBoxHighLightNoSystetm.Checked);
+            FormMain.SetConfigBool("ShowDebugWindow", "Configure", checkBoxShowDebugWindow.Checked);
+            FormMain.SetConfigBool("HotKey", "AppSetting", checkBoxShowHotKey.Checked);
+            FormMain.SetConfigBool("SelfProtect", "AppSetting", checkBoxSelfProtect.Checked);
+            FormMain.SetConfig("Title", "AppSetting", textBoxTitle.Text);
+            FormMain.Instance.Text = textBoxTitle.Text;
+            FormMain.SetConfig("HotKey1", "AppSetting", comboBoxShowHotKey1.SelectedItem.ToString());
+            FormMain.SetConfig("HotKey2", "AppSetting", comboBoxShowHotKey2.SelectedItem.ToString());
+
             Close();
         }
 
         private void button_save_Click(object sender, EventArgs e)
         {
             save_settings();
+        }
+
+        private void checkBoxTop_CheckedChanged(object sender, EventArgs e)
+        {
+            FormMain.AppHWNDSendMessage(FormMain.WM_COMMAND, new IntPtr(40117), IntPtr.Zero);
+            //FormMain.SetConfigBool("TopMost", "AppSetting", checkBoxTop.Checked);
+        }
+        private void checkBoxCloseHide_CheckedChanged(object sender, EventArgs e)
+        {
+            FormMain.AppHWNDSendMessage(FormMain.WM_COMMAND, new IntPtr(40120), IntPtr.Zero);
+            //FormMain.SetConfigBool("CloseHideToNotfication", "AppSetting", checkBoxCloseHide.Checked);
         }
     }
 }

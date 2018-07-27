@@ -710,4 +710,67 @@ PCMgr 需要管理员权限 才能对系统进行控制和管理。
   <data name="DeleteFiles" xml:space="preserve">
     <value>正在删除...</value>
   </data>
+  <data name="VHandleTitle" xml:space="preserve">
+    <value>进程 {0} [{1}] 的所有句柄：{2}</value>
+  </data>
+  <data name="KillOldFailed" xml:space="preserve">
+    <value>上一个 PCMgr 无法结束，您可以手动结束它</value>
+  </data>
+  <data name="KillOldSuccess" xml:space="preserve">
+    <value>上一个 PCMgr 已经成功结束</value>
+  </data>
+  <data name="Run2KillOld" xml:space="preserve">
+    <value>强制结束上一个 PCMgr</value>
+  </data>
+  <data name="Run2WarnText" xml:space="preserve">
+    <value>检测到您已经运行一个 PCMgr , 运行多个 PCMgr 可能导致软件功能异常，是否继续运行？
+如果上一个程序卡死或者无响应，您也可以选择强制结束上一个进程。</value>
+  </data>
+  <data name="LoadDriver" xml:space="preserve">
+    <value>加载内核驱动</value>
+  </data>
+  <data name="UnLoadDriver" xml:space="preserve">
+    <value>卸载内核驱动</value>
+  </data>
+  <data name="TitleFRebbot" xml:space="preserve">
+    <value>确定强制重启？您未保存的工作将会丢失！</value>
+  </data>
+  <data name="TitleFShutdown" xml:space="preserve">
+    <value>确定强制关机？您未保存的工作将会丢失！</value>
+  </data>
+  <data name="PleaseChooseDriver" xml:space="preserve">
+    <value>请输入一个驱动路径或选择一个驱动！</value>
+  </data>
+  <data name="DriverLoadFailed" xml:space="preserve">
+    <value>驱动加载失败。Lset Error : {0} . 更多信息请查看调试输出窗口。</value>
+  </data>
+  <data name="DriverLoadSuccessFull" xml:space="preserve">
+    <value>驱动加载成功。</value>
+  </data>
+  <data name="DriverUnLoadFailed" xml:space="preserve">
+    <value>驱动卸载失败。Lset Error : {0} . 更多信息请查看调试输出窗口。</value>
+  </data>
+  <data name="DriverUnLoadSuccessFull" xml:space="preserve">
+    <value>驱动卸载成功。</value>
+  </data>
+  <data name="PleaseEnterDriverServiceName" xml:space="preserve">
+    <value>请输入驱动刚才加载的服务名</value>
+  </data>
+  <data name="DriverCount" xml:space="preserve">
+    <value>驱动数：</value>
+  </data>
+  <data name="FileNotExist" xml:space="preserve">
+    <value>文件不存在</value>
+  </data>
+  <data name="FileNotTrust" xml:space="preserve">
+    <value>文件没有签名</value>
+  </data>
+  <data name="FileTrust" xml:space="preserve">
+    <value>文件已经签名
+
+&lt;A HREF="#"&gt;查看证书&lt;/A&gt;</value>
+  </data>
+  <data name="DriverCountLoaded" xml:space="preserve">
+    <value>其中已加载：</value>
+  </data>
 </root>

@@ -10,7 +10,7 @@ typedef void(__cdecl *WorkerCallBack)(int msg, void* data1, void* data2);
 LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 void MPrintErrorMessage(LPWSTR str, int icon = MB_OK);
-int MShowMessageDialog(HWND hwnd, LPWSTR text, LPWSTR title, LPWSTR apptl, int i=0, int button=0);
+int MShowMessageDialog(HWND hwnd, LPWSTR text, LPWSTR title, LPWSTR instruction, int i=0, int button=0);
 int MShowErrorMessage(LPWSTR text, LPWSTR intr, int ico=0, int btn=0);
 int MShowErrorMessageWithLastErr(LPWSTR text, LPWSTR intr, int ico, int btn);
 
@@ -25,10 +25,16 @@ EXTERN_C M_API DWORD MAppMainSetExitCode(DWORD ex);
 EXTERN_C M_API void* MAppSetCallBack(void* cp, int id);
 EXTERN_C M_API void MAppMainCall(int msg, void * data1, void * data2);
 EXTERN_C M_API void MAppSetLanuageItems(int in, int ind, LPWSTR msg, int size);
+EXTERN_C M_API void MAppRegShowHotKey(HWND hWnd, UINT vkkey, UINT key);
 EXTERN_C M_API void MAppExit();
 EXTERN_C M_API void MAppRebot();
 EXTERN_C M_API void MAppRebotAdmin();
+EXTERN_C M_API void MAppRebotAdmin2(LPWSTR agrs);
 EXTERN_C M_API void MListDrawItem(HWND hWnd, HDC hdc, int x, int y, int w, int h, int state);
+EXTERN_C M_API BOOL MAppStartEnd();
+EXTERN_C M_API BOOL MAppKillOld(LPWSTR procName);
+EXTERN_C M_API BOOL MAppStartTest();
+EXTERN_C M_API void MAppWorkCall2(UINT msg, WPARAM wParam, LPARAM lParam);
 EXTERN_C M_API int MAppWorkCall3(int id, HWND hWnd, void*data);
 EXTERN_C M_API HICON MGetWindowIcon(HWND hWnd);
 
@@ -46,7 +52,7 @@ EXTERN_C M_API LPCSTR MStrLoA(const LPCSTR str);
 EXTERN_C M_API LPWSTR MStrAddW(const LPWSTR str1, const LPWSTR str2);
 EXTERN_C M_API LPCSTR MStrAddA(const LPCSTR str1, const LPCSTR str2);
 EXTERN_C M_API BOOL MStrEqualA(const LPCSTR str1, const LPCSTR str2);
-EXTERN_C M_API BOOL MStrEqualW(const LPWSTR str1, const LPWSTR str2);
+EXTERN_C M_API BOOL MStrEqualW(const wchar_t* str1, const wchar_t* str2);
 EXTERN_C M_API LPCSTR MIntToStrA(int i);
 EXTERN_C M_API LPWSTR MIntToStrW(int i);
 EXTERN_C M_API LPCSTR MLongToStrA(long i);
@@ -60,4 +66,8 @@ EXTERN_C M_API BOOL MStrContainsW(const LPWSTR str, const LPWSTR testStr, LPWSTR
 EXTERN_C M_API int MHexStrToIntW(wchar_t *s);
 EXTERN_C M_API long long MHexStrToLongW(wchar_t *s);
 
+#ifndef _AMD64_
 void ThrowErrorAndErrorCodeX(DWORD code, LPWSTR msg, LPWSTR title, BOOL ntstatus = TRUE);
+#else
+void ThrowErrorAndErrorCodeX(__int64 code, LPWSTR msg, LPWSTR title, BOOL ntstatus = TRUE);
+#endif

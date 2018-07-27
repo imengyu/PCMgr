@@ -7,7 +7,9 @@
 #include "syshlp.h"
 #include "fmhlp.h"
 #include "ntdef.h"
+#include "kernelhlp.h"
 #include "lghlp.h"
+#include "suact.h"
 #include "StringHlp.h"
 
 #include <list>
@@ -15,13 +17,15 @@
 typedef void(__cdecl *EnumWinsCallBack)(HWND hWnd, HWND hWndParent);
 
 DWORD currentPid = 0;
-int selectItem2 = 0, selectItem1 = 0, currentShowThreadPid = 0, winscount = 0, winicoidx = 0, threadscount = 0;
+DWORD currentShowThreadPid = 0;
+int selectItem2 = 0, selectItem1 = 0, winscount = 0, winicoidx = 0, threadscount = 0;
 HWND selectItem3 = 0;
 
 HWND hListModuls = NULL, hListWins = NULL, hListThreads = NULL, hListHandles = NULL;
 HMODULE selectHModule = NULL;
 extern HANDLE hMainDevice;
 extern HINSTANCE hInstRs;
+extern bool use_apc;
 LPWSTR curretProcName = 0;
 HIMAGELIST hImgListWinSm;
 HCURSOR hCurLoading;
@@ -72,13 +76,11 @@ LPARAM SetItemData(HWND hList, int nItem, LPARAM dwData)
 	return NULL;
 }
 
-extern void ThrowErrorAndErrorCodeX(DWORD code, LPWSTR msg, LPWSTR title, BOOL ntstatus);
-
 BOOL FreeLibraryEx()
 {
 	HANDLE hProcess;
-	DWORD rs = MOpenProcessNt(currentPid, &hProcess);
-	if (rs == -1) {
+	NTSTATUS status = MOpenProcessNt(currentPid, &hProcess);
+	if (status == STATUS_INVALID_HANDLE || status == 0xC000000B) {
 		MessageBox(NULL, str_item_freeinvproc, str_item_freefailed, MB_OK | MB_ICONWARNING);
 	}
 	else if (hProcess) {
@@ -96,7 +98,7 @@ BOOL FreeLibraryEx()
 			MessageBox(NULL, str_item_freeinvproc, str_item_freefailed, MB_OK | MB_ICONWARNING);
 		else ThrowErrorAndErrorCodeX(rs2, L"", str_item_freefailed);
 	}
-	else ThrowErrorAndErrorCodeX(rs, str_item_openprocfailed, str_item_freefailed);
+	else ThrowErrorAndErrorCodeX(status, str_item_openprocfailed, str_item_freefailed);
 	return FALSE;
 }
 
@@ -105,36 +107,43 @@ void KillThreadKernel(bool a = false);
 bool KillThread()
 {
 	HANDLE hThread;
-	DWORD rs = MOpenThreadNt(selectItem1, &hThread, currentShowThreadPid);
-	if (rs == -1) {
+	DWORD NtStatus = MOpenThreadNt(selectItem1, &hThread, currentShowThreadPid);
+	if (NtStatus == STATUS_INVALID_HANDLE) {
 		MessageBox(NULL, str_item_killinvthread, str_item_killthreaderr, MB_OK);
 		return true;
 	}
 	if (hThread) {
-		rs = MTerminateThreadNt(hThread);
-		if (rs == 1)
+		NtStatus = MTerminateThreadNt(hThread);
+		if (hThread == STATUS_SUCCESS)
 			return true;
 		else {
 			
 		}
-		ThrowErrorAndErrorCodeX(rs, L"", str_item_killthreaderr);
+		ThrowErrorAndErrorCodeX(NtStatus, L"", str_item_killthreaderr);
 		return true;
 	}
 	else {
 		
 	}
-	ThrowErrorAndErrorCodeX(rs, str_item_openthreaderr, str_item_killthreaderr);
+	ThrowErrorAndErrorCodeX(NtStatus, str_item_openthreaderr, str_item_killthreaderr);
 	return false;
 }
 
 void KillThreadKernel(bool a)
 {
-	HANDLE hThread;
-	int rs = MOpenThreadNt(selectItem1, &hThread, currentShowThreadPid);
-	if (rs == -1)
-		MessageBox(NULL, str_item_killinvthread, str_item_killthreaderr, MB_OK);
+	if (!MCanUseKernel())MessageBox(NULL, str_item_kernelnotload, str_item_killthreaderr, MB_OK | MB_ICONERROR);
 	else {
-		MessageBox(NULL, str_item_kernelnotload, str_item_killthreaderr, MB_OK | MB_ICONERROR);
+		NTSTATUS status = 0;
+		if (!(M_SU_TerminateThreadTID(currentShowThreadPid, 0, &status, use_apc) && (status) == STATUS_SUCCESS))
+		{
+			if (status == STATUS_INVALID_HANDLE) MessageBox(NULL, str_item_killinvthread, str_item_killthreaderr, MB_OK);
+			else if (status == STATUS_ACCESS_DENIED)
+			{
+				if (!(M_SU_TerminateThreadTID(currentShowThreadPid, 0, &status) && (status) == STATUS_SUCCESS))
+					ThrowErrorAndErrorCodeX(status, L"Kernel return 2", str_item_killthreaderr);
+			}
+			else ThrowErrorAndErrorCodeX(status, L"Kernel return", str_item_killthreaderr);
+		}
 	}
 }
 
@@ -143,38 +152,38 @@ bool SuspendThread()
 	if (MShowMessageDialog(NULL, str_item_suthreadwarn, str_item_question, L"", MB_ICONWARNING, MB_YESNO) == IDNO)
 		return false;
 	HANDLE hThread;
-	DWORD rs = MOpenThreadNt(selectItem1, &hThread, currentShowThreadPid);
-	if (rs == -1) {
+	DWORD NtStatus = MOpenThreadNt(selectItem1, &hThread, currentShowThreadPid);
+	if (NtStatus == STATUS_INVALID_HANDLE) {
 		MessageBox(NULL, str_item_invthread, str_item_suthreaderr, MB_OK);
 		return true;
 	}
 	if (hThread) {
-		rs = MSuspendThreadNt(hThread);
-		if (rs == 1) {
+		NtStatus = MSuspendThreadNt(hThread);
+		if (NtStatus == STATUS_SUCCESS) {
 			return true;
 		}
-		else ThrowErrorAndErrorCodeX(rs, L"", str_item_suthreaderr);
+		else ThrowErrorAndErrorCodeX(NtStatus, L"", str_item_suthreaderr);
 	}
-	else ThrowErrorAndErrorCodeX(rs, str_item_openthreaderr, str_item_suthreaderr);
+	else ThrowErrorAndErrorCodeX(NtStatus, str_item_openthreaderr, str_item_suthreaderr);
 	return false;
 }
 
 bool ResusemeThread()
 {
 	HANDLE hThread;
-	DWORD rs = MOpenThreadNt(selectItem1, &hThread, currentShowThreadPid);
-	if (rs == -1) {
+	DWORD NtStatus = MOpenThreadNt(selectItem1, &hThread, currentShowThreadPid);
+	if (NtStatus == STATUS_INVALID_HANDLE) {
 		MessageBox(NULL, str_item_invthread, str_item_rethreaderr, MB_OK);
 		return true;
 	}
 	if (hThread) {
-		rs = MResumeThreadNt(hThread);
-		if (rs == 1) {
+		NtStatus = MResumeThreadNt(hThread);
+		if (NtStatus == STATUS_SUCCESS) {
 			return true;
 		}
-		else ThrowErrorAndErrorCodeX(rs, L"", str_item_rethreaderr);
+		else ThrowErrorAndErrorCodeX(NtStatus, L"", str_item_rethreaderr);
 	}
-	else ThrowErrorAndErrorCodeX(rs, str_item_openthreaderr, str_item_rethreaderr);
+	else ThrowErrorAndErrorCodeX(NtStatus, str_item_openthreaderr, str_item_rethreaderr);
 	return false;
 }
 
@@ -190,8 +199,9 @@ BOOL CALLBACK lpEnumFunc(HWND hWnd, LPARAM lParam)
 		vitem.iSubItem = 0;
 		vitem.iItem = 0;
 		vitem.iSubItem = 0;
-		HICON hIcon = (HICON)SendMessage(hWnd, WM_GETICON, ICON_SMALL, 0);
-		if (hIcon)
+		HICON hIcon = NULL;
+		if (!SendMessageTimeoutW(hWnd, WM_GETICON, 0, 0,
+			SMTO_BLOCK | SMTO_ABORTIFHUNG, 1000, (PULONG_PTR)&hIcon))
 		{
 			ImageList_AddIcon(hImgListWinSm, hIcon);
 			vitem.iImage = winicoidx;
@@ -237,7 +247,7 @@ BOOL CALLBACK lpEnumFunc2(HWND hWnd, LPARAM lParam)
 
 		wchar_t clsn[50];
 		GetClassName(hWnd, clsn, 50);
-		if (wcscmp(clsn, L"ApplicationFrameWindow") != 0)
+		if (!MStrEqualW(clsn, L"ApplicationFrameWindow"))
 		{
 			if ((l & WS_EX_APPWINDOW) == WS_EX_APPWINDOW || (l & WS_EX_OVERLAPPEDWINDOW) == WS_EX_OVERLAPPEDWINDOW)
 				hAllWins->push_back(hWnd);
@@ -302,7 +312,7 @@ M_API BOOL MAppVProcessAllWindowsGetProcessWindow2(DWORD pid)
 
 M_API BOOL MAppVProcessMsg(DWORD dwPID, HWND hDlg, int type, LPWSTR procName)
 {
-	currentPid = dwPID;	curretProcName = procName;
+	currentPid = static_cast<DWORD>(dwPID);	curretProcName = procName;
 	if (type == 1)
 		DialogBoxW(hInstRs, MAKEINTRESOURCE(IDD_VTHEADS), hDlg, VThreadsDlgProc);
 	else if (type == 2)
@@ -321,19 +331,19 @@ M_API BOOL MAppVProcessMsg(DWORD dwPID, HWND hDlg, int type, LPWSTR procName)
 }
 M_API BOOL MAppVProcessModuls(DWORD dwPID, HWND hDlg, LPWSTR procName)
 {
-	currentPid = dwPID;	curretProcName = procName;
+	currentPid = static_cast<DWORD>(dwPID);	curretProcName = procName;
 	DialogBoxW(hInstRs, MAKEINTRESOURCE(IDD_VMODULS), hDlg, VModulsDlgProc);
 	return TRUE;
 }
 M_API BOOL MAppVProcessThreads(DWORD dwPID, HWND hDlg, LPWSTR procName)
 {
-	currentPid = dwPID;	curretProcName = procName;
+	currentPid = static_cast<DWORD>(dwPID);	curretProcName = procName;
 	DialogBoxW(hInstRs, MAKEINTRESOURCE(IDD_VTHEADS), hDlg, VThreadsDlgProc);
 	return TRUE;
 }
 M_API BOOL MAppVProcessWindows(DWORD dwPID, HWND hDlg, LPWSTR procName)
 {
-	currentPid = dwPID;	curretProcName = procName;
+	currentPid = static_cast<DWORD>(dwPID);	curretProcName = procName;
 	DialogBoxW(hInstRs, MAKEINTRESOURCE(IDD_VWINS), hDlg, VWinsDlgProc);
 	return TRUE;
 }
@@ -357,22 +367,22 @@ BOOL MAppVModuls(DWORD dwPID, HWND hDlg, LPWSTR procName)
 	BOOL bFound = FALSE;
 	HANDLE hProcess;
 	HWND htitle = GetDlgItem(hDlg, IDC_TITLE);
-	int rs = MOpenProcessNt(dwPID, &hProcess);
-	if (rs == -1) {
+	NTSTATUS rs = MOpenProcessNt(dwPID, &hProcess);
+	if (rs == 0xC0000008 || rs == 0xC000000B) {
 		SetWindowText(htitle, (LPWSTR)str_item_invalidproc.c_str());
 		return -1;
 	}	
-	else if (rs == 0xC0000022) {
+	else if (rs == STATUS_ACCESS_DENIED) {
 		SetWindowText(htitle, (LPWSTR)str_item_access_denied.c_str());
 		return -1;
 	}
-	else if (rs == 1 && hProcess) {
+	else if (rs == STATUS_SUCCESS && hProcess) {
 
 		BOOL bRet = FALSE;
 		HANDLE hModuleSnap = NULL;
 		MODULEENTRY32 me32 = { 0 };
 
-		hModuleSnap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, dwPID);
+		hModuleSnap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, static_cast<DWORD>(dwPID));
 		if (hModuleSnap == INVALID_HANDLE_VALUE) {
 			if (GetLastError() == 299) SetWindowText(htitle, (LPWSTR)str_item_invalidproc.c_str());
 			else {
@@ -437,17 +447,17 @@ BOOL MAppVThreads(DWORD dwPID, HWND hDlg, LPWSTR procName)
 	BOOL bFound = FALSE;
 	HANDLE hProcess;
 	HWND htitle = GetDlgItem(hDlg, IDC_TITLE);
-	DWORD rs = MOpenProcessNt(dwPID, &hProcess);
-	if (rs == -1) {
+	NTSTATUS rs = MOpenProcessNt(dwPID, &hProcess);
+	if (rs == 0xC0000008 || rs == 0xC000000B) {
 		SetWindowText(htitle, (LPWSTR)str_item_invalidproc.c_str());
 		return -1;
 	}
-	else if (rs == 0xC0000022) {
+	else if (rs == STATUS_ACCESS_DENIED) {
 		SetWindowText(htitle, (LPWSTR)str_item_access_denied.c_str());
 		return -1;
 	}
-	else if (hProcess && rs == 1) {
-		HANDLE hSnapThread = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, dwPID);
+	else if (hProcess && rs == STATUS_SUCCESS) {
+		HANDLE hSnapThread = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, static_cast<DWORD>(dwPID));
 		if (INVALID_HANDLE_VALUE != hSnapThread)
 		{
 			THREADENTRY32 th32;
@@ -467,7 +477,19 @@ BOOL MAppVThreads(DWORD dwPID, HWND hDlg, LPWSTR procName)
 					vitem.pszText = c;
 					ListView_InsertItem(hListThreads, &vitem);
 					vitem.iSubItem++;
-					vitem.pszText = L"-";
+
+					ULONG_PTR ethread = 0;
+					if (M_SU_GetETHREAD(th32.th32ThreadID, &ethread))
+					{
+						wchar_t x[32];
+#ifdef _X64_
+						swprintf_s(x, L"0x%I64X", ethread);
+#else
+						swprintf_s(x, L"0x%08X", ethread);
+#endif
+						vitem.pszText = x;
+					}
+					else vitem.pszText = L"-";
 					ListView_SetItem(hListThreads, &vitem);
 
 					vitem.iSubItem++;
@@ -538,7 +560,7 @@ BOOL MAppVThreads(DWORD dwPID, HWND hDlg, LPWSTR procName)
 
 			wstring str = FormatString(str_item_vthreadtitle, procName, dwPID, threadscount);
 			SetWindowText(hDlg, str.c_str());
-			currentShowThreadPid = dwPID;
+			currentShowThreadPid = static_cast<DWORD>(dwPID);
 			CloseHandle(hSnapThread);
 
 			return TRUE;
@@ -583,14 +605,14 @@ int CALLBACK Sort_VMODULS(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 {
 	if (lParam1 == lParam2)
 		return -1;
-	int cloums = lParamSort;
+	int cloums = static_cast<int>(lParamSort);
 	switch (cloums)
 	{
 	case 1: {
 		wchar_t s1[MAX_PATH];
 		wchar_t s2[MAX_PATH];
-		ListView_GetItemText(hListModuls, lParam1, lParamSort, s1, MAX_PATH);
-		ListView_GetItemText(hListModuls, lParam2, lParamSort, s2, MAX_PATH);
+		ListView_GetItemText(hListModuls, lParam1, cloums, s1, MAX_PATH);
+		ListView_GetItemText(hListModuls, lParam2, cloums, s2, MAX_PATH);
 		return wcscmp(s1, s2);
 	}
 	case 0:
@@ -599,8 +621,8 @@ int CALLBACK Sort_VMODULS(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 	case 4: {
 		wchar_t s1[64];
 		wchar_t s2[64];
-		ListView_GetItemText(hListModuls, lParam1, lParamSort, s1, 64);
-		ListView_GetItemText(hListModuls, lParam2, lParamSort, s2, 64);
+		ListView_GetItemText(hListModuls, lParam1, cloums, s1, 64);
+		ListView_GetItemText(hListModuls, lParam2, cloums, s2, 64);
 		return wcscmp(s1, s2);
 	}
 	default:
@@ -612,15 +634,15 @@ int CALLBACK Sort_VTHREADS(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 {
 	if (lParam1 == lParam2)
 		return -1;
-	int cloums = lParamSort;
+	int cloums = static_cast<int>(lParamSort);
 	switch (cloums)
 	{
 	case 0:
 	case 7: {
 		wchar_t s1[64];
 		wchar_t s2[64];
-		ListView_GetItemText(hListThreads, lParam1, lParamSort, s1, 64);
-		ListView_GetItemText(hListThreads, lParam2, lParamSort, s2, 64);
+		ListView_GetItemText(hListThreads, lParam1, cloums, s1, 64);
+		ListView_GetItemText(hListThreads, lParam2, cloums, s2, 64);
 		int i1 = _wtoi(s1), i2 = _wtoi(s2);
 		if (i1 == i2)return 0;
 		if (i1 > i2) return 1;
@@ -629,8 +651,8 @@ int CALLBACK Sort_VTHREADS(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 	case 5: {
 		wchar_t s1[MAX_PATH];
 		wchar_t s2[MAX_PATH];
-		ListView_GetItemText(hListThreads, lParam1, lParamSort, s1, MAX_PATH);
-		ListView_GetItemText(hListThreads, lParam2, lParamSort, s2, MAX_PATH);
+		ListView_GetItemText(hListThreads, lParam1, cloums, s1, MAX_PATH);
+		ListView_GetItemText(hListThreads, lParam2, cloums, s2, MAX_PATH);
 		return wcscmp(s1, s2);
 	}
 	case 1:
@@ -640,8 +662,8 @@ int CALLBACK Sort_VTHREADS(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 	case 6: {
 		wchar_t s1[64];
 		wchar_t s2[64];
-		ListView_GetItemText(hListThreads, lParam1, lParamSort, s1, 64);
-		ListView_GetItemText(hListThreads, lParam2, lParamSort, s2, 64);
+		ListView_GetItemText(hListThreads, lParam1, cloums, s1, 64);
+		ListView_GetItemText(hListThreads, lParam2, cloums, s2, 64);
 		return wcscmp(s1, s2);
 	}
 	default:
@@ -919,8 +941,8 @@ INT_PTR CALLBACK VModulsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 			ListView_GetItemText(hListModuls, selectItem2, 1, path, MAX_PATH);
 			if (!MStrEqualW(path, L""))
 			{
-				LPWSTR lparm = MStrAddW(L"/select,", path);
-				ShellExecuteW(NULL, NULL, L"explorer.exe", lparm, NULL, SW_SHOWDEFAULT);
+				std::wstring buf = FormatString(L"/select,%s", path);
+				ShellExecuteW(NULL, NULL, L"explorer.exe", buf.c_str(), NULL, SW_SHOWDEFAULT);
 			}
 			else MessageBox(hDlg, str_item_cantgetpath, L"", MB_ICONERROR | MB_OK);
 			break;

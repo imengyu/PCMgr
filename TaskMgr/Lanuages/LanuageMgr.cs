@@ -11,15 +11,20 @@ namespace PCMgr.Lanuages
     {
         private static ResourceManager resLG;
 
+        public static string CurrentLanuage { get; private set; }
+        public static bool IsChinese { get; private set; }
+
         public static bool LoadLanuageResource(string lg)
         {
             try
             {
-                switch(lg)
+                CurrentLanuage = lg;
+                switch (lg)
                 {
                     case "zh":
                     case "zh-CN":
                         resLG = new ResourceManager(typeof(LanuageResource_zh));
+                        IsChinese = true;
                         return true;
                     case "en":
                     case "en-US":
@@ -27,6 +32,7 @@ namespace PCMgr.Lanuages
                         return true;
                     default:
                         resLG = new ResourceManager("PCMgrLanuage.LanuageResource_" + lg, System.Reflection.Assembly.GetExecutingAssembly());
+                        IsChinese = true;
                         return true;
                 }
             }

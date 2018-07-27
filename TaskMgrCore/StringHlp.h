@@ -11,6 +11,10 @@ std::wstring & FormatString(std::wstring & _str, const wchar_t * _Format, ...);
 
 std::wstring FormatString(const wchar_t * format, ...);
 
+std::wstring FormatString(const wchar_t *_Format, va_list marker);
+
+std::string FormatString(const char *_Format, va_list marker);
+
 std::string FormatString(const char * format, ...);
 
 #define FormatStringPtr FormatStringPtrW

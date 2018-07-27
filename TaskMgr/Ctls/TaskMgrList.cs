@@ -57,6 +57,13 @@ namespace PCMgr.Ctls
             defTagSolidBrush = new SolidBrush(Color.FromArgb(0, 120, 215));
             errTagSolidBrush = new SolidBrush(Color.Orange);
             defChildColorPen = new Pen(Color.FromArgb(0, 120, 215), 3);
+            DrawIcon = true;
+        }
+
+        public void ReposVscroll()
+        {
+            scrol.Height = Height - header.Height - 16;
+            scrol.Location = new Point(Width - 16, header.Height);
         }
 
         private bool b1 = false;
@@ -215,6 +222,10 @@ namespace PCMgr.Ctls
             get { return locked; }
             set { locked = value; }
         }
+        public bool DrawIcon
+        {
+            get;set;
+        }
         public void Sort(bool sync=true)
         {
             if (sorter != null)
@@ -365,7 +376,7 @@ namespace PCMgr.Ctls
                     }
 
                     if (i2 > 0 && item.SubItems[i2].Text != "") g.DrawString(item.SubItems[i2].Text, item.SubItems[i2].Font, item.SubItems[i2].ForeColorSolidBrush, new Rectangle(x + 6, item.YPos - yOffest, header.Items[i2].Width - 10, itemHeight), f);
-                    else if (i2 == 0) g.DrawString(item.Text, fnormalText2, item.SubItems[0].ForeColorSolidBrush, new Rectangle(x + 63, item.YPos - yOffest, header.Items[0].Width - 60, itemHeight), f);
+                    else if (i2 == 0) g.DrawString(item.Text, fnormalText2, item.SubItems[0].ForeColorSolidBrush, new Rectangle(x + (DrawIcon ? 63 : 5), item.YPos - yOffest, header.Items[0].Width - (DrawIcon ? 60 : 5), itemHeight), f);
                 }
                 else if (x > rect.Right) break;
             }

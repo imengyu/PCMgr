@@ -14,8 +14,16 @@ namespace PCMgr
         [STAThread]
         public static void Main(string[]agrs)
         {
+            if (!System.IO.File.Exists(Application.StartupPath + "\\" + FormMain.COREDLLNAME))
+            {
+                MessageBox.Show("Failed to find " + FormMain.COREDLLNAME + " !", "PCMgr - ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             FormMain.currentProcessName = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
+            FormMain.M_LOG_Init(FormMain.GetConfigBool("ShowDebugWindow", "Configure", false));
             FormMain.InitLanuage();
+            FormMain.Log("CS App starting : " + FormMain.currentProcessName + ".exe");
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
@@ -23,14 +31,108 @@ namespace PCMgr
 
             bool run = true;
 
-            if (!FormMain.MIsRunasAdmin())
+            if (agrs.Length > 0)
+                run = MainRunAgrs(agrs);
+
+            if (run && FormMain.MAppStartTest())
+                run = ShowRun2Warn();
+
+            if (run && !FormMain.MIsRunasAdmin())
                 run = ShowNOADMINWarn();
+#if !_X64_
             if (run && FormMain.MIs64BitOS())
                 run = Show64Warn();
+#endif
 
             if (run) Application.Run(new FormMain(agrs));
+            else FormMain.Log("Cancel run.");
+        }
+        public static bool MainRunAgrs(string[] agrs)
+        {
+            if (agrs.Length > 0)
+            {
+                FormMain.Log("MainRunAgrs 0 : " + agrs[0]);
+                switch(agrs[0])
+                {
+                    case "vmodul":
+                        if (agrs.Length > 1)
+                        {
+                            uint pid = 0;
+                            if(uint.TryParse(agrs[1], out pid))
+                            {
+                                FormMain.MAppVProcessModuls(pid, IntPtr.Zero, agrs.Length > 2 ? agrs[2] : "");
+                                return false;
+                            }
+                        }
+                        break;
+                    case "vthread":
+                        if (agrs.Length > 1)
+                        {
+                            uint pid = 0;
+                            if (uint.TryParse(agrs[1], out pid))
+                            {
+                                FormMain.MAppVProcessThreads(pid, IntPtr.Zero, agrs.Length > 2 ? agrs[2] : "");
+                                return false;
+                            }
+                        }
+                        break;
+                    case "vwin":
+                        if (agrs.Length > 1)
+                        {
+                            uint pid = 0;
+                            if (uint.TryParse(agrs[1], out pid))
+                            {
+                                FormMain.MAppVProcessWindows(pid, IntPtr.Zero, agrs.Length > 2 ? agrs[2] : "");
+                                return false;
+                            }
+                        }
+                        break;
+                    case "vhandle":
+                        if (agrs.Length > 1)
+                        {
+                            uint pid = 0;
+                            if (uint.TryParse(agrs[1], out pid))
+                            {
+                                new WorkWindow.FormVHandles(pid, agrs.Length > 2 ? agrs[2] : "");
+                                return false;
+                            }
+                        }
+                        break;
+                    case "spy":
+                        FormMain.Log("MainRunAgrs run spy ");
+                        new WorkWindow.FormSpyWindow(FormMain.GetDesktopWindow());
+                        return false;
+                }
+            }
+            return true;
         }
 
+        private static bool ShowRun2Warn()
+        {
+            bool has64 = FormMain.MIsFinded64();
+            TaskDialog t = new TaskDialog("", FormMain.DEFAPPTITLE);
+            t.Content = LanuageMgr.GetStr("Run2WarnText");
+            t.CommonIcon = TaskDialogIcon.None;
+            CustomButton[] btns = new CustomButton[3];
+            btns[0] = new CustomButton(Result.Yes, LanuageMgr.GetStr("ContinueRun"));
+            btns[1] = new CustomButton(Result.No, LanuageMgr.GetStr("CancelRun"));
+            btns[2] = new CustomButton(Result.Ignore, LanuageMgr.GetStr("Run2KillOld"));
+            t.CustomButtons = btns;
+            t.UseCommandLinks = true;
+            t.CanBeMinimized = false;
+            t.EnableHyperlinks = true;
+            Results rs = t.Show();
+            if (rs.CommonButton == Result.No) return false;
+            else if (rs.CommonButton == Result.Yes) return true;
+            else if (rs.CommonButton == Result.Ignore)
+            {
+                if (FormMain.MAppKillOld(FormMain.currentProcessName + ".exe"))
+                    TaskDialog.Show(LanuageMgr.GetStr("KillOldSuccess"), FormMain.DEFAPPTITLE);
+                else TaskDialog.Show(LanuageMgr.GetStr("KillOldFailed"), FormMain.DEFAPPTITLE);
+                return true;
+            }
+            return true;
+        }
         private static bool Show64Warn()
         {
             if (FormMain.GetConfigBool("X32Warning", "AppSetting", true))
@@ -110,15 +212,11 @@ namespace PCMgr
 
         private static void Application_ThreadException(object sender, System.Threading.ThreadExceptionEventArgs e)
         {
+            FormMain.FLogErr(e.Exception.ToString());
+
             DialogResult d = MessageBox.Show(e.Exception.ToString(), "Exception ! ", MessageBoxButtons.AbortRetryIgnore, MessageBoxIcon.Error);
             if (d == DialogResult.Abort)
                 Environment.Exit(0);
-        }
-
-        public static int EntryPoint(string args)
-        {
-            Main(args.Split(' '));
-            return 0;
         }
     }
 }

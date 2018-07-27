@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "lghlp.h"
 #include "syshlp.h"
+#include "mapphlp.h"
 #include <string>
 #include "StringHlp.h"
 
@@ -92,6 +93,11 @@ LPWSTR str_item_delscask;
 LPWSTR str_item_delsc2ask;
 LPWSTR str_item_endtask;
 LPWSTR str_item_rebootexplorer;
+LPWSTR str_item_loaddriver;
+LPWSTR str_item_unloaddriver;
+LPWSTR str_item_filenotexist;
+LPWSTR str_item_filetrusted;
+LPWSTR str_item_filenottrust;
 
 #define HASSTR(x) x=(LPWSTR)malloc(size*sizeof(WCHAR));wcscpy_s(x, size, msg)
 
@@ -100,7 +106,7 @@ HINSTANCE hInstRs = NULL;
 
 M_CAPI(void) MLG_SetLanuageRes(LPWSTR appstarppath, LPWSTR name)
 {
-	if (wcscmp(name, L"zh") != 0 && wcscmp(name, L"zh-CN") != 0)
+	if (!MStrEqualW(name, L"zh") && !MStrEqualW(name, L"zh-CN"))
 	{
 #if _X64_
 		std::wstring  s = FormatString(L"%s\\app\\x64\\%s\\PCMgr64.resource2.dll", appstarppath, name);
@@ -177,7 +183,11 @@ void MLG_SetLanuageItems_Destroy()
 	delete str_item_delsc2ask;
 	delete str_item_endtask;
 	delete str_item_rebootexplorer;
-
+	delete str_item_loaddriver;
+	delete str_item_unloaddriver;
+	delete str_item_filenotexist;
+	delete str_item_filetrusted;
+	delete str_item_filenottrust;
 }
 void MLG_SetLanuageItems_1(int id, LPWSTR msg, int size)
 {
@@ -244,5 +254,11 @@ void MLG_SetLanuageItems_2(int id, LPWSTR msg, int size)
 	case 1: HASSTR(str_item_delsc2ask); break;
 	case 2: HASSTR(str_item_endtask); break;
 	case 3: HASSTR(str_item_rebootexplorer); break;
+	case 4: HASSTR(str_item_loaddriver); break;
+	case 5: HASSTR(str_item_unloaddriver); break;
+	case 6: HASSTR(str_item_filenotexist); break;
+	case 7: HASSTR(str_item_filetrusted); break;
+	case 8: HASSTR(str_item_filenottrust); break;
 	}
+
 }

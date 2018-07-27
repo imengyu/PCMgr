@@ -3,6 +3,8 @@
 #include "resource.h"
 #include "fmhlp.h"
 #include "lghlp.h"
+#include "loghlp.h"
+#include "mapphlp.h"
 #include "reghlp.h"
 #include "StringHlp.h"
 
@@ -28,7 +30,7 @@ void MSM_OpenAndEnum(HKEY rootkey, LPWSTR path, LPWSTR type, EnumStartupsCallBac
 				DWORD dwSize = sizeof(dwValue);
 				if (RegQueryValueEx(hKEY, valueName, 0, &dwSzType, (LPBYTE)&dwValue, &dwSize) == ERROR_SUCCESS) {
 					callBack(valueName, type, dwValue, rootkey, path, valueName);
-				}
+				}LogErr(L"Query key value (%s\\%s) failed in RegQueryValueEx : %d", MREG_ROOTKEYToStr(rootkey), path, GetLastError());
 			}
 			dwIndex++;
 			length = MAX_PATH;
@@ -36,6 +38,7 @@ void MSM_OpenAndEnum(HKEY rootkey, LPWSTR path, LPWSTR type, EnumStartupsCallBac
 		}
 		RegCloseKey(hKEY);
 	}
+	else LogErr(L"Enum child key (%s\\%s) failed in RegOpenKeyEx : %d", MREG_ROOTKEYToStr(rootkey), path, GetLastError());
 }
 void MSM_OpenAndEnumWithClsid(HKEY rootkey, LPWSTR path, LPWSTR type, EnumStartupsCallBack callBack)
 {
@@ -67,7 +70,7 @@ void MSM_OpenAndEnumWithClsid(HKEY rootkey, LPWSTR path, LPWSTR type, EnumStartu
 							RegCloseKey(csidkey);
 						}
 						else callBack(valueName, type, dwValue, rootkey, path, valueName);
-					}
+					}LogErr(L"Query key value (%s\\%s) failed in RegQueryValueEx : %d", MREG_ROOTKEYToStr(rootkey), path, GetLastError());
 				}
 			}
 			dwIndex++;
@@ -76,6 +79,7 @@ void MSM_OpenAndEnumWithClsid(HKEY rootkey, LPWSTR path, LPWSTR type, EnumStartu
 		}
 		RegCloseKey(hKEY);
 	}
+	else LogErr(L"Enum child key (%s\\%s) failed in RegOpenKeyEx : %d", MREG_ROOTKEYToStr(rootkey), path, GetLastError());
 }
 
 //SOFTWARE\\Classes\\CLSID\\
@@ -130,7 +134,7 @@ M_CAPI(VOID) MStartupsMgr_ShowMenu(HKEY rootkey, LPWSTR path, LPWSTR filepath, L
 		POINT pt;
 		GetCursorPos(&pt);
 
-		if (!filepath || wcscmp(filepath, L"") == 0) {
+		if (!filepath || MStrEqualW(filepath, L"")) {
 			EnableMenuItem(hpop, IDC_MENUSTART_COPYPATH, MF_DISABLED);
 			EnableMenuItem(hpop, IDC_MENUSTART_OPENPATH, MF_DISABLED);
 		}
@@ -165,7 +169,7 @@ LRESULT MSM_HandleWmCommand(WPARAM wParam)
 		break;
 	}
 	case IDC_MENUSTART_COPYPATH: {
-		if (wcslen(selectedFilePath) > 0 || wcscmp(selectedFilePath, L"") != 0)
+		if (wcslen(selectedFilePath) > 0 || !MStrEqualW(selectedFilePath, L""))
 			MCopyToClipboard(selectedFilePath, wcslen(selectedFilePath));
 		break;
 	}
@@ -175,11 +179,8 @@ LRESULT MSM_HandleWmCommand(WPARAM wParam)
 		break;
 	}
 	case IDC_MENUSTART_OPENPATH: {
-		if (wcslen(selectedFilePath) > 0 || wcscmp(selectedFilePath, L"") != 0)
-		{
-			std::wstring path2 = FormatString(L"/select, %s", selectedFilePath);
-			ShellExecute(hWndMain, L"open", L"explorer.exe", path2.c_str(), NULL, 5);
-		}
+		if (wcslen(selectedFilePath) > 0 || !MStrEqualW(selectedFilePath, L""))
+			MFM_ShowInExplorer(selectedFilePath);
 		break;
 	}
 	default:

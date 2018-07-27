@@ -707,4 +707,67 @@ Then, make sure that the thread is forced to hang?</value>
   <data name="DeleteFiles" xml:space="preserve">
     <value>Deleting...</value>
   </data>
+  <data name="VHandleTitle" xml:space="preserve">
+    <value>Process {0}[{1}] All handles : {2}</value>
+  </data>
+  <data name="KillOldFailed" xml:space="preserve">
+    <value>Can not terminate last PCMgr process , you can terminate by your self.</value>
+  </data>
+  <data name="KillOldSuccess" xml:space="preserve">
+    <value>The last PCMgr process has terminated.</value>
+  </data>
+  <data name="Run2KillOld" xml:space="preserve">
+    <value>Terminate last PCMgr process</value>
+  </data>
+  <data name="Run2WarnText" xml:space="preserve">
+    <value>It is detected that you have run a PCMgr and not close it. Running multiple PCMgr may cause software function to be abnormal. 
+If the last program is stuck or unresponsive, you can also choose to Terminate the last process.</value>
+  </data>
+  <data name="LoadDriver" xml:space="preserve">
+    <value>Load kernel driver</value>
+  </data>
+  <data name="UnLoadDriver" xml:space="preserve">
+    <value>UnLoad kernel driver</value>
+  </data>
+  <data name="TitleFRebbot" xml:space="preserve">
+    <value>Determine the compulsory restart? The work you have not saved will be lost!</value>
+  </data>
+  <data name="TitleFShutdown" xml:space="preserve">
+    <value>Are you sure want to force shutdown? The work you have not saved will be lost!</value>
+  </data>
+  <data name="PleaseChooseDriver" xml:space="preserve">
+    <value>Please choose a driver and load！</value>
+  </data>
+  <data name="DriverLoadFailed" xml:space="preserve">
+    <value>Driver Load failed, Lset Error : {0} . for more information, please see in debug output window.</value>
+  </data>
+  <data name="DriverLoadSuccessFull" xml:space="preserve">
+    <value>Driver Load Success.</value>
+  </data>
+  <data name="DriverUnLoadFailed" xml:space="preserve">
+    <value>Driver unoad failed, Lset Error : {0} . for more information, please see in debug output window.</value>
+  </data>
+  <data name="DriverUnLoadSuccessFull" xml:space="preserve">
+    <value>Driver UnLoad Success.</value>
+  </data>
+  <data name="PleaseEnterDriverServiceName" xml:space="preserve">
+    <value>Please enter Driver ServiceName</value>
+  </data>
+  <data name="DriverCount" xml:space="preserve">
+    <value>Driver count :</value>
+  </data>
+  <data name="FileNotExist" xml:space="preserve">
+    <value>File not exist.</value>
+  </data>
+  <data name="FileNotTrust" xml:space="preserve">
+    <value>File not sign.</value>
+  </data>
+  <data name="FileTrust" xml:space="preserve">
+    <value>File have signed.
+
+&lt;A HREF="#"&gt;View the certificate&lt;/A&gt;</value>
+  </data>
+  <data name="DriverCountLoaded" xml:space="preserve">
+    <value>Loaded driver : </value>
+  </data>
 </root>

@@ -15,7 +15,7 @@ Path::~Path()
 bool Path::IsValidateFolderFileName(std::wstring * path)
 {
 	bool ret = true;
-	unsigned int u32Length = 0, u32Index = 0;
+	size_t u32Length = 0, u32Index = 0;
 	wchar_t u8SpecialChar[] = { '\\','<','>','(',')','[',']','&',':',',','/','|','?','*' };
 	wchar_t u8CtrlCharBegin = 0x0, u8CtrlCharEnd = 0x31;
 
@@ -41,7 +41,7 @@ bool Path::IsValidateFolderFileName(std::wstring * path)
 }
 bool Path::CheckInvalidPathChars(std::wstring * path)
 {
-	for (UINT i = 0; i < path->size(); i++)
+	for (size_t i = 0; i < path->size(); i++)
 	{
 		int num = (int)(*path)[i];
 		if (num == 34 || num == 60 || num == 62 || num == 124 || num < 32)
@@ -56,8 +56,8 @@ std::wstring * Path::GetExtension(std::wstring * path)
 	if (path == nullptr)
 		return nullptr;
 	if(Path::CheckInvalidPathChars(path)) return nullptr;
-	int length = path->size();
-	int num = length;
+	size_t length = path->size();
+	size_t num = length;
 	while (--num >= 0)
 	{
 		wchar_t c = (*path)[num];
@@ -83,7 +83,7 @@ bool Path::IsPathRooted(std::wstring * path1)
 	{
 		std::wstring path = *path1;
 		if (Path::CheckInvalidPathChars(path1)) return false;
-		int length = path.size();
+		size_t length = path.size();
 		if ((length >= 1 && (path[0] == DirectorySeparatorChar || path[0] == AltDirectorySeparatorChar)) || (length >= 2 && path[1] == VolumeSeparatorChar))
 		{
 			return true;
@@ -96,7 +96,7 @@ bool Path::HasExtension(std::wstring * path)
 	if (path != nullptr)
 	{
 		if(Path::CheckInvalidPathChars(path)) 	return false;
-		int num = path->size();
+		size_t num = path->size();
 		while (--num >= 0)
 		{
 			wchar_t c = (*path)[num];
@@ -119,7 +119,7 @@ std::wstring * Path::GetFileNameWithoutExtension(std::wstring * path)
 	{
 		return NULL;
 	}
-	int length;
+	size_t length;
 	if ((length = path->find_last_of(L'.')) == -1)
 	{
 		return path;
@@ -132,8 +132,8 @@ std::wstring * Path::GetFileName(std::wstring * path)
 	if (path != NULL)
 	{
 		if (Path::CheckInvalidPathChars(path))return NULL;
-		int length = path->size();
-		int num = length;
+		size_t length = path->size();
+		size_t num = length;
 		while (--num >= 0)
 		{
 			wchar_t c = (*path)[num];

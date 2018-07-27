@@ -376,11 +376,65 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 Driver count : 的本地化字符串。
+        /// </summary>
+        internal static string DriverCount {
+            get {
+                return ResourceManager.GetString("DriverCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Loaded driver :  的本地化字符串。
+        /// </summary>
+        internal static string DriverCountLoaded {
+            get {
+                return ResourceManager.GetString("DriverCountLoaded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 DriverLoad 的本地化字符串。
         /// </summary>
         internal static string DriverLoad {
             get {
                 return ResourceManager.GetString("DriverLoad", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Driver Load failed, Lset Error : {0} . for more information, please see in debug output window. 的本地化字符串。
+        /// </summary>
+        internal static string DriverLoadFailed {
+            get {
+                return ResourceManager.GetString("DriverLoadFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Driver Load Success. 的本地化字符串。
+        /// </summary>
+        internal static string DriverLoadSuccessFull {
+            get {
+                return ResourceManager.GetString("DriverLoadSuccessFull", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Driver unoad failed, Lset Error : {0} . for more information, please see in debug output window. 的本地化字符串。
+        /// </summary>
+        internal static string DriverUnLoadFailed {
+            get {
+                return ResourceManager.GetString("DriverUnLoadFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Driver UnLoad Success. 的本地化字符串。
+        /// </summary>
+        internal static string DriverUnLoadSuccessFull {
+            get {
+                return ResourceManager.GetString("DriverUnLoadSuccessFull", resourceCulture);
             }
         }
         
@@ -475,11 +529,40 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 File not exist. 的本地化字符串。
+        /// </summary>
+        internal static string FileNotExist {
+            get {
+                return ResourceManager.GetString("FileNotExist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 File not sign. 的本地化字符串。
+        /// </summary>
+        internal static string FileNotTrust {
+            get {
+                return ResourceManager.GetString("FileNotTrust", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 FileSystem 的本地化字符串。
         /// </summary>
         internal static string FileSystem {
             get {
                 return ResourceManager.GetString("FileSystem", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 File have signed.
+        ///
+        ///&lt;A HREF=&quot;#&quot;&gt;View the certificate&lt;/A&gt; 的本地化字符串。
+        /// </summary>
+        internal static string FileTrust {
+            get {
+                return ResourceManager.GetString("FileTrust", resourceCulture);
             }
         }
         
@@ -691,6 +774,24 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 Can not terminate last PCMgr process , you can terminate by your self. 的本地化字符串。
+        /// </summary>
+        internal static string KillOldFailed {
+            get {
+                return ResourceManager.GetString("KillOldFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 The last PCMgr process has terminated. 的本地化字符串。
+        /// </summary>
+        internal static string KillOldSuccess {
+            get {
+                return ResourceManager.GetString("KillOldSuccess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Unable to Terminate thread 的本地化字符串。
         /// </summary>
         internal static string KillThreadError {
@@ -714,6 +815,15 @@ namespace PCMgr.Lanuages {
         internal static string LanuageChangedTip {
             get {
                 return ResourceManager.GetString("LanuageChangedTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Load kernel driver 的本地化字符串。
+        /// </summary>
+        internal static string LoadDriver {
+            get {
+                return ResourceManager.GetString("LoadDriver", resourceCulture);
             }
         }
         
@@ -1024,6 +1134,24 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 Please choose a driver and load！ 的本地化字符串。
+        /// </summary>
+        internal static string PleaseChooseDriver {
+            get {
+                return ResourceManager.GetString("PleaseChooseDriver", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Please enter Driver ServiceName 的本地化字符串。
+        /// </summary>
+        internal static string PleaseEnterDriverServiceName {
+            get {
+                return ResourceManager.GetString("PleaseEnterDriverServiceName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Please enter the path to go! 的本地化字符串。
         /// </summary>
         internal static string PleaseEnterPath {
@@ -1167,6 +1295,25 @@ namespace PCMgr.Lanuages {
         internal static string ReThreadErr {
             get {
                 return ResourceManager.GetString("ReThreadErr", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Terminate last PCMgr process 的本地化字符串。
+        /// </summary>
+        internal static string Run2KillOld {
+            get {
+                return ResourceManager.GetString("Run2KillOld", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 It is detected that you have run a PCMgr and not close it. Running multiple PCMgr may cause software function to be abnormal. 
+        ///If the last program is stuck or unresponsive, you can also choose to Terminate the last process. 的本地化字符串。
+        /// </summary>
+        internal static string Run2WarnText {
+            get {
+                return ResourceManager.GetString("Run2WarnText", resourceCulture);
             }
         }
         
@@ -1505,6 +1652,24 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 Determine the compulsory restart? The work you have not saved will be lost! 的本地化字符串。
+        /// </summary>
+        internal static string TitleFRebbot {
+            get {
+                return ResourceManager.GetString("TitleFRebbot", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Are you sure want to force shutdown? The work you have not saved will be lost! 的本地化字符串。
+        /// </summary>
+        internal static string TitleFShutdown {
+            get {
+                return ResourceManager.GetString("TitleFShutdown", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Full name 的本地化字符串。
         /// </summary>
         internal static string TitleFullName {
@@ -1658,6 +1823,15 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 UnLoad kernel driver 的本地化字符串。
+        /// </summary>
+        internal static string UnLoadDriver {
+            get {
+                return ResourceManager.GetString("UnLoadDriver", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Unlock file failed. 的本地化字符串。
         /// </summary>
         internal static string UnlockFileFailed {
@@ -1699,6 +1873,15 @@ namespace PCMgr.Lanuages {
         internal static string UWPEnumFail {
             get {
                 return ResourceManager.GetString("UWPEnumFail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Process {0}[{1}] All handles : {2} 的本地化字符串。
+        /// </summary>
+        internal static string VHandleTitle {
+            get {
+                return ResourceManager.GetString("VHandleTitle", resourceCulture);
             }
         }
         

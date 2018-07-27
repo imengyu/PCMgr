@@ -18,10 +18,51 @@
     <ClCompile Include="Driver.c">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="protect.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="unexp.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="sys.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="proc.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="kmodul.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Driver.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="defs.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="protect.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="unexp.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="sys.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="proc.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="kmodul.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="PCMgrKernel32.rc">
+      <Filter>资源文件</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

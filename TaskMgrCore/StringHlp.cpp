@@ -36,6 +36,34 @@ std::wstring & FormatString(std::wstring & _str, const wchar_t * _Format, ...) {
 	return _str;
 }
 
+
+std::wstring FormatString(const wchar_t *_Format, va_list marker)
+{
+	std::wstring tmp;
+	size_t num_of_chars = _vscwprintf(_Format, marker);
+
+	if (num_of_chars > tmp.capacity()) {
+		tmp.resize(num_of_chars + 1);
+	}
+	vswprintf_s((wchar_t *)tmp.data(), tmp.capacity(), _Format, marker);
+	std::wstring  _str = tmp.c_str();
+	return _str;
+}
+
+std::string FormatString(const char *_Format, va_list marker)
+{
+	std::string tmp;
+	size_t num_of_chars = _vscprintf(_Format, marker);
+
+	if (num_of_chars > tmp.capacity()) {
+		tmp.resize(num_of_chars + 1);
+	}
+
+	vsprintf_s((char *)tmp.data(), tmp.capacity(), _Format, marker);
+	std::string _str = tmp.c_str();
+	return _str;
+}
+
 std::wstring FormatString(const wchar_t *_Format, ...)
 {
 	std::wstring tmp;

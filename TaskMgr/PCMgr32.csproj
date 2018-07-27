@@ -73,7 +73,7 @@
   <PropertyGroup />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
-    <OutputPath>..\Debug\app\x86\</OutputPath>
+    <OutputPath>..\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DebugType>full</DebugType>
@@ -82,7 +82,7 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <OutputPath>..\Release\app\x86\</OutputPath>
+    <OutputPath>..\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
@@ -92,7 +92,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <DebugSymbols>true</DebugSymbols>
-    <OutputPath>..\Debug\app\x64\</OutputPath>
+    <OutputPath>..\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DebugType>full</DebugType>
@@ -101,7 +101,7 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <OutputPath>..\Release\app\x64\</OutputPath>
+    <OutputPath>..\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
@@ -205,10 +205,10 @@
     <Compile Include="Ctls\TaskMgrList.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="WorkWindow\FormAbout.cs">
+    <Compile Include="Dialogs\FormAbout.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="WorkWindow\FormAbout.Designer.cs">
+    <Compile Include="Dialogs\FormAbout.Designer.cs">
       <DependentUpon>FormAbout.cs</DependentUpon>
     </Compile>
     <Compile Include="WorkWindow\FormCheckFileUse.cs">
@@ -235,6 +235,12 @@
     <Compile Include="WorkWindow\FormFillWithData.Designer.cs">
       <DependentUpon>FormFillWithData.cs</DependentUpon>
     </Compile>
+    <Compile Include="WorkWindow\FormLoadDriver.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WorkWindow\FormLoadDriver.Designer.cs">
+      <DependentUpon>FormLoadDriver.cs</DependentUpon>
+    </Compile>
     <Compile Include="WorkWindow\FormMainListHeaders.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -252,6 +258,12 @@
     </Compile>
     <Compile Include="WorkWindow\FormSpyWindow.Designer.cs">
       <DependentUpon>FormSpyWindow.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WorkWindow\FormVHandles.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WorkWindow\FormVHandles.Designer.cs">
+      <DependentUpon>FormVHandles.cs</DependentUpon>
     </Compile>
     <EmbeddedResource Include="Ctls\PerformancePageCpu.resx">
       <DependentUpon>PerformancePageCpu.cs</DependentUpon>
@@ -278,6 +290,18 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>LanuageResource_en.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormLoadDriver.en.resx">
+      <DependentUpon>FormLoadDriver.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormLoadDriver.resx">
+      <DependentUpon>FormLoadDriver.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormVHandles.en.resx">
+      <DependentUpon>FormVHandles.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormVHandles.resx">
+      <DependentUpon>FormVHandles.cs</DependentUpon>
+    </EmbeddedResource>
     <Resource Include="Lanuages\LanuageResource_zh-Hant.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>LanuageResource_zh-Hant.Designer.cs</LastGenOutput>
@@ -285,6 +309,7 @@
     <EmbeddedResource Include="Lanuages\LanuageResource_zh.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>LanuageResource_zh.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -296,7 +321,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="WorkWindow\FormAbout.resx">
+    <EmbeddedResource Include="Dialogs\FormAbout.resx">
       <DependentUpon>FormAbout.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="WorkWindow\FormCheckFileUse.en.resx">

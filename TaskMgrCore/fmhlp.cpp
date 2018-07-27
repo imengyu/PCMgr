@@ -9,6 +9,7 @@
 #include "mapphlp.h"
 #include "suact.h"
 #include "lghlp.h"
+#include "loghlp.h"
 
 extern NtQuerySystemInformationFun NtQuerySystemInformation;
 
@@ -27,7 +28,7 @@ MFCALLBACK mfmain_callback;
 HICON hiconFolder = NULL, hiconMyComputer = NULL;
 LPWSTR strMyComputer = NULL;
 
-typedef void(__cdecl*MFUSEINGCALLBACK)(SYSTEM_HANDLE handle, DWORD dwpid, LPWSTR value, int fileType, LPWSTR exepath);
+typedef void(__cdecl*MFUSEINGCALLBACK)(SYSTEM_HANDLE_TABLE_ENTRY_INFO handle, DWORD dwpid, LPWSTR value, int fileType, LPWSTR exepath);
 
 M_CAPI (BOOL) MFM_EnumFileHandles(const WCHAR* pszFilePath, MFUSEINGCALLBACK callBack)
 {
@@ -60,33 +61,33 @@ M_CAPI (BOOL) MFM_EnumFileHandles(const WCHAR* pszFilePath, MFUSEINGCALLBACK cal
 	}
 
 	// iterate over every handle
-	for (DWORD i = 0; i < pSysHandleInformation->dwCount; i++)
+	for (DWORD i = 0; i < pSysHandleInformation->NumberOfHandles; i++)
 	{
-		if (pSysHandleInformation->Handles[i].dwProcessId == GetCurrentProcessId())
-		{
+		//if (pSysHandleInformation->Handles[i].dwProcessId == GetCurrentProcessId())
+		//{
 			WCHAR strNtPath[MAX_PATH];
 			WCHAR strDosPath[MAX_PATH];
-			HANDLE hDup = (HANDLE)pSysHandleInformation->Handles[i].wValue;
+			HANDLE hDup = (HANDLE)pSysHandleInformation->Handles[i].HandleValue;
 			MGetNtPathFromHandle(hDup, strNtPath, MAX_PATH);
 			MNtPathToDosPath(strNtPath, strDosPath, MAX_PATH);
-			if (wcscmp(strDosPath, pszFilePath) == 0)
+			if (MStrEqualW(strDosPath, pszFilePath))
 			{
 				WCHAR strValue[16];
-				wsprintf(strValue, L"0x%x", pSysHandleInformation->Handles[i].wValue);
+				wsprintf(strValue, L"0x%x", pSysHandleInformation->Handles[i].HandleValue);
 
 				WCHAR exeFullPath[MAX_PATH] = { 0 };
 				HANDLE hProcess;
-				MGetProcessFullPathEx(pSysHandleInformation->Handles[i].dwProcessId, exeFullPath, &hProcess, L"");
+				MGetProcessFullPathEx(pSysHandleInformation->Handles[i].HandleValue, exeFullPath, &hProcess, L"");
 
-				callBack(pSysHandleInformation->Handles[i], pSysHandleInformation->Handles[i].dwProcessId, strValue,
-					pSysHandleInformation->Handles[i].bObjectType, exeFullPath);
+				callBack(pSysHandleInformation->Handles[i], pSysHandleInformation->Handles[i].HandleValue, strValue,
+					pSysHandleInformation->Handles[i].ObjectTypeIndex, exeFullPath);
 
 				//now we can close file open by another process
 				//do rename or delete file again
 				//EnableTokenPrivilege(SE_DEBUG_NAME);
 				//CloseHandleWithProcess(pSysHandleInformation->Handles[i]);
 			}
-		}
+		//}
 	}
 
 	delete pSysHandleInformation;
@@ -174,14 +175,14 @@ M_API VOID MShowFileProp(LPWSTR file)
 	info.fMask = SEE_MASK_INVOKEIDLIST;
 	ShellExecuteEx(&info);
 }
-M_API BOOL MCopyToClipboard(const WCHAR* pszData, const int nDataLen)
+M_API BOOL MCopyToClipboard(const WCHAR* pszData, const size_t nDataLen)
 {
 	if (OpenClipboard(NULL))
 	{
 		EmptyClipboard();
 		HGLOBAL clipbuffer;
 		WCHAR *buffer;
-		clipbuffer = ::GlobalAlloc(GMEM_DDESHARE, (nDataLen + 1) * sizeof(WCHAR));
+		clipbuffer = GlobalAlloc(GMEM_DDESHARE, (nDataLen + 1) * sizeof(WCHAR));
 		buffer = (WCHAR*)GlobalLock(clipbuffer);
 		wcscpy_s(buffer, nDataLen + 1, pszData);
 		GlobalUnlock(clipbuffer);
@@ -200,7 +201,7 @@ M_API void MFM_GetRoots()
 	GetLogicalDriveStrings(dwLen, pszDriver);
 
 	while (*pszDriver != '\0') {
-		int a = wcslen(pszDriver);
+		size_t a = wcslen(pszDriver);
 		DWORD serialNumber, maxComponentLength, fsFlags;
 
 		if (!lstrcmpi(pszDriver, L"A:\\") || !lstrcmpi(pszDriver, L"B:\\")) {
@@ -257,8 +258,7 @@ M_API BOOL MFM_GetFolders(LPWSTR path)
 		while (FindNextFile(hError, &FindData))
 		{
 			// 过虑.和..
-			if (wcscmp(FindData.cFileName, L".") == 0
-				|| wcscmp(FindData.cFileName, L"..") == 0)
+			if (MStrEqualW(FindData.cFileName, L".") || MStrEqualW(FindData.cFileName, L".."))
 				continue;
 			if (!fmShowHiddenFile && FindData.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN)
 				continue;
@@ -319,9 +319,9 @@ M_API BOOL MFM_GetFiles(LPWSTR path)
 		while (FindNextFile(hError, &FindData))
 		{
 			// 过虑.和..
-			if (wcscmp(FindData.cFileName, L".") == 0)
+			if (MStrEqualW(FindData.cFileName, L"."))
 				continue;
-			else if (wcscmp(FindData.cFileName, L"..") == 0) {
+			else if (MStrEqualW(FindData.cFileName, L"..")) {
 				mfmain_callback(7, L"..", path);
 				continue;
 			}
@@ -409,7 +409,7 @@ M_API void MFM_SetStatus(LPWSTR st)
 }
 M_API void MFM_SetStatus2(int st)
 {
-	mfmain_callback(15, (VOID*)st, 0);
+	mfmain_callback(15, (VOID*)(ULONG_PTR)st, 0);
 }
 M_API BOOL MFM_IsValidateFolderFileName(wchar_t *pName)
 {
@@ -433,9 +433,6 @@ M_API BOOL MFM_DeleteDirOrFile(wchar_t *path)
 }
 M_API UINT MFM_CalcFileCount(const wchar_t* szFileDir)
 {
-	needDeletedFileCount = 0;
-	MAppMainCall(21, 0, 0);
-
 	std::wstring strDir = szFileDir;
 	if (strDir.at(strDir.length() - 1) != '\\')
 		strDir += '\\';
@@ -465,40 +462,12 @@ M_API UINT MFM_CalcFileCount(const wchar_t* szFileDir)
 }
 M_API BOOL MFM_DeleteDir(const wchar_t* szFileDir)
 {
-	MFM_CalcFileCount(szFileDir);
-
-	deletedFileCount = 0;
-
-	std::wstring strDir = szFileDir;
-	if (strDir.at(strDir.length() - 1) != '\\')
-		strDir += '\\';
-	WIN32_FIND_DATA wfd;
-	HANDLE hFind = FindFirstFile((strDir + L"*.*").c_str(), &wfd);
-	if (hFind == INVALID_HANDLE_VALUE)
-		return false;
-	MAppMainCall(18, 0, 0);
-	do
-	{
-		if (wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-		{
-			if (_wcsicmp(wfd.cFileName, L".") != 0 &&
-				_wcsicmp(wfd.cFileName, L"..") != 0)
-				MFM_DeleteDir((strDir + wfd.cFileName).c_str());
-		}
-		else {
-			if (_wcsicmp(wfd.cFileName, L".") != 0 &&
-				_wcsicmp(wfd.cFileName, L"..") != 0) {
-				deletedFileCount++;
-				const wchar_t* path = (strDir + wfd.cFileName).c_str();
-				MAppMainCall(20, (void*)path, (void*)((int)((double)deletedFileCount / (double)needDeletedFileCount) * 100));
-				DeleteFile(path);
-			}
-		}
-	} while (FindNextFile(hFind, &wfd));
-	FindClose(hFind);
-	RemoveDirectory(szFileDir);
-	MAppMainCall(19, 0, 0);
-	return true;
+	size_t strsize = wcslen(szFileDir) + 1;
+	LPWSTR path = (LPWSTR)malloc(strsize * sizeof(wchar_t));
+	wcscpy_s(path, strsize, szFileDir);
+	HANDLE hThread = CreateThread(NULL, 0, MFM_DeleteDirThread, (LPVOID)path, 0, 0);
+	if (hThread)return TRUE;
+	return FALSE;
 }
 M_API BOOL MFM_IsPathDir(const wchar_t* path) {
 	struct _stat buf = { 0 };
@@ -507,7 +476,7 @@ M_API BOOL MFM_IsPathDir(const wchar_t* path) {
 }
 M_API LPWSTR MFM_GetSeledItemPath(int index)
 {
-	return (LPWSTR)mfmain_callback(16, (VOID*)index, 0);
+	return (LPWSTR)mfmain_callback(16, (VOID*)(ULONG_PTR)index, 0);
 }
 M_API void MFM_GetSeledItemFree(void* v)
 {
@@ -515,7 +484,7 @@ M_API void MFM_GetSeledItemFree(void* v)
 }
 M_API BOOL MFM_GetShowHiddenFiles()
 {
-	fmShowHiddenFile = (BOOL)mfmain_callback(18, 0, 0);
+	fmShowHiddenFile = static_cast<BOOL>((ULONG_PTR)mfmain_callback(18, 0, 0));
 	return fmShowHiddenFile;
 }
 M_API BOOL MFM_FileExist(const wchar_t* path)
@@ -536,6 +505,7 @@ M_API BOOL MFM_DeleteDirOrFileForce(const wchar_t* szFileDir)
 }
 M_API BOOL MFM_DeleteDirForce(const wchar_t* szFileDir)
 {
+
 
 	return 0;
 }
@@ -565,10 +535,12 @@ M_API BOOL MFM_FillData(const wchar_t* szFileDir, BOOL force, UINT fileSize)
 		DWORD written = 0;
 		SetFilePointer(hFile, 0, 0, FILE_BEGIN);
 		BOOL rs = WriteFile(hFile, buffer, fileSize, &written, NULL);
+		if(!rs)LogWarn(L"WriteFile failed (%d)", GetLastError());
 		SetEndOfFile(hFile);
 		CloseHandle(hFile);
 		return rs;
 	}
+	else LogWarn(L"M_SU_CreateFile failed (%s)", szFileDir);
 	return 0;
 }
 M_API BOOL MFM_EmeptyFile(const wchar_t* szFileDir, BOOL force)
@@ -581,6 +553,7 @@ M_API BOOL MFM_EmeptyFile(const wchar_t* szFileDir, BOOL force)
 		CloseHandle(hFile);
 		return TRUE;
 	}
+	else LogWarn(L"M_SU_CreateFile failed (%s)", szFileDir);
 	return 0;
 }
 M_API BOOL MFM_GetFileInformationString(const wchar_t* szFile, LPWSTR strbuf, UINT bufsize)
@@ -611,14 +584,83 @@ M_API BOOL MFM_GetFileInformationString(const wchar_t* szFile, LPWSTR strbuf, UI
 
 			return TRUE;
 		}
+		else LogWarn(L"_wstat failed (%s)", szFile);
 	}
 	else {
 		swprintf_s(strbuf, bufsize, L"File not exist.");
+		LogWarn(L"File not exist. (%s)", szFile);
 		return TRUE;
 	}
 	return 0;
 }
+M_API BOOL MFM_ShowInExplorer(const wchar_t* szFile)
+{
+	std::wstring path2 = FormatString(L"/select, %s", szFile);
+	return (ULONG_PTR)ShellExecute(hWndMain, L"open", L"explorer.exe", path2.c_str(), NULL, 5) >= 32;
+}
 
+DWORD WINAPI MFM_DeleteDirThread(LPVOID lpThreadParameter)
+{
+	needDeletedFileCount = 0;
+	MAppMainCall(21, 0, 0);
+	MFM_CalcFileCount((LPWSTR)lpThreadParameter);
+
+	deletedFileCount = 0;
+	MAppMainCall(18, 0, 0);
+	MFM_DeleteDirInnern((LPWSTR)lpThreadParameter);
+	MAppMainCall(19, 0, 0);
+
+	free(lpThreadParameter);
+	return 0;
+}
+BOOL MFM_DeleteDirInnern(const wchar_t* szFileDir)
+{
+	std::wstring strDir;
+	strDir = szFileDir;
+	if (strDir.at(strDir.length() - 1) != '\\')
+		strDir += '\\';
+	WIN32_FIND_DATA wfd;
+	HANDLE hFind = FindFirstFile((strDir + L"*.*").c_str(), &wfd);
+	if (hFind == INVALID_HANDLE_VALUE)
+		return FALSE;
+	do
+	{
+		WCHAR path[MAX_PATH];
+		wcscpy_s(path, strDir.c_str());
+		wcscat_s(path, wfd.cFileName);
+		if (wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+		{
+			if (_wcsicmp(wfd.cFileName, L".") != 0 &&
+				_wcsicmp(wfd.cFileName, L"..") != 0)
+				MFM_DeleteDirInnern(path);
+		}
+		else {
+
+			MAppMainCall(20, (void*)path, (void*)(ULONG_PTR)((int)((double)deletedFileCount / (double)needDeletedFileCount) * 100));
+
+			if (!DeleteFile(path)) {
+				DWORD lasterr = GetLastError();
+				if (lasterr == ERROR_ACCESS_DENIED)
+				{
+					if (MShowMessageDialog(hWndMain, path, (LPWSTR)str_item_access_denied.c_str(), str_item_delfailed, 0, MB_RETRYCANCEL) == IDRETRY)
+					{
+						if(!MFM_DeleteFileForce(path))
+							LogWarn(L"Deleting file : %s failed, (use force delete)", path);
+					}
+				}
+				LogWarn(L"Deleting file : %s failed, last error : %d", path, lasterr);
+			}
+
+			deletedFileCount++;
+		}
+	} while (FindNextFile(hFind, &wfd));
+	FindClose(hFind);
+
+	if(!RemoveDirectory(strDir.c_str()))
+		LogWarn(L"Deleting directory : %s failed, last error : %d", strDir.c_str(), GetLastError());
+
+	return TRUE;
+}
 void MFM_ReSetShowHiddenFiles()
 {
 	fmShowHiddenFile = !fmShowHiddenFile;
@@ -737,7 +779,7 @@ BOOL MFM_CopyFileToUser()
 BOOL MFM_DelFileToRecBinUser()
 {
 	if (fmMutilSelect) {
-		if (MShowMessageDialog(hWndMain, fmCurrectSelectFilePath0, str_item_delsure, (LPWSTR)FormatString(str_item_ask2).c_str(), MB_ICONEXCLAMATION, MB_YESNO) == IDYES)
+		if (MShowMessageDialog(hWndMain, fmCurrectSelectFilePath0, (LPWSTR)FormatString(str_item_ask2).c_str(), str_item_delsure, MB_ICONEXCLAMATION, MB_YESNO) == IDYES)
 		{
 			std::wstring paths;
 			LPWSTR buf;
@@ -763,7 +805,7 @@ BOOL MFM_DelFileToRecBinUser()
 	}
 	else {
 		if (MFM_FileExist(fmCurrectSelectFilePath0)) {
-			if (MShowMessageDialog(hWndMain, fmCurrectSelectFilePath0, str_item_delsure, str_item_ask1, MB_ICONEXCLAMATION, MB_YESNO) == IDYES)
+			if (MShowMessageDialog(hWndMain, fmCurrectSelectFilePath0, str_item_ask1, str_item_delsure, MB_ICONEXCLAMATION, MB_YESNO) == IDYES)
 			{
 				SHFILEOPSTRUCT FileOp;//定义SHFILEOPSTRUCT结构对象;
 				FileOp.hwnd = hWndMain;
@@ -780,27 +822,36 @@ BOOL MFM_DelFileToRecBinUser()
 	}
 	return 0;
 }
-BOOL MFM_DelFileBinUser()
+BOOL MFM_DelFileForeverUser()
 {
 	if (fmMutilSelect) {
 		if (MShowMessageDialog(hWndMain, fmCurrectSelectFilePath0, (LPWSTR)FormatString(str_item_ask2, fmMutilSelectCount).c_str(), str_item_delsure, MB_ICONEXCLAMATION, MB_YESNO) == IDYES)
 		{
+			bool showstatus = false;
+			if (fmMutilSelectCount > 32) {
+				showstatus = true;
+				needDeletedFileCount = fmMutilSelectCount;
+				deletedFileCount = 0;
+				MAppMainCall(18, 0, 0);
+			}
 			LPWSTR buf;
 			for (int i = 0; i < fmMutilSelectCount; i++)
 			{
 				if (i == 0)buf = fmCurrectSelectFilePath0;
 				else buf = MFM_GetSeledItemPath(i);
 
+				if (showstatus) MAppMainCall(20, (void*)buf, (void*)(ULONG_PTR)((int)((double)deletedFileCount / (double)needDeletedFileCount) * 100));
 				if (!DeleteFile(buf)) MShowErrorMessageWithLastErr(buf, str_item_delfailed, MB_ICONEXCLAMATION, 0);
 
 				if (i != 0)MFM_GetSeledItemFree(buf);
 			}
+			if (showstatus)MAppMainCall(19, 0, 0);
 		}
 		else return 1;
 	}
 	else {
 		if (MFM_FileExist(fmCurrectSelectFilePath0)) {
-			if (MShowMessageDialog(hWndMain, fmCurrectSelectFilePath0, str_item_ask1, str_item_delsure, MB_ICONEXCLAMATION, MB_YESNO) == IDYES)
+			if (MShowMessageDialog(hWndMain, fmCurrectSelectFilePath0, str_item_delsure, str_item_ask1, MB_ICONEXCLAMATION, MB_YESNO) == IDYES)
 				if (!MFM_DeleteDirOrFile(fmCurrectSelectFilePath0))
 					MShowErrorMessageWithLastErr(fmCurrectSelectFilePath0, str_item_delfailed, MB_ICONEXCLAMATION, 0);
 		}
@@ -818,7 +869,7 @@ void MFF_ShowInExplorer() {
 BOOL MFF_DelToRecBin() {
 	if (MFM_FileExist(fmCurrectSelectFolderPath0))
 	{
-		if (MShowMessageDialog(hWndMain, fmCurrectSelectFilePath0, str_item_delsure, str_item_ask3, MB_ICONEXCLAMATION, MB_YESNO) == IDYES)
+		if (MShowMessageDialog(hWndMain, fmCurrectSelectFilePath0, str_item_ask3, str_item_delsure,  MB_ICONEXCLAMATION, MB_YESNO) == IDYES)
 		{
 			SHFILEOPSTRUCT FileOp;//定义SHFILEOPSTRUCT结构对象;
 			FileOp.hwnd = hWndMain;
@@ -834,19 +885,20 @@ BOOL MFF_DelToRecBin() {
 	}
 	return 0;
 }
-BOOL MFF_Del() {
+BOOL MFF_DelForever() {
 	if (MFM_FileExist(fmCurrectSelectFolderPath0))
 	{
 		if (MShowMessageDialog(hWndMain, fmCurrectSelectFilePath0, str_item_delsure, str_item_ask3, MB_ICONEXCLAMATION, MB_YESNO) == IDYES)
 		{
-			SHFILEOPSTRUCT FileOp;//定义SHFILEOPSTRUCT结构对象;
+			/*SHFILEOPSTRUCT FileOp;//定义SHFILEOPSTRUCT结构对象;
 			FileOp.hwnd = hWndMain;
 			FileOp.wFunc = FO_DELETE; //执行文件删除操作;
 			FileOp.pFrom = fmCurrectSelectFolderPath0;
 			FileOp.pTo = 0;
 			FileOp.hNameMappings = NULL;
 			FileOp.lpszProgressTitle = str_item_deling;
-			return SHFileOperation(&FileOp);
+			return SHFileOperation(&FileOp);*/
+			return MFM_DeleteDir(fmCurrectSelectFolderPath0);
 		}
 		else return 1;
 	}	
@@ -854,7 +906,13 @@ BOOL MFF_Del() {
 }
 BOOL MFF_ForceDel()
 {
-	return MFM_DeleteDirForce(fmCurrectSelectFolderPath0);
+	if (MFM_FileExist(fmCurrectSelectFolderPath0))
+	{
+		if (MShowMessageDialog(hWndMain, fmCurrectSelectFilePath0, str_item_ask3, str_item_delsure, MB_ICONEXCLAMATION, MB_YESNO) == IDYES)
+			return MFM_DeleteDirForce(fmCurrectSelectFolderPath0);
+		else return 1;
+	}
+	return 0;
 }
 void MFF_Copy() {
 	MFM_CopyOrCutFileToClipboard(fmCurrectSelectFolderPath0, 1);
@@ -913,7 +971,7 @@ M_API int MAppWorkShowMenuFM(LPWSTR strFilePath, BOOL mutilSelect, int selectCou
 M_API int MAppWorkShowMenuFMF(LPWSTR strfolderPath)
 {
 	fmCurrectSelectFolderPath0 = strfolderPath;
-	if (wcscmp(fmCurrectSelectFolderPath0, L"\\\\") != 0 && wcscmp(fmCurrectSelectFolderPath0, L"mycp") != 0) {
+	if (!MStrEqualW(fmCurrectSelectFolderPath0, L"\\\\") && !MStrEqualW(fmCurrectSelectFolderPath0, L"mycp")) {
 		HMENU hroot = LoadMenu(hInstRs, MAKEINTRESOURCE(IDR_MENUFMFOLDER));
 		if (hroot) {
 			HMENU hpop = GetSubMenu(hroot, 0);

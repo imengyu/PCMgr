@@ -15,31 +15,27 @@ extern NtQuerySystemInformationFun NtQuerySystemInformation;
 
 extern PSYSTEM_PROCESSES current_system_process;
 
-M_API DWORD MGetThreadState(ULONG ulPID, ULONG ulTID)
+M_API NTSTATUS MGetThreadState(ULONG ulPID, ULONG ulTID)
 {
-#ifndef _AMD64_
 	bool done=false;
 	for (PSYSTEM_PROCESSES p = current_system_process; !done;
 	p = PSYSTEM_PROCESSES(PCHAR(p) + p->NextEntryDelta))
 	{
-		if (p->ProcessId == ulPID)
+		if (static_cast<DWORD>((ULONG_PTR)p->ProcessId) == ulPID)
 		{
 			for (ULONG i = 0; i<p->ThreadCount; i++)
 			{
 				SYSTEM_THREADS systemThread = p->Threads[i];
-				if ((ULONG)systemThread.ClientId.UniqueThread == ulTID)          
+				if ((ULONG)(ULONG_PTR)systemThread.ClientId.UniqueThread == ulTID)          
 					return systemThread.ThreadState;
 			}
 		}
 		done = p->NextEntryDelta == 0;
 	}
 	return 0;
-#else
-	return 0;
-#endif
 }
 
-M_API DWORD MOpenThreadNt(DWORD dwId, PHANDLE pLandle, DWORD dwPId)
+M_API NTSTATUS MOpenThreadNt(DWORD dwId, PHANDLE pLandle, DWORD dwPId)
 {
 	HANDLE hThread;
 	OBJECT_ATTRIBUTES ObjectAttributes;
@@ -52,8 +48,8 @@ M_API DWORD MOpenThreadNt(DWORD dwId, PHANDLE pLandle, DWORD dwPId)
 	ObjectAttributes.SecurityDescriptor = NULL;
 	ObjectAttributes.SecurityQualityOfService = NULL;
 
-	ClientId.UniqueThread = ((PVOID)dwId);
-	ClientId.UniqueProcess = ((PVOID)dwPId);
+	ClientId.UniqueThread = ((PVOID)(ULONG_PTR)dwId);
+	ClientId.UniqueProcess = ((PVOID)(ULONG_PTR)dwPId);
 
 	DWORD NtStatus = ZwOpenThread(
 		&hThread,
@@ -63,39 +59,30 @@ M_API DWORD MOpenThreadNt(DWORD dwId, PHANDLE pLandle, DWORD dwPId)
 
 	if (NtStatus == 0) {
 		*pLandle = hThread;
-		return 1;
+		return 0;
 	}
-	else if (NtStatus == 0xC0000008) return -1;
 	else {
 		return 0;
 	}
 }
 
-M_API DWORD MTerminateThreadNt(HANDLE handle)
+M_API NTSTATUS MTerminateThreadNt(HANDLE handle)
 {
 	DWORD rs = ZwTerminateThread(handle, 0);
-	if (rs == 0) {
-		WaitForSingleObject(handle, 1000);
-		return TRUE;
-	}
-	else return rs;
-}
-
-M_API DWORD MResumeThreadNt(HANDLE handle)
-{
-	ULONG count = 0;
-	DWORD rs = ZwResumeThread(handle, &count);
-	if (rs == 0)
-		return TRUE;
 	return rs;
 }
 
-M_API DWORD MSuspendThreadNt(HANDLE handle)
+M_API NTSTATUS MResumeThreadNt(HANDLE handle)
+{
+	ULONG count = 0;
+	DWORD rs = ZwResumeThread(handle, &count);
+	return rs;
+}
+
+M_API NTSTATUS MSuspendThreadNt(HANDLE handle)
 {
 	ULONG count = 0;
 	DWORD rs = ZwSuspendThread(handle, &count);
-	if (rs == 0)
-		return TRUE;
 	return rs;
 }
 
@@ -106,9 +93,14 @@ M_API BOOL MGetThreadInfoNt(DWORD tid, int i, LPWSTR *str)
 	LONG                        status;
 	HANDLE                      thread, process;
 
-	thread = OpenThread(THREAD_ALL_ACCESS, NULL, tid);
+#ifdef _X86_
+	thread = OpenThread(THREAD_ALL_ACCESS, 0, tid);
+#else
+	thread = OpenThread(THREAD_ALL_ACCESS, 0, static_cast<DWORD>(tid));
+#endif
+
 	//OpenThreadNt(tid, &thread);
-	if (thread == NULL) {
+	if ((thread) == NULL) {
 		CloseHandle(thread);
 		return FALSE;
 	}
@@ -118,12 +110,7 @@ M_API BOOL MGetThreadInfoNt(DWORD tid, int i, LPWSTR *str)
 	{
 		status = ZwQueryInformationThread(thread, ThreadQuerySetWin32StartAddress, &startaddr, sizeof(startaddr), NULL);
 		if (status == 0) {
-#ifdef WIN32
-			process = OpenProcess(PROCESS_ALL_ACCESS, 0, (DWORD)tbi.ClientId.UniqueProcess);
-#else
-			process = OpenProcess(PROCESS_ALL_ACCESS, 0, (DWORD)(LONG)tbi.ClientId.UniqueProcess);
-#endif
-			if (process != NULL)
+			if (MOpenProcessNt(static_cast<DWORD>((ULONG_PTR)tbi.ClientId.UniqueProcess), &process) == STATUS_SUCCESS)
 			{
 				TCHAR* modname = new TCHAR[260];
 				K32GetMappedFileNameW(process, startaddr, modname, 260);
