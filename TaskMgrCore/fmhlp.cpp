@@ -11,6 +11,7 @@
 #include "lghlp.h"
 #include "loghlp.h"
 
+
 extern NtQuerySystemInformationFun NtQuerySystemInformation;
 
 extern HINSTANCE hInstRs;
@@ -489,9 +490,9 @@ M_API BOOL MFM_GetShowHiddenFiles()
 }
 M_API BOOL MFM_FileExist(const wchar_t* path)
 {
-	if(_waccess(path, 0)==0)
-		return TRUE;
-	return 0;
+	//if(_waccess(path, 0)==0)
+	//	return TRUE;
+	return PathFileExists(path);
 }
 M_API void MFM_SetShowHiddenFiles(BOOL b)
 {

@@ -301,7 +301,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Lanuages\LanuageResource_en.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>LanuageResource_en.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="WorkWindow\FormKrnInfo.en.resx">
       <DependentUpon>FormKrnInfo.cs</DependentUpon>

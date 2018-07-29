@@ -7,6 +7,7 @@
 #pragma comment(lib, "Uxtheme.lib")
 #pragma comment(lib, "comctl32.lib")
 #pragma comment(lib, "Wintrust.lib")
+#pragma comment(lib, "Shlwapi.lib")
 
 // TODO: 在 STDAFX.H 中引用任何所需的附加头文件，
 //而不是在此文件中引用

@@ -3032,6 +3032,7 @@ namespace PCMgr
         public static string str_FileNotExist = "";
         private static string str_DriverCountLoaded = "";
         public static string str_AppTitle = "";
+        public static string str_FileTrust = "";
 
         public static void InitLanuage()
         {
@@ -3130,6 +3131,7 @@ namespace PCMgr
                 str_RefeshSuccess = LanuageMgr.GetStr("RefeshSuccess");
                 str_PleaseChooseDriver = LanuageMgr.GetStr("PleaseChooseDriver");
                 str_DriverCount = LanuageMgr.GetStr("DriverCount");
+                str_FileTrust = LanuageMgr.GetStr("FileTrust");
 
                 MAppSetLanuageItems(0, 0, LanuageMgr.GetStr("KillAskStart"), 0);
                 MAppSetLanuageItems(0, 1, LanuageMgr.GetStr("KillAskEnd"), 0);
@@ -3573,6 +3575,16 @@ namespace PCMgr
             }
         }
 
+        private string _FileTrustedLinkLastFile = "";
+
+        private void FileTrustedLink_HyperlinkClick(object sender, HyperlinkEventArgs e)
+        {
+            if (!string.IsNullOrEmpty(_FileTrustedLinkLastFile))
+            {
+                
+            }
+        }
+
         #endregion
 
         private void BaseProcessRefeshTimer_Tick(object sender, EventArgs e)
@@ -3823,6 +3835,12 @@ namespace PCMgr
                     }
                 case 30:
                     {
+                        string path = Marshal.PtrToStringUni(wParam);
+                        _FileTrustedLinkLastFile = path;
+                        TaskDialog d = new TaskDialog("", str_TipTitle, (path == null ? "" : (path + "\n")) + str_FileTrust);
+                        d.EnableHyperlinks = true;
+                        d.HyperlinkClick += FileTrustedLink_HyperlinkClick;
+                        d.Show(this);
                         break;
                     }
                 case 31:
@@ -3831,6 +3849,11 @@ namespace PCMgr
                     }
                 case 32:
                     {
+                        break;
+                    }
+                case 33:
+                    {
+
                         break;
                     }
             }

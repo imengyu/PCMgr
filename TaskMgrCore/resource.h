@@ -178,6 +178,8 @@
 #define IDM_DEBUG 41158
 #define ID_THREADMENU_FILEPROP 41159
 #define ID_THREADMENU_OPENPATH 41160
+#define IDM_SGINED 41161
+
 
 // Next default values for new objects
 // 

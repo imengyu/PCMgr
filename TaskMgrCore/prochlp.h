@@ -22,8 +22,8 @@ EXTERN_C M_API BOOL MGetExeInfo(LPWSTR strFilePath, LPWSTR InfoItem, LPWSTR str,
 EXTERN_C M_API BOOL MGetExeDescribe(LPWSTR pszFullPath, LPWSTR str, int maxCount);
 EXTERN_C M_API BOOL MGetExeCompany(LPWSTR pszFullPath, LPWSTR str, int maxCount);
 EXTERN_C M_API HICON MGetExeIcon(LPWSTR pszFullPath);
-
 EXTERN_C M_API BOOL MGetExeFileTrust(LPCWSTR lpFileName);
+EXTERN_C M_API LONG MVerifyEmbeddedSignature(LPCWSTR pwszSourceFile);
 
 EXTERN_C M_API BOOL MCloseHandle(HANDLE handle);
 EXTERN_C M_API NTSTATUS MSuspendProcessNt(DWORD dwPId, HANDLE handle);

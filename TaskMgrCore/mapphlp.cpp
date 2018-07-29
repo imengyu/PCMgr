@@ -1,4 +1,4 @@
-ï»¿#include "stdafx.h"
+#include "stdafx.h"
 #include "mapphlp.h"
 #include "resource.h"
 #include "prochlp.h"
@@ -137,7 +137,7 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 		SetMenu(hWnd, hMenuMain);
 		hWndMain = hWnd;
 
-		if (MFM_FileExist(L"â€ªC:\\Windows\\System32\\vsjitdebugger.exe"))
+		if (MFM_FileExist(L"C:\\Windows\\System32\\vsjitdebugger.exe"))
 			can_debug = true;
 
 		return 1;
@@ -666,8 +666,21 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		case IDM_DEBUG: {
 			if (thisCommandPid > 4)
 			{
-				std::wstring cmd = FormatString(L"-p %u", thisCommandPid);
+				std::wstring cmd = FormatString(L"-p %d", thisCommandPid);
 				ShellExecute(hWndMain, L"open", L"C:\\Windows\\System32\\vsjitdebugger.exe", (LPWSTR)cmd.c_str(), NULL, 5);
+			}
+			break;
+		}
+		case IDM_SGINED: {
+			if (thisCommandPath)
+			{
+				if (MFM_FileExist(thisCommandPath))
+				{
+					if (MGetExeFileTrust(thisCommandPath))
+						MAppMainCall(30, thisCommandPath, 0);
+					else MShowMessageDialog(hWndMain, thisCommandPath, str_item_tip, str_item_filenottrust, 0, 0);
+				}
+				else MShowMessageDialog(hWndMain, str_item_filenotexist, (LPWSTR)str_item_op_failed.c_str(), L"");
 			}
 			break;
 		}
@@ -1230,14 +1243,14 @@ int GenerateMiniDump(PEXCEPTION_POINTERS pExceptionPointers);
 
 LONG WINAPI MUnhandledExceptionFilter(struct _EXCEPTION_POINTERS *lpExceptionInfo)
 {
-	// è¿™é‡Œåšä¸€äº›å¼‚å¸¸çš„è¿‡æ»¤æˆ–æç¤º
+	// ÕâÀï×öÒ»Ð©Òì³£µÄ¹ýÂË»òÌáÊ¾
 	if (IsDebuggerPresent())
 		return EXCEPTION_CONTINUE_SEARCH;
 	return GenerateMiniDump(lpExceptionInfo);
 }
 int GenerateMiniDump(PEXCEPTION_POINTERS pExceptionPointers)
 {
-	// å®šä¹‰å‡½æ•°æŒ‡é’ˆ
+	// ¶¨Òåº¯ÊýÖ¸Õë
 	typedef BOOL(WINAPI * MiniDumpWriteDumpT)(
 		HANDLE,
 		DWORD,
@@ -1247,7 +1260,7 @@ int GenerateMiniDump(PEXCEPTION_POINTERS pExceptionPointers)
 		PMINIDUMP_USER_STREAM_INFORMATION,
 		PMINIDUMP_CALLBACK_INFORMATION
 		);
-	// ä»Ž "DbgHelp.dll" åº“ä¸­èŽ·å– "MiniDumpWriteDump" å‡½æ•°
+	// ´Ó "DbgHelp.dll" ¿âÖÐ»ñÈ¡ "MiniDumpWriteDump" º¯Êý
 	MiniDumpWriteDumpT pfnMiniDumpWriteDump = NULL;
 	HMODULE hDbgHelp = LoadLibrary(L"DbgHelp.dll");
 	if (NULL == hDbgHelp)
@@ -1261,7 +1274,7 @@ int GenerateMiniDump(PEXCEPTION_POINTERS pExceptionPointers)
 		FreeLibrary(hDbgHelp);
 		return EXCEPTION_CONTINUE_EXECUTION;
 	}
-	// åˆ›å»º dmp æ–‡ä»¶ä»¶
+	// ´´½¨ dmp ÎÄ¼þ¼þ
 	TCHAR szFileName[MAX_PATH] = { 0 };
 	LPWSTR szVersion = (LPWSTR)L"\\PCMgr";
 	SYSTEMTIME stLocalTime;
@@ -1277,21 +1290,21 @@ int GenerateMiniDump(PEXCEPTION_POINTERS pExceptionPointers)
 	if (INVALID_HANDLE_VALUE == hDumpFile)
 	{
 		//WCHAR err[200];
-		//wsprintf(err, L"-errreport %s %s %s", L"0", L"æœªçŸ¥é”™è¯¯", szFileName);
+		//wsprintf(err, L"-errreport %s %s %s", L"0", L"Î´Öª´íÎó", szFileName);
 		//ShellExecute(NULL, L"open", static_AppLoader->GetAppFullPath(), err, NULL, SW_SHOWNORMAL);
 		FLogErr(L"Application crashed!\nDump File Create failed! (ErrorCode: %d)", GetLastError());
 		FreeLibrary(hDbgHelp);
 		return EXCEPTION_CONTINUE_EXECUTION;
 
 	}
-	// å†™å…¥ dmp æ–‡ä»¶
+	// Ð´Èë dmp ÎÄ¼þ
 	MINIDUMP_EXCEPTION_INFORMATION expParam;
 	expParam.ThreadId = GetCurrentThreadId();
 	expParam.ExceptionPointers = pExceptionPointers;
 	expParam.ClientPointers = FALSE;
 	pfnMiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(),
 		hDumpFile, MiniDumpWithDataSegs, (pExceptionPointers ? &expParam : NULL), NULL, NULL);
-	// é‡Šæ”¾æ–‡ä»¶
+	// ÊÍ·ÅÎÄ¼þ
 	CloseHandle(hDumpFile);
 	FreeLibrary(hDbgHelp);
 	if (pExceptionPointers) {

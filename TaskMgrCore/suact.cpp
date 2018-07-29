@@ -515,7 +515,7 @@ LRESULT M_SU_EnumKernelModuls_HandleWmCommand(WPARAM wParam)
 			if (MFM_FileExist(selectedKmi->szFullDllPath))
 			{
 				if (MGetExeFileTrust(selectedKmi->szFullDllPath))
-					MShowMessageDialog(hWndMain, str_item_filetrusted, str_item_tip, L"", 0, 0);
+					MAppMainCall(30, selectedKmi->szFullDllPath, 0);
 				else
 					MShowMessageDialog(hWndMain, selectedKmi->szFullDllPath, str_item_tip, str_item_filenottrust, 0, 0);
 			}

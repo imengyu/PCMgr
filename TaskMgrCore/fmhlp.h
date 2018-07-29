@@ -3,7 +3,7 @@
 #include <ShlObj.h>
 #include <ShlGuid.h>
 #include <shellapi.h>
-
+#include <shlwapi.h>
 
 typedef void* (__cdecl*MFCALLBACK)(int msg, void* lParam, void* wParam);
 
