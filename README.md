@@ -12,5 +12,10 @@ Only part of the function is done at the moment.<br/>
 截图 ScreenShot
 ---
 ![Image1](https://raw.githubusercontent.com/717021/PCMgr/master/image1.png)<br/>
-![Image2](https://raw.githubusercontent.com/717021/PCMgr/master/image2.png)<br/>
 ![Image3](https://raw.githubusercontent.com/717021/PCMgr/master/image3.png)<br/>
+![Image5](https://raw.githubusercontent.com/717021/PCMgr/master/image5.png)<br/>
+![Image6](https://raw.githubusercontent.com/717021/PCMgr/master/image6.png)<br/>
+![Image7](https://raw.githubusercontent.com/717021/PCMgr/master/image7.png)<br/>
+![Image8](https://raw.githubusercontent.com/717021/PCMgr/master/image8.png)<br/>
+![Image9](https://raw.githubusercontent.com/717021/PCMgr/master/image9.png)<br/>
+![Image10](https://raw.githubusercontent.com/717021/PCMgr/master/image10.png)<br/>
