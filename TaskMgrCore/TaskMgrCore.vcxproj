@@ -249,6 +249,9 @@
     <ResourceCompile Include="TaskMgrCore.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="..\..\..\..\图片\Res\325.ico" />
+    <Image Include="..\..\..\..\图片\Res\329.ico" />
+    <Image Include="..\..\..\..\图片\Res\331.ico" />
     <Image Include="..\..\..\..\图片\Res\ico15.ico" />
     <Image Include="..\..\..\..\图片\Res\ico30655.ico" />
     <Image Include="..\..\..\..\图片\Res\ico30656.ico" />

@@ -207,5 +207,14 @@
     <Image Include="..\..\..\..\图片\Res\ico30656.ico">
       <Filter>资源文件</Filter>
     </Image>
+    <Image Include="..\..\..\..\图片\Res\331.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="..\..\..\..\图片\Res\329.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="..\..\..\..\图片\Res\325.ico">
+      <Filter>资源文件</Filter>
+    </Image>
   </ItemGroup>
 </Project>

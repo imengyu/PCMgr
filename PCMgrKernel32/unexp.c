@@ -3,14 +3,26 @@
 PspTerminateThreadByPointer_ PspTerminateThreadByPointer;
 PspExitThread_ PspExitThread;
 
+ULONG KxGetWin10Ver() {
+	return 0;
+}
 NTSTATUS KxGetFunctions(ULONG parm)
 {
 	NTSTATUS status = STATUS_SUCCESS;
-	PspTerminateThreadByPointer = (PspTerminateThreadByPointer_)KxGetPspTerminateThreadByPointerAddress();
-	PspExitThread = (PspExitThread_)KxGetPspExitThreadAddress();
 
-	KdPrint(("PspTerminateThreadByPointer : 0x%08x", PspTerminateThreadByPointer));
-	KdPrint(("PspExitThread : 0x%08x", PspExitThread));
+	if (parm == 7 || parm == 8) {
+		PspTerminateThreadByPointer = (PspTerminateThreadByPointer_)KxGetPspTerminateThreadByPointerAddress78();
+		PspExitThread = (PspExitThread_)KxGetPspExitThreadAddress78();
+
+		KdPrint(("PspTerminateThreadByPointer : 0x%08x", PspTerminateThreadByPointer));
+		KdPrint(("PspExitThread : 0x%08x", PspExitThread));
+	}
+	else {
+		ULONG w10ver = KxGetWin10Ver();
+		KdPrint(("Win10 Ver : %d", w10ver));
+
+
+	}
 
 	return status;
 }
@@ -53,7 +65,7 @@ ULONG_PTR KxSearchFeatureCodeForAddress(ULONG_PTR StartAddress, PUCHAR FeatureCo
 	}
 	return Real_address;
 }
-ULONG_PTR KxGetPspTerminateThreadByPointerAddress()
+ULONG_PTR KxGetPspTerminateThreadByPointerAddress78()
 {
 	UNICODE_STRING  FunName;
 	UCHAR FeatureCode[2] = { 0x50,0xe8 };//特征码push    eax call XXXX
@@ -82,24 +94,34 @@ ULONG_PTR KxGetPspTerminateThreadByPointerAddress()
 
 	return RetAddress;
 }
-ULONG_PTR KxGetPspExitThreadAddress()
+ULONG_PTR KxGetPspExitThreadAddress78()
 {
 	ULONG_PTR Address = 0; //找到的特征码的首地址
 	ULONG_PTR PTTBPAddress = (ULONG_PTR)PspTerminateThreadByPointer;
 	ULONG_PTR RetAddress = 0;//最终返回
-
-	for (int i = 1; i<0xff; i++)
-	{
-		if (MmIsAddressValid((PVOID)(PTTBPAddress + i)) != FALSE)
+	if (PTTBPAddress != 0) {
+		for (int i = 1; i < 0xff; i++)
 		{
-			//目标地址-原始地址-5=机器码
-			//目标地址=机器码+5+原始地址
-			if (*(BYTE *)(PTTBPAddress + i + 1) == 0xCC)//int 3
+			if (MmIsAddressValid((PVOID)(PTTBPAddress + i)) != FALSE)
 			{
-				RtlMoveMemory(&Address, (PVOID)(PTTBPAddress + i), 4);
-				RetAddress = (ULONG_PTR)Address + 5 + PTTBPAddress + i;
+				//目标地址-原始地址-5=机器码
+				//目标地址=机器码+5+原始地址
+				if (*(BYTE *)(PTTBPAddress + i + 1) == 0xCC)//int 3
+				{
+					RtlMoveMemory(&Address, (PVOID)(PTTBPAddress + i), 4);
+					RetAddress = (ULONG_PTR)Address + 5 + PTTBPAddress + i;
+				}
 			}
 		}
 	}
 	return RetAddress;
+}
+
+ULONG_PTR KxGetPspTerminateThreadByPointerAddress10(ULONG ver)
+{
+	return 0;
+}
+ULONG_PTR KxGetPspExitThreadAddress10(ULONG ver)
+{
+	return 0;
 }

@@ -34,6 +34,7 @@ BOOL killCmdSendBack = FALSE;
 BOOL isKillingExplorer = FALSE;
 
 extern bool use_apc;
+extern bool can_debug;
 
 //Api s
 
@@ -612,7 +613,7 @@ M_API BOOL MGetProcessFullPathEx(DWORD dwPID, LPWSTR outNter, PHANDLE phandle, L
 		wcscpy_s(outNter, 260, L"C:\\Windows\\System32\\ntoskrnl.exe");
 		return 1;
 	}
-	else if (dwPID == 88 && MStrEqualW(pszExeName, L"Memory Compression")) {
+	else if (MStrEqualW(pszExeName, L"Memory Compression")) {
 		wcscpy_s(outNter, 260, L"C:\\Windows\\System32\\ntoskrnl.exe");
 		return 1;
 	}
@@ -708,6 +709,53 @@ M_API BOOL MGetProcessEprocess(DWORD pid, LPWSTR l, int maxcount)
 	}
 	return FALSE;
 }
+M_API HANDLE MGetProcessKinfoOpen(DWORD dwPID)
+{
+	HANDLE hProcess;
+	NTSTATUS rs = MOpenProcessNt(dwPID, &hProcess);
+	if (rs == STATUS_SUCCESS)
+		return hProcess;
+	return NULL;
+}
+M_API BOOL MGetProcessPeb(HANDLE hProcess, LPWSTR l, int maxcount)
+{
+	if (hProcess != NULL) {
+		PROCESS_BASIC_INFORMATION pbi;
+		ULONG ReturnSize = 0;
+		NTSTATUS status = NtQueryInformationProcess(hProcess, ProcessBasicInformation, (PVOID*)&pbi, sizeof(pbi), &ReturnSize);
+		if (status == STATUS_SUCCESS)
+		{
+#ifdef _X64_
+			swprintf_s(l, maxcount, L"0x%I64X", (ULONG_PTR)pbi.PebBaseAddress);
+#else
+			swprintf_s(l, maxcount, L"0x%08X", (ULONG_PTR)pbi.PebBaseAddress);
+#endif
+		}
+		else wsprintf(l, L"Err : 0x%08X ReturnSize : %u /PBI Size : %u", status, ReturnSize, sizeof(pbi));
+		return TRUE;
+	}
+	return FALSE;
+}
+M_API BOOL MGetProcessJob(HANDLE hProcess, LPWSTR l, int maxcount)
+{
+	if (hProcess != NULL) {
+	}
+	return FALSE;
+}
+M_API BOOL MGetProcessBasePriority(HANDLE hProcess, LPWSTR l, int maxcount)
+{
+	if (hProcess != NULL) {
+		KPRIORITY kpirorty;
+		NTSTATUS status = MQueryProcessVariableSize(hProcess, ProcessBasePriority, (PVOID*)&kpirorty);
+		if (status == STATUS_SUCCESS)
+		{
+			wsprintf(l, L"%d", kpirorty);
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
 
 //UWP Process information
 /*M_API BOOL MGetUWPPackageId(HANDLE handle, MPerfAndProcessData*data)
@@ -941,6 +989,8 @@ M_API int MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWORD 
 				wcscpy_s(thisCommandPath, 260, strFilePath);
 			if (wcslen(strFileName) < 260)
 				wcscpy_s(thisCommandName, 260, strFileName);
+
+			if(!can_debug)EnableMenuItem(hpop, IDM_DEBUG, MF_DISABLED);
 
 			killCmdSendBack = type == 2;
 			isKillingExplorer = type == 1;

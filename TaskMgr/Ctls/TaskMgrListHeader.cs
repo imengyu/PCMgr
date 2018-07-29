@@ -114,9 +114,8 @@ namespace PCMgr.Ctls
             {
                 if (e.Button == MouseButtons.Left && e.Clicks == 1)
                 {
-                    if (arredItem != null)
-                        if (arredItem != enteredItem)
-                            arredItem.ArrowType = TaskMgrListHeaderSortArrow.None;
+                    foreach (TaskMgrListHeaderItem ii in items)
+                        if (ii != enteredItem) ii.ArrowType = TaskMgrListHeaderSortArrow.None;
                     if (enteredItem.ArrowType == TaskMgrListHeaderSortArrow.None)
                         enteredItem.ArrowType = TaskMgrListHeaderSortArrow.Ascending;
                     else if (enteredItem.ArrowType == TaskMgrListHeaderSortArrow.Ascending)
@@ -325,8 +324,6 @@ namespace PCMgr.Ctls
         public delegate void TaskMgrListHeaderEventHandler(object sender, TaskMgrListHeaderEventArgs e);
     }
 
-
-
     public enum TaskMgrListHeaderSortArrow
     {
         None,
@@ -454,7 +451,10 @@ namespace PCMgr.Ctls
         public TaskMgrListHeaderSortArrow ArrowType
         {
             get { return a; }
-            set { a = value; }
+            set
+            {
+                a = value;
+            }
         }
         public bool MouseEntered
         {

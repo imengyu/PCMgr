@@ -29,6 +29,7 @@ namespace PCMgr.Ctls
             header.Height = 58;
             Controls.Add(header);
             header.XOffestChanged += Header_XOffestChanged;
+            header.HearderWidthChanged += Header_HearderWidthChanged;
             groups = new TaskMgrListGroupCollection();
             items = new TaskMgrListItemCollection();
             items.ItemAdd += Items_ItemAdd;
@@ -58,6 +59,11 @@ namespace PCMgr.Ctls
             errTagSolidBrush = new SolidBrush(Color.Orange);
             defChildColorPen = new Pen(Color.FromArgb(0, 120, 215), 3);
             DrawIcon = true;
+        }
+
+        private void Header_HearderWidthChanged(object sender, EventArgs e)
+        {
+            Invalidate();
         }
 
         public void ReposVscroll()
@@ -170,7 +176,7 @@ namespace PCMgr.Ctls
         public bool FocusedType
         {
             get { return focused; }
-            set { focused = value; Invalidate(); }
+            set { focused = value; if(Visible) Invalidate(); }
         }
         public TaskMgrListItemCollection ShowedItems
         {
@@ -376,7 +382,7 @@ namespace PCMgr.Ctls
                     }
 
                     if (i2 > 0 && item.SubItems[i2].Text != "") g.DrawString(item.SubItems[i2].Text, item.SubItems[i2].Font, item.SubItems[i2].ForeColorSolidBrush, new Rectangle(x + 6, item.YPos - yOffest, header.Items[i2].Width - 10, itemHeight), f);
-                    else if (i2 == 0) g.DrawString(item.Text, fnormalText2, item.SubItems[0].ForeColorSolidBrush, new Rectangle(x + (DrawIcon ? 63 : 5), item.YPos - yOffest, header.Items[0].Width - (DrawIcon ? 60 : 5), itemHeight), f);
+                    else if (i2 == 0) g.DrawString(item.Text, fnormalText2, item.SubItems[0].ForeColorSolidBrush, new Rectangle(x + (DrawIcon ? 63 : 25), item.YPos - yOffest, header.Items[0].Width - (DrawIcon ? 60 : 25), itemHeight), f);
                 }
                 else if (x > rect.Right) break;
             }
@@ -417,6 +423,7 @@ namespace PCMgr.Ctls
 
             #region Icons
             if (item.Icon != null) g.DrawIcon(item.Icon, new Rectangle(7 - xOffest + 25, item.YPos - YOffest + itemHeight / 2 - 8, 16, 16));
+            else if (item.Image != null) g.DrawImage(item.Image, new Rectangle(7 - xOffest + 25, item.YPos - YOffest + itemHeight / 2 - 8, 16, 16));
             #endregion
         }
         private void DrawItemGroup(Graphics g, TaskMgrListItem item, int index, Rectangle rect)
@@ -497,13 +504,13 @@ namespace PCMgr.Ctls
                         {
                             if (items[i1].Group == gurrs)
                             {
-                                if (items[i1].YPos - yOffest >= r.Top || items[i1].YPos - yOffest + items[i1].ItemHeight - header.Height <= r.Bottom)
+                                if (items[i1].YPos  - yOffest >= r.Top || items[i1].YPos - yOffest <= r.Bottom)
                                 {
                                     if (items[i1].IsGroup || items[i1].IsAppHost) DrawItemGroup(g, items[i1], i1, r);
                                     else DrawItem(g, items[i1], i1, r);
                                     lastdrawitem = items[i1];
                                 }
-                                else if (items[i1].YPos - yOffest + items[i1].ItemHeight - header.Height > r.Bottom)
+                                else if (items[i1].YPos - yOffest > r.Bottom)
                                     break;
                             }
                         }
@@ -515,14 +522,14 @@ namespace PCMgr.Ctls
             {
                 for (int i1 = 0; i1 < items.Count; i1++)
                 {
-                    if (items[i1].YPos - yOffest >= r.Top || items[i1].YPos - yOffest + items[i1].ItemHeight - header.Height <= r.Bottom)
+                    if (items[i1].YPos - yOffest >= r.Top || items[i1].YPos - yOffest <= r.Bottom)
                     {
                         if (items[i1].IsGroup || items[i1].IsAppHost)
                             DrawItemGroup(g, items[i1], i1, r);
                         else
                             DrawItem(g, items[i1], i1, r);
                     }
-                    else if (items[i1].YPos - yOffest + items[i1].ItemHeight - header.Height > r.Bottom)
+                    else if (items[i1].YPos  - yOffest > r.Bottom)
                         break;
                 }
             }
@@ -822,6 +829,7 @@ namespace PCMgr.Ctls
             get { return icon; }
             set { icon = value; }
         }
+        public Image Image { get; set; }
         public bool IsGroup
         {
             get { return isGroup; }

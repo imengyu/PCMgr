@@ -54,6 +54,26 @@ namespace PCMgr
                 FormMain.Log("MainRunAgrs 0 : " + agrs[0]);
                 switch(agrs[0])
                 {
+                    case "reboot":
+                        {
+                            TaskDialog t = new TaskDialog(LanuageMgr.GetStr("TitleReboot"), FormMain.str_AppTitle, LanuageMgr.GetStr("TitleContinue"), TaskDialogButton.Yes | TaskDialogButton.No, TaskDialogIcon.Warning);
+                            if (t.Show().CommonButton == Result.Yes)
+                            {
+                                FormMain.MGetPrivileges();
+                                FormMain.MAppWorkCall3(185, IntPtr.Zero, IntPtr.Zero);
+                            }
+                            return false;
+                        }
+                    case "shutdown":
+                        {
+                            TaskDialog t = new TaskDialog(LanuageMgr.GetStr("TitleShutdown"), FormMain.str_AppTitle, LanuageMgr.GetStr("TitleContinue"), TaskDialogButton.Yes | TaskDialogButton.No, TaskDialogIcon.Warning);
+                            if (t.Show().CommonButton == Result.Yes)
+                            {
+                                FormMain.MGetPrivileges();
+                                FormMain.MAppWorkCall3(187, IntPtr.Zero, IntPtr.Zero);
+                            }
+                            return false;
+                        }
                     case "vmodul":
                         if (agrs.Length > 1)
                         {
@@ -110,7 +130,7 @@ namespace PCMgr
         private static bool ShowRun2Warn()
         {
             bool has64 = FormMain.MIsFinded64();
-            TaskDialog t = new TaskDialog("", FormMain.DEFAPPTITLE);
+            TaskDialog t = new TaskDialog("", FormMain.str_AppTitle);
             t.Content = LanuageMgr.GetStr("Run2WarnText");
             t.CommonIcon = TaskDialogIcon.None;
             CustomButton[] btns = new CustomButton[3];
@@ -127,8 +147,8 @@ namespace PCMgr
             else if (rs.CommonButton == Result.Ignore)
             {
                 if (FormMain.MAppKillOld(FormMain.currentProcessName + ".exe"))
-                    TaskDialog.Show(LanuageMgr.GetStr("KillOldSuccess"), FormMain.DEFAPPTITLE);
-                else TaskDialog.Show(LanuageMgr.GetStr("KillOldFailed"), FormMain.DEFAPPTITLE);
+                    TaskDialog.Show(LanuageMgr.GetStr("KillOldSuccess"), FormMain.str_AppTitle);
+                else TaskDialog.Show(LanuageMgr.GetStr("KillOldFailed"), FormMain.str_AppTitle);
                 return true;
             }
             return true;
@@ -138,7 +158,7 @@ namespace PCMgr
             if (FormMain.GetConfigBool("X32Warning", "AppSetting", true))
             {
                 bool has64 = FormMain.MIsFinded64();
-                TaskDialog t = new TaskDialog(LanuageMgr.GetStr("X64WarnTitle"), FormMain.DEFAPPTITLE);
+                TaskDialog t = new TaskDialog(LanuageMgr.GetStr("X64WarnTitle"), FormMain.str_AppTitle);
                 t.Content = LanuageMgr.GetStr("X64WarnText");
                 t.ExpandedInformation = LanuageMgr.GetStr("X64WarnMoreText") + (has64 ? LanuageMgr.GetStr("X64WarnFinded64Text") : "");
                 t.CommonIcon = TaskDialogIcon.Warning;
@@ -175,7 +195,7 @@ namespace PCMgr
         {
             if (FormMain.GetConfigBool("NOAdminWarning", "AppSetting", false))
             {
-                TaskDialog t = new TaskDialog(LanuageMgr.GetStr("NeedAdmin"), FormMain.DEFAPPTITLE, LanuageMgr.GetStr("RequestAdminText"));
+                TaskDialog t = new TaskDialog(LanuageMgr.GetStr("NeedAdmin"), FormMain.str_AppTitle, LanuageMgr.GetStr("RequestAdminText"));
                 t.CommonIcon = TaskDialogIcon.Warning;
                 t.VerificationText = LanuageMgr.GetStr("DoNotRemidMeLater");
                 t.VerificationClick += T_TaskDialog_NOADMINWarn_VerificationClick;

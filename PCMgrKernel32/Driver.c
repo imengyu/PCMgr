@@ -5,6 +5,7 @@
 #include "unexp.h"
 #include "proc.h"
 #include "kmodul.h"
+#include "monitor.h"
 
 #define DEVICE_LINK_NAME L"\\??\\PCMGRK"
 #define DEVICE_OBJECT_NAME  L"\\Device\\PCMGRK"
@@ -19,10 +20,20 @@ wcscpy_s_ _wcscpy_s;
 wcscat_s_ _wcscat_s;
 memset_ _memset;
 
+PsResumeProcess_ _PsResumeProcess;
+PsSuspendProcess_ _PsSuspendProcess;
+PsLookupProcessByProcessId_ _PsLookupProcessByProcessId;
+PsLookupThreadByThreadId_ _PsLookupThreadByThreadId;
+
+ULONG_PTR CurrentPCMgrProcess = 0;
 ULONG LoadedModuleOrder = 0;
 PLIST_ENTRY PsLoadedModuleList = NULL;
 PLIST_ENTRY ListEntry = NULL;
 PLIST_ENTRY ListEntryScan = NULL;
+
+extern BOOLEAN kxCanCreateProcess;
+extern BOOLEAN kxCanCreateThread;
+extern BOOLEAN kxCanLoadDriver;
 
 NTSTATUS DriverEntry(IN PDRIVER_OBJECT pDriverObject, IN PUNICODE_STRING pRegPath)
 {
@@ -64,6 +75,7 @@ NTSTATUS DriverEntry(IN PDRIVER_OBJECT pDriverObject, IN PUNICODE_STRING pRegPat
 		IoDeleteDevice(deviceObject);
 	}
 
+	
 #ifdef _AMD64_
 	PLDR_DATA_TABLE_ENTRY64 ldr;
 	ldr = (PLDR_DATA_TABLE_ENTRY64)pDriverObject->DriverSection;
@@ -81,6 +93,9 @@ NTSTATUS DriverEntry(IN PDRIVER_OBJECT pDriverObject, IN PUNICODE_STRING pRegPat
 	NTSTATUS statusKx = KxInitProtectProcess();
 	if(!NT_SUCCESS(statusKx)) KdPrint(("KxInitProtectProcess failed! 0x%08X\n", statusKx));
 
+	NTSTATUS statusKxM = KxPsMonitorInit();
+	if (!NT_SUCCESS(statusKxM)) KdPrint(("KxPsMonitorInit failed! 0x%08X\n", statusKxM));
+
 	KdPrint(("DriverEntry end!\n"));
 	return ntStatus;
 }
@@ -92,6 +107,7 @@ VOID DriverUnload(_In_ struct _DRIVER_OBJECT *pDriverObject)
 	PDEVICE_OBJECT  DeleteDeviceObject = NULL;
 
 	KxUnInitProtectProcess();
+	KxPsMonitorUnInit();
 
 	RtlInitUnicodeString(&DeviceLinkName, DEVICE_LINK_NAME);
 	IoDeleteSymbolicLink(&DeviceLinkName);
@@ -135,11 +151,31 @@ NTSTATUS IOControlDispatch(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp)
 
 		break;
 	}
+	case CTL_SET_MON_REFUSE_CREATE_PROC: {
+		BOOLEAN allow = *(UCHAR*)InputData;
+		kxCanCreateProcess = allow;
+		break;
+	}
+	case CTL_SET_MON_REFUSE_CREATE_THREAD: {
+		BOOLEAN allow = *(UCHAR*)InputData;
+		kxCanCreateThread = allow;
+		break;
+	}
+	case CTL_SET_MON_REFUSE_LOAD_IMAGE: {
+		BOOLEAN allow = *(UCHAR*)InputData;
+		kxCanLoadDriver = allow;
+		break;
+	}
+	case CTL_SET_CURRENT_PCMGR_PROCESS: {
+		ULONG_PTR pid = *(ULONG_PTR*)InputData;
+		CurrentPCMgrProcess = pid;
+		break;
+	}
 	case CTL_OPEN_PROCESS: {
 		ULONG_PTR pid = *(ULONG_PTR*)InputData;
 
 		PEPROCESS pEProc;
-		Status = PsLookupProcessByProcessId((HANDLE)pid, &pEProc);
+		Status = _PsLookupProcessByProcessId((HANDLE)pid, &pEProc);
 		if (NT_SUCCESS(Status))
 		{
 			HANDLE handle;
@@ -157,7 +193,8 @@ NTSTATUS IOControlDispatch(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp)
 	case CTL_OPEN_THREAD: {
 		ULONG_PTR tid = *(ULONG_PTR*)InputData;
 		PETHREAD pEThread;
-		if (NT_SUCCESS(PsLookupThreadByThreadId((HANDLE)tid, &pEThread)))
+		Status = _PsLookupThreadByThreadId((HANDLE)tid, &pEThread);
+		if (NT_SUCCESS(Status))
 		{
 			HANDLE handle;
 			Status = ObOpenObjectByPointer(pEThread, 0, 0, THREAD_ALL_ACCESS, *PsThreadType, UserMode, &handle);
@@ -188,7 +225,8 @@ NTSTATUS IOControlDispatch(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp)
 		ULONG_PTR pid = *(ULONG_PTR*)InputData;
 
 		PEPROCESS pEProc;
-		if (NT_SUCCESS(PsLookupProcessByProcessId((HANDLE)pid, &pEProc)))
+		Status = _PsLookupProcessByProcessId((HANDLE)pid, &pEProc);
+		if (NT_SUCCESS(Status))
 		{
 			_memcpy_s(OutputData, OutputDataLength, &pEProc, sizeof(pEProc));
 			Informaiton = OutputDataLength;
@@ -202,7 +240,8 @@ NTSTATUS IOControlDispatch(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp)
 		ULONG_PTR tid = *(ULONG_PTR*)InputData;
 
 		PETHREAD pEThread;
-		if (NT_SUCCESS(PsLookupThreadByThreadId((HANDLE)tid, &pEThread))) {
+		Status = _PsLookupThreadByThreadId((HANDLE)tid, &pEThread);
+		if (NT_SUCCESS(Status)) {
 			ULONG_PTR *outBuf = (ULONG_PTR *)OutputData;
 			_memcpy_s(OutputData, OutputDataLength, &pEThread, sizeof(pEThread));
 			Informaiton = OutputDataLength;
@@ -214,9 +253,10 @@ NTSTATUS IOControlDispatch(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp)
 	case CTL_SUSPEND_PROCESS: {
 		ULONG_PTR pid = *(ULONG_PTR*)InputData;
 		PEPROCESS pEProc;
-		if (NT_SUCCESS(PsLookupProcessByProcessId((HANDLE)pid, &pEProc)))
+		Status = _PsLookupProcessByProcessId((HANDLE)pid, &pEProc);
+		if (NT_SUCCESS(Status))
 		{
-			Status = PsSuspendProcess(pEProc);
+			Status = _PsSuspendProcess(pEProc);
 			ObDereferenceObject(pEProc);
 		}
 		_memcpy_s(OutputData, OutputDataLength, &Status, sizeof(Status));
@@ -226,9 +266,10 @@ NTSTATUS IOControlDispatch(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp)
 	case CTL_RESUME_PROCESS: {
 		ULONG_PTR pid = *(ULONG_PTR*)InputData;
 		PEPROCESS pEProc;
-		if (NT_SUCCESS(PsLookupProcessByProcessId((HANDLE)pid, &pEProc)))
+		Status = _PsLookupProcessByProcessId((HANDLE)pid, &pEProc);
+		if (NT_SUCCESS(Status))
 		{
-			Status = PsResumeProcess(pEProc);
+			Status = _PsResumeProcess(pEProc);
 			ObDereferenceObject(pEProc);
 		}
 		_memcpy_s(OutputData, OutputDataLength, &Status, sizeof(Status));
@@ -237,10 +278,12 @@ NTSTATUS IOControlDispatch(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp)
 	}
 	case CTL_FORCE_SHUTDOWN: {
 		KxForceShutdown();
+		Status = STATUS_SUCCESS;
 		break;
 	}	
 	case CTL_FORCE_REBOOT: {
 		KxForceReBoot();
+		Status = STATUS_SUCCESS;
 		break;
 	}
 	case CTL_TEST: {
@@ -282,11 +325,13 @@ NTSTATUS IOControlDispatch(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp)
 	case CTL_ADD_PROCESS_PROTECT: {
 		ULONG_PTR pid = *(ULONG_PTR*)InputData;
 		KxProtectProcessWithPid((HANDLE)pid);
+		Status = STATUS_SUCCESS;
 		break;
 	}	
 	case CTL_REMOVE_PROCESS_PROTECT: {
 		ULONG_PTR pid = *(ULONG_PTR*)InputData;
 		KxUnProtectProcessWithPid((HANDLE)pid);
+		Status = STATUS_SUCCESS;
 		break;
 	}
 	case CTL_GET_KERNEL_MODULS: {
@@ -368,7 +413,15 @@ VOID KxLoadFunctions()
 	UNICODE_STRING SWprintfsName;
 	UNICODE_STRING WCscatsName;
 	UNICODE_STRING WCscpysName;
+	UNICODE_STRING PsResumeProcessName;
+	UNICODE_STRING PsSuspendProcessName;
+	UNICODE_STRING PsLookupProcessByProcessIdName;
+	UNICODE_STRING PsLookupThreadByThreadIdName;
 
+	RtlInitUnicodeString(&PsLookupProcessByProcessIdName, L"PsLookupProcessByProcessId");
+	RtlInitUnicodeString(&PsLookupThreadByThreadIdName, L"PsLookupThreadByThreadId");
+	RtlInitUnicodeString(&PsResumeProcessName, L"PsResumeProcess");
+	RtlInitUnicodeString(&PsSuspendProcessName, L"PsSuspendProcess");
 	RtlInitUnicodeString(&MemsetName, L"memset");
 	RtlInitUnicodeString(&WCscatsName, L"wcscat_s");
 	RtlInitUnicodeString(&WCscpysName, L"wcscpy_s");
@@ -377,6 +430,10 @@ VOID KxLoadFunctions()
 	RtlInitUnicodeString(&StrcpysName, L"strcpy_s");
 	RtlInitUnicodeString(&StrcatsName, L"strcat_s");
 
+	_PsLookupProcessByProcessId = (PsLookupProcessByProcessId_)MmGetSystemRoutineAddress(&PsLookupProcessByProcessIdName);
+	_PsLookupThreadByThreadId = (PsLookupThreadByThreadId_)MmGetSystemRoutineAddress(&PsLookupThreadByThreadIdName);
+	_PsResumeProcess = (PsResumeProcess_)MmGetSystemRoutineAddress(&PsResumeProcessName);
+	_PsSuspendProcess = (PsSuspendProcess_)MmGetSystemRoutineAddress(&PsSuspendProcessName);
 	_memset = (memset_)MmGetSystemRoutineAddress(&MemsetName);
 	_wcscpy_s = (wcscpy_s_)MmGetSystemRoutineAddress(&WCscpysName);
 	_wcscat_s = (wcscat_s_)MmGetSystemRoutineAddress(&WCscatsName);

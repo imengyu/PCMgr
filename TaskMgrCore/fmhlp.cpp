@@ -73,7 +73,7 @@ M_CAPI (BOOL) MFM_EnumFileHandles(const WCHAR* pszFilePath, MFUSEINGCALLBACK cal
 			if (MStrEqualW(strDosPath, pszFilePath))
 			{
 				WCHAR strValue[16];
-				wsprintf(strValue, L"0x%x", pSysHandleInformation->Handles[i].HandleValue);
+				swprintf_s(strValue, L"0x%X", pSysHandleInformation->Handles[i].HandleValue);
 
 				WCHAR exeFullPath[MAX_PATH] = { 0 };
 				HANDLE hProcess;

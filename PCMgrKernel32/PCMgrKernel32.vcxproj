@@ -195,6 +195,7 @@
   <ItemGroup>
     <ClCompile Include="Driver.c" />
     <ClCompile Include="kmodul.c" />
+    <ClCompile Include="monitor.c" />
     <ClCompile Include="proc.c" />
     <ClCompile Include="protect.c" />
     <ClCompile Include="sys.c" />
@@ -204,6 +205,7 @@
     <ClInclude Include="defs.h" />
     <ClInclude Include="Driver.h" />
     <ClInclude Include="kmodul.h" />
+    <ClInclude Include="monitor.h" />
     <ClInclude Include="proc.h" />
     <ClInclude Include="protect.h" />
     <ClInclude Include="resource.h" />

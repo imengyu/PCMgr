@@ -770,4 +770,13 @@ If the last program is stuck or unresponsive, you can also choose to Terminate t
   <data name="DriverCountLoaded" xml:space="preserve">
     <value>Loaded driver : </value>
   </data>
+  <data name="TitleFilePath" xml:space="preserve">
+    <value>File path</value>
+  </data>
+  <data name="TitleRegPath" xml:space="preserve">
+    <value>Registry path</value>
+  </data>
+  <data name="AppTitle" xml:space="preserve">
+    <value>PCMgr</value>
+  </data>
 </root>

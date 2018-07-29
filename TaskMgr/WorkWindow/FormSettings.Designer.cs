@@ -49,6 +49,7 @@
             this.checkBoxTop = new System.Windows.Forms.CheckBox();
             this.label2 = new System.Windows.Forms.Label();
             this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.checkBoxAutoLoadDriver = new System.Windows.Forms.CheckBox();
             this.checkBoxHighLightNoSystetm = new System.Windows.Forms.CheckBox();
             this.label16 = new System.Windows.Forms.Label();
             this.label15 = new System.Windows.Forms.Label();
@@ -56,17 +57,17 @@
             this.label14 = new System.Windows.Forms.Label();
             this.labelDriverLoadStatus = new System.Windows.Forms.Label();
             this.label13 = new System.Windows.Forms.Label();
-            this.radioButton3 = new System.Windows.Forms.RadioButton();
-            this.radioButton2 = new System.Windows.Forms.RadioButton();
-            this.checkBox8 = new System.Windows.Forms.CheckBox();
-            this.radioButton1 = new System.Windows.Forms.RadioButton();
+            this.radioButtonDrvLog = new System.Windows.Forms.RadioButton();
+            this.radioButtonRefuseNoSginedAndAsk = new System.Windows.Forms.RadioButton();
+            this.checkBoxEnableLoadDrvCallback = new System.Windows.Forms.CheckBox();
+            this.radioButtonRefuseNoSginedDrv = new System.Windows.Forms.RadioButton();
             this.label12 = new System.Windows.Forms.Label();
-            this.checkBox7 = new System.Windows.Forms.CheckBox();
-            this.checkBox6 = new System.Windows.Forms.CheckBox();
-            this.checkBox5 = new System.Windows.Forms.CheckBox();
-            this.checkBox4 = new System.Windows.Forms.CheckBox();
-            this.checkBox3 = new System.Windows.Forms.CheckBox();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
+            this.checkBoxCannotLoadDriver = new System.Windows.Forms.CheckBox();
+            this.checkBoxCannoteLoadModule = new System.Windows.Forms.CheckBox();
+            this.checkBoxCannotCreateReg = new System.Windows.Forms.CheckBox();
+            this.checkBoxCannotCreateFile = new System.Windows.Forms.CheckBox();
+            this.checkBoxCannotCreateThread = new System.Windows.Forms.CheckBox();
+            this.checkBoxCannotCreateProc = new System.Windows.Forms.CheckBox();
             this.label11 = new System.Windows.Forms.Label();
             this.radioButtonApcPspTerProc = new System.Windows.Forms.RadioButton();
             this.radioButtonPspTerProc = new System.Windows.Forms.RadioButton();
@@ -76,7 +77,6 @@
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.comboBox_lg = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.checkBoxAutoLoadDriver = new System.Windows.Forms.CheckBox();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage4.SuspendLayout();
@@ -268,17 +268,17 @@
             this.tabPage4.Controls.Add(this.label14);
             this.tabPage4.Controls.Add(this.labelDriverLoadStatus);
             this.tabPage4.Controls.Add(this.label13);
-            this.tabPage4.Controls.Add(this.radioButton3);
-            this.tabPage4.Controls.Add(this.radioButton2);
-            this.tabPage4.Controls.Add(this.checkBox8);
-            this.tabPage4.Controls.Add(this.radioButton1);
+            this.tabPage4.Controls.Add(this.radioButtonDrvLog);
+            this.tabPage4.Controls.Add(this.radioButtonRefuseNoSginedAndAsk);
+            this.tabPage4.Controls.Add(this.checkBoxEnableLoadDrvCallback);
+            this.tabPage4.Controls.Add(this.radioButtonRefuseNoSginedDrv);
             this.tabPage4.Controls.Add(this.label12);
-            this.tabPage4.Controls.Add(this.checkBox7);
-            this.tabPage4.Controls.Add(this.checkBox6);
-            this.tabPage4.Controls.Add(this.checkBox5);
-            this.tabPage4.Controls.Add(this.checkBox4);
-            this.tabPage4.Controls.Add(this.checkBox3);
-            this.tabPage4.Controls.Add(this.checkBox1);
+            this.tabPage4.Controls.Add(this.checkBoxCannotLoadDriver);
+            this.tabPage4.Controls.Add(this.checkBoxCannoteLoadModule);
+            this.tabPage4.Controls.Add(this.checkBoxCannotCreateReg);
+            this.tabPage4.Controls.Add(this.checkBoxCannotCreateFile);
+            this.tabPage4.Controls.Add(this.checkBoxCannotCreateThread);
+            this.tabPage4.Controls.Add(this.checkBoxCannotCreateProc);
             this.tabPage4.Controls.Add(this.label11);
             this.tabPage4.Controls.Add(this.radioButtonApcPspTerProc);
             this.tabPage4.Controls.Add(this.radioButtonPspTerProc);
@@ -286,6 +286,12 @@
             this.tabPage4.Controls.Add(this.label9);
             this.tabPage4.Name = "tabPage4";
             this.tabPage4.UseVisualStyleBackColor = true;
+            // 
+            // checkBoxAutoLoadDriver
+            // 
+            resources.ApplyResources(this.checkBoxAutoLoadDriver, "checkBoxAutoLoadDriver");
+            this.checkBoxAutoLoadDriver.Name = "checkBoxAutoLoadDriver";
+            this.checkBoxAutoLoadDriver.UseVisualStyleBackColor = true;
             // 
             // checkBoxHighLightNoSystetm
             // 
@@ -324,73 +330,76 @@
             resources.ApplyResources(this.label13, "label13");
             this.label13.Name = "label13";
             // 
-            // radioButton3
+            // radioButtonDrvLog
             // 
-            resources.ApplyResources(this.radioButton3, "radioButton3");
-            this.radioButton3.Name = "radioButton3";
-            this.radioButton3.TabStop = true;
-            this.radioButton3.UseVisualStyleBackColor = true;
+            resources.ApplyResources(this.radioButtonDrvLog, "radioButtonDrvLog");
+            this.radioButtonDrvLog.Name = "radioButtonDrvLog";
+            this.radioButtonDrvLog.TabStop = true;
+            this.radioButtonDrvLog.UseVisualStyleBackColor = true;
             // 
-            // radioButton2
+            // radioButtonRefuseNoSginedAndAsk
             // 
-            resources.ApplyResources(this.radioButton2, "radioButton2");
-            this.radioButton2.Name = "radioButton2";
-            this.radioButton2.TabStop = true;
-            this.radioButton2.UseVisualStyleBackColor = true;
+            resources.ApplyResources(this.radioButtonRefuseNoSginedAndAsk, "radioButtonRefuseNoSginedAndAsk");
+            this.radioButtonRefuseNoSginedAndAsk.Name = "radioButtonRefuseNoSginedAndAsk";
+            this.radioButtonRefuseNoSginedAndAsk.TabStop = true;
+            this.radioButtonRefuseNoSginedAndAsk.UseVisualStyleBackColor = true;
             // 
-            // checkBox8
+            // checkBoxEnableLoadDrvCallback
             // 
-            resources.ApplyResources(this.checkBox8, "checkBox8");
-            this.checkBox8.Name = "checkBox8";
-            this.checkBox8.UseVisualStyleBackColor = true;
+            resources.ApplyResources(this.checkBoxEnableLoadDrvCallback, "checkBoxEnableLoadDrvCallback");
+            this.checkBoxEnableLoadDrvCallback.Name = "checkBoxEnableLoadDrvCallback";
+            this.checkBoxEnableLoadDrvCallback.UseVisualStyleBackColor = true;
             // 
-            // radioButton1
+            // radioButtonRefuseNoSginedDrv
             // 
-            resources.ApplyResources(this.radioButton1, "radioButton1");
-            this.radioButton1.Name = "radioButton1";
-            this.radioButton1.TabStop = true;
-            this.radioButton1.UseVisualStyleBackColor = true;
+            resources.ApplyResources(this.radioButtonRefuseNoSginedDrv, "radioButtonRefuseNoSginedDrv");
+            this.radioButtonRefuseNoSginedDrv.Name = "radioButtonRefuseNoSginedDrv";
+            this.radioButtonRefuseNoSginedDrv.TabStop = true;
+            this.radioButtonRefuseNoSginedDrv.UseVisualStyleBackColor = true;
             // 
             // label12
             // 
             resources.ApplyResources(this.label12, "label12");
             this.label12.Name = "label12";
             // 
-            // checkBox7
+            // checkBoxCannotLoadDriver
             // 
-            resources.ApplyResources(this.checkBox7, "checkBox7");
-            this.checkBox7.Name = "checkBox7";
-            this.checkBox7.UseVisualStyleBackColor = true;
+            resources.ApplyResources(this.checkBoxCannotLoadDriver, "checkBoxCannotLoadDriver");
+            this.checkBoxCannotLoadDriver.Name = "checkBoxCannotLoadDriver";
+            this.checkBoxCannotLoadDriver.UseVisualStyleBackColor = true;
+            this.checkBoxCannotLoadDriver.CheckedChanged += new System.EventHandler(this.checkBoxCannotLoadDriver_CheckedChanged);
             // 
-            // checkBox6
+            // checkBoxCannoteLoadModule
             // 
-            resources.ApplyResources(this.checkBox6, "checkBox6");
-            this.checkBox6.Name = "checkBox6";
-            this.checkBox6.UseVisualStyleBackColor = true;
+            resources.ApplyResources(this.checkBoxCannoteLoadModule, "checkBoxCannoteLoadModule");
+            this.checkBoxCannoteLoadModule.Name = "checkBoxCannoteLoadModule";
+            this.checkBoxCannoteLoadModule.UseVisualStyleBackColor = true;
             // 
-            // checkBox5
+            // checkBoxCannotCreateReg
             // 
-            resources.ApplyResources(this.checkBox5, "checkBox5");
-            this.checkBox5.Name = "checkBox5";
-            this.checkBox5.UseVisualStyleBackColor = true;
+            resources.ApplyResources(this.checkBoxCannotCreateReg, "checkBoxCannotCreateReg");
+            this.checkBoxCannotCreateReg.Name = "checkBoxCannotCreateReg";
+            this.checkBoxCannotCreateReg.UseVisualStyleBackColor = true;
             // 
-            // checkBox4
+            // checkBoxCannotCreateFile
             // 
-            resources.ApplyResources(this.checkBox4, "checkBox4");
-            this.checkBox4.Name = "checkBox4";
-            this.checkBox4.UseVisualStyleBackColor = true;
+            resources.ApplyResources(this.checkBoxCannotCreateFile, "checkBoxCannotCreateFile");
+            this.checkBoxCannotCreateFile.Name = "checkBoxCannotCreateFile";
+            this.checkBoxCannotCreateFile.UseVisualStyleBackColor = true;
             // 
-            // checkBox3
+            // checkBoxCannotCreateThread
             // 
-            resources.ApplyResources(this.checkBox3, "checkBox3");
-            this.checkBox3.Name = "checkBox3";
-            this.checkBox3.UseVisualStyleBackColor = true;
+            resources.ApplyResources(this.checkBoxCannotCreateThread, "checkBoxCannotCreateThread");
+            this.checkBoxCannotCreateThread.Name = "checkBoxCannotCreateThread";
+            this.checkBoxCannotCreateThread.UseVisualStyleBackColor = true;
+            this.checkBoxCannotCreateThread.CheckedChanged += new System.EventHandler(this.checkBoxCannotCreateThread_CheckedChanged);
             // 
-            // checkBox1
+            // checkBoxCannotCreateProc
             // 
-            resources.ApplyResources(this.checkBox1, "checkBox1");
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.UseVisualStyleBackColor = true;
+            resources.ApplyResources(this.checkBoxCannotCreateProc, "checkBoxCannotCreateProc");
+            this.checkBoxCannotCreateProc.Name = "checkBoxCannotCreateProc";
+            this.checkBoxCannotCreateProc.UseVisualStyleBackColor = true;
+            this.checkBoxCannotCreateProc.CheckedChanged += new System.EventHandler(this.checkBoxCannotCreateProc_CheckedChanged);
             // 
             // label11
             // 
@@ -452,12 +461,6 @@
             resources.ApplyResources(this.label1, "label1");
             this.label1.Name = "label1";
             // 
-            // checkBoxAutoLoadDriver
-            // 
-            resources.ApplyResources(this.checkBoxAutoLoadDriver, "checkBoxAutoLoadDriver");
-            this.checkBoxAutoLoadDriver.Name = "checkBoxAutoLoadDriver";
-            this.checkBoxAutoLoadDriver.UseVisualStyleBackColor = true;
-            // 
             // FormSettings
             // 
             resources.ApplyResources(this, "$this");
@@ -512,17 +515,17 @@
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Label label11;
-        private System.Windows.Forms.RadioButton radioButton3;
-        private System.Windows.Forms.RadioButton radioButton2;
-        private System.Windows.Forms.CheckBox checkBox8;
-        private System.Windows.Forms.RadioButton radioButton1;
+        private System.Windows.Forms.RadioButton radioButtonDrvLog;
+        private System.Windows.Forms.RadioButton radioButtonRefuseNoSginedAndAsk;
+        private System.Windows.Forms.CheckBox checkBoxEnableLoadDrvCallback;
+        private System.Windows.Forms.RadioButton radioButtonRefuseNoSginedDrv;
         private System.Windows.Forms.Label label12;
-        private System.Windows.Forms.CheckBox checkBox7;
-        private System.Windows.Forms.CheckBox checkBox6;
-        private System.Windows.Forms.CheckBox checkBox5;
-        private System.Windows.Forms.CheckBox checkBox4;
-        private System.Windows.Forms.CheckBox checkBox3;
-        private System.Windows.Forms.CheckBox checkBox1;
+        private System.Windows.Forms.CheckBox checkBoxCannotLoadDriver;
+        private System.Windows.Forms.CheckBox checkBoxCannoteLoadModule;
+        private System.Windows.Forms.CheckBox checkBoxCannotCreateReg;
+        private System.Windows.Forms.CheckBox checkBoxCannotCreateFile;
+        private System.Windows.Forms.CheckBox checkBoxCannotCreateThread;
+        private System.Windows.Forms.CheckBox checkBoxCannotCreateProc;
         private System.Windows.Forms.Label labelDriverLoadStatus;
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.CheckBox checkBoxShowDebugWindow;

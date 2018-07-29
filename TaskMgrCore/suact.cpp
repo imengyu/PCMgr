@@ -213,7 +213,31 @@ BOOL M_SU_UnProtectMySelf() {
 	ULONG_PTR pid = GetCurrentProcessId();
 	if (DeviceIoControl(hKernelDevice, CTL_REMOVE_PROCESS_PROTECT, &pid, sizeof(pid), 0, 0, &ReturnLength, NULL))
 		return TRUE;
-	else LogErr(L"M_SU_UnProtectMySelf DeviceIoControl err : %d", GetLastError());
+	return FALSE;
+}
+
+M_CAPI(BOOL) M_SU_SetKrlMonSet_CreateProcess(BOOL allow)
+{
+	DWORD ReturnLength = 0;
+	UCHAR inputBuffer = allow;
+	if (DeviceIoControl(hKernelDevice, CTL_KERNEL_INIT, &inputBuffer, sizeof(inputBuffer), NULL, 0, &ReturnLength, NULL))
+		return TRUE;
+	return FALSE;
+}
+M_CAPI(BOOL) M_SU_SetKrlMonSet_CreateThread(BOOL allow)
+{
+	DWORD ReturnLength = 0;
+	UCHAR inputBuffer = allow;
+	if (DeviceIoControl(hKernelDevice, CTL_KERNEL_INIT, &inputBuffer, sizeof(inputBuffer), NULL, 0, &ReturnLength, NULL))
+		return TRUE;
+	return FALSE;
+}
+M_CAPI(BOOL) M_SU_SetKrlMonSet_LoadImage(BOOL allow)
+{
+	DWORD ReturnLength = 0;
+	UCHAR inputBuffer = allow;
+	if (DeviceIoControl(hKernelDevice, CTL_KERNEL_INIT, &inputBuffer, sizeof(inputBuffer), NULL, 0, &ReturnLength, NULL))
+		return TRUE;
 	return FALSE;
 }
 
@@ -248,9 +272,12 @@ M_CAPI(BOOL) M_SU_Init() {
 	Log(L"M_SU_Init DeviceIoControl");
 	DWORD ReturnLength = 0;
 	ULONG inputBuffer = lastSetSysver;
+	ULONG_PTR currrntPID = GetCurrentProcessId();
+	if (!DeviceIoControl(hKernelDevice, CTL_SET_CURRENT_PCMGR_PROCESS, &currrntPID, sizeof(currrntPID), NULL, 0, &ReturnLength, NULL))
+		LogErr(L"M_SU_Init 1 DeviceIoControl err : %d", GetLastError());
 	if (DeviceIoControl(hKernelDevice, CTL_KERNEL_INIT, &inputBuffer, sizeof(inputBuffer), NULL, 0, &ReturnLength, NULL))
 		return TRUE;
-	LogErr(L"M_SU_Init DeviceIoControl err : %d", GetLastError());
+	LogErr(L"M_SU_Init 2 DeviceIoControl err : %d", GetLastError());
 	return FALSE;
 }
 M_CAPI(BOOL) M_SU_GetEPROCESS(DWORD pid, ULONG_PTR* lpEprocess)
@@ -331,13 +358,23 @@ M_CAPI(BOOL) M_SU_EnumKernelModuls(EnumKernelModulsCallBack callback, BOOL showa
 			//wcscpy_s(kmi->szFullDllPath, kModule.FullDllPath);
 			MNtPathToFilePath(kmi->szFullDllPathOrginal, kmi->szFullDllPath, MAX_PATH);
 
+#ifdef _AMD64_
 			if (kModule.EntryPoint == 0) wcscpy_s(strDriverObject, L"-");
-			else wsprintf(strEntryPoint, L"0x%08X", kModule.EntryPoint);
-			wsprintf(strSizeOfImage, L"0x%08X", kModule.SizeOfImage);
+			else swprintf_s(strEntryPoint, L"0x%I64X", kModule.EntryPoint);
+			swprintf_s(strSizeOfImage, L"0x%08X", kModule.SizeOfImage);
 			if (kModule.DriverObject == 0) wcscpy_s(strDriverObject, L"-");
-			else wsprintf(strDriverObject, L"0x%08X", kModule.DriverObject);
+			else swprintf_s(strDriverObject, L"0x%I64X", kModule.DriverObject);
 			if (kModule.Base == 0) wcscpy_s(strDriverObject, L"-");
-			else wsprintf(strBase, L"0x%08X", kModule.Base);
+			else swprintf_s(strBase, L"0x%I64X", kModule.Base);
+#else
+			if (kModule.EntryPoint == 0) wcscpy_s(strDriverObject, L"-");
+			else swprintf_s(strEntryPoint, L"0x%08X", kModule.EntryPoint);
+			swprintf_s(strSizeOfImage, L"0x%08X", kModule.SizeOfImage);
+			if (kModule.DriverObject == 0) wcscpy_s(strDriverObject, L"-");
+			else swprintf_s(strDriverObject, L"0x%08X", kModule.DriverObject);
+			if (kModule.Base == 0) wcscpy_s(strDriverObject, L"-");
+			else swprintf_s(strBase, L"0x%08X", kModule.Base);
+#endif
 
 			MSCM_CheckDriverServices(kmi->szFullDllPathOrginal, strPath, &kmi->serviceInfo);
 			wcscpy_s(kmi->szServiceName, strPath);

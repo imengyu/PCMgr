@@ -35,6 +35,9 @@ EXTERN_C M_API BOOL MGetProcessCommandLine(HANDLE handle, LPWSTR l, int maxcount
 EXTERN_C M_API BOOL MGetProcessIsUWP(HANDLE handle);
 EXTERN_C M_API BOOL MGetProcessIs32Bit(HANDLE handle);
 EXTERN_C M_API BOOL MGetProcessEprocess(DWORD pid, LPWSTR l, int maxcount);
+EXTERN_C M_API HANDLE MGetProcessKinfoOpen(DWORD dwPID);
+EXTERN_C M_API BOOL MGetProcessPeb(HANDLE hProcess, LPWSTR l, int maxcount);
+EXTERN_C M_API BOOL MGetProcessBasePriority(HANDLE hProcess, LPWSTR l, int maxcount);
 EXTERN_C M_API BOOL MGetUWPPackageFullName(HANDLE handle, int * len, LPWSTR buffer);
 EXTERN_C M_API int MGetProcessState(DWORD pid, HWND hWnd);
 EXTERN_C M_API VOID* MGetProcessThreads(DWORD pid);

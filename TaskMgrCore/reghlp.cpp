@@ -45,3 +45,14 @@ M_CAPI(BOOL) MREG_DeleteKey(HKEY hRootKey, LPWSTR path) {
 	}
 }
 
+M_CAPI(BOOL) MREG_DeleteKeyValue(HKEY hRootKey, LPWSTR path, LPWSTR value) {
+
+	DWORD lastErr = RegDeleteKeyValueW(hRootKey, path, value);
+	if (lastErr == ERROR_SUCCESS || lastErr == ERROR_FILE_NOT_FOUND)
+		return TRUE;
+	else
+	{
+		SetLastError(lastErr);
+		return 0;
+	}
+}

@@ -14,7 +14,8 @@ extern HWND hWndMain;
 void MSM_OpenAndEnum(HKEY rootkey, LPWSTR path, LPWSTR type, EnumStartupsCallBack callBack)
 {
 	HKEY hKEY;
-	if (RegOpenKeyEx(rootkey, path, 0, KEY_READ, &hKEY) == ERROR_SUCCESS)
+	DWORD err = RegOpenKeyEx(rootkey, path, 0, KEY_READ, &hKEY);
+	if (err == ERROR_SUCCESS)
 	{
 		DWORD dwIndex = 0;  // 注册表项的键值索引 
 		TCHAR valueName[MAX_PATH] = { 0 }; //保存项下键的名称 
@@ -28,9 +29,10 @@ void MSM_OpenAndEnum(HKEY rootkey, LPWSTR path, LPWSTR type, EnumStartupsCallBac
 				TCHAR dwValue[256];
 				DWORD dwSzType = REG_SZ;
 				DWORD dwSize = sizeof(dwValue);
+				err = RegQueryValueEx(hKEY, valueName, 0, &dwSzType, (LPBYTE)&dwValue, &dwSize);
 				if (RegQueryValueEx(hKEY, valueName, 0, &dwSzType, (LPBYTE)&dwValue, &dwSize) == ERROR_SUCCESS) {
 					callBack(valueName, type, dwValue, rootkey, path, valueName);
-				}LogErr(L"Query key value (%s\\%s) failed in RegQueryValueEx : %d", MREG_ROOTKEYToStr(rootkey), path, GetLastError());
+				}else LogErr(L"Query key value (%s\\%s) failed in RegQueryValueEx : %d", MREG_ROOTKEYToStr(rootkey), path, err);
 			}
 			dwIndex++;
 			length = MAX_PATH;
@@ -38,12 +40,13 @@ void MSM_OpenAndEnum(HKEY rootkey, LPWSTR path, LPWSTR type, EnumStartupsCallBac
 		}
 		RegCloseKey(hKEY);
 	}
-	else LogErr(L"Enum child key (%s\\%s) failed in RegOpenKeyEx : %d", MREG_ROOTKEYToStr(rootkey), path, GetLastError());
+	else LogErr(L"Enum child key (%s\\%s) failed in RegOpenKeyEx : %d", MREG_ROOTKEYToStr(rootkey), path, err);
 }
 void MSM_OpenAndEnumWithClsid(HKEY rootkey, LPWSTR path, LPWSTR type, EnumStartupsCallBack callBack)
 {
 	HKEY hKEY;
-	if (RegOpenKeyEx(rootkey, path, 0, KEY_READ, &hKEY) == ERROR_SUCCESS)
+	DWORD err = RegOpenKeyEx(rootkey, path, 0, KEY_READ, &hKEY);
+	if (err == ERROR_SUCCESS)
 	{
 		DWORD dwIndex = 0;  // 注册表项的键值索引 
 		TCHAR valueName[MAX_PATH] = { 0 }; //保存项下键的名称 
@@ -51,6 +54,7 @@ void MSM_OpenAndEnumWithClsid(HKEY rootkey, LPWSTR path, LPWSTR type, EnumStartu
 		BYTE keyData[MAX_PATH] = { 0 }; //保存键的值 
 		DWORD lengthData = MAX_PATH;  //保存值得长度 
 		DWORD dwType = REG_SZ;	      //键值的类型 
+
 		while (RegEnumValue(hKEY, dwIndex, valueName, &length, 0, &dwType, keyData, &lengthData) == ERROR_SUCCESS)
 		{
 			if (dwType == REG_SZ || dwType == REG_EXPAND_SZ) {
@@ -58,7 +62,8 @@ void MSM_OpenAndEnumWithClsid(HKEY rootkey, LPWSTR path, LPWSTR type, EnumStartu
 					TCHAR dwValue[256];
 					DWORD dwSzType = REG_SZ;
 					DWORD dwSize = sizeof(dwValue);
-					if (RegQueryValueEx(hKEY, valueName, 0, &dwSzType, (LPBYTE)&dwValue, &dwSize) == ERROR_SUCCESS)
+					err = RegQueryValueEx(hKEY, valueName, 0, &dwSzType, (LPBYTE)&dwValue, &dwSize);
+					if (err == ERROR_SUCCESS)
 					{
 						HKEY csidkey = MREG_CLSIDToHKEYInprocServer32(rootkey, dwValue);
 						if (csidkey != NULL) {
@@ -70,7 +75,7 @@ void MSM_OpenAndEnumWithClsid(HKEY rootkey, LPWSTR path, LPWSTR type, EnumStartu
 							RegCloseKey(csidkey);
 						}
 						else callBack(valueName, type, dwValue, rootkey, path, valueName);
-					}LogErr(L"Query key value (%s\\%s) failed in RegQueryValueEx : %d", MREG_ROOTKEYToStr(rootkey), path, GetLastError());
+					}else LogErr(L"Query key value (%s\\%s) failed in RegQueryValueEx : %d", MREG_ROOTKEYToStr(rootkey), path, err);
 				}
 			}
 			dwIndex++;
@@ -79,7 +84,7 @@ void MSM_OpenAndEnumWithClsid(HKEY rootkey, LPWSTR path, LPWSTR type, EnumStartu
 		}
 		RegCloseKey(hKEY);
 	}
-	else LogErr(L"Enum child key (%s\\%s) failed in RegOpenKeyEx : %d", MREG_ROOTKEYToStr(rootkey), path, GetLastError());
+	else LogErr(L"Enum child key (%s\\%s) failed in RegOpenKeyEx : %d", MREG_ROOTKEYToStr(rootkey), path, err);
 }
 
 //SOFTWARE\\Classes\\CLSID\\
@@ -107,14 +112,24 @@ TCHAR selectedFilePath[MAX_PATH];
 HKEY selectedRootkey;
 TCHAR selectedKey[MAX_PATH];
 TCHAR selectedValue[MAX_PATH];
+DWORD selectedId = 0;
 
 void MSM_DelSelectedReg()
 {
-
+	if (!MStrEqualW(selectedKey, L""))
+	{
+		if (!MREG_DeleteKeyValue(selectedRootkey, selectedKey, selectedValue))
+			MessageBox(hWndMain, L"Failed delete reg", (LPWSTR)str_item_op_failed.c_str(), MB_OK);
+		else MAppMainCall(26, (LPVOID)(ULONG_PTR)selectedId, 0);
+	}
 }
 void MSM_DelSelectedFile()
 {
-
+	if (!MStrEqualW(selectedFilePath, L""))
+	{
+		if (MFM_FileExist(selectedFilePath))
+			MFM_DeleteDirOrFile(selectedFilePath);
+	}
 }
 
 M_CAPI(VOID) MEnumStartups(EnumStartupsCallBack callBack) {
@@ -126,8 +141,9 @@ M_CAPI(VOID) MEnumStartups(EnumStartupsCallBack callBack) {
 		MSM_EnumHC_Prints(callBack);
 	}
 }
-M_CAPI(VOID) MStartupsMgr_ShowMenu(HKEY rootkey, LPWSTR path, LPWSTR filepath, LPWSTR regvalue)
+M_CAPI(VOID) MStartupsMgr_ShowMenu(HKEY rootkey, LPWSTR path, LPWSTR filepath, LPWSTR regvalue, DWORD id)
 {
+	selectedId = id;
 	HMENU hroot = LoadMenu(hInstRs, MAKEINTRESOURCE(IDR_MENUSTART));
 	if (hroot) {
 		HMENU hpop = GetSubMenu(hroot, 0);

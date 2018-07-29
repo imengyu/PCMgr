@@ -287,7 +287,6 @@ typedef enum _OBJECT_INFORMATION_CLASS {
 	ObjectTypeInformation = 2
 } OBJECT_INFORMATION_CLASS;
 
-
 typedef struct _PROCESS_BASIC_INFORMATION {
 	PVOID Reserved1;
 	PPEB PebBaseAddress;
@@ -295,7 +294,6 @@ typedef struct _PROCESS_BASIC_INFORMATION {
 	ULONG_PTR UniqueProcessId;
 	PVOID Reserved3;
 } PROCESS_BASIC_INFORMATION,*PPROCESS_BASIC_INFORMATION;
-
 
 typedef struct _THREAD_BASIC_INFORMATION { // Information Class 0
 	LONG     ExitStatus;
@@ -515,7 +513,7 @@ typedef DWORD(WINAPI * ZwTerminateThreadFun)(HANDLE ThreadHandle, DWORD ExitCode
 typedef DWORD(WINAPI * ZwSuspendThreadFun)(HANDLE ThreadHandle, PULONG PreviousSuspendCount OPTIONAL);
 typedef DWORD(NTAPI *ZwResumeThreadFun)(HANDLE ThreadHandle, PULONG SuspendCount OPTIONAL);
 
-typedef ULONG(WINAPI *NtQueryInformationProcessFun)(HANDLE, DWORD, PVOID, ULONG, PULONG);
+typedef ULONG(WINAPI *NtQueryInformationProcessFun)(HANDLE ProcessHandle, DWORD ProcessInformationClass, PVOID ProcessInformation, ULONG ProcessInformationLength, PULONG ReturnLength);
 typedef ULONG(WINAPI *NtQuerySystemInformationFun)(IN ULONG SysInfoClass, IN OUT PVOID SystemInformation, IN ULONG SystemInformationLength, OUT PULONG nRet);
 typedef ULONG(WINAPI *NtQueryInformationThreadFun)(HANDLE ThreadHandle, ULONG ThreadInformationClass, PVOID ThreadInformation, ULONG ThreadInformationLength, PULONG ReturnLength OPTIONAL);
 typedef DWORD(WINAPI *ZwSuspendProcessFun)(HANDLE);

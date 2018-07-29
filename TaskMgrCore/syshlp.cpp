@@ -128,7 +128,7 @@ M_CAPI(PVOID) MGetProcedureAddress(_In_ PVOID DllHandle, _In_opt_ PSTR Procedure
 			char c[260];
 			char dllname[260];
 			GetModuleFileNameA((HMODULE)DllHandle, dllname, 260);
-			wsprintfA(c, "无法定位程序输入点 %s 位于动态链接库 %s 上", ProcedureName, dllname);
+			sprintf_s(c, "无法定位程序输入点 %s 位于动态链接库 %s 上", ProcedureName, dllname);
 			MessageBoxA(NULL, c, "系统错误", MB_OK | MB_ICONERROR);
 			return NULL;
 		}
@@ -140,7 +140,7 @@ M_CAPI(PVOID) MGetProcedureAddress(_In_ PVOID DllHandle, _In_opt_ PSTR Procedure
 			char c[260];
 			char dllname[260];
 			GetModuleFileNameA((HMODULE)DllHandle, dllname, 260);
-			wsprintfA(c, "无法定位序数 %ld 位于动态链接库 %s 上", ProcedureNumber, dllname);
+			sprintf_s(c, "无法定位序数 %ld 位于动态链接库 %s 上", ProcedureNumber, dllname);
 			MessageBoxA(NULL, c, "系统错误", MB_OK | MB_ICONERROR);
 			return NULL;
 		}

@@ -773,4 +773,13 @@ PCMgr 需要管理员权限 才能对系统进行控制和管理。
   <data name="DriverCountLoaded" xml:space="preserve">
     <value>其中已加载：</value>
   </data>
+  <data name="TitleFilePath" xml:space="preserve">
+    <value>文件路径</value>
+  </data>
+  <data name="TitleRegPath" xml:space="preserve">
+    <value>注册表路径</value>
+  </data>
+  <data name="AppTitle" xml:space="preserve">
+    <value>任务管理器</value>
+  </data>
 </root>

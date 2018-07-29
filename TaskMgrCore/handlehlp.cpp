@@ -77,12 +77,17 @@ M_CAPI(BOOL) MEnumProcessHandles(DWORD pid, EHCALLBACK callback)
 					}
 					free(lpTypeInfo);
 
-
-					WCHAR strAddres[32]; wsprintf(strAddres, L"0x%08X", pSysHandleInformation->Handles[i].HandleValue);
-					WCHAR strObjAddres[32]; wsprintf(strObjAddres, L"0x%08X", (PVOID)pSysHandleInformation->Handles[i].Object);
+					WCHAR strAddres[32];
+					WCHAR strObjAddres[32];
+#ifdef _AMD64_
+					wsprintf(strAddres, L"0x%I64X", pSysHandleInformation->Handles[i].HandleValue);
+					wsprintf(strObjAddres, L"0x%I64X", (ULONG_PTR)(PVOID)pSysHandleInformation->Handles[i].Object);
+#else
+					wsprintf(strAddres, L"0x%08X", pSysHandleInformation->Handles[i].HandleValue);
+					wsprintf(strObjAddres, L"0x%08X", (PVOID)pSysHandleInformation->Handles[i].Object);
+#endif
 
 					callback((LPVOID)&pSysHandleInformation->Handles[i], strType, strNtPath, strAddres, strObjAddres, pSysHandleInformation->Handles[i].GrantedAccess, pSysHandleInformation->Handles[i].ObjectTypeIndex);
-
 				}
 			}
 			delete pSysHandleInformation;

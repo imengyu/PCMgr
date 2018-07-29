@@ -88,6 +88,15 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 PCMgr 的本地化字符串。
+        /// </summary>
+        internal static string AppTitle {
+            get {
+                return ResourceManager.GetString("AppTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Question 的本地化字符串。
         /// </summary>
         internal static string AskTitle {
@@ -1652,6 +1661,15 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 File path 的本地化字符串。
+        /// </summary>
+        internal static string TitleFilePath {
+            get {
+                return ResourceManager.GetString("TitleFilePath", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Determine the compulsory restart? The work you have not saved will be lost! 的本地化字符串。
         /// </summary>
         internal static string TitleFRebbot {
@@ -1774,6 +1792,15 @@ namespace PCMgr.Lanuages {
         internal static string TitleReboot {
             get {
                 return ResourceManager.GetString("TitleReboot", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Registry path 的本地化字符串。
+        /// </summary>
+        internal static string TitleRegPath {
+            get {
+                return ResourceManager.GetString("TitleRegPath", resourceCulture);
             }
         }
         

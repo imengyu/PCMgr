@@ -13,6 +13,10 @@ typedef int(_stdcall *wcscat_s_)(wchar_t* _Destination, rsize_t _SizeInWords, _I
 
 typedef NTSTATUS(_stdcall *PspTerminateThreadByPointer_)(IN PETHREAD Thread, IN NTSTATUS ExitStatus, IN BOOLEAN DirectTerminate);
 typedef NTSTATUS(_stdcall *PspExitThread_)(IN NTSTATUS ExitStatus);
+typedef NTSTATUS(_stdcall *PsResumeProcess_)(PEPROCESS Process);
+typedef NTSTATUS(_stdcall *PsSuspendProcess_)(PEPROCESS Process);
+typedef NTSTATUS(_stdcall *PsLookupProcessByProcessId_)(HANDLE ProcessId, PEPROCESS *Process);
+typedef NTSTATUS(_stdcall *PsLookupThreadByThreadId_)(HANDLE ThreadId, PETHREAD *Thread);
 
 
 typedef enum _KAPC_ENVIRONMENT

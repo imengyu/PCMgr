@@ -51,7 +51,7 @@
             this.label.Name = "label";
             this.label.Size = new System.Drawing.Size(452, 75);
             this.label.TabIndex = 1;
-            this.label.Text = "label1";
+            this.label.Text = "软件正在启动，请稍后...";
             this.label.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
             // 
             // FormDelFileProgress
@@ -65,8 +65,8 @@
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "FormDelFileProgress";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "FormDelFileProgress";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.Text = "Please wait";
             this.Load += new System.EventHandler(this.FormDelFileProgress_Load);
             this.ResumeLayout(false);
 

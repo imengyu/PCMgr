@@ -4,6 +4,8 @@ PPROTECT_PROC_STORAGE protectProcsStart = NULL;
 PPROTECT_PROC_STORAGE protectProcsEnd = NULL;
 PVOID obHandle = NULL;
 
+extern memset_ _memset;
+
 //存放保护进程的一个链表
 VOID KxInitProtectProcessList()
 {
@@ -47,7 +49,7 @@ VOID KxProtectProcessWithPid(HANDLE pid)
 		{
 			//添加到链表末尾
 			protectProcsEnd->Next = ExAllocatePool(NonPagedPool, sizeof(PROTECT_PROC_STORAGE));
-			((PPROTECT_PROC_STORAGE)protectProcsEnd->Next)->Next = NULL;
+			_memset(protectProcsEnd->Next, 0, sizeof(PROTECT_PROC_STORAGE));
 			((PPROTECT_PROC_STORAGE)protectProcsEnd->Next)->ProcessId = pid;
 			protectProcsEnd = protectProcsEnd->Next;
 
@@ -66,9 +68,11 @@ VOID KxUnProtectProcessWithPid(HANDLE pid)
 			//链表删除项目
 			if (ptr->ProcessId == pid) {
 				if (ptr_for) {
-					if (ptr->Next == NULL)
+					if (ptr->Next == NULL) {
+						ptr_for->Next = NULL;
 						protectProcsEnd = ptr_for;
-					else ptr_for = ptr->Next;
+					}
+					else ptr_for->Next = ptr->Next;
 				}
 				KdPrint(("UnProtect Process : %d", pid));
 				ExFreePool(ptr);

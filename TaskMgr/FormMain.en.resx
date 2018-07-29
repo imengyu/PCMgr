@@ -122,23 +122,23 @@
         AAEAAAD/////AQAAAAAAAAAMAgAAAFdTeXN0ZW0uV2luZG93cy5Gb3JtcywgVmVyc2lvbj00LjAuMC4w
         LCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODkFAQAAACZTeXN0
         ZW0uV2luZG93cy5Gb3Jtcy5JbWFnZUxpc3RTdHJlYW1lcgEAAAAERGF0YQcCAgAAAAkDAAAADwMAAAAM
-        CQAAAk1TRnQBSQFMAgEBAwEAAVwBAwFcAQMBEAEAARABAAT/ASEBAAj/AUIBTQE2BwABNgMAASgDAAFA
-        AwABEAMAAQEBAAEgBgABELYAAlgBYgHvAlgBYgHvDAACWAFiAe8CWAFiAe+EAAGyAQ0BAAH/DAACYgFY
-        Ae8B3AGPAQAB/wHoAZcBAAH/AegBlwEAAf8B6AGXAQAB/wHDAREBAAH/AkcBRgGAHAABjgHkAv8BjQHj
+        CQAAAk1TRnQBSQFMAgEBAwEAAWQBAwFkAQMBEAEAARABAAT/ASEBAAj/AUIBTQE2BwABNgMAASgDAAFA
+        AwABEAMAAQEBAAEgBgABELYAAlgBYgHvAlgBYgHvDAACWAFiAe8CWAFiAe+EAAGyAQwBAAH/DAACYgFY
+        Ae8B3AGPAQAB/wHoAZcBAAH/AegBlwEAAf8B6AGXAQAB/wHDARABAAH/AkcBRgGAHAABjgHkAv8BjQHj
         Av8BiwHjAv8BigHiAv8BiAHiAv8BhwHhAv8CAAG+Af8CAAHmAf8CAAG8Af8BAAHWAfwB/wIAAbkB/wIA
         Ad4B/wJYAWIB70gALP8DOgFgDAABxwGFAQAB/wHPAYkBAAH/AjoBOQFgAdwBkAEAAf8B6AGYAQAB/wHo
-        AZgBAAH/AegBmAEAAf8B6AGYAQAB/wHoAZgBAAH/AegBmAEAAf8B6AGYAQAB/wGyAQMBAAH/GAABkAHk
+        AZgBAAH/AegBmAEAAf8B6AGYAQAB/wHoAZgBAAH/AegBmAEAAf8B6AGYAQAB/wGyAQIBAAH/GAABkAHk
         Av8BtQHtAv8BjQHjAv8BiwHjAv8BigHiAv8BiAHiAv8BhwHhAv8CAAG+Af8CAAHmAf8CAAHBAf8CAAHi
         Af8CWAFiAe9IAAMMARAw/wwAAccBhQEAAf8B6AGZAQAB/wHoAZkBAAH/AegBmQEAAf8B5AGWAQAB/wJc
-        AVcB3wMqAUADKgFAAkwBSwGPAcMBEgEAAf8B6AGZAQAB/wHoAZkBAAH/AbIBAgEAAf8UAAGRAeUC/wG3
+        AVcB3wMqAUADKgFAAkwBSwGPAcMBEQEAAf8B6AGZAQAB/wHoAZkBAAH/AbIBAQEAAf8UAAGRAeUC/wG3
         Ae0C/wGOAeQC/wGNAeMC/wGLAeMC/wGKAeIC/wGIAeIC/wGHAeEC/wIAAcQB/wIAAeYB/wIAAcEB/0wA
         A1wB3wMyAVAs/wMMARAIAAHHAYUBAAH/AegBmgEAAf8B6AGaAQAB/wHkAZcBAAH/AyEBMBQAAmIBWAHv
         AegBmgEAAf8B6AGaAQAB/wJHAUYBgBAAAZMB5QL/AbcB7gL/AZAB5AL/AY4B5AL/AY0B4wL/AYsB4wL/
         AYoB4gL/AgABwAH/AgAB6gH/AgABxAH/AgAB5gH/AlgBYgHvSAAE/wQALP8DXAHfCAABxwGGAQAB/wHo
-        AZoBAAH/AegBmgEAAf8B6AGaAQAB/wHPAYkBAAH/GAABxwEUAQAB/wHoAZoBAAH/AcMBEAEAAf8QAAGU
+        AZoBAAH/AegBmgEAAf8B6AGaAQAB/wHPAYkBAAH/GAABxwETAQAB/wHoAZoBAAH/AcMBDwEAAf8QAAGU
         AeYC/wG5Ae4C/wGRAeUC/wGQAeQC/wGOAeQC/wGNAeMC/wIAAcMB/wIAAe4B/wIAAcAB/wEAAdIB9wH/
-        AgABvgH/AgAB5gH/AlgBYgHvRAAE/wNMAY8DUQGfLP8IAAG3AREBAAH/AccBhQEAAf8BxwGFAQAB/wHH
-        AYQBAAH/AccBhAEAAf8BsgEJAQAB/xQAAkwBSwGPAccBFAEAAf8BxwEUAQAB/xAAAZYB5gL/AbkB7wL/
+        AgABvgH/AgAB5gH/AlgBYgHvRAAE/wNMAY8DUQGfLP8IAAG3ARABAAH/AccBhQEAAf8BxwGFAQAB/wHH
+        AYQBAAH/AccBhAEAAf8BsgEIAQAB/xQAAkwBSwGPAccBEwEAAf8BxwETAQAB/xAAAZYB5gL/AbkB7wL/
         AZMB5QL/AZEB5QL/AZAB5AL/AY4B5AL/AgABvAH/AgABwwH/AYwB4wL/AYwB3gH4Af8BWQJcAc8CWAFi
         Ae8CWAFiAe9EAAj/BAAs/wNMAY9MAAGXAecC/wG7Ae8C/wGUAeYC/wGTAeUC/wGRAeUC/wGQAeQC/wGO
         AeQC/wGNAeMC/wGLAeMC/wGzAewC/1AACP8DKgFAA1wBzyz/TAABlwHnAv8BuwHvAv8BlgHmAv8BlAHm
@@ -149,19 +149,25 @@
         AQAB/wMqAUAMAAGXAecC/wG7Ae8C/wGXAecC/wGXAecC/wGWAeYC/wGUAeYC/wGTAeUC/wGRAeUC/wGQ
         AeQC/wG1Ae0C/1AANP8QAAJcAVcB3wHoAZkBAAH/AegBmQEAAf8CYgFYAe8QAANAAXAB3AGPAQAB/wHo
         AZkBAAH/AegBmQEAAf8B6AGZAQAB/wMqAUAMAAGXAecC/wG7Ae8C/wGXAecC/wGXAecC/wGXAecC/wGW
-        AeYC/wGUAeYC/wGTAeUC/wGRAeUC/wG3Ae0C/2QAAwwBEBj/GAABsgEMAQAB/wHoAZoBAAH/AegBmgEA
+        AeYC/wGUAeYC/wGTAeUC/wGRAeUC/wG3Ae0C/2QAAwwBEBj/GAABsgELAQAB/wHoAZoBAAH/AegBmgEA
         Af8B5AGXAQAB/wHHAYIBAAH/AccBggEAAf8B0wGKAQAB/wHoAZoBAAH/AegBmgEAAf8B5AGWAQAB/wHP
         AYUBAAH/AegBmgEAAf8DKgFADAABlwHnAv8BuwHvAv8BlwHnAv8BlwHnAv8BlwHnAv8BlwHnAv8BlgHm
         Av8BlAHmAv8BkwHlAv8BtwHuAv9sABD/IAACXAFXAd8B5AGXAQAB/wHoAZoBAAH/AegBmgEAAf8B6AGa
         AQAB/wHoAZoBAAH/AegBmgEAAf8BxwGAAQAB/wMhATAEAAHPAYUBAAH/AyoBQAwAAZcB5wL/AbsB7wL/
-        AZcB5wL/AZcB5wL/AZcB5wL/AZcB5wL/AZcB5wL/AZYB5gL/AZQB5gL/AbkB7gL/pAACUQFQAZ8BsgEI
-        AQAB/wG3AQsBAAH/AlwBWQHPAzIBUBAAAyoBQA0AAdAB8gH/AQAB0AHxAf8BAAHPAfEB/wEAAc4B8AH/
+        AZcB5wL/AZcB5wL/AZcB5wL/AZcB5wL/AZcB5wL/AZYB5gL/AZQB5gL/AbkB7gL/pAACUQFQAZ8BsgEH
+        AQAB/wG3AQoBAAH/AlwBWQHPAzIBUBAAAyoBQA0AAdAB8gH/AQAB0AHxAf8BAAHPAfEB/wEAAc4B8AH/
         AQABzgHwAf8BAAHNAe8B/wEAAcwB7wH/AQABzAHuAf8BAAHLAe4B/wEAAcoB7QH//wBNAAFCAU0BPgcA
         AT4DAAEoAwABQAMAARADAAEBAQABAQUAAYAXAAP/AQAF/wGcAgAC/wG4AQ8B4AMAAcABAwGAAQcB4AEB
         AgABgAEDAYABAwHgAQMCAAGAAQEBgwHhAeABAQIAAaABAQGDAfEB4AMAAYABAQGBAfEB4AMAAZABAAL/
         AeABBwIAAYABAAL/AeABBwIAAYcB/wGPAcAB4AEHAwABAwHHAuABBwIAAYABAwHDAcAB4AEHAgAB/AEH
         AeABAAHgAQcCAAH/AQ8B8AEEAeABBwIAAv8B/AEeAeABBwIABv8CAAs=
 </value>
+  </data>
+  <data name="treeFmLeft.ToolTip" xml:space="preserve">
+    <value />
+  </data>
+  <data name="splitContainerFm.Panel1.ToolTip" xml:space="preserve">
+    <value />
   </data>
   <data name="columnHeader1.Text" xml:space="preserve">
     <value>File Name</value>
@@ -186,15 +192,15 @@
         AAEAAAD/////AQAAAAAAAAAMAgAAAFdTeXN0ZW0uV2luZG93cy5Gb3JtcywgVmVyc2lvbj00LjAuMC4w
         LCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODkFAQAAACZTeXN0
         ZW0uV2luZG93cy5Gb3Jtcy5JbWFnZUxpc3RTdHJlYW1lcgEAAAAERGF0YQcCAgAAAAkDAAAADwMAAAC4
-        BAAAAk1TRnQBSQFMAwEBAAEkAQMBJAEDARABAAEQAQAE/wEhAQAI/wFCAU0BNgcAATYDAAEoAwABQAMA
+        BAAAAk1TRnQBSQFMAwEBAAEsAQMBLAEDARABAAEQAQAE/wEhAQAI/wFCAU0BNgcAATYDAAEoAwABQAMA
         ARADAAEBAQABIAYAARA8AAHNAf8MAAJQAVEBnwJQAVEBn8wAAvsB+gH/AvsB+gH/AvsB+gH/AvsB+gH/
         AvsB+gH/AvsB+gH/A/0B/wIAAdsB/wIAAdkB/wP9Af8CUAFRAZ8CAAHeAf8CUAFRAZ/MAAP7Af8B9wL2
         Af8B9wH2AfUB/wH3AfYB9QH/AfcB9gH1Af8B9wH2AfUB/wH3AfYB9QH/AvsB+gH/AgAB2wH/AgAB2QH/
         AgAB4gH/AlABUQGf0AAB/AL7Af8B+AH3AfYB/wH4AfcB9gH/AfgB9wH2Af8B+AH3AfYB/wH3AfYB9QH/
-        AfcB9gH1Af8B+AH3AfYB/wEEAQABygH/AgAB5wH/AgAB2QH/1AAB/AL7Af8B+AL3Af8B+AL3Af8B+AH3
-        AfYB/wH4AfcB9gH/AfgB9wH2Af8C+AH3Af8BBAEAAcwB/wIAAesB/wEEAQABzAH/AgAB2wH/AgAB2QH/
+        AfcB9gH1Af8B+AH3AfYB/wEDAQABygH/AgAB5wH/AgAB2QH/1AAB/AL7Af8B+AL3Af8B+AL3Af8B+AH3
+        AfYB/wH4AfcB9gH/AfgB9wH2Af8C+AH3Af8BAwEAAcwB/wIAAesB/wEDAQABzAH/AgAB2wH/AgAB2QH/
         0AAC/AH7Af8B+QH4AfcB/wH5AfgB9wH/AfkB+AH3Af8B+AL3Af8B+AH3AfYB/wGjAZ0B3QH/AgAB8AH/
-        AQQBAAHMAf8D+wH/BgAB2wH/AgABzQH/zAAD/AH/AfkC+AH/AfkC+AH/AfkB+AH3Af8B+QH4AfcB/wL4
+        AQMBAAHMAf8D+wH/BgAB2wH/AgABzQH/zAAD/AH/AfkC+AH/AfkC+AH/AfkB+AH3Af8B+QH4AfcB/wL4
         AfcB/wH5AfgB9wH/AaMBnQHdAf8B+QH4AfcB/wL7AfoB/9gAAf0C/AH/AfoB+QH4Af8C+QH4Af8C+QH4
         Af8B+QL4Af8B+QH4AfcB/wH5AfgB9wH/AfgB9wH2Af8B+AH3AfYB/wP7Af/YAAH9AvwB/wH6AfkB+AH/
         AfkC+AH/AfoB+QH4Af8C+QH4Af8B+QL4Af8B+QH4AfcB/wL4AfcB/wH4AfcB9gH/AfwC+wH/2AAB/QL8
@@ -208,6 +214,30 @@
         BgAB4AEBBgAB4AEEBgAB4AEHBgAB4AEHBgAB4AEHBgAB4AEHBgAB4AEHBgAB4AEHBgAB4AEHBgAB4AEH
         BgAB4AEPBgAC/wYACw==
 </value>
+  </data>
+  <data name="listFm.ToolTip" xml:space="preserve">
+    <value />
+  </data>
+  <data name="splitContainerFm.Panel2.ToolTip" xml:space="preserve">
+    <value />
+  </data>
+  <data name="splitContainerFm.ToolTip" xml:space="preserve">
+    <value />
+  </data>
+  <data name="sp3.ToolTip" xml:space="preserve">
+    <value />
+  </data>
+  <data name="performanceLeftList.ToolTip" xml:space="preserve">
+    <value />
+  </data>
+  <data name="splitContainerPerfCtls.Panel1.ToolTip" xml:space="preserve">
+    <value />
+  </data>
+  <data name="splitContainerPerfCtls.Panel2.ToolTip" xml:space="preserve">
+    <value />
+  </data>
+  <data name="splitContainerPerfCtls.ToolTip" xml:space="preserve">
+    <value />
   </data>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="check_showAllProcess.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
@@ -234,8 +264,17 @@
   <data name="check_showAllProcess.Text" xml:space="preserve">
     <value>Show process of all users</value>
   </data>
+  <data name="check_showAllProcess.ToolTip" xml:space="preserve">
+    <value />
+  </data>
   <data name="spl1.Location" type="System.Drawing.Point, System.Drawing">
     <value>130, 537</value>
+  </data>
+  <data name="spl1.ToolTip" xml:space="preserve">
+    <value />
+  </data>
+  <data name="lbShowDetals.ToolTip" xml:space="preserve">
+    <value />
   </data>
   <data name="btnEndProcess.Location" type="System.Drawing.Point, System.Drawing">
     <value>794, 531</value>
@@ -246,14 +285,26 @@
   <data name="btnEndProcess.Text" xml:space="preserve">
     <value>&amp;End Process</value>
   </data>
+  <data name="btnEndProcess.ToolTip" xml:space="preserve">
+    <value />
+  </data>
+  <data name="listProcess.ToolTip" xml:space="preserve">
+    <value />
+  </data>
   <data name="lbProcessCount.Size" type="System.Drawing.Size, System.Drawing">
     <value>113, 17</value>
   </data>
   <data name="lbProcessCount.Text" xml:space="preserve">
     <value>Process Count：--</value>
   </data>
+  <data name="lbProcessCount.ToolTip" xml:space="preserve">
+    <value />
+  </data>
   <data name="tabPageProcCtl.Text" xml:space="preserve">
     <value>Process</value>
+  </data>
+  <data name="tabPageProcCtl.ToolTip" xml:space="preserve">
+    <value />
   </data>
   <data name="linkRestartAsAdminDriver.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
@@ -279,8 +330,17 @@
   <data name="linkRestartAsAdminDriver.Text" xml:space="preserve">
     <value>Restart as administrator and load driver</value>
   </data>
+  <data name="linkRestartAsAdminDriver.ToolTip" xml:space="preserve">
+    <value />
+  </data>
   <data name="lbRestartAsAdminDriver.Text" xml:space="preserve">
     <value>Kernel driver not load</value>
+  </data>
+  <data name="lbRestartAsAdminDriver.ToolTip" xml:space="preserve">
+    <value />
+  </data>
+  <data name="pl_driverNotLoadTip.ToolTip" xml:space="preserve">
+    <value />
   </data>
   <data name="lbDriversCount.Size" type="System.Drawing.Size, System.Drawing">
     <value>103, 17</value>
@@ -288,20 +348,78 @@
   <data name="lbDriversCount.Text" xml:space="preserve">
     <value>Driver Count：--</value>
   </data>
+  <data name="lbDriversCount.ToolTip" xml:space="preserve">
+    <value />
+  </data>
+  <data name="columnHeader15.Text" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <assembly alias="mscorlib" name="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="columnHeader15.Width" type="System.Int32, mscorlib">
+    <value>153</value>
+  </data>
+  <data name="columnHeader16.Text" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="columnHeader17.Text" xml:space="preserve">
+    <value>Command Line</value>
+  </data>
+  <data name="columnHeader17.Width" type="System.Int32, mscorlib">
+    <value>110</value>
+  </data>
+  <data name="columnHeader18.Text" xml:space="preserve">
+    <value>Publisher</value>
+  </data>
+  <data name="columnHeader19.Text" xml:space="preserve">
+    <value>File Path</value>
+  </data>
+  <data name="columnHeader20.Text" xml:space="preserve">
+    <value>Reg path</value>
+  </data>
+  <data name="columnHeader22.Text" xml:space="preserve">
+    <value>Load order</value>
+  </data>
+  <data name="columnHeader23.Text" xml:space="preserve">
+    <value>Publisher</value>
+  </data>
+  <data name="listDrivers.ToolTip" xml:space="preserve">
+    <value />
+  </data>
   <data name="tabPageKernelCtl.Text" xml:space="preserve">
     <value>Kernel</value>
+  </data>
+  <data name="tabPageKernelCtl.ToolTip" xml:space="preserve">
+    <value />
   </data>
   <data name="tabPageSysCtl.Text" xml:space="preserve">
     <value>System</value>
   </data>
+  <data name="tabPageSysCtl.ToolTip" xml:space="preserve">
+    <value />
+  </data>
   <data name="tabPagePerfCtl.Text" xml:space="preserve">
     <value>Performance</value>
+  </data>
+  <data name="tabPagePerfCtl.ToolTip" xml:space="preserve">
+    <value />
   </data>
   <data name="lbUWPEnumFailText.Text" xml:space="preserve">
     <value>Unkow error</value>
   </data>
+  <data name="lbUWPEnumFailText.ToolTip" xml:space="preserve">
+    <value />
+  </data>
+  <data name="pl_UWPEnumFailTip.ToolTip" xml:space="preserve">
+    <value />
+  </data>
+  <data name="listUwpApps.ToolTip" xml:space="preserve">
+    <value />
+  </data>
   <data name="tabPageUWPCtl.Text" xml:space="preserve">
     <value>Universal apps</value>
+  </data>
+  <data name="tabPageUWPCtl.ToolTip" xml:space="preserve">
+    <value />
   </data>
   <data name="linkRebootAsAdmin.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
@@ -327,6 +445,9 @@
   <data name="linkRebootAsAdmin.Text" xml:space="preserve">
     <value>Restart as administrator </value>
   </data>
+  <data name="linkRebootAsAdmin.ToolTip" xml:space="preserve">
+    <value />
+  </data>
   <data name="lbScNeedAdminTip.Location" type="System.Drawing.Point, System.Drawing">
     <value>248, 23</value>
   </data>
@@ -336,14 +457,23 @@
   <data name="lbScNeedAdminTip.Text" xml:space="preserve">
     <value>I need to run as administrator to enumlate service information.</value>
   </data>
+  <data name="lbScNeedAdminTip.ToolTip" xml:space="preserve">
+    <value />
+  </data>
   <data name="pl_ScNeedAdminTip.Location" type="System.Drawing.Point, System.Drawing">
     <value>0, 209</value>
   </data>
   <data name="pl_ScNeedAdminTip.Size" type="System.Drawing.Size, System.Drawing">
     <value>898, 103</value>
   </data>
+  <data name="pl_ScNeedAdminTip.ToolTip" xml:space="preserve">
+    <value />
+  </data>
   <data name="sp2.Location" type="System.Drawing.Point, System.Drawing">
     <value>130, 536</value>
+  </data>
+  <data name="sp2.ToolTip" xml:space="preserve">
+    <value />
   </data>
   <data name="linkOpenScMsc.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
@@ -367,13 +497,15 @@
   <data name="linkOpenScMsc.Text" xml:space="preserve">
     <value>Open Service Manager</value>
   </data>
+  <data name="linkOpenScMsc.ToolTip" xml:space="preserve">
+    <value />
+  </data>
   <data name="columnHeader7.Text" xml:space="preserve">
     <value>Name</value>
   </data>
   <data name="columnHeader9.Text" xml:space="preserve">
     <value>Description</value>
   </data>
-  <assembly alias="mscorlib" name="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="columnHeader9.Width" type="System.Int32, mscorlib">
     <value>158</value>
   </data>
@@ -401,6 +533,12 @@
   <data name="columnHeader14.Text" xml:space="preserve">
     <value>Executable file path</value>
   </data>
+  <data name="columnHeader21.Text" xml:space="preserve">
+    <value>Publisher</value>
+  </data>
+  <data name="listService.ToolTip" xml:space="preserve">
+    <value />
+  </data>
   <data name="lbServicesCount.Location" type="System.Drawing.Point, System.Drawing">
     <value>15, 534</value>
   </data>
@@ -410,41 +548,32 @@
   <data name="lbServicesCount.Text" xml:space="preserve">
     <value>Service Count：--</value>
   </data>
+  <data name="lbServicesCount.ToolTip" xml:space="preserve">
+    <value />
+  </data>
   <data name="tabPageScCtl.Text" xml:space="preserve">
     <value>Services</value>
   </data>
-  <data name="columnHeader15.Text" xml:space="preserve">
-    <value>Name</value>
+  <data name="tabPageScCtl.ToolTip" xml:space="preserve">
+    <value />
   </data>
-  <data name="columnHeader15.Width" type="System.Int32, mscorlib">
-    <value>153</value>
-  </data>
-  <data name="columnHeader16.Text" xml:space="preserve">
-    <value>Type</value>
-  </data>
-  <data name="columnHeader17.Text" xml:space="preserve">
-    <value>Command Line</value>
-  </data>
-  <data name="columnHeader17.Width" type="System.Int32, mscorlib">
-    <value>110</value>
-  </data>
-  <data name="columnHeader19.Text" xml:space="preserve">
-    <value>File Path</value>
-  </data>
-  <data name="columnHeader18.Text" xml:space="preserve">
-    <value>Publisher</value>
-  </data>
-  <data name="columnHeader20.Text" xml:space="preserve">
-    <value>Reg path</value>
+  <data name="listStartup.ToolTip" xml:space="preserve">
+    <value />
   </data>
   <data name="tabPageStartCtl.Text" xml:space="preserve">
     <value>Start apps</value>
+  </data>
+  <data name="tabPageStartCtl.ToolTip" xml:space="preserve">
+    <value />
   </data>
   <data name="lbFileMgrStatus.Size" type="System.Drawing.Size, System.Drawing">
     <value>44, 17</value>
   </data>
   <data name="lbFileMgrStatus.Text" xml:space="preserve">
     <value>Ready</value>
+  </data>
+  <data name="lbFileMgrStatus.ToolTip" xml:space="preserve">
+    <value />
   </data>
   <data name="btnFmAddGoto.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
@@ -462,8 +591,20 @@
         RK5CYII=
 </value>
   </data>
+  <data name="textBoxFmCurrent.ToolTip" xml:space="preserve">
+    <value />
+  </data>
   <data name="tabPageFileCtl.Text" xml:space="preserve">
     <value>File Manager</value>
+  </data>
+  <data name="tabPageFileCtl.ToolTip" xml:space="preserve">
+    <value />
+  </data>
+  <data name="tabControlMain.ToolTip" xml:space="preserve">
+    <value />
+  </data>
+  <data name="spBottom.ToolTip" xml:space="preserve">
+    <value />
   </data>
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
@@ -1795,6 +1936,9 @@
   </data>
   <data name="$this.Text" xml:space="preserve">
     <value>PCMgr</value>
+  </data>
+  <data name="$this.ToolTip" xml:space="preserve">
+    <value />
   </data>
   <data name="notifyIcon.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>

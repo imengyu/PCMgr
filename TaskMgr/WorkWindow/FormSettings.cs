@@ -48,7 +48,7 @@ namespace PCMgr.WorkWindow
         private void load_settings()
         {
             string setting_lg = FormMain.GetConfig("Lanuage", "AppSetting");
-            switch(setting_lg)
+            switch (setting_lg)
             {
                 case "zh":
                     comboBox_lg.SelectedIndex = 0;
@@ -109,7 +109,9 @@ namespace PCMgr.WorkWindow
             FormMain.SetConfigBool("HotKey", "AppSetting", checkBoxShowHotKey.Checked);
             FormMain.SetConfigBool("SelfProtect", "AppSetting", checkBoxSelfProtect.Checked);
             FormMain.SetConfig("Title", "AppSetting", textBoxTitle.Text);
-            FormMain.Instance.Text = textBoxTitle.Text;
+            if (textBoxTitle.Text != "")
+                FormMain.Instance.Text = textBoxTitle.Text;
+            else FormMain.Instance.Text = FormMain.str_AppTitle;
             FormMain.SetConfig("HotKey1", "AppSetting", comboBoxShowHotKey1.SelectedItem.ToString());
             FormMain.SetConfig("HotKey2", "AppSetting", comboBoxShowHotKey2.SelectedItem.ToString());
 
@@ -130,6 +132,22 @@ namespace PCMgr.WorkWindow
         {
             FormMain.AppHWNDSendMessage(FormMain.WM_COMMAND, new IntPtr(40120), IntPtr.Zero);
             //FormMain.SetConfigBool("CloseHideToNotfication", "AppSetting", checkBoxCloseHide.Checked);
+        }
+
+        private void checkBoxCannotCreateProc_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!FormMain.M_SU_SetKrlMonSet_CreateProcess(checkBoxCannotCreateProc.Checked))
+                MessageBox.Show(FormMain.str_failed);
+        }
+        private void checkBoxCannotCreateThread_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!FormMain.M_SU_SetKrlMonSet_CreateThread(checkBoxCannotCreateThread.Checked))
+                MessageBox.Show(FormMain.str_failed);
+        }
+        private void checkBoxCannotLoadDriver_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!FormMain.M_SU_SetKrlMonSet_LoadImage(checkBoxCannotLoadDriver.Checked))
+                MessageBox.Show(FormMain.str_failed);
         }
     }
 }

@@ -10,6 +10,10 @@
 #define WIN32_LEAN_AND_MEAN             // 从 Windows 头中排除极少使用的资料
 // Windows 头文件: 
 #include <windows.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+
 
 #define M_API __declspec(dllexport)
 #define M_CAPI(x) extern "C" M_API x

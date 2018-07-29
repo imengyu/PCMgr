@@ -1,6 +1,6 @@
 ﻿namespace PCMgr.WorkWindow
 {
-    partial class FormVHandles
+    partial class FormKrnInfo
     {
         /// <summary>
         /// Required designer variable.
@@ -29,17 +29,13 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormVHandles));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormKrnInfo));
             this.listView1 = new System.Windows.Forms.ListView();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.刷新ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.关闭句柄ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.复制ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.重新加载ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -47,13 +43,8 @@
             // 
             this.listView1.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader1,
-            this.columnHeader2,
-            this.columnHeader3,
-            this.columnHeader4,
-            this.columnHeader5,
-            this.columnHeader6});
+            this.columnHeader2});
             resources.ApplyResources(this.listView1, "listView1");
-            this.listView1.FullRowSelect = true;
             this.listView1.Name = "listView1";
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.View = System.Windows.Forms.View.Details;
@@ -68,50 +59,34 @@
             // 
             resources.ApplyResources(this.columnHeader2, "columnHeader2");
             // 
-            // columnHeader3
-            // 
-            resources.ApplyResources(this.columnHeader3, "columnHeader3");
-            // 
-            // columnHeader4
-            // 
-            resources.ApplyResources(this.columnHeader4, "columnHeader4");
-            // 
-            // columnHeader5
-            // 
-            resources.ApplyResources(this.columnHeader5, "columnHeader5");
-            // 
-            // columnHeader6
-            // 
-            resources.ApplyResources(this.columnHeader6, "columnHeader6");
-            // 
             // contextMenuStrip1
             // 
             this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.刷新ToolStripMenuItem,
-            this.关闭句柄ToolStripMenuItem});
+            this.复制ToolStripMenuItem,
+            this.重新加载ToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
             resources.ApplyResources(this.contextMenuStrip1, "contextMenuStrip1");
             // 
-            // 刷新ToolStripMenuItem
+            // 复制ToolStripMenuItem
             // 
-            this.刷新ToolStripMenuItem.Name = "刷新ToolStripMenuItem";
-            resources.ApplyResources(this.刷新ToolStripMenuItem, "刷新ToolStripMenuItem");
-            this.刷新ToolStripMenuItem.Click += new System.EventHandler(this.刷新ToolStripMenuItem_Click);
+            this.复制ToolStripMenuItem.Name = "复制ToolStripMenuItem";
+            resources.ApplyResources(this.复制ToolStripMenuItem, "复制ToolStripMenuItem");
+            this.复制ToolStripMenuItem.Click += new System.EventHandler(this.复制ToolStripMenuItem_Click);
             // 
-            // 关闭句柄ToolStripMenuItem
+            // 重新加载ToolStripMenuItem
             // 
-            this.关闭句柄ToolStripMenuItem.Name = "关闭句柄ToolStripMenuItem";
-            resources.ApplyResources(this.关闭句柄ToolStripMenuItem, "关闭句柄ToolStripMenuItem");
-            this.关闭句柄ToolStripMenuItem.Click += new System.EventHandler(this.关闭句柄ToolStripMenuItem_Click);
+            this.重新加载ToolStripMenuItem.Name = "重新加载ToolStripMenuItem";
+            resources.ApplyResources(this.重新加载ToolStripMenuItem, "重新加载ToolStripMenuItem");
+            this.重新加载ToolStripMenuItem.Click += new System.EventHandler(this.重新加载ToolStripMenuItem_Click);
             // 
-            // FormVHandles
+            // FormKrnInfo
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.listView1);
             this.MinimizeBox = false;
-            this.Name = "FormVHandles";
-            this.Load += new System.EventHandler(this.FormVHandles_Load);
+            this.Name = "FormKrnInfo";
+            this.Load += new System.EventHandler(this.FormKrnInfo_Load);
             this.contextMenuStrip1.ResumeLayout(false);
             this.ResumeLayout(false);
 
@@ -122,12 +97,8 @@
         private System.Windows.Forms.ListView listView1;
         private System.Windows.Forms.ColumnHeader columnHeader1;
         private System.Windows.Forms.ColumnHeader columnHeader2;
-        private System.Windows.Forms.ColumnHeader columnHeader3;
-        private System.Windows.Forms.ColumnHeader columnHeader4;
-        private System.Windows.Forms.ColumnHeader columnHeader5;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
-        private System.Windows.Forms.ToolStripMenuItem 刷新ToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem 关闭句柄ToolStripMenuItem;
-        private System.Windows.Forms.ColumnHeader columnHeader6;
+        private System.Windows.Forms.ToolStripMenuItem 复制ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 重新加载ToolStripMenuItem;
     }
 }
