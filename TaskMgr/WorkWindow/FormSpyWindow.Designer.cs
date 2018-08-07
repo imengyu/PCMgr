@@ -57,7 +57,12 @@
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.显示ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.隐藏ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.启用窗口ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.禁用窗口ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.删除ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.显示逻辑区域ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panelMain.SuspendLayout();
             this.contextMenuStripMain.SuspendLayout();
             this.SuspendLayout();
@@ -217,7 +222,12 @@
             this.toolStripSeparator1,
             this.显示ToolStripMenuItem,
             this.隐藏ToolStripMenuItem,
-            this.删除ToolStripMenuItem});
+            this.toolStripSeparator2,
+            this.启用窗口ToolStripMenuItem,
+            this.禁用窗口ToolStripMenuItem,
+            this.toolStripSeparator3,
+            this.删除ToolStripMenuItem,
+            this.显示逻辑区域ToolStripMenuItem});
             this.contextMenuStripMain.Name = "contextMenuStripMain";
             // 
             // 刷新ToolStripMenuItem
@@ -243,11 +253,39 @@
             this.隐藏ToolStripMenuItem.Name = "隐藏ToolStripMenuItem";
             this.隐藏ToolStripMenuItem.Click += new System.EventHandler(this.隐藏ToolStripMenuItem_Click);
             // 
+            // toolStripSeparator2
+            // 
+            resources.ApplyResources(this.toolStripSeparator2, "toolStripSeparator2");
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            // 
+            // 启用窗口ToolStripMenuItem
+            // 
+            resources.ApplyResources(this.启用窗口ToolStripMenuItem, "启用窗口ToolStripMenuItem");
+            this.启用窗口ToolStripMenuItem.Name = "启用窗口ToolStripMenuItem";
+            this.启用窗口ToolStripMenuItem.Click += new System.EventHandler(this.启用窗口ToolStripMenuItem_Click);
+            // 
+            // 禁用窗口ToolStripMenuItem
+            // 
+            resources.ApplyResources(this.禁用窗口ToolStripMenuItem, "禁用窗口ToolStripMenuItem");
+            this.禁用窗口ToolStripMenuItem.Name = "禁用窗口ToolStripMenuItem";
+            this.禁用窗口ToolStripMenuItem.Click += new System.EventHandler(this.禁用窗口ToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator3
+            // 
+            resources.ApplyResources(this.toolStripSeparator3, "toolStripSeparator3");
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            // 
             // 删除ToolStripMenuItem
             // 
             resources.ApplyResources(this.删除ToolStripMenuItem, "删除ToolStripMenuItem");
             this.删除ToolStripMenuItem.Name = "删除ToolStripMenuItem";
             this.删除ToolStripMenuItem.Click += new System.EventHandler(this.删除ToolStripMenuItem_Click);
+            // 
+            // 显示逻辑区域ToolStripMenuItem
+            // 
+            resources.ApplyResources(this.显示逻辑区域ToolStripMenuItem, "显示逻辑区域ToolStripMenuItem");
+            this.显示逻辑区域ToolStripMenuItem.Name = "显示逻辑区域ToolStripMenuItem";
+            this.显示逻辑区域ToolStripMenuItem.Click += new System.EventHandler(this.显示逻辑区域ToolStripMenuItem_Click);
             // 
             // FormSpyWindow
             // 
@@ -296,5 +334,10 @@
         private System.Windows.Forms.ToolStripMenuItem 显示ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 隐藏ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 删除ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.ToolStripMenuItem 启用窗口ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 禁用窗口ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
+        private System.Windows.Forms.ToolStripMenuItem 显示逻辑区域ToolStripMenuItem;
     }
 }

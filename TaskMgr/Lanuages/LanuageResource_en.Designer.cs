@@ -142,7 +142,7 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
-        ///   查找类似 Restart (E) 的本地化字符串。
+        ///   查找类似 Restart (&amp;E) 的本地化字符串。
         /// </summary>
         internal static string BtnRestartText {
             get {
@@ -201,6 +201,15 @@ namespace PCMgr.Lanuages {
         internal static string CantMoveFile {
             get {
                 return ResourceManager.GetString("CantMoveFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Can not change service start type. 的本地化字符串。
+        /// </summary>
+        internal static string ChangeScStartTypeFailed {
+            get {
+                return ResourceManager.GetString("ChangeScStartTypeFailed", resourceCulture);
             }
         }
         
@@ -277,6 +286,15 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 Double click this item to continue disassembling 的本地化字符串。
+        /// </summary>
+        internal static string DblClickToDa {
+            get {
+                return ResourceManager.GetString("DblClickToDa", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Do you really want to delete this file? 的本地化字符串。
         /// </summary>
         internal static string DelAsk1 {
@@ -327,6 +345,15 @@ namespace PCMgr.Lanuages {
         internal static string DelFailed {
             get {
                 return ResourceManager.GetString("DelFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Delete service failed 的本地化字符串。
+        /// </summary>
+        internal static string DelScError {
+            get {
+                return ResourceManager.GetString("DelScError", resourceCulture);
             }
         }
         
@@ -565,13 +592,20 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
-        ///   查找类似 File have signed.
-        ///
-        ///&lt;A HREF=&quot;#&quot;&gt;View the certificate&lt;/A&gt; 的本地化字符串。
+        ///   查找类似 File have signed. 的本地化字符串。
         /// </summary>
         internal static string FileTrust {
             get {
                 return ResourceManager.GetString("FileTrust", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 &lt;A HREF=&quot;#&quot;&gt;View the certificate&lt;/A&gt; 的本地化字符串。
+        /// </summary>
+        internal static string FileTrustViewCrt {
+            get {
+                return ResourceManager.GetString("FileTrustViewCrt", resourceCulture);
             }
         }
         
@@ -662,6 +696,15 @@ namespace PCMgr.Lanuages {
         internal static string FroceDelSuccess {
             get {
                 return ResourceManager.GetString("FroceDelSuccess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Developing, please wait! 的本地化字符串。
+        /// </summary>
+        internal static string FunCreateing {
+            get {
+                return ResourceManager.GetString("FunCreateing", resourceCulture);
             }
         }
         
@@ -1080,6 +1123,15 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 OpenService Error 的本地化字符串。
+        /// </summary>
+        internal static string OpenServiceError {
+            get {
+                return ResourceManager.GetString("OpenServiceError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Unable to open thread 的本地化字符串。
         /// </summary>
         internal static string OpenThreadFailed {
@@ -1152,6 +1204,15 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 Please enter the size that you want disassembling 的本地化字符串。
+        /// </summary>
+        internal static string PleaseEnterDaSize {
+            get {
+                return ResourceManager.GetString("PleaseEnterDaSize", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Please enter Driver ServiceName 的本地化字符串。
         /// </summary>
         internal static string PleaseEnterDriverServiceName {
@@ -1166,6 +1227,15 @@ namespace PCMgr.Lanuages {
         internal static string PleaseEnterPath {
             get {
                 return ResourceManager.GetString("PleaseEnterPath", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Please enter the target address 的本地化字符串。
+        /// </summary>
+        internal static string PleaseEnterTargetAddress {
+            get {
+                return ResourceManager.GetString("PleaseEnterTargetAddress", resourceCulture);
             }
         }
         

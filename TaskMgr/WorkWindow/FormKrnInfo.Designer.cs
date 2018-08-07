@@ -84,7 +84,6 @@
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.listView1);
-            this.MinimizeBox = false;
             this.Name = "FormKrnInfo";
             this.Load += new System.EventHandler(this.FormKrnInfo_Load);
             this.contextMenuStrip1.ResumeLayout(false);

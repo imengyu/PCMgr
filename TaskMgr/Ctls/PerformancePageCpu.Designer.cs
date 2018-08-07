@@ -60,7 +60,7 @@
             this.performanceGridGlobal.DrawData2Bg = false;
             this.performanceGridGlobal.GridColor = System.Drawing.Color.FromArgb(((int)(((byte)(206)))), ((int)(((byte)(226)))), ((int)(((byte)(240)))));
             this.performanceGridGlobal.LeftBottomText = "60 秒";
-            this.performanceGridGlobal.LeftText = "% Useage";
+            this.performanceGridGlobal.LeftText = "% 使用率";
             this.performanceGridGlobal.Name = "performanceGridGlobal";
             this.performanceGridGlobal.RightBottomText = "0";
             this.performanceGridGlobal.RightText = "100 %";

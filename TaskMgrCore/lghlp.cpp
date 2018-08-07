@@ -18,6 +18,11 @@ std::wstring str_item_cantcopyfile;
 std::wstring str_item_cantmovefile;
 std::wstring str_item_choose_target_dir;
 
+void MLG_Startup() {
+	str_item_access_denied = L"拒绝访问";
+	str_item_invalidproc = L"无效进程";
+	str_item_op_failed = L"操作失败";
+}
 void MLG_SetLanuageItems_0(int id, LPWSTR msg, int size)
 {
 	switch (id)
@@ -51,9 +56,9 @@ LPWSTR str_item_deling;
 LPWSTR str_item_noadmin1;
 LPWSTR str_item_noadmin2;
 LPWSTR str_item_delfailed;
-LPWSTR str_item_systemidleproc;
+LPWSTR str_item_systemidleproc = L"Idle Process";
 LPWSTR str_item_endprocfailed;
-LPWSTR str_item_openprocfailed;
+LPWSTR str_item_openprocfailed = L"打开进程失败";
 LPWSTR str_item_susprocfailed;
 LPWSTR str_item_resprocfailed;
 LPWSTR str_item_rebootasadmin;
@@ -62,21 +67,21 @@ LPWSTR str_item_cantgetpath;
 LPWSTR str_item_freesuccess;
 LPWSTR str_item_proerty;
 LPWSTR str_item_entrypoint;
-LPWSTR str_item_modulename;
+LPWSTR str_item_modulename = L"模块名称";
 LPWSTR str_item_state;
 LPWSTR str_item_contextswitch;
-LPWSTR str_item_modulepath;
-LPWSTR str_item_address;
-LPWSTR str_item_size;
-LPWSTR str_item_publisher;
+LPWSTR str_item_modulepath = L"模块路径";
+LPWSTR str_item_address = L"基地址";
+LPWSTR str_item_size = L"大小";
+LPWSTR str_item_publisher = L"发布者";
 LPWSTR str_item_windowtext;
 LPWSTR str_item_windowhandle;
 LPWSTR str_item_wndclass;
 LPWSTR str_item_wndbthread;
 LPWSTR str_item_vwinstitle;
-LPWSTR str_item_vmodulestitle;
+LPWSTR str_item_vmodulestitle = L"进程 %s [%d] 的所有模块：%d";
 LPWSTR str_item_vthreadtitle;
-LPWSTR str_item_enum_modulefailed;
+LPWSTR str_item_enum_modulefailed = L"枚举模块失败";
 LPWSTR str_item_enum_threadfailed;
 LPWSTR str_item_freeinvproc;
 LPWSTR str_item_freefailed;
@@ -98,25 +103,33 @@ LPWSTR str_item_unloaddriver;
 LPWSTR str_item_filenotexist;
 LPWSTR str_item_filetrusted;
 LPWSTR str_item_filenottrust;
+LPWSTR str_item_opensc_err;
+LPWSTR str_item_delsc_err;
+LPWSTR str_item_setscstart_err;
 
 #define HASSTR(x) x=(LPWSTR)malloc(size*sizeof(WCHAR));wcscpy_s(x, size, msg)
 
 extern HINSTANCE hInst;
 HINSTANCE hInstRs = NULL;
+BOOL lgRealloc = TRUE;
 
+M_CAPI(void) MLG_SetLanuageItems_NoRealloc() {
+	lgRealloc = FALSE;
+}
 M_CAPI(void) MLG_SetLanuageRes(LPWSTR appstarppath, LPWSTR name)
 {
 	if (!MStrEqualW(name, L"zh") && !MStrEqualW(name, L"zh-CN"))
 	{
 #if _X64_
-		std::wstring  s = FormatString(L"%s\\app\\x64\\%s\\PCMgr64.resource2.dll", appstarppath, name);
+		std::wstring  s = FormatString(L"%s\\%s\\PCMgrApp64.resource2.dll", appstarppath, name);
 #else
-		std::wstring  s = FormatString(L"%s\\app\\x86\\%s\\PCMgr32.resource2.dll", appstarppath, name);
+		std::wstring  s = FormatString(L"%s\\%s\\PCMgrApp32.resource2.dll", appstarppath, name);
 #endif
 		hInstRs = LoadLibrary((LPWSTR)s.c_str());
 		if(!hInstRs) hInstRs = hInst;
 	}
 	else hInstRs = hInst;
+	lgRealloc = TRUE;
 }
 M_CAPI(void) MLG_SetLanuageItems_CallBack(LanuageItems_CallBack c)
 {
@@ -128,6 +141,7 @@ LPWSTR MLG_GetLanuageItem(LPWSTR name)
 }
 void MLG_SetLanuageItems_Destroy()
 {
+	if (!lgRealloc)return;
 	delete str_item_copying;
 	delete str_item_moveing;
 	delete str_item_fileexisted;
@@ -188,6 +202,9 @@ void MLG_SetLanuageItems_Destroy()
 	delete str_item_filenotexist;
 	delete str_item_filetrusted;
 	delete str_item_filenottrust;
+	delete str_item_opensc_err;
+	delete str_item_delsc_err;
+	delete str_item_setscstart_err;
 }
 void MLG_SetLanuageItems_1(int id, LPWSTR msg, int size)
 {
@@ -259,6 +276,10 @@ void MLG_SetLanuageItems_2(int id, LPWSTR msg, int size)
 	case 6: HASSTR(str_item_filenotexist); break;
 	case 7: HASSTR(str_item_filetrusted); break;
 	case 8: HASSTR(str_item_filenottrust); break;
+	case 9: HASSTR(str_item_opensc_err); break;
+	case 10: HASSTR(str_item_delsc_err); break;
+	case 11: HASSTR(str_item_setscstart_err); break;
+		
 	}
 
 }

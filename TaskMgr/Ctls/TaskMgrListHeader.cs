@@ -12,7 +12,9 @@ namespace PCMgr.Ctls
         public TaskMgrListHeader(TaskMgrList par)
         {
             parent = par;
+            SetStyle(ControlStyles.Selectable, true);
             SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
+            SetStyle(ControlStyles.AllPaintingInWmPaint, true);
             SetStyle(ControlStyles.SupportsTransparentBackColor, true);
             items = new TaskMgrListHeaderItemCollection();
             items.HearderAdd += Items_HearderAdd;
@@ -21,7 +23,7 @@ namespace PCMgr.Ctls
             t.Interval = 40;
             if (par != null)
             {
-                HScrollBar vs = new HScrollBar();
+                vs = new HScrollBar();
                 vs.Name = "HScrollBarBase";
                 vs.Location = new Point(0, par.Height - 16);
                 if (par.Width == 0)
@@ -30,6 +32,8 @@ namespace PCMgr.Ctls
                 vs.Height = 16;
                 vs.Visible = false;
                 vs.ValueChanged += Vs_ValueChanged;
+                vs.TabIndex = 3;
+                vs.TabStop = true;
                 par.Controls.Add(vs);
             }
         }
@@ -64,6 +68,7 @@ namespace PCMgr.Ctls
             Vsitem();
         }
 
+        private HScrollBar vs = null;
         private int xOffiest = 0;
         private TaskMgrList parent = null;
         private Timer t = new Timer();
@@ -88,9 +93,121 @@ namespace PCMgr.Ctls
         public int XOffiest
         {
             get { return xOffiest; }
-            set { xOffiest = value;vsed = false; Vsitem(); Invalidate(); }
+            set { xOffiest = value;vsed = false; Vsitem(); Invalidate(); XOffestChanged?.Invoke(this, null); }
         }
 
+        public bool ScrollToItem(TaskMgrListHeaderItem item)
+        {
+            //item.X -Width + item.Width =  +xOffiest 
+            int xrpos = item.X - xOffiest;
+            if (xrpos < 0)
+            {
+                XOffiest = item.X;
+                return true;
+            }
+            else if (xrpos + item.Width > Width)
+            {
+                XOffiest = item.X - Width + item.Width;
+                return true;
+            }
+            return false;
+        }
+        
+        private void ReSetEnterItemArrow()
+        {
+            foreach (TaskMgrListHeaderItem ii in items)
+                if (ii != enteredItem) ii.ArrowType = TaskMgrListHeaderSortArrow.None;
+            if (enteredItem.ArrowType == TaskMgrListHeaderSortArrow.None)
+                enteredItem.ArrowType = TaskMgrListHeaderSortArrow.Ascending;
+            else if (enteredItem.ArrowType == TaskMgrListHeaderSortArrow.Ascending)
+                enteredItem.ArrowType = TaskMgrListHeaderSortArrow.Descending;
+            else if (enteredItem.ArrowType == TaskMgrListHeaderSortArrow.Descending)
+                enteredItem.ArrowType = TaskMgrListHeaderSortArrow.Ascending;
+            arredItem = enteredItem;
+            Invalidate();
+        }
+
+        protected override bool ProcessDialogKey(Keys keyData)
+        {
+            if (keyData == Keys.Right)
+            {
+                if (enteredItem == null)
+                {
+                    if (items.Count > 0)
+                    {
+                        enteredItem = items[0];
+                        if (!ScrollToItem(enteredItem))
+                            Invalidate();
+                        return false;
+                    }
+
+                }
+                else
+                {
+                    TaskMgrListHeaderItem last_selectedItem = enteredItem;
+                    int index = items.IndexOf(last_selectedItem);
+                    if (index < items.Count - 1)
+                        enteredItem = items[index + 1];
+                    if (!ScrollToItem(enteredItem))
+                        Invalidate();
+                    return false;
+                }
+            }
+            else if (keyData == Keys.Left)
+            {
+                if (enteredItem != null)
+                {
+                    TaskMgrListHeaderItem last_selectedItem = enteredItem;
+                    int index = items.IndexOf(last_selectedItem);
+                    if (index >= 1)
+                        enteredItem = items[index - 1];
+                    if (!ScrollToItem(enteredItem))
+                        Invalidate();
+                    return false;
+                }
+            }
+            else if (keyData == Keys.Down)
+            {
+                if (Parent != null)
+                    Parent.Focus();
+            }
+            return base.ProcessDialogKey(keyData);
+        }
+
+        protected override void OnLostFocus(EventArgs e)
+        {
+            if (enteredItem != null)
+            {
+                enteredItem = null;
+                Invalidate();
+            }
+            base.OnLostFocus(e);
+        }
+        protected override void OnGotFocus(EventArgs e)
+        {
+            if (enteredItem == null)
+            {
+                if (items.Count > 0)
+                {
+                    enteredItem = items[0];
+                    Invalidate();
+                }
+            }
+            base.OnGotFocus(e);
+        }
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            if(e.KeyCode == Keys.Enter)
+            {
+                if (enteredItem != null)
+                {
+                    ReSetEnterItemArrow();
+                    MouseEventArgs e1 = new MouseEventArgs(MouseButtons.Left, 1, 0, 0, 0);
+                    CloumClick?.Invoke(this, new TaskMgrListHeaderEventArgs(enteredItem, items.IndexOf(enteredItem), e1));
+                }
+            }
+            base.OnKeyDown(e);
+        }
         protected override void OnSizeChanged(EventArgs e)
         {
             vsed = false;
@@ -113,18 +230,7 @@ namespace PCMgr.Ctls
             if (enteredItem != null)
             {
                 if (e.Button == MouseButtons.Left && e.Clicks == 1)
-                {
-                    foreach (TaskMgrListHeaderItem ii in items)
-                        if (ii != enteredItem) ii.ArrowType = TaskMgrListHeaderSortArrow.None;
-                    if (enteredItem.ArrowType == TaskMgrListHeaderSortArrow.None)
-                        enteredItem.ArrowType = TaskMgrListHeaderSortArrow.Ascending;
-                    else if (enteredItem.ArrowType == TaskMgrListHeaderSortArrow.Ascending)
-                        enteredItem.ArrowType = TaskMgrListHeaderSortArrow.Descending;
-                    else if (enteredItem.ArrowType == TaskMgrListHeaderSortArrow.Descending)
-                        enteredItem.ArrowType = TaskMgrListHeaderSortArrow.Ascending;
-                    arredItem = enteredItem;
-                    Invalidate();
-                }
+                    ReSetEnterItemArrow();
                 CloumClick?.Invoke(this, new TaskMgrListHeaderEventArgs(enteredItem, items.IndexOf(enteredItem), e));
             }
             base.OnMouseClick(e);
@@ -209,7 +315,7 @@ namespace PCMgr.Ctls
                 int x = thisWidth + items[i].Width;
 
                 g.DrawLine(p, new Point(x, 0), new Point(x, h));
-                if (items[i].MouseEntered)
+                if (items[i] == enteredItem)
                     g.FillRectangle(new SolidBrush(Color.FromArgb(229, 243, 255)), new Rectangle(thisWidth + 1, 0, items[i].Width - 1, h));
                 if (items[i].IsHot)
                     g.FillRectangle(new SolidBrush(Color.FromArgb(248, 106, 42)), new Rectangle(thisWidth + 1, 0, items[i].Width - 1, h));
@@ -401,7 +507,7 @@ namespace PCMgr.Ctls
         StringFormat format = null;
         bool m1 = false;
 
-        public string FuckYou { get; set; }
+        public string Identifier { get; set; }
         public bool IsNum { get; set; }
         public bool IsHot
         {

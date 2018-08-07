@@ -44,6 +44,10 @@ namespace PCMgr.WorkWindow
         {
             load_settings();
             load = false;
+
+#if _X64_
+            checkBoxEnableLoadDrvCallback.Enabled = false;
+#endif
         }
         private void load_settings()
         {
@@ -71,12 +75,15 @@ namespace PCMgr.WorkWindow
             checkBoxAutoLoadDriver.Checked = FormMain.GetConfigBool("LoadKernelDriver", "Configure", false);
             checkBoxHighLightNoSystetm.Checked = FormMain.GetConfigBool("HighLightNoSystetm", "Configure", false);
             checkBoxShowDebugWindow.Checked = FormMain.GetConfigBool("ShowDebugWindow", "Configure", true);
+            checkBoxNTOSPDB.Checked = FormMain.GetConfigBool("UseKrnlPDB", "Configure", true);
 
             textBoxTitle.Text = FormMain.GetConfig("Title", "AppSetting", "");
 
             checkBoxShowHotKey.Checked = FormMain.GetConfigBool("HotKey", "AppSetting", true);
             comboBoxShowHotKey1.SelectedItem = FormMain.GetConfig("HotKey1", "AppSetting", "(None)");
             comboBoxShowHotKey2.SelectedItem = FormMain.GetConfig("HotKey2", "AppSetting", "T");
+
+            checkBoxUseMyDbgView.Checked = FormMain.GetConfigBool("LogDbgPrint", "Configure", true);
 
             string terproc = FormMain.GetConfig("TerProcFun", "Configure", "PspTerProc");
             radioButtonPspTerProc.Checked = terproc == "PspTerProc";
@@ -102,6 +109,9 @@ namespace PCMgr.WorkWindow
                 FormMain.SetConfig("TerProcFun", "Configure", "PspTerProc");
             else if (radioButtonPspTerProc.Checked)
                 FormMain.SetConfig("TerProcFun", "Configure", "ApcPspTerProc");
+
+            FormMain.SetConfigBool("LogDbgPrint", "Configure", checkBoxUseMyDbgView.Checked);
+            FormMain.SetConfigBool("UseKrnlPDB", "Configure", checkBoxNTOSPDB.Checked);
 
             FormMain.SetConfigBool("LoadKernelDriver", "Configure", checkBoxAutoLoadDriver.Checked);
             FormMain.SetConfigBool("HighLightNoSystetm", "Configure", checkBoxHighLightNoSystetm.Checked);

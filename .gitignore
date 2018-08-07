@@ -1,8 +1,6 @@
 .vs/
 obj/
 bin/
-Debug/
-Release/
 depends.exe - 快捷方式.lnk
 *.pdb
 *.cache
@@ -14,4 +12,10 @@ depends.exe - 快捷方式.lnk
 *.log
 *.pch
 *.lastbulidstate
-
+*.exp
+*.lib
+*.ilk
+*.pdb
+*.config
+*.xml
+*.diagsession

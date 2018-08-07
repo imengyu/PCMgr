@@ -243,7 +243,7 @@ M_CAPI(BOOL) MSCM_DeleteService(LPWSTR scname, LPWSTR errText)
 	}
 	else {
 		LogErr(L"OpenService error : %d (%s)", GetLastError(), scname);
-		ThrowErrorAndErrorCodeX(GetLastError(), L"打开服务失败", errText, FALSE);
+		ThrowErrorAndErrorCodeX(GetLastError(), str_item_opensc_err, errText, FALSE);
 	}
 	return FALSE;
 }
@@ -273,7 +273,7 @@ M_CAPI(BOOL) MSCM_ChangeScStartType(LPWSTR scname, DWORD type, LPWSTR errText)
 	}
 	else {
 		LogErr(L"OpenService error : %d (%s)", GetLastError(), scname);
-		ThrowErrorAndErrorCodeX(GetLastError(), L"打开服务失败（OpenService error）", errText, FALSE);
+		ThrowErrorAndErrorCodeX(GetLastError(), str_item_opensc_err, errText, FALSE);
 	}
 	return FALSE;
 }
@@ -302,7 +302,7 @@ M_CAPI(BOOL) MSCM_ControlSc(LPWSTR scname, DWORD targetStatus, DWORD targetCtl, 
 	}
 	else {
 		LogErr(L"OpenService error : %d (%s)", GetLastError(), scname);
-		ThrowErrorAndErrorCodeX(GetLastError(), L"打开服务失败（OpenService error）", errText, FALSE);
+		ThrowErrorAndErrorCodeX(GetLastError(), str_item_opensc_err, errText, FALSE);
 	}
 	return FALSE;
 }
@@ -322,22 +322,22 @@ LRESULT MSCM_HandleWmCommand(WPARAM wParam)
 	}
 	case ID_SCMAIN_DEL: {
 		if (wcslen(currSc) > 0 || !MStrEqualW(currSc, L""))
-			MSCM_DeleteService(currSc, L"删除服务失败");
+			MSCM_DeleteService(currSc, str_item_delsc_err);
 		break;
 	}
 	case ID_SCMAIN_DISABLE: {
 		if (wcslen(currSc) > 0 || !MStrEqualW(currSc, L""))
-			MSCM_ChangeScStartType(currSc, SERVICE_DISABLED, L"");
+			MSCM_ChangeScStartType(currSc, SERVICE_DISABLED, str_item_setscstart_err);
 		break;
 	}
 	case ID_SCMAIN_AUTOSTART: {
 		if (wcslen(currSc) > 0 || !MStrEqualW(currSc, L"")) 
-			MSCM_ChangeScStartType(currSc, SERVICE_AUTO_START, L"");
+			MSCM_ChangeScStartType(currSc, SERVICE_AUTO_START, str_item_setscstart_err);
 		break;
 	}
 	case ID_SCMAIN_NOAUTOSTART: {
 		if (wcslen(currSc) > 0 || !MStrEqualW(currSc, L""))
-			MSCM_ChangeScStartType(currSc, SERVICE_DEMAND_START, L"");
+			MSCM_ChangeScStartType(currSc, SERVICE_DEMAND_START, str_item_setscstart_err);
 		break;
 	}
 	case ID_SCMAIN_REBOOT: 
@@ -362,7 +362,7 @@ LRESULT MSCM_HandleWmCommand(WPARAM wParam)
 					return TRUE;
 				}
 			}
-			else ThrowErrorAndErrorCodeX(GetLastError(), L"打开服务失败（OpenService）", (LPWSTR)str_item_op_failed.c_str(), FALSE);
+			else ThrowErrorAndErrorCodeX(GetLastError(), str_item_opensc_err, (LPWSTR)str_item_op_failed.c_str(), FALSE);
 		}
 		break;
 	}
@@ -382,7 +382,7 @@ LRESULT MSCM_HandleWmCommand(WPARAM wParam)
 					return TRUE;
 				}
 			}
-			else ThrowErrorAndErrorCodeX(GetLastError(), L"打开服务失败（OpenService）", (LPWSTR)str_item_op_failed.c_str(), FALSE);
+			else ThrowErrorAndErrorCodeX(GetLastError(), str_item_opensc_err, (LPWSTR)str_item_op_failed.c_str(), FALSE);
 		}
 		break;
 	}	
@@ -413,13 +413,18 @@ LRESULT MSCM_HandleWmCommand(WPARAM wParam)
 	}    
 	return 0;
 }
-M_CAPI(void) MSCM_ShowMenu(HWND hDlg, LPWSTR serviceName, DWORD running, DWORD startType, LPWSTR path)
+M_CAPI(void) MSCM_ShowMenu(HWND hDlg, LPWSTR serviceName, DWORD running, DWORD startType, LPWSTR path, int x,int y)
 {
 	HMENU hroot = LoadMenu(hInstRs, MAKEINTRESOURCE(IDR_MENUSCMAIN));
 	if (hroot) {
 		HMENU hpop = GetSubMenu(hroot, 0);
 		POINT pt;
-		GetCursorPos(&pt);
+		if (x == 0 && y == 0)
+			GetCursorPos(&pt);
+		else {
+			pt.x = x;
+			pt.y = y;
+		}
 
 		if (running == SERVICE_STOPPED)
 		{

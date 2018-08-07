@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{FBDCA192-8453-45DF-A94F-8AB317AE617A}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <ProjectGuid>{9402F872-668B-472A-AC0C-62643A550464}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>PCMgr</RootNamespace>
-    <AssemblyName>PCMgr64</AssemblyName>
+    <AssemblyName>PCMgrApp64</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <IsWebBootstrapper>false</IsWebBootstrapper>
@@ -33,7 +33,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\Debug\</OutputPath>
+    <OutputPath>..\Debug_64\</OutputPath>
     <DefineConstants>TRACE;DEBUG;_X64_</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -44,8 +44,8 @@
     <PlatformTarget>x64</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\Release\app\x64\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <OutputPath>..\Release_64\</OutputPath>
+    <DefineConstants>TRACE;_X64_</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -73,26 +73,26 @@
   <PropertyGroup />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
-    <OutputPath>..\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <OutputPath>..\Debug_64\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;_X64_</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DebugType>full</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <OutputPath>..\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <OutputPath>..\Release_64\</OutputPath>
+    <DefineConstants>TRACE;_X64_</DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <DebugSymbols>true</DebugSymbols>
-    <OutputPath>..\Debug\</OutputPath>
+    <OutputPath>..\Debug_64\</OutputPath>
     <DefineConstants>TRACE;DEBUG;_X64_</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DebugType>full</DebugType>
@@ -101,7 +101,7 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <OutputPath>..\Release\</OutputPath>
+    <OutputPath>..\Release_64\</OutputPath>
     <DefineConstants>TRACE;_X64_</DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
@@ -110,9 +110,7 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup />
-  <PropertyGroup>
-    <ApplicationManifest>app.manifest</ApplicationManifest>
-  </PropertyGroup>
+  <PropertyGroup />
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -180,12 +178,6 @@
     <Compile Include="Ctls\TaskMgrListHeader.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Dialogs\FormAbout.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Dialogs\FormAbout.Designer.cs">
-      <DependentUpon>FormAbout.cs</DependentUpon>
-    </Compile>
     <Compile Include="FormMain.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -215,11 +207,23 @@
     <Compile Include="Ctls\TaskMgrList.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Dialogs\FormAbout.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Dialogs\FormAbout.Designer.cs">
+      <DependentUpon>FormAbout.cs</DependentUpon>
+    </Compile>
     <Compile Include="WorkWindow\FormCheckFileUse.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="WorkWindow\FormCheckFileUse.Designer.cs">
       <DependentUpon>FormCheckFileUse.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WorkWindow\FormDA.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WorkWindow\FormDA.Designer.cs">
+      <DependentUpon>FormDA.cs</DependentUpon>
     </Compile>
     <Compile Include="WorkWindow\FormDelFileProgress.cs">
       <SubType>Form</SubType>
@@ -263,6 +267,12 @@
     <Compile Include="WorkWindow\FormSettings.Designer.cs">
       <DependentUpon>FormSettings.cs</DependentUpon>
     </Compile>
+    <Compile Include="WorkWindow\FormSpeedBall.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WorkWindow\FormSpeedBall.Designer.cs">
+      <DependentUpon>FormSpeedBall.cs</DependentUpon>
+    </Compile>
     <Compile Include="WorkWindow\FormSpyWindow.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -287,20 +297,21 @@
     <EmbeddedResource Include="Ctls\PerformancePageRam.resx">
       <DependentUpon>PerformancePageRam.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\FormAbout.resx">
-      <DependentUpon>FormAbout.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="FormMain.en.resx">
       <DependentUpon>FormMain.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FormMain.resx">
       <DependentUpon>FormMain.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormMain.zh.resx">
-      <DependentUpon>FormMain.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Lanuages\LanuageResource_en.resx">
       <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>LanuageResource_en.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormDA.en.resx">
+      <DependentUpon>FormDA.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormDA.resx">
+      <DependentUpon>FormDA.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="WorkWindow\FormKrnInfo.en.resx">
       <DependentUpon>FormKrnInfo.cs</DependentUpon>
@@ -308,8 +319,14 @@
     <EmbeddedResource Include="WorkWindow\FormKrnInfo.resx">
       <DependentUpon>FormKrnInfo.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormLoadDriver.en.resx">
+      <DependentUpon>FormLoadDriver.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="WorkWindow\FormLoadDriver.resx">
       <DependentUpon>FormLoadDriver.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormSpeedBall.resx">
+      <DependentUpon>FormSpeedBall.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="WorkWindow\FormVHandles.en.resx">
       <DependentUpon>FormVHandles.cs</DependentUpon>
@@ -324,6 +341,7 @@
     <EmbeddedResource Include="Lanuages\LanuageResource_zh.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>LanuageResource_zh.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -335,6 +353,27 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="Dialogs\FormAbout.resx">
+      <DependentUpon>FormAbout.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormCheckFileUse.en.resx">
+      <DependentUpon>FormCheckFileUse.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormCheckFileUse.resx">
+      <DependentUpon>FormCheckFileUse.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormDelFileProgress.resx">
+      <DependentUpon>FormDelFileProgress.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormFileTool.en.resx">
+      <DependentUpon>FormFileTool.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormFileTool.resx">
+      <DependentUpon>FormFileTool.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormFillWithData.en.resx">
+      <DependentUpon>FormFillWithData.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="WorkWindow\FormFillWithData.resx">
       <DependentUpon>FormFillWithData.cs</DependentUpon>
     </EmbeddedResource>

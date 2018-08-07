@@ -114,6 +114,15 @@
     <ClInclude Include="sysstructs.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="kda.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="settinghlp.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ntsymbol.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -188,6 +197,15 @@
     <ClCompile Include="handlehlp.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="kda.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="settinghlp.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ntsymbol.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="TaskMgrCore.rc">
@@ -214,6 +232,12 @@
       <Filter>资源文件</Filter>
     </Image>
     <Image Include="..\..\..\..\图片\Res\325.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="..\TaskMgr\icoPcmgrCos.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="..\TaskMgr\icoPcmgr.ico">
       <Filter>资源文件</Filter>
     </Image>
   </ItemGroup>

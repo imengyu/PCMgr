@@ -29,9 +29,11 @@ MFCALLBACK mfmain_callback;
 HICON hiconFolder = NULL, hiconMyComputer = NULL;
 LPWSTR strMyComputer = NULL;
 
+#define OB_TYPE_INDEX_FILE 28
+
 typedef void(__cdecl*MFUSEINGCALLBACK)(SYSTEM_HANDLE_TABLE_ENTRY_INFO handle, DWORD dwpid, LPWSTR value, int fileType, LPWSTR exepath);
 
-M_CAPI (BOOL) MFM_EnumFileHandles(const WCHAR* pszFilePath, MFUSEINGCALLBACK callBack)
+M_CAPI(BOOL) MFM_EnumFileHandles(const WCHAR* pszFilePath, MFUSEINGCALLBACK callBack)
 {
 	if (!callBack) { SetLastError(ERROR_INVALID_PARAMETER); return FALSE; }
 
@@ -45,6 +47,7 @@ M_CAPI (BOOL) MFM_EnumFileHandles(const WCHAR* pszFilePath, MFUSEINGCALLBACK cal
 		{
 			delete pSysHandleInformation;
 			SetLastError(ERROR_SHARING_VIOLATION);
+			LogErr(L"MFM_EnumFileHandles err in NtQuerySystemInformation : 0x%08X", status);
 			return FALSE;// some other error
 		}
 		// The previously supplied buffer wasn't enough.
@@ -57,6 +60,7 @@ M_CAPI (BOOL) MFM_EnumFileHandles(const WCHAR* pszFilePath, MFUSEINGCALLBACK cal
 			// some other error so quit.
 			delete pSysHandleInformation;
 			SetLastError(ERROR_SHARING_VIOLATION);
+			LogErr(L"MFM_EnumFileHandles err in NtQuerySystemInformation (2) : 0x%08X", status);
 			return FALSE;
 		}
 	}
@@ -66,28 +70,39 @@ M_CAPI (BOOL) MFM_EnumFileHandles(const WCHAR* pszFilePath, MFUSEINGCALLBACK cal
 	{
 		//if (pSysHandleInformation->Handles[i].dwProcessId == GetCurrentProcessId())
 		//{
-			WCHAR strNtPath[MAX_PATH];
-			WCHAR strDosPath[MAX_PATH];
-			HANDLE hDup = (HANDLE)pSysHandleInformation->Handles[i].HandleValue;
-			MGetNtPathFromHandle(hDup, strNtPath, MAX_PATH);
-			MNtPathToDosPath(strNtPath, strDosPath, MAX_PATH);
-			if (MStrEqualW(strDosPath, pszFilePath))
-			{
-				WCHAR strValue[16];
-				swprintf_s(strValue, L"0x%X", pSysHandleInformation->Handles[i].HandleValue);
+		//Is a file handle
+		HANDLE hProcess;
+		if (pSysHandleInformation->Handles[i].ObjectTypeIndex == OB_TYPE_INDEX_FILE) {
+			if (MOpenProcessNt(pSysHandleInformation->Handles[i].UniqueProcessId, &hProcess)) {
+				HANDLE hDup = 0;
+				BOOL b = DuplicateHandle(hProcess, (HANDLE)pSysHandleInformation->Handles[i].HandleValue, GetCurrentProcess(),
+					&hDup, DUPLICATE_SAME_ACCESS, FALSE, DUPLICATE_SAME_ACCESS);
+				if (!b) continue;
 
-				WCHAR exeFullPath[MAX_PATH] = { 0 };
-				HANDLE hProcess;
-				MGetProcessFullPathEx(pSysHandleInformation->Handles[i].HandleValue, exeFullPath, &hProcess, L"");
+				WCHAR strNtPath[MAX_PATH];
+				WCHAR strDosPath[MAX_PATH];
+				if (MGetNtPathFromHandle(hDup, strNtPath, MAX_PATH) == ERROR_SUCCESS) {
+					if (MNtPathToDosPath(strNtPath, strDosPath, MAX_PATH) == ERROR_SUCCESS) {
+						if (MStrEqualW(strDosPath, pszFilePath))
+						{
+							WCHAR strValue[16];
+							swprintf_s(strValue, L"0x%X", pSysHandleInformation->Handles[i].HandleValue);
 
-				callBack(pSysHandleInformation->Handles[i], pSysHandleInformation->Handles[i].HandleValue, strValue,
-					pSysHandleInformation->Handles[i].ObjectTypeIndex, exeFullPath);
+							WCHAR exeFullPath[MAX_PATH] = { 0 };
 
-				//now we can close file open by another process
-				//do rename or delete file again
-				//EnableTokenPrivilege(SE_DEBUG_NAME);
-				//CloseHandleWithProcess(pSysHandleInformation->Handles[i]);
+							MGetProcessFullPathEx(pSysHandleInformation->Handles[i].UniqueProcessId, exeFullPath, &hProcess, L"");
+							callBack(pSysHandleInformation->Handles[i], pSysHandleInformation->Handles[i].UniqueProcessId, strValue,
+								pSysHandleInformation->Handles[i].ObjectTypeIndex, exeFullPath);
+
+							//now we can close file open by another process
+							//do rename or delete file again
+							//EnableTokenPrivilege(SE_DEBUG_NAME);
+							//CloseHandleWithProcess(pSysHandleInformation->Handles[i]);
+						}
+					}
+				}
 			}
+		}
 		//}
 	}
 
@@ -192,6 +207,9 @@ M_API BOOL MCopyToClipboard(const WCHAR* pszData, const size_t nDataLen)
 		return TRUE;
 	}
 	return FALSE;
+}
+M_API BOOL MCopyToClipboard2(const WCHAR* pszData) {
+	return MCopyToClipboard(pszData, (wcslen(pszData) + 1) * sizeof(WCHAR));
 }
 
 M_API void MFM_GetRoots()
@@ -366,6 +384,9 @@ M_API BOOL MFM_GetFileAttr(DWORD att, LPWSTR s, int count, BOOL*hiddenout)
 	}
 	return 0;
 }
+M_API BOOL MFM_OpenAFile(LPWSTR path) {
+	return static_cast<int>((ULONG_PTR)ShellExecute(NULL, L"open", path, L"", NULL, 5)) > 32;
+}
 M_API void MFM_Refesh()
 {
 	mfmain_callback(8, 0, 0);
@@ -493,6 +514,12 @@ M_API BOOL MFM_FileExist(const wchar_t* path)
 	//if(_waccess(path, 0)==0)
 	//	return TRUE;
 	return PathFileExists(path);
+}
+M_API BOOL MFM_FileExistA(const char* path)
+{
+	//if(_waccess(path, 0)==0)
+	//	return TRUE;
+	return PathFileExistsA(path);
 }
 M_API void MFM_SetShowHiddenFiles(BOOL b)
 {

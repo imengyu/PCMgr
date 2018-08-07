@@ -7,11 +7,15 @@ typedef ULONG KPRIORITY;
 
 #define STATUS_SUCCESS                         ((NTSTATUS)0x00000000L)
 #define STATUS_UNSUCCESSFUL                ((NTSTATUS)0xC0000001L)
+#define STATUS_NOT_IMPLEMENTED            ((NTSTATUS)0xC0000002L)
+#define STATUS_INVALID_INFO_CLASS      ((NTSTATUS)0xC0000003L)
 #define STATUS_INFO_LENGTH_MISMATCH ((NTSTATUS)0xC0000004L)
 #define STATUS_BUFFER_OVERFLOW           ((NTSTATUS)0x80000005L)
+#define STATUS_INVALID_CID                      ((NTSTATUS)0xC000000BL)
 #define STATUS_ACCESS_DENIED                 ((NTSTATUS)0xC0000022L)
 #define STATUS_BUFFER_TOO_SMALL          ((NTSTATUS)0xC0000023L)
-
+#define STATUS_PROCESS_IS_TERMINATING  ((NTSTATUS)0xC000010AL)
+#define STATUS_THREAD_IS_TERMINATING   ((NTSTATUS)0xC000004BL)
 
 #define NT_SUCCESS(status) ((NTSTATUS)(status)>=0)
 
@@ -84,7 +88,39 @@ typedef struct _OBJECT_ATTRIBUTES {
 typedef OBJECT_ATTRIBUTES *POBJECT_ATTRIBUTES;
 
 
-
+typedef enum _SYSTEM_HANDLE_TYPE
+{
+	OB_TYPE_UNKNOWN,         // 0,未知类型
+	OB_TYPE_TYPE,            // 1,类型
+	OB_TYPE_DIRECTORY,       // 2,目录
+	OB_TYPE_SYMBOLIC_LINK,   // 3,符号链接
+	OB_TYPE_TOKEN,           // 4,安全
+	OB_TYPE_PROCESS,         // 5,进程
+	OB_TYPE_THREAD,          // 6,线程
+	OB_TYPE_JOB,             // 7,Job
+	OB_TYPE_DEBUG_OBJECT,    // 8,调试对象
+	OB_TYPE_EVENT,           // 9,事件
+	OB_TYPE_EVENT_PAIR,      // 10,事件
+	OB_TYPE_MUTANT,          // 11,互斥体
+	OB_TYPE_CALLBACK,        // 12,回调
+	OB_TYPE_SEMAPHORE,       // 13,信号量
+	OB_TYPE_TIMER,           // 14,时钟
+	OB_TYPE_PROFILE,         // 15,Profile
+	OB_TYPE_KEYED_EVENT,     // 16,键盘事件
+	OB_TYPE_WINDOWS_STATION, // 17,fixed
+	OB_TYPE_DESKTOP,         // 18,桌面
+	OB_TYPE_SECTION,         // 19,共享内存区
+	OB_TYPE_KEY,             // 20,键值
+	OB_TYPE_PORT,            // 21,端口
+	OB_TYPE_WAITABLE_PORT,   // 22,可等待端口
+	OB_TYPE_ADAPTER,         // 23,适配器
+	OB_TYPE_CONTROLLER,      // 24,控制器
+	OB_TYPE_DEVICE,          // 25,设备
+	OB_TYPE_DRIVER,          // 26,驱动
+	OB_TYPE_IOCOMPLETION,    // 27,fixed
+	OB_TYPE_FILE,            // 28,内存映射文件
+	OB_TYPE_WMIGUID          // 29,fixed
+} SYSTEM_HANDLE_TYPE;
 typedef enum _THREAD_STATE {
 	StateInitialized,
 	StateReady,
@@ -125,28 +161,6 @@ typedef enum _KWAIT_REASON {
 	WrKernel
 } KWAIT_REASON;
 
-typedef enum _THREADINFOCLASS {
-	ThreadBasicInformation,
-	ThreadTimes,
-	ThreadPriority,
-	ThreadBasePriority,
-	ThreadAffinityMask,
-	ThreadImpersonationToken,
-	ThreadDescriptorTableEntry,
-	ThreadEnableAlignmentFaultFixup,
-	ThreadEventPair_Reusable,
-	ThreadQuerySetWin32StartAddress,
-	ThreadZeroTlsCell,
-	ThreadPerformanceCount,
-	ThreadAmILastThread,
-	ThreadIdealProcessor,
-	ThreadPriorityBoost,
-	ThreadSetTlsArrayAddress,
-	ThreadIsIoPending,
-	ThreadHideFromDebugger,
-	ThreadBreakOnTermination,
-	MaxThreadInfoClass
-}   THREADINFOCLASS;
 typedef enum _SYSTEM_INFORMATION_CLASS {
 	SystemBasicInformation,                // 0 Y N
 	SystemProcessorInformation,            // 1 Y N
@@ -281,6 +295,28 @@ typedef enum _PROCESSINFOCLASS
 	ProcessRaiseUMExceptionOnInvalidHandleClose,
 	MaxProcessInfoClass
 } PROCESSINFOCLASS;
+typedef enum _THREADINFOCLASS {
+	ThreadBasicInformation,
+	ThreadTimes,
+	ThreadPriority,
+	ThreadBasePriority,
+	ThreadAffinityMask,
+	ThreadImpersonationToken,
+	ThreadDescriptorTableEntry,
+	ThreadEnableAlignmentFaultFixup,
+	ThreadEventPair_Reusable,
+	ThreadQuerySetWin32StartAddress,
+	ThreadZeroTlsCell,
+	ThreadPerformanceCount,
+	ThreadAmILastThread,
+	ThreadIdealProcessor,
+	ThreadPriorityBoost,
+	ThreadSetTlsArrayAddress,
+	ThreadIsIoPending,
+	ThreadHideFromDebugger,
+	ThreadBreakOnTermination,
+	MaxThreadInfoClass
+}   THREADINFOCLASS;
 typedef enum _OBJECT_INFORMATION_CLASS {
 	ObjectBasicInformation = 0,
 	ObjectNameInformation = 1,
@@ -294,7 +330,6 @@ typedef struct _PROCESS_BASIC_INFORMATION {
 	ULONG_PTR UniqueProcessId;
 	PVOID Reserved3;
 } PROCESS_BASIC_INFORMATION,*PPROCESS_BASIC_INFORMATION;
-
 typedef struct _THREAD_BASIC_INFORMATION { // Information Class 0
 	LONG     ExitStatus;
 	PVOID    TebBaseAddress;
@@ -303,7 +338,6 @@ typedef struct _THREAD_BASIC_INFORMATION { // Information Class 0
 	LONG Priority;
 	LONG BasePriority;
 } THREAD_BASIC_INFORMATION, *PTHREAD_BASIC_INFORMATION;
-
 typedef struct _SYSTEM_MODULE_INFORMATION {
 	ULONG Reserved[2];
 	PVOID Base;
@@ -358,8 +392,6 @@ typedef struct _OBJECT_BASIC_INFORMATION {
 	ULONG                   SecurityDescriptorLength;
 	LARGE_INTEGER           CreationTime;
 } OBJECT_BASIC_INFORMATION, *POBJECT_BASIC_INFORMATION;
-
-
 
 typedef struct _SYSTEMMODULELIST {
 	ULONG ulCount;
@@ -418,18 +450,28 @@ typedef struct _SYSTEM_PROCESSES { // Information Class 5
 	SYSTEM_THREADS Threads[1];
 } SYSTEM_PROCESSES, *PSYSTEM_PROCESSES;
 
+/*typedef struct _SYSTEM_HANDLE_INFORMATION {
+	ULONG                ProcessId;
+	UCHAR                ObjectTypeNumber;
+	UCHAR                Flags;
+	USHORT               Handle;
+	PVOID                Object;
+	ACCESS_MASK          GrantedAccess;
+} SYSTEM_HANDLE_INFORMATION, *PSYSTEM_HANDLE_INFORMATION;*/
+
+
 typedef struct _SYSTEM_HANDLE_TABLE_ENTRY_INFO {
-    USHORT	UniqueProcessId;
-    USHORT	CreatorBackTraceIndex;
-    UCHAR	ObjectTypeIndex;
-    UCHAR	HandleAttributes;
-    USHORT	HandleValue;
-    PVOID	Object;
-    ULONG	GrantedAccess;
-}SYSTEM_HANDLE_TABLE_ENTRY_INFO;
+	USHORT UniqueProcessId;
+	USHORT CreatorBackTraceIndex;
+	UCHAR ObjectTypeIndex;
+	UCHAR HandleAttributes;
+	USHORT HandleValue;
+	PVOID Object;
+	ULONG GrantedAccess;
+} SYSTEM_HANDLE_TABLE_ENTRY_INFO, *PSYSTEM_HANDLE_TABLE_ENTRY_INFO;
 
 typedef struct _SYSTEM_HANDLE_INFORMATION {
-	DWORD NumberOfHandles;
+	ULONG NumberOfHandles;
 	SYSTEM_HANDLE_TABLE_ENTRY_INFO Handles[1];
 } SYSTEM_HANDLE_INFORMATION, *PSYSTEM_HANDLE_INFORMATION;
 

@@ -64,12 +64,17 @@ namespace PCMgr.Ctls
         private int outtHeight = 0;
         private VScrollBar scrol = null;
         private PerformanceListItem mouseEnterItem = null;
-        private PerformanceListItem selectedtem = null;
+        private PerformanceListItem selectedItem = null;
 
         public event EventHandler SelectedtndexChanged;
 
-        public PerformanceListItem Selectedtem { get { return selectedtem; } set { selectedtem = value;Invalidate(); } }
+        public PerformanceListItem Selectedtem { get { return selectedItem; } set { selectedItem = value;Invalidate(); } }
         public PerformanceListItemCollection Items { get { return items; } }
+
+        protected virtual void OnSelectedtndexChanged(EventArgs e)
+        {
+            SelectedtndexChanged?.Invoke(this, e);
+        }
 
         public void UpdateAll()
         {
@@ -111,12 +116,12 @@ namespace PCMgr.Ctls
         {
             if (it == mouseEnterItem)
             {
-                MListDrawItem(Handle, g.GetHdc(), 2, mouseEnterItem.ItemY + 1 - yOffest, Width - 6, mouseEnterItem.ItemHeight - 2, 3);
+                MListDrawItem(Handle, g.GetHdc(), 2, mouseEnterItem.ItemY + 1 - yOffest, Width - 6, mouseEnterItem.ItemHeight - 2, 1);
                 g.ReleaseHdc();
             }
-            else if (it == selectedtem)
+            else if (it == selectedItem)
             {
-                MListDrawItem(Handle, g.GetHdc(), 2, selectedtem.ItemY + 1 - yOffest, Width - 6, selectedtem.ItemHeight - 2, 1);
+                MListDrawItem(Handle, g.GetHdc(), 2, selectedItem.ItemY + 1 - yOffest, Width - 6, selectedItem.ItemHeight - 2, 4);
                 g.ReleaseHdc();
             }
 
@@ -168,6 +173,61 @@ namespace PCMgr.Ctls
             Invalidate(new Rectangle(0, it.ItemY - yOffest, Width, it.ItemHeight));
         }
 
+        protected override bool ProcessDialogKey(Keys keyData)
+        {
+            if (keyData == Keys.Up)
+            {
+                if (selectedItem != null)
+                {
+                    PerformanceListItem last_selectedItem = selectedItem;
+                    int index = items.IndexOf(last_selectedItem);
+                    if (index >= 1)
+                    {
+                        selectedItem = items[index - 1];
+                        InvalidAItem(selectedItem);
+                        InvalidAItem(last_selectedItem);
+                        OnSelectedtndexChanged(EventArgs.Empty);
+                        return false;
+                    }
+                }
+            }
+            else if (keyData == Keys.Down)
+            {
+                if (selectedItem == null)
+                {
+                    if (items.Count > 0)
+                    {
+                        Selectedtem = items[0];
+                        OnSelectedtndexChanged(EventArgs.Empty);
+                    }
+                    return false; 
+                }
+                else
+                {
+                    PerformanceListItem last_selectedItem = selectedItem;
+                    int index = items.IndexOf(last_selectedItem);
+                    if (index < items.Count - 1)
+                    {
+                        selectedItem = items[index + 1];
+                        InvalidAItem(selectedItem);
+                        InvalidAItem(last_selectedItem);
+                        OnSelectedtndexChanged(EventArgs.Empty);
+                        return false;
+                    }
+                }
+            }
+            return base.ProcessDialogKey(keyData);
+        }
+
+        protected override void OnGotFocus(EventArgs e)
+        {
+            if (selectedItem == null)
+            {
+                if (items.Count > 0)
+                    Selectedtem = items[0];
+            }
+            base.OnGotFocus(e);
+        }
         protected override void OnMouseDown(MouseEventArgs e)
         {
             base.OnMouseDown(e);
@@ -175,9 +235,9 @@ namespace PCMgr.Ctls
             {
                 if (mouseEnterItem != null)
                 {
-                    if (selectedtem != null) InvalidAItem(selectedtem);
-                    selectedtem = mouseEnterItem;
-                    InvalidAItem(selectedtem);
+                    if (selectedItem != null) InvalidAItem(selectedItem);
+                    selectedItem = mouseEnterItem;
+                    InvalidAItem(selectedItem);
                     SelectedtndexChanged?.Invoke(this, null);
                 }
             }
@@ -279,6 +339,10 @@ namespace PCMgr.Ctls
         {
         }
 
+        public int IndexOf(PerformanceListItem newcontrol)
+        {
+            return List.IndexOf(newcontrol);
+        }
         public void Add(PerformanceListItem newcontrol)
         {
             List.Add(newcontrol);

@@ -130,7 +130,7 @@
     <value>&amp;End Task</value>
   </data>
   <data name="BtnRestartText" xml:space="preserve">
-    <value>Restart (E)</value>
+    <value>Restart (&amp;E)</value>
   </data>
   <data name="CancelRun" xml:space="preserve">
     <value>Cancel</value>
@@ -763,9 +763,7 @@ If the last program is stuck or unresponsive, you can also choose to Terminate t
     <value>File not sign.</value>
   </data>
   <data name="FileTrust" xml:space="preserve">
-    <value>File have signed.
-
-&lt;A HREF="#"&gt;View the certificate&lt;/A&gt;</value>
+    <value>File have signed.</value>
   </data>
   <data name="DriverCountLoaded" xml:space="preserve">
     <value>Loaded driver : </value>
@@ -778,5 +776,29 @@ If the last program is stuck or unresponsive, you can also choose to Terminate t
   </data>
   <data name="AppTitle" xml:space="preserve">
     <value>PCMgr</value>
+  </data>
+  <data name="FileTrustViewCrt" xml:space="preserve">
+    <value>&lt;A HREF="#"&gt;View the certificate&lt;/A&gt;</value>
+  </data>
+  <data name="FunCreateing" xml:space="preserve">
+    <value>Developing, please wait!</value>
+  </data>
+  <data name="PleaseEnterDaSize" xml:space="preserve">
+    <value>Please enter the size that you want disassembling</value>
+  </data>
+  <data name="PleaseEnterTargetAddress" xml:space="preserve">
+    <value>Please enter the target address</value>
+  </data>
+  <data name="DblClickToDa" xml:space="preserve">
+    <value>Double click this item to continue disassembling</value>
+  </data>
+  <data name="OpenServiceError" xml:space="preserve">
+    <value>OpenService Error</value>
+  </data>
+  <data name="ChangeScStartTypeFailed" xml:space="preserve">
+    <value>Can not change service start type.</value>
+  </data>
+  <data name="DelScError" xml:space="preserve">
+    <value>Delete service failed</value>
   </data>
 </root>

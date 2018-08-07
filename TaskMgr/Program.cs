@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using PCMgr.Aero.TaskDialog;
 using PCMgr.Lanuages;
@@ -14,16 +15,9 @@ namespace PCMgr
         [STAThread]
         public static void Main(string[]agrs)
         {
-            if (!System.IO.File.Exists(Application.StartupPath + "\\" + FormMain.COREDLLNAME))
-            {
-                MessageBox.Show("Failed to find " + FormMain.COREDLLNAME + " !", "PCMgr - ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
+            FormMain.cfgFilePath = Marshal.PtrToStringUni(FormMain.M_CFG_GetCfgFilePath());
             FormMain.currentProcessName = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
-            FormMain.M_LOG_Init(FormMain.GetConfigBool("ShowDebugWindow", "Configure", false));
             FormMain.InitLanuage();
-            FormMain.Log("CS App starting : " + FormMain.currentProcessName + ".exe");
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
@@ -34,7 +28,7 @@ namespace PCMgr
             if (agrs.Length > 0)
                 run = MainRunAgrs(agrs);
 
-            if (run && FormMain.MAppStartTest())
+            if (run && FormMain.MAppStartTest() && !TryCloseLastApp())
                 run = ShowRun2Warn();
 
             if (run && !FormMain.MIsRunasAdmin())
@@ -83,6 +77,7 @@ namespace PCMgr
                                 FormMain.MAppVProcessModuls(pid, IntPtr.Zero, agrs.Length > 2 ? agrs[2] : "");
                                 return false;
                             }
+                            else FormMain.Log("Invalid args[1] : " + agrs[1]);
                         }
                         break;
                     case "vthread":
@@ -94,6 +89,7 @@ namespace PCMgr
                                 FormMain.MAppVProcessThreads(pid, IntPtr.Zero, agrs.Length > 2 ? agrs[2] : "");
                                 return false;
                             }
+                            else FormMain.Log("Invalid args[1] : " + agrs[1]);
                         }
                         break;
                     case "vwin":
@@ -105,6 +101,7 @@ namespace PCMgr
                                 FormMain.MAppVProcessWindows(pid, IntPtr.Zero, agrs.Length > 2 ? agrs[2] : "");
                                 return false;
                             }
+                            else FormMain.Log("Invalid args[1] : " + agrs[1]);
                         }
                         break;
                     case "vhandle":
@@ -113,20 +110,32 @@ namespace PCMgr
                             uint pid = 0;
                             if (uint.TryParse(agrs[1], out pid))
                             {
-                                new WorkWindow.FormVHandles(pid, agrs.Length > 2 ? agrs[2] : "");
+                                Application.Run(new WorkWindow.FormVHandles(pid, agrs.Length > 2 ? agrs[2] : ""));
                                 return false;
                             }
+                            else FormMain.Log("Invalid args[1] : " + agrs[1]);
                         }
                         break;
                     case "spy":
                         FormMain.Log("MainRunAgrs run spy ");
-                        new WorkWindow.FormSpyWindow(FormMain.GetDesktopWindow());
+                        Application.Run(new WorkWindow.FormSpyWindow(FormMain.GetDesktopWindow()));
+                        return false;
+                    case "kda":
+                        FormMain.Log("MainRunAgrs run kda ");
+                        Application.Run(new WorkWindow.FormDA());
                         return false;
                 }
             }
             return true;
         }
 
+        private static bool TryCloseLastApp()
+        {
+            string lastTitle = FormMain.GetConfig("LastWindowTitle", "AppSetting");
+            if (lastTitle != "")
+                return FormMain.MAppStartTryCloseLastApp(lastTitle);
+            return false;
+        }
         private static bool ShowRun2Warn()
         {
             bool has64 = FormMain.MIsFinded64();
@@ -147,7 +156,10 @@ namespace PCMgr
             else if (rs.CommonButton == Result.Ignore)
             {
                 if (FormMain.MAppKillOld(FormMain.currentProcessName + ".exe"))
+                {
                     TaskDialog.Show(LanuageMgr.GetStr("KillOldSuccess"), FormMain.str_AppTitle);
+                    FormMain.MAppStartTest();
+                }
                 else TaskDialog.Show(LanuageMgr.GetStr("KillOldFailed"), FormMain.str_AppTitle);
                 return true;
             }
@@ -237,6 +249,27 @@ namespace PCMgr
             DialogResult d = MessageBox.Show(e.Exception.ToString(), "Exception ! ", MessageBoxButtons.AbortRetryIgnore, MessageBoxIcon.Error);
             if (d == DialogResult.Abort)
                 Environment.Exit(0);
+        }
+
+        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int MAppMainGetArgs([MarshalAs(UnmanagedType.LPWStr)]string cmdline);
+        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        private static extern IntPtr MAppMainGetArgsStr(int index);
+        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        private static extern void MAppMainGetArgsFreAall();
+
+        public static int ProgramEntry(string cmdline)
+        {
+            int argscount = MAppMainGetArgs(cmdline);
+            List<string> agrs = new List<string>();
+            for (int i = 0; i < argscount; i++)
+                agrs.Add(Marshal.PtrToStringUni(MAppMainGetArgsStr(i)));
+            MAppMainGetArgsFreAall();
+
+            agrs.RemoveAt(0);
+
+            Main(agrs.ToArray());
+            return 0;
         }
     }
 }

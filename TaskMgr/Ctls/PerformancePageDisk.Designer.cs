@@ -46,7 +46,7 @@
             this.performanceGridDiskTime.DrawData2Bg = false;
             this.performanceGridDiskTime.GridColor = System.Drawing.Color.FromArgb(((int)(((byte)(219)))), ((int)(((byte)(237)))), ((int)(((byte)(206)))));
             this.performanceGridDiskTime.LeftBottomText = "60秒";
-            this.performanceGridDiskTime.LeftText = "Activite time";
+            this.performanceGridDiskTime.LeftText = "活动时间";
             this.performanceGridDiskTime.Name = "performanceGridDiskTime";
             this.performanceGridDiskTime.RightBottomText = "0";
             this.performanceGridDiskTime.RightText = "100%";
@@ -72,7 +72,7 @@
             this.performanceGridSpeed.DrawData2Bg = false;
             this.performanceGridSpeed.GridColor = System.Drawing.Color.FromArgb(((int)(((byte)(219)))), ((int)(((byte)(237)))), ((int)(((byte)(206)))));
             this.performanceGridSpeed.LeftBottomText = "60s";
-            this.performanceGridSpeed.LeftText = "Disk transfer rate";
+            this.performanceGridSpeed.LeftText = "磁盘传输速率";
             this.performanceGridSpeed.Name = "performanceGridSpeed";
             this.performanceGridSpeed.RightBottomText = "0";
             this.performanceGridSpeed.RightText = "100%";

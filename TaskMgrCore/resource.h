@@ -18,9 +18,9 @@
 #define IDR_MENUDRIVER                  114
 #define IDI_ICONOPEN                    115
 #define IDI_ICONSHUTDOWN                116
-#define IDI_ICON3                       117
 #define IDI_ICONLOGON                   117
 #define IDR_MENUTASK                    118
+#define IDI_ICONCONSOLE                 118
 #define IDD_VWINS                       125
 #define IDI_ICONACTIVEDWIN              206
 #define IDR_WINSMENU                    209
@@ -172,20 +172,30 @@
 #define IDM_SYSTEM_FORCE_REBOOT         41152
 #define IDC_SOFTACT_TEST2               41153
 #define IDC_SOFTACT_SHOWDRIVER_LOADERTOOL 41154
-#define IDM_VKSTRUCTS 41155
-#define IDM_VTIMER 41156
-#define IDM_VHOTKEY 41157
-#define IDM_DEBUG 41158
-#define ID_THREADMENU_FILEPROP 41159
-#define ID_THREADMENU_OPENPATH 41160
-#define IDM_SGINED 41161
+#define IDM_VKSTRUCTS                   41155
+#define IDM_VTIMER                      41156
+#define IDM_VHOTKEY                     41157
+#define IDM_DEBUG                       41158
+#define ID_THREADMENU_FILEPROP          41159
+#define ID_THREADMENU_OPENPATH          41160
+#define IDM_SGINED                      41161
+#define IDC_SOFTACT_SHOW_KDA            41162
+#define IDC_SOFTACT_TEST3               41163
+#define IDC_PCMGR_CMD                 41164
+#define ID_FMMAIN_CNECK_USING 41165
+
+
+
+
+
+
 
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        118
+#define _APS_NEXT_RESOURCE_VALUE        119
 #define _APS_NEXT_COMMAND_VALUE         40180
 #define _APS_NEXT_CONTROL_VALUE         1001
 #define _APS_NEXT_SYMED_VALUE           101

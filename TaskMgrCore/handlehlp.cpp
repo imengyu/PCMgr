@@ -8,97 +8,131 @@
 extern NtQuerySystemInformationFun NtQuerySystemInformation;
 extern NtQueryObjectFun NtQueryObject;
 
-M_CAPI(BOOL) MEnumProcessHandles(DWORD pid, EHCALLBACK callback)
+M_CAPI(BOOL) M_EH_CloseHandle(DWORD pid, LPVOID handleValue)
 {
-	if (callback)
+	BOOL rs = FALSE;
+	HANDLE hFile = (HANDLE)handleValue;
+	HANDLE hProcess;
+	NTSTATUS status = 0;
+	if (M_SU_OpenProcess(pid, &hProcess, &status)) {
+		HANDLE hDup = 0;
+		BOOL b = DuplicateHandle(hProcess, hFile, GetCurrentProcess(),
+			&hDup, DUPLICATE_SAME_ACCESS, FALSE, DUPLICATE_CLOSE_SOURCE);
+		if (hDup) rs = MCloseHandle(hDup);
+		else LogErr(L"CloseHandleWithProcess failed in DuplicateHandle (%d) PID %d HANDLE : 0x%08X", GetLastError(), pid, hFile);
+		MCloseHandle(hProcess);
+	}
+	else LogErr(L"CloseHandleWithProcess failed (%d) PID %d HANDLE : 0x%08X", GetLastError(), pid, hFile);
+	return rs;
+}
+M_CAPI(BOOL) M_EH_GetHandleTypeName(PSYSTEM_HANDLE_TABLE_ENTRY_INFO pSystemHandle, LPWSTR buffer, size_t bufsize)
+{
+	if (pSystemHandle)
 	{
-		HANDLE hTest = 0;
-		HANDLE hProcess;
 		NTSTATUS status = 0;
-		status = MOpenProcessNt(pid, &hProcess);
-		if (NT_SUCCESS(status))
+		POBJECT_TYPE_INFORMATION pHandleType = (POBJECT_TYPE_INFORMATION)malloc(sizeof(OBJECT_TYPE_INFORMATION));
+		ULONG outLength = 0;
+		if (NtQueryObject((HANDLE)pSystemHandle->HandleValue, ObjectTypeInformation, pHandleType, outLength, &outLength) == STATUS_INFO_LENGTH_MISMATCH)
 		{
-			PSYSTEM_HANDLE_INFORMATION pSysHandleInformation = new SYSTEM_HANDLE_INFORMATION;
-			DWORD size = sizeof(SYSTEM_HANDLE_INFORMATION);
-			DWORD needed = 0;
-
-			status = NtQuerySystemInformation(SystemHandleInformation, pSysHandleInformation, size, &needed);
-			if (status != STATUS_SUCCESS)
+			if (outLength == 0)
 			{
-				delete pSysHandleInformation;
-				if (needed == 0)
-					return FALSE;
-
-				size = needed + 1024;
-				pSysHandleInformation = (PSYSTEM_HANDLE_INFORMATION)malloc(size);
-				memset(pSysHandleInformation, 0, size);
-
-				status = NtQuerySystemInformation(SYSTEM_INFORMATION_CLASS(SystemHandleInformation), pSysHandleInformation, size, &needed);
-				if (status != STATUS_SUCCESS)
-				{
-					delete pSysHandleInformation;
-					Log(L"NtQuerySystemInformation failed 0x%08X", status);
-					return FALSE;
-				}
+				LogErr(L"NtQueryObject failed and return size 0", status);
+				return FALSE;
 			}
 
-			ULONG handleCount = pSysHandleInformation->NumberOfHandles;
-			for (DWORD i = 0; i < handleCount; i++)
-			{
-				if (pSysHandleInformation->Handles[i].UniqueProcessId == pid)
-				{
-					WCHAR strNtPath[MAX_PATH];
-					WCHAR strType[MAX_PATH];
-					memset(strType, 0, sizeof(strType));
-					memset(strNtPath, 0, sizeof(strNtPath));
-
-					HANDLE hDup = (HANDLE)pSysHandleInformation->Handles[i].HandleValue;
-					MGetNtPathFromHandle(hDup, strNtPath, MAX_PATH);
-
-					DWORD u32_ReqLength = 0;
-					POBJECT_TYPE_INFORMATION lpTypeInfo = (POBJECT_TYPE_INFORMATION)malloc(sizeof(OBJECT_TYPE_INFORMATION));
-					memset(lpTypeInfo, 0, sizeof(OBJECT_TYPE_INFORMATION));
-					status = NtQueryObject(hDup, ObjectTypeInformation, lpTypeInfo, sizeof(OBJECT_TYPE_INFORMATION), &u32_ReqLength);
-					if (status == STATUS_INFO_LENGTH_MISMATCH)
-					{
-						free(lpTypeInfo);
-						lpTypeInfo = (POBJECT_TYPE_INFORMATION)malloc(u32_ReqLength);
-						memset(lpTypeInfo, 0, u32_ReqLength);
-						NTSTATUS status = NtQueryObject(hDup, ObjectTypeInformation, lpTypeInfo, u32_ReqLength, &u32_ReqLength);
-						if (status == STATUS_SUCCESS)
-						{
-							if (lpTypeInfo->TypeName.Buffer != nullptr)
-								wcscpy_s(strType, lpTypeInfo->TypeName.Buffer);
-						}
-						else wsprintf(strType, L"2:0x%08X", status);
-					}
-					else if (status != 0xC0000008) {
-						wsprintf(strType, L"1:0x%08X", status);
-					}
-					free(lpTypeInfo);
-
-					WCHAR strAddres[32];
-					WCHAR strObjAddres[32];
-#ifdef _AMD64_
-					wsprintf(strAddres, L"0x%I64X", pSysHandleInformation->Handles[i].HandleValue);
-					wsprintf(strObjAddres, L"0x%I64X", (ULONG_PTR)(PVOID)pSysHandleInformation->Handles[i].Object);
-#else
-					wsprintf(strAddres, L"0x%08X", pSysHandleInformation->Handles[i].HandleValue);
-					wsprintf(strObjAddres, L"0x%08X", (PVOID)pSysHandleInformation->Handles[i].Object);
-#endif
-
-					callback((LPVOID)&pSysHandleInformation->Handles[i], strType, strNtPath, strAddres, strObjAddres, pSysHandleInformation->Handles[i].GrantedAccess, pSysHandleInformation->Handles[i].ObjectTypeIndex);
-				}
-			}
-			delete pSysHandleInformation;
-			MCloseHandle(hProcess);
-			return TRUE;
+			free(pHandleType);
+			pHandleType = (POBJECT_TYPE_INFORMATION)malloc(outLength);
+			memset(pHandleType, 0, outLength);
 		}
-		else Log(L"MOpenProcessNt failed 0x%08X", status);
+	
+		if (pHandleType)
+		{
+			status = NtQueryObject((HANDLE)pSystemHandle->HandleValue, ObjectTypeInformation, pHandleType, outLength, &outLength);
+			if (!NT_SUCCESS(status))
+			{
+				if (status != STATUS_INVALID_HANDLE)
+					LogErr(L"NtQueryObject failed 0x%08X", status);
+				return FALSE;
+			}
+
+			if (pHandleType->TypeName.Length != NULL && pHandleType->TypeName.Buffer != NULL)
+			{
+				wcscpy_s(buffer, bufsize, pHandleType->TypeName.Buffer);
+				return FALSE;
+			}
+		}
 	}
 	return FALSE;
 }
-M_CAPI(BOOL) M_EH_CloseHandle(_SYSTEM_HANDLE_TABLE_ENTRY_INFO *pSystemHandle)
+M_CAPI(BOOL) MEnumProcessHandles(DWORD pid, EHCALLBACK callback)
 {
-	return M_SU_CloseHandleWithProcess(pSystemHandle);
+	if (!callback) return FALSE;
+
+	HANDLE hProcess;
+	NTSTATUS status = 0;
+	status = MOpenProcessNt(pid, &hProcess);
+	if (!NT_SUCCESS(status))
+	{
+		LogErr(L"OpenProcess failed 0x%08X", status);
+		return FALSE;
+	}
+
+	PSYSTEM_HANDLE_INFORMATION pSystemHandleInfos = (PSYSTEM_HANDLE_INFORMATION)malloc(sizeof(SYSTEM_HANDLE_INFORMATION));
+	ULONG outLength = 0;
+	if (NtQuerySystemInformation(SystemHandleInformation, pSystemHandleInfos, sizeof(SYSTEM_HANDLE_INFORMATION), &outLength) == STATUS_INFO_LENGTH_MISMATCH)
+	{
+		if (outLength == 0)
+		{
+			LogErr(L"NtQuerySystemInformation failed and return size 0", status);
+			return FALSE;
+		}
+		free(pSystemHandleInfos);
+
+		pSystemHandleInfos = (PSYSTEM_HANDLE_INFORMATION)malloc(outLength);
+		memset(pSystemHandleInfos, 0, outLength);
+	}
+
+	if (pSystemHandleInfos)
+	{
+		status = NtQuerySystemInformation(SystemHandleInformation, pSystemHandleInfos, outLength, &outLength);
+		if (!NT_SUCCESS(status))
+		{
+			LogErr(L"NtQuerySystemInformation failed 0x%08X", status);
+			return FALSE;
+		}
+
+		ULONG handlesCount = pSystemHandleInfos->NumberOfHandles;
+		for (ULONG i = 0; i < handlesCount; i++)
+		{
+			SYSTEM_HANDLE_TABLE_ENTRY_INFO info = pSystemHandleInfos->Handles[i];
+			if (info.UniqueProcessId != (USHORT)pid) continue;
+
+			HANDLE hDup = 0;
+			BOOL b = DuplicateHandle(hProcess, (HANDLE)info.HandleValue, GetCurrentProcess(),
+				&hDup, DUPLICATE_SAME_ACCESS, FALSE, DUPLICATE_SAME_ACCESS);
+
+			WCHAR handleTypeName[64];
+			memset(handleTypeName, 0, sizeof(handleTypeName));
+			M_EH_GetHandleTypeName(&info, handleTypeName, 64);
+
+			WCHAR handlePath[MAX_PATH];
+			memset(handlePath, 0, sizeof(handlePath));
+
+			if(b) MGetNtPathFromHandle(hDup, handlePath, MAX_PATH);
+
+			WCHAR handleAddress[32];
+			swprintf_s(handleAddress, L"0x%08X", info.HandleValue);
+			WCHAR handleObjAddress[32];
+			swprintf_s(handleObjAddress, L"0x%08X", (ULONG_PTR)info.Object);
+
+			callback((LPVOID)info.HandleValue, handleTypeName, handlePath, handleAddress, handleObjAddress, info.CreatorBackTraceIndex, info.ObjectTypeIndex);
+		}
+
+		free(pSystemHandleInfos);
+	}
+
+	MCloseHandle(hProcess);
+	return TRUE;
 }
+
+

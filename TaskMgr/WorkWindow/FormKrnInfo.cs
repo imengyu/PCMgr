@@ -26,15 +26,6 @@ namespace PCMgr.WorkWindow
         private string oldText = "";
         private uint currentPid = 0;
 
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern bool MCloseHandle(IntPtr handle);
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern IntPtr MGetProcessKinfoOpen(uint handle);
-
-
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        private static extern bool MGetProcessPeb(IntPtr handle, StringBuilder sb, int maxcount);
-
         private void FormKrnInfo_Load(object sender, EventArgs e)
         {
             Text = oldText + " Process : " + procName + " [" + currentPid + "]";
@@ -66,15 +57,17 @@ namespace PCMgr.WorkWindow
             AddItem("ProcessId", currentPid.ToString());
             AddEmeptyItem();
 
-            IntPtr hProcess = IntPtr.Zero;
-            hProcess = MGetProcessKinfoOpen(currentPid);
-            if (hProcess != IntPtr.Zero)
-            {
-                StringBuilder sb = new StringBuilder(64);
-                if (MGetProcessPeb(hProcess, sb, 64))
-                    AddItem("Peb", sb.ToString());
 
-                MCloseHandle(hProcess);
+            FormMain.PEOCESSKINFO info = new FormMain.PEOCESSKINFO();
+            if (FormMain.MCanUseKernel())
+            {
+                if (FormMain.MGetProcessEprocess(currentPid, ref info))
+                {
+                    AddItem("Eprocess", info.Eprocess);
+                    AddItem("Peb", info.PebAddress);
+                    AddItem("Job", info.JobAddress);
+                    AddItem("ImageFileName", info.ImageFileName);
+                }
             }
         }
 
@@ -94,7 +87,7 @@ namespace PCMgr.WorkWindow
         {
             if (listView1.SelectedItems.Count > 0)
             {
-                Clipboard.SetDataObject(listView1.SelectedItems[0].Text + ":" + listView1.SelectedItems[0].SubItems[1].Text);
+                FormMain.MCopyToClipboard2(listView1.SelectedItems[0].Text + ":" + listView1.SelectedItems[0].SubItems[1].Text);
             }
         }
 

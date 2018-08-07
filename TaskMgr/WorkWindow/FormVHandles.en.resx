@@ -158,8 +158,17 @@
   <data name="关闭句柄ToolStripMenuItem.Text" xml:space="preserve">
     <value>Close Handle</value>
   </data>
+  <data name="强制关闭句柄ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>153, 22</value>
+  </data>
   <data name="contextMenuStrip1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>154, 48</value>
+    <value>154, 70</value>
+  </data>
+  <data name="labelEnuming.Size" type="System.Drawing.Size, System.Drawing">
+    <value>89, 12</value>
+  </data>
+  <data name="labelEnuming.Text" xml:space="preserve">
+    <value>Enumerating...</value>
   </data>
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
@@ -184,5 +193,8 @@
         Fv+5hBuyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
         AAAAAAAAAAAAAA==
 </value>
+  </data>
+  <data name="$this.Text" xml:space="preserve">
+    <value>View process handles</value>
   </data>
 </root>

@@ -124,13 +124,13 @@
     <value>自动</value>
   </data>
   <data name="BtnEndProcess" xml:space="preserve">
-    <value>结束进程(E)</value>
+    <value>结束进程(&amp;E)</value>
   </data>
   <data name="BtnEndTask" xml:space="preserve">
-    <value>结束任务(E)</value>
+    <value>结束任务(&amp;E)</value>
   </data>
   <data name="BtnRestartText" xml:space="preserve">
-    <value>重新启动(E)</value>
+    <value>重新启动(&amp;E)</value>
   </data>
   <data name="CancelRun" xml:space="preserve">
     <value>取消运行</value>
@@ -766,9 +766,7 @@ PCMgr 需要管理员权限 才能对系统进行控制和管理。
     <value>文件没有签名</value>
   </data>
   <data name="FileTrust" xml:space="preserve">
-    <value>文件已经签名
-
-&lt;A HREF="#"&gt;查看证书&lt;/A&gt;</value>
+    <value>文件已经签名</value>
   </data>
   <data name="DriverCountLoaded" xml:space="preserve">
     <value>其中已加载：</value>
@@ -781,5 +779,29 @@ PCMgr 需要管理员权限 才能对系统进行控制和管理。
   </data>
   <data name="AppTitle" xml:space="preserve">
     <value>任务管理器</value>
+  </data>
+  <data name="FileTrustViewCrt" xml:space="preserve">
+    <value>&lt;A HREF="#"&gt;查看证书&lt;/A&gt;</value>
+  </data>
+  <data name="FunCreateing" xml:space="preserve">
+    <value>功能正在开发中，敬请期待！</value>
+  </data>
+  <data name="PleaseEnterDaSize" xml:space="preserve">
+    <value>请输入反汇编大小</value>
+  </data>
+  <data name="PleaseEnterTargetAddress" xml:space="preserve">
+    <value>请输入目标地址</value>
+  </data>
+  <data name="DblClickToDa" xml:space="preserve">
+    <value>反汇编大小过大，双击此条目继续反汇编</value>
+  </data>
+  <data name="OpenServiceError" xml:space="preserve">
+    <value>打开服务失败</value>
+  </data>
+  <data name="ChangeScStartTypeFailed" xml:space="preserve">
+    <value>无法改变服务设置</value>
+  </data>
+  <data name="DelScError" xml:space="preserve">
+    <value>无法删除服务</value>
   </data>
 </root>

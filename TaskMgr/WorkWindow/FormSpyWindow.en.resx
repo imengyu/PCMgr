@@ -200,14 +200,14 @@ HWND</value>
   <data name="checkBoxShowVisible.Text" xml:space="preserve">
     <value>Do not show hidden window</value>
   </data>
-  <data name="contextMenuStripMain.Size" type="System.Drawing.Size, System.Drawing">
-    <value>170, 98</value>
-  </data>
   <data name="刷新ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
     <value>169, 22</value>
   </data>
   <data name="刷新ToolStripMenuItem.Text" xml:space="preserve">
     <value>Refesh</value>
+  </data>
+  <data name="toolStripSeparator1.Size" type="System.Drawing.Size, System.Drawing">
+    <value>166, 6</value>
   </data>
   <data name="显示ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
     <value>169, 22</value>
@@ -221,11 +221,38 @@ HWND</value>
   <data name="隐藏ToolStripMenuItem.Text" xml:space="preserve">
     <value>Hide window</value>
   </data>
+  <data name="toolStripSeparator2.Size" type="System.Drawing.Size, System.Drawing">
+    <value>166, 6</value>
+  </data>
+  <data name="启用窗口ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>169, 22</value>
+  </data>
+  <data name="启用窗口ToolStripMenuItem.Text" xml:space="preserve">
+    <value>Enable window</value>
+  </data>
+  <data name="禁用窗口ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>169, 22</value>
+  </data>
+  <data name="禁用窗口ToolStripMenuItem.Text" xml:space="preserve">
+    <value>Disable window</value>
+  </data>
+  <data name="toolStripSeparator3.Size" type="System.Drawing.Size, System.Drawing">
+    <value>166, 6</value>
+  </data>
   <data name="删除ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
     <value>169, 22</value>
   </data>
   <data name="删除ToolStripMenuItem.Text" xml:space="preserve">
     <value>Destroy window</value>
+  </data>
+  <data name="显示逻辑区域ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>169, 22</value>
+  </data>
+  <data name="显示逻辑区域ToolStripMenuItem.Text" xml:space="preserve">
+    <value>Show region</value>
+  </data>
+  <data name="contextMenuStripMain.Size" type="System.Drawing.Size, System.Drawing">
+    <value>170, 198</value>
   </data>
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>

@@ -17,7 +17,10 @@ typedef NTSTATUS(_stdcall *PsResumeProcess_)(PEPROCESS Process);
 typedef NTSTATUS(_stdcall *PsSuspendProcess_)(PEPROCESS Process);
 typedef NTSTATUS(_stdcall *PsLookupProcessByProcessId_)(HANDLE ProcessId, PEPROCESS *Process);
 typedef NTSTATUS(_stdcall *PsLookupThreadByThreadId_)(HANDLE ThreadId, PETHREAD *Thread);
-
+typedef PETHREAD(_stdcall *PsGetNextProcessThread_)(IN PEPROCESS Process, IN PETHREAD Thread);
+typedef NTSTATUS(_stdcall *PsTerminateProcess_)(PEPROCESS Process, NTSTATUS ExitStatus);
+typedef PEPROCESS(_stdcall *PsGetNextProcess_)(PEPROCESS Process);
+typedef ULONG(_stdcall *KeForceResumeThread_)(__inout PKTHREAD Thread);
 
 typedef enum _KAPC_ENVIRONMENT
 {
@@ -94,41 +97,27 @@ typedef struct _LDR_DATA_TABLE_ENTRY32 {
 	LARGE_INTEGER LoadTime;
 } LDR_DATA_TABLE_ENTRY32, *PLDR_DATA_TABLE_ENTRY32;
 
-#ifdef _AMD64_
-typedef struct tag_KERNEL_MODULE
-{
-	WCHAR BaseDllName[64];
-	WCHAR FullDllPath[260];
-	ULONG_PTR EntryPoint;
-	ULONG SizeOfImage;
-	ULONG_PTR DriverObject;
-	ULONG_PTR Base;
-	ULONG Order;
-}KERNEL_MODULE, *PKERNEL_MODULE;
-#else
-typedef struct tag_KERNEL_MODULE
-{
-	WCHAR BaseDllName[64];
-	WCHAR FullDllPath[260];
-	ULONG EntryPoint;
-	ULONG SizeOfImage;
-	ULONG_PTR DriverObject;
-	ULONG_PTR Base;
-	ULONG Order;
-}KERNEL_MODULE, *PKERNEL_MODULE;
-#endif
+typedef struct _OBJECT_HANDLE_FLAG_INFORMATION {
+	BOOLEAN Inherit;
+	BOOLEAN ProtectFromClose;
+}OBJECT_HANDLE_FLAG_INFORMATION, *POBJECT_HANDLE_FLAG_INFORMATION;
 
+
+extern NTKERNELAPI int PsGetProcessPriorityClass(PEPROCESS Process);
+extern NTKERNELAPI VOID* PsGetProcessJob(PEPROCESS Process);
+extern NTKERNELAPI VOID* PsGetProcessPeb(PEPROCESS Process);
+extern NTKERNELAPI UCHAR* PsGetProcessImageFileName(PEPROCESS Process);
+extern NTKERNELAPI VOID* PsGetThreadTeb(PETHREAD Thread);
 extern NTKERNELAPI NTSTATUS PsResumeProcess(PEPROCESS Process);
 extern NTKERNELAPI NTSTATUS PsSuspendProcess(PEPROCESS Process);
 extern NTKERNELAPI PEPROCESS IoThreadToProcess(PETHREAD Thread);
 extern NTKERNELAPI NTSTATUS ZwQueryInformationThread(HANDLE ThreadHandle, THREADINFOCLASS ThreadInformationClass, PVOID ThreadInformation, ULONG ThreadInformationLength, PULONG ReturnLength OPTIONAL);
 extern NTKERNELAPI NTSTATUS ZwQueryInformationProcess(HANDLE ProcessHandle, PROCESSINFOCLASS ProcessInformationClass, PVOID ProcessInformation, ULONG ProcessInformationLength, PULONG ReturnLength);
 extern NTKERNELAPI NTSTATUS ObReferenceObjectByName(PUNICODE_STRING ObjectName, ULONG Attributes, PACCESS_STATE AccessState, ACCESS_MASK DesiredAccess, POBJECT_TYPE ObjectType, KPROCESSOR_MODE AccessMode, PVOID ParseContext, PVOID *Object);
+extern NTKERNELAPI NTSTATUS ObSetHandleAttributes(HANDLE Handle, POBJECT_HANDLE_FLAG_INFORMATION HandleFlags, KPROCESSOR_MODE PreviousMode);
 
 extern POBJECT_TYPE *IoDriverObjectType;
 
 extern VOID NTAPI KeInitializeApc(__in PKAPC Apc, __in PKTHREAD Thread, __in KAPC_ENVIRONMENT   TargetEnvironment, __in PKKERNEL_ROUTINE KernelRoutine, __in_opt PKRUNDOWN_ROUTINE RundownRoutine, __in PKNORMAL_ROUTINE NormalRoutine, __in KPROCESSOR_MODE Mode, __in PVOID Context);
 extern BOOLEAN NTAPI KeInsertQueueApc(IN PKAPC Apc, IN PVOID SystemArgument1, IN PVOID SystemArgument2, IN KPRIORITY PriorityBoost);
-
-
 

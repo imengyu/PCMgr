@@ -6,6 +6,7 @@
 #include "proc.h"
 #include "kmodul.h"
 #include "monitor.h"
+#include "handle.h"
 
 #define DEVICE_LINK_NAME L"\\??\\PCMGRK"
 #define DEVICE_OBJECT_NAME  L"\\Device\\PCMGRK"
@@ -25,21 +26,34 @@ PsSuspendProcess_ _PsSuspendProcess;
 PsLookupProcessByProcessId_ _PsLookupProcessByProcessId;
 PsLookupThreadByThreadId_ _PsLookupThreadByThreadId;
 
+ULONG_PTR CurrentDbgViewProcess = 0;
 ULONG_PTR CurrentPCMgrProcess = 0;
 ULONG LoadedModuleOrder = 0;
 PLIST_ENTRY PsLoadedModuleList = NULL;
 PLIST_ENTRY ListEntry = NULL;
 PLIST_ENTRY ListEntryScan = NULL;
+PEPROCESS PEprocessSystem = NULL;
 
 extern BOOLEAN kxCanCreateProcess;
 extern BOOLEAN kxCanCreateThread;
 extern BOOLEAN kxCanLoadDriver;
 
+ULONG_PTR kxNtosBaseAddress = 0;
+WCHAR kxNtosName[32];
+PRKEVENT kxEventObjectDbgViewEvent = NULL;
+PRKEVENT kxEventObjectMain = NULL;
+OBJECT_HANDLE_INFORMATION kxObjectHandleInfoEventMain;
+OBJECT_HANDLE_INFORMATION kxObjectHandleInfoDbgViewEvent;
+BOOLEAN kxMyDbgViewCanUse = FALSE;
+
+PDBGPRINT_DATA kxMyDbgViewDataStart = NULL;
+PDBGPRINT_DATA kxMyDbgViewDataEnd = NULL;
+
+BOOLEAN kxMyDbgViewLastReceived = FALSE;
+
 NTSTATUS DriverEntry(IN PDRIVER_OBJECT pDriverObject, IN PUNICODE_STRING pRegPath)
 {
 	NTSTATUS ntStatus;
-
-	KdPrint(("Enter DriverEntry!\n"));
 
 	UNICODE_STRING DeviceObjectName; // NT Device Name 
 	UNICODE_STRING DeviceLinkName; // Win32 Name 
@@ -74,8 +88,9 @@ NTSTATUS DriverEntry(IN PDRIVER_OBJECT pDriverObject, IN PUNICODE_STRING pRegPat
 		KdPrint(("Couldn't create symbolic link\n"));
 		IoDeleteDevice(deviceObject);
 	}
-
 	
+	KxLoadFunctions();
+
 #ifdef _AMD64_
 	PLDR_DATA_TABLE_ENTRY64 ldr;
 	ldr = (PLDR_DATA_TABLE_ENTRY64)pDriverObject->DriverSection;
@@ -87,8 +102,24 @@ NTSTATUS DriverEntry(IN PDRIVER_OBJECT pDriverObject, IN PUNICODE_STRING pRegPat
 	//获取内核模块链表
 	PsLoadedModuleList = (PLIST_ENTRY)(ULONG_PTR)ldr->InLoadOrderLinks.Flink;
 	ListEntry = PsLoadedModuleList->Flink;
+	//获取ntoskrnl基址和名称
+	ListEntryScan = ListEntry;
+#ifdef _AMD64_
+	PLDR_DATA_TABLE_ENTRY64 ModuleNtos = CONTAINING_RECORD(ListEntry, LDR_DATA_TABLE_ENTRY64, InLoadOrderLinks);
+	if (ModuleNtos->BaseDllName.Buffer != 0)
+		_wcscpy_s(kxNtosName, 32, (wchar_t*)(ULONG_PTR)ModuleNtos->BaseDllName.Buffer);
+	kxNtosBaseAddress = ModuleNtos->DllBase;
+#else
+	PLDR_DATA_TABLE_ENTRY32 ModuleNtos = CONTAINING_RECORD(ListEntry, LDR_DATA_TABLE_ENTRY32, InLoadOrderLinks);
+	if (ModuleNtos->BaseDllName.Buffer != 0) {
+		_wcscpy_s(kxNtosName, 32, (wchar_t*)(ULONG_PTR)ModuleNtos->BaseDllName.Buffer);
+	}
+	kxNtosBaseAddress = ModuleNtos->DllBase;
+#endif
 
-	KxLoadFunctions();
+
+	NTSTATUS statusKxD = KxInitMyDbgView();
+	if (!NT_SUCCESS(statusKxD)) KdPrint(("KxInitMyDbgView failed! 0x%08X\n", statusKxD));
 
 	NTSTATUS statusKx = KxInitProtectProcess();
 	if(!NT_SUCCESS(statusKx)) KdPrint(("KxInitProtectProcess failed! 0x%08X\n", statusKx));
@@ -96,10 +127,11 @@ NTSTATUS DriverEntry(IN PDRIVER_OBJECT pDriverObject, IN PUNICODE_STRING pRegPat
 	NTSTATUS statusKxM = KxPsMonitorInit();
 	if (!NT_SUCCESS(statusKxM)) KdPrint(("KxPsMonitorInit failed! 0x%08X\n", statusKxM));
 
-	KdPrint(("DriverEntry end!\n"));
+	PEprocessSystem = IoGetCurrentProcess();
+
+	KdPrint(("DriverEntry OK!\n"));
 	return ntStatus;
 }
-
 VOID DriverUnload(_In_ struct _DRIVER_OBJECT *pDriverObject)
 {
 	UNICODE_STRING  DeviceLinkName;
@@ -108,6 +140,7 @@ VOID DriverUnload(_In_ struct _DRIVER_OBJECT *pDriverObject)
 
 	KxUnInitProtectProcess();
 	KxPsMonitorUnInit();
+	KxUnInitMyDbgView();
 
 	RtlInitUnicodeString(&DeviceLinkName, DEVICE_LINK_NAME);
 	IoDeleteSymbolicLink(&DeviceLinkName);
@@ -143,32 +176,80 @@ NTSTATUS IOControlDispatch(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp)
 	switch (IoControlCode)
 	{
 	case CTL_KERNEL_INIT: {
-		Status = InitKernel(*(ULONG*)InputData);
+		PKINITAGRS agrs = (PKINITAGRS)InputData;
+		Status = InitKernel(agrs);
+		if (agrs->NeedNtosVaule) {
+			KNTOSVALUE ntosvalue;
+			ntosvalue.NtostAddress = kxNtosBaseAddress;
+			ntosvalue.KernelDataInited = kernelInited;
+			_wcscpy_s(ntosvalue.NtosModuleName, 32, kxNtosName);
+			_memcpy_s(OutputData, OutputDataLength, &ntosvalue, sizeof(ntosvalue));
+			Informaiton = sizeof(KNTOSVALUE);
+		}
+		break;
+	}
+	case CTL_KERNEL_INIT_WITH_PDB_DATA: {
+		if (!kernelInited) {
+			PNTOS_PDB_DATA data = (PNTOS_PDB_DATA)InputData;
+			KxGetFunctionsFormPDBData(data);
+			KxGetStructOffestsFormPDBData(&data->StructOffestData);
+			KdPrint(("Pdb Data received."));
+			kernelInited = TRUE;
+		}
+		Status = STATUS_SUCCESS;
+		break;
+	}
+	case CTL_SET_DBGVIEW_EVENT: {
+		BOOLEAN result = FALSE;
+		PDBGVIEW_SENDER hEvent = (PDBGVIEW_SENDER)InputData;
+		if (!KxMyDbgViewWorking())
+		{
+			Status = ObReferenceObjectByHandle(hEvent->EventHandle, EVENT_MODIFY_STATE, *ExEventObjectType, KernelMode, (PVOID*)&kxEventObjectDbgViewEvent, &kxObjectHandleInfoDbgViewEvent);
+			if (NT_SUCCESS(Status))
+			{
+				CurrentDbgViewProcess = hEvent->ProcessId;
+				kxMyDbgViewCanUse = TRUE;
+				Status = STATUS_SUCCESS;
+				result = TRUE;
+			}
+		}
+		else Status = STATUS_SUCCESS;
+		_memcpy_s(OutputData, OutputDataLength, &result, sizeof(result));
+		Informaiton = OutputDataLength;
 		break;
 	}
 	case CTL_SET_KERNEL_EVENT: {
+		HANDLE hEvent = *(HANDLE*)InputData;
+		Status = ObReferenceObjectByHandle(hEvent, GENERIC_ALL, NULL, KernelMode, (PVOID*)&kxEventObjectMain, &kxObjectHandleInfoEventMain);
+		if (NT_SUCCESS(Status))
+		{
 
-
+			Status = STATUS_SUCCESS;
+		}
 		break;
 	}
 	case CTL_SET_MON_REFUSE_CREATE_PROC: {
 		BOOLEAN allow = *(UCHAR*)InputData;
 		kxCanCreateProcess = allow;
+		Status = STATUS_SUCCESS;
 		break;
 	}
 	case CTL_SET_MON_REFUSE_CREATE_THREAD: {
 		BOOLEAN allow = *(UCHAR*)InputData;
 		kxCanCreateThread = allow;
+		Status = STATUS_SUCCESS;
 		break;
 	}
 	case CTL_SET_MON_REFUSE_LOAD_IMAGE: {
 		BOOLEAN allow = *(UCHAR*)InputData;
 		kxCanLoadDriver = allow;
+		Status = STATUS_SUCCESS;
 		break;
 	}
 	case CTL_SET_CURRENT_PCMGR_PROCESS: {
 		ULONG_PTR pid = *(ULONG_PTR*)InputData;
 		CurrentPCMgrProcess = pid;
+		Status = STATUS_SUCCESS;
 		break;
 	}
 	case CTL_OPEN_PROCESS: {
@@ -207,43 +288,49 @@ NTSTATUS IOControlDispatch(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp)
 		}
 		break;
 	}
-	case CTL_TREMINATE_PROCESS: {
-		HANDLE hProcess = *(HANDLE*)InputData;
-		Status = KxTerminateProcess(hProcess, 0);
-		_memcpy_s(OutputData, OutputDataLength, &Status, sizeof(Status));
-		Informaiton = OutputDataLength;
-		break;
-	}
-	case CTL_TREMINATE_THREAD: {
-		HANDLE hThread = *(HANDLE*)InputData;
-		Status = KxTerminateThread(hThread, 0);
-		_memcpy_s(OutputData, OutputDataLength, &Status, sizeof(Status));
-		Informaiton = OutputDataLength;
-		break;
-	}
 	case CTL_GET_EPROCESS: {
-		ULONG_PTR pid = *(ULONG_PTR*)InputData;
-
-		PEPROCESS pEProc;
-		Status = _PsLookupProcessByProcessId((HANDLE)pid, &pEProc);
-		if (NT_SUCCESS(Status))
-		{
-			_memcpy_s(OutputData, OutputDataLength, &pEProc, sizeof(pEProc));
+		ULONG pid = *(ULONG*)InputData;
+		if (pid == 0) {
+			KPROCINFO kpinfo;
+			_memset(&kpinfo, 0, sizeof(kpinfo));
+			_memcpy_s(OutputData, OutputDataLength, &kpinfo, sizeof(kpinfo));
 			Informaiton = OutputDataLength;
-
-			ObDereferenceObject(pEProc);
 			Status = STATUS_SUCCESS;
+		}
+		else {
+			PEPROCESS pEProc;
+			Status = _PsLookupProcessByProcessId((HANDLE)(ULONG_PTR)pid, &pEProc);
+			if (NT_SUCCESS(Status))
+			{
+				KPROCINFO kpinfo;
+				_memset(&kpinfo, 0, sizeof(kpinfo));
+				kpinfo.EProcess = (ULONG_PTR)pEProc;
+				kpinfo.PebAddress = (ULONG_PTR)PsGetProcessPeb(pEProc);
+				kpinfo.JobAddress = (ULONG_PTR)PsGetProcessJob(pEProc);
+				kpinfo.PriorityClass = (ULONG_PTR)PsGetProcessPriorityClass(pEProc);
+				PUCHAR procName = PsGetProcessImageFileName(pEProc);
+				size_t procNameSize = strlen(procName) + 1;
+				_memcpy_s(kpinfo.FullPath, procNameSize, procName, procNameSize);
+				_memcpy_s(OutputData, OutputDataLength, &kpinfo, sizeof(kpinfo));
+				Informaiton = OutputDataLength;
+
+				ObDereferenceObject(pEProc);
+				Status = STATUS_SUCCESS;
+			}
 		}
 		break;
 	}
 	case CTL_GET_ETHREAD: {
-		ULONG_PTR tid = *(ULONG_PTR*)InputData;
+		ULONG tid = *(ULONG*)InputData;
 
 		PETHREAD pEThread;
-		Status = _PsLookupThreadByThreadId((HANDLE)tid, &pEThread);
+		Status = _PsLookupThreadByThreadId((HANDLE)(ULONG_PTR)tid, &pEThread);
 		if (NT_SUCCESS(Status)) {
-			ULONG_PTR *outBuf = (ULONG_PTR *)OutputData;
-			_memcpy_s(OutputData, OutputDataLength, &pEThread, sizeof(pEThread));
+			KTHREADINFO ktinfp;
+			_memset(&ktinfp, 0, sizeof(ktinfp));
+			ktinfp.EThread = (ULONG_PTR)pEThread;
+			ktinfp.TebAddress = (ULONG_PTR)PsGetThreadTeb(pEThread);
+			_memcpy_s(OutputData, OutputDataLength, &ktinfp, sizeof(ktinfp));
 			Informaiton = OutputDataLength;
 			ObDereferenceObject(pEThread);
 			Status = STATUS_SUCCESS;
@@ -262,7 +349,7 @@ NTSTATUS IOControlDispatch(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp)
 		_memcpy_s(OutputData, OutputDataLength, &Status, sizeof(Status));
 		Informaiton = OutputDataLength;
 		break;
-	}	
+	}
 	case CTL_RESUME_PROCESS: {
 		ULONG_PTR pid = *(ULONG_PTR*)InputData;
 		PEPROCESS pEProc;
@@ -280,7 +367,7 @@ NTSTATUS IOControlDispatch(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp)
 		KxForceShutdown();
 		Status = STATUS_SUCCESS;
 		break;
-	}	
+	}
 	case CTL_FORCE_REBOOT: {
 		KxForceReBoot();
 		Status = STATUS_SUCCESS;
@@ -289,35 +376,58 @@ NTSTATUS IOControlDispatch(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp)
 	case CTL_TEST: {
 		if (InputData != NULL && InputDataLength > 0)
 		{
-			KdPrint(("%s\n", (CHAR*)InputData));
+			KdPrint(((CHAR*)InputData));
 			Status = STATUS_SUCCESS;
 		}
 		break;
 	}
+	case CTL_TEST2: {
+
+		break;
+	}
+	case CTL_TEST_KPROC: {
+		KdPrint(("CTL_TEST_KPROC"));
+		ULONG_PTR pid = *(ULONG_PTR*)InputData;
+		Status = KxTerminateProcessTest(pid);
+		_memcpy_s(OutputData, OutputDataLength, &Status, sizeof(Status));
+		Informaiton = OutputDataLength;
+		break;
+	}
+	case CTL_PRINT_INTERNAL_FUNS: {
+		KxPrintInternalFuns();
+		Status = STATUS_SUCCESS;
+		break;
+	}
 	case CTL_FORCE_TREMINATE_PROCESS: {
 		ULONG_PTR pid = *(ULONG_PTR*)InputData;
-		Status = KxTerminateProcessWithPid(pid, 0);
-		_memcpy_s(OutputData, OutputDataLength, &Status, sizeof(Status));
-		Informaiton = sizeof(Status);
-		break;
-	}	
-	case CTL_FORCE_TREMINATE_THREAD: {
-		ULONG_PTR tid = *(ULONG_PTR*)InputData;
-		Status = KxTerminateThreadWithTid(tid, 0);
+		Status = KxTerminateProcessWithPid(pid, 0, FALSE, FALSE);
 		_memcpy_s(OutputData, OutputDataLength, &Status, sizeof(Status));
 		Informaiton = sizeof(Status);
 		break;
 	}
+	case CTL_FORCE_TREMINATE_THREAD: {
+		ULONG_PTR tid = *(ULONG_PTR*)InputData;
+		Status = KxTerminateThreadWithTid(tid, 0, 0);
+		_memcpy_s(OutputData, OutputDataLength, &Status, sizeof(Status));
+		Informaiton = sizeof(Status);
+		break;
+	}
+	case CTL_FORCE_TREMINATE_PROCESS_PS: {
+		ULONG_PTR pid = *(ULONG_PTR*)InputData;
+		Status = KxTerminateProcessWithPid(pid, 0, TRUE, FALSE);
+		_memcpy_s(OutputData, OutputDataLength, &Status, sizeof(Status));
+		Informaiton = sizeof(Status);
+	}
 	case CTL_FORCE_TREMINATE_PROCESS_APC: {
 		ULONG_PTR pid = *(ULONG_PTR*)InputData;
-		Status = KxTerminateProcessWithPidAndApc(pid, 0);
+		Status = KxTerminateProcessWithPid(pid, 0, FALSE, TRUE);
 		_memcpy_s(OutputData, OutputDataLength, &Status, sizeof(Status));
 		Informaiton = OutputDataLength;
 		break;
 	}
 	case CTL_FORCE_TREMINATE_THREAD_APC: {
 		ULONG_PTR tid = *(ULONG_PTR*)InputData;
-		Status = KxTerminateThreadWithTidAndApc(tid, 0);
+		Status = KxTerminateThreadWithTid(tid, 0, 1);
 		_memcpy_s(OutputData, OutputDataLength, &Status, sizeof(Status));
 		Informaiton = OutputDataLength;
 		break;
@@ -327,7 +437,7 @@ NTSTATUS IOControlDispatch(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp)
 		KxProtectProcessWithPid((HANDLE)pid);
 		Status = STATUS_SUCCESS;
 		break;
-	}	
+	}
 	case CTL_REMOVE_PROCESS_PROTECT: {
 		ULONG_PTR pid = *(ULONG_PTR*)InputData;
 		KxUnProtectProcessWithPid((HANDLE)pid);
@@ -340,8 +450,7 @@ NTSTATUS IOControlDispatch(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp)
 			ListEntryScan = ListEntry;
 			LoadedModuleOrder = 0;
 			KdPrint(("CTL_GET_KERNEL_MODULS start"));
-		}			
-
+		}
 
 		KERNEL_MODULE kModule;
 		_memset(&kModule, 0, sizeof(KERNEL_MODULE));
@@ -373,6 +482,63 @@ NTSTATUS IOControlDispatch(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp)
 		Informaiton = OutputDataLength;
 		break;
 	}
+	case CTL_KDA_DEC: {
+		PKDAAGRS agr = (KDAAGRS*)InputData;
+		PUCHAR outBuffer = OutputData;
+		ULONG_PTR curcodeptr = agr->StartAddress;
+		if (MmIsAddressValid((PVOID)curcodeptr) != FALSE && MmIsAddressValid((PVOID)(agr->StartAddress + agr->Size)) != FALSE)
+			RtlMoveMemory(outBuffer, (PVOID)curcodeptr, agr->Size);
+		Informaiton = OutputDataLength;
+		Status = STATUS_SUCCESS;
+		break;
+	}
+	case CTL_GET_DBGVIEW_BUFFER: {
+		Status = STATUS_UNSUCCESSFUL;
+		if (kxMyDbgViewCanUse)
+		{
+			DBGPRT_DATA_TRA data;
+			if (kxMyDbgViewDataStart)
+			{
+				data.HasData = TRUE;
+
+				PDBGPRINT_DATA ptr = kxMyDbgViewDataStart;
+				PDBGPRINT_DATA ptr_next = kxMyDbgViewDataStart->Next;
+				_memcpy_s(data.Data, sizeof(data.Data), ptr->StrBuffer, sizeof(data.Data));
+
+				data.HasMoreData = ptr_next != NULL;
+
+				if (kxMyDbgViewDataEnd == kxMyDbgViewDataStart)
+					kxMyDbgViewDataEnd = NULL;
+				kxMyDbgViewDataStart = ptr_next;
+
+				ExFreePool(ptr);
+			}		
+			else data.HasData = FALSE;
+			_memcpy_s(OutputData, OutputDataLength, &data, sizeof(data));
+			Informaiton = sizeof(data);
+			kxMyDbgViewLastReceived = FALSE;
+			Status = STATUS_SUCCESS;
+		}
+		break;
+	}
+	case CTL_RESET_DBGVIEW_EVENT: {
+		KxMyDbgViewReset();
+		Status = STATUS_SUCCESS;
+		break;
+	}
+	case CTL_GET_DBGVIEW_LAST_REC: {
+		_memcpy_s(OutputData, OutputDataLength, &kxMyDbgViewLastReceived, sizeof(kxMyDbgViewLastReceived));
+		Informaiton = sizeof(kxMyDbgViewLastReceived);
+		Status = STATUS_SUCCESS;
+		break;
+	}
+	case CTL_FORCE_CLOSE_HANDLE: {
+		PFCLOSE_HANDLE_DATA data = (PFCLOSE_HANDLE_DATA)InputData;
+		Status = KxForceCloseHandle((HANDLE)data->ProcessId, data->HandleValue);
+		_memcpy_s(OutputData, OutputDataLength, &Status, sizeof(Status));
+		Informaiton = OutputDataLength;
+		break;
+	}
 	default:
 		break;
 	}
@@ -390,15 +556,21 @@ NTSTATUS CreateDispatch(IN PDEVICE_OBJECT DeviceObject,IN PIRP Irp)
 	return STATUS_SUCCESS;
 }
 
-NTSTATUS InitKernel(ULONG parm) 
+NTSTATUS InitKernel(PKINITAGRS parm)
 {
 	NTSTATUS status = STATUS_SUCCESS;
 	if (!kernelInited) {
-		KdPrint(("InitKernel ! System ver : %u\n", parm));
-
-		status = KxGetFunctions(parm);
-
-		kernelInited = TRUE;
+		if (parm->NeedNtosVaule) {
+			KdPrint(("InitKernel ! Waiting for PDB Data"));
+			kernelInited = FALSE;
+		}
+		else {
+			PWINVERS wv = &parm->WinVer;
+			KdPrint(("InitKernel ! System ver : %u Bulid ver : %u\n", wv->VerSimple, wv->WinBulidVerl));
+			status = KxGetFunctions(wv);
+			status = KxLoadStructOffests(wv);
+			kernelInited = TRUE;
+		}
 	}
 	else KdPrint(("InitKernel ! And kernel alredy inited"));
 	return status;
@@ -443,5 +615,95 @@ VOID KxLoadFunctions()
 	swprintf_s = (swprintf_s_)MmGetSystemRoutineAddress(&SWprintfsName);
 	
 }
+
+void KxDbgViewR3Exited() {
+
+	KxMyDbgViewReset();
+}
+
+VOID KxMyDebugPrintCopyData(_In_ PSTRING Output)
+{
+	if (kxMyDbgViewDataEnd == NULL)
+	{
+		kxMyDbgViewDataStart = ExAllocatePool(NonPagedPool, sizeof(DBGPRINT_DATA));
+		kxMyDbgViewDataEnd = kxMyDbgViewDataStart;
+	}
+	else 
+	{
+		kxMyDbgViewDataEnd->Next = ExAllocatePool(NonPagedPool, sizeof(DBGPRINT_DATA));
+		kxMyDbgViewDataEnd = kxMyDbgViewDataEnd->Next;
+	}
+
+	_memset(kxMyDbgViewDataEnd, 0, sizeof(DBGPRINT_DATA));
+
+	for (int i = 0; i < Output->Length &&i < 256; i++)
+		kxMyDbgViewDataEnd->StrBuffer[i] = Output->Buffer[i];
+}
+VOID KxMyDebugPrintCallback(_In_ PSTRING Output, _In_ ULONG ComponentId, _In_ ULONG Level)
+{
+	kxMyDbgViewLastReceived = TRUE;
+	if (kxMyDbgViewCanUse) {
+		if (Output != NULL && Output->Buffer != NULL)
+		{
+			KxMyDebugPrintCopyData(Output);
+			KeSetEvent(kxEventObjectDbgViewEvent, 0, 0);
+		}
+	}
+}
+
+void KxMyDbgViewFreeAllData() {
+	if (kxMyDbgViewDataStart)
+	{
+		PDBGPRINT_DATA ptr = kxMyDbgViewDataStart;
+		if (ptr->Next != NULL) {
+			do {
+				PDBGPRINT_DATA ptr_next = ptr->Next;
+				ExFreePool(ptr);
+				ptr = ptr_next;
+			} while (ptr != NULL);
+		}
+		else {
+			ExFreePool(ptr);
+		}
+
+		kxMyDbgViewDataStart = NULL;
+		kxMyDbgViewDataEnd = NULL;
+	}
+}
+void KxMyDbgViewReset() {
+	kxMyDbgViewCanUse = FALSE;
+	if (kxEventObjectDbgViewEvent) {
+		ObDereferenceObject(kxEventObjectDbgViewEvent);
+		kxEventObjectDbgViewEvent = NULL;	
+		KxMyDbgViewFreeAllData();
+	}
+	CurrentDbgViewProcess = 0;
+}
+BOOLEAN KxMyDbgViewWorking() {
+	if (kxEventObjectDbgViewEvent && CurrentDbgViewProcess != 0)
+	{
+		PEPROCESS pEprocess;
+		NTSTATUS ntstatus = _PsLookupProcessByProcessId((HANDLE)CurrentDbgViewProcess, &pEprocess);
+		if (ntstatus == STATUS_SUCCESS) {
+			ObDereferenceObject(pEprocess);
+			return TRUE;
+		}
+		else if (ntstatus == STATUS_INVALID_CID)
+		{
+			KxMyDbgViewReset();
+			return FALSE;
+		}
+	}
+	return FALSE;
+}
+
+NTSTATUS KxUnInitMyDbgView() {
+	KxMyDbgViewFreeAllData();
+	return DbgSetDebugPrintCallback(KxMyDebugPrintCallback, FALSE);
+}
+NTSTATUS KxInitMyDbgView() {
+	return DbgSetDebugPrintCallback(KxMyDebugPrintCallback, TRUE);
+}
+
 
 

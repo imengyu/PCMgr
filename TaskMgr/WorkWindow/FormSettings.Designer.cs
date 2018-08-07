@@ -49,6 +49,7 @@
             this.checkBoxTop = new System.Windows.Forms.CheckBox();
             this.label2 = new System.Windows.Forms.Label();
             this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.checkBoxUseMyDbgView = new System.Windows.Forms.CheckBox();
             this.checkBoxAutoLoadDriver = new System.Windows.Forms.CheckBox();
             this.checkBoxHighLightNoSystetm = new System.Windows.Forms.CheckBox();
             this.label16 = new System.Windows.Forms.Label();
@@ -77,6 +78,7 @@
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.comboBox_lg = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
+            this.checkBoxNTOSPDB = new System.Windows.Forms.CheckBox();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage4.SuspendLayout();
@@ -202,7 +204,9 @@
             this.comboBoxShowHotKey1.Items.AddRange(new object[] {
             resources.GetString("comboBoxShowHotKey1.Items"),
             resources.GetString("comboBoxShowHotKey1.Items1"),
-            resources.GetString("comboBoxShowHotKey1.Items2")});
+            resources.GetString("comboBoxShowHotKey1.Items2"),
+            resources.GetString("comboBoxShowHotKey1.Items3"),
+            resources.GetString("comboBoxShowHotKey1.Items4")});
             resources.ApplyResources(this.comboBoxShowHotKey1, "comboBoxShowHotKey1");
             this.comboBoxShowHotKey1.Name = "comboBoxShowHotKey1";
             // 
@@ -260,6 +264,8 @@
             // tabPage4
             // 
             resources.ApplyResources(this.tabPage4, "tabPage4");
+            this.tabPage4.Controls.Add(this.checkBoxNTOSPDB);
+            this.tabPage4.Controls.Add(this.checkBoxUseMyDbgView);
             this.tabPage4.Controls.Add(this.checkBoxAutoLoadDriver);
             this.tabPage4.Controls.Add(this.checkBoxHighLightNoSystetm);
             this.tabPage4.Controls.Add(this.label16);
@@ -286,6 +292,12 @@
             this.tabPage4.Controls.Add(this.label9);
             this.tabPage4.Name = "tabPage4";
             this.tabPage4.UseVisualStyleBackColor = true;
+            // 
+            // checkBoxUseMyDbgView
+            // 
+            resources.ApplyResources(this.checkBoxUseMyDbgView, "checkBoxUseMyDbgView");
+            this.checkBoxUseMyDbgView.Name = "checkBoxUseMyDbgView";
+            this.checkBoxUseMyDbgView.UseVisualStyleBackColor = true;
             // 
             // checkBoxAutoLoadDriver
             // 
@@ -461,6 +473,12 @@
             resources.ApplyResources(this.label1, "label1");
             this.label1.Name = "label1";
             // 
+            // checkBoxNTOSPDB
+            // 
+            resources.ApplyResources(this.checkBoxNTOSPDB, "checkBoxNTOSPDB");
+            this.checkBoxNTOSPDB.Name = "checkBoxNTOSPDB";
+            this.checkBoxNTOSPDB.UseVisualStyleBackColor = true;
+            // 
             // FormSettings
             // 
             resources.ApplyResources(this, "$this");
@@ -534,5 +552,7 @@
         private System.Windows.Forms.CheckBox checkBoxHighLightNoSystetm;
         private System.Windows.Forms.Label label16;
         private System.Windows.Forms.CheckBox checkBoxAutoLoadDriver;
+        private System.Windows.Forms.CheckBox checkBoxUseMyDbgView;
+        private System.Windows.Forms.CheckBox checkBoxNTOSPDB;
     }
 }

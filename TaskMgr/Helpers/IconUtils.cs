@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
@@ -11,7 +12,37 @@ namespace PCMgr.Helpers
 {
     class IconUtils
     {
+        /// <summary>
+        /// 图片缩放
+        /// </summary>
+        /// <param name="bmp">图片</param>
+        /// <param name="width">目标宽度，若为0，表示宽度按比例缩放</param>
+        /// <param name="height">目标长度，若为0，表示长度按比例缩放</param>
+        public static Bitmap GetThumbnail(Bitmap bmp, int width, int height)
+        {
+            if (width == 0)
+            {
+                width = height * bmp.Width / bmp.Height;
+            }
+            if (height == 0)
+            {
+                height = width * bmp.Height / bmp.Width;
+            }
 
+            Image imgSource = bmp;
+            Bitmap outBmp = new Bitmap(width, height);
+            Graphics g = Graphics.FromImage(outBmp);
+            g.Clear(Color.Transparent);
+            // 设置画布的描绘质量   
+            g.CompositingQuality = CompositingQuality.HighQuality;
+            g.SmoothingMode = SmoothingMode.HighQuality;
+            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            g.DrawImage(imgSource, new Rectangle(0, 0, width, height + 1), 0, 0, imgSource.Width, imgSource.Height, GraphicsUnit.Pixel);
+            g.Dispose();
+            imgSource.Dispose();
+            bmp.Dispose();
+            return outBmp;
+        }
         /// <summary>
         /// 转换Image为Icon
         /// </summary>

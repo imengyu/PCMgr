@@ -34,12 +34,12 @@
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.btnClose = new System.Windows.Forms.Button();
             this.btnReleaseAll = new System.Windows.Forms.Button();
             this.labelFileInfo = new System.Windows.Forms.Label();
             this.btnRelease = new System.Windows.Forms.Button();
             this.btnRefesh = new System.Windows.Forms.Button();
-            this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.SuspendLayout();
             // 
             // listViewUsing
@@ -73,6 +73,10 @@
             // 
             resources.ApplyResources(this.columnHeader4, "columnHeader4");
             // 
+            // columnHeader5
+            // 
+            resources.ApplyResources(this.columnHeader5, "columnHeader5");
+            // 
             // btnClose
             // 
             resources.ApplyResources(this.btnClose, "btnClose");
@@ -105,10 +109,6 @@
             this.btnRefesh.Name = "btnRefesh";
             this.btnRefesh.UseVisualStyleBackColor = true;
             this.btnRefesh.Click += new System.EventHandler(this.btnRefesh_Click);
-            // 
-            // columnHeader5
-            // 
-            resources.ApplyResources(this.columnHeader5, "columnHeader5");
             // 
             // FormCheckFileUse
             // 

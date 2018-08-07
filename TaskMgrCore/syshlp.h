@@ -12,4 +12,10 @@ M_CAPI(BOOL) MIsRunasAdmin();
 M_CAPI(PVOID) MGetProcedureAddress(PVOID DllHandle, PSTR ProcedureName, ULONG ProcedureNumber);
 M_CAPI(PVOID) MGetProcAddress(PVOID DllHandle, PSTR ProcedureName);
 
+M_CAPI(BOOL) MGetWindowsBulidVersion();
+
+M_CAPI(BOOL) MRunExe(LPWSTR path, LPWSTR args, BOOL runAsadmin, HWND hWnd);
+
+M_CAPI(BOOL) MGetNtosNameAndStartAddress(LPWSTR name, size_t buffersize, ULONG_PTR * address);
+
 

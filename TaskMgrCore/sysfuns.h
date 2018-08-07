@@ -1,6 +1,7 @@
 #pragma once
 #include "stdafx.h"
 #include "appmodel.h"
+#include <cryptuiapi.h>
 
 typedef BOOL(WINAPI *_RunFileDlg)(_In_ HWND hwndOwner, _In_opt_ HICON hIcon, _In_opt_ LPCWSTR lpszDirectory, _In_opt_ LPCWSTR lpszTitle, _In_opt_ LPCWSTR lpszDescription, _In_ ULONG uFlags);
 typedef BOOL(WINAPI *_IsImmersiveProcess)(_In_ HANDLE hProcess);
@@ -10,3 +11,7 @@ typedef LONG(WINAPI *_ClosePackageInfo)(PACKAGE_INFO_REFERENCE packageInfoRefere
 typedef LONG(WINAPI *_OpenPackageInfoByFullName)(PCWSTR packageFullName,	const UINT32 reserved, PACKAGE_INFO_REFERENCE *packageInfoReference);
 typedef LONG(WINAPI *_GetPackageId)(_In_ HANDLE hProcess, _Inout_ UINT32 * bufferLength, _Out_writes_bytes_opt_(*bufferLength) BYTE * buffer);
 typedef BOOL(WINAPI *_IsWow64Process)(HANDLE, PBOOL);
+typedef DWORD(WINAPI*_GetModuleFileNameW)(_In_opt_ HMODULE hModule, LPWSTR lpFilename, DWORD nSize);
+typedef BOOL(WINAPI*_CryptUIDlgViewCertificateW)(_In_  PCCRYPTUI_VIEWCERTIFICATE_STRUCTW pCertViewInfo, _Out_ BOOL *pfPropertiesChanged);
+typedef BOOL(WINAPI*_CryptUIDlgViewContext)(DWORD dwContextType, const void *pvContext, HWND hwnd, LPCWSTR pwszTitle, DWORD dwFlags, void *pvReserved);
+

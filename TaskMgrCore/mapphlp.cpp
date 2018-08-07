@@ -10,10 +10,12 @@
 #include "lghlp.h"
 #include "suact.h"
 #include "starthlp.h"
+#include "settinghlp.h"
 #include "kernelhlp.h"
 #include "VersionHelpers.h"
 #include "StringHlp.h"
 #include "loghlp.h"
+#include "nthlp.h"
 #include <shellapi.h>
 #include <Vsstyle.h>
 #include <vssym32.h>
@@ -21,10 +23,17 @@
 #include <string.h>
 #include <string>
 #include <dbghelp.h>
+#include <mscoree.h>
+#include <Metahost.h>
+
 #pragma comment(linker,"\"/manifestdependency:type='win32' \
 name = 'Microsoft.Windows.Common-Controls' version = '6.0.0.0' \
 processorArchitecture = '*' publicKeyToken = '6595b64144ccf1df' language = '*'\"")
 
+#define WM_S_APPBAR 900
+#define WM_S_MESSAGE_EXIT 901
+
+extern HINSTANCE hInst;
 extern HINSTANCE hInstRs;
 
 extern LPWSTR fmCurrectSelectFilePath0;
@@ -36,8 +45,7 @@ typedef HRESULT(WINAPI*CLRCreateInstanceFun)(REFCLSID clsid, REFIID riid, LPVOID
 HMENU hMenuMain;
 exitcallback hMainExitCallBack;
 extern HWND hWndMain;
-extern void ThrowErrorAndErrorCode(DWORD code, LPWSTR msg, LPWSTR title);
-taskdialogcallback hMainTaskDialogCallBack;
+
 EnumWinsCallBack hEnumWinsCallBack;
 GetWinsCallBack hGetWinsWinsCallBack;
 CLRCreateInstanceFun _CLRCreateInstance;
@@ -47,12 +55,16 @@ HANDLE hMutex;
 WCHAR appDir[MAX_PATH];
 DWORD dwMainAppRet = 0;
 
+
+int menu_last_x = 0,
+menu_last_y = 0;
 HMENU hMenuMainFile;
 HMENU hMenuMainSet;
 HMENU hMenuMainView;
 HWND selectItem4;
 
 int HotKeyId = 0;
+bool has_fullscreen_window = false;
 
 extern BOOL killCmdSendBack;
 bool refesh_fast = false;
@@ -75,6 +87,16 @@ LONG WINAPI MUnhandledExceptionFilter(struct _EXCEPTION_POINTERS *lpExceptionInf
 M_API BOOL MAppStartEnd() {
 	return CloseHandle(hMutex);
 }
+M_API BOOL MAppStartTryCloseLastApp(LPWSTR windowTitle) {
+	HWND hWnd = FindWindow(NULL, windowTitle);
+	if (IsWindow(hWnd))
+	{
+		if (SendMessageTimeout(hWnd, WM_S_MESSAGE_EXIT, NULL, NULL, SMTO_BLOCK, 500, 0) == 0)
+			return FALSE;
+		else return TRUE;
+	}		
+	return FALSE;
+}
 M_API BOOL MAppKillOld(LPWSTR procName)
 {
 	BOOL ended = FALSE;
@@ -91,7 +113,7 @@ M_API BOOL MAppKillOld(LPWSTR procName)
 		if (MStrEqualW(pe.szExeFile, procName))
 			if (pe.th32ProcessID != GetCurrentProcessId()) {
 				Log(L"Killing old PCMgr process : %d", pe.th32ProcessID);
-				ended = MTerminateProcessNt(pe.th32ProcessID, NULL) == TRUE;
+				ended = MTerminateProcessNt(pe.th32ProcessID, NULL) == STATUS_SUCCESS;
 			}
 	}
 	CloseHandle(hSnapshot);
@@ -149,7 +171,12 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 			if (hroot) {
 				HMENU hpop = GetSubMenu(hroot, 0);
 				POINT pt;
-				GetCursorPos(&pt);
+				if (menu_last_x == 0 && menu_last_y == 0)
+					GetCursorPos(&pt);
+				else {
+					pt.x = menu_last_x;
+					pt.y = menu_last_y;
+				}
 				TrackPopupMenu(hpop,
 					TPM_LEFTALIGN | TPM_TOPALIGN | TPM_RIGHTBUTTON,
 					pt.x,
@@ -183,7 +210,12 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 		if (hroot) {
 			HMENU hpop = GetSubMenu(hroot, 0);
 			POINT pt;
-			GetCursorPos(&pt);
+			if (menu_last_x == 0 && menu_last_y == 0)
+				GetCursorPos(&pt);
+			else {
+				pt.x = menu_last_x;
+				pt.y = menu_last_y;
+			}
 			if (IsWindow(selectItem4)) {
 				if (IsWindowEnabled(selectItem4))
 					EnableMenuItem(hpop, ID_WINSMENU_ENABLE, MF_DISABLED);
@@ -281,7 +313,7 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 		M_SU_UnProtectMySelf();
 		break;
 	case 205:
-
+		ShowWindow(hWnd, SW_SHOW);
 		break;
 	case 206:
 		use_apc = (BOOL)(ULONG_PTR)data;
@@ -289,11 +321,42 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 	case 207:
 		UnregisterHotKey(hWnd, HotKeyId);
 		break;
+	case 208:
+		if (!IsWindowVisible(hWnd)) 
+			ShowWindow(hWnd, SW_SHOW);
+		if (IsIconic(hWnd))
+			ShowWindow(hWnd, SW_RESTORE);
+		if (has_fullscreen_window)
+			SendMessage(hWnd, WM_COMMAND, IDM_TOPMOST, 0);
+		SetForegroundWindow(hWnd);
+		break;
+	case 209:
+		APPBARDATA abd;
+		memset(&abd, 0, sizeof(abd));
+		abd.cbSize = sizeof(APPBARDATA);
+		abd.hWnd = hWnd;
+		abd.uCallbackMessage = WM_S_APPBAR;
+		SHAppBarMessage(ABM_NEW, &abd);
+		break;
+	case 210:
+		EnableWindow(hWnd, FALSE);
+		break;
+	case 211:
+		EnableWindow(hWnd, TRUE);
+		break;
+	case 212:
+		menu_last_x = (int)(ULONG_PTR)hWnd;
+		menu_last_y = (int)(ULONG_PTR)data;
+		break;
 	default:
 		return 0;
 		break;
 	}
 	return 0;
+}
+M_API void MAppHideCos()
+{
+	ShowWindow(GetConsoleWindow(), SW_HIDE);
 }
 M_API void* MAppSetCallBack(void * cp, int id)
 {
@@ -304,9 +367,6 @@ M_API void* MAppSetCallBack(void * cp, int id)
 		break;
 	case 1:
 		hMainExitCallBack = (exitcallback)cp;
-		break;
-	case 2:
-		hMainTaskDialogCallBack = (taskdialogcallback)cp;
 		break;
 	case 3:
 		hEnumWinsCallBack = (EnumWinsCallBack)cp;
@@ -343,10 +403,26 @@ M_API void MAppSetLanuageItems(int in, int ind, LPWSTR msg, int size)
 		break;
 	}
 }
-M_API void MAppRegShowHotKey(HWND hWnd, UINT vkkey, UINT key)
+M_API int MAppRegShowHotKey(HWND hWnd, UINT vkkey, UINT key)
+{	
+    HotKeyId = GlobalAddAtom(L"PCMgrHotKey") - 0xC000;
+	if (vkkey == 65536)//c# shift
+		vkkey = MOD_SHIFT;
+	if (vkkey == 262144)//c# alt
+		vkkey = MOD_ALT;
+	if (vkkey == 91 || vkkey == 92) {//c# lwin rwin
+		if (!RegisterHotKey(hWnd, HotKeyId, MOD_WIN, key))
+			LogWarn(L"RegisterHotKey failed : %d ", GetLastError());
+	}
+	else {
+		if (!RegisterHotKey(hWnd, HotKeyId, MOD_CONTROL | vkkey, key))
+			LogWarn(L"RegisterHotKey failed : %d ", GetLastError());
+	}
+	return HotKeyId;
+}
+M_API void MAppSetStartingProgessText(LPWSTR text)
 {
-    HotKeyId = GlobalAddAtom(L"PCMgrHotKet") - 0xC000;
-	RegisterHotKey(hWnd, HotKeyId, VK_CONTROL | vkkey, key);
+	MAppMainCall(34, text, NULL);
 }
 
 M_API HICON MGetWindowIcon(HWND hWnd)
@@ -364,18 +440,121 @@ M_API BOOL MIsSystemSupport()
 {
 	return IsWindows7OrGreater();
 }
+
+LPWSTR*argsStrs = NULL;
+
+M_API BOOL MAppMainCanRun()
+{
+	if (!MIsSystemSupport()) 
+	{
+		MPrintErrorMessage((LPWSTR)L"Application not support your Windows, Running this program requires Windows 7 at least.", MB_ICONERROR);
+		return FALSE;
+	}
+	return TRUE;
+}
 M_API void MAppMainExit(UINT exitcode)
 {
 	ExitProcess(exitcode);
 }
 M_API DWORD MAppMainGetExitCode()
 {
-	
 	return dwMainAppRet;
+}
+M_API void MAppMainRun()
+{
+	M_LOG_Init(M_CFG_GetConfigBOOL(L"ShowDebugWindow", L"Configure", FALSE));
+	MLG_SetLanuageItems_NoRealloc();
+
+	GetModuleFileName(NULL, appDir, MAX_PATH);
+	PathRemoveFileSpec(appDir);
+
+	WCHAR mainDllPath[MAX_PATH];
+	wcscpy_s(mainDllPath, appDir);
+#ifdef _AMD64_
+	wcscat_s(mainDllPath, L"\\PCMgrApp64.dll");
+#else
+	wcscat_s(mainDllPath, L"\\PCMgrApp32.dll");
+#endif
+	if (!MFM_FileExist(mainDllPath))
+	{
+		MShowErrorMessage(L"Not found Main Dll.", L"Load app failed", MB_ICONERROR);
+		LogErr(L"Main Dll missing : %s", mainDllPath);
+		return;
+	}
+
+	typedef HRESULT (WINAPI*_CLRCreateInstance)(REFCLSID clsid, REFIID riid, LPVOID *ppInterface);
+
+	_CLRCreateInstance c = (_CLRCreateInstance)GetProcAddress(GetModuleHandle(L"mscoree.dll"), "CLRCreateInstance");
+	if (c)
+	{
+		ICLRMetaHost *pMetaHost = nullptr;
+		ICLRMetaHostPolicy *pMetaHostPolicy = nullptr;
+		ICLRRuntimeHost *pRuntimeHost = nullptr;
+		ICLRRuntimeInfo *pRuntimeInfo = nullptr;
+
+		HRESULT hr = c(CLSID_CLRMetaHost, IID_ICLRMetaHost, (LPVOID*)&pMetaHost);
+		hr = pMetaHost->GetRuntime(L"v4.0.30319", IID_PPV_ARGS(&pRuntimeInfo));
+
+		if (FAILED(hr)) {
+			MShowErrorMessage(L"Not found .NET framework runtime v4.0.30319.", L"Load app failed", MB_ICONERROR);
+			LogErr(L"GetRuntime v4.0.30319 failed HRESULT : 0x%08X", hr);
+			goto cleanup;
+		}
+		hr = pRuntimeInfo->GetInterface(CLSID_CLRRuntimeHost, IID_PPV_ARGS(&pRuntimeHost));
+		if (FAILED(hr)) {
+			MShowErrorMessage(L"Create CLRRuntimeHost Failed.", L"Load app failed", MB_ICONERROR);
+			LogErr(L"GetInterface CLSID_CLRRuntimeHost failed HRESULT : 0x%08X", hr);
+			goto cleanup;
+		}
+
+		hr = pRuntimeHost->Start();
+		if (FAILED(hr)) { LogErr(L"Start RuntimeHost failed HRESULT : 0x%08X", hr); goto cleanup; }
+
+		LogInfo(L"Load main app : %s", mainDllPath);
+		hr = pRuntimeHost->ExecuteInDefaultAppDomain(mainDllPath, L"PCMgr.Program", L"ProgramEntry", GetCommandLine(), &dwMainAppRet);
+		if (FAILED(hr)) LogErr(L"ExecuteInDefaultAppDomain %s failed HRESULT : 0x%08X", mainDllPath, hr);
+		hr = pRuntimeHost->Stop();
+
+	cleanup:
+		if (pRuntimeInfo != nullptr) {
+			pRuntimeInfo->Release();
+			pRuntimeInfo = nullptr;
+		}
+		if (pRuntimeHost != nullptr) {
+			pRuntimeHost->Release();
+			pRuntimeHost = nullptr;
+		}
+		if (pMetaHost != nullptr) {
+			pMetaHost->Release();
+			pMetaHost = nullptr;
+		}
+	}
+	else {
+		MShowErrorMessage(L"Not found .NET framework in your computer.", L"Load app failed", MB_ICONERROR);
+		LogErr(L"Load mscoree.dll failed !");
+	}
+}
+M_API int MAppMainGetArgs(LPWSTR cmdline) {
+	int argc = 0;
+	argsStrs = CommandLineToArgvW(cmdline, &argc);
+
+	return argc;
+}
+M_API LPWSTR MAppMainGetArgsStr(int index)
+{
+	return argsStrs[index];
+}
+M_API void MAppMainGetArgsFreAall() {
+	if (argsStrs) LocalFree(argsStrs);
 }
 
 typedef void(*startfun)();
 
+EXTERN_C BOOL STDMETHODCALLTYPE _CorDllMain(HINSTANCE hInst, DWORD dwReason, LPVOID lpReserved);
+
+bool MLoadApp() {
+	return _CorDllMain(hInst, 0, 0);
+}
 bool MLoadAppBackUp()
 {
 	HMODULE hI = LoadLibrary(L"PCMgrInit32.dll");
@@ -412,6 +591,7 @@ M_API void MAppRebotAdmin() {
 			hMainExitCallBack();
 	}
 	else {
+		LogWarn(L"Restart app to admin canceled.");
 		if (GetLastError() == ERROR_CANCELLED) {
 			MShowMessageDialog(hWndMain, str_item_noadmin1, str_item_tip, str_item_noadmin2);
 		}
@@ -496,23 +676,19 @@ void MAppWmCommandTools(WPARAM wParam)
 	}
 }
 
-#ifndef _AMD64_
-void ThrowErrorAndErrorCodeX(DWORD code, LPWSTR msg, LPWSTR title, BOOL ntstatus)
+void ThrowErrorAndErrorCodeX(NTSTATUS code, LPWSTR msg, LPWSTR title, BOOL ntstatus)
 {
+	if (ntstatus && STATUS_SUCCESS == code)return;	
 	wchar_t errcode[260];
-	if(ntstatus)wsprintf(errcode, L"\nCode : %d\nNTSTATUS : 0x%lX", code, code);
+	if (ntstatus) {
+		LPWSTR ntstatusstr = MNtstatusToStr(code);
+		if (ntstatusstr==0)
+		wsprintf(errcode, L"\nCode : %d\nNTSTATUS : 0x%lX", code, code);
+		else wsprintf(errcode, L"\nCode : %d\n%s (0x%lX)", code, ntstatusstr, code);
+	}
 	else wsprintf(errcode, L"\nError Code : %d", code);
 	MShowMessageDialog(hWndMain, errcode, title, msg, MB_ICONERROR, MB_OK);
 }
-#else
-void ThrowErrorAndErrorCodeX(__int64 code, LPWSTR msg, LPWSTR title, BOOL ntstatus)
-{
-	wchar_t errcode[260];
-	if (ntstatus)wsprintf(errcode, L"\nCode : %d\nNTSTATUS : 0x%lX", code, code);
-	else wsprintf(errcode, L"\nError Code : %d", code);
-	MShowMessageDialog(hWndMain, errcode, title, msg, MB_ICONERROR, MB_OK);
-}
-#endif
 
 extern DWORD thisCommandPid;
 extern LPWSTR thisCommandPath;
@@ -522,6 +698,23 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg)
 	{
+	case WM_S_MESSAGE_EXIT: {
+		MAppExit();
+		break;
+	}
+	case WM_S_APPBAR: {
+		switch (wParam)
+		{
+		case ABN_FULLSCREENAPP:
+		{
+			has_fullscreen_window = (BOOL)lParam;
+		}
+		break;
+		default:
+			break;
+		}
+		break;
+	}
 	case WM_COMMAND:
 		switch (wParam)
 		{
@@ -638,14 +831,14 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		case IDM_RESPROC: {
 			if (thisCommandPid > 4)
 			{
-				NTSTATUS status = MRusemeProcessNt(thisCommandPid, NULL);
+				NTSTATUS status = MResumeProcessNt(thisCommandPid, NULL);
 				if (status == STATUS_INVALID_HANDLE) {
 					MShowErrorMessage((LPWSTR)str_item_invalidproc.c_str(), (LPWSTR)str_item_op_failed.c_str(), MB_ICONWARNING, MB_OK);
 					SendMessage(hWndMain, WM_COMMAND, 41012, 0);
 				}
 				else if (status == STATUS_ACCESS_DENIED)
 					MShowErrorMessage((LPWSTR)str_item_access_denied.c_str(), (LPWSTR)str_item_op_failed.c_str(), MB_ICONERROR, MB_OK);
-				else if (status != 1)ThrowErrorAndErrorCodeX(status, str_item_resprocfailed, (LPWSTR)str_item_op_failed.c_str());
+				else if (status != STATUS_SUCCESS)ThrowErrorAndErrorCodeX(status, str_item_resprocfailed, (LPWSTR)str_item_op_failed.c_str());
 			}
 			break;
 		}
@@ -682,6 +875,20 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				}
 				else MShowMessageDialog(hWndMain, str_item_filenotexist, (LPWSTR)str_item_op_failed.c_str(), L"");
 			}
+			break;
+		}
+		case IDC_PCMGR_CMD: {
+#ifdef _AMD64_
+			if(MFM_FileExist(L"PCMgrCmd64.exe"))
+			    MFM_OpenFile(L"PCMgrCmd64.exe", hWnd);
+#else
+			if (MFM_FileExist(L"PCMgrCmd32.exe"))
+				MFM_OpenFile(L"PCMgrCmd32.exe", hWnd);
+#endif
+			break;
+		}
+		case IDC_SOFTACT_SHOW_KDA: {
+			MAppMainCall(32, 0, 0);
 			break;
 		}
 		case ID_MAINWINMENU_SETTO: {
@@ -814,6 +1021,11 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			}
 			break;
 		}
+		case ID_FMMAIN_CNECK_USING: {
+			if (MFM_FileExist(fmCurrectSelectFilePath0))
+				MFM_Recall(20, fmCurrectSelectFilePath0);
+			break;
+		}
 		case ID_FMM_READONLY: {
 			if (MFM_FileExist(fmCurrectSelectFilePath0))
 				MFM_SetFileArrtibute(fmCurrectSelectFilePath0, FILE_ATTRIBUTE_READONLY);
@@ -919,9 +1131,25 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		case IDC_SOFTACT_SHOWFILETOOL:
 		case IDC_SOFTACT_SHOWDRIVER_LOADERTOOL: {
 			MAppWmCommandTools(wParam);
+			break;
 		}
 		case IDC_SOFTACT_TEST1: {
 			Log(L"Test 1 : %s", L"IDC_SOFTACT_TEST1");
+			NTSTATUS status = 0;
+			BOOL rs = M_SU_TerminateProcessPIDTest(GetCurrentProcessId(), &status);
+			if (status != 0 || !rs) {
+				LogErr(L"M_SU_TerminateProcessPIDTest failed : 0x%08X", status);
+			}
+			break;
+		}
+		case IDC_SOFTACT_TEST2: {
+			Log(L"IDC_SOFTACT_TEST2");
+			//M_SU_Test("TestString");
+			//M_SU_Test2();
+			break;
+		}
+		case IDC_SOFTACT_TEST3: {
+			M_SU_PrintInternalFuns();
 			break;
 		}
 		default:
@@ -978,13 +1206,33 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 
 void MPrintErrorMessage(LPWSTR str, int icon)
 {
-	MShowErrorMessage(L"", str, icon, MB_OK);
+	MShowErrorMessage(str, L"", icon, MB_OK);
 }
 int MShowMessageDialog(HWND hwnd, LPWSTR text, LPWSTR title, LPWSTR instruction, int ico, int button)
 {
-	if (hMainTaskDialogCallBack)
-		return hMainTaskDialogCallBack(hwnd, text, title, instruction, ico, button);
-	return 0;
+	PCWSTR tico = NULL;
+	if (ico == MB_ICONERROR)
+		tico = TD_ERROR_ICON;
+	else if (ico == MB_ICONWARNING)
+		tico = TD_WARNING_ICON;
+	else if (ico == MB_ICONASTERISK)
+		tico = TD_INFORMATION_ICON;
+
+	TASKDIALOG_COMMON_BUTTON_FLAGS tbtn;
+	if (button == MB_OK)
+		tbtn = TDCBF_OK_BUTTON;
+	else if (button == MB_OKCANCEL)
+		tbtn = TDCBF_OK_BUTTON | TDCBF_CANCEL_BUTTON;
+	else if (button == MB_YESNO)
+		tbtn = TDCBF_YES_BUTTON | TDCBF_NO_BUTTON;
+	else if (button == MB_YESNOCANCEL)
+		tbtn = TDCBF_YES_BUTTON | TDCBF_NO_BUTTON | TDCBF_CANCEL_BUTTON;
+	else if (button == MB_ABORTRETRYIGNORE)
+		tbtn = TDCBF_RETRY_BUTTON | TDCBF_CANCEL_BUTTON;
+
+	int result = 0;
+	TaskDialog(hwnd, hInstRs, title, instruction, text, tbtn, tico, &result);
+	return result;
 }
 int MShowErrorMessage(LPWSTR text, LPWSTR intr, int ico, int btn)
 {
@@ -1008,6 +1256,10 @@ EXTERN_C M_API HRESULT MTaskDialog(_In_opt_ HWND hwndOwner, _In_opt_ HINSTANCE h
 
 #pragma region StringHlp
 
+M_API void MConvertStrDel(void*str)
+{
+	delete str;
+}
 M_API LPWSTR MConvertLPCSTRToLPWSTR(const char * szString)
 {
 	size_t dwLen = strlen(szString) + 1;
@@ -1292,7 +1544,7 @@ int GenerateMiniDump(PEXCEPTION_POINTERS pExceptionPointers)
 		//WCHAR err[200];
 		//wsprintf(err, L"-errreport %s %s %s", L"0", L"Î´Öª´íÎó", szFileName);
 		//ShellExecute(NULL, L"open", static_AppLoader->GetAppFullPath(), err, NULL, SW_SHOWNORMAL);
-		FLogErr(L"Application crashed!\nDump File Create failed! (ErrorCode: %d)", GetLastError());
+		M_LOG_Error_ForceFile(L"Application crashed!\nDump File Create failed! (ErrorCode: %d)", GetLastError());
 		FreeLibrary(hDbgHelp);
 		return EXCEPTION_CONTINUE_EXECUTION;
 
@@ -1309,7 +1561,7 @@ int GenerateMiniDump(PEXCEPTION_POINTERS pExceptionPointers)
 	FreeLibrary(hDbgHelp);
 	if (pExceptionPointers) {
 		if (pExceptionPointers->ContextRecord&&pExceptionPointers->ExceptionRecord) {
-			FLogErr(L"Application crashed!\nA Dump file was created.\n  Dump file: %s\nPlease send this Error Description file to us.\n\
+			M_LOG_Error_ForceFile(L"Application crashed!\nA Dump file was created.\n  Dump file: %s\nPlease send this Error Description file to us.\n\
 		        Details:  ExceptionAddress:%d\nExceptionCode:%d\nExceptionFlags:%u\
                 ContextFlags:%d\n\
 				Dr0:%d\n\

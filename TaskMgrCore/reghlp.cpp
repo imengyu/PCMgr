@@ -1,19 +1,32 @@
 #include "stdafx.h"
 #include "reghlp.h"
+#include "loghlp.h"
 #include <string>
 
 M_CAPI(HKEY) MREG_CLSIDToHKEY(HKEY hRootKey, LPWSTR clsid)
 {
 	HKEY hKEY;
 	std::wstring path; path += L"SOFTWARE\\Classes\\CLSID\\"; path += clsid;
-	RegOpenKeyEx(hRootKey, (LPWSTR)path.c_str(), 0, KEY_READ, &hKEY);
+#ifdef _AMD64_
+	DWORD err = RegOpenKeyEx(hRootKey, (LPWSTR)path.c_str(), 0, KEY_READ, &hKEY);
+#else
+	DWORD err = RegOpenKeyEx(hRootKey, (LPWSTR)path.c_str(), 0, KEY_WOW64_64KEY | KEY_READ, &hKEY);
+#endif
+	if (err != ERROR_SUCCESS)
+		LogErr(L"MREG_CLSIDToHKEY err : %d key : %s\\%s", err, MREG_ROOTKEYToStr(hRootKey), path.c_str());
 	return hKEY;
 }
 M_CAPI(HKEY) MREG_CLSIDToHKEYInprocServer32(HKEY hRootKey, LPWSTR clsid)
 {
 	HKEY hKEY;
 	std::wstring path; path += L"SOFTWARE\\Classes\\CLSID\\"; path += clsid; path += L"\\InprocServer32";
-	RegOpenKeyEx(hRootKey, (LPWSTR)path.c_str(), 0, KEY_READ, &hKEY);
+#ifdef _AMD64_
+	DWORD err = RegOpenKeyEx(hRootKey, (LPWSTR)path.c_str(), 0, KEY_READ, &hKEY);
+#else
+	DWORD err = RegOpenKeyEx(hRootKey, (LPWSTR)path.c_str(), 0, KEY_WOW64_64KEY | KEY_READ, &hKEY);
+#endif
+	if (err != ERROR_SUCCESS) 
+		LogErr(L"MREG_CLSIDToHKEYInprocServer32 err : %d key : %s\\%s", err, MREG_ROOTKEYToStr(hRootKey), path.c_str());
 	return hKEY;
 }
 M_CAPI(LPWSTR) MREG_ROOTKEYToStr(HKEY hRootKey)

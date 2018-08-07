@@ -7,13 +7,24 @@
 #include "reghlp.h"
 #include "loghlp.h"
 #include "resource.h"
+#include "settinghlp.h"
+#include "thdhlp.h"
+#include "ntsymbol.h"
+#include "sysstructs.h"
 #include "StringHlp.h"
 #include <io.h>
 
 BOOL isKernelDriverLoaded = FALSE;
+BOOL isKernelPDBLoaded = FALSE;
 HANDLE hKernelDevice = NULL;
 extern HWND hWndMain;
 extern HMENU hMenuMainFile;
+
+ULONG_PTR uNTBaseAddress = 0;
+HANDLE hThreadDbgView = NULL;
+HANDLE hEventDbgView = NULL;
+BOOL isMyDbgViewLoaded = FALSE;
+BOOL isMyDbgViewRunning = FALSE;
 
 BOOL MForceDeleteServiceRegkey(LPWSTR lpszDriverName)
 {
@@ -32,7 +43,7 @@ BOOL MForceDeleteServiceRegkey(LPWSTR lpszDriverName)
 	rs = MREG_DeleteKey(HKEY_LOCAL_MACHINE, regPath);
 
 	if (!rs) {
-		LogErr(L"RegDeleteTree failed : %d in delete key HKEY_LOCAL_MACHINE\\%s", GetLastError(), regPath);
+		LogWarn(L"RegDeleteTree failed : %d in delete key HKEY_LOCAL_MACHINE\\%s", GetLastError(), regPath);
 		rs = TRUE;
 	}
 	else Log(L"Service Key deleted : HKEY_LOCAL_MACHINE\\%s", regPath);
@@ -41,6 +52,13 @@ BOOL MForceDeleteServiceRegkey(LPWSTR lpszDriverName)
 }
 M_CAPI(BOOL) MLoadKernelDriver(LPWSTR lpszDriverName, LPWSTR driverPath, LPWSTR lpszDisplayName)
 {
+#ifndef _AMD64_
+	if (MIs64BitOS())
+	{
+		LogErr(L"You need to use 64 bit version PCMgr application to load driver.");
+		return FALSE;
+	}
+#endif
 	if (MIsRunasAdmin())
 	{
 		wchar_t sDriverName[32];
@@ -143,7 +161,9 @@ M_CAPI(BOOL) MUnLoadKernelDriver(LPWSTR szSvrName)
 	hServiceDDK = OpenService(hServiceMgr, szSvrName, SERVICE_ALL_ACCESS);
 	if (hServiceDDK == NULL)
 	{
-		LogErr(L"UnLoad driver error in OpenService : %d", GetLastError());
+		if (GetLastError() == ERROR_SERVICE_DOES_NOT_EXIST)
+			LogErr(L"UnLoad driver error because driver not load.");
+		else LogErr(L"UnLoad driver error in OpenService : %d", GetLastError());
 		bRet = FALSE;
 		goto BeforeLeave;
 	}
@@ -167,7 +187,10 @@ BeforeLeave:
 
 	return bRet;
 }
- 
+
+M_CAPI(ULONG_PTR) MGetNTBaseAddress() {
+	return uNTBaseAddress;
+}
 void MInitKernelSwitchMenuState(BOOL loaded)
 {
 	if (loaded) {
@@ -189,16 +212,61 @@ BOOL MInitKernelDriverHandle() {
 		NULL);
 	if (hKernelDevice == INVALID_HANDLE_VALUE)
 	{
-		LogErr(L"Load Kernel driver success but CreateFile failed : %d . ", GetLastError());		
+		LogErr(L"Get Kernel driver handle (CreateFile) failed : %d . ", GetLastError());
 		return FALSE;
 	}
-	else {
-		Log(L"Kernel Driver HANDLE Created.");
-		M_SU_Init();
-	}
+
+	Log(L"Kernel Driver HANDLE Created.");
+
+	MInitMyDbgView();
+
+	CreateThread(NULL, 0, MLoadingThread, NULL, 0, NULL);
+
 	MInitKernelSwitchMenuState(isKernelDriverLoaded);
 	return TRUE;
 }
+
+BOOL MInitKernelNTPDB(BOOL usingNtosPDB, PKNTOSVALUE kNtosValue)
+{
+	if (!usingNtosPDB)
+		return TRUE;
+	if (!InitSymHandler())
+		return FALSE;
+
+	if (kNtosValue->NtostAddress != 0 && !MStrEqualW(kNtosValue->NtosModuleName, L""))
+	{
+		uNTBaseAddress = kNtosValue->NtostAddress;
+		char* ntosNameC = (char*)MConvertLPWSTRToLPCSTR(kNtosValue->NtosModuleName);
+#ifdef _AMD64_
+		Log(L"Get NTOS base info : %s 0x%I64X", kNtosValue->NtosModuleName, kNtosValue->NtostAddress);
+#else
+		Log(L"Get NTOS base info : %s 0x%08X", kNtosValue->NtosModuleName, kNtosValue->NtostAddress);
+#endif
+		MAppSetStartingProgessText(L"Downloading and loading ntos PDB file...");
+		if (MKSymInit(ntosNameC, kNtosValue->NtostAddress))
+		{
+			isKernelPDBLoaded = TRUE;
+			MAppSetStartingProgessText(L"Analysis of the kernel PDB files...");
+			if (MEnumSyms(kNtosValue->NtostAddress, (PSYM_ENUMERATESYMBOLS_CALLBACK)MEnumSymRoutine, NULL))
+			{
+				delete ntosNameC;
+
+				MSendAllSymAddressToDriver();;
+				return TRUE;
+			}
+		}
+		delete ntosNameC;
+	}
+	else LogErr2(L"Failed get ntos baseAddress and name!");
+
+	return FALSE;
+}
+BOOL MUnInitKernelNTPDB() {
+	if (isKernelPDBLoaded)
+		return MEnumSymsClear();
+	return TRUE;
+}
+
 M_CAPI(BOOL) MCanUseKernel()
 {
 	return isKernelDriverLoaded && hKernelDevice != NULL;
@@ -206,6 +274,7 @@ M_CAPI(BOOL) MCanUseKernel()
 M_CAPI(BOOL) MInitKernel(LPWSTR currentPath)
 {
 	Log(L"MInitKernel (%s)...", currentPath);
+	MAppSetStartingProgessText(L"Loading kernel driver...");
 	if (!isKernelDriverLoaded)
 	{
 		wchar_t path[MAX_PATH];
@@ -241,7 +310,7 @@ M_CAPI(BOOL) MInitKernel(LPWSTR currentPath)
 		else {
 
 			LogErr(L"Load Kernel driver error because kernel driver file missing.");
-			LogErr(L"Try find kernel driver file : %s.", path);
+			LogInfo(L"Try find kernel driver file : %s.", path);
 
 			isKernelDriverLoaded = FALSE;
 			MInitKernelSwitchMenuState(isKernelDriverLoaded);
@@ -255,6 +324,8 @@ M_CAPI(BOOL) MUninitKernel()
 	Log(L"MUninitKernel...");
 	if (isKernelDriverLoaded)
 	{
+		if (isMyDbgViewLoaded)
+			MUnInitMyDbgView();
 		if (hKernelDevice != NULL)
 			CloseHandle(hKernelDevice);
 
@@ -264,12 +335,13 @@ M_CAPI(BOOL) MUninitKernel()
 			EnableMenuItem(hMenuMainFile, IDM_LOAD_DRIVER, MF_ENABLED);
 			
 			Log(L"Kernel unloaded");
+			return TRUE;
 		}
 		else Log(L"Kernel unload failed");
 		return !isKernelDriverLoaded;
 	}
 	else {
-		Log(L"Kernel not load , try force delete service");
+		LogWarn(L"Kernel not load , try force delete service");
 
 		if (MUnLoadKernelDriver(L"PCMgrKernel")) {
 			isKernelDriverLoaded = FALSE;
@@ -277,8 +349,101 @@ M_CAPI(BOOL) MUninitKernel()
 			EnableMenuItem(hMenuMainFile, IDM_LOAD_DRIVER, MF_ENABLED);
 
 			Log(L"Kernel unloaded");
+			return TRUE;
 		}
-		else Log(L"Kernel unload failed");
+		else LogErr(L"Kernel unload failed");
 	}
 	return FALSE;
+}
+
+BOOL froceNotUseMyDbgView = FALSE;
+
+BOOL MUnInitMyDbgView() {
+	if (isMyDbgViewLoaded)
+	{
+		M_SU_ReSetDbgViewEvent();
+		if (hEventDbgView) { CloseHandle(hEventDbgView); hEventDbgView = 0; }
+		isMyDbgViewRunning = FALSE;
+		DWORD dw = WaitForSingleObject(hThreadDbgView, 1000);
+		if (dw == WAIT_TIMEOUT) { 
+			if(NT_SUCCESS(MTerminateThreadNt(hThreadDbgView)))
+				LogInfo(L"MDbgViewReceiveThread Terminated.");
+			else LogWarn(L"MDbgViewReceiveThread Terminate failed!");
+		}
+		if (hThreadDbgView) { CloseHandle(hThreadDbgView); hThreadDbgView = 0; }
+		isMyDbgViewLoaded = FALSE;
+		LogInfo(L"MyDbgView stoped.");
+	}
+	return !isMyDbgViewLoaded;
+}
+BOOL MInitMyDbgView() 
+{
+	if (!isMyDbgViewLoaded)
+	{
+		if (!M_CFG_GetConfigBOOL(L"LogDbgPrint", L"Configure", true) && !froceNotUseMyDbgView)
+			return TRUE;
+
+		hEventDbgView = CreateEvent(NULL, TRUE, FALSE, L"PCMGR_DBGVIEW");
+		if (!M_SU_SetDbgViewEvent(hEventDbgView)) {
+			CloseHandle(hEventDbgView);
+			return FALSE;
+		}
+
+		isMyDbgViewRunning = TRUE;
+		hThreadDbgView = CreateThread(NULL, 0, MDbgViewReceiveThread, NULL, 0, NULL);
+		if (hThreadDbgView) {
+			isMyDbgViewLoaded = TRUE;
+			LogInfo(L"MyDbgView started.");
+			return isMyDbgViewLoaded;
+		}
+		else LogWarn(L"Create MyDbgView Thread failed : %d", GetLastError());
+	}
+	return FALSE;
+}
+M_CAPI(VOID) MDoNotStartMyDbgView()
+{
+	froceNotUseMyDbgView = TRUE;
+}
+
+DWORD WINAPI MDbgViewReceiveThread(LPVOID lpParameter)
+{
+	LogInfo(L"MDbgViewReceiveThread sterted.");
+
+	while (isMyDbgViewRunning) 
+	{
+		WaitForSingleObject(hEventDbgView, INFINITE);
+
+		WCHAR lastBuffer[256];
+
+		CONTINUE:
+		BOOL hasMoreData = FALSE;
+		memset(lastBuffer, 0, sizeof(lastBuffer));
+		if (M_SU_GetDbgViewLastBuffer(lastBuffer, 256, &hasMoreData))
+		{
+			if (MStrEqualW(lastBuffer, L""))
+				LogText(FOREGROUND_INTENSITY | FOREGROUND_BLUE |	FOREGROUND_RED, L"[DBGL] \n", lastBuffer);
+			else LogText(FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_BLUE, L"[DBGL] %s\n", lastBuffer);
+
+			if (hasMoreData) goto CONTINUE;
+		}
+
+		ResetEvent(hEventDbgView);
+	}
+
+	LogInfo(L"MDbgViewReceiveThread exiting.");
+	return 0;
+}
+DWORD WINAPI MLoadingThread(LPVOID lpParameter)
+{
+	BOOL usingNtosPDB = M_CFG_GetConfigBOOL(L"UseKrnlPDB", L"Configure", true);
+	MAppSetStartingProgessText(L"Init Kernel...");
+	KNTOSVALUE kNtosValue = { 0 };
+	M_SU_Init(usingNtosPDB, &kNtosValue);
+	if (!kNtosValue.KernelDataInited)
+	{
+		MGetNtosNameAndStartAddress(kNtosValue.NtosModuleName, 32, (kNtosValue.NtostAddress == 0 ? &kNtosValue.NtostAddress : 0));
+		MInitKernelNTPDB(usingNtosPDB, &kNtosValue);
+	}
+	MAppSetStartingProgessText(L"Initializing...");
+	return 0;
 }

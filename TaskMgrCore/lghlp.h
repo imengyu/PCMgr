@@ -2,6 +2,9 @@
 #include "stdafx.h"
 #include <string>
 
+M_CAPI(void) MLG_SetLanuageItems_NoRealloc();
+M_CAPI(void) MLG_SetLanuageRes(LPWSTR appstarppath, LPWSTR name);
+
 extern std::wstring str_item_kill_ask_start;
 extern std::wstring str_item_kill_ask_end;
 extern std::wstring str_item_kill_ast_content;
@@ -79,6 +82,9 @@ extern LPWSTR str_item_unloaddriver;
 extern LPWSTR str_item_filenotexist;
 extern LPWSTR str_item_filetrusted;
 extern LPWSTR str_item_filenottrust;
+extern LPWSTR str_item_opensc_err;
+extern LPWSTR str_item_delsc_err;
+extern LPWSTR str_item_setscstart_err;
 
 
 

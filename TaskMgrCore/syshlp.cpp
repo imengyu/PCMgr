@@ -1,14 +1,20 @@
 #include "stdafx.h"
 #include "syshlp.h"
 #include "shellapi.h"
+#include "loghlp.h"
+#include "mapphlp.h"
+#include "PathHelper.h"
 
 BOOL _Is64BitOS = -1;
 BOOL _IsRunasAdmin = -1;
 
+DWORD currentWindowsBulidVer = 0;
+DWORD currentWindowsMajor = 0;
 
 extern _RunFileDlg RunFileDlg;
 extern LdrGetProcedureAddressFun LdrGetProcedureAddress;
 extern RtlInitAnsiStringFun RtlInitAnsiString;
+extern NtQuerySystemInformationFun NtQuerySystemInformation;
 
 M_CAPI(BOOL) MRunFileDlg(_In_ HWND hwndOwner, _In_opt_ HICON hIcon, _In_opt_ LPCWSTR lpszDirectory, _In_opt_ LPCWSTR lpszTitle, _In_opt_ LPCWSTR lpszDescription, _In_ ULONG uFlags)
 {
@@ -116,7 +122,7 @@ M_CAPI(BOOL) MIsRunasAdmin()
 }
 M_CAPI(PVOID) MGetProcedureAddress(_In_ PVOID DllHandle, _In_opt_ PSTR ProcedureName, _In_opt_ ULONG ProcedureNumber)
 {
-	DWORD status;
+	NTSTATUS status;
 	ANSI_STRING procedureName;
 	PVOID procedureAddress;
 
@@ -167,4 +173,80 @@ M_CAPI(BOOL) MCommandLineToFilePath(LPWSTR cmdline, LPWSTR buffer, int size)
 		}
 	}
 	return  FALSE;
+}
+M_CAPI(BOOL) MGetWindowsWin8Upper() {
+	return currentWindowsMajor >= 8;
+}
+M_CAPI(BOOL) MGetWindowsBulidVersion() {
+
+	HKEY hKey;
+#ifdef _AMD64_
+	DWORD err = RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", 0, KEY_READ, &hKey);
+#else
+	DWORD err = RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", 0, KEY_WOW64_64KEY | KEY_READ, &hKey);
+#endif
+	if (err == ERROR_SUCCESS)
+	{
+		DWORD majotver = 0;
+		DWORD majotverLength = MAX_PATH;
+		DWORD majotverType = REG_SZ;
+		err = RegQueryValueEx(hKey, L"CurrentMajorVersionNumber", 0, &majotverType, (LPBYTE)&majotver, &majotverLength);
+		if (err == ERROR_SUCCESS) {
+			currentWindowsMajor = majotver;
+			Log(L"Windows Version : %d", majotver);
+		}
+
+		TCHAR bulidver[MAX_PATH] = { 0 };
+		DWORD bulidverLength = MAX_PATH;
+		DWORD bulidverType = REG_SZ;
+		err = RegQueryValueEx(hKey, L"CurrentBuild", 0, &bulidverType, (LPBYTE)&bulidver, &bulidverLength);
+		if (err == ERROR_SUCCESS)
+			currentWindowsBulidVer = static_cast<DWORD>(_wtoll(bulidver));
+		TCHAR buildLab[MAX_PATH] = { 0 };
+		DWORD buildLabLength = MAX_PATH;
+		DWORD buildLabType = REG_SZ;
+		err = RegQueryValueEx(hKey, L"BuildLab", 0, &buildLabType, (LPBYTE)&buildLab, &buildLabLength);
+
+		Log(L"Windows Bulid version : %s \n      Internal bulid Version : %s", bulidver, buildLab);
+	}
+	return FALSE;
+}
+M_CAPI(BOOL) MRunExe(LPWSTR path, LPWSTR args, BOOL runAsadmin, HWND hWnd)
+{
+	return ShellExecute(hWnd, runAsadmin ? L"runas" : L"run", path, args, NULL, SW_SHOW) > (HINSTANCE)32;
+}
+M_CAPI(BOOL) MGetNtosNameAndStartAddress(LPWSTR name, size_t buffersize, ULONG_PTR *address)
+{
+	ULONG outLength = 0;
+	PSYSTEM_MODULE_INFORMATION pSysModuleNames = (PSYSTEM_MODULE_INFORMATION)malloc(sizeof(SYSTEM_MODULE_INFORMATION));
+	if (NtQuerySystemInformation(SystemModuleInformation, pSysModuleNames, 0, &outLength) == STATUS_INFO_LENGTH_MISMATCH)
+	{
+		free(pSysModuleNames);
+		pSysModuleNames = (PSYSTEM_MODULE_INFORMATION)malloc(outLength);
+	}
+	else
+	{
+		free(pSysModuleNames);
+		pSysModuleNames = NULL;
+	}
+
+	if (pSysModuleNames)
+	{
+		NTSTATUS status = NtQuerySystemInformation(SystemModuleInformation, pSysModuleNames, outLength, &outLength);
+		if (!NT_SUCCESS(status)) {
+			LogErr(L"MGetNtosName NtQuerySystemInformation failed : 0x%08X", status);
+			free(pSysModuleNames);
+			return 0;
+		}
+
+		PSYSTEM_MODULE_INFORMATION SystemModuleInfo = (PSYSTEM_MODULE_INFORMATION)((PULONG)pSysModuleNames + 1);
+		LPWSTR strw = MConvertLPCSTRToLPWSTR(SystemModuleInfo->ImageName);
+		std::wstring *s = Path::GetFileName(strw);
+		if (name)wcscpy_s(name, buffersize, s->c_str());
+		if (address)*address = (ULONG_PTR)SystemModuleInfo->Base;
+		delete strw;
+		delete s;
+		free(pSysModuleNames);
+	}
+	return 0;
 }

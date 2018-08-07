@@ -27,7 +27,9 @@ namespace PCMgr.WorkWindow
         private uint currentPid = 0;
 
         [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern bool M_EH_CloseHandle(IntPtr handle);
+        private static extern bool M_SU_CloseHandleWithProcess(uint pid, IntPtr handle);
+        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        private static extern bool M_EH_CloseHandle(uint pid, IntPtr handle);
         [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern bool MEnumProcessHandles(uint pid, IntPtr callback);
 
@@ -44,8 +46,6 @@ namespace PCMgr.WorkWindow
 
             Callback = _EHCALLBACK;
             CallbackPtr = Marshal.GetFunctionPointerForDelegate(Callback);
-
-            刷新ToolStripMenuItem_Click(sender, e);
         }
         private void _EHCALLBACK(IntPtr handle, IntPtr type, IntPtr name, IntPtr address, IntPtr objaddr, int refcount, int typeindex)
         {
@@ -71,7 +71,7 @@ namespace PCMgr.WorkWindow
         private void 关闭句柄ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (listView1.SelectedItems.Count > 0)
-                if (M_EH_CloseHandle((IntPtr)listView1.SelectedItems[0].Tag))
+                if (M_EH_CloseHandle(currentPid, (IntPtr)listView1.SelectedItems[0].Tag))
                     MessageBox.Show(LanuageMgr.GetStr("OpSuccess"));
                 else MessageBox.Show(LanuageMgr.GetStr("OpFailed"));
         }
@@ -105,6 +105,34 @@ namespace PCMgr.WorkWindow
             ((ListViewItemComparer)listView1.ListViewItemSorter).Asdening = !((ListViewItemComparer)listView1.ListViewItemSorter).Asdening;
             ((ListViewItemComparer)listView1.ListViewItemSorter).SortColum = e.Column;
             listView1.Sort();
+        }
+
+        private void 强制关闭句柄ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (listView1.SelectedItems.Count > 0)
+                if (M_SU_CloseHandleWithProcess(currentPid, (IntPtr)listView1.SelectedItems[0].Tag))
+                    MessageBox.Show(LanuageMgr.GetStr("OpSuccess"));
+                else MessageBox.Show(LanuageMgr.GetStr("OpFailed"));
+        }
+
+        private void FormVHandles_Shown(object sender, EventArgs e)
+        {
+            刷新ToolStripMenuItem_Click(sender, e);
+            labelEnuming.Hide();
+        }
+
+        private void listView1_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Apps)
+            {
+                if (listView1.SelectedItems.Count > 0)
+                {
+                    ListViewItem item = listView1.SelectedItems[0];
+                    Point p = item.Position; p.X = 0;
+                    p = listView1.PointToScreen(p);
+                    contextMenuStrip1.Show(p);
+                }
+            }
         }
     }
 }

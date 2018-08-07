@@ -123,21 +123,267 @@
   <data name="button_cancel.Text" xml:space="preserve">
     <value>Cancel</value>
   </data>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="label8.Location" type="System.Drawing.Point, System.Drawing">
+    <value>201, 137</value>
+  </data>
+  <data name="label7.Location" type="System.Drawing.Point, System.Drawing">
+    <value>304, 137</value>
+  </data>
+  <data name="comboBoxShowHotKey2.Location" type="System.Drawing.Point, System.Drawing">
+    <value>321, 132</value>
+  </data>
+  <data name="label6.Location" type="System.Drawing.Point, System.Drawing">
+    <value>231, 137</value>
+  </data>
+  <data name="comboBoxShowHotKey1.Location" type="System.Drawing.Point, System.Drawing">
+    <value>248, 132</value>
+  </data>
+  <data name="label5.Size" type="System.Drawing.Size, System.Drawing">
+    <value>161, 24</value>
+  </data>
+  <data name="label5.Text" xml:space="preserve">
+    <value>Hotkey to Show main window
+(Apply after restar app)</value>
+  </data>
+  <data name="label4.Text" xml:space="preserve">
+    <value>Window title</value>
+  </data>
+  <data name="checkBox2.Size" type="System.Drawing.Size, System.Drawing">
+    <value>90, 16</value>
+  </data>
+  <data name="checkBox2.Text" xml:space="preserve">
+    <value>Not support</value>
+  </data>
+  <data name="checkBoxSelfProtect.Size" type="System.Drawing.Size, System.Drawing">
+    <value>222, 16</value>
+  </data>
+  <data name="checkBoxSelfProtect.Text" xml:space="preserve">
+    <value>Kernel driver for process lifting</value>
+  </data>
+  <data name="label3.Size" type="System.Drawing.Size, System.Drawing">
+    <value>89, 12</value>
+  </data>
+  <data name="label3.Text" xml:space="preserve">
+    <value>Self protect</value>
+  </data>
+  <data name="checkBoxCloseHide.Size" type="System.Drawing.Size, System.Drawing">
+    <value>180, 16</value>
+  </data>
+  <data name="checkBoxCloseHide.Text" xml:space="preserve">
+    <value>Hide window when click "X"</value>
+  </data>
+  <data name="checkBoxTop.Size" type="System.Drawing.Size, System.Drawing">
+    <value>72, 16</value>
+  </data>
+  <data name="checkBoxTop.Text" xml:space="preserve">
+    <value>Top most</value>
+  </data>
+  <data name="label2.Size" type="System.Drawing.Size, System.Drawing">
+    <value>89, 12</value>
+  </data>
+  <data name="label2.Text" xml:space="preserve">
+    <value>App Settings</value>
+  </data>
   <data name="tabPage1.Text" xml:space="preserve">
     <value>App</value>
+  </data>
+  <data name="checkBoxUseMyDbgView.Size" type="System.Drawing.Size, System.Drawing">
+    <value>96, 16</value>
+  </data>
+  <data name="checkBoxUseMyDbgView.Text" xml:space="preserve">
+    <value>Log DbgPrint</value>
+  </data>
+  <data name="checkBoxAutoLoadDriver.Size" type="System.Drawing.Size, System.Drawing">
+    <value>120, 16</value>
+  </data>
+  <data name="checkBoxAutoLoadDriver.Text" xml:space="preserve">
+    <value>Auto load driver</value>
+  </data>
+  <data name="checkBoxHighLightNoSystetm.Size" type="System.Drawing.Size, System.Drawing">
+    <value>384, 16</value>
+  </data>
+  <data name="checkBoxHighLightNoSystetm.Text" xml:space="preserve">
+    <value>For non system processes, services etc. use blue highlighted</value>
+  </data>
+  <data name="label16.Size" type="System.Drawing.Size, System.Drawing">
+    <value>54, 12</value>
+  </data>
+  <data name="label16.Text" xml:space="preserve">
+    <value>Display</value>
+  </data>
+  <data name="label15.Size" type="System.Drawing.Size, System.Drawing">
+    <value>353, 24</value>
+  </data>
+  <data name="label15.Text" xml:space="preserve">
+    <value>Use ZwTerminateProcess/NtTerminateThread End (default, if 
+unsuccessful, use the following two methods)</value>
+  </data>
+  <data name="checkBoxShowDebugWindow.Size" type="System.Drawing.Size, System.Drawing">
+    <value>168, 16</value>
+  </data>
+  <data name="checkBoxShowDebugWindow.Text" xml:space="preserve">
+    <value>Show Debug OutPut window</value>
+  </data>
+  <data name="label14.Size" type="System.Drawing.Size, System.Drawing">
+    <value>40, 12</value>
+  </data>
+  <data name="label14.Text" xml:space="preserve">
+    <value>Debug</value>
+  </data>
+  <data name="labelDriverLoadStatus.Location" type="System.Drawing.Point, System.Drawing">
+    <value>146, 20</value>
+  </data>
+  <data name="labelDriverLoadStatus.Size" type="System.Drawing.Size, System.Drawing">
+    <value>83, 12</value>
+  </data>
+  <data name="labelDriverLoadStatus.Text" xml:space="preserve">
+    <value>Driver status</value>
+  </data>
+  <data name="label13.Size" type="System.Drawing.Size, System.Drawing">
+    <value>117, 12</value>
+  </data>
+  <data name="label13.Text" xml:space="preserve">
+    <value>Here is the last</value>
+  </data>
+  <data name="radioButtonDrvLog.Location" type="System.Drawing.Point, System.Drawing">
+    <value>20, 443</value>
+  </data>
+  <data name="radioButtonDrvLog.Size" type="System.Drawing.Size, System.Drawing">
+    <value>71, 16</value>
+  </data>
+  <data name="radioButtonDrvLog.Text" xml:space="preserve">
+    <value>Log only</value>
+  </data>
+  <data name="radioButtonRefuseNoSginedAndAsk.Size" type="System.Drawing.Size, System.Drawing">
+    <value>425, 28</value>
+  </data>
+  <data name="radioButtonRefuseNoSginedAndAsk.Text" xml:space="preserve">
+    <value>For loading unsigned drivers, callback to application layer pop-up 
+dialog asks if you load and Log.</value>
+  </data>
+  <data name="checkBoxEnableLoadDrvCallback.Location" type="System.Drawing.Point, System.Drawing">
+    <value>158, 362</value>
+  </data>
+  <data name="checkBoxEnableLoadDrvCallback.Size" type="System.Drawing.Size, System.Drawing">
+    <value>246, 16</value>
+  </data>
+  <data name="checkBoxEnableLoadDrvCallback.Text" xml:space="preserve">
+    <value>Enabled (only 32 bit systems can use)</value>
+  </data>
+  <data name="radioButtonRefuseNoSginedDrv.Size" type="System.Drawing.Size, System.Drawing">
+    <value>287, 16</value>
+  </data>
+  <data name="radioButtonRefuseNoSginedDrv.Text" xml:space="preserve">
+    <value>Prevent unsigned driver from loading and Log</value>
+  </data>
+  <data name="label12.Size" type="System.Drawing.Size, System.Drawing">
+    <value>145, 12</value>
+  </data>
+  <data name="label12.Text" xml:space="preserve">
+    <value>Load driver callback</value>
+  </data>
+  <data name="checkBoxCannotLoadDriver.Size" type="System.Drawing.Size, System.Drawing">
+    <value>144, 16</value>
+  </data>
+  <data name="checkBoxCannotLoadDriver.Text" xml:space="preserve">
+    <value>Prohibit load driver</value>
+  </data>
+  <data name="checkBoxCannoteLoadModule.Size" type="System.Drawing.Size, System.Drawing">
+    <value>144, 16</value>
+  </data>
+  <data name="checkBoxCannoteLoadModule.Text" xml:space="preserve">
+    <value>Prohibit load module</value>
+  </data>
+  <data name="checkBoxCannotCreateReg.Size" type="System.Drawing.Size, System.Drawing">
+    <value>222, 16</value>
+  </data>
+  <data name="checkBoxCannotCreateReg.Text" xml:space="preserve">
+    <value>Prohibit create reg key and value</value>
+  </data>
+  <data name="checkBoxCannotCreateFile.Size" type="System.Drawing.Size, System.Drawing">
+    <value>144, 16</value>
+  </data>
+  <data name="checkBoxCannotCreateFile.Text" xml:space="preserve">
+    <value>Prohibit create file</value>
+  </data>
+  <data name="checkBoxCannotCreateThread.Size" type="System.Drawing.Size, System.Drawing">
+    <value>156, 16</value>
+  </data>
+  <data name="checkBoxCannotCreateThread.Text" xml:space="preserve">
+    <value>Prohibit create thread</value>
+  </data>
+  <data name="checkBoxCannotCreateProc.Size" type="System.Drawing.Size, System.Drawing">
+    <value>162, 16</value>
+  </data>
+  <data name="checkBoxCannotCreateProc.Text" xml:space="preserve">
+    <value>Prohibit create process</value>
+  </data>
+  <data name="label11.Size" type="System.Drawing.Size, System.Drawing">
+    <value>383, 12</value>
+  </data>
+  <data name="label11.Text" xml:space="preserve">
+    <value>Temporary configuration (effective after driving load)</value>
+  </data>
+  <data name="radioButtonApcPspTerProc.Text" xml:space="preserve">
+    <value>Ke APC + PspExitThread</value>
+  </data>
+  <data name="radioButtonPspTerProc.Size" type="System.Drawing.Size, System.Drawing">
+    <value>185, 16</value>
+  </data>
+  <data name="radioButtonPspTerProc.Text" xml:space="preserve">
+    <value>PspTerminateThreadByPointer</value>
+  </data>
+  <data name="label10.Size" type="System.Drawing.Size, System.Drawing">
+    <value>395, 12</value>
+  </data>
+  <data name="label10.Text" xml:space="preserve">
+    <value>R3 Terminate Process/Thread：NtTerminateProcess/NtTerminateThread</value>
+  </data>
+  <data name="label9.Size" type="System.Drawing.Size, System.Drawing">
+    <value>194, 12</value>
+  </data>
+  <data name="label9.Text" xml:space="preserve">
+    <value>R0 Terminate Process/Thread</value>
+  </data>
+  <data name="tabPage4.Text" xml:space="preserve">
+    <value>Config</value>
   </data>
   <data name="tabPage2.Text" xml:space="preserve">
     <value>Others</value>
   </data>
-  <data name="tabPage3.Text" xml:space="preserve">
-    <value>Lanuage</value>
-  </data>
-  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="label1.Size" type="System.Drawing.Size, System.Drawing">
     <value>47, 12</value>
   </data>
   <data name="label1.Text" xml:space="preserve">
     <value>Lanuage</value>
+  </data>
+  <data name="tabPage3.Text" xml:space="preserve">
+    <value>Lanuage</value>
+  </data>
+  <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAQAQAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAzAAAAMwAAADMAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAkAAAAIwAAAAAAAAAAdHJw/3Jwbv90cnD/AAAAAAAAAAAAAAAvAAAAIwAA
+        AAAAAAAAAAAAAAAAAAAAAAAjbGpowWtpaL8AAAAvAAAAM3BubP/u7Ov/cG5s/wAAADMAAAAzc3Fv8Wtp
+        aMAAAAAkAAAAAAAAAAAAAAAAbmxqv6CenP+dm5n/b21r73BubP+IhoT/4d/e/4iGhP9wbmz/cW9t/p6c
+        mv+gnpz/cG5svQAAAAAAAAAAAAAAAHl3de2enJr/393b/7e1s//b2df/2NbU/9bU0v/Y1tT/29nX/7e1
+        s//f3dv/npya/3l3da8AAAAAAAAAAAAAAAAAAAAAdXRx/raysv/S0M//0c/P/9PR0P/T0dD/09HQ/9HP
+        z//S0M//trKy/3RycO8AAAAAAAAAAAAAAAAAAAAzAAAAM3d1c//S0M7/zszK/727uf+Rj43/jIqI/5GP
+        jf+9u7n/zszK/9LQzv93dXP/AAAAMwAAADMAAAAAgH58/3t5d/+cmpj/zMnI/8zJyP+SkI7/eXd1nH17
+        eSJ5d3WckpCO/8zJyP/Mycj/nJqY/3t5d/+Afnz/AAAAAIB+fP/j4d//3NrY/8XEwf/IxcP/joyK/0dG
+        RT0AAAAHR0ZFPY6Miv/IxcP/xcTB/9za2P/j4d//gH58/wAAAACDgX//f317/5OTkf/Qzsz/wr++/5KQ
+        jv9xcG6tOTg3TnFwbq2SkY//wr++/9DOzP+Tk5H/f317/4OBf/8AAAAAAAAAAAAAAAB/fXv/2tnY/726
+        uP+7uLb/k5CN/5GOjP+TkI7/srGv/726uP/b2dj/f317/wAAAAAAAAAAAAAAAAAAAAAAAAAjgX5876up
+        p//HxML/ure2/7m2tf+6t7b/ure2/7q3tv/HxML/q6mn/4B+fO8AAAAjAAAAAAAAAAAAAAAAgX99uqOh
+        n//a2Nf/xcPB/+Tj4f/b2df/wb69/9fV1P/k4+H/xMPB/9rY1/+joZ//gX99ugAAAAAAAAAAAAAAAIqI
+        hrKxsK7/rq2r/4SCgOuFg4H/mZeW/7u5tv+Zl5b/hYOB/4SCgP6urav/sbCu/4qIhrIAAAAAAAAAAAAA
+        AAAAAAAAjIqIsoyKiK8AAAAAAAAAAIqIhv/p5+f/ioiG/wAAAAAAAAAAi4mH7YyKiLAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACPjYv/joyK/4+Ni/8AAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAA/H8AAMxnAACAAwAAgAMAAIADAADABwAAAAEAAAABAAAAAQAAAAEAAMAHAACAAwAAgAMAAIAD
+        AADMZwAA/H8AAA==
+</value>
   </data>
   <data name="$this.Text" xml:space="preserve">
     <value>Settings</value>

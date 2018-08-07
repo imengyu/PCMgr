@@ -22,17 +22,5 @@ namespace PCMgr.Properties {
                 return defaultInstance;
             }
         }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("ssss")]
-        public string 设置 {
-            get {
-                return ((string)(this["设置"]));
-            }
-            set {
-                this["设置"] = value;
-            }
-        }
     }
 }

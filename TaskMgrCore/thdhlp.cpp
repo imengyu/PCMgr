@@ -13,12 +13,6 @@ extern RtlNtStatusToDosErrorFun RtlNtStatusToDosError;
 extern RtlGetLastWin32ErrorFun RtlGetLastWin32Error;
 extern NtQuerySystemInformationFun NtQuerySystemInformation;
 
-
-M_API NTSTATUS MGetThreadState(ULONG ulPID, ULONG ulTID)
-{
-	return 0;
-}
-
 M_API NTSTATUS MOpenThreadNt(DWORD dwId, PHANDLE pLandle, DWORD dwPId)
 {
 	HANDLE hThread;
@@ -52,26 +46,15 @@ M_API NTSTATUS MOpenThreadNt(DWORD dwId, PHANDLE pLandle, DWORD dwPId)
 
 M_API NTSTATUS MTerminateThreadNt(HANDLE handle)
 {
-	DWORD rs = ZwTerminateThread(handle, 0);
-	return rs;
+	return ZwTerminateThread(handle, 0);
 }
-
 M_API NTSTATUS MResumeThreadNt(HANDLE handle)
 {
 	ULONG count = 0;
-	DWORD rs = ZwResumeThread(handle, &count);
-	return rs;
+	return ZwResumeThread(handle, &count);
 }
-
 M_API NTSTATUS MSuspendThreadNt(HANDLE handle)
 {
 	ULONG count = 0;
-	DWORD rs = ZwSuspendThread(handle, &count);
-	return rs;
+	return ZwSuspendThread(handle, &count);
 }
-
-M_API BOOL MGetThreadInfoNt(DWORD tid, int i, LPWSTR *str)
-{
-	return 0;
-}
-

@@ -2,6 +2,7 @@
 #include "protect.h"
 
 extern ULONG_PTR CurrentPCMgrProcess;
+extern ULONG_PTR CurrentDbgViewProcess;
 
 extern PsLookupProcessByProcessId_ _PsLookupProcessByProcessId;
 extern PsLookupThreadByThreadId_ _PsLookupThreadByThreadId;
@@ -9,6 +10,8 @@ extern PsLookupThreadByThreadId_ _PsLookupThreadByThreadId;
 BOOLEAN kxCanCreateProcess = TRUE;
 BOOLEAN kxCanCreateThread = TRUE;
 BOOLEAN kxCanLoadDriver = TRUE;
+
+extern void KxDbgViewR3Exited();
 
 VOID KxPsMonitorSetReset() {
 	kxCanCreateProcess = TRUE;
@@ -46,7 +49,9 @@ VOID KxCreateProcessNotifyEx(__inout PEPROCESS Process,__in HANDLE ProcessId,__i
 		if (KxIsProcessProtect(ProcessId))
 			KxUnProtectProcessWithPid(ProcessId);
 		if ((ULONG_PTR)ProcessId == CurrentPCMgrProcess)
-			KxPsMonitorSetReset();
+			KxPsMonitorSetReset();	
+		if ((ULONG_PTR)ProcessId == CurrentDbgViewProcess)
+			KxDbgViewR3Exited();
 	}
 }
 

@@ -11,7 +11,7 @@
 #include "lghlp.h"
 #include "suact.h"
 #include "StringHlp.h"
-
+#include "loghlp.h"
 #include <list>
 
 typedef void(__cdecl *EnumWinsCallBack)(HWND hWnd, HWND hWndParent);
@@ -98,9 +98,15 @@ BOOL FreeLibraryEx()
 			return TRUE;
 		else if (rs2 == 0xC000010A)
 			MessageBox(NULL, str_item_freeinvproc, str_item_freefailed, MB_OK | MB_ICONWARNING);
-		else ThrowErrorAndErrorCodeX(rs2, L"", str_item_freefailed);
+		else {
+			LogErr(L"UnmapView failed %s NTSTATUS : 0x%08X", address, status);
+			ThrowErrorAndErrorCodeX(rs2, L"", str_item_freefailed);
+		}
 	}
-	else ThrowErrorAndErrorCodeX(status, str_item_openprocfailed, str_item_freefailed);
+	else {
+		LogErr(L"OpenProcess %d Error : 0x%08X", currentPid, status);
+		ThrowErrorAndErrorCodeX(status, str_item_openprocfailed, str_item_freefailed);
+	}
 	return FALSE;
 }
 
@@ -109,28 +115,28 @@ void KillThreadKernel(bool a = false);
 bool KillThread()
 {
 	HANDLE hThread;
-	DWORD NtStatus = MOpenThreadNt(selectItem1, &hThread, currentShowThreadPid);
+	NTSTATUS NtStatus = MOpenThreadNt(selectItem1, &hThread, currentShowThreadPid);
 	if (NtStatus == STATUS_INVALID_HANDLE) {
 		MessageBox(NULL, str_item_killinvthread, str_item_killthreaderr, MB_OK);
 		return true;
 	}
 	if (hThread) {
 		NtStatus = MTerminateThreadNt(hThread);
-		if (hThread == STATUS_SUCCESS)
+		if (NtStatus == STATUS_SUCCESS)
 			return true;
 		else {
-			
+			LogErr(L"TerminateThread Error : 0x%08X", NtStatus);
+			ThrowErrorAndErrorCodeX(NtStatus, L"", str_item_killthreaderr);
 		}
-		ThrowErrorAndErrorCodeX(NtStatus, L"", str_item_killthreaderr);
 		return true;
 	}
 	else {
-		
+		LogErr(L"OpenThread Error : 0x%08X", NtStatus);
+		if (MCanUseKernel())Log(L"You can try to terminate it in kernel module.");
+		ThrowErrorAndErrorCodeX(NtStatus, str_item_openthreaderr, str_item_killthreaderr);
 	}
-	ThrowErrorAndErrorCodeX(NtStatus, str_item_openthreaderr, str_item_killthreaderr);
 	return false;
 }
-
 void KillThreadKernel(bool a)
 {
 	if (!MCanUseKernel())MessageBox(NULL, str_item_kernelnotload, str_item_killthreaderr, MB_OK | MB_ICONERROR);
@@ -148,13 +154,12 @@ void KillThreadKernel(bool a)
 		}
 	}
 }
-
 bool SuspendThread()
 {
 	if (MShowMessageDialog(NULL, str_item_suthreadwarn, str_item_question, L"", MB_ICONWARNING, MB_YESNO) == IDNO)
 		return false;
 	HANDLE hThread;
-	DWORD NtStatus = MOpenThreadNt(selectItem1, &hThread, currentShowThreadPid);
+	NTSTATUS NtStatus = MOpenThreadNt(selectItem1, &hThread, currentShowThreadPid);
 	if (NtStatus == STATUS_INVALID_HANDLE) {
 		MessageBox(NULL, str_item_invthread, str_item_suthreaderr, MB_OK);
 		return true;
@@ -164,34 +169,45 @@ bool SuspendThread()
 		if (NtStatus == STATUS_SUCCESS) {
 			return true;
 		}
-		else ThrowErrorAndErrorCodeX(NtStatus, L"", str_item_suthreaderr);
+		else {
+			LogErr(L"SuspendThread Error : 0x%08X", NtStatus);
+			ThrowErrorAndErrorCodeX(NtStatus, L"", str_item_suthreaderr);
+		}
 	}
-	else ThrowErrorAndErrorCodeX(NtStatus, str_item_openthreaderr, str_item_suthreaderr);
+	else {
+		LogErr(L"OpenThread Error : 0x%08X", NtStatus);
+		ThrowErrorAndErrorCodeX(NtStatus, str_item_openthreaderr, str_item_suthreaderr);
+	}
 	return false;
 }
-
 bool ResusemeThread()
 {
 	HANDLE hThread;
-	DWORD NtStatus = MOpenThreadNt(selectItem1, &hThread, currentShowThreadPid);
+	NTSTATUS NtStatus = MOpenThreadNt(selectItem1, &hThread, currentShowThreadPid);
 	if (NtStatus == STATUS_INVALID_HANDLE) {
 		MessageBox(NULL, str_item_invthread, str_item_rethreaderr, MB_OK);
 		return true;
 	}
 	if (hThread) {
 		NtStatus = MResumeThreadNt(hThread);
-		if (NtStatus == STATUS_SUCCESS) {
+		if (NtStatus == STATUS_SUCCESS)
 			return true;
+		else {
+			ThrowErrorAndErrorCodeX(NtStatus, L"", str_item_rethreaderr);
+			LogErr(L"ResumeThread Error : 0x%08X", NtStatus);
 		}
-		else ThrowErrorAndErrorCodeX(NtStatus, L"", str_item_rethreaderr);
 	}
-	else ThrowErrorAndErrorCodeX(NtStatus, str_item_openthreaderr, str_item_rethreaderr);
+	else {
+		ThrowErrorAndErrorCodeX(NtStatus, str_item_openthreaderr, str_item_rethreaderr);
+		LogErr(L"OpenThread Error : 0x%08X", NtStatus);
+	}
 	return false;
 }
 
 BOOL CALLBACK lpEnumFunc(HWND hWnd, LPARAM lParam)
 {
 	DWORD processId;
+
 	GetWindowThreadProcessId(hWnd, &processId);
 	if (processId == lParam)
 	{
@@ -203,7 +219,7 @@ BOOL CALLBACK lpEnumFunc(HWND hWnd, LPARAM lParam)
 		vitem.iSubItem = 0;
 		HICON hIcon = NULL;
 		if (!SendMessageTimeoutW(hWnd, WM_GETICON, 0, 0,
-			SMTO_BLOCK | SMTO_ABORTIFHUNG, 1000, (PULONG_PTR)&hIcon))
+			SMTO_BLOCK | SMTO_ABORTIFHUNG, 500, (PULONG_PTR)&hIcon))
 		{
 			ImageList_AddIcon(hImgListWinSm, hIcon);
 			vitem.iImage = winicoidx;
@@ -394,6 +410,7 @@ BOOL MAppVModuls(DWORD dwPID, HWND hDlg, LPWSTR procName)
 		if (hModuleSnap == INVALID_HANDLE_VALUE) {
 			if (GetLastError() == 299) SetWindowText(htitle, (LPWSTR)str_item_invalidproc.c_str());
 			else {
+				LogWarn(L"View Modules Failed in CreateToolhelp32Snapshot : %d", GetLastError());
 				wstring str = FormatString(L"%s\nLast Error : 0x%08x", str_item_enum_modulefailed, GetLastError());
 				SetWindowText(htitle, str.c_str());
 			}
@@ -452,12 +469,12 @@ BOOL MAppVModuls(DWORD dwPID, HWND hDlg, LPWSTR procName)
 		return TRUE;
 	}
 	else {
+		LogWarn(L"View Modules Failed in OpenProcess : 0x%08X", rs);
 		wstring str = FormatString(L"%d , %d\nError Code : 0x%08x", str_item_enum_modulefailed, str_item_openprocfailed, rs);
 		SetWindowText(htitle, str.c_str());
 		return 0;
 	}
 }
-
 BOOL MAppVThreads(DWORD dwPID, HWND hDlg, LPWSTR procName)
 {
 	BOOL bFound = FALSE;
@@ -491,14 +508,13 @@ BOOL MAppVThreads(DWORD dwPID, HWND hDlg, LPWSTR procName)
 #else
 				swprintf_s(c, L"%lu", tid);
 #endif
-
-
 				vitem.pszText = c;
 				ListView_InsertItem(hListThreads, &vitem);
 				vitem.iSubItem++;
 
+				ULONG_PTR teb = 0;
 				ULONG_PTR ethread = 0;
-				if (M_SU_GetETHREAD(static_cast<DWORD>(tid), &ethread))
+				if (M_SU_GetETHREAD(static_cast<DWORD>(tid), &ethread, &teb))
 				{
 					wchar_t x[32];
 #ifdef _X64_
@@ -529,6 +545,15 @@ BOOL MAppVThreads(DWORD dwPID, HWND hDlg, LPWSTR procName)
 						swprintf_s(err, L"ERROR:0x%08X", status);
 						vitem.pszText = err;
 					}
+				}
+				else if (teb) {
+					TCHAR modname1[32];
+#ifdef _X64_
+					swprintf_s(modname1, L"0x%I64X", (ULONG_PTR)teb);
+#else
+					swprintf_s(modname1, L"0x%08X", (ULONG_PTR)teb);
+#endif
+					vitem.pszText = modname1;
 				}
 				else vitem.pszText = L"-";
 				ListView_SetItem(hListThreads, &vitem);
@@ -622,6 +647,7 @@ BOOL MAppVThreads(DWORD dwPID, HWND hDlg, LPWSTR procName)
 		}
 		done = p->NextEntryDelta == 0;
 	}
+	LogWarn(L"Not found process : %d", dwPID);
 	return 0;
 
 	/*
@@ -669,7 +695,6 @@ BOOL MAppVThreads(DWORD dwPID, HWND hDlg, LPWSTR procName)
 		return FALSE;
 	}*/
 }
-
 BOOL MAppVWins(DWORD dwPID, HWND hDlg, LPWSTR procName)
 {
 	winscount = 0; winicoidx = 2;
@@ -759,6 +784,18 @@ int CALLBACK Sort_VTHREADS(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 	default:
 		break;
 	}
+	return 0;
+}
+int CALLBACK Sort_VWINS(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
+{
+	if (lParam1 == lParam2)
+		return -1;
+	wchar_t s1[64];
+	wchar_t s2[64];
+	int cloums = static_cast<int>(lParamSort);
+	ListView_GetItemText(hListWins, lParam1, cloums, s1, 64);
+	ListView_GetItemText(hListWins, lParam2, cloums, s2, 64);
+	return wcscmp(s1, s2);
 	return 0;
 }
 
@@ -904,9 +941,44 @@ INT_PTR CALLBACK VWinsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 		case IDC_WINSLIST:
 			switch (((LPNMHDR)lParam)->code)
 			{
-			case LVN_COLUMNCLICK:
-			{
+			case LVN_KEYDOWN: {
+				LPNMLVKEYDOWN lpnmk = (LPNMLVKEYDOWN)lParam;
+				if (lpnmk->wVKey == 93)
+				{
+					WCHAR hwnd[32];
+					ListView_GetItemText(hListWins, ListView_GetSelectionMark(hListWins), 1, hwnd, 32);
+					selectItem3 = (HWND)LongToHandle(MHexStrToIntW(hwnd));
+					HMENU hroot = LoadMenu(hInstRs, MAKEINTRESOURCE(IDR_WINSMENU));
+					if (hroot) {
+						HMENU hpop = GetSubMenu(hroot, 0);
+						POINT pt;
+						GetCursorPos(&pt);
 
+						if (IsWindow(selectItem3)) {
+							if (IsWindowEnabled(selectItem3))
+								EnableMenuItem(hpop, ID_WINSMENU_ENABLE, MF_DISABLED);
+							else
+								EnableMenuItem(hpop, ID_WINSMENU_DISABLE, MF_DISABLED);
+							if (!IsWindowVisible(selectItem3))
+								EnableMenuItem(hpop, ID_WINSMENU_HIDEWINDOW, MF_DISABLED);
+							else
+								EnableMenuItem(hpop, ID_WINSMENU_SHOWWND, MF_DISABLED);
+						}
+						TrackPopupMenu(hpop,
+							TPM_LEFTALIGN | TPM_TOPALIGN | TPM_RIGHTBUTTON,
+							pt.x,
+							pt.y,
+							0,
+							hDlg,
+							NULL);
+						DestroyMenu(hroot);
+					}
+				}
+				break;
+			}
+			case LVN_COLUMNCLICK:{
+				ListView_SortItemsEx(hListWins, Sort_VWINS, ((LPNMLISTVIEW)lParam)->iSubItem);
+				break;
 			}
 			case NM_CLICK: {
 				WCHAR hwnd[32];
@@ -914,8 +986,7 @@ INT_PTR CALLBACK VWinsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 				selectItem3 = (HWND)LongToHandle(MHexStrToIntW(hwnd));
 				break;
 			}
-			case NM_RCLICK:
-			{
+			case NM_RCLICK:{
 				WCHAR hwnd[32];
 				ListView_GetItemText(hListWins, ListView_GetSelectionMark(hListWins), 1, hwnd, 32);
 				selectItem3 = (HWND)LongToHandle(MHexStrToIntW(hwnd));
@@ -953,12 +1024,11 @@ INT_PTR CALLBACK VWinsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 	}
 	return (INT_PTR)FALSE;
 }
-
 INT_PTR CALLBACK VModulsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg)
 	{
-	case WM_INITDIALOG:
+	case WM_INITDIALOG: {
 		SendMessage(hDlg, WM_SETICON, ICON_SMALL, (LPARAM)LoadIcon(hInstRs, MAKEINTRESOURCE(IDI_ICONAPP)));
 		hListModuls = GetDlgItem(hDlg, IDC_MODULLIST);
 		LV_COLUMN lvc;
@@ -990,6 +1060,7 @@ INT_PTR CALLBACK VModulsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 			ShowWindow(GetDlgItem(hDlg, IDC_TITLE), SW_SHOW);
 		}
 		return 0;
+	}
 	case WM_SYSCOMMAND:
 		if (wParam == SC_CLOSE) {
 			EndDialog(hDlg, 0);
@@ -1038,30 +1109,52 @@ INT_PTR CALLBACK VModulsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 			break;
 		}
 		break;
-	case WM_SIZE:
-	{
+	case WM_SIZE:	{
 		RECT rc;
 		GetClientRect(hDlg, &rc);
 		MoveWindow(hListModuls, 0, 0, rc.right - rc.left, rc.bottom - rc.top, TRUE);
 		MoveWindow(GetDlgItem(hDlg, IDC_TITLE), 0, 0, rc.right - rc.left, rc.bottom - rc.top, TRUE);
+		break;
 	}
-	break;
 	case WM_NOTIFY:
 		switch (LOWORD(wParam))
 		{
 		case IDC_MODULLIST:
 			switch (((LPNMHDR)lParam)->code)
 			{
-			case LVN_COLUMNCLICK:
-			{											
-				ListView_SortItemsEx(hListModuls, Sort_VMODULS, ((LPNMLISTVIEW)lParam)->iSubItem);
+			case LVN_KEYDOWN: {
+				LPNMLVKEYDOWN lpnmk = (LPNMLVKEYDOWN)lParam;
+				if (lpnmk->wVKey == 93)
+				{
+					selectItem2 = ListView_GetSelectionMark(hListModuls);
+					selectHModule = (HMODULE)GetItemData(hListModuls, ListView_GetSelectionMark(hListModuls));
+					HMENU hroot = LoadMenu(hInstRs, MAKEINTRESOURCE(IDR_MODULSMENU));
+					if (hroot) {
+						HMENU hpop = GetSubMenu(hroot, 0);
+						POINT pt;
+						GetCursorPos(&pt);
+						TrackPopupMenu(hpop,
+							TPM_LEFTALIGN | TPM_TOPALIGN | TPM_RIGHTBUTTON,
+							pt.x,
+							pt.y,
+							0,
+							hDlg,
+							NULL);
+						DestroyMenu(hroot);
+					}
+				}
+				break;
 			}
-			case NM_CLICK:
+			case LVN_COLUMNCLICK: {											
+				ListView_SortItemsEx(hListModuls, Sort_VMODULS, ((LPNMLISTVIEW)lParam)->iSubItem);
+				break;
+			}
+			case NM_CLICK: {
 				selectItem2 = ListView_GetSelectionMark(hListModuls);
 				selectHModule = (HMODULE)GetItemData(hListModuls, ListView_GetSelectionMark(hListModuls));
 				break;
-			case NM_RCLICK:
-			{
+			}
+			case NM_RCLICK: {
 				selectItem2 = ListView_GetSelectionMark(hListModuls);
 				selectHModule = (HMODULE)GetItemData(hListModuls, ListView_GetSelectionMark(hListModuls));
 				HMENU hroot = LoadMenu(hInstRs, MAKEINTRESOURCE(IDR_MODULSMENU));
@@ -1085,12 +1178,11 @@ INT_PTR CALLBACK VModulsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 	}
 	return (INT_PTR)FALSE;
 }
-
 INT_PTR CALLBACK VThreadsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg)
 	{
-	case WM_INITDIALOG:
+	case WM_INITDIALOG: {
 		SendMessage(hDlg, WM_SETICON, ICON_SMALL, (LPARAM)LoadIcon(hInstRs, MAKEINTRESOURCE(IDI_ICONAPP)));
 		hListThreads = GetDlgItem(hDlg, IDC_THREADLIST);
 		SetWindowTheme(hListThreads, L"explorer", NULL);
@@ -1125,6 +1217,7 @@ INT_PTR CALLBACK VThreadsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPar
 		SendMessage(hListThreads, LVM_INSERTCOLUMN, 0, (LPARAM)&lvc);
 		SendMessage(hDlg, WM_COMMAND, 16765, 0);
 		return 0;
+	}
 	case WM_SYSCOMMAND:
 		if (wParam == SC_CLOSE) {
 			EndDialog(hDlg, 0);
@@ -1193,23 +1286,46 @@ INT_PTR CALLBACK VThreadsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPar
 			break;
 		}
 		break;
-	case WM_SIZE:
-	{
+	case WM_SIZE: {
 		RECT rc;
 		GetClientRect(hDlg, &rc);
 		MoveWindow(hListThreads, 0, 0, rc.right - rc.left, rc.bottom - rc.top, TRUE);
 		MoveWindow(GetDlgItem(hDlg, IDC_TITLE), 0, 0, rc.right - rc.left, rc.bottom - rc.top, TRUE);
+		break;
 	}
-	break;
 	case WM_NOTIFY:
 		switch (LOWORD(wParam))
 		{
 		case IDC_THREADLIST:
 			switch (((LPNMHDR)lParam)->code)
 			{
-			case LVN_COLUMNCLICK:
-			{
+			case LVN_KEYDOWN: {
+				LPNMLVKEYDOWN lpnmk = (LPNMLVKEYDOWN)lParam;
+				if (lpnmk->wVKey == 93)
+				{
+					TCHAR id[20];
+					ListView_GetItemText(hListThreads, ListView_GetSelectionMark(hListThreads), 0, id, 20);
+					selectItem1 = _wtoi(id);
+					HMENU hroot = LoadMenu(hInstRs, MAKEINTRESOURCE(IDR_THREADMENU));
+					if (hroot) {
+						HMENU hpop = GetSubMenu(hroot, 0);
+						POINT pt;
+						GetCursorPos(&pt);
+						TrackPopupMenu(hpop,
+							TPM_LEFTALIGN | TPM_TOPALIGN | TPM_RIGHTBUTTON,
+							pt.x,
+							pt.y,
+							0,
+							hDlg,
+							NULL);
+						DestroyMenu(hroot);
+					}
+				}
+				break;
+			}
+			case LVN_COLUMNCLICK: {
 				ListView_SortItemsEx(hListThreads, Sort_VTHREADS, ((LPNMLISTVIEW)lParam)->iSubItem);
+				break;
 			}
 			case NM_CLICK: {
 				TCHAR id[20];
@@ -1217,8 +1333,7 @@ INT_PTR CALLBACK VThreadsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPar
 				selectItem1 = _wtoi(id);
 				break;
 			}
-			case NM_RCLICK:
-			{
+			case NM_RCLICK: {
 				TCHAR id[20];
 				ListView_GetItemText(hListThreads, ListView_GetSelectionMark(hListThreads), 0, id, 20);
 				selectItem1 = _wtoi(id);
@@ -1238,6 +1353,7 @@ INT_PTR CALLBACK VThreadsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPar
 				}
 				break;
 			}
+
 			}
 		}
 	}

@@ -138,7 +138,7 @@
     <value>System.Windows.Forms.UserControl, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;performanceGrid.Type" xml:space="preserve">
-    <value>PCMgr.Ctls.PerformanceGrid, PCMgr32, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>PCMgr.Ctls.PerformanceGrid, PCMgrApp32, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;$this.Name" xml:space="preserve">
     <value>PerformancePageNet</value>
@@ -151,7 +151,7 @@
     <value>503, 257</value>
   </data>
   <data name="&gt;&gt;performanceTitle.Type" xml:space="preserve">
-    <value>PCMgr.Ctls.PerformanceTitle, PCMgr32, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>PCMgr.Ctls.PerformanceTitle, PCMgrApp32, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="performanceInfos.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
     <value>Bottom</value>
@@ -199,7 +199,7 @@
     <value>performanceInfos1</value>
   </data>
   <data name="&gt;&gt;performanceInfos.Type" xml:space="preserve">
-    <value>PCMgr.Ctls.PerformanceInfos, PCMgr32, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>PCMgr.Ctls.PerformanceInfos, PCMgrApp32, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="$this.Size" type="System.Drawing.Size, System.Drawing">
     <value>506, 421</value>

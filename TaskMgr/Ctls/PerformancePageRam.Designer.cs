@@ -37,15 +37,15 @@
             // 
             // performanceInfos
             // 
-            resources.ApplyResources(this.performanceInfos, "performanceInfos");
             this.performanceInfos.ColorText = System.Drawing.Color.Black;
             this.performanceInfos.ColorTitle = System.Drawing.Color.Gray;
+            resources.ApplyResources(this.performanceInfos, "performanceInfos");
             this.performanceInfos.FontText = new System.Drawing.Font("微软雅黑", 9F);
             this.performanceInfos.FontTextSpeical = new System.Drawing.Font("微软雅黑", 15F);
             this.performanceInfos.FontTitle = new System.Drawing.Font("微软雅黑", 9F);
             this.performanceInfos.ItemMargan = 0;
             this.performanceInfos.LineOffest = 0;
-            this.performanceInfos.MaxSpeicalItemsWidth = 300;
+            this.performanceInfos.MaxSpeicalItemsWidth = 500;
             this.performanceInfos.Name = "performanceInfos";
             // 
             // performanceGridGlobal
@@ -59,7 +59,7 @@
             this.performanceGridGlobal.DrawData2Bg = false;
             this.performanceGridGlobal.GridColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(222)))), ((int)(((byte)(240)))));
             this.performanceGridGlobal.LeftBottomText = "60 s";
-            this.performanceGridGlobal.LeftText = "Memory useage";
+            this.performanceGridGlobal.LeftText = "内存使用";
             this.performanceGridGlobal.Name = "performanceGridGlobal";
             this.performanceGridGlobal.RightBottomText = "0";
             this.performanceGridGlobal.RightText = "MAXRAMSIZE";
@@ -71,7 +71,7 @@
             this.performanceTitle.Name = "performanceTitle";
             this.performanceTitle.SmallTitle = "";
             this.performanceTitle.SmallTitleFont = new System.Drawing.Font("微软雅黑", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.performanceTitle.Title = "Memory";
+            this.performanceTitle.Title = "内存";
             this.performanceTitle.TitleFont = new System.Drawing.Font("微软雅黑", 21.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             // 
             // performanceRamPoolGrid
@@ -80,7 +80,7 @@
             this.performanceRamPoolGrid.BgColor = System.Drawing.Color.FromArgb(((int)(((byte)(244)))), ((int)(((byte)(242)))), ((int)(((byte)(244)))));
             this.performanceRamPoolGrid.DrawColor = System.Drawing.Color.FromArgb(((int)(((byte)(139)))), ((int)(((byte)(18)))), ((int)(((byte)(174)))));
             this.performanceRamPoolGrid.GridColor = System.Drawing.Color.FromArgb(((int)(((byte)(206)))), ((int)(((byte)(176)))), ((int)(((byte)(215)))));
-            this.performanceRamPoolGrid.LeftText = "Memory composition";
+            this.performanceRamPoolGrid.LeftText = "内存组合";
             this.performanceRamPoolGrid.Name = "performanceRamPoolGrid";
             this.performanceRamPoolGrid.RightText = null;
             this.performanceRamPoolGrid.TextColor = System.Drawing.Color.Gray;

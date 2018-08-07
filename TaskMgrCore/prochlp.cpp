@@ -19,7 +19,10 @@
 #include <tchar.h>
 #include <shellapi.h>
 #include <wintrust.h>
+#include <cryptuiapi.h>
 #include <mscat.h>
+
+#define ENCODING (X509_ASN_ENCODING | PKCS_7_ASN_ENCODING)
 
 extern HINSTANCE hInstRs;
 
@@ -29,6 +32,7 @@ DWORD thisCommandPid = 0;
 HICON HIconDef;
 HWND hWndMain;
 PSYSTEM_PROCESSES current_system_process = NULL;
+CERT_CONTEXT lastVeredCertContext = { 0 };
 
 BOOL killCmdSendBack = FALSE;
 BOOL isKillingExplorer = FALSE;
@@ -68,11 +72,15 @@ _GetPackageInfo dGetPackageInfo;
 _ClosePackageInfo dClosePackageInfo;
 _OpenPackageInfoByFullName dOpenPackageInfoByFullName;
 _GetPackageId dGetPackageId;
+_GetModuleFileNameW dGetModuleFileNameW;
+//
+_CryptUIDlgViewCertificateW dCryptUIDlgViewCertificateW;
+_CryptUIDlgViewContext dCryptUIDlgViewContext;
 
 //Enum apis
 EXTERN_C BOOL MAppVProcessAllWindows();
 
-M_API void MFroceKillProcessUser()
+void MFroceKillProcessUser()
 {
 	if (thisCommandPid > 4)
 	{
@@ -90,7 +98,7 @@ M_API void MFroceKillProcessUser()
 		}
 	}
 }
-M_API void MKillProcessUser(BOOL ask)
+void MKillProcessUser(BOOL ask)
 {
 	if (thisCommandPid > 4)
 	{
@@ -172,7 +180,7 @@ M_API BOOL MGetPrivileges2()
 	CloseHandle(hToken);
 	return TRUE;
 }
-void MEnumProcessCore()
+M_API void MEnumProcessCore()
 {
 	if (current_system_process) {
 		free(current_system_process);
@@ -339,6 +347,7 @@ M_API HICON MGetExeIcon(LPWSTR pszFullPath)
 		hIcon = HIconDef;
 	return hIcon;
 }
+//PE Signature Verify
 M_API LONG MVerifyEmbeddedSignature(LPCWSTR pwszSourceFile)
 {
 	LONG rs = 0;
@@ -515,7 +524,65 @@ M_API LONG MVerifyEmbeddedSignature(LPCWSTR pwszSourceFile)
 
 	return rs;
 }
+M_API BOOL MShowExeFileSignatureInfo(LPCWSTR pwszSourceFile)
+{
+	CERT_INFO CertInfo;
+	DWORD dwEncoding, dwContentType, dwFormatType;
+	HCERTSTORE hStore = NULL;
+	HCRYPTMSG hMsg = NULL;
+	PCMSG_SIGNER_INFO pSignerInfo = NULL;
+	DWORD dwSignerInfo;
+	PCCERT_CONTEXT pCertContext = NULL;
 
+	BOOL fResult = CryptQueryObject(CERT_QUERY_OBJECT_FILE,
+		pwszSourceFile,
+		CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED_EMBED, CERT_QUERY_FORMAT_FLAG_BINARY,
+		0, &dwEncoding, &dwContentType, &dwFormatType, &hStore, &hMsg, NULL);
+	if (!fResult) goto RETURN;
+
+	fResult = CryptMsgGetParam(hMsg,
+		CMSG_SIGNER_INFO_PARAM,
+		0,
+		NULL,
+		&dwSignerInfo);
+	if (!fResult) goto RETURN;
+	pSignerInfo = (PCMSG_SIGNER_INFO)malloc(dwSignerInfo);
+	fResult = CryptMsgGetParam(hMsg,
+		CMSG_SIGNER_INFO_PARAM,
+		0,
+		(PVOID)pSignerInfo,
+		&dwSignerInfo);
+	if (!fResult) goto RETURN;
+
+	CertInfo.Issuer = pSignerInfo->Issuer;
+	CertInfo.SerialNumber = pSignerInfo->SerialNumber;
+	pCertContext = CertFindCertificateInStore(hStore,
+		ENCODING,
+		0,
+		CERT_FIND_SUBJECT_CERT,
+		(PVOID)&CertInfo,
+		NULL);
+	if (pCertContext)
+	{
+		/*
+		CRYPTUI_VIEWCERTIFICATE_STRUCT cvs = { 0 };
+		cvs.dwSize = sizeof(CRYPTUI_VIEWCERTIFICATE_STRUCT);
+		cvs.hwndParent = hWndMain;
+		cvs.dwFlags = CRYPTUI_DISABLE_EDITPROPERTIES | CRYPTUI_DISABLE_ADDTOSTORE 
+			| CRYPTUI_DISABLE_EXPORT | CRYPTUI_IGNORE_UNTRUSTED_ROOT | CRYPTUI_ONLY_OPEN_ROOT_STORE;
+		cvs.pCertContext = pCertContext;
+		fResult = dCryptUIDlgViewCertificateW(&cvs, NULL);
+		*/
+		fResult = dCryptUIDlgViewContext(CERT_STORE_CERTIFICATE_CONTEXT, pCertContext, hWndMain, NULL, 0, 0);
+		CertFreeCertificateContext(pCertContext);
+	}
+	else LogErr(_T("CertFindCertificateInStore failed with %x\n"),	GetLastError());
+RETURN:
+	if (pSignerInfo)free(pSignerInfo);
+	if (hStore != NULL) CertCloseStore(hStore, 0);
+	if (hMsg != NULL) CryptMsgClose(hMsg);
+	return fResult;
+}
 M_API BOOL MGetExeFileTrust(LPCWSTR lpFileName)
 {
 	BOOL bRet = FALSE;
@@ -570,6 +637,8 @@ M_API BOOL MGetExeFileTrust(LPCWSTR lpFileName)
 			wci.pcwszCatalogFilePath = ci.wszCatalogFile;
 			wci.pcwszMemberFilePath = lpFileName;
 			wci.pcwszMemberTag = pszMemberTag;
+
+
 			wd.cbStruct = sizeof(WINTRUST_DATA);
 			wd.dwUnionChoice = WTD_CHOICE_CATALOG;
 			wd.pCatalog = &wci;
@@ -682,7 +751,7 @@ M_API DWORD MGetNtPathFromHandle(HANDLE hFile, LPWSTR ps_NTPath, UINT szDosPathS
 		return ERROR_SUCCESS;
 	}
 
-	BYTE  u8_Buffer[2000];
+	BYTE  u8_Buffer[512];
 	DWORD u32_ReqLength = 0;
 
 	UNICODE_STRING* pk_Info = &((OBJECT_NAME_INFORMATION*)u8_Buffer)->Name;
@@ -692,7 +761,7 @@ M_API DWORD MGetNtPathFromHandle(HANDLE hFile, LPWSTR ps_NTPath, UINT szDosPathS
 	// IMPORTANT: The return value from NtQueryObject is bullshit! (driver bug?)
 	// - The function may return STATUS_NOT_SUPPORTED although it has successfully written to the buffer.
 	// - The function returns STATUS_SUCCESS although h_File == 0xFFFFFFFF
-	NtQueryObject(hFile, OBJECT_INFORMATION_CLASS(ObjectNameInformation), u8_Buffer, sizeof(u8_Buffer), &u32_ReqLength);
+	NtQueryObject(hFile, ObjectNameInformation, u8_Buffer, sizeof(u8_Buffer), &u32_ReqLength);
 
 	// On error pk_Info->Buffer is NULL
 	if (!pk_Info->Buffer || !pk_Info->Length)
@@ -799,6 +868,7 @@ M_API BOOL MGetProcessFullPathEx(DWORD dwPID, LPWSTR outNter, PHANDLE phandle, L
 	TCHAR szImagePath[MAX_PATH];
 	HANDLE hProcess;
 
+
 	NTSTATUS rs = MOpenProcessNt(dwPID, &hProcess);
 	if (!hProcess || rs != STATUS_SUCCESS) return FALSE;
 	if (!K32GetProcessImageFileNameW(hProcess, szImagePath, MAX_PATH))
@@ -872,69 +942,33 @@ M_API BOOL MGetProcessIs32Bit(HANDLE handle) {
 	IsWow64Process(handle, &rs);
 	return rs;
 }
-M_API BOOL MGetProcessEprocess(DWORD pid, LPWSTR l, int maxcount)
+M_API BOOL MGetProcessEprocess(DWORD pid, PPEOCESSKINFO info)
 {
 	ULONG_PTR outEprocess = 0;
-	if (M_SU_GetEPROCESS(pid, &outEprocess))
+	ULONG_PTR outPeb = 0;
+	ULONG_PTR outJob = 0;
+	WCHAR krnpath[MAX_PATH];
+	memset(krnpath, 0, sizeof(krnpath));
+
+	if (M_SU_GetEPROCESS(pid, &outEprocess, &outPeb, &outJob, krnpath))
 	{
 #ifdef _X64_
-		swprintf_s(l, maxcount, L"0x%I64X", outEprocess);
+		swprintf_s(info->Eprocess, L"0x%I64X", outEprocess);
+		swprintf_s(info->PebAddress, L"0x%I64X", outPeb);
+		swprintf_s(info->JobAddress, L"0x%I64X", outJob);
 #else
-		swprintf_s(l, maxcount, L"0x%08X", outEprocess);
+		swprintf_s(info->Eprocess, L"0x%08X", outEprocess);
+		swprintf_s(info->PebAddress,L"0x%08X", outPeb);
+		swprintf_s(info->JobAddress, L"0x%08X", outJob);
 #endif
+
+		wcscpy_s(info->ImageFileName, krnpath);
 		return TRUE;
 	}
 	return FALSE;
 }
-M_API HANDLE MGetProcessKinfoOpen(DWORD dwPID)
-{
-	HANDLE hProcess;
-	NTSTATUS rs = MOpenProcessNt(dwPID, &hProcess);
-	if (rs == STATUS_SUCCESS)
-		return hProcess;
-	return NULL;
-}
-M_API BOOL MGetProcessPeb(HANDLE hProcess, LPWSTR l, int maxcount)
-{
-	if (hProcess != NULL) {
-		PROCESS_BASIC_INFORMATION pbi;
-		ULONG ReturnSize = 0;
-		NTSTATUS status = NtQueryInformationProcess(hProcess, ProcessBasicInformation, (PVOID*)&pbi, sizeof(pbi), &ReturnSize);
-		if (status == STATUS_SUCCESS)
-		{
-#ifdef _X64_
-			swprintf_s(l, maxcount, L"0x%I64X", (ULONG_PTR)pbi.PebBaseAddress);
-#else
-			swprintf_s(l, maxcount, L"0x%08X", (ULONG_PTR)pbi.PebBaseAddress);
-#endif
-		}
-		else wsprintf(l, L"Err : 0x%08X ReturnSize : %u /PBI Size : %u", status, ReturnSize, sizeof(pbi));
-		return TRUE;
-	}
-	return FALSE;
-}
-M_API BOOL MGetProcessJob(HANDLE hProcess, LPWSTR l, int maxcount)
-{
-	if (hProcess != NULL) {
-	}
-	return FALSE;
-}
-M_API BOOL MGetProcessBasePriority(HANDLE hProcess, LPWSTR l, int maxcount)
-{
-	if (hProcess != NULL) {
-		KPRIORITY kpirorty;
-		NTSTATUS status = MQueryProcessVariableSize(hProcess, ProcessBasePriority, (PVOID*)&kpirorty);
-		if (status == STATUS_SUCCESS)
-		{
-			wsprintf(l, L"%d", kpirorty);
-			return TRUE;
-		}
-	}
-	return FALSE;
-}
 
-
-//UWP Process information
+//UWP
 /*M_API BOOL MGetUWPPackageId(HANDLE handle, MPerfAndProcessData*data)
 {
 	if (handle && data)
@@ -968,6 +1002,10 @@ M_API BOOL MGetUWPPackageFullName(HANDLE handle, int*len, LPWSTR buffer)
 	}
 	return 0;
 }
+M_API BOOL MUnInstallUWPApp(LPWSTR name)
+{
+	return FALSE;
+}
 
 //..
 M_API BOOL MCloseHandle(HANDLE handle)
@@ -980,75 +1018,93 @@ M_API NTSTATUS MSuspendProcessNt(DWORD dwPId, HANDLE handle)
 	if (dwPId != 0 && dwPId != 4 && dwPId > 0) {
 		HANDLE hProcess;
 		NTSTATUS rs = MOpenProcessNt(dwPId, &hProcess);
-		if (hProcess) {
-			rs = ZwSuspendProcess(hProcess);
-			MCloseHandle(hProcess);
-			if (rs == STATUS_SUCCESS)
-				return STATUS_SUCCESS;
+		if (rs == STATUS_SUCCESS) {
+			if (hProcess) {
+				rs = ZwSuspendProcess(hProcess);
+				MCloseHandle(hProcess);
+				if (rs == STATUS_SUCCESS)
+					return STATUS_SUCCESS;
+				else {
+					LogErr(L"SuspendProcess failed (PID : %d) NTSTATUS : 0x%08X", dwPId, rs);
+					return rs;
+				}
+			}
 			else {
-				LogErr(L"SuspendProcess failed (PID : %d) NTSTATUS : 0x%08X", dwPId, rs);
-				return rs;
+				if (rs == STATUS_ACCESS_DENIED && MCanUseKernel()) {
+					LogWarn(L"SuspendProcess failed in OpenProcess : (PID : %d) , Use kernel mode to Suspend it.");
+					M_SU_SuspendProcess(dwPId, 0, &rs);
+					if (rs != STATUS_SUCCESS)
+						LogErr(L"SuspendProcess failed in kernel : (PID : %d) NTSTATUS : 0x%08X", dwPId, rs);
+				}
+				else LogErr(L"SuspendProcess failed in OpenProcess : (PID : %d) NTSTATUS : 0x%08X", dwPId, rs);
 			}
 		}
-		else {
-			if (rs == STATUS_ACCESS_DENIED && MCanUseKernel()) {
-				LogWarn(L"SuspendProcess failed in OpenProcess : (PID : %d) , Use kernel mode to Suspend it.");
-				M_SU_SuspendProcess(dwPId, 0, &rs);
-				if(rs != STATUS_SUCCESS)
-					LogErr(L"SuspendProcess failed in kernel : (PID : %d) NTSTATUS : 0x%08X", dwPId, rs);
-			}
-			else LogErr(L"SuspendProcess failed in OpenProcess : (PID : %d) NTSTATUS : 0x%08X", dwPId, rs);
+		else if (rs == STATUS_ACCESS_DENIED && MCanUseKernel()) {
+			LogWarn(L"SuspendProcess failed in OpenProcess : (PID : %d) , Use kernel mode to Suspend it.");
+			M_SU_SuspendProcess(dwPId, 0, &rs);
+			if (rs != STATUS_SUCCESS)
+				LogErr(L"SuspendProcess failed in kernel : (PID : %d) NTSTATUS : 0x%08X", dwPId, rs);
 		}
+		else LogErr(L"SuspendProcess failed in OpenProcess : (PID : %d) NTSTATUS : 0x%08X", dwPId, rs);
 		return rs;
 	}
 	else if (handle)
 	{
 		NTSTATUS  rs = ZwSuspendProcess(handle);
-		if (rs == 0)
-			return TRUE;
+		if (rs == 0) return STATUS_SUCCESS;
 		else {
 			LogErr(L"SuspendProcess failed NTSTATUS : 0x%08X", rs);
 			return rs;
 		}
 	}
-	return FALSE;
+	return STATUS_UNSUCCESSFUL;
 }
-M_API NTSTATUS MRusemeProcessNt(DWORD dwPId, HANDLE handle)
+M_API NTSTATUS MResumeProcessNt(DWORD dwPId, HANDLE handle)
 {
 	if (dwPId != 0 && dwPId != 4 && dwPId > 0) {
 		HANDLE hProcess;
 		NTSTATUS rs = MOpenProcessNt(dwPId, &hProcess);
-		if (hProcess)
-		{
-			rs = ZwResumeProcess(hProcess);
-			MCloseHandle(hProcess);
-			if (rs == STATUS_SUCCESS) return STATUS_SUCCESS;
+		if (rs == STATUS_SUCCESS) {
+			if (hProcess)
+			{
+				rs = ZwResumeProcess(hProcess);
+				MCloseHandle(hProcess);
+				if (rs == STATUS_SUCCESS) return STATUS_SUCCESS;
+				else {
+					LogErr(L"RusemeProcess failed (PID : %d) NTSTATUS : 0x%08X", dwPId, rs);
+					return rs;
+				}
+			}
 			else {
-				LogErr(L"RusemeProcess failed (PID : %d) NTSTATUS : 0x%08X", dwPId, rs);
-				return rs;
+				if (rs == STATUS_ACCESS_DENIED && MCanUseKernel()) {
+					LogWarn(L"RusemeProcess failed in OpenProcess : (PID : %d) , Use kernel mode to Ruseme it.");
+					M_SU_ResumeProcess(dwPId, 0, &rs);
+					if (rs != STATUS_SUCCESS)
+						LogErr(L"RusemeProcess failed in kernel : (PID : %d) NTSTATUS : 0x%08X", dwPId, rs);
+				}
+				else LogErr(L"RusemeProcess failed in OpenProcess : (PID : %d) NTSTATUS : 0x%08X", dwPId, rs);
 			}
 		}
-		else {
-			if (rs == STATUS_ACCESS_DENIED && MCanUseKernel()) {
-				LogWarn(L"RusemeProcess failed in OpenProcess : (PID : %d) , Use kernel mode to Ruseme it.");
-				M_SU_ResumeProcess(dwPId, 0, &rs);
-				if (rs != STATUS_SUCCESS)
-					LogErr(L"RusemeProcess failed in kernel : (PID : %d) NTSTATUS : 0x%08X", dwPId, rs);
-			}
-			else LogErr(L"RusemeProcess failed in OpenProcess : (PID : %d) NTSTATUS : 0x%08X", dwPId, rs);
+		else if (rs == STATUS_ACCESS_DENIED && MCanUseKernel()) {
+			LogWarn(L"RusemeProcess failed in OpenProcess : (PID : %d) , Use kernel mode to Ruseme it.");
+			M_SU_ResumeProcess(dwPId, 0, &rs);
+			if (rs != STATUS_SUCCESS)
+				LogErr(L"RusemeProcess failed in kernel : (PID : %d) NTSTATUS : 0x%08X", dwPId, rs);
 		}
+		else LogErr(L"RusemeProcess failed in OpenProcess : (PID : %d) NTSTATUS : 0x%08X", dwPId, rs);
+		return rs;
 	}
 	else if (handle)
 	{
 		NTSTATUS rs = ZwResumeProcess(handle);
-		if (rs == 0)return TRUE;
+		if (rs == 0)return STATUS_SUCCESS;
 		else
 		{
 			LogErr(L"RusemeProcess failed NTSTATUS : 0x%08X", rs);
 			return rs;
 		}
 	}
-	return FALSE;
+	return STATUS_UNSUCCESSFUL;
 }
 M_API NTSTATUS MOpenProcessNt(DWORD dwId, PHANDLE pLandle)
 {
@@ -1114,7 +1170,14 @@ M_API NTSTATUS MTerminateProcessNt(DWORD dwId, HANDLE handle)
 		else return STATUS_ACCESS_DENIED;
 	}
 }
-
+M_API BOOL MRunUWPApp(LPWSTR packageName, LPWSTR name)
+{
+	std::wstring cmdline = FormatString(L"shell:AppsFolder\\%s!%s", packageName, name);
+	return ShellExecute(hWndMain, L"open", L"explorer.exe", (LPWSTR)cmdline.c_str(), NULL, 5) > (HINSTANCE)32;
+}
+M_API NTSTATUS MCreateProcess() {
+	return 0;
+}
 
 M_API int MAppWorkShowMenuProcessPrepare(LPWSTR strFilePath, LPWSTR strFileName, DWORD pid)
 {
@@ -1136,7 +1199,7 @@ M_API int MAppWorkShowMenuProcessPrepare(LPWSTR strFilePath, LPWSTR strFileName,
 	return 0;
 }
 //MENU
-M_API int MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWORD pid, HWND hDlg, int data, int type)
+M_API int MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWORD pid, HWND hDlg, int data, int type, int x, int y)
 {
 	thisCommandPid = pid;
 	if (pid > 0)
@@ -1144,8 +1207,15 @@ M_API int MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWORD 
 		HMENU hroot = LoadMenu(hInstRs, MAKEINTRESOURCE(IDR_MENUTASK));
 		if (hroot) {
 			HMENU hpop = GetSubMenu(hroot, 0);
+
 			POINT pt;
-			GetCursorPos(&pt);
+			if (x == 0 && y == 0)
+				GetCursorPos(&pt);
+			else {
+				pt.x = x;
+				pt.y = y;
+			}
+
 			if (pid == 4) {
 				EnableMenuItem(hpop, IDM_SUPROC, MF_DISABLED);
 				EnableMenuItem(hpop, IDM_RESPROC, MF_DISABLED);
@@ -1157,6 +1227,10 @@ M_API int MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWORD 
 				EnableMenuItem(hpop, IDM_VMODULS, MF_DISABLED);
 				EnableMenuItem(hpop, IDM_VWINS, MF_DISABLED);
 				EnableMenuItem(hpop, IDM_KILL, MF_DISABLED);
+				EnableMenuItem(hpop, IDM_SGINED, MF_DISABLED);
+				EnableMenuItem(hpop, IDM_VKSTRUCTS, MF_DISABLED);
+				EnableMenuItem(hpop, IDM_VHOTKEY, MF_DISABLED);
+				EnableMenuItem(hpop, IDM_VTIMER, MF_DISABLED);
 			}
 			if (MStrEqualW(strFilePath, L"") || MStrEqualW(strFilePath, L"-")) {
 				EnableMenuItem(hpop, IDM_OPENPATH, MF_DISABLED);
@@ -1216,6 +1290,11 @@ M_API int MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWORD 
 			EnableMenuItem(hpop, IDM_VHANDLES, MF_DISABLED);
 			EnableMenuItem(hpop, IDM_VMODULS, MF_DISABLED);
 			EnableMenuItem(hpop, IDM_VWINS, MF_DISABLED);
+			EnableMenuItem(hpop, IDM_SGINED, MF_DISABLED);
+			EnableMenuItem(hpop, IDM_VKSTRUCTS, MF_DISABLED);
+			EnableMenuItem(hpop, IDM_VHOTKEY, MF_DISABLED);
+			EnableMenuItem(hpop, IDM_VTIMER, MF_DISABLED);
+			EnableMenuItem(hpop, IDM_FILEPROP, MF_DISABLED);
 
 			if (MStrEqualW(strFilePath, L"") || MStrEqualW(strFilePath, L"-")) {
 				EnableMenuItem(hpop, IDM_OPENPATH, MF_DISABLED);
@@ -1260,13 +1339,15 @@ HINSTANCE hNtDll;
 HINSTANCE hShell32;
 HINSTANCE hKernel32;
 HINSTANCE hUser32;
+HINSTANCE hCryptui;
 
 BOOL LoadDll()
 {
-	hNtDll = LoadLibrary(L"ntdll.dll");
-	hShell32 = LoadLibrary(L"shell32.dll");
+	hNtDll = GetModuleHandle(L"ntdll.dll");
+	hShell32 = GetModuleHandle(L"shell32.dll");
 	hKernel32 = GetModuleHandle(L"kernel32.dll");
 	hUser32 = GetModuleHandle(L"user32.dll");
+	hCryptui = LoadLibrary(L"Cryptui.dll");
 	thisCommandPath = new WCHAR[260];
 	thisCommandName = new WCHAR[260];
 	if (hNtDll == NULL) {
@@ -1314,7 +1395,11 @@ BOOL LoadDll()
 		dGetPackageInfo = (_GetPackageInfo)GetProcAddress(hKernel32, "GetPackageInfo");
 		dClosePackageInfo = (_ClosePackageInfo)GetProcAddress(hKernel32, "ClosePackageInfo");
 		dOpenPackageInfoByFullName = (_OpenPackageInfoByFullName)GetProcAddress(hKernel32, "OpenPackageInfoByFullName");
-	    dGetPackageId = (_GetPackageId)GetProcAddress(hKernel32, "GetPackageId");
+		dGetPackageId = (_GetPackageId)GetProcAddress(hKernel32, "GetPackageId");
+		dGetModuleFileNameW = (_GetModuleFileNameW)GetProcAddress(hKernel32, "GetModuleFileNameW");
+		//
+		dCryptUIDlgViewCertificateW = (_CryptUIDlgViewCertificateW)GetProcAddress(hCryptui, "CryptUIDlgViewCertificateW");
+		dCryptUIDlgViewContext = (_CryptUIDlgViewContext)GetProcAddress(hCryptui, "CryptUIDlgViewContext");
 
 		return TRUE;
 	}

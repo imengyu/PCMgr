@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "ntdef.h"
 #include "schlp.h"
+#include "sysstructs.h"
 
 typedef struct _KernelModulSmallInfo
 {
@@ -24,18 +25,24 @@ typedef void(__cdecl*EnumKernelModulsCallBack)(
 	LPWSTR szServiceName,
 	ULONG Order);
 
+typedef void(__cdecl*DACALLBACK)(ULONG_PTR curaddress, LPWSTR addressstr, LPWSTR shellstr, LPWSTR bariny, LPWSTR asmstr);
+
+
+
 M_CAPI(BOOL) M_SU_CreateFile(LPCWSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, DWORD dwCreationDisposition, PHANDLE pHandle);
 M_CAPI(BOOL) M_SU_OpenProcess(DWORD pid, PHANDLE pHandle, NTSTATUS* pStatus);
 M_CAPI(BOOL) M_SU_OpenThread(DWORD pid, DWORD tid, PHANDLE pHandle, NTSTATUS* pStatus);
-M_CAPI(BOOL) M_SU_TerminateProcess(HANDLE hProcess, UINT exitCode, NTSTATUS* pStatus);
-M_CAPI(BOOL) M_SU_TerminateThread(HANDLE hProcess, UINT exitCode, NTSTATUS* pStatus);
-M_CAPI(BOOL) M_SU_CloseHandleWithProcess(_SYSTEM_HANDLE_TABLE_ENTRY_INFO*sh);
-
 M_CAPI(BOOL) M_SU_TerminateProcessPID(DWORD pid, UINT exitCode, NTSTATUS* pStatus, BOOL useApc = FALSE);
 M_CAPI(BOOL) M_SU_TerminateThreadTID(DWORD tid, UINT exitCode, NTSTATUS* pStatus, BOOL useApc = FALSE);
 
+M_CAPI(BOOL) M_SU_CloseHandleWithProcess(DWORD pid, LPVOID handleValue);
+
 M_CAPI(BOOL) M_SU_SuspendProcess(DWORD pid, UINT exitCode, NTSTATUS * pStatus);
 M_CAPI(BOOL) M_SU_ResumeProcess(DWORD pid, UINT exitCode, NTSTATUS * pStatus);
+
+M_CAPI(BOOL) M_SU_KDA(DACALLBACK callback, ULONG_PTR startaddress, ULONG_PTR size);
+
+M_CAPI(BOOL) M_SU_TerminateProcessPIDTest(DWORD pid, NTSTATUS * pStatus);
 
 BOOL M_SU_ForceShutdown();
 BOOL M_SU_ForceReboot();
@@ -43,9 +50,25 @@ BOOL M_SU_ForceReboot();
 BOOL M_SU_ProtectMySelf();
 BOOL M_SU_UnProtectMySelf();
 
-M_CAPI(BOOL) M_SU_Init();
+VOID M_SU_TestLastDbgPrint();
 
-M_CAPI(BOOL) M_SU_GetEPROCESS(DWORD pid, ULONG_PTR* lpEprocess);
-M_CAPI(BOOL) M_SU_GetETHREAD(DWORD tid, ULONG_PTR* lpEthread);
+M_CAPI(VOID) M_SU_Test(LPCSTR instr);
+
+M_CAPI(VOID) M_SU_Test2();
+
+
+
+M_CAPI(BOOL) M_SU_Init(BOOL requestNtosValue, PKNTOSVALUE outValue);
+
+M_CAPI(BOOL) M_SU_GetEPROCESS(DWORD pid, ULONG_PTR * lpEprocess, ULONG_PTR * lpPeb, ULONG_PTR * lpJob, LPWSTR path);
+M_CAPI(BOOL) M_SU_GetETHREAD(DWORD tid, ULONG_PTR* lpEthread, ULONG_PTR * lpTeb);
+
+M_CAPI(BOOL) M_SU_SetDbgViewEvent(HANDLE hEvent);
+
+M_CAPI(BOOL) M_SU_ReSetDbgViewEvent();
+
+M_CAPI(BOOL) M_SU_GetDbgViewLastBuffer(LPWSTR outbuffer, size_t bufsize, BOOL*hasMoreData);
+
+M_CAPI(BOOL) M_SU_PrintInternalFuns();
 
 LRESULT M_SU_EnumKernelModuls_HandleWmCommand(WPARAM wParam);

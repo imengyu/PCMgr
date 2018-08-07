@@ -35,3 +35,15 @@ VOID KxForceShutdown(void)
 	fcrb();
 
 }
+
+BOOLEAN KxDasm(ULONG_PTR address, ULONG_PTR offest, PUCHAR buf) 
+{
+	PUCHAR Scan = (PUCHAR)address;
+	ULONG_PTR curcodeptr = address + offest;
+	if (MmIsAddressValid((PVOID)curcodeptr) != FALSE)
+	{
+		*buf = Scan[offest];
+		return TRUE;
+	}
+	return FALSE;
+}

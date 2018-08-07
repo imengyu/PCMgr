@@ -14,9 +14,13 @@
 #include <stdio.h>
 
 
-
+#ifdef TASKMGRCORE_EXPORTS
 #define M_API __declspec(dllexport)
 #define M_CAPI(x) extern "C" M_API x
+#else
+#define M_API __declspec(dllimport)
+#define M_CAPI(x) extern "C" M_API x
+#endif
 
 #define DEFDIALOGGTITLE L"PC Manager"
 

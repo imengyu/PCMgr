@@ -121,9 +121,6 @@
   <data name="System_Windows_Forms_CheckBox" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\System.Windows.Forms.CheckBox.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="System_Windows_Forms_DomainUpDown" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\System.Windows.Forms.DomainUpDown.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="System_Windows_Forms_VScrollBar" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\System.Windows.Forms.VScrollBar.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -142,6 +139,9 @@
   <data name="listHeaderArrowDisascending" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\listHeaderArrowDisascending.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="System_Windows_Forms_DomainUpDown" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\System.Windows.Forms.DomainUpDown.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="System_Windows_Forms_ToolTip" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\System.Windows.Forms.ToolTip.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -150,6 +150,9 @@
   </data>
   <data name="System_Windows_Forms_Form" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\System.Windows.Forms.Form.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="icoServiceHost" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\icoServiceHost.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="System_Windows_Forms_TextBox" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\System.Windows.Forms.TextBox.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -190,6 +193,9 @@
   <data name="icoHidedWindow" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\ico30655.ico;System.Drawing.Icon, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="icoService" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\icoService.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="icoShowedWindow" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\ico30656.ico;System.Drawing.Icon, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -217,10 +223,7 @@
   <data name="System_Windows_Forms_LinkLabel" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\System.Windows.Forms.LinkLabel.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="icoService" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\icoService.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="icoServiceHost" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\icoServiceHost.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="icoResourceMon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\icoResourceMon.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

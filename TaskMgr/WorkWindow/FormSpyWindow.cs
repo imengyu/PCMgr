@@ -534,11 +534,12 @@ namespace PCMgr.WorkWindow
                 }
             }
         }
+
         private void 显示ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (treeViewMain.SelectedNode != null)
             {
-                ShowWindow(selectHwnd, 5);
+                FormMain.MAppWorkCall3(205, selectHwnd, IntPtr.Zero);
                 refeshitem();
             }
         }
@@ -546,7 +547,7 @@ namespace PCMgr.WorkWindow
         {
             if (treeViewMain.SelectedNode != null)
             {
-                ShowWindow(selectHwnd, 0);
+                FormMain.MAppWorkCall3(200, selectHwnd, IntPtr.Zero);
                 refeshitem();
             }
         }
@@ -559,6 +560,7 @@ namespace PCMgr.WorkWindow
                 refeshitem();
             }
         }
+
         private void buttonRefesh_Click(object sender, EventArgs e)
         {
             刷新ToolStripMenuItem_Click(null, null);
@@ -578,6 +580,22 @@ namespace PCMgr.WorkWindow
                     treeViewMain.SelectedNode.ForeColor = Color.Red;
                 else treeViewMain.SelectedNode.ForeColor = Color.Black;
             }
+        }
+
+        private void 启用窗口ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (treeViewMain.SelectedNode != null)
+                FormMain.MAppWorkCall3(211, selectHwnd, IntPtr.Zero);
+        }
+        private void 禁用窗口ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (treeViewMain.SelectedNode != null)
+                FormMain.MAppWorkCall3(210, selectHwnd, IntPtr.Zero);
+        }
+
+        private void 显示逻辑区域ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

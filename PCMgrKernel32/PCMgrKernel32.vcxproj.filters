@@ -36,6 +36,9 @@
     <ClCompile Include="monitor.c">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="handle.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Driver.h">
@@ -63,6 +66,12 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="monitor.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="istructs.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="handle.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
