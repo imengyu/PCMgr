@@ -80,4 +80,12 @@
       <Filter>资源文件</Filter>
     </ResourceCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="solve.asm">
+      <Filter>源文件</Filter>
+    </None>
+    <None Include="internalcall_x86.asm">
+      <Filter>源文件</Filter>
+    </None>
+  </ItemGroup>
 </Project>

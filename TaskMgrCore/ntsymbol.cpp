@@ -10,6 +10,8 @@
 HANDLE hProcess;
 char* url = "http://msdl.microsoft.com/download/symbols";
 extern HANDLE hKernelDevice;
+ULONG_PTR ntosModuleBase = 0;
+SYMBOL_INFO eprocessSymbolInfo;
 
 BOOLEAN InitSymHandler()
 {
@@ -63,6 +65,7 @@ BOOLEAN LoadSymModule(char* ImageName, DWORD ModuleBase)
 	if (!SymGetSymbolFile(hProcess, NULL, szFile, sfPdb, SymFile, MAX_PATH, SymFile, MAX_PATH))
 	{
 		LogErr(L"Cannot get symbol file of %hs  (%hs), error: %d \n", ImageName, szFile, GetLastError());
+		MAppMainCall(35, 0, 0);
 		return FALSE;
 	}
 	FreeLibrary(hDll);
@@ -77,34 +80,61 @@ BOOLEAN LoadSymModule(char* ImageName, DWORD ModuleBase)
 	return TRUE;
 }
 
-ULONG_PTR ntosModuleBase = 0;
-SYMBOL_INFO eprocessSymbolInfo;
-
-BOOLEAN MEnumSyms(ULONG_PTR ModuleBase, PSYM_ENUMERATESYMBOLS_CALLBACK EnumRoutine, PVOID Context)
-{
-	BOOLEAN bEnum;
-	ntosModuleBase = ModuleBase;
-
-	bEnum = SymEnumSymbols(hProcess, ModuleBase, NULL, EnumRoutine, Context);
-	if (!bEnum) LogErr(L"SymEnumSymbols failed , error: %d \n", GetLastError());
-
-
-	MKEnumSymStructs(ModuleBase, "!_EPROCESS", (PSYM_ENUMERATESYMBOLS_CALLBACK)CALLBACKMEnumSymStruct_EPROCESS_Routine, NULL);
-	MKEnumSymStructs(ModuleBase, "!_ETHREAD", (PSYM_ENUMERATESYMBOLS_CALLBACK)CALLBACKMEnumSymStruct_ETHREAD_Routine, NULL);
-	
-	return bEnum;
-}
-BOOLEAN MEnumSymsClear() {
-	return SymCleanup(GetCurrentProcess());
-}
-
 ULONG_PTR Off_EPROCESS_RundownProtectOffest;
 ULONG_PTR Off_EPROCESS_FlagsOffest;
 ULONG_PTR Off_EPROCESS_ThreadListHeadOffest;
+ULONG_PTR Off_EPROCESS_SeAuditProcessCreationInfoOffest;
 
 ULONG_PTR Off_ETHREAD_TcbOffest;
 ULONG_PTR Off_ETHREAD_CrossThreadFlagsOffest;
 
+ULONG_PTR Off_PEB_LdrOffest;
+ULONG_PTR Off_PEB_ProcessParametersOffest;
+
+ULONG_PTR Off_RTL_USER_PROCESS_PARAMETERS_CommandLineOffest;
+
+BOOL CALLBACKMEnumSymStruct_Off_RTL_USER_PROCESS_PARAMETERS_Routine(_In_ LPCSTR structName, _In_ LPWSTR mumberName, _In_opt_ DWORD mumberOffest)
+{
+	if (MStrEqual(mumberName, L"CommandLine"))
+		Off_RTL_USER_PROCESS_PARAMETERS_CommandLineOffest = mumberOffest;
+	return TRUE;
+}
+BOOL CALLBACKMEnumSymStruct_Off_PEB_Routine(_In_ LPCSTR structName, _In_ LPWSTR mumberName, _In_opt_ DWORD mumberOffest)
+{
+	if (MStrEqual(mumberName, L"Ldr"))
+		Off_PEB_LdrOffest = mumberOffest;
+	if (MStrEqual(mumberName, L"ProcessParameters"))
+		Off_PEB_ProcessParametersOffest = mumberOffest;
+	return TRUE;
+}
+BOOL CALLBACKMEnumSymStruct_Off_EPROCESS_Routine(_In_ LPCSTR structName, _In_ LPWSTR mumberName, _In_opt_ DWORD mumberOffest)
+{
+	if (MStrEqual(mumberName, L"RundownProtect"))
+		Off_EPROCESS_RundownProtectOffest = mumberOffest;
+	else 	if (MStrEqual(mumberName, L"ThreadListHead"))
+		Off_EPROCESS_ThreadListHeadOffest = mumberOffest;
+	else 	if (MStrEqual(mumberName, L"Flags"))
+		Off_EPROCESS_FlagsOffest = mumberOffest;
+	else 	if (MStrEqual(mumberName, L"SeAuditProcessCreationInfo"))
+		Off_EPROCESS_SeAuditProcessCreationInfoOffest = mumberOffest;
+	return TRUE;
+}
+BOOL CALLBACKMEnumSymStruct_Off_ETHREAD_Routine(_In_ LPCSTR structName, _In_ LPWSTR mumberName, _In_opt_ DWORD mumberOffest)
+{
+	if (MStrEqual(mumberName, L"Tcb"))
+		Off_ETHREAD_TcbOffest = mumberOffest;
+	else 	if (MStrEqual(mumberName, L"CrossThreadFlags"))
+		Off_ETHREAD_CrossThreadFlagsOffest = mumberOffest;
+
+	return TRUE;
+}
+
+BOOLEAN CALLBACK  CALLBACKMEnumSymStruct_RTL_USER_PROCESS_PARAMETERS_Routine(PSYMBOL_INFO psi, ULONG SymSize, PVOID Context)
+{
+	if (strcmp(psi->Name, "_RTL_USER_PROCESS_PARAMETERS") == 0)
+		MKEnumSymStructOffests(psi, ntosModuleBase, (MENUMSTRUCTOFFEST_CALLBACK)CALLBACKMEnumSymStruct_Off_RTL_USER_PROCESS_PARAMETERS_Routine, NULL);
+	return TRUE;
+}
 BOOLEAN CALLBACK  CALLBACKMEnumSymStruct_EPROCESS_Routine(PSYMBOL_INFO psi, ULONG SymSize, PVOID Context)
 {
 	if (strcmp(psi->Name, "_EPROCESS") == 0)
@@ -117,26 +147,13 @@ BOOLEAN CALLBACK  CALLBACKMEnumSymStruct_ETHREAD_Routine(PSYMBOL_INFO psi, ULONG
 		MKEnumSymStructOffests(psi, ntosModuleBase, (MENUMSTRUCTOFFEST_CALLBACK)CALLBACKMEnumSymStruct_Off_ETHREAD_Routine, NULL);
 	return TRUE;
 }
-BOOL CALLBACKMEnumSymStruct_Off_EPROCESS_Routine(_In_ LPCSTR structName, _In_ LPWSTR mumberName, _In_opt_ DWORD mumberOffest)
+BOOLEAN CALLBACK  CALLBACKMEnumSymStruct_PEB_Routine(PSYMBOL_INFO psi, ULONG SymSize, PVOID Context)
 {
-	if (MStrEqual(mumberName, L"RundownProtect"))
-		Off_EPROCESS_RundownProtectOffest = mumberOffest;
-	else 	if (MStrEqual(mumberName, L"ThreadListHead"))
-		Off_EPROCESS_ThreadListHeadOffest = mumberOffest;
-	else 	if (MStrEqual(mumberName, L"Flags"))
-		Off_EPROCESS_FlagsOffest = mumberOffest;
-	
+	if (strcmp(psi->Name, "_PEB") == 0)
+		MKEnumSymStructOffests(psi, ntosModuleBase, (MENUMSTRUCTOFFEST_CALLBACK)CALLBACKMEnumSymStruct_Off_PEB_Routine, NULL);
 	return TRUE;
 }
-BOOL CALLBACKMEnumSymStruct_Off_ETHREAD_Routine(_In_ LPCSTR structName, _In_ LPWSTR mumberName, _In_opt_ DWORD mumberOffest)
-{
-	if (MStrEqual(mumberName, L"Tcb"))
-		Off_ETHREAD_TcbOffest = mumberOffest;
-	else 	if (MStrEqual(mumberName, L"CrossThreadFlags"))
-		Off_ETHREAD_CrossThreadFlagsOffest = mumberOffest;
 
-	return TRUE;
-}
 
 M_CAPI(BOOLEAN) MKSymInit(char* ImageName, ULONG_PTR ModuleBase) {
 	if (!LoadSymModule(ImageName, ModuleBase))
@@ -194,13 +211,33 @@ M_CAPI(BOOLEAN) MKEnumSymStructOffests(PSYMBOL_INFO psi, ULONG_PTR ModuleBase, M
 }
 
 
+
+BOOLEAN MEnumSyms(ULONG_PTR ModuleBase, PSYM_ENUMERATESYMBOLS_CALLBACK EnumRoutine, PVOID Context)
+{
+	BOOLEAN bEnum;
+	ntosModuleBase = ModuleBase;
+
+	bEnum = SymEnumSymbols(hProcess, ModuleBase, NULL, EnumRoutine, Context);
+	if (!bEnum) LogErr(L"SymEnumSymbols failed , error: %d \n", GetLastError());
+
+
+	MKEnumSymStructs(ModuleBase, "!_EPROCESS", (PSYM_ENUMERATESYMBOLS_CALLBACK)CALLBACKMEnumSymStruct_EPROCESS_Routine, NULL);
+	MKEnumSymStructs(ModuleBase, "!_ETHREAD", (PSYM_ENUMERATESYMBOLS_CALLBACK)CALLBACKMEnumSymStruct_ETHREAD_Routine, NULL);
+	MKEnumSymStructs(ModuleBase, "!_PEB", (PSYM_ENUMERATESYMBOLS_CALLBACK)CALLBACKMEnumSymStruct_PEB_Routine, NULL);
+	MKEnumSymStructs(ModuleBase, "!_RTL_USER_PROCESS_PARAMETERS", (PSYM_ENUMERATESYMBOLS_CALLBACK)CALLBACKMEnumSymStruct_RTL_USER_PROCESS_PARAMETERS_Routine, NULL);
+
+	return bEnum;
+}
+BOOLEAN MEnumSymsClear() {
+	return SymCleanup(GetCurrentProcess());
+}
+
 ULONG_PTR PspTerminateThreadByPointer_;
 ULONG_PTR PspExitThread_;
 ULONG_PTR PsGetNextProcessThread_;
 ULONG_PTR PsTerminateProcess_;
 ULONG_PTR PsGetNextProcess_;
 ULONG_PTR KeForceResumeThread_;
-
 
 BOOLEAN CALLBACK MEnumSymRoutine(PSYMBOL_INFO psi, ULONG SymSize, PVOID Context)
 {
@@ -220,16 +257,24 @@ BOOLEAN CALLBACK MEnumSymRoutine(PSYMBOL_INFO psi, ULONG SymSize, PVOID Context)
 	return TRUE;
 }
 
-BOOL MSendAllSymAddressToDriver() {
+BOOL MSendAllSymAddressToDriver() 
+{
 	DWORD ReturnLength = 0;
 	NTOS_PDB_DATA inputBuffer = { 0 };
 
 	inputBuffer.StructOffestData.EPROCESS_RundownProtectOffest = Off_EPROCESS_RundownProtectOffest;
 	inputBuffer.StructOffestData.EPROCESS_ThreadListHeadOffest = Off_EPROCESS_ThreadListHeadOffest;
 	inputBuffer.StructOffestData.EPROCESS_FlagsOffest = Off_EPROCESS_FlagsOffest;
+	inputBuffer.StructOffestData.EPROCESS_SeAuditProcessCreationInfoOffest = Off_EPROCESS_SeAuditProcessCreationInfoOffest;
 
 	inputBuffer.StructOffestData.ETHREAD_TcbOffest = Off_ETHREAD_TcbOffest;
 	inputBuffer.StructOffestData.ETHREAD_CrossThreadFlagsOffest = Off_ETHREAD_CrossThreadFlagsOffest;
+
+	inputBuffer.StructOffestData.PEB_LdrOffest = Off_PEB_LdrOffest;
+	inputBuffer.StructOffestData.PEB_ProcessParametersOffest = Off_PEB_ProcessParametersOffest;
+
+	inputBuffer.StructOffestData.RTL_USER_PROCESS_PARAMETERS_CommandLineOffest = Off_RTL_USER_PROCESS_PARAMETERS_CommandLineOffest;
+
 
 	inputBuffer.PsGetNextProcessThread_ = PsGetNextProcessThread_;
 	inputBuffer.PsGetNextProcess_ = PsGetNextProcess_;

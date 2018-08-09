@@ -19,11 +19,6 @@ namespace PCMgr.Ctls
         {
             InitializeComponent();
         }
-        public PerformancePageCpu(PerformanceCounter performanceCounterCpu)
-        {
-            InitializeComponent();
-            this.performanceCounterCpu = performanceCounterCpu;
-        }
 
         [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern uint MPERF_GetCpuL1Cache();
@@ -55,7 +50,6 @@ namespace PCMgr.Ctls
         [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern Int64 MPERF_GetRunTime();
 
-        private PerformanceCounter performanceCounterCpu = null;
         private TimeSpan times;
         private int cpuCount = 0;
         private int cpuUseage = 0;

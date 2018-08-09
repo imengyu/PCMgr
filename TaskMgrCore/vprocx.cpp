@@ -271,10 +271,15 @@ BOOL CALLBACK lpEnumFunc2(HWND hWnd, LPARAM lParam)
 		GetClassName(hWnd, clsn, 50);
 		if (!MStrEqualW(clsn, L"ApplicationFrameWindow"))
 		{
-			if ((l & WS_EX_APPWINDOW) == WS_EX_APPWINDOW || (l & WS_EX_OVERLAPPEDWINDOW) == WS_EX_OVERLAPPEDWINDOW)
-				hAllWins->push_back(hWnd);
-			else if ((ls & WS_CAPTION) == WS_CAPTION)
-				hAllWins->push_back(hWnd);
+			if ((l & WS_EX_TOOLWINDOW) != WS_EX_TOOLWINDOW) {
+				if ((l & WS_EX_APPWINDOW) == WS_EX_APPWINDOW
+					|| (l & WS_EX_OVERLAPPEDWINDOW) == WS_EX_OVERLAPPEDWINDOW)
+					hAllWins->push_back(hWnd);		
+				else if ((ls & WS_CAPTION) == WS_CAPTION
+					|| (ls & WS_OVERLAPPED) == WS_OVERLAPPED) {
+					hAllWins->push_back(hWnd);
+				}
+			}
 		}
 		else 
 		{

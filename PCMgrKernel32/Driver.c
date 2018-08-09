@@ -40,11 +40,11 @@ extern BOOLEAN kxCanLoadDriver;
 
 ULONG_PTR kxNtosBaseAddress = 0;
 WCHAR kxNtosName[32];
-PRKEVENT kxEventObjectDbgViewEvent = NULL;
 PRKEVENT kxEventObjectMain = NULL;
 OBJECT_HANDLE_INFORMATION kxObjectHandleInfoEventMain;
 OBJECT_HANDLE_INFORMATION kxObjectHandleInfoDbgViewEvent;
 BOOLEAN kxMyDbgViewCanUse = FALSE;
+PVOID kxEventObjectDbgViewEvent = NULL;
 
 PDBGPRINT_DATA kxMyDbgViewDataStart = NULL;
 PDBGPRINT_DATA kxMyDbgViewDataEnd = NULL;
@@ -108,7 +108,7 @@ NTSTATUS DriverEntry(IN PDRIVER_OBJECT pDriverObject, IN PUNICODE_STRING pRegPat
 	PLDR_DATA_TABLE_ENTRY64 ModuleNtos = CONTAINING_RECORD(ListEntry, LDR_DATA_TABLE_ENTRY64, InLoadOrderLinks);
 	if (ModuleNtos->BaseDllName.Buffer != 0)
 		_wcscpy_s(kxNtosName, 32, (wchar_t*)(ULONG_PTR)ModuleNtos->BaseDllName.Buffer);
-	kxNtosBaseAddress = ModuleNtos->DllBase;
+	kxNtosBaseAddress = (ULONG_PTR)ModuleNtos->DllBase;
 #else
 	PLDR_DATA_TABLE_ENTRY32 ModuleNtos = CONTAINING_RECORD(ListEntry, LDR_DATA_TABLE_ENTRY32, InLoadOrderLinks);
 	if (ModuleNtos->BaseDllName.Buffer != 0) {
@@ -310,9 +310,12 @@ NTSTATUS IOControlDispatch(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp)
 				kpinfo.PriorityClass = (ULONG_PTR)PsGetProcessPriorityClass(pEProc);
 				PUCHAR procName = PsGetProcessImageFileName(pEProc);
 				size_t procNameSize = strlen(procName) + 1;
-				_memcpy_s(kpinfo.FullPath, procNameSize, procName, procNameSize);
+				_memcpy_s(kpinfo.ImageFileName, procNameSize, procName, procNameSize);
+				PUNICODE_STRING fullPathString = KxGetProcessFullPath(pEProc);
+				if (fullPathString && fullPathString->Buffer)
+					_wcscpy_s(kpinfo.FullPath, 260, fullPathString->Buffer);
 				_memcpy_s(OutputData, OutputDataLength, &kpinfo, sizeof(kpinfo));
-				Informaiton = OutputDataLength;
+				Informaiton = sizeof(kpinfo);
 
 				ObDereferenceObject(pEProc);
 				Status = STATUS_SUCCESS;
@@ -449,7 +452,6 @@ NTSTATUS IOControlDispatch(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp)
 		if (start) {
 			ListEntryScan = ListEntry;
 			LoadedModuleOrder = 0;
-			KdPrint(("CTL_GET_KERNEL_MODULS start"));
 		}
 
 		KERNEL_MODULE kModule;
@@ -512,7 +514,7 @@ NTSTATUS IOControlDispatch(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp)
 				kxMyDbgViewDataStart = ptr_next;
 
 				ExFreePool(ptr);
-			}		
+			}
 			else data.HasData = FALSE;
 			_memcpy_s(OutputData, OutputDataLength, &data, sizeof(data));
 			Informaiton = sizeof(data);
@@ -537,6 +539,22 @@ NTSTATUS IOControlDispatch(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp)
 		Status = KxForceCloseHandle((HANDLE)data->ProcessId, data->HandleValue);
 		_memcpy_s(OutputData, OutputDataLength, &Status, sizeof(Status));
 		Informaiton = OutputDataLength;
+		break;
+	}
+	case CTL_GET_PROCESS_COMMANDLINE: {
+		ULONG_PTR pid = *(ULONG_PTR*)InputData;
+		PEPROCESS Process;
+		Status = _PsLookupProcessByProcessId((HANDLE)pid, &Process);
+		if (NT_SUCCESS(Status))
+		{
+			PUNICODE_STRING cmdStr = KxGetProcessCommandLine(Process);
+			if (cmdStr != NULL && cmdStr->Buffer != NULL) {
+				_wcscpy_s((wchar_t*)OutputData, 1024, cmdStr->Buffer);
+				Informaiton = 1024 * sizeof(wchar_t);
+			}
+			ObDereferenceObject(Process);
+			Status = STATUS_SUCCESS;
+		}
 		break;
 	}
 	default:

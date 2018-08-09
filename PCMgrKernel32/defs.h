@@ -102,6 +102,31 @@ typedef struct _OBJECT_HANDLE_FLAG_INFORMATION {
 	BOOLEAN ProtectFromClose;
 }OBJECT_HANDLE_FLAG_INFORMATION, *POBJECT_HANDLE_FLAG_INFORMATION;
 
+#ifdef _AMD64_
+typedef struct _PEB_LDR_DATA {
+	ULONG Length;
+	UCHAR Initialized;
+	PVOID SsHandle;
+	LIST_ENTRY64 InLoadOrderLinks;
+	LIST_ENTRY64 InMemoryOrderLinks;
+	LIST_ENTRY64 InInitializationOrderLinks;
+	PVOID EntryInProgress;
+	UCHAR ShutdownInProgress;
+	PVOID ShutdownThreadId;
+} PEB_LDR_DATA, *PPEB_LDR_DATA;
+#else
+typedef struct _PEB_LDR_DATA {
+	ULONG Length;
+	UCHAR Initialized;
+	PVOID SsHandle;
+	LIST_ENTRY32 InLoadOrderLinks;
+	LIST_ENTRY32 InMemoryOrderLinks;
+	LIST_ENTRY32 InInitializationOrderLinks;
+	PVOID EntryInProgress;
+	UCHAR ShutdownInProgress;
+	PVOID ShutdownThreadId;
+} PEB_LDR_DATA, *PPEB_LDR_DATA;
+#endif
 
 extern NTKERNELAPI int PsGetProcessPriorityClass(PEPROCESS Process);
 extern NTKERNELAPI VOID* PsGetProcessJob(PEPROCESS Process);

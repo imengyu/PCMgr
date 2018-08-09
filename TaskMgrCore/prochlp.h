@@ -3,14 +3,15 @@
 #include "perfhlp.h"
 #include "ntdef.h"
 
-typedef void(__cdecl*EnumProcessCallBack)(DWORD pid, DWORD parentid, LPWSTR exename, LPWSTR exefullpath, int tp, HANDLE hProcess);
-typedef void(__cdecl*EnumProcessCallBack2)(DWORD pid);
+typedef void(__cdecl*EnumProcessCallBack)(DWORD pid, DWORD parentid, LPWSTR exename, LPWSTR exefullpath, int tp, HANDLE hProcess, PSYSTEM_PROCESSES proc);
+typedef void(__cdecl*EnumProcessCallBack2)(DWORD pid, PSYSTEM_PROCESSES proc);
 
 typedef struct tag_PEOCESSKINFO {
 	WCHAR Eprocess[32];
 	WCHAR PebAddress[32];
 	WCHAR JobAddress[32];
 	WCHAR ImageFileName[MAX_PATH];
+	WCHAR ImageFullName[MAX_PATH];
 }PEOCESSKINFO,*PPEOCESSKINFO;
 
 void MFroceKillProcessUser();
@@ -43,12 +44,12 @@ EXTERN_C M_API NTSTATUS MTerminateProcessNt(DWORD dwId, HANDLE handle);
 
 EXTERN_C M_API BOOL MRunUWPApp(LPWSTR packageName, LPWSTR name);
 
-EXTERN_C M_API BOOL MGetProcessCommandLine(HANDLE handle, LPWSTR l, int maxcount);
+EXTERN_C M_API BOOL MGetProcessCommandLine(HANDLE handle, LPWSTR l, int maxcount, DWORD pid = 0);
 EXTERN_C M_API BOOL MGetProcessIsUWP(HANDLE handle);
 EXTERN_C M_API BOOL MGetProcessIs32Bit(HANDLE handle);
 EXTERN_C M_API BOOL MGetProcessEprocess(DWORD pid, PPEOCESSKINFO info);
 EXTERN_C M_API BOOL MGetUWPPackageFullName(HANDLE handle, int * len, LPWSTR buffer);
-EXTERN_C M_API int MGetProcessState(DWORD pid, HWND hWnd);
+EXTERN_C M_API int MGetProcessState(PSYSTEM_PROCESSES p, HWND hWnd);
 EXTERN_C M_API VOID* MGetProcessThreads(DWORD pid);
 
 EXTERN_C M_API int MAppWorkShowMenuProcessPrepare(LPWSTR strFilePath, LPWSTR strFileName, DWORD pid);

@@ -14,6 +14,7 @@
 #include "StringHlp.h"
 #include <io.h>
 
+BOOL isKernelNeed64 = FALSE;
 BOOL isKernelDriverLoaded = FALSE;
 BOOL isKernelPDBLoaded = FALSE;
 HANDLE hKernelDevice = NULL;
@@ -267,6 +268,10 @@ BOOL MUnInitKernelNTPDB() {
 	return TRUE;
 }
 
+M_CAPI(BOOL) MIsKernelNeed64()
+{
+	return isKernelNeed64;
+}
 M_CAPI(BOOL) MCanUseKernel()
 {
 	return isKernelDriverLoaded && hKernelDevice != NULL;
@@ -278,7 +283,15 @@ M_CAPI(BOOL) MInitKernel(LPWSTR currentPath)
 	if (!isKernelDriverLoaded)
 	{
 		wchar_t path[MAX_PATH];
-		if(MIs64BitOS()) wsprintf(path, L"%s\\PCMgrKernel64.sys", currentPath);
+		if (MIs64BitOS()) {
+#ifdef _AMD64_
+			wsprintf(path, L"%s\\PCMgrKernel64.sys", currentPath);
+#else
+			isKernelNeed64 = TRUE;
+			LogErr(L"You need to use 64 bit version PCMgr application to load driver.");
+			return FALSE;
+#endif
+		}
 		else wsprintf(path, L"%s\\PCMgrKernel32.sys", currentPath);
 
 		if (MFM_FileExist(path))
@@ -442,8 +455,11 @@ DWORD WINAPI MLoadingThread(LPVOID lpParameter)
 	if (!kNtosValue.KernelDataInited)
 	{
 		MGetNtosNameAndStartAddress(kNtosValue.NtosModuleName, 32, (kNtosValue.NtostAddress == 0 ? &kNtosValue.NtostAddress : 0));
-		MInitKernelNTPDB(usingNtosPDB, &kNtosValue);
+		if (!MInitKernelNTPDB(usingNtosPDB, &kNtosValue) && !isKernelPDBLoaded) {
+			M_SU_Init(false, &kNtosValue);
+		}
 	}
 	MAppSetStartingProgessText(L"Initializing...");
+	MAppMainCall(36, 0, 0);
 	return 0;
 }

@@ -49,6 +49,8 @@
             this.checkBoxTop = new System.Windows.Forms.CheckBox();
             this.label2 = new System.Windows.Forms.Label();
             this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.checkBoxAbortShutdown = new System.Windows.Forms.CheckBox();
+            this.checkBoxNTOSPDB = new System.Windows.Forms.CheckBox();
             this.checkBoxUseMyDbgView = new System.Windows.Forms.CheckBox();
             this.checkBoxAutoLoadDriver = new System.Windows.Forms.CheckBox();
             this.checkBoxHighLightNoSystetm = new System.Windows.Forms.CheckBox();
@@ -78,7 +80,6 @@
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.comboBox_lg = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.checkBoxNTOSPDB = new System.Windows.Forms.CheckBox();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage4.SuspendLayout();
@@ -148,6 +149,7 @@
             // 
             // comboBoxShowHotKey2
             // 
+            resources.ApplyResources(this.comboBoxShowHotKey2, "comboBoxShowHotKey2");
             this.comboBoxShowHotKey2.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxShowHotKey2.FormattingEnabled = true;
             this.comboBoxShowHotKey2.Items.AddRange(new object[] {
@@ -189,7 +191,6 @@
             resources.GetString("comboBoxShowHotKey2.Items35"),
             resources.GetString("comboBoxShowHotKey2.Items36"),
             resources.GetString("comboBoxShowHotKey2.Items37")});
-            resources.ApplyResources(this.comboBoxShowHotKey2, "comboBoxShowHotKey2");
             this.comboBoxShowHotKey2.Name = "comboBoxShowHotKey2";
             // 
             // label6
@@ -199,6 +200,7 @@
             // 
             // comboBoxShowHotKey1
             // 
+            resources.ApplyResources(this.comboBoxShowHotKey1, "comboBoxShowHotKey1");
             this.comboBoxShowHotKey1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxShowHotKey1.FormattingEnabled = true;
             this.comboBoxShowHotKey1.Items.AddRange(new object[] {
@@ -207,7 +209,6 @@
             resources.GetString("comboBoxShowHotKey1.Items2"),
             resources.GetString("comboBoxShowHotKey1.Items3"),
             resources.GetString("comboBoxShowHotKey1.Items4")});
-            resources.ApplyResources(this.comboBoxShowHotKey1, "comboBoxShowHotKey1");
             this.comboBoxShowHotKey1.Name = "comboBoxShowHotKey1";
             // 
             // label5
@@ -264,6 +265,7 @@
             // tabPage4
             // 
             resources.ApplyResources(this.tabPage4, "tabPage4");
+            this.tabPage4.Controls.Add(this.checkBoxAbortShutdown);
             this.tabPage4.Controls.Add(this.checkBoxNTOSPDB);
             this.tabPage4.Controls.Add(this.checkBoxUseMyDbgView);
             this.tabPage4.Controls.Add(this.checkBoxAutoLoadDriver);
@@ -292,6 +294,18 @@
             this.tabPage4.Controls.Add(this.label9);
             this.tabPage4.Name = "tabPage4";
             this.tabPage4.UseVisualStyleBackColor = true;
+            // 
+            // checkBoxAbortShutdown
+            // 
+            resources.ApplyResources(this.checkBoxAbortShutdown, "checkBoxAbortShutdown");
+            this.checkBoxAbortShutdown.Name = "checkBoxAbortShutdown";
+            this.checkBoxAbortShutdown.UseVisualStyleBackColor = true;
+            // 
+            // checkBoxNTOSPDB
+            // 
+            resources.ApplyResources(this.checkBoxNTOSPDB, "checkBoxNTOSPDB");
+            this.checkBoxNTOSPDB.Name = "checkBoxNTOSPDB";
+            this.checkBoxNTOSPDB.UseVisualStyleBackColor = true;
             // 
             // checkBoxUseMyDbgView
             // 
@@ -450,21 +464,21 @@
             // 
             // tabPage3
             // 
+            resources.ApplyResources(this.tabPage3, "tabPage3");
             this.tabPage3.Controls.Add(this.comboBox_lg);
             this.tabPage3.Controls.Add(this.label1);
-            resources.ApplyResources(this.tabPage3, "tabPage3");
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.UseVisualStyleBackColor = true;
             // 
             // comboBox_lg
             // 
+            resources.ApplyResources(this.comboBox_lg, "comboBox_lg");
             this.comboBox_lg.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_lg.FormattingEnabled = true;
             this.comboBox_lg.Items.AddRange(new object[] {
             resources.GetString("comboBox_lg.Items"),
             resources.GetString("comboBox_lg.Items1"),
             resources.GetString("comboBox_lg.Items2")});
-            resources.ApplyResources(this.comboBox_lg, "comboBox_lg");
             this.comboBox_lg.Name = "comboBox_lg";
             this.comboBox_lg.SelectedIndexChanged += new System.EventHandler(this.comboBox_lg_SelectedIndexChanged);
             // 
@@ -472,12 +486,6 @@
             // 
             resources.ApplyResources(this.label1, "label1");
             this.label1.Name = "label1";
-            // 
-            // checkBoxNTOSPDB
-            // 
-            resources.ApplyResources(this.checkBoxNTOSPDB, "checkBoxNTOSPDB");
-            this.checkBoxNTOSPDB.Name = "checkBoxNTOSPDB";
-            this.checkBoxNTOSPDB.UseVisualStyleBackColor = true;
             // 
             // FormSettings
             // 
@@ -554,5 +562,6 @@
         private System.Windows.Forms.CheckBox checkBoxAutoLoadDriver;
         private System.Windows.Forms.CheckBox checkBoxUseMyDbgView;
         private System.Windows.Forms.CheckBox checkBoxNTOSPDB;
+        private System.Windows.Forms.CheckBox checkBoxAbortShutdown;
     }
 }

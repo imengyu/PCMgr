@@ -9,8 +9,15 @@ typedef struct tag_NTOS_EPROCESS_OFF_DATA {
 	ULONG_PTR EPROCESS_RundownProtectOffest;
 	ULONG_PTR EPROCESS_ThreadListHeadOffest;
 	ULONG_PTR EPROCESS_FlagsOffest;
+	ULONG_PTR EPROCESS_SeAuditProcessCreationInfoOffest;
+
 	ULONG_PTR ETHREAD_TcbOffest;
 	ULONG_PTR ETHREAD_CrossThreadFlagsOffest;
+
+	ULONG_PTR PEB_LdrOffest;
+	ULONG_PTR PEB_ProcessParametersOffest;
+
+	ULONG_PTR RTL_USER_PROCESS_PARAMETERS_CommandLineOffest;
 }NTOS_EPROCESS_OFF_DATA, *PNTOS_EPROCESS_OFF_DATA;
 
 typedef struct tag_NTOS_PDB_DATA {
@@ -49,7 +56,9 @@ typedef struct tag_KPROCINFO {
 	ULONG_PTR PebAddress;
 	ULONG_PTR JobAddress;
 	int PriorityClass;
-	UCHAR FullPath[260];
+	UCHAR ImageFileName[260];
+	wchar_t FullPath[260];
+
 }KPROCINFO, *PKPROCINFO;
 
 typedef struct tag_KDAAGRS {

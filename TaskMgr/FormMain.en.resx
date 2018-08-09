@@ -121,24 +121,24 @@
     <value>
         AAEAAAD/////AQAAAAAAAAAMAgAAAFdTeXN0ZW0uV2luZG93cy5Gb3JtcywgVmVyc2lvbj00LjAuMC4w
         LCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODkFAQAAACZTeXN0
-        ZW0uV2luZG93cy5Gb3Jtcy5JbWFnZUxpc3RTdHJlYW1lcgEAAAAERGF0YQcCAgAAAAkDAAAADwMAAAAE
-        CQAAAk1TRnQBSQFMAgEBAwEAAawBAwGsAQMBEAEAARABAAT/ASEBAAj/AUIBTQE2BwABNgMAASgDAAFA
-        AwABEAMAAQEBAAEgBgABELYAAlgBYgHvAlgBYgHvDAACWAFiAe8CWAFiAe+EAAGyAQMBAAH/DAACYgFY
-        Ae8B3AGPAQAB/wHoAZcBAAH/AegBlwEAAf8B6AGXAQAB/wHDAQcBAAH/AkcBRgGAHAABjgHkAv8BjQHj
+        ZW0uV2luZG93cy5Gb3Jtcy5JbWFnZUxpc3RTdHJlYW1lcgEAAAAERGF0YQcCAgAAAAkDAAAADwMAAAAA
+        CQAAAk1TRnQBSQFMAgEBAwEAAbwBAwG8AQMBEAEAARABAAT/ASEBAAj/AUIBTQE2BwABNgMAASgDAAFA
+        AwABEAMAAQEBAAEgBgABELYAAlgBYgHvAlgBYgHvDAACWAFiAe8CWAFiAe+EAAGyAQEBAAH/DAACYgFY
+        Ae8B3AGPAQAB/wHoAZcBAAH/AegBlwEAAf8B6AGXAQAB/wHDAQUBAAH/AkcBRgGAHAABjgHkAv8BjQHj
         Av8BiwHjAv8BigHiAv8BiAHiAv8BhwHhAv8CAAG+Af8CAAHmAf8CAAG8Af8BAAHWAfwB/wIAAbkB/wIA
         Ad4B/wJYAWIB70gALP8DOgFgDAABxwGFAQAB/wHPAYkBAAH/AjoBOQFgAdwBkAEAAf8B6AGYAQAB/wHo
         AZgBAAH/AegBmAEAAf8B6AGYAQAB/wHoAZgBAAH/AegBmAEAAf8B6AGYAQAB/wGyAgAB/xgAAZAB5AL/
         AbUB7QL/AY0B4wL/AYsB4wL/AYoB4gL/AYgB4gL/AYcB4QL/AgABvgH/AgAB5gH/AgABwQH/AgAB4gH/
         AlgBYgHvSAADDAEQMP8MAAHHAYUBAAH/AegBmQEAAf8B6AGZAQAB/wHoAZkBAAH/AeQBlgEAAf8CXAFX
-        Ad8DKgFAAyoBQAJMAUsBjwHDAQgBAAH/AegBmQEAAf8B6AGZAQAB/wGyAgAB/xQAAZEB5QL/AbcB7QL/
+        Ad8DKgFAAyoBQAJMAUsBjwHDAQYBAAH/AegBmQEAAf8B6AGZAQAB/wGyAgAB/xQAAZEB5QL/AbcB7QL/
         AY4B5AL/AY0B4wL/AYsB4wL/AYoB4gL/AYgB4gL/AYcB4QL/AgABxAH/AgAB5gH/AgABwQH/TAADXAHf
         AzIBUCz/AwwBEAgAAccBhQEAAf8B6AGaAQAB/wHoAZoBAAH/AeQBlwEAAf8DIQEwFAACYgFYAe8B6AGa
         AQAB/wHoAZoBAAH/AkcBRgGAEAABkwHlAv8BtwHuAv8BkAHkAv8BjgHkAv8BjQHjAv8BiwHjAv8BigHi
         Av8CAAHAAf8CAAHqAf8CAAHEAf8CAAHmAf8CWAFiAe9IAAT/BAAs/wNcAd8IAAHHAYYBAAH/AegBmgEA
-        Af8B6AGaAQAB/wHoAZoBAAH/Ac8BiQEAAf8YAAHHAQoBAAH/AegBmgEAAf8BwwEGAQAB/xAAAZQB5gL/
+        Af8B6AGaAQAB/wHoAZoBAAH/Ac8BiQEAAf8YAAHHAQgBAAH/AegBmgEAAf8BwwEEAQAB/xAAAZQB5gL/
         AbkB7gL/AZEB5QL/AZAB5AL/AY4B5AL/AY0B4wL/AgABwwH/AgAB7gH/AgABwAH/AQAB0gH3Af8CAAG+
-        Af8CAAHmAf8CWAFiAe9EAAT/A0wBjwNRAZ8s/wgAAbcBBwEAAf8BxwGFAQAB/wHHAYUBAAH/AccBhAEA
-        Af8BxwGEAQAB/wGyAgAB/xQAAkwBSwGPAccBCgEAAf8BxwEKAQAB/xAAAZYB5gL/AbkB7wL/AZMB5QL/
+        Af8CAAHmAf8CWAFiAe9EAAT/A0wBjwNRAZ8s/wgAAbcBBQEAAf8BxwGFAQAB/wHHAYUBAAH/AccBhAEA
+        Af8BxwGEAQAB/wGyAgAB/xQAAkwBSwGPAccBCAEAAf8BxwEIAQAB/xAAAZYB5gL/AbkB7wL/AZMB5QL/
         AZEB5QL/AZAB5AL/AY4B5AL/AgABvAH/AgABwwH/AYwB4wL/AYwB3gH4Af8BWQJcAc8CWAFiAe8CWAFi
         Ae9EAAj/BAAs/wNMAY9MAAGXAecC/wG7Ae8C/wGUAeYC/wGTAeUC/wGRAeUC/wGQAeQC/wGOAeQC/wGN
         AeMC/wGLAeMC/wGzAewC/1AACP8DKgFAA1wBzyz/TAABlwHnAv8BuwHvAv8BlgHmAv8BlAHmAv8BkwHl
@@ -149,18 +149,18 @@
         AUAMAAGXAecC/wG7Ae8C/wGXAecC/wGXAecC/wGWAeYC/wGUAeYC/wGTAeUC/wGRAeUC/wGQAeQC/wG1
         Ae0C/1AANP8QAAJcAVcB3wHoAZkBAAH/AegBmQEAAf8CYgFYAe8QAANAAXAB3AGPAQAB/wHoAZkBAAH/
         AegBmQEAAf8B6AGZAQAB/wMqAUAMAAGXAecC/wG7Ae8C/wGXAecC/wGXAecC/wGXAecC/wGWAeYC/wGU
-        AeYC/wGTAeUC/wGRAeUC/wG3Ae0C/2QAAwwBEBj/GAABsgECAQAB/wHoAZoBAAH/AegBmgEAAf8B5AGX
-        AQAB/wHHAYIBAAH/AccBggEAAf8B0wGKAQAB/wHoAZoBAAH/AegBmgEAAf8B5AGWAQAB/wHPAYUBAAH/
-        AegBmgEAAf8DKgFADAABlwHnAv8BuwHvAv8BlwHnAv8BlwHnAv8BlwHnAv8BlwHnAv8BlgHmAv8BlAHm
-        Av8BkwHlAv8BtwHuAv9sABD/IAACXAFXAd8B5AGXAQAB/wHoAZoBAAH/AegBmgEAAf8B6AGaAQAB/wHo
-        AZoBAAH/AegBmgEAAf8BxwGAAQAB/wMhATAEAAHPAYUBAAH/AyoBQAwAAZcB5wL/AbsB7wL/AZcB5wL/
-        AZcB5wL/AZcB5wL/AZcB5wL/AZcB5wL/AZYB5gL/AZQB5gL/AbkB7gL/pAACUQFQAZ8BsgIAAf8BtwEB
-        AQAB/wJcAVkBzwMyAVAQAAMqAUANAAHQAfIB/wEAAdAB8QH/AQABzwHxAf8BAAHOAfAB/wEAAc4B8AH/
-        AQABzQHvAf8BAAHMAe8B/wEAAcwB7gH/AQABywHuAf8BAAHKAe0B//8ATQABQgFNAT4HAAE+AwABKAMA
-        AUADAAEQAwABAQEAAQEFAAGAFwAD/wEABf8BnAIAAv8BuAEPAeADAAHAAQMBgAEHAeABAQIAAYABAwGA
-        AQMB4AEDAgABgAEBAYMB4QHgAQECAAGgAQEBgwHxAeADAAGAAQEBgQHxAeADAAGQAQAC/wHgAQcCAAGA
-        AQAC/wHgAQcCAAGHAf8BjwHAAeABBwMAAQMBxwLgAQcCAAGAAQMBwwHAAeABBwIAAfwBBwHgAQAB4AEH
-        AgAB/wEPAfABBAHgAQcCAAL/AfwBHgHgAQcCAAb/AgAL
+        AeYC/wGTAeUC/wGRAeUC/wG3Ae0C/2QAAwwBEBj/GAABsgIAAf8B6AGaAQAB/wHoAZoBAAH/AeQBlwEA
+        Af8BxwGCAQAB/wHHAYIBAAH/AdMBigEAAf8B6AGaAQAB/wHoAZoBAAH/AeQBlgEAAf8BzwGFAQAB/wHo
+        AZoBAAH/AyoBQAwAAZcB5wL/AbsB7wL/AZcB5wL/AZcB5wL/AZcB5wL/AZcB5wL/AZYB5gL/AZQB5gL/
+        AZMB5QL/AbcB7gL/bAAQ/yAAAlwBVwHfAeQBlwEAAf8B6AGaAQAB/wHoAZoBAAH/AegBmgEAAf8B6AGa
+        AQAB/wHoAZoBAAH/AccBgAEAAf8DIQEwBAABzwGFAQAB/wMqAUAMAAGXAecC/wG7Ae8C/wGXAecC/wGX
+        AecC/wGXAecC/wGXAecC/wGXAecC/wGWAeYC/wGUAeYC/wG5Ae4C/6QAAlEBUAGfAbICAAH/AbcCAAH/
+        AlwBWQHPAzIBUBAAAyoBQA0AAdAB8gH/AQAB0AHxAf8BAAHPAfEB/wEAAc4B8AH/AQABzgHwAf8BAAHN
+        Ae8B/wEAAcwB7wH/AQABzAHuAf8BAAHLAe4B/wEAAcoB7QH//wBNAAFCAU0BPgcAAT4DAAEoAwABQAMA
+        ARADAAEBAQABAQUAAYAXAAP/AQAF/wGcAgAC/wG4AQ8B4AMAAcABAwGAAQcB4AEBAgABgAEDAYABAwHg
+        AQMCAAGAAQEBgwHhAeABAQIAAaABAQGDAfEB4AMAAYABAQGBAfEB4AMAAZABAAL/AeABBwIAAYABAAL/
+        AeABBwIAAYcB/wGPAcAB4AEHAwABAwHHAuABBwIAAYABAwHDAcAB4AEHAgAB/AEHAeABAAHgAQcCAAH/
+        AQ8B8AEEAeABBwIAAv8B/AEeAeABBwIABv8CAAs=
 </value>
   </data>
   <data name="columnHeader1.Text" xml:space="preserve">
@@ -186,7 +186,7 @@
         AAEAAAD/////AQAAAAAAAAAMAgAAAFdTeXN0ZW0uV2luZG93cy5Gb3JtcywgVmVyc2lvbj00LjAuMC4w
         LCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODkFAQAAACZTeXN0
         ZW0uV2luZG93cy5Gb3Jtcy5JbWFnZUxpc3RTdHJlYW1lcgEAAAAERGF0YQcCAgAAAAkDAAAADwMAAACw
-        BAAAAk1TRnQBSQFMAwEBAAF0AQMBdAEDARABAAEQAQAE/wEhAQAI/wFCAU0BNgcAATYDAAEoAwABQAMA
+        BAAAAk1TRnQBSQFMAwEBAAGEAQMBhAEDARABAAEQAQAE/wEhAQAI/wFCAU0BNgcAATYDAAEoAwABQAMA
         ARADAAEBAQABIAYAARA8AAHNAf8MAAJQAVEBnwJQAVEBn8wAAvsB+gH/AvsB+gH/AvsB+gH/AvsB+gH/
         AvsB+gH/AvsB+gH/A/0B/wIAAdsB/wIAAdkB/wP9Af8CUAFRAZ8CAAHeAf8CUAFRAZ/MAAP7Af8B9wL2
         Af8B9wH2AfUB/wH3AfYB9QH/AfcB9gH1Af8B9wH2AfUB/wH3AfYB9QH/AvsB+gH/AgAB2wH/AgAB2QH/
@@ -209,7 +209,10 @@
         Av8GAAs=
 </value>
   </data>
-  <data name="labelStartingStatus.Text" xml:space="preserve">
+  <data name="tabPageProcCtl.Text" xml:space="preserve">
+    <value>Process</value>
+  </data>
+  <data name="lbStartingStatus.Text" xml:space="preserve">
     <value>Initializing...</value>
   </data>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
@@ -255,8 +258,14 @@
   <data name="lbProcessCount.Text" xml:space="preserve">
     <value>Process Count：--</value>
   </data>
-  <data name="tabPageProcCtl.Text" xml:space="preserve">
-    <value>Process</value>
+  <data name="tabPageKernelCtl.Text" xml:space="preserve">
+    <value>Kernel</value>
+  </data>
+  <data name="pl_driverNotLoadTip.Location" type="System.Drawing.Point, System.Drawing">
+    <value>-4, 198</value>
+  </data>
+  <data name="pl_driverNotLoadTip.Size" type="System.Drawing.Size, System.Drawing">
+    <value>905, 103</value>
   </data>
   <data name="linkRestartAsAdminDriver.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
@@ -274,13 +283,19 @@
 </value>
   </data>
   <data name="linkRestartAsAdminDriver.Location" type="System.Drawing.Point, System.Drawing">
-    <value>162, 39</value>
+    <value>322, 48</value>
   </data>
   <data name="linkRestartAsAdminDriver.Size" type="System.Drawing.Size, System.Drawing">
     <value>263, 21</value>
   </data>
   <data name="linkRestartAsAdminDriver.Text" xml:space="preserve">
     <value>Restart as administrator and load driver</value>
+  </data>
+  <data name="lbRestartAsAdminDriver.Location" type="System.Drawing.Point, System.Drawing">
+    <value>3, 25</value>
+  </data>
+  <data name="lbRestartAsAdminDriver.Size" type="System.Drawing.Size, System.Drawing">
+    <value>899, 23</value>
   </data>
   <data name="lbRestartAsAdminDriver.Text" xml:space="preserve">
     <value>Kernel driver not load</value>
@@ -322,17 +337,29 @@
   <data name="columnHeader23.Text" xml:space="preserve">
     <value>Publisher</value>
   </data>
-  <data name="tabPageKernelCtl.Text" xml:space="preserve">
-    <value>Kernel</value>
-  </data>
   <data name="tabPagePerfCtl.Text" xml:space="preserve">
     <value>Performance</value>
+  </data>
+  <data name="linkLabelOpenPerfMon.Size" type="System.Drawing.Size, System.Drawing">
+    <value>165, 17</value>
+  </data>
+  <data name="linkLabelOpenPerfMon.Text" xml:space="preserve">
+    <value>Open resource monitor</value>
+  </data>
+  <data name="tabPageUWPCtl.Text" xml:space="preserve">
+    <value>Universal apps</value>
   </data>
   <data name="lbUWPEnumFailText.Text" xml:space="preserve">
     <value>Unkow error</value>
   </data>
-  <data name="tabPageUWPCtl.Text" xml:space="preserve">
-    <value>Universal apps</value>
+  <data name="tabPageScCtl.Text" xml:space="preserve">
+    <value>Services</value>
+  </data>
+  <data name="pl_ScNeedAdminTip.Location" type="System.Drawing.Point, System.Drawing">
+    <value>0, 209</value>
+  </data>
+  <data name="pl_ScNeedAdminTip.Size" type="System.Drawing.Size, System.Drawing">
+    <value>898, 103</value>
   </data>
   <data name="linkRebootAsAdmin.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
@@ -366,12 +393,6 @@
   </data>
   <data name="lbScNeedAdminTip.Text" xml:space="preserve">
     <value>I need to run as administrator to enumlate service information.</value>
-  </data>
-  <data name="pl_ScNeedAdminTip.Location" type="System.Drawing.Point, System.Drawing">
-    <value>0, 209</value>
-  </data>
-  <data name="pl_ScNeedAdminTip.Size" type="System.Drawing.Size, System.Drawing">
-    <value>898, 103</value>
   </data>
   <data name="sp2.Location" type="System.Drawing.Point, System.Drawing">
     <value>130, 536</value>
@@ -443,11 +464,11 @@
   <data name="lbServicesCount.Text" xml:space="preserve">
     <value>Service Count：--</value>
   </data>
-  <data name="tabPageScCtl.Text" xml:space="preserve">
-    <value>Services</value>
-  </data>
   <data name="tabPageStartCtl.Text" xml:space="preserve">
     <value>Start apps</value>
+  </data>
+  <data name="tabPageFileCtl.Text" xml:space="preserve">
+    <value>File Manager</value>
   </data>
   <data name="lbFileMgrStatus.Size" type="System.Drawing.Size, System.Drawing">
     <value>44, 17</value>
@@ -471,14 +492,32 @@
         RK5CYII=
 </value>
   </data>
-  <data name="tabPageFileCtl.Text" xml:space="preserve">
-    <value>File Manager</value>
-  </data>
   <data name="打开应用ToolStripMenuItem.Text" xml:space="preserve">
     <value>Open app</value>
   </data>
   <data name="卸载应用ToolStripMenuItem.Text" xml:space="preserve">
     <value>Uinstall app</value>
+  </data>
+  <data name="打开安装位置ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>203, 22</value>
+  </data>
+  <data name="打开安装位置ToolStripMenuItem.Text" xml:space="preserve">
+    <value>Open Install Directory</value>
+  </data>
+  <data name="复制名称ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>203, 22</value>
+  </data>
+  <data name="复制名称ToolStripMenuItem.Text" xml:space="preserve">
+    <value>Copy name</value>
+  </data>
+  <data name="复制完整名称ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>203, 22</value>
+  </data>
+  <data name="复制完整名称ToolStripMenuItem.Text" xml:space="preserve">
+    <value>Copy full name</value>
+  </data>
+  <data name="contextMenuStripUWP.Size" type="System.Drawing.Size, System.Drawing">
+    <value>204, 114</value>
   </data>
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
@@ -1105,7 +1144,7 @@
 </value>
   </data>
   <data name="$this.Text" xml:space="preserve">
-    <value>PCMgr</value>
+    <value>PCManager</value>
   </data>
   <data name="notifyIcon.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>

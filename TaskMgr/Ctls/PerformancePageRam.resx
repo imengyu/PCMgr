@@ -117,127 +117,154 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="performanceInfos.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
-    <value>Bottom</value>
-  </data>
-  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-  <data name="performanceInfos.Location" type="System.Drawing.Point, System.Drawing">
-    <value>0, 308</value>
-  </data>
-  <data name="performanceInfos.Size" type="System.Drawing.Size, System.Drawing">
-    <value>588, 113</value>
-  </data>
   <assembly alias="mscorlib" name="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="performanceInfos.TabIndex" type="System.Int32, mscorlib">
     <value>5</value>
   </data>
-  <data name="&gt;&gt;performanceInfos.Name" xml:space="preserve">
-    <value>performanceInfos</value>
-  </data>
-  <data name="&gt;&gt;performanceInfos.Type" xml:space="preserve">
-    <value>PCMgr.Ctls.PerformanceInfos, PCMgrApp32, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+  <data name="&gt;&gt;performanceGridGlobal.Name" xml:space="preserve">
+    <value>performanceGridGlobal</value>
   </data>
   <data name="&gt;&gt;performanceInfos.Parent" xml:space="preserve">
     <value>$this</value>
   </data>
-  <data name="&gt;&gt;performanceInfos.ZOrder" xml:space="preserve">
-    <value>1</value>
-  </data>
-  <data name="performanceGridGlobal.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
-    <value>Top, Bottom, Left, Right</value>
-  </data>
-  <data name="performanceGridGlobal.Location" type="System.Drawing.Point, System.Drawing">
-    <value>0, 45</value>
-  </data>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="performanceGridGlobal.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>3, 4, 3, 4</value>
   </data>
-  <data name="performanceGridGlobal.Size" type="System.Drawing.Size, System.Drawing">
-    <value>588, 192</value>
+  <data name="&gt;&gt;performanceTitle.Name" xml:space="preserve">
+    <value>performanceTitle</value>
   </data>
-  <data name="performanceGridGlobal.TabIndex" type="System.Int32, mscorlib">
-    <value>3</value>
-  </data>
-  <data name="&gt;&gt;performanceGridGlobal.Name" xml:space="preserve">
-    <value>performanceGridGlobal</value>
-  </data>
-  <data name="&gt;&gt;performanceGridGlobal.Type" xml:space="preserve">
-    <value>PCMgr.Ctls.PerformanceGrid, PCMgrApp32, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</value>
-  </data>
-  <data name="&gt;&gt;performanceGridGlobal.Parent" xml:space="preserve">
+  <data name="&gt;&gt;performanceTitle.Parent" xml:space="preserve">
     <value>$this</value>
   </data>
   <data name="&gt;&gt;performanceGridGlobal.ZOrder" xml:space="preserve">
     <value>2</value>
   </data>
-  <data name="performanceTitle.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
-    <value>Top</value>
+  <data name="performanceGridGlobal.RightText" xml:space="preserve">
+    <value>MAXRAMSIZE</value>
   </data>
-  <data name="performanceTitle.Location" type="System.Drawing.Point, System.Drawing">
-    <value>0, 0</value>
+  <data name="performanceRamPoolGrid.RightText" type="System.Resources.ResXNullRef, System.Windows.Forms">
+    <value />
   </data>
-  <data name="performanceTitle.Size" type="System.Drawing.Size, System.Drawing">
-    <value>588, 38</value>
+  <data name="&gt;&gt;$this.Type" xml:space="preserve">
+    <value>System.Windows.Forms.UserControl, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="performanceTitle.TabIndex" type="System.Int32, mscorlib">
-    <value>4</value>
+  <data name="&gt;&gt;performanceGridGlobal.Type" xml:space="preserve">
+    <value>PCMgr.Ctls.PerformanceGrid, PCMgrApp32, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</value>
   </data>
-  <data name="&gt;&gt;performanceTitle.Name" xml:space="preserve">
-    <value>performanceTitle</value>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="performanceGridGlobal.Location" type="System.Drawing.Point, System.Drawing">
+    <value>0, 45</value>
+  </data>
+  <data name="&gt;&gt;$this.Name" xml:space="preserve">
+    <value>PerformancePageRam</value>
+  </data>
+  <data name="performanceInfos.Size" type="System.Drawing.Size, System.Drawing">
+    <value>588, 113</value>
+  </data>
+  <data name="&gt;&gt;performanceInfos.Type" xml:space="preserve">
+    <value>PCMgr.Ctls.PerformanceInfos, PCMgrApp32, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+  </data>
+  <data name="performanceTitle.Title" xml:space="preserve">
+    <value>内存</value>
   </data>
   <data name="&gt;&gt;performanceTitle.Type" xml:space="preserve">
     <value>PCMgr.Ctls.PerformanceTitle, PCMgrApp32, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</value>
   </data>
-  <data name="&gt;&gt;performanceTitle.Parent" xml:space="preserve">
+  <data name="performanceInfos.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
+    <value>Bottom</value>
+  </data>
+  <data name="performanceRamPoolGrid.Text" xml:space="preserve">
+    <value>performanceRamPoolGrid1</value>
+  </data>
+  <data name="performanceRamPoolGrid.Size" type="System.Drawing.Size, System.Drawing">
+    <value>588, 46</value>
+  </data>
+  <data name="performanceGridGlobal.Size" type="System.Drawing.Size, System.Drawing">
+    <value>588, 192</value>
+  </data>
+  <data name="performanceRamPoolGrid.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
+    <value>Bottom, Left, Right</value>
+  </data>
+  <data name="performanceTitle.SmallTitle" xml:space="preserve">
+    <value />
+  </data>
+  <data name="&gt;&gt;performanceInfos.Name" xml:space="preserve">
+    <value>performanceInfos</value>
+  </data>
+  <data name="&gt;&gt;performanceInfos.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="performanceRamPoolGrid.TabIndex" type="System.Int32, mscorlib">
+    <value>6</value>
+  </data>
+  <data name="&gt;&gt;performanceRamPoolGrid.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="performanceInfos.Location" type="System.Drawing.Point, System.Drawing">
+    <value>0, 308</value>
+  </data>
+  <data name="performanceTitle.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
+    <value>Top</value>
+  </data>
+  <data name="performanceGridGlobal.TabIndex" type="System.Int32, mscorlib">
+    <value>3</value>
+  </data>
+  <data name="performanceGridGlobal.LeftBottomText" xml:space="preserve">
+    <value>60 s</value>
+  </data>
+  <data name="performanceRamPoolGrid.LeftText" xml:space="preserve">
+    <value>内存组合</value>
+  </data>
+  <data name="&gt;&gt;performanceRamPoolGrid.Parent" xml:space="preserve">
     <value>$this</value>
   </data>
   <data name="&gt;&gt;performanceTitle.ZOrder" xml:space="preserve">
     <value>3</value>
   </data>
-  <data name="performanceRamPoolGrid.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
-    <value>Bottom, Left, Right</value>
-  </data>
   <data name="performanceRamPoolGrid.Location" type="System.Drawing.Point, System.Drawing">
     <value>0, 244</value>
   </data>
-  <data name="performanceRamPoolGrid.Size" type="System.Drawing.Size, System.Drawing">
-    <value>588, 46</value>
-  </data>
-  <data name="performanceRamPoolGrid.TabIndex" type="System.Int32, mscorlib">
-    <value>6</value>
-  </data>
-  <data name="performanceRamPoolGrid.Text" xml:space="preserve">
-    <value>performanceRamPoolGrid1</value>
-  </data>
-  <data name="&gt;&gt;performanceRamPoolGrid.Name" xml:space="preserve">
-    <value>performanceRamPoolGrid</value>
+  <data name="performanceGridGlobal.RightBottomText" xml:space="preserve">
+    <value>0</value>
   </data>
   <data name="&gt;&gt;performanceRamPoolGrid.Type" xml:space="preserve">
     <value>PCMgr.Ctls.PerformanceRamPoolGrid, PCMgrApp32, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</value>
   </data>
-  <data name="&gt;&gt;performanceRamPoolGrid.Parent" xml:space="preserve">
-    <value>$this</value>
-  </data>
-  <data name="&gt;&gt;performanceRamPoolGrid.ZOrder" xml:space="preserve">
-    <value>0</value>
-  </data>
-  <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-    <value>True</value>
-  </metadata>
-  <data name="$this.AutoScaleDimensions" type="System.Drawing.SizeF, System.Drawing">
-    <value>6, 12</value>
-  </data>
   <data name="$this.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>20, 20, 20, 20</value>
+  </data>
+  <data name="performanceGridGlobal.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
+    <value>Top, Bottom, Left, Right</value>
+  </data>
+  <data name="performanceTitle.TabIndex" type="System.Int32, mscorlib">
+    <value>4</value>
+  </data>
+  <data name="performanceTitle.Size" type="System.Drawing.Size, System.Drawing">
+    <value>588, 38</value>
+  </data>
+  <data name="&gt;&gt;performanceGridGlobal.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;performanceRamPoolGrid.Name" xml:space="preserve">
+    <value>performanceRamPoolGrid</value>
+  </data>
+  <data name="$this.AutoScaleDimensions" type="System.Drawing.SizeF, System.Drawing">
+    <value>6, 12</value>
   </data>
   <data name="$this.Size" type="System.Drawing.Size, System.Drawing">
     <value>588, 421</value>
   </data>
-  <data name="&gt;&gt;$this.Name" xml:space="preserve">
-    <value>PerformancePageRam</value>
+  <data name="performanceTitle.Location" type="System.Drawing.Point, System.Drawing">
+    <value>0, 0</value>
   </data>
-  <data name="&gt;&gt;$this.Type" xml:space="preserve">
-    <value>System.Windows.Forms.UserControl, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="performanceGridGlobal.LeftText" xml:space="preserve">
+    <value>内存使用率</value>
   </data>
+  <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>True</value>
+  </metadata>
+  <metadata name="$this.Language" type="System.Globalization.CultureInfo, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>en</value>
+  </metadata>
 </root>

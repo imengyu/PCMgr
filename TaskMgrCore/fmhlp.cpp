@@ -289,6 +289,10 @@ M_API BOOL MFM_GetFolders(LPWSTR path)
 	else mfmain_callback(3, 0, (LPVOID)-1);
 	return 0;
 }
+M_API BOOL MFM_RunExe(LPWSTR path, LPWSTR cmd, HWND hWnd)
+{
+	return ShellExecute(hWnd, L"open", path, cmd, NULL, 5) != NULL;
+}
 M_API BOOL MFM_OpenFile(LPWSTR path, HWND hWnd)
 {
 	return ShellExecute(hWnd, L"open", path, NULL, NULL, 5) != NULL;
@@ -492,9 +496,7 @@ M_API BOOL MFM_DeleteDir(const wchar_t* szFileDir)
 	return FALSE;
 }
 M_API BOOL MFM_IsPathDir(const wchar_t* path) {
-	struct _stat buf = { 0 };
-	_wstat(path, &buf);
-	return buf.st_mode & _S_IFDIR;
+	return PathIsDirectory(path);
 }
 M_API LPWSTR MFM_GetSeledItemPath(int index)
 {
@@ -511,14 +513,10 @@ M_API BOOL MFM_GetShowHiddenFiles()
 }
 M_API BOOL MFM_FileExist(const wchar_t* path)
 {
-	//if(_waccess(path, 0)==0)
-	//	return TRUE;
 	return PathFileExists(path);
 }
 M_API BOOL MFM_FileExistA(const char* path)
 {
-	//if(_waccess(path, 0)==0)
-	//	return TRUE;
 	return PathFileExistsA(path);
 }
 M_API void MFM_SetShowHiddenFiles(BOOL b)

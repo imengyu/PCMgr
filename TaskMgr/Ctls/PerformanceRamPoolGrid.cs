@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -50,7 +51,9 @@ namespace PCMgr.Ctls
         public Brush BgBrush { get; set; }
         public Pen DrawPen { get; set; }
         public Pen GridPen { get; set; }
+        [Bindable(true), Localizable(true)]
         public string LeftText { get; set; }
+        [Bindable(true), Localizable(true)]
         public string RightText { get; set; }
         public Color TextColor
         {

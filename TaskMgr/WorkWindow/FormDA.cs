@@ -88,12 +88,18 @@ namespace PCMgr.WorkWindow
 
         private void dastest()
         {
+            labelErrStatus.Hide();
+            listViewDA.Show();
+
             listViewDA.Items.Clear();
             textBoxBariny.Text = "";
             M_SU_KDA_Test(CallbackPtr);
         }
         private void das()
         {
+            labelErrStatus.Hide();
+            listViewDA.Show();
+
             address = 0;
             size = 0;
             showedsize = 0;
@@ -101,17 +107,17 @@ namespace PCMgr.WorkWindow
             textBoxBariny.Text = "";
             if (!FormMain.MCanUseKernel())
             {
-                add_Item("", "", "", FormMain.str_DriverLoadFailed);
+                show_err(FormMain.str_DriverLoadFailed);
                 return;
             }
             if (textBoxTargetAddress.Text == "")
             {
-                add_Item("", "", "", FormMain.str_PleaseEnterTargetAddress);
+                show_err(FormMain.str_PleaseEnterTargetAddress);
                 return;
             }
             if (textBoxDesize.Text == "")
             {
-                add_Item("", "", "", FormMain.str_PleaseEnterDaSize);
+                show_err(FormMain.str_PleaseEnterDaSize);
                 return;
             }
 
@@ -125,12 +131,12 @@ namespace PCMgr.WorkWindow
             bool rs = false;
             if (address <= 0)
             {
-                add_Item("", "", address.ToString(), "Enter address not valid.");
+                show_err("Enter address not valid : " + address.ToString());
                 return;
             }
             if (size <= 0)
             {
-                add_Item("", "", size.ToString(), "Enter size not valid.");
+                show_err("Enter size not valid : " + size.ToString());
                 return;
             }
             if (size > oncemaxdsize)
@@ -138,7 +144,12 @@ namespace PCMgr.WorkWindow
             else rs = M_SU_KDA(CallbackPtr, address, size);
             if (!rs) FormMain.LogErr("KDA Failed!");
         }
-
+        private void show_err(string s)
+        {
+            listViewDA.Hide();
+            labelErrStatus.Text = s;
+            labelErrStatus.Show();
+        }
         private void add_Item(string address, string shell, string binary, string asm, string tag = null)
         {
             ListViewItem li = new ListViewItem(address);

@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace PCMgr.Ctls
@@ -79,10 +76,16 @@ namespace PCMgr.Ctls
         public Pen DrawPen { get; set; }
         public Pen DrawPen2 { get; set; }
         public Pen GridPen { get; set; }
+
+        [Bindable(true), Localizable(true)]
         public string LeftText { get; set; }
+        [Bindable(true), Localizable(true)]
         public string RightText { get; set; }
+        [Bindable(true), Localizable(true)]
         public string LeftBottomText { get; set; }
+        [Bindable(true), Localizable(true)]
         public string RightBottomText { get; set; }
+
         public int TopTextHeight { get; set; }
         public int BottomTextHeight { get; set; }
 

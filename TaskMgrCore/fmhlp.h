@@ -17,6 +17,7 @@ EXTERN_C M_API BOOL MCopyToClipboard2(const WCHAR * pszData);
 EXTERN_C M_API void MFM_GetRoots();
 EXTERN_C M_API void MFM_SetCallBack(MFCALLBACK cp);
 EXTERN_C M_API BOOL MFM_GetFolders(LPWSTR path);
+EXTERN_C M_API BOOL MFM_RunExe(LPWSTR path, LPWSTR cmd, HWND hWnd);
 EXTERN_C M_API BOOL MFM_OpenFile(LPWSTR path, HWND hWnd);
 EXTERN_C M_API BOOL MFM_ReUpdateFile(LPWSTR fullPath, LPWSTR dirPath);
 EXTERN_C M_API BOOL MFM_UpdateFile(LPWSTR fullPath, LPWSTR dirPath);

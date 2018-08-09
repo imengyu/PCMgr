@@ -8,6 +8,7 @@ using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -56,16 +57,19 @@ namespace PCMgr.WorkWindow
             li.SubItems.Add(Marshal.PtrToStringUni(objaddr));
             li.SubItems.Add(refcount.ToString());
             li.SubItems.Add(typeindex.ToString());
-            listView1.Items.Add(li);
+
+            listView1.Invoke(new Action(delegate {
+                listView1.Items.Add(li);
+            }));
         }
 
         private void 刷新ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (currentPid >= 4)
             {
+                labelEnuming.Show();
                 listView1.Items.Clear();
-                MEnumProcessHandles(currentPid, CallbackPtr);
-                Text = string.Format(LanuageMgr.GetStr("VHandleTitle"), currentName, currentPid, listView1.Items.Count);
+                new Thread(EnumHandles).Start();
             }
         }
         private void 关闭句柄ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -74,6 +78,15 @@ namespace PCMgr.WorkWindow
                 if (M_EH_CloseHandle(currentPid, (IntPtr)listView1.SelectedItems[0].Tag))
                     MessageBox.Show(LanuageMgr.GetStr("OpSuccess"));
                 else MessageBox.Show(LanuageMgr.GetStr("OpFailed"));
+        }
+
+        private void EnumHandles()
+        {
+            MEnumProcessHandles(currentPid, CallbackPtr);
+            Invoke(new Action(delegate {
+                Text = string.Format(LanuageMgr.GetStr("VHandleTitle"), currentName, currentPid, listView1.Items.Count);
+                labelEnuming.Hide();
+            }));
         }
 
         private void listView1_MouseClick(object sender, MouseEventArgs e)

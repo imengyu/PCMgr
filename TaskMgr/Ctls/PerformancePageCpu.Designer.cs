@@ -29,12 +29,19 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PerformancePageCpu));
+            this.performanceCpus = new System.Windows.Forms.PictureBox();
             this.performanceInfos = new PCMgr.Ctls.PerformanceInfos();
             this.performanceGridGlobal = new PCMgr.Ctls.PerformanceGrid();
             this.performanceTitle = new PCMgr.Ctls.PerformanceTitle();
-            this.performanceCpus = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.performanceCpus)).BeginInit();
             this.SuspendLayout();
+            // 
+            // performanceCpus
+            // 
+            resources.ApplyResources(this.performanceCpus, "performanceCpus");
+            this.performanceCpus.Name = "performanceCpus";
+            this.performanceCpus.TabStop = false;
+            this.performanceCpus.Paint += new System.Windows.Forms.PaintEventHandler(this.performanceCpus_Paint);
             // 
             // performanceInfos
             // 
@@ -59,28 +66,15 @@
             this.performanceGridGlobal.DrawData2 = false;
             this.performanceGridGlobal.DrawData2Bg = false;
             this.performanceGridGlobal.GridColor = System.Drawing.Color.FromArgb(((int)(((byte)(206)))), ((int)(((byte)(226)))), ((int)(((byte)(240)))));
-            this.performanceGridGlobal.LeftBottomText = "60 秒";
-            this.performanceGridGlobal.LeftText = "% 使用率";
             this.performanceGridGlobal.Name = "performanceGridGlobal";
-            this.performanceGridGlobal.RightBottomText = "0";
-            this.performanceGridGlobal.RightText = "100 %";
             this.performanceGridGlobal.TopTextHeight = 20;
             // 
             // performanceTitle
             // 
             resources.ApplyResources(this.performanceTitle, "performanceTitle");
             this.performanceTitle.Name = "performanceTitle";
-            this.performanceTitle.SmallTitle = "cpu id and name";
             this.performanceTitle.SmallTitleFont = new System.Drawing.Font("微软雅黑", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.performanceTitle.Title = "CPU";
             this.performanceTitle.TitleFont = new System.Drawing.Font("微软雅黑", 21.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            // 
-            // performanceCpus
-            // 
-            resources.ApplyResources(this.performanceCpus, "performanceCpus");
-            this.performanceCpus.Name = "performanceCpus";
-            this.performanceCpus.TabStop = false;
-            this.performanceCpus.Paint += new System.Windows.Forms.PaintEventHandler(this.performanceCpus_Paint);
             // 
             // PerformancePageCpu
             // 

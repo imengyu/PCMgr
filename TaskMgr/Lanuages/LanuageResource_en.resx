@@ -801,4 +801,21 @@ If the last program is stuck or unresponsive, you can also choose to Terminate t
   <data name="DelScError" xml:space="preserve">
     <value>Delete service failed</value>
   </data>
+  <data name="NoPDBWarn" xml:space="preserve">
+    <value>Unable to download or load the NTOS symbol file</value>
+  </data>
+  <data name="NoPDBWarnText" xml:space="preserve">
+    <value>We need the pdb file of NTOS to analyze the kernel and display all the functions of the software. As a result, part of the kernel's functionality will be disabled.
+
+You can also try to use WinDbg to download NTOS symbolic files, and then copy them to this software directory symbols folder, we will automatically load.</value>
+  </data>
+  <data name="LoadDriverErrNeed64" xml:space="preserve">
+    <value>A 64 bit program is needed to load the kernel driver</value>
+  </data>
+  <data name="LoadDriverErrNeed64Text" xml:space="preserve">
+    <value>In the 64 bit system, PC Manager needs to run in 64 bit mode to load the driver correctly and invoke the kernel.
+
+
+Therefore, the kernel function is not available. If you need to use the kernel function, switch to the 64 bit PC Manager program.</value>
+  </data>
 </root>

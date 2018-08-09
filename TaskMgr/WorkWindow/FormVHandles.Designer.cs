@@ -48,6 +48,7 @@
             // listView1
             // 
             resources.ApplyResources(this.listView1, "listView1");
+            this.listView1.BackColor = System.Drawing.Color.White;
             this.listView1.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader1,
             this.columnHeader2,
@@ -117,6 +118,7 @@
             // labelEnuming
             // 
             resources.ApplyResources(this.labelEnuming, "labelEnuming");
+            this.labelEnuming.BackColor = System.Drawing.Color.White;
             this.labelEnuming.Name = "labelEnuming";
             // 
             // FormVHandles

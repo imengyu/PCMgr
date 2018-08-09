@@ -36,6 +36,8 @@ processorArchitecture = '*' publicKeyToken = '6595b64144ccf1df' language = '*'\"
 extern HINSTANCE hInst;
 extern HINSTANCE hInstRs;
 
+extern _CancelShutdown dCancelShutdown;
+
 extern LPWSTR fmCurrectSelectFilePath0;
 extern bool fmMutilSelect;
 extern int fmMutilSelectCount;
@@ -66,6 +68,7 @@ HWND selectItem4;
 int HotKeyId = 0;
 bool has_fullscreen_window = false;
 
+extern BOOL killUWPCmdSendBack;
 extern BOOL killCmdSendBack;
 bool refesh_fast = false;
 bool refesh_paused = false;
@@ -693,11 +696,21 @@ void ThrowErrorAndErrorCodeX(NTSTATUS code, LPWSTR msg, LPWSTR title, BOOL ntsta
 extern DWORD thisCommandPid;
 extern LPWSTR thisCommandPath;
 extern LPWSTR thisCommandName;
+extern LPWSTR thisCommandUWPName;
 
 LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg)
 	{
+	case WM_QUERYENDSESSION: {
+		if (M_CFG_GetConfigBOOL(L"AbortShutdown", L"AppSetting", false))
+		{
+			dCancelShutdown();
+			return TRUE;
+		}
+		else MAppExit();
+		break;
+	}
 	case WM_S_MESSAGE_EXIT: {
 		MAppExit();
 		break;
@@ -774,6 +787,8 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		case IDM_KILL: {
 			if (killCmdSendBack)
 				MAppMainCall(15, (LPVOID)(ULONG_PTR)thisCommandPid, 0);
+			else if (killUWPCmdSendBack)
+				MAppMainCall(37, (LPVOID)thisCommandUWPName, 0);
 			else MKillProcessUser(TRUE);
 			break;
 		}

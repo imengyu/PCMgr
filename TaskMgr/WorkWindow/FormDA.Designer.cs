@@ -48,6 +48,7 @@
             this.复制二进制码ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.复制OpCodeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.复制汇编代码ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.labelErrStatus = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).BeginInit();
             this.splitContainer.Panel1.SuspendLayout();
             this.splitContainer.Panel2.SuspendLayout();
@@ -62,22 +63,21 @@
             // 
             // splitContainer.Panel1
             // 
-            resources.ApplyResources(this.splitContainer.Panel1, "splitContainer.Panel1");
+            this.splitContainer.Panel1.Controls.Add(this.labelErrStatus);
             this.splitContainer.Panel1.Controls.Add(this.listViewDA);
             // 
             // splitContainer.Panel2
             // 
-            resources.ApplyResources(this.splitContainer.Panel2, "splitContainer.Panel2");
             this.splitContainer.Panel2.Controls.Add(this.textBoxBariny);
             // 
             // listViewDA
             // 
-            resources.ApplyResources(this.listViewDA, "listViewDA");
             this.listViewDA.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader1,
             this.columnHeader2,
             this.columnHeader4,
             this.columnHeader3});
+            resources.ApplyResources(this.listViewDA, "listViewDA");
             this.listViewDA.FullRowSelect = true;
             this.listViewDA.MultiSelect = false;
             this.listViewDA.Name = "listViewDA";
@@ -143,37 +143,44 @@
             // 
             // contextMenuStrip1
             // 
-            resources.ApplyResources(this.contextMenuStrip1, "contextMenuStrip1");
             this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.复制地址ToolStripMenuItem,
             this.复制二进制码ToolStripMenuItem,
             this.复制OpCodeToolStripMenuItem,
             this.复制汇编代码ToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
+            resources.ApplyResources(this.contextMenuStrip1, "contextMenuStrip1");
             // 
             // 复制地址ToolStripMenuItem
             // 
-            resources.ApplyResources(this.复制地址ToolStripMenuItem, "复制地址ToolStripMenuItem");
             this.复制地址ToolStripMenuItem.Name = "复制地址ToolStripMenuItem";
+            resources.ApplyResources(this.复制地址ToolStripMenuItem, "复制地址ToolStripMenuItem");
             this.复制地址ToolStripMenuItem.Click += new System.EventHandler(this.复制地址ToolStripMenuItem_Click);
             // 
             // 复制二进制码ToolStripMenuItem
             // 
-            resources.ApplyResources(this.复制二进制码ToolStripMenuItem, "复制二进制码ToolStripMenuItem");
             this.复制二进制码ToolStripMenuItem.Name = "复制二进制码ToolStripMenuItem";
+            resources.ApplyResources(this.复制二进制码ToolStripMenuItem, "复制二进制码ToolStripMenuItem");
             this.复制二进制码ToolStripMenuItem.Click += new System.EventHandler(this.复制二进制码ToolStripMenuItem_Click);
             // 
             // 复制OpCodeToolStripMenuItem
             // 
-            resources.ApplyResources(this.复制OpCodeToolStripMenuItem, "复制OpCodeToolStripMenuItem");
             this.复制OpCodeToolStripMenuItem.Name = "复制OpCodeToolStripMenuItem";
+            resources.ApplyResources(this.复制OpCodeToolStripMenuItem, "复制OpCodeToolStripMenuItem");
             this.复制OpCodeToolStripMenuItem.Click += new System.EventHandler(this.复制OpCodeToolStripMenuItem_Click);
             // 
             // 复制汇编代码ToolStripMenuItem
             // 
-            resources.ApplyResources(this.复制汇编代码ToolStripMenuItem, "复制汇编代码ToolStripMenuItem");
             this.复制汇编代码ToolStripMenuItem.Name = "复制汇编代码ToolStripMenuItem";
+            resources.ApplyResources(this.复制汇编代码ToolStripMenuItem, "复制汇编代码ToolStripMenuItem");
             this.复制汇编代码ToolStripMenuItem.Click += new System.EventHandler(this.复制汇编代码ToolStripMenuItem_Click);
+            // 
+            // labelErrStatus
+            // 
+            resources.ApplyResources(this.labelErrStatus, "labelErrStatus");
+            this.labelErrStatus.AutoEllipsis = true;
+            this.labelErrStatus.BackColor = System.Drawing.Color.White;
+            this.labelErrStatus.Name = "labelErrStatus";
             // 
             // FormDA
             // 
@@ -219,5 +226,6 @@
         private System.Windows.Forms.ToolStripMenuItem 复制二进制码ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 复制OpCodeToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 复制汇编代码ToolStripMenuItem;
+        private System.Windows.Forms.Label labelErrStatus;
     }
 }

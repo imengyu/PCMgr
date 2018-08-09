@@ -60,7 +60,6 @@
             // 
             // textBoxDriverPath
             // 
-            this.textBoxDriverPath.AllowDrop = true;
             resources.ApplyResources(this.textBoxDriverPath, "textBoxDriverPath");
             this.textBoxDriverPath.Name = "textBoxDriverPath";
             this.textBoxDriverPath.DragDrop += new System.Windows.Forms.DragEventHandler(this.textBoxDriverPath_DragDrop);

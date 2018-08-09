@@ -1,7 +1,13 @@
 #include "stdafx.h"
 #include "perfhlp.h"
 #include "ntdef.h"
+#include "sysfuns.h"
 #include <Psapi.h>
+#include <winsock2.h>
+#include <Ws2tcpip.h>
+#include <iphlpapi.h>
+#include <Tcpestats.h>
+
 
 int cpu_Count = 0;
 __int64 LastTime;
@@ -189,10 +195,36 @@ __int64 FileTimeToInt64(const FILETIME& time)
 	tt.HighPart = time.dwHighDateTime;
 	return(tt.QuadPart);  //返回整型值
 }
+__int64 CompareFileTime(FILETIME time1, FILETIME time2)
+{
+	__int64 a = ((__int64)time1.dwHighDateTime << 32U) | (__int64)time1.dwLowDateTime;
+	__int64 b = ((__int64)time2.dwHighDateTime << 32U) | (__int64)time2.dwLowDateTime;
+	return (b - a);
+}
+
+FILETIME LastIdleTime, LastKernelTime, LastUserTime;
+FILETIME IdleTime, KernelTime, UserTime;
+
+M_CAPI(double)MPERF_GetCupUseAge() {
+
+	memcpy_s(&LastIdleTime, sizeof(FILETIME), &IdleTime, sizeof(FILETIME));
+	memcpy_s(&LastKernelTime, sizeof(FILETIME), &KernelTime, sizeof(FILETIME));
+	memcpy_s(&LastUserTime, sizeof(FILETIME), &LastUserTime, sizeof(FILETIME));
+
+	GetSystemTimes(&IdleTime, &KernelTime, &UserTime);
+
+	__int64 idle = CompareFileTime(LastIdleTime, IdleTime);
+	__int64 kernel = CompareFileTime(LastKernelTime, KernelTime);
+	__int64 user = CompareFileTime(LastUserTime, LastUserTime);
+
+	return static_cast<double>((double)(kernel + user - idle) * 100 / (double)(kernel + user));
+}
 
 M_CAPI(MPerfAndProcessData*) MPERF_PerfDataCreate()
 {
-	return new MPerfAndProcessData();
+	MPerfAndProcessData * data= new MPerfAndProcessData();
+	memset(data, 0, sizeof(MPerfAndProcessData));
+	return data;
 }
 M_CAPI(void) MPERF_PerfDataDestroy(MPerfAndProcessData*data)
 {
@@ -208,46 +240,37 @@ M_CAPI(void) MPERF_CpuTimeUpdate()
 	TimeInterval = nowu - LastTime;
 	LastTime = nowu;
 }
-M_CAPI(double) MPERF_GetProcessCpuUseAge(HANDLE hProcess, MPerfAndProcessData*data)
+M_CAPI(double) MPERF_GetProcessCpuUseAge(PSYSTEM_PROCESSES p, MPerfAndProcessData*data)
 {
-	if (hProcess && data)
+	if (p && data)
 	{
-		FILETIME KernelTime;
-		FILETIME UserTime;
-		if (GetProcessTimes(hProcess, &CreateTime, &ExitTime, &KernelTime, &UserTime))
-		{
-			data->LastCpuTime = data->NowCpuTime;
-			data->NowCpuTime = (FileTimeToInt64(KernelTime) + FileTimeToInt64(UserTime)) / cpu_Count;
-			if (TimeInterval == 0) return 0;
-			__int64 i1 = (data->NowCpuTime - data->LastCpuTime) / 1000;
-			double rs = static_cast<double>((double)i1 / (double)(TimeInterval / 100000));
-			return (rs < 0.1 && rs>0.05) ? 0.1 : rs;
-		}
+		data->LastCpuTime = data->NowCpuTime;
+		data->NowCpuTime = (p->KernelTime.QuadPart + p->UserTime.QuadPart) / cpu_Count;
+		if (TimeInterval == 0) return 0;
+		__int64 i1 = (data->NowCpuTime - data->LastCpuTime) / 1000;
+		double rs = static_cast<double>((double)i1 / (double)(TimeInterval / 100000));
+		return (rs < 0.1 && rs>0.05) ? 0.1 : rs;
 	}
 	return -1;
 }
-M_CAPI(SIZE_T) MPERF_GetProcessRam(HANDLE hProcess)
+M_CAPI(SIZE_T) MPERF_GetProcessRam(PSYSTEM_PROCESSES p)
 {
-	if (hProcess)
-	{
-		PROCESS_MEMORY_COUNTERS mpc;
-		if (GetProcessMemoryInfo(hProcess, &mpc, sizeof(mpc)))
-			return mpc.WorkingSetSize;
-	}
+	if (p)
+		return p->VmCounters.WorkingSetSize;
 	return 0;
 }
-M_CAPI(DWORD) MPERF_GetProcessDiskRate(HANDLE hProcess, MPerfAndProcessData*data)
+M_CAPI(DWORD) MPERF_GetProcessDiskRate(PSYSTEM_PROCESSES p, MPerfAndProcessData*data)
 {
-	if (hProcess && data)
+	if (p && data)
 	{
-		IO_COUNTERS io_counter;
-		if (GetProcessIoCounters(hProcess, &io_counter))
+		PIO_COUNTERS io_counter = &p->IoCounters;
+		if (io_counter)
 		{
-			ULONGLONG outRead = io_counter.ReadTransferCount - data->LastRead;
-			ULONGLONG outWrite = io_counter.WriteTransferCount - data->LastWrite;
+			ULONGLONG outRead = io_counter->ReadTransferCount - data->LastRead;
+			ULONGLONG outWrite = io_counter->WriteTransferCount - data->LastWrite;
 
-			data->LastRead = io_counter.ReadTransferCount;
-			data->LastWrite = io_counter.WriteTransferCount;
+			data->LastRead = io_counter->ReadTransferCount;
+			data->LastWrite = io_counter->WriteTransferCount;
 
 			DWORD interval = static_cast<DWORD>(TimeInterval / 10000000);
 			if (interval <= 0)interval = 1;
@@ -256,4 +279,95 @@ M_CAPI(DWORD) MPERF_GetProcessDiskRate(HANDLE hProcess, MPerfAndProcessData*data
 		}
 	}
 	return 0;
+}
+
+PMIB_TCPTABLE_OWNER_PID netProcess = NULL;
+
+extern _GetPerTcpConnectionEStats dGetPerTcpConnectionEStats;
+
+M_CAPI(BOOL) MPERF_GetConnectNetWorkAllBuffer(DWORD dwLocalAddr, DWORD dwLocalPort, DWORD dwRemoteAddr, DWORD dwRemotePort, DWORD dwState, MPerfAndProcessData*data)
+{
+	MIB_TCPROW row = { 0 };
+	row.dwLocalAddr = dwLocalAddr;
+	row.dwLocalPort = dwLocalPort;
+	row.dwRemoteAddr = dwRemoteAddr;
+	row.dwRemotePort = dwRemotePort;
+	row.dwState = dwState;
+
+	TCP_ESTATS_BANDWIDTH_ROD_v0 rod= { 0 };
+	if (dGetPerTcpConnectionEStats(&row, TcpConnectionEstatsData, NULL, 0, 0, NULL, 0, 0, (LPBYTE)&rod, 0, sizeof(rod)) == NO_ERROR)
+	{
+		data->NetWorkInBandWidth += rod.InboundBandwidth;
+		data->NetWorkOutBandWidth += rod.OutboundBandwidth;
+
+		return TRUE;
+	}
+	return 0;
+}
+M_CAPI(ULONG64) MPERF_GetProcessNetWorkRate(DWORD pid, MPerfAndProcessData*data)
+{
+	if (data && netProcess)
+	{
+		data->NetWorkInBandWidth = 0;
+		data->NetWorkOutBandWidth = 0;
+		for (UINT i = 0; i < netProcess->dwNumEntries; i++)
+		{
+			if (netProcess->table[i].dwOwningPid == pid)
+			{
+				MPERF_GetConnectNetWorkAllBuffer(netProcess->table[i].dwLocalAddr, netProcess->table[i].dwLocalPort,
+					netProcess->table[i].dwRemoteAddr, netProcess->table[i].dwRemotePort, netProcess->table[i].dwState, data);
+			}
+		}
+		return (data->NetWorkInBandWidth + data->NetWorkOutBandWidth);
+	}
+	return 0;
+}
+
+M_CAPI(BOOL)MPERF_NET_IsProcessInNet(DWORD pid) {
+	BOOL rs = FALSE;
+	if (netProcess) 
+	{
+		for (UINT i = 0; i < netProcess->dwNumEntries; i++)
+		{
+			if (netProcess->table[i].dwOwningPid == pid)
+			{
+				rs = TRUE;
+				break;
+			}
+		}
+	}
+	return rs;
+}
+M_CAPI(void)MPERF_NET_FreeAllProcessNetInfo()
+{
+	if (netProcess)
+	{
+		free(netProcess);
+		netProcess = NULL;
+	}
+}
+M_CAPI(BOOL)MPERF_NET_UpdateAllProcessNetInfo()
+{
+	MPERF_NET_FreeAllProcessNetInfo();
+	
+	DWORD dwSize = sizeof(MIB_TCPTABLE_OWNER_PID);
+	netProcess = (PMIB_TCPTABLE_OWNER_PID)malloc(sizeof(MIB_TCPTABLE_OWNER_PID));
+	memset(netProcess, 0, sizeof(dwSize));
+	if (GetExtendedTcpTable(netProcess, &dwSize, TRUE, AF_INET, TCP_TABLE_OWNER_PID_CONNECTIONS, 0) == ERROR_INSUFFICIENT_BUFFER)
+	{
+		free(netProcess);
+		DWORD realSize = sizeof(DWORD) + dwSize * sizeof(MIB_TCPROW_OWNER_PID);
+		netProcess = (PMIB_TCPTABLE_OWNER_PID)malloc(realSize);
+		memset(netProcess, 0, sizeof(realSize));
+		if (GetExtendedTcpTable(netProcess, &dwSize, TRUE, AF_INET, TCP_TABLE_OWNER_PID_CONNECTIONS, 0) != NO_ERROR)
+		{
+			MPERF_NET_FreeAllProcessNetInfo();
+			return FALSE;
+		}
+	}
+	return TRUE;
+}
+M_CAPI(void)MPERF_GetNetInfo()
+{
+	MPERF_NET_FreeAllProcessNetInfo();
 }

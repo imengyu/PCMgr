@@ -10,14 +10,88 @@ extern KeForceResumeThread_ KeForceResumeThread;
 extern ULONG_PTR EPROCESS_ThreadListHead_Offest;
 extern ULONG_PTR EPROCESS_RundownProtect_Offest;
 extern ULONG_PTR EPROCESS_Flags_Offest;
+extern ULONG_PTR EPROCESS_SeAuditProcessCreationInfo_Offest;
 extern ULONG_PTR ETHREAD_Tcb_Offest;
 extern ULONG_PTR ETHREAD_CrossThreadFlags_Offest;
+extern ULONG_PTR PEB_Ldr_Offest;
+extern ULONG_PTR PEB_ProcessParameters_Offest;
+extern ULONG_PTR RTL_USER_PROCESS_PARAMETERS_CommandLine_Offest;
+
+EXTERN_C PETHREAD KxGetNextProcessThread_x64Call(PEPROCESS Process, PETHREAD Thread);
+EXTERN_C PETHREAD KxGetNextProcessThread_x86Call(PEPROCESS Process, PETHREAD Thread);
 
 VOID  KernelKillThreadRoutine(IN PKAPC Apc, IN OUT PKNORMAL_ROUTINE *NormalRoutine, IN OUT PVOID *NormalContext, IN OUT PVOID *SystemArgument1, IN OUT PVOID *SystemArgument2)
 {
 	PspExitThread(STATUS_SUCCESS);
 }
 
+NTSTATUS MySolveThread(PETHREAD Thread)
+{
+	return 0;
+}
+NTSTATUS MyEnumProcessPGNPT(PEPROCESS Process)
+{
+	NTSTATUS Status = STATUS_SUCCESS;
+	__asm {
+		mov ebx, 0
+		jmp loc_loop
+	loc_work:
+		mov eax, ebx
+		push eax
+		call MySolveThread
+		mov[Status], eax
+		push ebx
+	loc_loop:
+		mov eax, [Process]
+		call PsGetNextProcessThread
+		mov ebx, eax
+		test ebx, ebx
+		jnz short loc_work
+	}
+	return Status;
+}
+
+
+PUNICODE_STRING KxGetProcessCommandLine(PEPROCESS Process)
+{
+	if (PEB_Ldr_Offest && PEB_ProcessParameters_Offest && RTL_USER_PROCESS_PARAMETERS_CommandLine_Offest)
+	{
+		ULONG_PTR pebAddress = (ULONG_PTR)PsGetProcessPeb(Process);
+		if (pebAddress)
+		{
+			ULONG_PTR pebLdrAddress = pebAddress + PEB_Ldr_Offest;
+			ULONG_PTR pebLdrRtlUserParamtersAddress = (ULONG_PTR)(*((ULONG_PTR*)pebLdrAddress) + PEB_ProcessParameters_Offest);
+		
+			ULONG_PTR pebLdrRtlUserParamtersCommandLineAddress = (ULONG_PTR)(*((ULONG_PTR*)pebLdrRtlUserParamtersAddress) + RTL_USER_PROCESS_PARAMETERS_CommandLine_Offest);
+			PUNICODE_STRING strCommandLine = (PUNICODE_STRING)pebLdrRtlUserParamtersCommandLineAddress;
+			return strCommandLine;
+		}
+	}
+	return NULL;
+}
+PUNICODE_STRING KxGetProcessFullPath(PEPROCESS Process)
+{
+	if (EPROCESS_SeAuditProcessCreationInfo_Offest)
+	{
+		//获取 _SE_AUDIT_PROCESS_CREATION_INFO
+		ULONG_PTR SEAuditValue = *(ULONG_PTR*)((ULONG_PTR)Process + EPROCESS_SeAuditProcessCreationInfo_Offest);
+		//获取_OBJECT_NAME_INFORMATION指针
+		ULONG_PTR* pNameInfo = (ULONG_PTR*)SEAuditValue;
+		PUNICODE_STRING lpPath = (PUNICODE_STRING)(PVOID)pNameInfo;
+		return lpPath;
+	}
+	return NULL;
+}
+PETHREAD KxGetNextProcessThread(PEPROCESS Process, PETHREAD Thread)
+{
+	PETHREAD NewThread = NULL;
+#ifdef _AMD64_
+	NewThread = KxGetNextProcessThread_x64Call(Process, Thread);
+#else
+	NewThread = KxGetNextProcessThread_x86Call(Process, Thread);
+#endif	
+	return NewThread;
+}
 VOID KxForceResumeThread(PETHREAD Thread)
 {
 	PKTHREAD kThread = (PKTHREAD)((ULONG_PTR)Thread + ETHREAD_Tcb_Offest);
@@ -84,60 +158,6 @@ NTSTATUS KxTerminateThreadApc(PETHREAD Thread)
 		}
 	}
 
-	return Status;
-}
-NTSTATUS KxTerminateProcessPGNPTAPC(PEPROCESS Process)
-{
-	NTSTATUS Status = STATUS_SUCCESS;
-#ifdef _AMD64_
-	__asm {
-
-}
-#else
-	__asm {
-		mov ebx, 0
-		jmp loc_6D5008
-	loc_6D4FFF:
-		mov eax, ebx
-		push eax
-		call KxTerminateThreadApc
-		mov [Status], eax
-		push ebx
-	loc_6D5008:
-	    mov eax, [Process]
-		call PsGetNextProcessThread
-		mov ebx, eax
-		test ebx, ebx
-		jnz short loc_6D4FFF
-	}
-#endif
-	return Status;
-}
-NTSTATUS KxTerminateProcessPGNPT(PEPROCESS Process)
-{
-	NTSTATUS Status = STATUS_SUCCESS;
-#ifdef _AMD64_
-	__asm {
-
-	}
-#else
-	__asm {
-		mov ebx, 0
-		jmp loc_6D5008
-	loc_6D4FFF :
-		mov eax, ebx
-		push eax
-		call KxTerminateThread
-		mov[Status], eax
-		push ebx
-	loc_6D5008 :
-		mov eax, [Process]
-		call PsGetNextProcessThread
-		mov ebx, eax
-		test ebx, ebx
-		jnz short loc_6D4FFF
-	}
-#endif
 	return Status;
 }
 
@@ -225,7 +245,7 @@ NTSTATUS KxTerminateProcessWithPid(ULONG_PTR pid, ULONG exitCode, BOOLEAN usepst
 					if (Process == IoThreadToProcess(Thread))
 					{
 						if (useapc) Status = KxTerminateThreadApc(Thread);
-						else Status = PspTerminateThreadByPointer(Thread, exitCode, FALSE);
+						else Status = KxTerminateThread(Thread);
 					}
 				}
 				ObDereferenceObject(Thread);
@@ -235,8 +255,13 @@ NTSTATUS KxTerminateProcessWithPid(ULONG_PTR pid, ULONG exitCode, BOOLEAN usepst
 	}
 	else {
 		//PsGetNextProcessThread获取线程
-		if(useapc) Status = KxTerminateProcessPGNPTAPC(Process);
-		else Status = KxTerminateProcessPGNPT(Process);
+		for (Thread = KxGetNextProcessThread(Process, NULL); Thread != NULL; Thread = KxGetNextProcessThread(Process, Thread))
+		{
+			if (Thread != Self) {
+				if (useapc) Status = KxTerminateThreadApc(Thread);
+				else Status = KxTerminateThread(Thread);
+			}
+		}
 	}
 
 	//RundownProtect off

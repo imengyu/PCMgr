@@ -28,12 +28,14 @@ extern HINSTANCE hInstRs;
 
 LPWSTR thisCommandPath = NULL;
 LPWSTR thisCommandName = NULL;
+LPWSTR thisCommandUWPName = NULL;
 DWORD thisCommandPid = 0;
 HICON HIconDef;
 HWND hWndMain;
 PSYSTEM_PROCESSES current_system_process = NULL;
 CERT_CONTEXT lastVeredCertContext = { 0 };
 
+BOOL killUWPCmdSendBack = FALSE;
 BOOL killCmdSendBack = FALSE;
 BOOL isKillingExplorer = FALSE;
 
@@ -76,6 +78,10 @@ _GetModuleFileNameW dGetModuleFileNameW;
 //
 _CryptUIDlgViewCertificateW dCryptUIDlgViewCertificateW;
 _CryptUIDlgViewContext dCryptUIDlgViewContext;
+//u32 api
+_CancelShutdown dCancelShutdown;
+//
+_GetPerTcpConnectionEStats dGetPerTcpConnectionEStats;
 
 //Enum apis
 EXTERN_C BOOL MAppVProcessAllWindows();
@@ -193,7 +199,6 @@ M_API void MEnumProcessCore()
 }
 M_API void MEnumProcessFree()
 {
-
 	if (current_system_process) {
 		free(current_system_process);
 		current_system_process = NULL;
@@ -204,20 +209,21 @@ M_API void MEnumProcess(EnumProcessCallBack calBack)
 	if (calBack)
 	{
 		HANDLE hProcess = NULL;
+		WCHAR exeFullPath[260];
 		MAppVProcessAllWindows();
 		MEnumProcessCore();
 		bool done = false;
 		int ix = 0;
 		for (PSYSTEM_PROCESSES p = current_system_process; !done; p = PSYSTEM_PROCESSES(PCHAR(p) + p->NextEntryDelta))
 		{
-			WCHAR exeFullPath[260];
-			if (MGetProcessFullPathEx(static_cast<DWORD>((ULONG_PTR)p->ProcessId), exeFullPath, &hProcess, p->ProcessName.Buffer))
-				calBack(static_cast<DWORD>((ULONG_PTR)p->ProcessId), static_cast<DWORD>((ULONG_PTR)p->InheritedFromProcessId), p->ProcessName.Buffer, exeFullPath, 1, hProcess);
-			else calBack(static_cast<DWORD>((ULONG_PTR)p->ProcessId), static_cast<DWORD>((ULONG_PTR)p->InheritedFromProcessId), p->ProcessName.Buffer, 0, 1, NULL);
+			memset(exeFullPath, 0, sizeof(exeFullPath));
+			hProcess = NULL;
+			MGetProcessFullPathEx(static_cast<DWORD>(p->ProcessId), exeFullPath, &hProcess, p->ProcessName.Buffer);
+			calBack(static_cast<DWORD>(p->ProcessId), static_cast<DWORD>(p->InheritedFromProcessId), p->ProcessName.Buffer, exeFullPath, 1, hProcess, p);
 			ix++;
 			done = p->NextEntryDelta == 0;
 		}
-		calBack(ix, 0, NULL, NULL, 0, 0);
+		calBack(ix, 0, NULL, NULL, 0, 0, NULL);
 	}
 }
 M_API void MEnumProcess2Refesh(EnumProcessCallBack2 callBack)
@@ -229,7 +235,7 @@ M_API void MEnumProcess2Refesh(EnumProcessCallBack2 callBack)
 		bool done = false;
 		for (PSYSTEM_PROCESSES p = current_system_process; !done; p = PSYSTEM_PROCESSES(PCHAR(p) + p->NextEntryDelta))
 		{
-			callBack(static_cast<DWORD>((ULONG_PTR)p->ProcessId));
+			callBack(static_cast<DWORD>(p->ProcessId), p);
 			done = p->NextEntryDelta == 0;
 		}
 	}
@@ -237,17 +243,16 @@ M_API void MEnumProcess2Refesh(EnumProcessCallBack2 callBack)
 M_API BOOL MReUpdateProcess(DWORD pid, EnumProcessCallBack calBack)
 {
 	bool done = false;
-	//遍历进程列表
 	for (PSYSTEM_PROCESSES p = current_system_process; !done;
 		p = PSYSTEM_PROCESSES(PCHAR(p) + p->NextEntryDelta))
 	{
 		if (static_cast<DWORD>((ULONG_PTR)p->ProcessId) == pid)
 		{
-			HANDLE hProcess;
+			HANDLE hProcess = 0;
 			WCHAR exeFullPath[260];
-			if (MGetProcessFullPathEx(static_cast<DWORD>((ULONG_PTR)p->ProcessId), exeFullPath, &hProcess, p->ProcessName.Buffer))
-				calBack(static_cast<DWORD>((ULONG_PTR)p->ProcessId), static_cast<DWORD>((ULONG_PTR)p->InheritedFromProcessId), p->ProcessName.Buffer, exeFullPath, 1, hProcess);
-			else calBack(static_cast<DWORD>((ULONG_PTR)p->ProcessId), static_cast<DWORD>((ULONG_PTR)p->InheritedFromProcessId), p->ProcessName.Buffer, 0, 1, NULL);
+			memset(exeFullPath, 0, sizeof(exeFullPath));
+			MGetProcessFullPathEx(static_cast<DWORD>(p->ProcessId), exeFullPath, &hProcess, p->ProcessName.Buffer);
+			calBack(static_cast<DWORD>(p->ProcessId), static_cast<DWORD>(p->InheritedFromProcessId), p->ProcessName.Buffer, exeFullPath, 1, hProcess, p);	
 			done = true;
 			return TRUE;
 		}
@@ -883,22 +888,16 @@ M_API BOOL MGetProcessFullPathEx(DWORD dwPID, LPWSTR outNter, PHANDLE phandle, L
 	else MCloseHandle(hProcess);
 	return TRUE;
 }
-M_API int MGetProcessState(DWORD pid, HWND hWnd)
+M_API int MGetProcessState(PSYSTEM_PROCESSES p, HWND hWnd)
 {
 	bool done = false;
-	//遍历进程列表
-	for (PSYSTEM_PROCESSES p = current_system_process; !done;
-	p = PSYSTEM_PROCESSES(PCHAR(p) + p->NextEntryDelta))
+	if (p)
 	{
-		if (static_cast<DWORD>((ULONG_PTR)p->ProcessId) == pid)
-		{
-			SYSTEM_THREADS systemThread = p->Threads[0];
-			if (systemThread.ThreadState == THREAD_STATE::StateWait && systemThread.WaitReason == Suspended)
-				return 2;
-			else return 1;		
-		}
-		done = p->NextEntryDelta == 0;
-	}
+		SYSTEM_THREADS systemThread = p->Threads[0];
+		if (systemThread.ThreadState == THREAD_STATE::StateWait && systemThread.WaitReason == Suspended)
+			return 2;
+		else return 1;
+	}	
 	return 0;
 }
 M_API VOID* MGetProcessThreads(DWORD pid)
@@ -914,7 +913,7 @@ M_API VOID* MGetProcessThreads(DWORD pid)
 	}
 	return 0;
 }
-M_API BOOL MGetProcessCommandLine(HANDLE handle, LPWSTR l, int maxcount) {
+M_API BOOL MGetProcessCommandLine(HANDLE handle, LPWSTR l, int maxcount, DWORD pid) {
 	if (handle && l) {
 		DWORD id = GetProcessId(handle);
 		if (id != 0 && id != 4) {
@@ -931,6 +930,8 @@ M_API BOOL MGetProcessCommandLine(HANDLE handle, LPWSTR l, int maxcount) {
 			return TRUE;
 		}
 	}
+	else if (l && pid >4)
+		return M_SU_GetProcessCommandLine(pid, l);
 	return FALSE;
 }
 M_API BOOL MGetProcessIsUWP(HANDLE handle)
@@ -947,10 +948,14 @@ M_API BOOL MGetProcessEprocess(DWORD pid, PPEOCESSKINFO info)
 	ULONG_PTR outEprocess = 0;
 	ULONG_PTR outPeb = 0;
 	ULONG_PTR outJob = 0;
+	WCHAR imageName[MAX_PATH];
+	memset(imageName, 0, sizeof(imageName));
 	WCHAR krnpath[MAX_PATH];
 	memset(krnpath, 0, sizeof(krnpath));
+	WCHAR ntpath[MAX_PATH];
+	memset(ntpath, 0, sizeof(ntpath));
 
-	if (M_SU_GetEPROCESS(pid, &outEprocess, &outPeb, &outJob, krnpath))
+	if (M_SU_GetEPROCESS(pid, &outEprocess, &outPeb, &outJob, imageName, krnpath))
 	{
 #ifdef _X64_
 		swprintf_s(info->Eprocess, L"0x%I64X", outEprocess);
@@ -958,13 +963,15 @@ M_API BOOL MGetProcessEprocess(DWORD pid, PPEOCESSKINFO info)
 		swprintf_s(info->JobAddress, L"0x%I64X", outJob);
 #else
 		swprintf_s(info->Eprocess, L"0x%08X", outEprocess);
-		swprintf_s(info->PebAddress,L"0x%08X", outPeb);
+		swprintf_s(info->PebAddress, L"0x%08X", outPeb);
 		swprintf_s(info->JobAddress, L"0x%08X", outJob);
 #endif
-
-		wcscpy_s(info->ImageFileName, krnpath);
+		wcscpy_s(info->ImageFileName, imageName);
+		if (!MDosPathToNtPath(krnpath, ntpath))
+			wcscpy_s(info->ImageFullName, krnpath);
+		else wcscpy_s(info->ImageFullName, ntpath);
 		return TRUE;
-	}
+}
 	return FALSE;
 }
 
@@ -1202,85 +1209,21 @@ M_API int MAppWorkShowMenuProcessPrepare(LPWSTR strFilePath, LPWSTR strFileName,
 M_API int MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWORD pid, HWND hDlg, int data, int type, int x, int y)
 {
 	thisCommandPid = pid;
+	HMENU hroot = LoadMenu(hInstRs, MAKEINTRESOURCE(IDR_MENUTASK));
+	if (!hroot) return 0;
 	if (pid > 0)
 	{
-		HMENU hroot = LoadMenu(hInstRs, MAKEINTRESOURCE(IDR_MENUTASK));
-		if (hroot) {
-			HMENU hpop = GetSubMenu(hroot, 0);
+		HMENU hpop = GetSubMenu(hroot, 0);
 
-			POINT pt;
-			if (x == 0 && y == 0)
-				GetCursorPos(&pt);
-			else {
-				pt.x = x;
-				pt.y = y;
-			}
-
-			if (pid == 4) {
-				EnableMenuItem(hpop, IDM_SUPROC, MF_DISABLED);
-				EnableMenuItem(hpop, IDM_RESPROC, MF_DISABLED);
-				EnableMenuItem(hpop, IDM_KILLKERNEL, MF_DISABLED);
-				EnableMenuItem(hpop, IDM_KILLPROCTREE, MF_DISABLED);
-				EnableMenuItem(hpop, IDM_OPENPATH, MF_DISABLED);
-				EnableMenuItem(hpop, IDM_VTHREAD, MF_DISABLED);
-				EnableMenuItem(hpop, IDM_VHANDLES, MF_DISABLED);
-				EnableMenuItem(hpop, IDM_VMODULS, MF_DISABLED);
-				EnableMenuItem(hpop, IDM_VWINS, MF_DISABLED);
-				EnableMenuItem(hpop, IDM_KILL, MF_DISABLED);
-				EnableMenuItem(hpop, IDM_SGINED, MF_DISABLED);
-				EnableMenuItem(hpop, IDM_VKSTRUCTS, MF_DISABLED);
-				EnableMenuItem(hpop, IDM_VHOTKEY, MF_DISABLED);
-				EnableMenuItem(hpop, IDM_VTIMER, MF_DISABLED);
-			}
-			if (MStrEqualW(strFilePath, L"") || MStrEqualW(strFilePath, L"-")) {
-				EnableMenuItem(hpop, IDM_OPENPATH, MF_DISABLED);
-				EnableMenuItem(hpop, IDM_FILEPROP, MF_DISABLED);
-			}
-			else if (wcslen(strFilePath) < 260)
-				wcscpy_s(thisCommandPath, 260, strFilePath);
-			if (wcslen(strFileName) < 260)
-				wcscpy_s(thisCommandName, 260, strFileName);
-
-			if(!can_debug)EnableMenuItem(hpop, IDM_DEBUG, MF_DISABLED);
-
-			killCmdSendBack = type == 2;
-			isKillingExplorer = type == 1;
-
-			if (type == 1) {
-				MENUITEMINFO info = MENUITEMINFO();
-				info.cbSize = sizeof(MENUITEMINFO);
-				info.fMask = MIIM_STRING;
-				info.dwTypeData = str_item_rebootexplorer;
-				SetMenuItemInfo(hpop, IDM_KILL, FALSE, &info);
-			}			
-			else if (type == 2) {
-				MENUITEMINFO info = MENUITEMINFO();
-				info.cbSize = sizeof(MENUITEMINFO);
-				info.fMask = MIIM_STRING;
-				info.dwTypeData = str_item_endtask;
-				SetMenuItemInfo(hpop, IDM_KILL, FALSE, &info);
-			}
-
-			TrackPopupMenu(hpop,
-				TPM_LEFTALIGN | TPM_TOPALIGN | TPM_RIGHTBUTTON,
-				pt.x,
-				pt.y,
-				0,
-				hWndMain,
-				NULL);
-
-			DestroyMenu(hroot);
-		}
-	}
-	else if(pid==0)
-	{
-		HMENU hroot = LoadMenu(hInstRs, MAKEINTRESOURCE(IDR_MENUTASK));
-		if (hroot) {
-			HMENU hpop = GetSubMenu(hroot, 0);
-			POINT pt;
+		POINT pt;
+		if (x == 0 && y == 0)
 			GetCursorPos(&pt);
+		else {
+			pt.x = x;
+			pt.y = y;
+		}
 
-			EnableMenuItem(hpop, IDM_KILL, MF_DISABLED);
+		if (pid == 4) {
 			EnableMenuItem(hpop, IDM_SUPROC, MF_DISABLED);
 			EnableMenuItem(hpop, IDM_RESPROC, MF_DISABLED);
 			EnableMenuItem(hpop, IDM_KILLKERNEL, MF_DISABLED);
@@ -1290,31 +1233,106 @@ M_API int MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWORD 
 			EnableMenuItem(hpop, IDM_VHANDLES, MF_DISABLED);
 			EnableMenuItem(hpop, IDM_VMODULS, MF_DISABLED);
 			EnableMenuItem(hpop, IDM_VWINS, MF_DISABLED);
+			EnableMenuItem(hpop, IDM_KILL, MF_DISABLED);
 			EnableMenuItem(hpop, IDM_SGINED, MF_DISABLED);
 			EnableMenuItem(hpop, IDM_VKSTRUCTS, MF_DISABLED);
 			EnableMenuItem(hpop, IDM_VHOTKEY, MF_DISABLED);
 			EnableMenuItem(hpop, IDM_VTIMER, MF_DISABLED);
-			EnableMenuItem(hpop, IDM_FILEPROP, MF_DISABLED);
-
-			if (MStrEqualW(strFilePath, L"") || MStrEqualW(strFilePath, L"-")) {
-				EnableMenuItem(hpop, IDM_OPENPATH, MF_DISABLED);
-				EnableMenuItem(hpop, IDM_FILEPROP, MF_DISABLED);
-			}
-
-			if (wcslen(strFilePath) < 260)
-				wcscpy_s(thisCommandPath, 260, strFilePath);
-
-			TrackPopupMenu(hpop,
-				TPM_LEFTALIGN | TPM_TOPALIGN | TPM_RIGHTBUTTON,
-				pt.x,
-				pt.y,
-				0,
-				hWndMain,
-				NULL);
-
-			DestroyMenu(hroot);
 		}
+		if (MStrEqualW(strFilePath, L"") || MStrEqualW(strFilePath, L"-")) {
+			EnableMenuItem(hpop, IDM_OPENPATH, MF_DISABLED);
+			EnableMenuItem(hpop, IDM_FILEPROP, MF_DISABLED);
+		}
+		else if (wcslen(strFilePath) < 260)
+			wcscpy_s(thisCommandPath, 260, strFilePath);
+		if (wcslen(strFileName) < 260)
+			wcscpy_s(thisCommandName, 260, strFileName);
+
+		if (!can_debug)EnableMenuItem(hpop, IDM_DEBUG, MF_DISABLED);
+
+		killUWPCmdSendBack = type == 3;
+		killCmdSendBack = type == 2;
+		isKillingExplorer = type == 1;
+
+		if (type == 1) {
+			MENUITEMINFO info = MENUITEMINFO();
+			info.cbSize = sizeof(MENUITEMINFO);
+			info.fMask = MIIM_STRING;
+			info.dwTypeData = str_item_rebootexplorer;
+			SetMenuItemInfo(hpop, IDM_KILL, FALSE, &info);
+		}
+		else if (type == 2 || type == 3) {
+			MENUITEMINFO info = MENUITEMINFO();
+			info.cbSize = sizeof(MENUITEMINFO);
+			info.fMask = MIIM_STRING;
+			info.dwTypeData = str_item_endtask;
+			SetMenuItemInfo(hpop, IDM_KILL, FALSE, &info);
+			if (type == 3) {
+				wcscpy_s(thisCommandUWPName, 260, strFileName);
+
+				EnableMenuItem(hpop, IDM_SUPROC, MF_DISABLED);
+				EnableMenuItem(hpop, IDM_RESPROC, MF_DISABLED);
+				EnableMenuItem(hpop, IDM_KILLKERNEL, MF_DISABLED);
+				EnableMenuItem(hpop, IDM_KILLPROCTREE, MF_DISABLED);
+				EnableMenuItem(hpop, IDM_OPENPATH, MF_DISABLED);
+				EnableMenuItem(hpop, IDM_VTHREAD, MF_DISABLED);
+				EnableMenuItem(hpop, IDM_VHANDLES, MF_DISABLED);
+				EnableMenuItem(hpop, IDM_VMODULS, MF_DISABLED);
+				EnableMenuItem(hpop, IDM_VWINS, MF_DISABLED);
+				EnableMenuItem(hpop, IDM_SGINED, MF_DISABLED);
+				EnableMenuItem(hpop, IDM_VKSTRUCTS, MF_DISABLED);
+				EnableMenuItem(hpop, IDM_VHOTKEY, MF_DISABLED);
+				EnableMenuItem(hpop, IDM_VTIMER, MF_DISABLED);
+			}
+		}
+
+		TrackPopupMenu(hpop,
+			TPM_LEFTALIGN | TPM_TOPALIGN | TPM_RIGHTBUTTON,
+			pt.x,
+			pt.y,
+			0,
+			hWndMain,
+			NULL);
 	}
+	else if (pid == 0)
+	{
+		HMENU hpop = GetSubMenu(hroot, 0);
+		POINT pt;
+		GetCursorPos(&pt);
+
+		EnableMenuItem(hpop, IDM_KILL, MF_DISABLED);
+		EnableMenuItem(hpop, IDM_SUPROC, MF_DISABLED);
+		EnableMenuItem(hpop, IDM_RESPROC, MF_DISABLED);
+		EnableMenuItem(hpop, IDM_KILLKERNEL, MF_DISABLED);
+		EnableMenuItem(hpop, IDM_KILLPROCTREE, MF_DISABLED);
+		EnableMenuItem(hpop, IDM_OPENPATH, MF_DISABLED);
+		EnableMenuItem(hpop, IDM_VTHREAD, MF_DISABLED);
+		EnableMenuItem(hpop, IDM_VHANDLES, MF_DISABLED);
+		EnableMenuItem(hpop, IDM_VMODULS, MF_DISABLED);
+		EnableMenuItem(hpop, IDM_VWINS, MF_DISABLED);
+		EnableMenuItem(hpop, IDM_SGINED, MF_DISABLED);
+		EnableMenuItem(hpop, IDM_VKSTRUCTS, MF_DISABLED);
+		EnableMenuItem(hpop, IDM_VHOTKEY, MF_DISABLED);
+		EnableMenuItem(hpop, IDM_VTIMER, MF_DISABLED);
+		EnableMenuItem(hpop, IDM_FILEPROP, MF_DISABLED);
+
+		if (MStrEqualW(strFilePath, L"") || MStrEqualW(strFilePath, L"-")) {
+			EnableMenuItem(hpop, IDM_OPENPATH, MF_DISABLED);
+			EnableMenuItem(hpop, IDM_FILEPROP, MF_DISABLED);
+		}
+
+		if (wcslen(strFilePath) < 260)
+			wcscpy_s(thisCommandPath, 260, strFilePath);
+
+		TrackPopupMenu(hpop,
+			TPM_LEFTALIGN | TPM_TOPALIGN | TPM_RIGHTBUTTON,
+			pt.x,
+			pt.y,
+			0,
+			hWndMain,
+			NULL);
+	}
+	DestroyMenu(hroot);
 	return 0;
 }
 
@@ -1340,6 +1358,7 @@ HINSTANCE hShell32;
 HINSTANCE hKernel32;
 HINSTANCE hUser32;
 HINSTANCE hCryptui;
+HINSTANCE hIphlpapi;
 
 BOOL LoadDll()
 {
@@ -1348,8 +1367,10 @@ BOOL LoadDll()
 	hKernel32 = GetModuleHandle(L"kernel32.dll");
 	hUser32 = GetModuleHandle(L"user32.dll");
 	hCryptui = LoadLibrary(L"Cryptui.dll");
+	hIphlpapi = LoadLibrary(L"IPHLPAPI.dll");
 	thisCommandPath = new WCHAR[260];
 	thisCommandName = new WCHAR[260];
+	thisCommandUWPName = new WCHAR[260];
 	if (hNtDll == NULL) {
 		FreeLibrary(hNtDll);
 		MessageBox(NULL, L"Load NTDLL ERROR", L"ERROR !", MB_OK | MB_ICONERROR);
@@ -1400,12 +1421,16 @@ BOOL LoadDll()
 		//
 		dCryptUIDlgViewCertificateW = (_CryptUIDlgViewCertificateW)GetProcAddress(hCryptui, "CryptUIDlgViewCertificateW");
 		dCryptUIDlgViewContext = (_CryptUIDlgViewContext)GetProcAddress(hCryptui, "CryptUIDlgViewContext");
-
+		//u32 api
+		dCancelShutdown = (_CancelShutdown)GetProcAddress(hUser32, "CancelShutdown");
+		//
+		dGetPerTcpConnectionEStats = (_GetPerTcpConnectionEStats)GetProcAddress(hIphlpapi, "GetPerTcpConnectionEStats");
 		return TRUE;
 	}
 }
 void FreeDll() {
 
+	delete thisCommandUWPName;
 	delete thisCommandPath;
 	delete thisCommandName;
 }

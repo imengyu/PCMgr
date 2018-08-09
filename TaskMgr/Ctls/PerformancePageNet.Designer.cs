@@ -51,9 +51,7 @@
             // 
             resources.ApplyResources(this.performanceTitle, "performanceTitle");
             this.performanceTitle.Name = "performanceTitle";
-            this.performanceTitle.SmallTitle = "网卡名称";
             this.performanceTitle.SmallTitleFont = new System.Drawing.Font("微软雅黑", 12F);
-            this.performanceTitle.Title = "网络";
             this.performanceTitle.TitleFont = new System.Drawing.Font("微软雅黑", 18F);
             // 
             // performanceGrid
@@ -66,11 +64,7 @@
             this.performanceGrid.DrawData2 = true;
             this.performanceGrid.DrawData2Bg = false;
             this.performanceGrid.GridColor = System.Drawing.Color.FromArgb(((int)(((byte)(238)))), ((int)(((byte)(222)))), ((int)(((byte)(207)))));
-            this.performanceGrid.LeftBottomText = "60 s";
-            this.performanceGrid.LeftText = "吞吐量";
             this.performanceGrid.Name = "performanceGrid";
-            this.performanceGrid.RightBottomText = "0";
-            this.performanceGrid.RightText = "100Kbps";
             this.performanceGrid.TopTextHeight = 20;
             // 
             // PerformancePageNet

@@ -11,6 +11,8 @@ BOOL MInitMyDbgView();
 M_CAPI(VOID) MDoNotStartMyDbgView();
 BOOL MInitKernelNTPDB(BOOL usingNtosPDB, PKNTOSVALUE kNtosValue);
 
+M_CAPI(BOOL) MIsKernelNeed64();
+
 M_CAPI(BOOL) MCanUseKernel();
 M_CAPI(BOOL) MInitKernel(LPWSTR currentPath);
 M_CAPI(BOOL) MUninitKernel();

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -21,7 +22,9 @@ namespace PCMgr.Ctls
 
         public Font TitleFont { get; set; }
         public Font SmallTitleFont { get; set; }
+        [Bindable(true), Localizable(true)]
         public string Title { get; set; }
+        [Bindable(true), Localizable(true)]
         public string SmallTitle { get; set; }
 
         private StringFormat stringFormatRight = null;

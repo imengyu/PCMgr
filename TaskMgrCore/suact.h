@@ -60,8 +60,10 @@ M_CAPI(VOID) M_SU_Test2();
 
 M_CAPI(BOOL) M_SU_Init(BOOL requestNtosValue, PKNTOSVALUE outValue);
 
-M_CAPI(BOOL) M_SU_GetEPROCESS(DWORD pid, ULONG_PTR * lpEprocess, ULONG_PTR * lpPeb, ULONG_PTR * lpJob, LPWSTR path);
+M_CAPI(BOOL) M_SU_GetEPROCESS(DWORD pid, ULONG_PTR* lpEprocess, ULONG_PTR* lpPeb, ULONG_PTR* lpJob, LPWSTR imagename, LPWSTR path); 
 M_CAPI(BOOL) M_SU_GetETHREAD(DWORD tid, ULONG_PTR* lpEthread, ULONG_PTR * lpTeb);
+
+M_CAPI(BOOL) M_SU_GetProcessCommandLine(DWORD tid, LPWSTR outCmdLine);
 
 M_CAPI(BOOL) M_SU_SetDbgViewEvent(HANDLE hEvent);
 

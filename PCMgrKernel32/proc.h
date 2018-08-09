@@ -9,8 +9,11 @@
 #define PS_TEST_SET_BITS(Flags, Flag) \
     RtlInterlockedSetBits (Flags, Flag)
 
+
 NTSTATUS KxTerminateProcessTest(ULONG_PTR PID);
 NTSTATUS KxTerminateProcessByZero(ULONG_PTRPID);
+PUNICODE_STRING KxGetProcessCommandLine(PEPROCESS Process);
+PUNICODE_STRING KxGetProcessFullPath(PEPROCESS Process);
 VOID KxForceResumeThread(PETHREAD Thread);
 NTSTATUS KxTerminateThreadWithTid(ULONG_PTR tid, ULONG exitCode, BOOLEAN useapc);
 NTSTATUS KxTerminateProcessWithPid(ULONG_PTR pid, ULONG exitCode, BOOLEAN usepst, BOOLEAN useapc);

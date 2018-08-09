@@ -12,6 +12,10 @@
 #pragma comment(lib, "Crypt32.lib")
 #pragma comment(lib , "DbgHelp.lib")
 #pragma comment(lib , "Imagehlp.lib")
+#pragma comment(lib, "iphlpapi.lib")
+#pragma comment(lib, "ws2_32.lib")
+
+
 
 // TODO: 在 STDAFX.H 中引用任何所需的附加头文件，
 //而不是在此文件中引用

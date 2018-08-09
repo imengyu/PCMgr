@@ -898,6 +898,25 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 需要 64 位的程序来加载内核驱动 的本地化字符串。
+        /// </summary>
+        internal static string LoadDriverErrNeed64 {
+            get {
+                return ResourceManager.GetString("LoadDriverErrNeed64", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 在 64 位系统中 PC Manager 需要 以 64 位模式运行才能正确加载驱动并调用内核。
+        ///因此，内核功能不可用，如果您需要使用内核功能，请切换至 64 位PC Manager 程序 的本地化字符串。
+        /// </summary>
+        internal static string LoadDriverErrNeed64Text {
+            get {
+                return ResourceManager.GetString("LoadDriverErrNeed64Text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 正在加载 的本地化字符串。
         /// </summary>
         internal static string Loading {
@@ -1110,6 +1129,25 @@ namespace PCMgr.Lanuages {
         internal static string NonPagedPool {
             get {
                 return ResourceManager.GetString("NonPagedPool", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 无法下载或加载NTOS的符号文件 的本地化字符串。
+        /// </summary>
+        internal static string NoPDBWarn {
+            get {
+                return ResourceManager.GetString("NoPDBWarn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 我们需要NTOS的pdb文件才能对内核进行分析，发挥出软件的所有功能。因此，内核的部分功能将被禁用。
+        ///您也可以尝试用WinDbg来下载NTOS的符号文件，然后将其复制到本软件目录\symbols文件夹下，我们将会自动加载。 的本地化字符串。
+        /// </summary>
+        internal static string NoPDBWarnText {
+            get {
+                return ResourceManager.GetString("NoPDBWarnText", resourceCulture);
             }
         }
         

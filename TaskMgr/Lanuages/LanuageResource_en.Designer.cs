@@ -889,6 +889,27 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 A 64 bit program is needed to load the kernel driver 的本地化字符串。
+        /// </summary>
+        internal static string LoadDriverErrNeed64 {
+            get {
+                return ResourceManager.GetString("LoadDriverErrNeed64", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 In the 64 bit system, PC Manager needs to run in 64 bit mode to load the driver correctly and invoke the kernel.
+        ///
+        ///
+        ///Therefore, the kernel function is not available. If you need to use the kernel function, switch to the 64 bit PC Manager program. 的本地化字符串。
+        /// </summary>
+        internal static string LoadDriverErrNeed64Text {
+            get {
+                return ResourceManager.GetString("LoadDriverErrNeed64Text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Loading 的本地化字符串。
         /// </summary>
         internal static string Loading {
@@ -1101,6 +1122,26 @@ namespace PCMgr.Lanuages {
         internal static string NonPagedPool {
             get {
                 return ResourceManager.GetString("NonPagedPool", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Unable to download or load the NTOS symbol file 的本地化字符串。
+        /// </summary>
+        internal static string NoPDBWarn {
+            get {
+                return ResourceManager.GetString("NoPDBWarn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 We need the pdb file of NTOS to analyze the kernel and display all the functions of the software. As a result, part of the kernel&apos;s functionality will be disabled.
+        ///
+        ///You can also try to use WinDbg to download NTOS symbolic files, and then copy them to this software directory symbols folder, we will automatically load. 的本地化字符串。
+        /// </summary>
+        internal static string NoPDBWarnText {
+            get {
+                return ResourceManager.GetString("NoPDBWarnText", resourceCulture);
             }
         }
         

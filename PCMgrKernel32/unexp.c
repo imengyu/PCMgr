@@ -189,7 +189,8 @@ NTSTATUS KxGetFunctions(PWINVERS parm)
 	return status;
 }
 //从pdb获取一些未导出函数
-VOID KxGetFunctionsFormPDBData(PNTOS_PDB_DATA data) {
+VOID KxGetFunctionsFormPDBData(PNTOS_PDB_DATA data) 
+{
 	PspExitThread = (PspExitThread_)data->PspExitThread_;
 	PspTerminateThreadByPointer = (PspTerminateThreadByPointer_)data->PspTerminateThreadByPointer_;
 	PsGetNextProcessThread = (PsGetNextProcessThread_)data->PsGetNextProcessThread_;
@@ -203,16 +204,28 @@ VOID KxGetFunctionsFormPDBData(PNTOS_PDB_DATA data) {
 ULONG_PTR EPROCESS_ThreadListHead_Offest;
 ULONG_PTR EPROCESS_RundownProtect_Offest;
 ULONG_PTR EPROCESS_Flags_Offest;
+ULONG_PTR EPROCESS_SeAuditProcessCreationInfo_Offest;
 ULONG_PTR ETHREAD_Tcb_Offest;
 ULONG_PTR ETHREAD_CrossThreadFlags_Offest;
+ULONG_PTR PEB_Ldr_Offest;
+ULONG_PTR PEB_ProcessParameters_Offest;
+ULONG_PTR RTL_USER_PROCESS_PARAMETERS_CommandLine_Offest;
 
 VOID KxGetStructOffestsFormPDBData(PNTOS_EPROCESS_OFF_DATA data) {
 
 	EPROCESS_ThreadListHead_Offest = data->EPROCESS_ThreadListHeadOffest;
 	EPROCESS_RundownProtect_Offest = data->EPROCESS_RundownProtectOffest;
 	EPROCESS_Flags_Offest = data->EPROCESS_FlagsOffest;
+	EPROCESS_SeAuditProcessCreationInfo_Offest = data->EPROCESS_SeAuditProcessCreationInfoOffest;
+
 	ETHREAD_Tcb_Offest = data->ETHREAD_TcbOffest;
 	ETHREAD_CrossThreadFlags_Offest = data->ETHREAD_CrossThreadFlagsOffest;
+
+	PEB_Ldr_Offest = data->PEB_LdrOffest;
+	PEB_ProcessParameters_Offest = data->PEB_ProcessParametersOffest;
+
+	RTL_USER_PROCESS_PARAMETERS_CommandLine_Offest = data->RTL_USER_PROCESS_PARAMETERS_CommandLineOffest;
+
 	KxPrintInternalOffests();
 }
 
@@ -239,15 +252,24 @@ VOID KxPrintInternalOffests()
 #ifdef _AMD64_
 	KdPrint(("_EPROCESS->ThreadListHead : +0x%I64x", EPROCESS_ThreadListHead_Offest));
 	KdPrint(("_EPROCESS->RundownProtect : +0x%I64x", EPROCESS_RundownProtect_Offest));
+	KdPrint(("_EPROCESS->SeAuditProcessCreationInfo : +0x%I64x", EPROCESS_SeAuditProcessCreationInfo_Offest));
 	KdPrint(("_EPROCESS->Flags : +0x%I64x", EPROCESS_Flags_Offest));
 	KdPrint(("_ETHREAD->Tcb : +0x%I64x", ETHREAD_Tcb_Offest));
 	KdPrint(("_ETHREAD->CrossThreadFlags : +0x%I64x", ETHREAD_CrossThreadFlags_Offest));
+	KdPrint(("_PEB->Ldr : +0x%I64x", PEB_Ldr_Offest));
+	KdPrint(("_PEB->ProcessParameters : +0x%I64x", PEB_ProcessParameters_Offest));
+	KdPrint(("_RTL_USER_PROCESS_PARAMETERS->CommandLine : +0x%I64x", RTL_USER_PROCESS_PARAMETERS_CommandLine_Offest));
+
 #else
-	KdPrint(("_EPROCESS->ThreadListHead : +0x%08x", EPROCESS_ThreadListHead_Offest));
-	KdPrint(("_EPROCESS->RundownProtect : +0x%08x", EPROCESS_RundownProtect_Offest));
-	KdPrint(("_EPROCESS->Flags : +0x%08x", EPROCESS_Flags_Offest));
-	KdPrint(("_ETHREAD->Tcb : +0x%08x", ETHREAD_Tcb_Offest));
-	KdPrint(("_ETHREAD->CrossThreadFlags : +0x%08x", ETHREAD_CrossThreadFlags_Offest));
+	KdPrint(("_EPROCESS->ThreadListHead : +0x%x", EPROCESS_ThreadListHead_Offest));
+	KdPrint(("_EPROCESS->RundownProtect : +0x%x", EPROCESS_RundownProtect_Offest));
+	KdPrint(("_EPROCESS->SeAuditProcessCreationInfo : +0x%x", EPROCESS_SeAuditProcessCreationInfo_Offest));
+	KdPrint(("_EPROCESS->Flags : +0x%x", EPROCESS_Flags_Offest));
+	KdPrint(("_ETHREAD->Tcb : +0x%x", ETHREAD_Tcb_Offest));
+	KdPrint(("_ETHREAD->CrossThreadFlags : +0x%x", ETHREAD_CrossThreadFlags_Offest));
+	KdPrint(("_PEB->Ldr : +0x%x", PEB_Ldr_Offest));
+	KdPrint(("_PEB->ProcessParameters : +0x%x", PEB_ProcessParameters_Offest));
+	KdPrint(("_RTL_USER_PROCESS_PARAMETERS->CommandLine : +0x%x", RTL_USER_PROCESS_PARAMETERS_CommandLine_Offest));
 #endif
 }
 

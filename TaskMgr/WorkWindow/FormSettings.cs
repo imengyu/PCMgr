@@ -66,6 +66,7 @@ namespace PCMgr.WorkWindow
 
             }
 
+            checkBoxAbortShutdown.Checked = FormMain.GetConfigBool("AbortShutdown", "AppSetting", false);
             checkBoxTop.Checked = FormMain.GetConfigBool("TopMost", "AppSetting", false);
             checkBoxCloseHide.Checked = FormMain.GetConfigBool("CloseHideToNotfication", "AppSetting", false);
             checkBoxSelfProtect.Checked = FormMain.GetConfigBool("SelfProtect", "AppSetting", false);
@@ -74,7 +75,7 @@ namespace PCMgr.WorkWindow
 
             checkBoxAutoLoadDriver.Checked = FormMain.GetConfigBool("LoadKernelDriver", "Configure", false);
             checkBoxHighLightNoSystetm.Checked = FormMain.GetConfigBool("HighLightNoSystetm", "Configure", false);
-            checkBoxShowDebugWindow.Checked = FormMain.GetConfigBool("ShowDebugWindow", "Configure", true);
+            checkBoxShowDebugWindow.Checked = FormMain.GetConfigBool("ShowDebugWindow", "Configure", false);
             checkBoxNTOSPDB.Checked = FormMain.GetConfigBool("UseKrnlPDB", "Configure", true);
 
             textBoxTitle.Text = FormMain.GetConfig("Title", "AppSetting", "");
@@ -104,7 +105,7 @@ namespace PCMgr.WorkWindow
                     break;
 
             }
-
+            FormMain.SetConfigBool("AbortShutdown", "AppSetting", checkBoxAbortShutdown.Checked);
             if (radioButtonPspTerProc.Checked)
                 FormMain.SetConfig("TerProcFun", "Configure", "PspTerProc");
             else if (radioButtonPspTerProc.Checked)

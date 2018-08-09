@@ -383,7 +383,7 @@ M_CAPI(BOOL) M_SU_Init(BOOL requestNtosValue, PKNTOSVALUE outValue) {
 	LogErr(L"M_SU_Init 2 DeviceIoControl err : %d", GetLastError());
 	return FALSE;
 }
-M_CAPI(BOOL) M_SU_GetEPROCESS(DWORD pid, ULONG_PTR* lpEprocess, ULONG_PTR* lpPeb, ULONG_PTR* lpJob, LPWSTR path)
+M_CAPI(BOOL) M_SU_GetEPROCESS(DWORD pid, ULONG_PTR* lpEprocess, ULONG_PTR* lpPeb, ULONG_PTR* lpJob, LPWSTR imagename, LPWSTR path)
 {
 	BOOL rs = FALSE;
 	if (isKernelDriverLoaded)
@@ -391,17 +391,17 @@ M_CAPI(BOOL) M_SU_GetEPROCESS(DWORD pid, ULONG_PTR* lpEprocess, ULONG_PTR* lpPeb
 		PKPROCINFO output = (PKPROCINFO)malloc(sizeof(KPROCINFO));
 		memset(output, 0, sizeof(KPROCINFO));
 		DWORD ReturnLength = 0;
-		if (DeviceIoControl(hKernelDevice, CTL_GET_EPROCESS, &pid, sizeof(DWORD), output, sizeof(PKPROCINFO), &ReturnLength, NULL))
+		if (DeviceIoControl(hKernelDevice, CTL_GET_EPROCESS, &pid, sizeof(DWORD), output, sizeof(KPROCINFO), &ReturnLength, NULL))
 		{
 			if (lpEprocess)(*lpEprocess) = (ULONG_PTR)output->EProcess;
 			if (lpPeb)(*lpPeb) = (ULONG_PTR)output->PebAddress;
 			if (lpJob)(*lpJob) = (ULONG_PTR)output->JobAddress;
-			if (path) {
-				LPWSTR pathw = MConvertLPCSTRToLPWSTR((CHAR*)output->FullPath);
-				wcscpy_s(path, MAX_PATH, pathw);
+			if (imagename) {
+				LPWSTR pathw = MConvertLPCSTRToLPWSTR((CHAR*)output->ImageFileName);
+				wcscpy_s(imagename, MAX_PATH, pathw);
 				delete pathw;
 			}
-
+			if (path) wcscpy_s(path, MAX_PATH, output->FullPath);
 			rs = TRUE;
 		} else LogErr(L"M_SU_GetEPROCESS DeviceIoControl err : %d in pid : %d", GetLastError(), pid);
 		free(output);
@@ -428,6 +428,25 @@ M_CAPI(BOOL) M_SU_GetETHREAD(DWORD tid, ULONG_PTR* lpEthread, ULONG_PTR * lpTeb)
 	}
 	return rs;
 }
+M_CAPI(BOOL) M_SU_GetProcessCommandLine(DWORD tid, LPWSTR outCmdLine)
+{
+	BOOL rs = FALSE;
+	if (isKernelDriverLoaded)
+	{
+		WCHAR output[1024];
+		memset(&output, 0, sizeof(output));
+		DWORD ReturnLength = 0;
+		if (DeviceIoControl(hKernelDevice, CTL_GET_PROCESS_COMMANDLINE, &tid, sizeof(DWORD), output, sizeof(KTHREADINFO), &ReturnLength, NULL))
+		{
+			if (outCmdLine)wcscpy_s(outCmdLine, 1024, output);
+			rs = TRUE;
+		}
+		else LogErr(L"M_SU_GetProcessCommandLine DeviceIoControl err : %d in tid : %d", GetLastError(), tid);
+		free(output);
+	}
+	return rs;
+}
+
 M_CAPI(void) M_SU_EnumKernelModulsItemDestroy(KernelModulSmallInfo*km)
 {
 	if (km) free(km);

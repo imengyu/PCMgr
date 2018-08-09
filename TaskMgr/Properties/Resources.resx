@@ -226,4 +226,7 @@
   <data name="icoResourceMon" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\icoResourceMon.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="icon_background_uwp" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\icon_background_uwp.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
 </root>

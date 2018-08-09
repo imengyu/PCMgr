@@ -285,14 +285,26 @@
     <Compile Include="WorkWindow\FormVHandles.Designer.cs">
       <DependentUpon>FormVHandles.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="Ctls\PerformancePageCpu.en.resx">
+      <DependentUpon>PerformancePageCpu.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Ctls\PerformancePageCpu.resx">
       <DependentUpon>PerformancePageCpu.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Ctls\PerformancePageDisk.en.resx">
+      <DependentUpon>PerformancePageDisk.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Ctls\PerformancePageDisk.resx">
       <DependentUpon>PerformancePageDisk.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Ctls\PerformancePageNet.en.resx">
+      <DependentUpon>PerformancePageNet.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Ctls\PerformancePageNet.resx">
       <DependentUpon>PerformancePageNet.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Ctls\PerformancePageRam.en.resx">
+      <DependentUpon>PerformancePageRam.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Ctls\PerformancePageRam.resx">
       <DependentUpon>PerformancePageRam.cs</DependentUpon>
@@ -412,6 +424,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="icoPcmgr.ico" />
+    <None Include="Resources\icon_background_uwp.png" />
     <None Include="Resources\icoResourceMon.bmp" />
     <None Include="Resources\icoServiceHost.ico" />
     <None Include="Resources\icoService.ico" />
