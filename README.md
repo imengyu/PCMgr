@@ -9,6 +9,10 @@ This is a task manager / process manager on the Windows platform.<br/>
 Use Windows API, you can view the process, get the path of process, end the process, etc. <br/>
 Only part of the function is done at the moment.<br/>
 
+版权所有
+---
+Copyright © 2018 By DreamFish<br/>
+
 截图 ScreenShot
 ---
 ![Image1](https://raw.githubusercontent.com/717021/PCMgr/master/image1.png)<br/>
