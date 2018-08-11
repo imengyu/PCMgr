@@ -153,6 +153,7 @@
       <EntryPointSymbol>DriverEntry</EntryPointSymbol>
       <SubSystem>Native</SubSystem>
       <Driver>Driver</Driver>
+      <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

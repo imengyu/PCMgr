@@ -20,37 +20,24 @@ extern ULONG_PTR RTL_USER_PROCESS_PARAMETERS_CommandLine_Offest;
 EXTERN_C PETHREAD KxGetNextProcessThread_x64Call(PEPROCESS Process, PETHREAD Thread);
 EXTERN_C PETHREAD KxGetNextProcessThread_x86Call(PEPROCESS Process, PETHREAD Thread);
 
+#ifdef _AMD64_
+PETHREAD KxGetNextProcessThread_x86Call(PEPROCESS Process, PETHREAD Thread)
+{
+	PETHREAD result = NULL;
+	result = PsGetNextProcessThread(Process, Thread);
+	return result; 
+}
+#else
+PETHREAD KxGetNextProcessThread_x64Call(PEPROCESS Process, PETHREAD Thread)
+{
+	return PsGetNextProcessThread(Process, Thread);
+}
+#endif
+
 VOID  KernelKillThreadRoutine(IN PKAPC Apc, IN OUT PKNORMAL_ROUTINE *NormalRoutine, IN OUT PVOID *NormalContext, IN OUT PVOID *SystemArgument1, IN OUT PVOID *SystemArgument2)
 {
 	PspExitThread(STATUS_SUCCESS);
 }
-
-NTSTATUS MySolveThread(PETHREAD Thread)
-{
-	return 0;
-}
-NTSTATUS MyEnumProcessPGNPT(PEPROCESS Process)
-{
-	NTSTATUS Status = STATUS_SUCCESS;
-	__asm {
-		mov ebx, 0
-		jmp loc_loop
-	loc_work:
-		mov eax, ebx
-		push eax
-		call MySolveThread
-		mov[Status], eax
-		push ebx
-	loc_loop:
-		mov eax, [Process]
-		call PsGetNextProcessThread
-		mov ebx, eax
-		test ebx, ebx
-		jnz short loc_work
-	}
-	return Status;
-}
-
 
 PUNICODE_STRING KxGetProcessCommandLine(PEPROCESS Process)
 {
@@ -82,16 +69,7 @@ PUNICODE_STRING KxGetProcessFullPath(PEPROCESS Process)
 	}
 	return NULL;
 }
-PETHREAD KxGetNextProcessThread(PEPROCESS Process, PETHREAD Thread)
-{
-	PETHREAD NewThread = NULL;
-#ifdef _AMD64_
-	NewThread = KxGetNextProcessThread_x64Call(Process, Thread);
-#else
-	NewThread = KxGetNextProcessThread_x86Call(Process, Thread);
-#endif	
-	return NewThread;
-}
+
 VOID KxForceResumeThread(PETHREAD Thread)
 {
 	PKTHREAD kThread = (PKTHREAD)((ULONG_PTR)Thread + ETHREAD_Tcb_Offest);
@@ -255,13 +233,18 @@ NTSTATUS KxTerminateProcessWithPid(ULONG_PTR pid, ULONG exitCode, BOOLEAN usepst
 	}
 	else {
 		//PsGetNextProcessThread获取线程
-		for (Thread = KxGetNextProcessThread(Process, NULL); Thread != NULL; Thread = KxGetNextProcessThread(Process, Thread))
+#ifdef _AMD64_
+		for (Thread = KxGetNextProcessThread_x64Call(Process, NULL); Thread != NULL; Thread = KxGetNextProcessThread_x64Call(Process, Thread))
+#else
+		for (Thread = KxGetNextProcessThread_x86Call(Process, NULL); Thread != NULL; Thread = KxGetNextProcessThread_x86Call(Process, Thread))
+#endif	
 		{
 			if (Thread != Self) {
 				if (useapc) Status = KxTerminateThreadApc(Thread);
 				else Status = KxTerminateThread(Thread);
 			}
 		}
+		
 	}
 
 	//RundownProtect off

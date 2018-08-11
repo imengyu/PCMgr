@@ -13,6 +13,8 @@ Only part of the function is done at the moment.<br/>
 ---
 ![Image1](https://raw.githubusercontent.com/717021/PCMgr/master/image1.png)<br/>
 ![Image2](https://raw.githubusercontent.com/717021/PCMgr/master/image2.png)<br/>
+![Image3](https://raw.githubusercontent.com/717021/PCMgr/master/image3.png)<br/>
+![Image4](https://raw.githubusercontent.com/717021/PCMgr/master/image4.png)<br/>
 ![Image5](https://raw.githubusercontent.com/717021/PCMgr/master/image5.png)<br/>
 ![Image6](https://raw.githubusercontent.com/717021/PCMgr/master/image6.png)<br/>
 ![Image7](https://raw.githubusercontent.com/717021/PCMgr/master/image7.png)<br/>

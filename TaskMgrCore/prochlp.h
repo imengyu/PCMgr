@@ -52,9 +52,6 @@ EXTERN_C M_API BOOL MGetUWPPackageFullName(HANDLE handle, int * len, LPWSTR buff
 EXTERN_C M_API int MGetProcessState(PSYSTEM_PROCESSES p, HWND hWnd);
 EXTERN_C M_API VOID* MGetProcessThreads(DWORD pid);
 
-EXTERN_C M_API int MAppWorkShowMenuProcessPrepare(LPWSTR strFilePath, LPWSTR strFileName, DWORD pid);
-EXTERN_C M_API int MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWORD pid, HWND hDlg, int data, int type, int x, int y);
-
 EXTERN_C M_API double MGetRamUseAge();
 EXTERN_C M_API ULONG MGetAllRam();
 

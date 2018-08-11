@@ -71,6 +71,26 @@ namespace PCMgr.Properties {
         }
         
         /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap icoBackgroundUwp {
+            get {
+                object obj = ResourceManager.GetObject("icoBackgroundUwp", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似于 (图标) 的 System.Drawing.Icon 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Icon icoFiles {
+            get {
+                object obj = ResourceManager.GetObject("icoFiles", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
         ///   查找类似于 (图标) 的 System.Drawing.Icon 类型的本地化资源。
         /// </summary>
         internal static System.Drawing.Icon icoHidedWindow {
@@ -83,9 +103,9 @@ namespace PCMgr.Properties {
         /// <summary>
         ///   查找 System.Drawing.Bitmap 类型的本地化资源。
         /// </summary>
-        internal static System.Drawing.Bitmap icon_background_uwp {
+        internal static System.Drawing.Bitmap iconContextMenu {
             get {
-                object obj = ResourceManager.GetObject("icon_background_uwp", resourceCulture);
+                object obj = ResourceManager.GetObject("iconContextMenu", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

@@ -47,7 +47,7 @@ BOOLEAN InitSymHandler()
 	if(!rs) LogErr(L"SymInitialize failed : %d", GetLastError());
 	return rs;
 }
-BOOLEAN LoadSymModule(char* ImageName, DWORD ModuleBase)
+BOOLEAN LoadSymModule(char* ImageName, ULONG_PTR ModuleBase)
 {
 	DWORD64 tmp;
 	CHAR szFile[MAX_PATH],
@@ -70,7 +70,7 @@ BOOLEAN LoadSymModule(char* ImageName, DWORD ModuleBase)
 	}
 	FreeLibrary(hDll);
 
-	tmp = SymLoadModule64(hProcess, NULL, szFile, NULL, (DWORD64)ModuleBase, ModInfo.SizeOfImage);
+	tmp = SymLoadModule64(hProcess, NULL, szFile, NULL, (ULONG_PTR)ModuleBase, ModInfo.SizeOfImage);
 	if (!tmp)
 	{
 		LogErr(L"Cannot load module (SymLoadModule64) , error : %d \n", GetLastError());

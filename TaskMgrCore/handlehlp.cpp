@@ -121,10 +121,13 @@ M_CAPI(BOOL) MEnumProcessHandles(DWORD pid, EHCALLBACK callback)
 			if(b) MGetNtPathFromHandle(hDup, handlePath, MAX_PATH);
 
 			WCHAR handleAddress[32];
-			swprintf_s(handleAddress, L"0x%08X", info.HandleValue);
 			WCHAR handleObjAddress[32];
+			swprintf_s(handleAddress, L"0x%08X", info.HandleValue);
+#ifndef _AMD64_
 			swprintf_s(handleObjAddress, L"0x%08X", (ULONG_PTR)info.Object);
-
+#else
+			swprintf_s(handleObjAddress, L"0x%I64X", (ULONG_PTR)info.Object);
+#endif
 			callback((LPVOID)info.HandleValue, handleTypeName, handlePath, handleAddress, handleObjAddress, info.CreatorBackTraceIndex, info.ObjectTypeIndex);
 		}
 

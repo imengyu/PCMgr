@@ -6,14 +6,20 @@ extern PsGetNextProcessThread:qword
 
 
 KxGetNextProcessThread_x64Call PROC
-mov [rsp-8+qword ptr 10h], rdx
-mov [rsp-8+qword ptr 18h], rcx
-push rbp
-push rdi
-mov rcx, rbp
+
+arg_0= qword ptr  8
+arg_8= qword ptr  10h
+
+mov     [rsp+arg_8], rdx
+mov     [rsp+arg_0], rcx
+sub     rsp, 28h
+mov     rdx, [rsp+28h+arg_8]
+mov     rcx, [rsp+28h+arg_0]
+mov     rbx, rdx
 call PsGetNextProcessThread
-pop rdi
-pop rbp
+mov     rbx, rax
+mov     rax, rbx
+add     rsp, 28h
 ret
 KxGetNextProcessThread_x64Call ENDP
 

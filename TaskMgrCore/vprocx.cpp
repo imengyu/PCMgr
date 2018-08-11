@@ -82,21 +82,17 @@ BOOL FreeLibraryEx()
 {
 	HANDLE hProcess;
 	NTSTATUS status = MOpenProcessNt(currentPid, &hProcess);
-	if (status == STATUS_INVALID_HANDLE || status == 0xC000000B) {
+	if (status == STATUS_INVALID_HANDLE || status == STATUS_INVALID_CID) {
 		MessageBox(NULL, str_item_freeinvproc, str_item_freefailed, MB_OK | MB_ICONWARNING);
 	}
 	else if (hProcess) {
 		TCHAR address[128];
 		ListView_GetItemText(hListModuls, selectItem2, 2, address, 128);
 		long long moduleBaseAddr = MHexStrToLongW(address);
-#ifndef _AMD64_
 		DWORD rs2 = NtUnmapViewOfSection(hProcess, (PVOID)moduleBaseAddr);
-#else
-		long long rs2 = NtUnmapViewOfSection(hProcess, (PVOID)moduleBaseAddr);
-#endif
 		if (rs2 == 0)
 			return TRUE;
-		else if (rs2 == 0xC000010A)
+		else if (rs2 == STATUS_PROCESS_IS_TERMINATING)
 			MessageBox(NULL, str_item_freeinvproc, str_item_freefailed, MB_OK | MB_ICONWARNING);
 		else {
 			LogErr(L"UnmapView failed %s NTSTATUS : 0x%08X", address, status);

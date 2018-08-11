@@ -11,17 +11,14 @@ Thread= dword ptr  0Ch
 
 push    ebp
 mov     ebp, esp
-
 mov     ebx, [ebp+Thread]
-push     ebx
+push    ebx
 mov     eax, [ebp+Process]
-
-call _PsGetNextProcessThread
-pop     ebx
-
+call    _PsGetNextProcessThread
+mov     ebx, eax
+mov     eax, ebx
 pop     ebp
-ret 4
-
+retn    8
 _KxGetNextProcessThread_x86Call@8 ENDP
 
 END

@@ -818,4 +818,34 @@ PCMgr 需要管理员权限 才能对系统进行控制和管理。
     <value>在 64 位系统中 PC Manager 需要 以 64 位模式运行才能正确加载驱动并调用内核。
 因此，内核功能不可用，如果您需要使用内核功能，请切换至 64 位PC Manager 程序</value>
   </data>
+  <data name="KillAskContentImporant" xml:space="preserve">
+    <value>结束此进程将导致 Windows 不稳定或关闭，从而导致丢失所有未保存的数据。你确定要继续吗?</value>
+  </data>
+  <data name="KillAskImporantGiveup" xml:space="preserve">
+    <value>放弃未保存的数据并关闭。</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>关闭</value>
+  </data>
+  <data name="KillAskContentVeryImporant" xml:space="preserve">
+    <value>请注意，强制结束此进程将导致系统立即奔溃！</value>
+  </data>
+  <data name="SuspendEnd" xml:space="preserve">
+    <value>的运行吗？</value>
+  </data>
+  <data name="SuspendStart" xml:space="preserve">
+    <value>你确定要暂停</value>
+  </data>
+  <data name="SuspendVeryImporantWarnContent" xml:space="preserve">
+    <value>强制暂停此进程运行将导致 Windows 立即奔溃！</value>
+  </data>
+  <data name="SuspendWarnContent" xml:space="preserve">
+    <value>强制暂停此进程运行将导致 Windows 不稳定或关闭，从而导致丢失所有未保存的数据。你确定要继续吗?</value>
+  </data>
+  <data name="TitleVeryWarn" xml:space="preserve">
+    <value>重要警告</value>
+  </data>
 </root>

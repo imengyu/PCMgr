@@ -171,6 +171,15 @@ namespace PCMgr.Lanuages {
         /// <summary>
         ///   查找类似 Cancel 的本地化字符串。
         /// </summary>
+        internal static string Cancel {
+            get {
+                return ResourceManager.GetString("Cancel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Cancel 的本地化字符串。
+        /// </summary>
         internal static string CancelRun {
             get {
                 return ResourceManager.GetString("CancelRun", resourceCulture);
@@ -228,6 +237,15 @@ namespace PCMgr.Lanuages {
         internal static string ChooseTargetDir {
             get {
                 return ResourceManager.GetString("ChooseTargetDir", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Shutdown 的本地化字符串。
+        /// </summary>
+        internal static string Close {
+            get {
+                return ResourceManager.GetString("Close", resourceCulture);
             }
         }
         
@@ -799,11 +817,38 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 Ending this process causes Windows to become unstable or shut down, resulting in the loss of all unsaved data. Are you sure you want to continue? 的本地化字符串。
+        /// </summary>
+        internal static string KillAskContentImporant {
+            get {
+                return ResourceManager.GetString("KillAskContentImporant", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Please note that forced the end this process will cause the system to collapse immediately! 的本地化字符串。
+        /// </summary>
+        internal static string KillAskContentVeryImporant {
+            get {
+                return ResourceManager.GetString("KillAskContentVeryImporant", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似  ? 的本地化字符串。
         /// </summary>
         internal static string KillAskEnd {
             get {
                 return ResourceManager.GetString("KillAskEnd", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Give up the unsaved data and shutdown. 的本地化字符串。
+        /// </summary>
+        internal static string KillAskImporantGiveup {
+            get {
+                return ResourceManager.GetString("KillAskImporantGiveup", resourceCulture);
             }
         }
         
@@ -1573,6 +1618,42 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 ? 的本地化字符串。
+        /// </summary>
+        internal static string SuspendEnd {
+            get {
+                return ResourceManager.GetString("SuspendEnd", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Are you sure want to suspend  的本地化字符串。
+        /// </summary>
+        internal static string SuspendStart {
+            get {
+                return ResourceManager.GetString("SuspendStart", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Please note that forced the suspend this process will cause the system to collapse immediately! 的本地化字符串。
+        /// </summary>
+        internal static string SuspendVeryImporantWarnContent {
+            get {
+                return ResourceManager.GetString("SuspendVeryImporantWarnContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Forced suspension of this process will cause Windows to become unstable or shut down, resulting in the loss of all unsaved data. Are you sure you want to continue? 的本地化字符串。
+        /// </summary>
+        internal static string SuspendWarnContent {
+            get {
+                return ResourceManager.GetString("SuspendWarnContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Unable to suspend process 的本地化字符串。
         /// </summary>
         internal static string SusProcFailed {
@@ -1939,6 +2020,15 @@ namespace PCMgr.Lanuages {
         internal static string TitleStatus {
             get {
                 return ResourceManager.GetString("TitleStatus", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 An important warning 的本地化字符串。
+        /// </summary>
+        internal static string TitleVeryWarn {
+            get {
+                return ResourceManager.GetString("TitleVeryWarn", resourceCulture);
             }
         }
         

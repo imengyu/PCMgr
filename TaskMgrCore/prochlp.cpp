@@ -25,11 +25,14 @@
 #define ENCODING (X509_ASN_ENCODING | PKCS_7_ASN_ENCODING)
 
 extern HINSTANCE hInstRs;
+extern TerminateImporantWarnCallBack hTerminateImporantWarnCallBack;
 
 LPWSTR thisCommandPath = NULL;
 LPWSTR thisCommandName = NULL;
 LPWSTR thisCommandUWPName = NULL;
 DWORD thisCommandPid = 0;
+BOOL thisCommandIsImporant = FALSE;
+BOOL thisCommandIsVeryImporant = FALSE;
 HICON HIconDef;
 HWND hWndMain;
 PSYSTEM_PROCESSES current_system_process = NULL;
@@ -90,10 +93,12 @@ void MFroceKillProcessUser()
 {
 	if (thisCommandPid > 4)
 	{
-		if ((MShowMessageDialog(hWndMain, (LPWSTR)str_item_kill_ast_content.c_str(), DEFDIALOGGTITLE,
+		if (thisCommandIsVeryImporant && !hTerminateImporantWarnCallBack(thisCommandName, 3))return;
+		if (!thisCommandIsVeryImporant && thisCommandIsImporant && !hTerminateImporantWarnCallBack(thisCommandName, 1))return;
+		if ((!thisCommandIsVeryImporant && thisCommandIsImporant) || (!thisCommandIsImporant && MShowMessageDialog(hWndMain, (LPWSTR)str_item_kill_ast_content.c_str(), DEFDIALOGGTITLE,
 			(LPWSTR)(str_item_kill_ask_start + thisCommandName + str_item_kill_ask_end).c_str(), NULL, MB_YESNO) == IDYES))
 		{
-			NTSTATUS status = 0;	
+			NTSTATUS status = 0;
 			if (!M_SU_TerminateProcessPID(thisCommandPid, 0, &status, use_apc))
 				ThrowErrorAndErrorCodeX(status, str_item_endprocfailed, (LPWSTR)str_item_kill_failed.c_str());
 			else if (status == STATUS_ACCESS_DENIED)
@@ -108,7 +113,9 @@ void MKillProcessUser(BOOL ask)
 {
 	if (thisCommandPid > 4)
 	{
-		if (isKillingExplorer || !ask || (MShowMessageDialog(hWndMain, (LPWSTR)str_item_kill_ast_content.c_str(), DEFDIALOGGTITLE,
+		if (thisCommandIsVeryImporant && !hTerminateImporantWarnCallBack(thisCommandName, 3))return;
+		if (!thisCommandIsVeryImporant && thisCommandIsImporant && !hTerminateImporantWarnCallBack(thisCommandName, 1))return;
+		if ((!thisCommandIsVeryImporant && thisCommandIsImporant) || !ask || isKillingExplorer || (!thisCommandIsImporant && MShowMessageDialog(hWndMain, (LPWSTR)str_item_kill_ast_content.c_str(), DEFDIALOGGTITLE,
 			(LPWSTR)(str_item_kill_ask_start + thisCommandName + str_item_kill_ask_end).c_str(), NULL, MB_YESNO) == IDYES))
 		{
 			HANDLE hProcess;
@@ -218,8 +225,8 @@ M_API void MEnumProcess(EnumProcessCallBack calBack)
 		{
 			memset(exeFullPath, 0, sizeof(exeFullPath));
 			hProcess = NULL;
-			MGetProcessFullPathEx(static_cast<DWORD>(p->ProcessId), exeFullPath, &hProcess, p->ProcessName.Buffer);
-			calBack(static_cast<DWORD>(p->ProcessId), static_cast<DWORD>(p->InheritedFromProcessId), p->ProcessName.Buffer, exeFullPath, 1, hProcess, p);
+			MGetProcessFullPathEx(static_cast<DWORD>((ULONG_PTR)p->ProcessId), exeFullPath, &hProcess, p->ProcessName.Buffer);
+			calBack(static_cast<DWORD>((ULONG_PTR)p->ProcessId), static_cast<DWORD>((ULONG_PTR)p->InheritedFromProcessId), p->ProcessName.Buffer, exeFullPath, 1, hProcess, p);
 			ix++;
 			done = p->NextEntryDelta == 0;
 		}
@@ -235,7 +242,7 @@ M_API void MEnumProcess2Refesh(EnumProcessCallBack2 callBack)
 		bool done = false;
 		for (PSYSTEM_PROCESSES p = current_system_process; !done; p = PSYSTEM_PROCESSES(PCHAR(p) + p->NextEntryDelta))
 		{
-			callBack(static_cast<DWORD>(p->ProcessId), p);
+			callBack(static_cast<DWORD>((ULONG_PTR)p->ProcessId), p);
 			done = p->NextEntryDelta == 0;
 		}
 	}
@@ -251,8 +258,8 @@ M_API BOOL MReUpdateProcess(DWORD pid, EnumProcessCallBack calBack)
 			HANDLE hProcess = 0;
 			WCHAR exeFullPath[260];
 			memset(exeFullPath, 0, sizeof(exeFullPath));
-			MGetProcessFullPathEx(static_cast<DWORD>(p->ProcessId), exeFullPath, &hProcess, p->ProcessName.Buffer);
-			calBack(static_cast<DWORD>(p->ProcessId), static_cast<DWORD>(p->InheritedFromProcessId), p->ProcessName.Buffer, exeFullPath, 1, hProcess, p);	
+			MGetProcessFullPathEx(static_cast<DWORD>((ULONG_PTR)p->ProcessId), exeFullPath, &hProcess, p->ProcessName.Buffer);
+			calBack(static_cast<DWORD>((ULONG_PTR)p->ProcessId), static_cast<DWORD>((ULONG_PTR)p->InheritedFromProcessId), p->ProcessName.Buffer, exeFullPath, 1, hProcess, p);
 			done = true;
 			return TRUE;
 		}
@@ -1186,8 +1193,10 @@ M_API NTSTATUS MCreateProcess() {
 	return 0;
 }
 
-M_API int MAppWorkShowMenuProcessPrepare(LPWSTR strFilePath, LPWSTR strFileName, DWORD pid)
+M_CAPI(int) MAppWorkShowMenuProcessPrepare(LPWSTR strFilePath, LPWSTR strFileName, DWORD pid, BOOL isImporant, BOOL isVeryImporant)
 {
+	thisCommandIsVeryImporant = isVeryImporant;
+	thisCommandIsImporant = isImporant;
 	thisCommandPid = pid;
 	if (pid > 0)
 	{
@@ -1206,7 +1215,7 @@ M_API int MAppWorkShowMenuProcessPrepare(LPWSTR strFilePath, LPWSTR strFileName,
 	return 0;
 }
 //MENU
-M_API int MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWORD pid, HWND hDlg, int data, int type, int x, int y)
+M_CAPI(int) MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWORD pid, HWND hDlg, int data, int type, int x, int y)
 {
 	thisCommandPid = pid;
 	HMENU hroot = LoadMenu(hInstRs, MAKEINTRESOURCE(IDR_MENUTASK));

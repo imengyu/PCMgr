@@ -35,7 +35,14 @@ void MSM_OpenAndEnumKeyValues(HKEY rootkey, LPWSTR path, LPWSTR type, EnumStartu
 				DWORD dwSize = sizeof(dwValue);
 				err = RegQueryValueEx(hKEY, valueName, 0, &dwSzType, (LPBYTE)&dwValue, &dwSize);
 				if (RegQueryValueEx(hKEY, valueName, 0, &dwSzType, (LPBYTE)&dwValue, &dwSize) == ERROR_SUCCESS) {
-					callBack(valueName, type, dwValue, rootkey, path, valueName);
+					TCHAR realPath[MAX_PATH];
+					TCHAR sysPath[MAX_PATH];
+					wcscpy_s(realPath, dwValue);
+					if (isKnowDLLs) {
+						swprintf_s(sysPath, L"%%SystemRoot%%\\System32\\%s", dwValue);
+						ExpandEnvironmentStrings(sysPath, realPath, MAX_PATH);
+					}
+					callBack(valueName, type, realPath, rootkey, path, valueName);
 				}else LogErr(L"Query key value (%s\\%s) failed in RegQueryValueEx : %d", MREG_ROOTKEYToStr(rootkey), path, err);
 			}
 			dwIndex++;
@@ -151,8 +158,71 @@ void MSM_OpenAndEnumWithClsid(HKEY rootkey, LPWSTR path, LPWSTR type, EnumStartu
 	}
 	else LogErr(L"Enum child key (%s\\%s) failed in RegOpenKeyEx : %d", MREG_ROOTKEYToStr(rootkey), path, err);
 }
+void MSM_OpenAndEnumPrintKeyValues(HKEY rootkey, LPWSTR path, LPWSTR type, EnumStartupsCallBack callBack)
+{
+	HKEY hKEY;
+	DWORD err = RegOpenKeyEx(rootkey, path, 0, KEY_READ, &hKEY);
+	if (err == ERROR_SUCCESS)
+	{
+		DWORD dwIndex = 0;
+		TCHAR valueName[MAX_PATH] = { 0 }; //¼üÖµÃû³Æ
+		DWORD length = MAX_PATH;
+		DWORD dwType = REG_SZ;
+
+		list<wstring> childKeys;
+		err = RegEnumKeyEx(hKEY, dwIndex, valueName, &length, NULL, NULL, NULL, NULL);
+		while (err == ERROR_SUCCESS)
+		{
+			childKeys.push_back(wstring(valueName));
+			dwIndex++;
+			length = MAX_PATH;
+			err = RegEnumKeyEx(hKEY, dwIndex, valueName, &length, NULL, NULL, NULL, NULL);
+		}
+
+		list<wstring>::iterator itor;
+		for (itor = childKeys.begin(); itor != childKeys.end(); itor++)
+		{
+			LPWSTR keyName = (LPWSTR)(*itor).c_str();
+
+			TCHAR dspNameValue[MAX_PATH] = { 0 };
+			DWORD dspNameLength = MAX_PATH;
+			DWORD dspNameType = REG_SZ;
+
+			TCHAR dllNameValue[MAX_PATH] = { 0 };
+			DWORD dllNameLength = MAX_PATH;
+			DWORD dllNameType = REG_SZ;
+			TCHAR dllFullPath[MAX_PATH] = { 0 };
+
+			HKEY hKeyChild;
+			wstring childKeyPath = FormatString(L"%s\\%s", path, keyName);
+			err = RegOpenKeyEx(rootkey, (LPWSTR)childKeyPath.c_str(), 0, KEY_READ, &hKeyChild);
+			if (err == ERROR_SUCCESS)
+			{
+				err = RegQueryValueEx(hKeyChild, L"DisplayName", 0, &dspNameType, (LPBYTE)&dspNameValue, &dspNameLength);
+				if (err != ERROR_SUCCESS)
+					wcscpy_s(dspNameValue, keyName);
+			
+				err = RegQueryValueEx(hKeyChild, L"Name", 0, &dllNameType, (LPBYTE)&dllNameValue, &dllNameLength);
+				if (err == ERROR_SUCCESS)
+				{
+					wcscpy_s(dllFullPath, dllNameValue);
+					swprintf_s(dllNameValue, L"%%SystemRoot%%\\System32\\%s", dllFullPath);
+					ExpandEnvironmentStrings(dllNameValue, dllFullPath, MAX_PATH);
+				}
+			}
+
+			callBack(dspNameValue, type, dllFullPath, rootkey, (LPWSTR)childKeyPath.c_str(), dllNameValue);
+		}
+
+		RegCloseKey(hKEY);
+	}
+	else LogErr(L"Enum child key (%s\\%s) failed in RegOpenKeyEx : %d", MREG_ROOTKEYToStr(rootkey), path, err);
+}
 
 //SOFTWARE\\Classes\\CLSID\\
+
+//HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Print\Providers
+//HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Print\Monitors\
 
 void MSM_EnumHC_RUN(EnumStartupsCallBack callBack)
 {
@@ -166,11 +236,14 @@ void MSM_EnumHC_KnowDlls(EnumStartupsCallBack callBack)
 void MSM_EnumHC_RightMenus(EnumStartupsCallBack callBack)
 {
 	MSM_OpenAndEnumWithClsid(HKEY_LOCAL_MACHINE, TEXT("SOFTWARE\\Classes\\*\\shellex\\ContextMenuHandlers\\"), L"RightMenu1", callBack);
-	MSM_OpenAndEnumWithClsid(HKEY_CURRENT_USER, TEXT("SOFTWARE\\Classes\\*\\shellex\\ContextMenuHandlers\\"), L"RightMenu2", callBack);
+	MSM_OpenAndEnumWithClsid(HKEY_CURRENT_USER, TEXT("SOFTWARE\\Classes\\*\\shellex\\ContextMenuHandlers\\"), L"RightMenu1", callBack);
+	MSM_OpenAndEnumWithClsid(HKEY_LOCAL_MACHINE, TEXT("SOFTWARE\\Classes\\AllFilesystemObjects\\shellex\\"), L"RightMenu2", callBack);
+	MSM_OpenAndEnumWithClsid(HKEY_LOCAL_MACHINE, TEXT("SOFTWARE\\Classes\\Folder\\ShellEx\\ContextMenuHandlers\\"), L"RightMenu3", callBack);
 }
 void MSM_EnumHC_Prints(EnumStartupsCallBack callBack)
 {
-
+	MSM_OpenAndEnumPrintKeyValues(HKEY_LOCAL_MACHINE, L"SYSTEM\\CurrentControlSet\\Control\\Print\\Providers", L"PrintMonitors", callBack);
+	MSM_OpenAndEnumPrintKeyValues(HKEY_LOCAL_MACHINE, L"SYSTEM\\CurrentControlSet\\Control\\Print\\Providers", L"PrintProviders", callBack);
 }
 
 TCHAR selectedFilePath[MAX_PATH];

@@ -818,4 +818,34 @@ You can also try to use WinDbg to download NTOS symbolic files, and then copy th
 
 Therefore, the kernel function is not available. If you need to use the kernel function, switch to the 64 bit PC Manager program.</value>
   </data>
+  <data name="KillAskContentImporant" xml:space="preserve">
+    <value>Ending this process causes Windows to become unstable or shut down, resulting in the loss of all unsaved data. Are you sure you want to continue?</value>
+  </data>
+  <data name="KillAskImporantGiveup" xml:space="preserve">
+    <value>Give up the unsaved data and shutdown.</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Shutdown</value>
+  </data>
+  <data name="KillAskContentVeryImporant" xml:space="preserve">
+    <value>Please note that forced the end this process will cause the system to collapse immediately!</value>
+  </data>
+  <data name="SuspendEnd" xml:space="preserve">
+    <value>?</value>
+  </data>
+  <data name="SuspendStart" xml:space="preserve">
+    <value>Are you sure want to suspend </value>
+  </data>
+  <data name="SuspendVeryImporantWarnContent" xml:space="preserve">
+    <value>Please note that forced the suspend this process will cause the system to collapse immediately!</value>
+  </data>
+  <data name="SuspendWarnContent" xml:space="preserve">
+    <value>Forced suspension of this process will cause Windows to become unstable or shut down, resulting in the loss of all unsaved data. Are you sure you want to continue?</value>
+  </data>
+  <data name="TitleVeryWarn" xml:space="preserve">
+    <value>An important warning</value>
+  </data>
 </root>

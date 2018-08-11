@@ -181,7 +181,7 @@ M_CAPI(BOOL) M_SU_KDA(DACALLBACK callback, ULONG_PTR startaddress, ULONG_PTR siz
 		memset(outBuffer, 0, size);
 
 		DWORD ReturnLength = 0;
-		if (!DeviceIoControl(hKernelDevice, CTL_KDA_DEC, &agrs, sizeof(agrs), outBuffer, size, &ReturnLength, NULL))
+		if (!DeviceIoControl(hKernelDevice, CTL_KDA_DEC, &agrs, sizeof(agrs), outBuffer, static_cast<DWORD>(size), &ReturnLength, NULL))
 		{
 			LogErr(L"M_SU_KDA DeviceIoControl err : %d", GetLastError());
 			return FALSE;

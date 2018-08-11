@@ -81,11 +81,11 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="solve.asm">
+    <CustomBuild Include="internalcall_x86.asm">
       <Filter>源文件</Filter>
-    </None>
-    <None Include="internalcall_x86.asm">
+    </CustomBuild>
+    <CustomBuild Include="internalcall_x64.asm">
       <Filter>源文件</Filter>
-    </None>
+    </CustomBuild>
   </ItemGroup>
 </Project>

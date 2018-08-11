@@ -7,6 +7,7 @@ typedef int(__cdecl *taskdialogcallback)(HWND hwnd, LPWSTR text, LPWSTR title, L
 typedef void(__cdecl *EnumWinsCallBack)(HWND hWnd, HWND hWndParent);
 typedef void(__cdecl *GetWinsCallBack)(HWND hWnd, HWND hWndParent, int i);
 typedef void(__cdecl *WorkerCallBack)(int msg, void* data1, void* data2);
+typedef BOOL(__cdecl *TerminateImporantWarnCallBack)(LPWSTR commandName, int id);
 
 LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);

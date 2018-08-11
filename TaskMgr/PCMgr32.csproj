@@ -243,11 +243,11 @@
     <Compile Include="WorkWindow\FormFillWithData.Designer.cs">
       <DependentUpon>FormFillWithData.cs</DependentUpon>
     </Compile>
-    <Compile Include="WorkWindow\FormKrnInfo.cs">
+    <Compile Include="WorkWindow\FormVKrnInfo.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="WorkWindow\FormKrnInfo.Designer.cs">
-      <DependentUpon>FormKrnInfo.cs</DependentUpon>
+    <Compile Include="WorkWindow\FormVKrnInfo.Designer.cs">
+      <DependentUpon>FormVKrnInfo.cs</DependentUpon>
     </Compile>
     <Compile Include="WorkWindow\FormLoadDriver.cs">
       <SubType>Form</SubType>
@@ -328,11 +328,11 @@
     <EmbeddedResource Include="WorkWindow\FormDelFileProgress.en.resx">
       <DependentUpon>FormDelFileProgress.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="WorkWindow\FormKrnInfo.en.resx">
-      <DependentUpon>FormKrnInfo.cs</DependentUpon>
+    <EmbeddedResource Include="WorkWindow\FormVKrnInfo.en.resx">
+      <DependentUpon>FormVKrnInfo.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="WorkWindow\FormKrnInfo.resx">
-      <DependentUpon>FormKrnInfo.cs</DependentUpon>
+    <EmbeddedResource Include="WorkWindow\FormVKrnInfo.resx">
+      <DependentUpon>FormVKrnInfo.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="WorkWindow\FormLoadDriver.en.resx">
       <DependentUpon>FormLoadDriver.cs</DependentUpon>
@@ -424,6 +424,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="icoPcmgr.ico" />
+    <None Include="Resources\iconContextMenu.png" />
+    <None Include="Resources\icoFiles.ico" />
     <None Include="Resources\icon_background_uwp.png" />
     <None Include="Resources\icoResourceMon.bmp" />
     <None Include="Resources\icoServiceHost.ico" />

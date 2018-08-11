@@ -169,6 +169,15 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 取消 的本地化字符串。
+        /// </summary>
+        internal static string Cancel {
+            get {
+                return ResourceManager.GetString("Cancel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 取消运行 的本地化字符串。
         /// </summary>
         internal static string CancelRun {
@@ -237,6 +246,15 @@ namespace PCMgr.Lanuages {
         internal static string ChooseTargetDir {
             get {
                 return ResourceManager.GetString("ChooseTargetDir", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 关闭 的本地化字符串。
+        /// </summary>
+        internal static string Close {
+            get {
+                return ResourceManager.GetString("Close", resourceCulture);
             }
         }
         
@@ -808,11 +826,38 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 结束此进程将导致 Windows 不稳定或关闭，从而导致丢失所有未保存的数据。你确定要继续吗? 的本地化字符串。
+        /// </summary>
+        internal static string KillAskContentImporant {
+            get {
+                return ResourceManager.GetString("KillAskContentImporant", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 请注意，强制结束此进程将导致系统立即奔溃！ 的本地化字符串。
+        /// </summary>
+        internal static string KillAskContentVeryImporant {
+            get {
+                return ResourceManager.GetString("KillAskContentVeryImporant", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 吗？ 的本地化字符串。
         /// </summary>
         internal static string KillAskEnd {
             get {
                 return ResourceManager.GetString("KillAskEnd", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 放弃未保存的数据并关闭。 的本地化字符串。
+        /// </summary>
+        internal static string KillAskImporantGiveup {
+            get {
+                return ResourceManager.GetString("KillAskImporantGiveup", resourceCulture);
             }
         }
         
@@ -1579,6 +1624,42 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 的运行吗？ 的本地化字符串。
+        /// </summary>
+        internal static string SuspendEnd {
+            get {
+                return ResourceManager.GetString("SuspendEnd", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 你确定要暂停 的本地化字符串。
+        /// </summary>
+        internal static string SuspendStart {
+            get {
+                return ResourceManager.GetString("SuspendStart", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 强制暂停此进程运行将导致 Windows 立即奔溃！ 的本地化字符串。
+        /// </summary>
+        internal static string SuspendVeryImporantWarnContent {
+            get {
+                return ResourceManager.GetString("SuspendVeryImporantWarnContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 强制暂停此进程运行将导致 Windows 不稳定或关闭，从而导致丢失所有未保存的数据。你确定要继续吗? 的本地化字符串。
+        /// </summary>
+        internal static string SuspendWarnContent {
+            get {
+                return ResourceManager.GetString("SuspendWarnContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 无法暂停进程运行 的本地化字符串。
         /// </summary>
         internal static string SusProcFailed {
@@ -1945,6 +2026,15 @@ namespace PCMgr.Lanuages {
         internal static string TitleStatus {
             get {
                 return ResourceManager.GetString("TitleStatus", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 重要警告 的本地化字符串。
+        /// </summary>
+        internal static string TitleVeryWarn {
+            get {
+                return ResourceManager.GetString("TitleVeryWarn", resourceCulture);
             }
         }
         

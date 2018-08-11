@@ -52,6 +52,7 @@ EnumWinsCallBack hEnumWinsCallBack;
 GetWinsCallBack hGetWinsWinsCallBack;
 CLRCreateInstanceFun _CLRCreateInstance;
 WorkerCallBack hWorkerCallBack;
+TerminateImporantWarnCallBack hTerminateImporantWarnCallBack;
 HANDLE hMutex;
 
 WCHAR appDir[MAX_PATH];
@@ -370,6 +371,9 @@ M_API void* MAppSetCallBack(void * cp, int id)
 		break;
 	case 1:
 		hMainExitCallBack = (exitcallback)cp;
+		break;
+	case 2:
+		hTerminateImporantWarnCallBack = (TerminateImporantWarnCallBack)cp;
 		break;
 	case 3:
 		hEnumWinsCallBack = (EnumWinsCallBack)cp;
@@ -697,6 +701,8 @@ extern DWORD thisCommandPid;
 extern LPWSTR thisCommandPath;
 extern LPWSTR thisCommandName;
 extern LPWSTR thisCommandUWPName;
+extern BOOL thisCommandIsImporant;
+extern BOOL thisCommandIsVeryImporant;
 
 LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -832,6 +838,8 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		case IDM_SUPROC: {
 			if (thisCommandPid > 4)
 			{
+				if (thisCommandIsVeryImporant && !hTerminateImporantWarnCallBack(thisCommandName, 4)) break;
+				if (!thisCommandIsVeryImporant && thisCommandIsImporant && !hTerminateImporantWarnCallBack(thisCommandName, 2)) break;
 				NTSTATUS status = MSuspendProcessNt(thisCommandPid, NULL);
 				if (status == STATUS_INVALID_HANDLE) {
 					MShowErrorMessage((LPWSTR)str_item_invalidproc.c_str(), (LPWSTR)str_item_op_failed.c_str(), MB_ICONWARNING, MB_OK);

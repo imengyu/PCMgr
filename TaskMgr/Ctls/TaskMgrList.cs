@@ -57,7 +57,7 @@ namespace PCMgr.Ctls
             scrol.Hide();
             t = new Timer();
             t.Tick += T_Tick;
-            t.Interval = 100;
+            t.Interval = 50;
             defLineColorPen = new Pen(Color.FromArgb(234, 213, 160));
             hotLineColorPen = new Pen(Color.FromArgb(248, 106, 42));
             defBgSolidBrush = new SolidBrush(Color.FromArgb(255, 249, 228));
@@ -65,7 +65,7 @@ namespace PCMgr.Ctls
             errTagSolidBrush = new SolidBrush(Color.Orange);
             defChildColorPen = new Pen(Color.FromArgb(0, 120, 215), 3);
             DrawIcon = true;
-            PauseUwpIco = Properties.Resources.icon_background_uwp;
+            PauseUwpIco = Properties.Resources.icoBackgroundUwp;
         }
 
         private void Header_HearderWidthChanged(object sender, EventArgs e)
@@ -141,6 +141,8 @@ namespace PCMgr.Ctls
         private Font fnormalText = new Font("微软雅黑", 13f);
         private Font fgroupText = new Font("微软雅黑", 13f);
         private Font fnormalText2 = new Font("微软雅黑", 9f);
+        private Font fsmallText2 = new Font("微软雅黑", 8.5f);
+        private SolidBrush bsmallText2 = new SolidBrush(Color.FromArgb(0xFF, 0x7F, 0x24));
         private TaskMgrListItem selectedItem = null;
         private TaskMgrListItem mouseenteredItem_ = null;
         private TaskMgrListItem mouseenteredItem
@@ -425,7 +427,11 @@ namespace PCMgr.Ctls
                     }
 
                     if (i2 > 0 && item.SubItems[i2].Text != "") g.DrawString(item.SubItems[i2].Text, item.SubItems[i2].Font, drawAsPausedGray ? Brushes.Gray : item.SubItems[i2].ForeColorSolidBrush, new Rectangle(x + 6, item.YPos - yOffest, header.Items[i2].Width - 10, currItemHeight), f);
-                    else if (i2 == 0) g.DrawString(item.Text, fnormalText2, item.SubItems[0].ForeColorSolidBrush, new Rectangle(x + (DrawIcon ? 63 : 25) + (isChildItem ? 5 : 0), item.YPos - yOffest, header.Items[0].Width - (DrawIcon ? 60 : 25) - (isChildItem ? 5 : 0), currItemHeight), f);
+                    else if (i2 == 0)
+                    {
+                        if (item.DisplayChildCount) g.DrawString(item.Text + " (" + item.Childs.Count + ")", fnormalText2, item.SubItems[0].ForeColorSolidBrush, new Rectangle(x + (DrawIcon ? 63 : 25) + (isChildItem ? 5 : 0), item.YPos - yOffest, header.Items[0].Width - (DrawIcon ? 60 : 25) - (isChildItem ? 5 : 0), currItemHeight), f);
+                        else g.DrawString(item.Text, fnormalText2, item.SubItems[0].ForeColorSolidBrush, new Rectangle(x + (DrawIcon ? 63 : 25) + (isChildItem ? 5 : 0), item.YPos - yOffest, header.Items[0].Width - (DrawIcon ? 60 : 25) - (isChildItem ? 5 : 0), currItemHeight), f);
+                    }
 
                     if (drawAsPausedIcon && i2 == item.DrawUWPPausedIconIndex)
                         g.DrawImage(PauseUwpIco, new Rectangle(x + header.Items[i2].Width - PauseUwpIco.Width - 2, item.YPos - yOffest + (isChildItem ? -2 : 2), PauseUwpIco.Width, PauseUwpIco.Height));
@@ -445,6 +451,12 @@ namespace PCMgr.Ctls
 
                     for (int i2 = 0; i2 < item.Childs.Count; i2++)
                     {
+                        if (item.Childs[i2] == item.OldSelectedItem || (item.Childs[i2] == mouseenteredItem))
+                        {
+                            if (FocusedType) MListDrawItem(Handle, g.GetHdc(), 37 - xOffest, item.YPos - yOffest + i2 * smallItemHeight + itemHeight, header.AllWidth - 37, smallItemHeight, 4);
+                            else MListDrawItem(Handle, g.GetHdc(), 37 - xOffest, item.YPos - yOffest + i2 * smallItemHeight + itemHeight, header.AllWidth - 37, smallItemHeight, 2);
+                            g.ReleaseHdc();
+                        }
                         if (item.Childs[i2].IsFullData)
                         {
                             showedItems.Add(item.Childs[i2]);
@@ -459,14 +471,8 @@ namespace PCMgr.Ctls
                             g.DrawIcon(item.Childs[i2].Icon, new Rectangle(40 - xOffest, item.YPos - yOffest + i2 * smallItemHeight + itemHeight + 4, 16, 16));
                         else if (item.Childs[i2].Image != null)
                             g.DrawImage(item.Childs[i2].Image, new Rectangle(40 - xOffest, item.YPos - yOffest + i2 * smallItemHeight + itemHeight + 4, 16, 16));
-
-                        if (item.Childs[i2] == item.OldSelectedItem || (item.Childs[i2] == mouseenteredItem))
-                        {
-                            if (FocusedType) MListDrawItem(Handle, g.GetHdc(), 37 - xOffest, item.YPos - yOffest + i2 * smallItemHeight + itemHeight, header.AllWidth - 37, smallItemHeight, 4);
-                            else MListDrawItem(Handle, g.GetHdc(), 37 - xOffest, item.YPos - yOffest + i2 * smallItemHeight + itemHeight, header.AllWidth - 37, smallItemHeight, 2);
-                            g.ReleaseHdc();
-                        }
-
+                        else if (item.DisplayChildIndex)
+                            g.DrawString((i2+1).ToString(), fsmallText2, bsmallText2, 40 - xOffest, item.YPos - yOffest + i2 * smallItemHeight + itemHeight + 5);
                         //if (item.YPos + itemHeight - yOffest + i2 * smallItemHeight > rect.Bottom)
                        //     break;
                     }
@@ -1166,6 +1172,9 @@ namespace PCMgr.Ctls
         public bool DrawUWPPausedGray { get; set; }
         public int DrawUWPPausedIconIndex { get; set; }
 
+        public bool DisplayChildCount { get; set; }
+        public bool DisplayChildIndex { get; set; }
+
         public bool IsUWPICO { get; set; }
         public bool IsSelectingChilds { get; set; }
         public TaskMgrListItem Parent { get; set; }
@@ -1191,11 +1200,12 @@ namespace PCMgr.Ctls
         {
             get { return childs; }
         }
-        public bool HasChild(IntPtr tag)
+        public bool HasWindowChild(IntPtr tag)
         {
             bool rs = false;
-            foreach (TaskMgrListItemChild c in childs)
-                if ((IntPtr)c.Tag== tag) return true;
+            foreach (TaskMgrListItem c in childs)
+                if (c.Type == TaskMgrListItemType.ItemWindow)
+                    if ((IntPtr)c.Tag == tag) return true;
             return rs;
         }
     }
