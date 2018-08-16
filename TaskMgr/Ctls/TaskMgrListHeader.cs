@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Text;
 using System.Windows.Forms;
 
 namespace PCMgr.Ctls
@@ -36,6 +34,7 @@ namespace PCMgr.Ctls
                 vs.TabStop = true;
                 par.Controls.Add(vs);
             }
+            lineBrush = new LinearGradientBrush(new Point(0, 0), new Point(0, 60), Color.Transparent, Color.FromArgb(187, 187, 187));
         }
 
         private void Vs_ValueChanged(object sender, EventArgs e)
@@ -68,6 +67,8 @@ namespace PCMgr.Ctls
             Vsitem();
         }
 
+        private LinearGradientBrush lineBrush = null;
+        private IntPtr hTheme = IntPtr.Zero;
         private HScrollBar vs = null;
         private int xOffiest = 0;
         private TaskMgrList parent = null;
@@ -94,6 +95,30 @@ namespace PCMgr.Ctls
         {
             get { return xOffiest; }
             set { xOffiest = value;vsed = false; Vsitem(); Invalidate(); XOffestChanged?.Invoke(this, null); }
+        }
+        /// <summary>
+        /// 获取一个值，用以指示 System.ComponentModel.Component 当前是否处于设计模式。
+        /// </summary>
+        protected new bool DesignMode
+        {
+            get
+            {
+
+#if DEBUG
+                bool returnFlag = false;
+                if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime)
+                {
+                    returnFlag = true;
+                }
+                else if (System.Diagnostics.Process.GetCurrentProcess().ProcessName.ToUpper().Equals("DEVENV"))
+                {
+                    returnFlag = true;
+                }
+                return returnFlag;
+#else
+                return base.DesignMode;
+#endif
+            }
         }
 
         public bool ScrollToItem(TaskMgrListHeaderItem item)
@@ -174,6 +199,23 @@ namespace PCMgr.Ctls
             return base.ProcessDialogKey(keyData);
         }
 
+        protected override void OnHandleCreated(EventArgs e)
+        {
+            base.OnHandleCreated(e);
+            if (DesignMode == false)
+            {
+                hTheme = TaskMgrListApis.MOpenThemeData(Handle, "HEADER");
+            }
+        }
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (!DesignMode) TaskMgrListApis.MCloseThemeData(hTheme);
+                hTheme = IntPtr.Zero;
+            }
+            base.Dispose(disposing);
+        }
         protected override void OnLostFocus(EventArgs e)
         {
             if (enteredItem != null)
@@ -306,45 +348,57 @@ namespace PCMgr.Ctls
 
             Graphics g = e.Graphics;
             int thisWidth = -xOffiest;
-            LinearGradientBrush b = new LinearGradientBrush(new Point(0, 0), new Point(0, 60), Color.Transparent, Color.FromArgb(187, 187, 187));
-            Pen p = new Pen(b);
-            int h = Height - 1;
-            bool arrdrawed = false;
-            for (int i = 0; i < Items.Count; i++)
+            using (Pen p = new Pen(lineBrush))
             {
-                int x = thisWidth + items[i].Width;
-
-                g.DrawLine(p, new Point(x, 0), new Point(x, h));
-                if (items[i] == enteredItem)
-                    g.FillRectangle(new SolidBrush(Color.FromArgb(229, 243, 255)), new Rectangle(thisWidth + 1, 0, items[i].Width - 1, h));
-                if (items[i].IsHot)
-                    g.FillRectangle(new SolidBrush(Color.FromArgb(248, 106, 42)), new Rectangle(thisWidth + 1, 0, items[i].Width - 1, h));
-                string tb = items[i].TextBig;
-                string ts = items[i].TextSmall;
-                if (tb != "" || ts != "")
+                int h = Height - 1;
+                bool arrdrawed = false;
+                for (int i = 0; i < Items.Count; i++)
                 {
-                    StringFormat f = items[i].AlignmentStringFormat;
-                    if (tb != "")
-                        g.DrawString(tb, fb, Brushes.Black, new Rectangle(thisWidth + 3, 10, items[i].Width - 6, 24), f);
-                    if (ts != "")
-                        g.DrawString(ts, fs, new SolidBrush(Color.FromArgb(76, 96, 122)), new Rectangle(thisWidth + 3, Height - 22, items[i].Width - 6, 18), f);
+                    int x = thisWidth + items[i].Width;
+
+                    g.DrawLine(p, new Point(x, 0), new Point(x, h));
+
+                    if (items[i] == enteredItem)
+                    {
+                        TaskMgrListApis.MHeaderDrawItem(hTheme, g.GetHdc(), (thisWidth + 1), 0, items[i].Width - 1, h, TaskMgrListApis.M_DRAW_HEADER_HOT);
+                        g.ReleaseHdc();
+                    }
+                    else if (items[i].IsHot)
+                    {
+                        TaskMgrListApis.MHeaderDrawItem(hTheme, g.GetHdc(), (thisWidth + 1), 0, items[i].Width - 1, h, TaskMgrListApis.M_DRAW_HEADER_PRESSED);
+                        g.ReleaseHdc();
+                    }
+
+                    string tb = items[i].TextBig;
+                    string ts = items[i].TextSmall;
+                    if (tb != "" || ts != "")
+                    {
+                        StringFormat f = items[i].AlignmentStringFormat;
+                        if (tb != "")
+                            g.DrawString(tb, fb, Brushes.Black, new Rectangle(thisWidth + 3, 10, items[i].Width - 6, 24), f);
+                        if (ts != "")
+                            g.DrawString(ts, fs, new SolidBrush(Color.FromArgb(76, 96, 122)), new Rectangle(thisWidth + 3, Height - 22, items[i].Width - 6, 18), f);
+                    }
+                    if (!arrdrawed)
+                        if (items[i].ArrowType == TaskMgrListHeaderSortArrow.Ascending)
+                        {
+                            int posx = thisWidth + Items[i].Width / 2 - 4;
+                            // g.DrawImage(PCMgr.Properties.Resources.listHeaderArrowAscending, posx, 0, 9, 5);
+                            TaskMgrListApis.MHeaderDrawItem(hTheme, g.GetHdc(), posx, 0, 9, 6, TaskMgrListApis.M_DRAW_HEADER_SORTUP);
+                            g.ReleaseHdc();
+                            arrdrawed = true;
+                        }
+                        else if (items[i].ArrowType == TaskMgrListHeaderSortArrow.Descending)
+                        {
+                            int posx = thisWidth + Items[i].Width / 2 - 4;
+                            TaskMgrListApis.MHeaderDrawItem(hTheme, g.GetHdc(), posx, 0, 9, 6, TaskMgrListApis.M_DRAW_HEADER_SORTDOWN);
+                            g.ReleaseHdc();
+                            arrdrawed = true;
+                        }
+                    thisWidth += items[i].Width;
                 }
-                if (!arrdrawed)
-                    if (items[i].ArrowType == TaskMgrListHeaderSortArrow.Ascending)
-                    {
-                        int posx = thisWidth + Items[i].Width / 2 - 4;
-                        g.DrawImage(PCMgr.Properties.Resources.listHeaderArrowAscending, posx, 0, 9, 5);
-                        arrdrawed = true;
-                    }
-                    else if (items[i].ArrowType == TaskMgrListHeaderSortArrow.Descending)
-                    {
-                        int posx = thisWidth + Items[i].Width / 2 - 4;
-                        g.DrawImage(PCMgr.Properties.Resources.listHeaderArrowDisascending, posx, 0, 9, 5);
-                        arrdrawed = true;
-                    }
-                thisWidth += items[i].Width;
+                g.DrawLine(new Pen(Color.FromArgb(160, 160, 160)), new Point(0, Height - 1), new Point(Width, Height - 1));
             }
-            g.DrawLine(new Pen(Color.FromArgb(160, 160, 160)), new Point(0, Height - 1), new Point(Width, Height - 1));
         }
         public bool Vsitem(bool b=false)
         {

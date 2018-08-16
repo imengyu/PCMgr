@@ -141,13 +141,14 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 {
 	switch (id)
 	{
+	case 180: return GetCurrentProcessId();
 	case 181: {
 		SetUnhandledExceptionFilter(NULL);
 		SetUnhandledExceptionFilter(MUnhandledExceptionFilter);
 		return 1;
 	}
 	case 182:
-		SetWindowTheme(hWnd, L"Explorer", NULL);
+		MSetAsExplorerTheme(hWnd);
 		return 1;
 	case 183: {
 		hMenuMain = LoadMenu(hInstRs, MAKEINTRESOURCE(IDR_MENUMAIN));
@@ -160,8 +161,9 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 			InsertMenu(hMenuMainFile, 2, MF_BYPOSITION, IDM_UNLOAD_DRIVER, str_item_unloaddriver);
 			InsertMenu(hMenuMainFile, 2, MF_BYPOSITION, IDM_LOAD_DRIVER, str_item_loaddriver);
 		}
-		SetMenu(hWnd, hMenuMain);
 		hWndMain = hWnd;
+		if (!M_CFG_GetConfigBOOL(L"SimpleView", L"AppSetting", TRUE))
+			SetMenu(hWnd, hMenuMain);
 
 		if (MFM_FileExist(L"C:\\Windows\\System32\\vsjitdebugger.exe"))
 			can_debug = true;
@@ -220,15 +222,10 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 				pt.x = menu_last_x;
 				pt.y = menu_last_y;
 			}
-			if (IsWindow(selectItem4)) {
-				if (IsWindowEnabled(selectItem4))
-					EnableMenuItem(hpop, ID_WINSMENU_ENABLE, MF_DISABLED);
-				else
-					EnableMenuItem(hpop, ID_WINSMENU_DISABLE, MF_DISABLED);
-				if (!IsWindowVisible(selectItem4))
-					EnableMenuItem(hpop, ID_WINSMENU_HIDEWINDOW, MF_DISABLED);
-				else
-					EnableMenuItem(hpop, ID_WINSMENU_SHOWWND, MF_DISABLED);
+			if (selectItem4 == hWndMain)
+			{
+				EnableMenuItem(hpop, ID_MAINWINMENU_SETTO, MF_DISABLED);
+				EnableMenuItem(hpop, ID_MAINWINMENU_BRINGFORNT, MF_DISABLED);
 			}
 			TrackPopupMenu(hpop,
 				TPM_LEFTALIGN | TPM_TOPALIGN | TPM_RIGHTBUTTON,
@@ -249,8 +246,10 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 		break;
 	case 192:
 		if (SendMessageTimeout((HWND)data, WM_SYSCOMMAND, SC_CLOSE, 0, SMTO_BLOCK, 500, 0) == 0)
-			MKillProcessUser(FALSE);
-		break;
+			return 1;
+		if (IsWindow((HWND)data))
+			return 1;
+		return 0;
 	case 193: {
 		int c = static_cast<int>((ULONG_PTR)data);
 		switch (c)
@@ -326,7 +325,7 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 		UnregisterHotKey(hWnd, HotKeyId);
 		break;
 	case 208:
-		if (!IsWindowVisible(hWnd)) 
+		if (!IsWindowVisible(hWnd))
 			ShowWindow(hWnd, SW_SHOW);
 		if (IsIconic(hWnd))
 			ShowWindow(hWnd, SW_RESTORE);
@@ -352,6 +351,37 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 		menu_last_x = (int)(ULONG_PTR)hWnd;
 		menu_last_y = (int)(ULONG_PTR)data;
 		break;
+	case 213: {
+		if (IsIconic(hWnd))
+			ShowWindow(hWnd, SW_RESTORE);
+		SetForegroundWindow(hWnd);
+		break;
+	}
+	case 214: {
+		HMENU hroot = LoadMenu(hInstRs, MAKEINTRESOURCE(IDR_MENUSIMPPROC));
+		if (hroot) {
+			HMENU hpop = GetSubMenu(hroot, 0);
+			POINT pt;
+			if (menu_last_x == 0 && menu_last_y == 0)
+				GetCursorPos(&pt);
+			else {
+				pt.x = menu_last_x;
+				pt.y = menu_last_y;
+			}
+			TrackPopupMenu(hpop,
+				TPM_LEFTALIGN | TPM_TOPALIGN | TPM_RIGHTBUTTON,
+				pt.x,
+				pt.y,
+				0,
+				hWnd,
+				NULL);
+			DestroyMenu(hroot);
+		}
+		break;
+	}
+	case 215: SetMenu(hWnd, NULL); break;
+	case 216: SetMenu(hWnd, hMenuMain); break;
+
 	default:
 		return 0;
 		break;
@@ -450,15 +480,7 @@ M_API BOOL MIsSystemSupport()
 
 LPWSTR*argsStrs = NULL;
 
-M_API BOOL MAppMainCanRun()
-{
-	if (!MIsSystemSupport()) 
-	{
-		MPrintErrorMessage((LPWSTR)L"Application not support your Windows, Running this program requires Windows 7 at least.", MB_ICONERROR);
-		return FALSE;
-	}
-	return TRUE;
-}
+
 M_API void MAppMainExit(UINT exitcode)
 {
 	ExitProcess(exitcode);
@@ -564,6 +586,7 @@ bool MLoadApp() {
 }
 bool MLoadAppBackUp()
 {
+	MAppRun2();
 	HMODULE hI = LoadLibrary(L"PCMgrInit32.dll");
 	if (hI)
 	{
@@ -574,6 +597,9 @@ bool MLoadAppBackUp()
 		}
 	}
 	return false;
+}
+M_API void MAppRun2() {
+	MLoadAppBackUp();
 }
 
 M_API void MAppExit() {
@@ -618,9 +644,82 @@ M_API void MAppRebotAdmin2(LPWSTR agrs) {
 		}
 	}
 }
-M_API void MListDrawItem(HWND hWnd, HDC hdc, int x, int y, int w, int h, int state)
+
+//Theme
+M_API HANDLE MOpenThemeData(HWND hWnd, LPWSTR className)
 {
-	HTHEME hTheme = NULL;
+	return OpenThemeData(hWnd, className);
+}
+M_API void MCloseThemeData(HANDLE hTheme)
+{
+	if (hTheme != NULL)
+		CloseThemeData(hTheme);
+}
+M_API void MSetAsExplorerTheme(HWND hWnd)
+{
+	SetWindowTheme(hWnd, L"Explorer", NULL);
+}
+
+M_API void MDrawImage(HDC hdc, int x, int y)
+{
+
+}
+M_API void MDrawIcon(HICON hIcon, HDC hdc, int x, int y)
+{
+	DrawIconEx(hdc, x, y, hIcon, 16, 16, 0, NULL, DI_NORMAL);
+}
+
+//Theme draw Expand button
+M_API void MExpandDrawButton(HANDLE hTheme, HDC hdc, int x, int y, int state, BOOL	on)
+{
+	RECT rc;
+	rc.left = x;
+	rc.top = y;
+	rc.right = x + 19;
+	rc.bottom = y + 21;
+	switch (state)
+	{
+	case M_DRAW_EXPAND_NORMAL:
+		DrawThemeBackground(hTheme, hdc, TDLG_EXPANDOBUTTON, on ? TDLGEBS_EXPANDEDNORMAL : TDLGEBS_NORMAL, &rc, &rc);
+		break;
+	case M_DRAW_EXPAND_HOVER:
+		DrawThemeBackground(hTheme, hdc, TDLG_EXPANDOBUTTON, on ? TDLGEBS_EXPANDEDHOVER : TDLGEBS_HOVER, &rc, &rc);
+		break;
+	case M_DRAW_EXPAND_PRESSED:
+		DrawThemeBackground(hTheme, hdc, TDLG_EXPANDOBUTTON, on ? TDLGEBS_EXPANDEDPRESSED : TDLGEBS_PRESSED, &rc, &rc);
+		break;
+	}
+}
+//Theme draw Header
+M_API void MHeaderDrawItem(HANDLE hTheme, HDC hdc, int x, int y, int w, int h, int state)
+{	
+	if (hTheme)
+	{
+		RECT rc;
+		rc.left = x;
+		rc.top = y;
+		rc.right = x + w;
+		rc.bottom = y + h;
+		switch (state)
+		{
+		case M_DRAW_HEADER_HOT:
+			DrawThemeBackground(hTheme, hdc, HP_HEADERITEM, HIS_HOT, &rc, &rc);
+			break;
+		case M_DRAW_HEADER_PRESSED:
+			DrawThemeBackground(hTheme, hdc, HP_HEADERITEM, HIS_PRESSED, &rc, &rc);
+			break;
+		case M_DRAW_HEADER_SORTDOWN:
+			DrawThemeBackground(hTheme, hdc, HP_HEADERSORTARROW, HSAS_SORTEDDOWN, &rc, &rc);
+			break;
+		case M_DRAW_HEADER_SORTUP:
+			DrawThemeBackground(hTheme, hdc, HP_HEADERSORTARROW, HSAS_SORTEDUP, &rc, &rc);
+			break;
+		}
+	}
+}
+//Theme draw LISTVIEW Item
+M_API void MListDrawItem(HANDLE hTheme, HDC hdc, int x, int y, int w, int h, int state)
+{
 	RECT rc;
 	rc.left = x;
 	rc.top = y;
@@ -628,41 +727,33 @@ M_API void MListDrawItem(HWND hWnd, HDC hdc, int x, int y, int w, int h, int sta
 	rc.bottom = y + h;
 	switch (state)
 	{
-	case 1:
-		hTheme = OpenThemeData(hWnd, L"LISTVIEW");
-		DrawThemeBackground(hTheme, hdc, TVP_TREEITEM, LISS_HOTSELECTED, &rc, &rc);
+	case M_DRAW_LISTVIEW_HOT:
+		DrawThemeBackground(hTheme, hdc, LVP_LISTITEM, LISS_HOT, &rc, &rc);
 		break;
-	case 2:
-		hTheme = OpenThemeData(hWnd, L"LISTVIEW");
-		DrawThemeBackground(hTheme, hdc, TVP_TREEITEM, LISS_SELECTEDNOTFOCUS, &rc, &rc);
+	case M_DRAW_LISTVIEW_SELECT_NOFOCUS:
+		DrawThemeBackground(hTheme, hdc, LVP_LISTITEM, LISS_SELECTEDNOTFOCUS, &rc, &rc);
 		break;
-	case 3:
-		hTheme = OpenThemeData(hWnd, L"LISTVIEW");
-		DrawThemeBackground(hTheme, hdc, TVP_TREEITEM, LISS_HOT, &rc, &rc);
-	case 4:
-		hTheme = OpenThemeData(hWnd, L"LISTVIEW");
-		DrawThemeBackground(hTheme, hdc, TVP_TREEITEM, LISS_SELECTED, &rc, &rc);
+	case M_DRAW_LISTVIEW_HOT_SELECT:
+		DrawThemeBackground(hTheme, hdc, LVP_LISTITEM, LISS_HOTSELECTED, &rc, &rc);
 		break;
-	case 5:
-		hTheme = OpenThemeData(hWnd, L"TREEVIEW");
-		DrawThemeBackground(hTheme, hdc, TVP_GLYPH, GLPS_CLOSED, &rc, &rc);
+	case M_DRAW_LISTVIEW_SELECT:
+		DrawThemeBackground(hTheme, hdc, LVP_LISTITEM, LISS_SELECTED, &rc, &rc);
 		break;
-	case 6:
-		hTheme = OpenThemeData(hWnd, L"TREEVIEW");
+	case M_DRAW_TREEVIEW_GY_OPEN:
 		DrawThemeBackground(hTheme, hdc, TVP_GLYPH, GLPS_OPENED, &rc, &rc);
 		break;
-	case 7:
-		hTheme = OpenThemeData(hWnd, L"TREEVIEW");
-		DrawThemeBackground(hTheme, hdc, TVP_HOTGLYPH, HGLPS_CLOSED, &rc, &rc);
+	case M_DRAW_TREEVIEW_GY_CLOSED:
+		DrawThemeBackground(hTheme, hdc, TVP_GLYPH, GLPS_CLOSED, &rc, &rc);
 		break;
-	case 8:
-		hTheme = OpenThemeData(hWnd, L"TREEVIEW");
+	case M_DRAW_TREEVIEW_GY_OPEN_HOT:
 		DrawThemeBackground(hTheme, hdc, TVP_HOTGLYPH, HGLPS_OPENED, &rc, &rc);
+		break;
+	case M_DRAW_TREEVIEW_GY_CLOSED_HOT:
+		DrawThemeBackground(hTheme, hdc, TVP_HOTGLYPH, HGLPS_CLOSED, &rc, &rc);
 		break;
 	default:
 		break;
 	}
-	if (hTheme != NULL)CloseThemeData(hTheme);
 }
 
 void MAppWmCommandTools(WPARAM wParam)
@@ -704,6 +795,8 @@ extern LPWSTR thisCommandUWPName;
 extern BOOL thisCommandIsImporant;
 extern BOOL thisCommandIsVeryImporant;
 
+
+//主窗口 WinProc
 LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg)
@@ -769,6 +862,7 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			MAppWorkCall3(193, NULL, (LPVOID)(ULONG_PTR)1);
 			break;
 		}
+		case ID_SIMPPROC_NEWTASK:
 		case IDM_RUN: {
 			MRunFileDlg(hWnd, NULL, NULL, NULL, NULL, 0);
 			break;
@@ -833,6 +927,11 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		case IDM_VHANDLES: {
 			if (thisCommandPid > 4)
 				MAppMainCall(23, (LPVOID)(ULONG_PTR)thisCommandPid, thisCommandName);
+			break;
+		}
+		case IDM_VPRIVILEGE: {
+			if (thisCommandPid > 4)
+				MAppMainCall(51, (LPVOID)(ULONG_PTR)thisCommandPid, thisCommandName);
 			break;
 		}
 		case IDM_SUPROC: {
@@ -902,8 +1001,8 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 		case IDC_PCMGR_CMD: {
 #ifdef _AMD64_
-			if(MFM_FileExist(L"PCMgrCmd64.exe"))
-			    MFM_OpenFile(L"PCMgrCmd64.exe", hWnd);
+			if (MFM_FileExist(L"PCMgrCmd64.exe"))
+				MFM_OpenFile(L"PCMgrCmd64.exe", hWnd);
 #else
 			if (MFM_FileExist(L"PCMgrCmd32.exe"))
 				MFM_OpenFile(L"PCMgrCmd32.exe", hWnd);
@@ -912,6 +1011,41 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 		case IDC_SOFTACT_SHOW_KDA: {
 			MAppMainCall(32, 0, 0);
+			break;
+		}
+		case IDC_PCMGR_KERNEL_TOOL: {
+			MAppMainCall(52, 0, 0);
+			break;
+		}
+		case IDC_PCMGR_HOOK_TOOL: {
+			MAppMainCall(53, 0, 0);
+			break;
+		}
+		case IDC_PCMGR_NETMON: {
+			MAppMainCall(54, 0, 0);
+			break;
+		}
+		case IDC_PCMGR_REGEDIT: {
+			MAppMainCall(55, 0, 0);
+			break;
+		}
+		case IDC_PCMGR_FILEMGR: {
+			MAppMainCall(56, 0, 0);
+			break;
+		}
+		case IDM_DBGVIEW: {
+			if (MCanUseKernel())
+				MShowMyDbgView();
+			break;
+		}
+		case IDM_RELOADPDB: {
+			if (MCanUseKernel())
+			{
+				MAppMainCall(41, 0, 0);
+				KNTOSVALUE kNtosValue = { 0 };
+				MLoadKernelNTPDB(&kNtosValue, M_CFG_GetConfigBOOL(L"UseKrnlPDB", L"Configure", true));
+				MAppMainCall(42, 0, 0);
+			}
 			break;
 		}
 		case ID_MAINWINMENU_SETTO: {
@@ -1157,22 +1291,26 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		case IDC_SOFTACT_TEST1: {
-			Log(L"Test 1 : %s", L"IDC_SOFTACT_TEST1");
-			NTSTATUS status = 0;
-			BOOL rs = M_SU_TerminateProcessPIDTest(GetCurrentProcessId(), &status);
-			if (status != 0 || !rs) {
-				LogErr(L"M_SU_TerminateProcessPIDTest failed : 0x%08X", status);
-			}
+			Log(L"IDC_SOFTACT_TEST1");
+			ULONG_PTR addrWin32k = 0;
+			MGetNtosAndWin32kfullNameAndStartAddress(NULL, 0, NULL, &addrWin32k);
+			Log(L"Win32k StartAddress : %X", addrWin32k);
 			break;
 		}
 		case IDC_SOFTACT_TEST2: {
 			Log(L"IDC_SOFTACT_TEST2");
-			//M_SU_Test("TestString");
-			//M_SU_Test2();
 			break;
 		}
 		case IDC_SOFTACT_TEST3: {
 			M_SU_PrintInternalFuns();
+			break;
+		}
+		case ID_SIMPPROC_ENDTASK: {
+			MAppMainCall(58, (LPVOID)1, 0);
+			break;
+		}
+		case ID_SIMPPROC_SETTO: {
+			MAppMainCall(58, 0, 0);
 			break;
 		}
 		default:
@@ -1525,30 +1663,6 @@ LONG WINAPI MUnhandledExceptionFilter(struct _EXCEPTION_POINTERS *lpExceptionInf
 }
 int GenerateMiniDump(PEXCEPTION_POINTERS pExceptionPointers)
 {
-	// 定义函数指针
-	typedef BOOL(WINAPI * MiniDumpWriteDumpT)(
-		HANDLE,
-		DWORD,
-		HANDLE,
-		MINIDUMP_TYPE,
-		PMINIDUMP_EXCEPTION_INFORMATION,
-		PMINIDUMP_USER_STREAM_INFORMATION,
-		PMINIDUMP_CALLBACK_INFORMATION
-		);
-	// 从 "DbgHelp.dll" 库中获取 "MiniDumpWriteDump" 函数
-	MiniDumpWriteDumpT pfnMiniDumpWriteDump = NULL;
-	HMODULE hDbgHelp = LoadLibrary(L"DbgHelp.dll");
-	if (NULL == hDbgHelp)
-	{
-		return EXCEPTION_CONTINUE_EXECUTION;
-	}
-	pfnMiniDumpWriteDump = (MiniDumpWriteDumpT)GetProcAddress(hDbgHelp, "MiniDumpWriteDump");
-
-	if (NULL == pfnMiniDumpWriteDump)
-	{
-		FreeLibrary(hDbgHelp);
-		return EXCEPTION_CONTINUE_EXECUTION;
-	}
 	// 创建 dmp 文件件
 	TCHAR szFileName[MAX_PATH] = { 0 };
 	LPWSTR szVersion = (LPWSTR)L"\\PCMgr";
@@ -1557,18 +1671,13 @@ int GenerateMiniDump(PEXCEPTION_POINTERS pExceptionPointers)
 	wsprintf(szFileName, L"%s%s-%04d%02d%02d-%02d%02d%02d-Crush.dmp", appDir,
 		szVersion, stLocalTime.wYear, stLocalTime.wMonth, stLocalTime.wDay,
 		stLocalTime.wHour, stLocalTime.wMinute, stLocalTime.wSecond);
-	MessageBox(0, szFileName, L"szFileName", 0);
 
 	HANDLE hDumpFile = CreateFile(szFileName, GENERIC_READ | GENERIC_WRITE,
 		FILE_SHARE_WRITE | FILE_SHARE_READ, 0, CREATE_ALWAYS, 0, 0);
 
 	if (INVALID_HANDLE_VALUE == hDumpFile)
 	{
-		//WCHAR err[200];
-		//wsprintf(err, L"-errreport %s %s %s", L"0", L"未知错误", szFileName);
-		//ShellExecute(NULL, L"open", static_AppLoader->GetAppFullPath(), err, NULL, SW_SHOWNORMAL);
 		M_LOG_Error_ForceFile(L"Application crashed!\nDump File Create failed! (ErrorCode: %d)", GetLastError());
-		FreeLibrary(hDbgHelp);
 		return EXCEPTION_CONTINUE_EXECUTION;
 
 	}
@@ -1577,11 +1686,10 @@ int GenerateMiniDump(PEXCEPTION_POINTERS pExceptionPointers)
 	expParam.ThreadId = GetCurrentThreadId();
 	expParam.ExceptionPointers = pExceptionPointers;
 	expParam.ClientPointers = FALSE;
-	pfnMiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(),
+	MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(),
 		hDumpFile, MiniDumpWithDataSegs, (pExceptionPointers ? &expParam : NULL), NULL, NULL);
 	// 释放文件
 	CloseHandle(hDumpFile);
-	FreeLibrary(hDbgHelp);
 	if (pExceptionPointers) {
 		if (pExceptionPointers->ContextRecord&&pExceptionPointers->ExceptionRecord) {
 			M_LOG_Error_ForceFile(L"Application crashed!\nA Dump file was created.\n  Dump file: %s\nPlease send this Error Description file to us.\n\

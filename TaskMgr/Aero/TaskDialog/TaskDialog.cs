@@ -10,12 +10,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Windows.Forms;
-using System.Drawing;
 using System.Runtime.InteropServices;
 
-namespace PCMgr.Aero.TaskDialog {
+namespace PCMgr.Aero.TaskDialog
+{
 
     /// <summary>Displays a dialog box that can contain text, icons, buttons, command links, radio buttons and/or a progress bar.</summary>
     public partial class TaskDialog {

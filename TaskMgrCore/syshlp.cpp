@@ -16,10 +16,16 @@ extern LdrGetProcedureAddressFun LdrGetProcedureAddress;
 extern RtlInitAnsiStringFun RtlInitAnsiString;
 extern NtQuerySystemInformationFun NtQuerySystemInformation;
 
+
+M_CAPI(BOOL) MRunExe(LPWSTR path, LPWSTR args, BOOL runAsadmin, HWND hWnd)
+{
+	return ShellExecute(hWnd, runAsadmin ? L"runas" : L"run", path, args, NULL, SW_SHOW) > (HINSTANCE)32;
+}
 M_CAPI(BOOL) MRunFileDlg(_In_ HWND hwndOwner, _In_opt_ HICON hIcon, _In_opt_ LPCWSTR lpszDirectory, _In_opt_ LPCWSTR lpszTitle, _In_opt_ LPCWSTR lpszDescription, _In_ ULONG uFlags)
 {
 	return RunFileDlg(hwndOwner, hIcon, lpszDirectory, lpszTitle, lpszDescription, uFlags);
 }
+
 M_CAPI(BOOL) MIs64BitOS()
 {
 	if (_Is64BitOS == -1)
@@ -120,6 +126,7 @@ M_CAPI(BOOL) MIsRunasAdmin()
 	}
 	return _IsRunasAdmin;
 }
+
 M_CAPI(PVOID) MGetProcedureAddress(_In_ PVOID DllHandle, _In_opt_ PSTR ProcedureName, _In_opt_ ULONG ProcedureNumber)
 {
 	NTSTATUS status;
@@ -159,6 +166,7 @@ M_CAPI(PVOID) MGetProcAddress(_In_ PVOID DllHandle, _In_opt_ PSTR ProcedureName)
 {
 	return GetProcAddress((HMODULE)DllHandle, ProcedureName);
 }
+
 M_CAPI(BOOL) MCommandLineToFilePath(LPWSTR cmdline, LPWSTR buffer, int size)
 {
 	if (cmdline && buffer)
@@ -173,6 +181,10 @@ M_CAPI(BOOL) MCommandLineToFilePath(LPWSTR cmdline, LPWSTR buffer, int size)
 		}
 	}
 	return  FALSE;
+}
+
+M_CAPI(DWORD) MGetWindowsBulidVersionValue() {
+	return currentWindowsBulidVer;
 }
 M_CAPI(BOOL) MGetWindowsWin8Upper() {
 	return currentWindowsMajor >= 8;
@@ -211,18 +223,14 @@ M_CAPI(BOOL) MGetWindowsBulidVersion() {
 	}
 	return FALSE;
 }
-M_CAPI(BOOL) MRunExe(LPWSTR path, LPWSTR args, BOOL runAsadmin, HWND hWnd)
-{
-	return ShellExecute(hWnd, runAsadmin ? L"runas" : L"run", path, args, NULL, SW_SHOW) > (HINSTANCE)32;
-}
-M_CAPI(BOOL) MGetNtosNameAndStartAddress(LPWSTR name, size_t buffersize, ULONG_PTR *address)
+M_CAPI(BOOL) MGetNtosAndWin32kfullNameAndStartAddress(LPWSTR name, size_t buffersize, ULONG_PTR *address, ULONG_PTR *win32kfulladdress)
 {
 	ULONG outLength = 0;
-	PSYSTEM_MODULE_INFORMATION pSysModuleNames = (PSYSTEM_MODULE_INFORMATION)malloc(sizeof(SYSTEM_MODULE_INFORMATION));
+	PSYSTEMMODULELIST pSysModuleNames = (PSYSTEMMODULELIST)malloc(sizeof(SYSTEM_MODULE_INFORMATION));
 	if (NtQuerySystemInformation(SystemModuleInformation, pSysModuleNames, 0, &outLength) == STATUS_INFO_LENGTH_MISMATCH)
 	{
 		free(pSysModuleNames);
-		pSysModuleNames = (PSYSTEM_MODULE_INFORMATION)malloc(outLength);
+		pSysModuleNames = (PSYSTEMMODULELIST)malloc(outLength);
 	}
 	else
 	{
@@ -239,14 +247,152 @@ M_CAPI(BOOL) MGetNtosNameAndStartAddress(LPWSTR name, size_t buffersize, ULONG_P
 			return 0;
 		}
 
-		PSYSTEM_MODULE_INFORMATION SystemModuleInfo = (PSYSTEM_MODULE_INFORMATION)((PULONG)pSysModuleNames + 1);
+		int allModulesCount = pSysModuleNames->ulCount;
+
+		//System Modules
+		PSYSTEM_MODULE_INFORMATION SystemModuleInfo = (PSYSTEM_MODULE_INFORMATION)((PULONG)&pSysModuleNames->smi[0]);
+			//Find ntoskrnl
 		LPWSTR strw = MConvertLPCSTRToLPWSTR(SystemModuleInfo->ImageName);
 		std::wstring *s = Path::GetFileName(strw);
 		if (name)wcscpy_s(name, buffersize, s->c_str());
 		if (address)*address = (ULONG_PTR)SystemModuleInfo->Base;
 		delete strw;
 		delete s;
+
+		PSYSTEM_MODULE_INFORMATION SystemModuleInfoThis;
+		//And then , find win32k.sys
+		for (int i = 2; i < allModulesCount; i++) {
+			SystemModuleInfoThis = (PSYSTEM_MODULE_INFORMATION)((PULONG)&pSysModuleNames->smi[i]);
+			if (MStrEqualA(SystemModuleInfoThis->ImageName, "\\SystemRoot\\System32\\win32k.sys"))
+				if (win32kfulladdress)
+					*win32kfulladdress = (ULONG_PTR)SystemModuleInfoThis->Base;
+		}
 		free(pSysModuleNames);
 	}
 	return 0;
+}
+
+M_CAPI(LPWSTR) MKeyToStr(UINT vk)
+{
+	switch (vk)
+	{
+	case 'A':return L"A";
+	case 'B':return L"B";
+	case 'C':return L"C";
+	case 'D':return L"D";
+	case 'E':return L"E";
+	case 'F':return L"F";
+	case 'G':return L"G";
+	case 'H':return L"H";
+	case 'I':return L"I";
+	case 'J':return L"J";
+	case 'K':return L"K";
+	case 'L':return L"L";
+	case 'M':return L"M";
+	case 'N':return L"N";
+	case 'O':return L"O";
+	case 'P':return L"P";
+	case 'Q':return L"Q";
+	case 'R':return L"A";
+	case 'S':return L"S";
+	case 'T':return L"T";
+	case 'U':return L"U";
+	case 'V':return L"V";
+	case 'W':return L"W";
+	case 'X':return L"X";
+	case 'Y':return L"Y";
+	case 'Z':return L"Z";
+	case VK_BACK:return L"Backspace";
+	case VK_TAB:return L"Tab";
+	case VK_CLEAR:return L"VK_CLEAR";
+	case VK_RETURN:return L"Enter";
+	case VK_PAUSE:return L"Pause break";
+	case VK_CAPITAL:return L"Caps Lock";
+	case VK_KANA:return L"VK_KANA";
+	case VK_JUNJA:return L"VK_JUNJA";
+	case VK_FINAL:return L"VK_FINAL";
+	case VK_HANJA:return L"VK_HANJA";
+	case VK_ESCAPE:return L"Escape";
+	case VK_CONVERT:return L"VK_CONVERT";
+	case VK_NONCONVERT:return L"VK_NONCONVERT";
+	case VK_ACCEPT:return L"VK_ACCEPT";
+	case VK_MODECHANGE:return L"VK_MODECHANGE";
+	case VK_SPACE:return L"Space";
+	case VK_PRIOR:return L"Page Up";
+	case VK_NEXT:return L"Page Down";
+	case VK_END:return L"End";
+	case VK_HOME:return L"Home";
+	case VK_LEFT:return L"Left";
+	case VK_UP:return L"Up";
+	case VK_RIGHT:return L"Right";
+	case VK_DOWN:return L"Down";
+	case VK_SELECT:return L"VK_SELECT";
+	case VK_PRINT:return L"VK_PRINT";
+	case VK_EXECUTE:return L"VK_EXECUTE";
+	case VK_SNAPSHOT:return L"Print Screen";
+	case VK_INSERT:return L"Insert";
+	case VK_DELETE:return L"Delete";
+	case VK_HELP:return L"VK_HELP";
+	case VK_NUMPAD0:return L"Numpad 0";
+	case VK_NUMPAD1:return L"Numpad 1";
+	case VK_NUMPAD2:return L"Numpad 2";
+	case VK_NUMPAD3:return L"Numpad 3";
+	case VK_NUMPAD4:return L"Numpad 4";
+	case VK_NUMPAD5:return L"Numpad 5";
+	case VK_NUMPAD6:return L"Numpad 6";
+	case VK_NUMPAD7:return L"Numpad 7";
+	case VK_NUMPAD8:return L"Numpad 8";
+	case VK_NUMPAD9:return L"Numpad 9";
+	case VK_MULTIPLY:return L"Multiply(*)";
+	case VK_ADD:return L"Add(+)";
+	case VK_SEPARATOR:return L"|";
+	case VK_SUBTRACT:return L"sUBSTRACT(-)";
+	case VK_DECIMAL:return L"Decimal(.)";
+	case VK_DIVIDE:return L"Divide(/)";
+	case VK_F1:return L"F1";
+	case VK_F2:return L"F2";
+	case VK_F3:return L"F3";
+	case VK_F4:return L"F4";
+	case VK_F5:return L"F5";
+	case VK_F6:return L"F6";
+	case VK_F7:return L"F7";
+	case VK_F8:return L"F8";
+	case VK_F9:return L"F9";
+	case VK_F10:return L"F10";
+	case VK_F11:return L"F11";
+	case VK_F12:return L"F12";
+	case VK_F13:return L"F13";
+	case VK_F14:return L"F14";
+	case VK_F15:return L"F15";
+	case VK_F16:return L"F16";
+	case VK_F17:return L"F17";
+	case VK_F18:return L"F18";
+	case VK_F19:return L"F19";
+	case VK_F20:return L"F20";
+	case VK_F21:return L"F21";
+	case VK_F22:return L"F22";
+	case VK_F23:return L"F23";
+	case VK_F24:return L"F24";
+	}
+	return L"";
+}
+M_CAPI(BOOL) MHotKeyToStr(UINT fsModifiers, UINT vk, LPWSTR buffer, int size)
+{
+	WCHAR strBuffer[32];
+	if ((fsModifiers & MOD_CONTROL) == MOD_CONTROL)
+		wcscat_s(strBuffer, L"+ Control ");
+	if ((fsModifiers & MOD_ALT) == MOD_ALT)
+		wcscat_s(strBuffer, L"+ Alt ");
+	if ((fsModifiers & MOD_SHIFT) == MOD_SHIFT)
+		wcscat_s(strBuffer, L"+ Shift ");
+	if ((fsModifiers & MOD_WIN) == MOD_WIN)
+		wcscat_s(strBuffer, L"+ Win ");
+
+	wcscat_s(strBuffer, L"+ ");
+	wcscat_s(strBuffer, MKeyToStr(vk));
+
+	if (strBuffer[0] == '+') strBuffer[0] = ' ';
+
+	wcscpy_s(buffer, size, strBuffer);
+	return TRUE;
 }

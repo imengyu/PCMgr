@@ -217,9 +217,6 @@
     <Image Include="..\..\..\..\图片\Res\ico30656.ico" />
     <Image Include="..\..\..\..\图片\Res\icoPcmgr.ico" />
   </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="resource.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

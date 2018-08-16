@@ -11,9 +11,12 @@
 
 
 NTSTATUS KxTerminateProcessTest(ULONG_PTR PID);
+NTSTATUS KxGetProcessHotKeys(ULONG_PTR PID, ULONG * outCount);
+NTSTATUS KxGetProcessTimers(ULONG_PTR PID, ULONG*outCount);
 NTSTATUS KxTerminateProcessByZero(ULONG_PTRPID);
 PUNICODE_STRING KxGetProcessCommandLine(PEPROCESS Process);
 PUNICODE_STRING KxGetProcessFullPath(PEPROCESS Process);
 VOID KxForceResumeThread(PETHREAD Thread);
 NTSTATUS KxTerminateThreadWithTid(ULONG_PTR tid, ULONG exitCode, BOOLEAN useapc);
 NTSTATUS KxTerminateProcessWithPid(ULONG_PTR pid, ULONG exitCode, BOOLEAN usepst, BOOLEAN useapc);
+

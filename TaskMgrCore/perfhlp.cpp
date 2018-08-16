@@ -281,9 +281,11 @@ M_CAPI(DWORD) MPERF_GetProcessDiskRate(PSYSTEM_PROCESSES p, MPerfAndProcessData*
 	return 0;
 }
 
+
 PMIB_TCPTABLE_OWNER_PID netProcess = NULL;
 
 extern _GetPerTcpConnectionEStats dGetPerTcpConnectionEStats;
+extern _GetExtendedTcpTable dGetExtendedTcpTable;
 
 M_CAPI(BOOL) MPERF_GetConnectNetWorkAllBuffer(DWORD dwLocalAddr, DWORD dwLocalPort, DWORD dwRemoteAddr, DWORD dwRemotePort, DWORD dwState, MPerfAndProcessData*data)
 {
@@ -353,7 +355,7 @@ M_CAPI(BOOL)MPERF_NET_UpdateAllProcessNetInfo()
 	DWORD dwSize = sizeof(MIB_TCPTABLE_OWNER_PID);
 	netProcess = (PMIB_TCPTABLE_OWNER_PID)malloc(sizeof(MIB_TCPTABLE_OWNER_PID));
 	memset(netProcess, 0, sizeof(dwSize));
-	if (GetExtendedTcpTable(netProcess, &dwSize, TRUE, AF_INET, TCP_TABLE_OWNER_PID_CONNECTIONS, 0) == ERROR_INSUFFICIENT_BUFFER)
+	if (dGetExtendedTcpTable(netProcess, &dwSize, TRUE, AF_INET, TCP_TABLE_OWNER_PID_CONNECTIONS, 0) == ERROR_INSUFFICIENT_BUFFER)
 	{
 		free(netProcess);
 		DWORD realSize = sizeof(DWORD) + dwSize * sizeof(MIB_TCPROW_OWNER_PID);

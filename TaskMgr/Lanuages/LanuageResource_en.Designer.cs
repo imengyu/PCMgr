@@ -196,6 +196,15 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 Can not find any result of  的本地化字符串。
+        /// </summary>
+        internal static string CantFind {
+            get {
+                return ResourceManager.GetString("CantFind", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Get process failed 的本地化字符串。
         /// </summary>
         internal static string CantGetPath {
@@ -300,6 +309,42 @@ namespace PCMgr.Lanuages {
         internal static string CpuPackageCount {
             get {
                 return ResourceManager.GetString("CpuPackageCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Double Click this item to show _EPROCESS of process 的本地化字符串。
+        /// </summary>
+        internal static string DblCklShow_EPROCESS {
+            get {
+                return ResourceManager.GetString("DblCklShow_EPROCESS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Double Click this item to show _KPROCESS of process 的本地化字符串。
+        /// </summary>
+        internal static string DblCklShow_KPROCESS {
+            get {
+                return ResourceManager.GetString("DblCklShow_KPROCESS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Double Click this item to show _PEB of process 的本地化字符串。
+        /// </summary>
+        internal static string DblCklShow_PEB {
+            get {
+                return ResourceManager.GetString("DblCklShow_PEB", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Double Click this item to show RTL_USER_PROCESS_PARAMETERS  of process 的本地化字符串。
+        /// </summary>
+        internal static string DblCklShow_RTL_USER_PROCESS_PARAMETERS {
+            get {
+                return ResourceManager.GetString("DblCklShow_RTL_USER_PROCESS_PARAMETERS", resourceCulture);
             }
         }
         
@@ -1171,7 +1216,7 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
-        ///   查找类似 Unable to download or load the NTOS symbol file 的本地化字符串。
+        ///   查找类似 Unable to download or load the {0} symbol file 的本地化字符串。
         /// </summary>
         internal static string NoPDBWarn {
             get {
@@ -1180,9 +1225,9 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
-        ///   查找类似 We need the pdb file of NTOS to analyze the kernel and display all the functions of the software. As a result, part of the kernel&apos;s functionality will be disabled.
+        ///   查找类似 We need the pdb file of {0} to analyze the kernel and display all the functions of the software. As a result, part of the kernel&apos;s functionality will be disabled.
         ///
-        ///You can also try to use WinDbg to download NTOS symbolic files, and then copy them to this software directory symbols folder, we will automatically load. 的本地化字符串。
+        ///You can also try to use WinDbg to download  {1} symbol files, and then copy them to this software directory symbols folder, we will automatically load. 的本地化字符串。
         /// </summary>
         internal static string NoPDBWarnText {
             get {

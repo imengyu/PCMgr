@@ -203,8 +203,7 @@ bool ResusemeThread()
 BOOL CALLBACK lpEnumFunc(HWND hWnd, LPARAM lParam)
 {
 	DWORD processId;
-
-	GetWindowThreadProcessId(hWnd, &processId);
+	DWORD threadId = GetWindowThreadProcessId(hWnd, &processId);
 	if (processId == lParam)
 	{
 		BOOL visible = IsWindowVisible(hWnd);
@@ -250,7 +249,10 @@ BOOL CALLBACK lpEnumFunc(HWND hWnd, LPARAM lParam)
 		else vitem.pszText = L"-";
 		ListView_SetItem(hListWins, &vitem);
 		vitem.iSubItem++;
-		vitem.pszText = L"-";
+
+		WCHAR threadidstr[16];
+		_ltow_s(threadId, threadidstr, 10);
+		vitem.pszText = threadidstr;
 		ListView_SetItem(hListWins, &vitem);
 		winscount++;
 	}
@@ -260,9 +262,13 @@ BOOL CALLBACK lpEnumFunc2(HWND hWnd, LPARAM lParam)
 {
 	if (IsWindowVisible(hWnd))
 	{
+		wchar_t txtn[50];
+		GetWindowText(hWnd, txtn, 50);
+		if (MStrEqual(txtn, L""))
+			return TRUE;
+
 		long l = GetWindowLong(hWnd, GWL_EXSTYLE);
 		long ls = GetWindowLong(hWnd, GWL_STYLE);
-
 		wchar_t clsn[50];
 		GetClassName(hWnd, clsn, 50);
 		if (!MStrEqualW(clsn, L"ApplicationFrameWindow"))
@@ -270,14 +276,14 @@ BOOL CALLBACK lpEnumFunc2(HWND hWnd, LPARAM lParam)
 			if ((l & WS_EX_TOOLWINDOW) != WS_EX_TOOLWINDOW) {
 				if ((l & WS_EX_APPWINDOW) == WS_EX_APPWINDOW
 					|| (l & WS_EX_OVERLAPPEDWINDOW) == WS_EX_OVERLAPPEDWINDOW)
-					hAllWins->push_back(hWnd);		
+					hAllWins->push_back(hWnd);
 				else if ((ls & WS_CAPTION) == WS_CAPTION
 					|| (ls & WS_OVERLAPPED) == WS_OVERLAPPED) {
 					hAllWins->push_back(hWnd);
 				}
 			}
 		}
-		else 
+		else
 		{
 			if ((l & WS_EX_APPWINDOW) == WS_EX_APPWINDOW || (l & WS_EX_OVERLAPPEDWINDOW) == WS_EX_OVERLAPPEDWINDOW)
 				hUWPWins->push_back(hWnd);

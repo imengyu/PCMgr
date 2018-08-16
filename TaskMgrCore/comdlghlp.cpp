@@ -4,7 +4,36 @@
 #include <Shlobj.h>
 #include <Shobjidl.h>
 
-BOOL MChooseFileSingal(HWND hWnd, LPWSTR startDir, LPWSTR title, LPWSTR fileFilter, LPWSTR fileName, LPWSTR defExt, LPWSTR*strrs, size_t bufsize)
+BOOL MSaveFileSingal(HWND hWnd, LPWSTR startDir, LPWSTR title, LPWSTR fileFilter, LPWSTR fileName, LPWSTR defExt, LPWSTR strrs, size_t bufsize)
+{
+	if (strrs) {
+		OPENFILENAME ofn;
+		TCHAR szFile[MAX_PATH];
+		if (fileName != 0 && wcslen(fileName) != 0)
+			wcscpy_s(szFile, fileName);
+		ZeroMemory(&ofn, sizeof(OPENFILENAME));
+		ofn.lStructSize = sizeof(OPENFILENAME);
+		ofn.hwndOwner = hWnd;
+		ofn.lpstrFile = szFile;
+		ofn.lpstrFile[0] = '\0';
+		ofn.nMaxFile = sizeof(szFile);
+		ofn.nFilterIndex = 1;
+		ofn.lpstrFilter = fileFilter;
+		ofn.lpstrDefExt = defExt;
+		ofn.lpstrFileTitle = title;
+		ofn.nMaxFileTitle = 0;
+		ofn.lpstrInitialDir = startDir;
+		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+		if (GetSaveFileName(&ofn))
+		{
+			//显示选择的文件。 szFile
+			wcscpy_s(strrs, bufsize, szFile);
+			return TRUE;
+		}
+	}
+	return 0;
+}
+BOOL MChooseFileSingal(HWND hWnd, LPWSTR startDir, LPWSTR title, LPWSTR fileFilter, LPWSTR fileName, LPWSTR defExt, LPWSTR strrs, size_t bufsize)
 {
 	if (strrs) {
 		OPENFILENAME ofn;
@@ -27,13 +56,13 @@ BOOL MChooseFileSingal(HWND hWnd, LPWSTR startDir, LPWSTR title, LPWSTR fileFilt
 		if (GetOpenFileName(&ofn))
 		{
 			//显示选择的文件。 szFile
-			wcscpy_s(*strrs, bufsize, szFile);
+			wcscpy_s(strrs, bufsize, szFile);
 			return TRUE;
 		}
 	}
 	return 0;
 }
-BOOL MChooseDir(HWND hWnd, LPWSTR startDir, LPWSTR title, LPWSTR*strrs, size_t bufsize)
+BOOL MChooseDir(HWND hWnd, LPWSTR startDir, LPWSTR title, LPWSTR strrs, size_t bufsize)
 {
 	if (strrs) {
 		IFileDialog *pfd = NULL;
@@ -65,7 +94,7 @@ BOOL MChooseDir(HWND hWnd, LPWSTR startDir, LPWSTR title, LPWSTR*strrs, size_t b
 			hr = pfd->GetResult(&item);
 			LPWSTR pathrs;
 			item->GetDisplayName(SIGDN_FILESYSPATH, &pathrs);
-			wcscpy_s(*strrs, bufsize, pathrs);
+			wcscpy_s(strrs, bufsize, pathrs);
 			return TRUE;
 		}
 	}

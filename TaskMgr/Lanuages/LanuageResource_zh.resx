@@ -805,11 +805,11 @@ PCMgr 需要管理员权限 才能对系统进行控制和管理。
     <value>无法删除服务</value>
   </data>
   <data name="NoPDBWarn" xml:space="preserve">
-    <value>无法下载或加载NTOS的符号文件</value>
+    <value>无法下载或加载 {0} 的符号文件</value>
   </data>
   <data name="NoPDBWarnText" xml:space="preserve">
-    <value>我们需要NTOS的pdb文件才能对内核进行分析，发挥出软件的所有功能。因此，内核的部分功能将被禁用。
-您也可以尝试用WinDbg来下载NTOS的符号文件，然后将其复制到本软件目录\symbols文件夹下，我们将会自动加载。</value>
+    <value>我们需要  {0} 的pdb文件才能对内核进行分析，发挥出软件的所有功能。因此，内核的部分功能将被禁用。
+您也可以尝试用WinDbg来下载 {1} 的符号文件，然后将其复制到本软件目录\symbols文件夹下，我们将会自动加载。</value>
   </data>
   <data name="LoadDriverErrNeed64" xml:space="preserve">
     <value>需要 64 位的程序来加载内核驱动</value>
@@ -847,5 +847,20 @@ PCMgr 需要管理员权限 才能对系统进行控制和管理。
   </data>
   <data name="TitleVeryWarn" xml:space="preserve">
     <value>重要警告</value>
+  </data>
+  <data name="DblCklShow_EPROCESS" xml:space="preserve">
+    <value>双击此条目显示进程 _EPROCESS</value>
+  </data>
+  <data name="DblCklShow_KPROCESS" xml:space="preserve">
+    <value>双击此条目显示进程 _KPROCESS</value>
+  </data>
+  <data name="DblCklShow_PEB" xml:space="preserve">
+    <value>双击此条目显示进程 _PEB</value>
+  </data>
+  <data name="DblCklShow_RTL_USER_PROCESS_PARAMETERS" xml:space="preserve">
+    <value>双击此条目显示进程 _RTL_USER_PROCESS_PARAMETERS</value>
+  </data>
+  <data name="CantFind" xml:space="preserve">
+    <value>无法找到：</value>
   </data>
 </root>

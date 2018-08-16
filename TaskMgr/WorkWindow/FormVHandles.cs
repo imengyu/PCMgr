@@ -1,15 +1,9 @@
 ﻿using PCMgr.Lanuages;
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace PCMgr.WorkWindow
@@ -82,10 +76,12 @@ namespace PCMgr.WorkWindow
 
         private void EnumHandles()
         {
-            MEnumProcessHandles(currentPid, CallbackPtr);
             Invoke(new Action(delegate {
+                listView1.Visible = false;
+                MEnumProcessHandles(currentPid, CallbackPtr);
                 Text = string.Format(LanuageMgr.GetStr("VHandleTitle"), currentName, currentPid, listView1.Items.Count);
                 labelEnuming.Hide();
+                listView1.Visible = true;
             }));
         }
 

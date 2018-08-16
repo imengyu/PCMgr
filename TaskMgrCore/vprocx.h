@@ -9,23 +9,33 @@
 #include <string>
 #include <string.h>
 
+void WindowEnumStart();
+void WindowEnumDestroy();
+
 EXTERN_C M_API BOOL MAppVProcessAllWindows();
-
 EXTERN_C M_API void MAppVProcessAllWindowsUWP();
-
 EXTERN_C M_API BOOL MAppVProcessAllWindowsGetProcessWindow(DWORD pid);
-
 EXTERN_C M_API BOOL MAppVProcessAllWindowsGetProcessWindow2(DWORD pid);
 
+EXTERN_C M_API BOOL MAppVProcess(HWND hWndParent);
 EXTERN_C M_API BOOL MAppVProcessMsg(DWORD dwPID, HWND hDlg, int type, LPWSTR procName);
 
+//显示查看模块对话框
+//    dwPID：需要查看的进程id
+//    hDlg：父窗口
+//    procName：进程名字，显示在标题栏上
 EXTERN_C M_API BOOL MAppVProcessModuls(DWORD dwPID, HWND hDlg, LPWSTR procName);
-
+//显示查看线程对话框
+//    dwPID：需要查看的进程id
+//    hDlg：父窗口
+//    procName：进程名字，显示在标题栏上
 EXTERN_C M_API BOOL MAppVProcessThreads(DWORD dwPID, HWND hDlg, LPWSTR procName);
-
+//显示查看窗口对话框
+//    dwPID：需要查看的进程id
+//    hDlg：父窗口
+//    procName：进程名字，显示在标题栏上
 EXTERN_C M_API BOOL MAppVProcessWindows(DWORD dwPID, HWND hDlg, LPWSTR procName);
 
-EXTERN_C M_API BOOL MAppVProcess(HWND hWndParent);
 
 BOOL MAppVModuls(DWORD dwPID, HWND hDlg, LPWSTR procName);
 

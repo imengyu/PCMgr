@@ -6,6 +6,8 @@
 #include <capstone/platform.h>
 #include <capstone/capstone.h>
 
+//基于开源 capstone 反汇编引擎
+
 static csh csh_handle;
 
 M_CAPI(BOOL) M_KDA_Dec(PUCHAR buf, ULONG_PTR startaddress, LPVOID callback, ULONG_PTR size, BOOL x86Orx64)

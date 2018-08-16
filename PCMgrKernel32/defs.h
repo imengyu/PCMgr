@@ -102,6 +102,45 @@ typedef struct _OBJECT_HANDLE_FLAG_INFORMATION {
 	BOOLEAN ProtectFromClose;
 }OBJECT_HANDLE_FLAG_INFORMATION, *POBJECT_HANDLE_FLAG_INFORMATION;
 
+typedef PVOID HWND;
+typedef unsigned int UINT;
+
+//Hot key
+typedef struct _HOT_KEY_ITEM
+{
+	LIST_ENTRY ListEntry;
+	struct _ETHREAD *Thread;
+	HWND hWnd;
+	int id;
+	UINT fsModifiers;
+	UINT vk;
+} HOT_KEY_ITEM, *PHOT_KEY_ITEM;
+
+typedef struct _HEAD {
+	HANDLE h;
+	DWORD cLockObj;
+} HEAD, *PHEAD;
+//Timer
+typedef struct tagTIMER {
+	HEAD head;
+	// 下个结构
+	struct tagTIMER *ptmrNext;
+	struct tagTIMER *ptmrPrev;
+	PULONG pti;
+	// 窗口句柄
+	PULONG spwnd;
+	// 定时器ID
+	UINT_PTR nID;
+	// 倒计时
+	INT cmsCountdown;
+	// 间隔时间
+	INT cmsRate;
+	UINT flags;
+	// 函数入口
+	ULONG pfn;
+	PULONG ptiOptCreator;
+} TIMER, *PTIMER;
+
 #ifdef _AMD64_
 typedef struct _PEB_LDR_DATA {
 	ULONG Length;
@@ -127,6 +166,18 @@ typedef struct _PEB_LDR_DATA {
 	PVOID ShutdownThreadId;
 } PEB_LDR_DATA, *PPEB_LDR_DATA;
 #endif
+
+typedef struct tag_GET_HOT_KEYS_CACHE
+{
+	struct tag_GET_HOT_KEYS_CACHE*Next;
+	struct HOT_KEY_ITEM*Object;
+}GET_HOT_KEYS_CACHE, *PGET_HOT_KEYS_CACHE;
+
+typedef struct tag_GET_TIMERS_CACHE
+{
+	struct tag_GET_TIMERS_CACHE*Next;
+	struct TIMER*Object;
+}GET_TIMERS_CACHE,*PGET_TIMERS_CACHE;
 
 extern NTKERNELAPI int PsGetProcessPriorityClass(PEPROCESS Process);
 extern NTKERNELAPI VOID* PsGetProcessJob(PEPROCESS Process);

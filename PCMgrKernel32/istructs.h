@@ -20,8 +20,14 @@ typedef struct tag_NTOS_EPROCESS_OFF_DATA {
 	ULONG_PTR RTL_USER_PROCESS_PARAMETERS_CommandLineOffest;
 }NTOS_EPROCESS_OFF_DATA, *PNTOS_EPROCESS_OFF_DATA;
 
+typedef struct tag_WIN32K_PDB_DATA {
+	ULONG_PTR _gptmrFirst;
+	ULONG_PTR _gphkFirst;
+}WIN32K_PDB_DATA, *PWIN32K_PDB_DATA;
+
 typedef struct tag_NTOS_PDB_DATA {
 	NTOS_EPROCESS_OFF_DATA StructOffestData;
+	WIN32K_PDB_DATA Win32KData;
 	ULONG_PTR PspTerminateThreadByPointer_;
 	ULONG_PTR PspExitThread_;
 	ULONG_PTR PsGetNextProcessThread_;
@@ -67,6 +73,7 @@ typedef struct tag_KDAAGRS {
 }KDAAGRS, *PKDAAGRS;
 
 typedef struct tag_KNTOSVALUE {
+	ULONG_PTR Win32KAddress;
 	ULONG_PTR NtostAddress;
 	WCHAR NtosModuleName[32];
 	BOOLEAN KernelDataInited;
@@ -83,7 +90,32 @@ typedef struct tag_KINITAGRS {
 
 }KINITAGRS, *PKINITAGRS;
 
+typedef struct tag_HOT_KEY_DATA {
+	ULONG_PTR ObjectPtr;
+	HWND hWnd;
+	int id;
+	UINT fsModifiers;
+	UINT vk;
+	ULONG ThreadId;
+	ULONG ProcessId;
+	CHAR ImageFileName[128];
+}HOT_KEY_DATA, *PHOT_KEY_DATA;
 
+typedef struct tag_TIMER_DATA {
+	ULONG_PTR ObjectPtr;
+	PULONG pti;
+	// 窗口句柄
+	PULONG spwnd;
+	// 定时器ID
+	UINT_PTR nID;
+	// 倒计时
+	INT cmsCountdown;
+	// 间隔时间
+	INT cmsRate;
+	UINT flags;
+	// 函数入口
+	ULONG pfn;
+}TIMER_DATA, *PTIMER_DATA;
 
 
 #ifdef _AMD64_

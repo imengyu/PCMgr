@@ -4,25 +4,32 @@
 #include "fmhlp.h"
 #include "ioctls.h"
 #include "sysstructs.h"
+#include "sysfuns.h"
 #include "mapphlp.h"
+#include "DirectoryHelper.h"
+#include "PathHelper.h"
 #include <psapi.h>
 
 HANDLE hProcess;
-char* url = "http://msdl.microsoft.com/download/symbols";
+CHAR* url = "http://msdl.microsoft.com/download/symbols";
 extern HANDLE hKernelDevice;
 ULONG_PTR ntosModuleBase = 0;
+ULONG_PTR win32kModuleBase = 0;
 SYMBOL_INFO eprocessSymbolInfo;
+CHAR SymPathDir[MAX_PATH] = { 0 };
+
+fnIMAGELOAD ImageLoad;
+fnIMAGEUNLOAD ImageUnload;
 
 BOOLEAN InitSymHandler()
 {
 	char Path[MAX_PATH] = { 0 };
 	char SymSrvPath[MAX_PATH] = { 0 };
-	char FileName[MAX_PATH] = { 0 };
 	char SymPath[MAX_PATH * 2] = { 0 };
 
 	if (!GetCurrentDirectoryA(MAX_PATH, Path))
 	{
-		LogErr2(L"Cannot get current directory \n");
+		LogErr2(L"Cannot get current directory");
 		return FALSE;
 	}
 
@@ -31,53 +38,81 @@ BOOLEAN InitSymHandler()
 	if (!LoadLibraryA(SymSrvPath))
 		LogErr(L"LoadLibrary %s failed : %d", SymSrvPath, GetLastError());
 
-	strcpy_s(FileName, Path);
-	strcat_s(FileName, "\\symsrv.yes");
-
 	hProcess = GetCurrentProcess();
 
 	SymSetOptions(SYMOPT_DEFERRED_LOADS | SYMOPT_EXACT_SYMBOLS | SYMOPT_CASE_INSENSITIVE | SYMOPT_UNDNAME | SYMOPT_LOAD_ANYTHING);
 
 	strcat_s(Path, "\\symbols*");
+	strcpy_s(SymPathDir, Path);
 	strcpy_s(SymPath, "SRV*");
 	strcat_s(SymPath, Path);
 	strcat_s(SymPath, url);
 
 	BOOL rs = SymInitialize(hProcess, SymPath, FALSE);
-	if(!rs) LogErr(L"SymInitialize failed : %d", GetLastError());
+	if(!rs) LogErr2(L"SymInitialize failed : %d", GetLastError());
 	return rs;
 }
 BOOLEAN LoadSymModule(char* ImageName, ULONG_PTR ModuleBase)
 {
+	BOOL rs = FALSE;
 	DWORD64 tmp;
-	CHAR szFile[MAX_PATH],
-		SymFile[MAX_PATH];
-	MODULEINFO ModInfo;
-	HMODULE hDll = LoadLibraryExA(ImageName, NULL, DONT_RESOLVE_DLL_REFERENCES);
-	if (!hDll)
+	CHAR SymFileOrginalExe[MAX_PATH];
+	CHAR SymFile[MAX_PATH];
+	BOOL useOrginalExe = TRUE;
+
+	memset(SymFileOrginalExe, 0, sizeof(SymFileOrginalExe));
+	memset(SymFile, 0, sizeof(SymFile));
+
+	PLOADED_IMAGE ImageInfo = ImageLoad(ImageName, NULL);
+	if (!ImageInfo)
 	{
-		LogErr(L"Cannot load library %hs, error: %d \n", ImageName, GetLastError());
-		return FALSE;
+		LogErr(L"Cannot load library %hs, (ImageLoad) error: %d", ImageName, GetLastError());
+		return rs;
 	}
 
-	GetModuleFileNameA(hDll, szFile, sizeof(szFile) / sizeof(szFile[0]));
-	GetModuleInformation(hProcess, hDll, &ModInfo, sizeof(ModInfo));
-	if (!SymGetSymbolFile(hProcess, NULL, szFile, sfPdb, SymFile, MAX_PATH, SymFile, MAX_PATH))
+	if (!MStrEqualA(ImageName, "ntoskrnl.exe") &&! MStrEqualA(ImageName, "ntkrnlpa.exe"))
 	{
-		LogErr(L"Cannot get symbol file of %hs  (%hs), error: %d \n", ImageName, szFile, GetLastError());
-		MAppMainCall(35, 0, 0);
-		return FALSE;
-	}
-	FreeLibrary(hDll);
+		CHAR ModuleSymPathDir[MAX_PATH] = { 0 };
+		strcpy_s(ModuleSymPathDir, SymPathDir);
+		strcat_s(ModuleSymPathDir, "\\");
+		strcat_s(ModuleSymPathDir, ImageName);
+		if (!Directory::Exists(ModuleSymPathDir))
+			Directory::Create(ModuleSymPathDir);
 
-	tmp = SymLoadModule64(hProcess, NULL, szFile, NULL, (ULONG_PTR)ModuleBase, ModInfo.SizeOfImage);
-	if (!tmp)
+		CHAR ModuleSymPathDir2Size[MAX_PATH] = { 0 };
+		sprintf_s(ModuleSymPathDir2Size, "%X", ImageInfo->SizeOfImage);
+		CHAR ModuleSymPathDir2[MAX_PATH] = { 0 };
+		strcpy_s(ModuleSymPathDir2, SymPathDir);
+		strcat_s(ModuleSymPathDir2, "\\");
+		strcat_s(ModuleSymPathDir2, ModuleSymPathDir2Size);
+		if (!Directory::Exists(ModuleSymPathDir2))
+			Directory::Create(ModuleSymPathDir2);
+
+		CHAR ModuleSymPathFile[MAX_PATH] = { 0 };
+		strcpy_s(ModuleSymPathFile, ModuleSymPathDir2);
+		strcat_s(ModuleSymPathFile, "\\");
+		strcat_s(ModuleSymPathDir, ImageName);
+		if (!MFM_FileExistA(ModuleSymPathFile))
+			useOrginalExe = !CopyFileA(ModuleSymPathFile, ImageInfo->ModuleName, TRUE);
+	}
+
+	LPCSTR targerFile = useOrginalExe ? ImageInfo->ModuleName : SymFileOrginalExe;
+
+	if (!SymGetSymbolFile(hProcess, NULL, targerFile, sfPdb, SymFile, MAX_PATH, SymFile, MAX_PATH))
 	{
-		LogErr(L"Cannot load module (SymLoadModule64) , error : %d \n", GetLastError());
-		return FALSE;
+		LogErr2(L"Cannot get symbol file of %hs  (%hs), error: %d", ImageName, targerFile, GetLastError());
+		MAppMainCall(35, ImageName, 0);
+		ImageUnload(ImageInfo);
+		return rs;
 	}
 
-	return TRUE;
+	tmp = SymLoadModule64(hProcess, ImageInfo->hFile, targerFile, NULL, (ULONG_PTR)ModuleBase, ImageInfo->SizeOfImage);
+	if (!tmp) LogErr2(L"Cannot load module (SymLoadModule64) , error : %d", GetLastError());
+	else rs = TRUE;
+
+	ImageUnload(ImageInfo);
+
+	return rs;
 }
 
 ULONG_PTR Off_EPROCESS_RundownProtectOffest;
@@ -154,11 +189,9 @@ BOOLEAN CALLBACK  CALLBACKMEnumSymStruct_PEB_Routine(PSYMBOL_INFO psi, ULONG Sym
 	return TRUE;
 }
 
-
-M_CAPI(BOOLEAN) MKSymInit(char* ImageName, ULONG_PTR ModuleBase) {
-	if (!LoadSymModule(ImageName, ModuleBase))
-		return FALSE;
-	return TRUE;
+M_CAPI(BOOLEAN) MKSymInit(char* ImageName, ULONG_PTR ModuleBase) 
+{
+	return LoadSymModule(ImageName, ModuleBase);
 }
 M_CAPI(BOOLEAN) MKEnumAllSym(ULONG_PTR ModuleBase, PSYM_ENUMERATESYMBOLS_CALLBACK callback, PVOID Context)
 {
@@ -212,7 +245,7 @@ M_CAPI(BOOLEAN) MKEnumSymStructOffests(PSYMBOL_INFO psi, ULONG_PTR ModuleBase, M
 
 
 
-BOOLEAN MEnumSyms(ULONG_PTR ModuleBase, PSYM_ENUMERATESYMBOLS_CALLBACK EnumRoutine, PVOID Context)
+BOOLEAN MEnumNTOSSyms(ULONG_PTR ModuleBase, PSYM_ENUMERATESYMBOLS_CALLBACK EnumRoutine, PVOID Context)
 {
 	BOOLEAN bEnum;
 	ntosModuleBase = ModuleBase;
@@ -221,10 +254,19 @@ BOOLEAN MEnumSyms(ULONG_PTR ModuleBase, PSYM_ENUMERATESYMBOLS_CALLBACK EnumRouti
 	if (!bEnum) LogErr(L"SymEnumSymbols failed , error: %d \n", GetLastError());
 
 
-	MKEnumSymStructs(ModuleBase, "!_EPROCESS", (PSYM_ENUMERATESYMBOLS_CALLBACK)CALLBACKMEnumSymStruct_EPROCESS_Routine, NULL);
-	MKEnumSymStructs(ModuleBase, "!_ETHREAD", (PSYM_ENUMERATESYMBOLS_CALLBACK)CALLBACKMEnumSymStruct_ETHREAD_Routine, NULL);
-	MKEnumSymStructs(ModuleBase, "!_PEB", (PSYM_ENUMERATESYMBOLS_CALLBACK)CALLBACKMEnumSymStruct_PEB_Routine, NULL);
-	MKEnumSymStructs(ModuleBase, "!_RTL_USER_PROCESS_PARAMETERS", (PSYM_ENUMERATESYMBOLS_CALLBACK)CALLBACKMEnumSymStruct_RTL_USER_PROCESS_PARAMETERS_Routine, NULL);
+	bEnum = MKEnumSymStructs(ModuleBase, "!_EPROCESS", (PSYM_ENUMERATESYMBOLS_CALLBACK)CALLBACKMEnumSymStruct_EPROCESS_Routine, NULL);
+	bEnum = MKEnumSymStructs(ModuleBase, "!_ETHREAD", (PSYM_ENUMERATESYMBOLS_CALLBACK)CALLBACKMEnumSymStruct_ETHREAD_Routine, NULL);
+	bEnum = MKEnumSymStructs(ModuleBase, "!_PEB", (PSYM_ENUMERATESYMBOLS_CALLBACK)CALLBACKMEnumSymStruct_PEB_Routine, NULL);
+	bEnum = MKEnumSymStructs(ModuleBase, "!_RTL_USER_PROCESS_PARAMETERS", (PSYM_ENUMERATESYMBOLS_CALLBACK)CALLBACKMEnumSymStruct_RTL_USER_PROCESS_PARAMETERS_Routine, NULL);
+
+	return bEnum;
+}
+BOOLEAN MEnumWIN32KSyms(ULONG_PTR ModuleBase, PSYM_ENUMERATESYMBOLS_CALLBACK EnumRoutine, PVOID Context)
+{
+	BOOLEAN bEnum;
+	win32kModuleBase = ModuleBase;
+	bEnum = SymEnumSymbols(hProcess, ModuleBase, NULL, EnumRoutine, Context);
+	if (!bEnum) LogErr(L"SymEnumSymbols failed , error: %d \n", GetLastError());
 
 	return bEnum;
 }
@@ -232,14 +274,25 @@ BOOLEAN MEnumSymsClear() {
 	return SymCleanup(GetCurrentProcess());
 }
 
-ULONG_PTR PspTerminateThreadByPointer_;
-ULONG_PTR PspExitThread_;
-ULONG_PTR PsGetNextProcessThread_;
-ULONG_PTR PsTerminateProcess_;
-ULONG_PTR PsGetNextProcess_;
-ULONG_PTR KeForceResumeThread_;
+ULONG_PTR PspTerminateThreadByPointer_ = 0;
+ULONG_PTR PspExitThread_ = 0;
+ULONG_PTR PsGetNextProcessThread_ = 0;
+ULONG_PTR PsTerminateProcess_ = 0;
+ULONG_PTR PsGetNextProcess_ = 0;
+ULONG_PTR KeForceResumeThread_ = 0;
 
-BOOLEAN CALLBACK MEnumSymRoutine(PSYMBOL_INFO psi, ULONG SymSize, PVOID Context)
+ULONG_PTR _gptmrFirst = 0;
+ULONG_PTR _gphkFirst = 0;
+
+BOOLEAN CALLBACK MEnumSymWIN32KRoutine(PSYMBOL_INFO psi, ULONG SymSize, PVOID Context)
+{
+	if (strcmp(psi->Name, "_gptmrFirst") == 0)
+		_gptmrFirst = (ULONG_PTR)psi->Address;
+	else if (strcmp(psi->Name, "_gphkFirst") == 0)
+		_gphkFirst = (ULONG_PTR)psi->Address;
+	return TRUE;
+}
+BOOLEAN CALLBACK MEnumSymNTOSRoutine(PSYMBOL_INFO psi, ULONG SymSize, PVOID Context)
 {
 	if (strcmp(psi->Name, "PspTerminateThreadByPointer") == 0)
 		PspTerminateThreadByPointer_ = (ULONG_PTR)psi->Address;
@@ -275,6 +328,8 @@ BOOL MSendAllSymAddressToDriver()
 
 	inputBuffer.StructOffestData.RTL_USER_PROCESS_PARAMETERS_CommandLineOffest = Off_RTL_USER_PROCESS_PARAMETERS_CommandLineOffest;
 
+	inputBuffer.Win32KData._gphkFirst = _gphkFirst;
+	inputBuffer.Win32KData._gptmrFirst = _gptmrFirst;
 
 	inputBuffer.PsGetNextProcessThread_ = PsGetNextProcessThread_;
 	inputBuffer.PsGetNextProcess_ = PsGetNextProcess_;

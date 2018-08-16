@@ -9,10 +9,9 @@
  *****************************************************/
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace PCMgr.Aero.TaskDialog {
+namespace PCMgr.Aero.TaskDialog
+{
     /// <summary>Common Task Dialog buttons. OK is the default button.</summary>
     [Flags]
     public enum TaskDialogButton : int {

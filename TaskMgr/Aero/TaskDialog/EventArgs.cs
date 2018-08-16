@@ -9,10 +9,9 @@
  *****************************************************/
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace PCMgr.Aero.TaskDialog {
+namespace PCMgr.Aero.TaskDialog
+{
 
     public class ClickEventArgs : EventArgs {
         public ClickEventArgs(int buttonID) {

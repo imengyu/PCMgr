@@ -27,30 +27,10 @@ HANDLE hEventDbgView = NULL;
 BOOL isMyDbgViewLoaded = FALSE;
 BOOL isMyDbgViewRunning = FALSE;
 
-BOOL MForceDeleteServiceRegkey(LPWSTR lpszDriverName)
-{
-	BOOL rs = FALSE;
-	wchar_t regPath[MAX_PATH];
-	wsprintf(regPath, L"SYSTEM\\CurrentControlSet\\services\\%s", lpszDriverName);
-	rs = MREG_DeleteKey(HKEY_LOCAL_MACHINE, regPath);
-
-	if (!rs)LogErr(L"RegDeleteTree failed : %d in delete key HKEY_LOCAL_MACHINE\\%s", GetLastError(), regPath);
-	else Log(L"Service Key deleted : HKEY_LOCAL_MACHINE\\%s", regPath);
-	
-	wchar_t regName[MAX_PATH];
-	wcscpy_s(regName, lpszDriverName);
-	_wcsupr_s(regName);
-	wsprintf(regPath, L"SYSTEM\\CurrentControlSet\\Enum\\Root\\LEGACY_%s", regName);
-	rs = MREG_DeleteKey(HKEY_LOCAL_MACHINE, regPath);
-
-	if (!rs) {
-		LogWarn(L"RegDeleteTree failed : %d in delete key HKEY_LOCAL_MACHINE\\%s", GetLastError(), regPath);
-		rs = TRUE;
-	}
-	else Log(L"Service Key deleted : HKEY_LOCAL_MACHINE\\%s", regPath);
-
-	return rs;
-}
+//加载驱动
+//    lpszDriverName：驱动的服务名
+//    driverPath：驱动的完整路径
+//    lpszDisplayName：nullptr
 M_CAPI(BOOL) MLoadKernelDriver(LPWSTR lpszDriverName, LPWSTR driverPath, LPWSTR lpszDisplayName)
 {
 #ifndef _AMD64_
@@ -93,7 +73,7 @@ M_CAPI(BOOL) MLoadKernelDriver(LPWSTR lpszDriverName, LPWSTR driverPath, LPWSTR 
 					recreatee = true;
 					if (hServiceDDK) CloseServiceHandle(hServiceDDK);
 					if (hServiceMgr) CloseServiceHandle(hServiceMgr);
-					if (MForceDeleteServiceRegkey(sDriverName)) goto RECREATE;
+					if (MREG_ForceDeleteServiceRegkey(sDriverName)) goto RECREATE;
 				}
 			}
 			if (dwRtn != ERROR_IO_PENDING && dwRtn != ERROR_SERVICE_EXISTS)
@@ -144,6 +124,8 @@ M_CAPI(BOOL) MLoadKernelDriver(LPWSTR lpszDriverName, LPWSTR driverPath, LPWSTR 
 	}else LogErr(L"Load driver error because need adminstrator.");
 	return FALSE;
 }
+//卸载驱动
+//    szSvrName：服务名
 M_CAPI(BOOL) MUnLoadKernelDriver(LPWSTR szSvrName)
 {
 	BOOL bDeleted = FALSE;
@@ -184,14 +166,16 @@ BeforeLeave:
 	if (hServiceDDK) CloseServiceHandle(hServiceDDK);
 	if (hServiceMgr) CloseServiceHandle(hServiceMgr);
 
-	if(bDeleted) bRet = MForceDeleteServiceRegkey(szSvrName);
+	if(bDeleted) bRet = MREG_ForceDeleteServiceRegkey(szSvrName);
 
 	return bRet;
 }
 
+//获取ntoskrn.exe基地址（内核加载以后有效）
 M_CAPI(ULONG_PTR) MGetNTBaseAddress() {
 	return uNTBaseAddress;
 }
+//切换加载/卸载驱动菜单状态
 void MInitKernelSwitchMenuState(BOOL loaded)
 {
 	if (loaded) {
@@ -203,6 +187,7 @@ void MInitKernelSwitchMenuState(BOOL loaded)
 		EnableMenuItem(hMenuMainFile, IDM_LOAD_DRIVER, MF_ENABLED);
 	}
 }
+//打开驱动句柄
 BOOL MInitKernelDriverHandle() {
 	hKernelDevice = CreateFile(L"\\\\.\\PCMGRK",
 		GENERIC_READ | GENERIC_WRITE,
@@ -227,6 +212,7 @@ BOOL MInitKernelDriverHandle() {
 	return TRUE;
 }
 
+//加载内核的pdb
 BOOL MInitKernelNTPDB(BOOL usingNtosPDB, PKNTOSVALUE kNtosValue)
 {
 	if (!usingNtosPDB)
@@ -234,6 +220,8 @@ BOOL MInitKernelNTPDB(BOOL usingNtosPDB, PKNTOSVALUE kNtosValue)
 	if (!InitSymHandler())
 		return FALSE;
 
+	BOOL rs = FALSE;
+	BOOL canSend = FALSE;
 	if (kNtosValue->NtostAddress != 0 && !MStrEqualW(kNtosValue->NtosModuleName, L""))
 	{
 		uNTBaseAddress = kNtosValue->NtostAddress;
@@ -246,53 +234,86 @@ BOOL MInitKernelNTPDB(BOOL usingNtosPDB, PKNTOSVALUE kNtosValue)
 		MAppSetStartingProgessText(L"Downloading and loading ntos PDB file...");
 		if (MKSymInit(ntosNameC, kNtosValue->NtostAddress))
 		{
-			isKernelPDBLoaded = TRUE;
-			MAppSetStartingProgessText(L"Analysis of the kernel PDB files...");
-			if (MEnumSyms(kNtosValue->NtostAddress, (PSYM_ENUMERATESYMBOLS_CALLBACK)MEnumSymRoutine, NULL))
-			{
-				delete ntosNameC;
-
-				MSendAllSymAddressToDriver();;
-				return TRUE;
-			}
+			MAppSetStartingProgessText(L"Analysis the ntos PDB files...");
+			if (MEnumNTOSSyms(kNtosValue->NtostAddress, (PSYM_ENUMERATESYMBOLS_CALLBACK)MEnumSymNTOSRoutine, NULL))
+				canSend = TRUE;
 		}
 		delete ntosNameC;
 	}
 	else LogErr2(L"Failed get ntos baseAddress and name!");
 
-	return FALSE;
+	if (kNtosValue->Win32KAddress != 0)
+	{
+#ifdef _AMD64_
+		Log(L"Get Win32K base address : 0x%I64X", kNtosValue->Win32KAddress);
+#else
+		Log(L"Get Win32K base address : 0x%X", kNtosValue->Win32KAddress);
+#endif
+		MAppSetStartingProgessText(L"Downloading and loading Win32K PDB file...");
+		if (MKSymInit("win32k.sys", kNtosValue->Win32KAddress))
+		{			
+			MAppSetStartingProgessText(L"Analysis of the Win32K PDB files...");
+			if (MEnumWIN32KSyms(kNtosValue->NtostAddress, (PSYM_ENUMERATESYMBOLS_CALLBACK)MEnumSymWIN32KRoutine, NULL))
+				canSend = TRUE;
+		}
+	}			
+	else LogWarn2(L"Failed get Win32K base address!");
+	if (canSend) {
+
+		MAppSetStartingProgessText(L"Analysis finished\nSend all symbol data to driver...");
+		rs = MSendAllSymAddressToDriver();
+		isKernelPDBLoaded = rs;
+	}
+	else rs = FALSE;
+	return rs;
 }
+//加载内核的pdb释放资源
 BOOL MUnInitKernelNTPDB() {
 	if (isKernelPDBLoaded)
 		return MEnumSymsClear();
 	return TRUE;
+}
+VOID MLoadKernelNTPDB(PKNTOSVALUE kNtosValue, BOOL usingNtosPDB) {
+	MGetNtosAndWin32kfullNameAndStartAddress(kNtosValue->NtosModuleName, 32, (kNtosValue->NtostAddress == 0 ? &kNtosValue->NtostAddress : 0), &kNtosValue->Win32KAddress);
+	if (!MInitKernelNTPDB(usingNtosPDB, kNtosValue) && !isKernelPDBLoaded) {
+		LogWarn(L"Failed to load pdb file of ntos, instead, compiled static constants will used.");
+		LogInfo(L"=================================");
+		LogWarn(L"Compiled static constants are used by the kernel, but not necessarily accurate, so kernel operations can cause system crashes. Therefore, in order to protect your system, most of the kernel functions have been disabled and always return STATUS_UNSUCCESSFUL.");
+		LogInfo(L"=================================");
+		M_SU_Init(false, kNtosValue);
+	}
 }
 
 M_CAPI(BOOL) MIsKernelNeed64()
 {
 	return isKernelNeed64;
 }
+
 M_CAPI(BOOL) MCanUseKernel()
 {
 	return isKernelDriverLoaded && hKernelDevice != NULL;
 }
 M_CAPI(BOOL) MInitKernel(LPWSTR currentPath)
 {
-	Log(L"MInitKernel (%s)...", currentPath);
+	WCHAR currentDir[MAX_PATH];
+	if (currentPath == 0 || MStrEqual(currentPath, L""))
+		GetCurrentDirectory(MAX_PATH, currentDir);
+	else wcscpy_s(currentDir, currentPath);
+	Log(L"MInitKernel (%s)...", currentDir);
 	MAppSetStartingProgessText(L"Loading kernel driver...");
 	if (!isKernelDriverLoaded)
 	{
 		wchar_t path[MAX_PATH];
 		if (MIs64BitOS()) {
 #ifdef _AMD64_
-			wsprintf(path, L"%s\\PCMgrKernel64.sys", currentPath);
+			wsprintf(path, L"%s\\PCMgrKernel64.sys", currentDir);
 #else
 			isKernelNeed64 = TRUE;
 			LogErr(L"You need to use 64 bit version PCMgr application to load driver.");
 			return FALSE;
 #endif
 		}
-		else wsprintf(path, L"%s\\PCMgrKernel32.sys", currentPath);
+		else wsprintf(path, L"%s\\PCMgrKernel32.sys", currentDir);
 
 		if (MFM_FileExist(path))
 		{
@@ -371,13 +392,27 @@ M_CAPI(BOOL) MUninitKernel()
 
 BOOL froceNotUseMyDbgView = FALSE;
 
+BOOL MShowMyDbgView()
+{
+	if (!isMyDbgViewLoaded)
+		MInitMyDbgView();
+	else MAppMainCall(38, 0, 0);
+	return 1;
+}
+
+M_CAPI(VOID) MOnCloseMyDbgView() {
+	if (isMyDbgViewLoaded)
+		MUnInitMyDbgView();
+}
+
 BOOL MUnInitMyDbgView() {
 	if (isMyDbgViewLoaded)
 	{
+		MAppMainCall(38, 0, 0);
 		M_SU_ReSetDbgViewEvent();
 		if (hEventDbgView) { CloseHandle(hEventDbgView); hEventDbgView = 0; }
 		isMyDbgViewRunning = FALSE;
-		DWORD dw = WaitForSingleObject(hThreadDbgView, 1000);
+		DWORD dw = WaitForSingleObject(hThreadDbgView, 100);
 		if (dw == WAIT_TIMEOUT) { 
 			if(NT_SUCCESS(MTerminateThreadNt(hThreadDbgView)))
 				LogInfo(L"MDbgViewReceiveThread Terminated.");
@@ -406,6 +441,7 @@ BOOL MInitMyDbgView()
 		hThreadDbgView = CreateThread(NULL, 0, MDbgViewReceiveThread, NULL, 0, NULL);
 		if (hThreadDbgView) {
 			isMyDbgViewLoaded = TRUE;
+			MAppMainCall(37, 0, 0);
 			LogInfo(L"MyDbgView started.");
 			return isMyDbgViewLoaded;
 		}
@@ -418,6 +454,7 @@ M_CAPI(VOID) MDoNotStartMyDbgView()
 	froceNotUseMyDbgView = TRUE;
 }
 
+//MyDbgView线程
 DWORD WINAPI MDbgViewReceiveThread(LPVOID lpParameter)
 {
 	LogInfo(L"MDbgViewReceiveThread sterted.");
@@ -434,8 +471,8 @@ DWORD WINAPI MDbgViewReceiveThread(LPVOID lpParameter)
 		if (M_SU_GetDbgViewLastBuffer(lastBuffer, 256, &hasMoreData))
 		{
 			if (MStrEqualW(lastBuffer, L""))
-				LogText(FOREGROUND_INTENSITY | FOREGROUND_BLUE |	FOREGROUND_RED, L"[DBGL] \n", lastBuffer);
-			else LogText(FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_BLUE, L"[DBGL] %s\n", lastBuffer);
+				MAppMainCall(40, 0, 0);
+			else MAppMainCall(39, lastBuffer, 0);
 
 			if (hasMoreData) goto CONTINUE;
 		}
@@ -446,6 +483,7 @@ DWORD WINAPI MDbgViewReceiveThread(LPVOID lpParameter)
 	LogInfo(L"MDbgViewReceiveThread exiting.");
 	return 0;
 }
+//加载线程
 DWORD WINAPI MLoadingThread(LPVOID lpParameter)
 {
 	BOOL usingNtosPDB = M_CFG_GetConfigBOOL(L"UseKrnlPDB", L"Configure", true);
@@ -453,12 +491,7 @@ DWORD WINAPI MLoadingThread(LPVOID lpParameter)
 	KNTOSVALUE kNtosValue = { 0 };
 	M_SU_Init(usingNtosPDB, &kNtosValue);
 	if (!kNtosValue.KernelDataInited)
-	{
-		MGetNtosNameAndStartAddress(kNtosValue.NtosModuleName, 32, (kNtosValue.NtostAddress == 0 ? &kNtosValue.NtostAddress : 0));
-		if (!MInitKernelNTPDB(usingNtosPDB, &kNtosValue) && !isKernelPDBLoaded) {
-			M_SU_Init(false, &kNtosValue);
-		}
-	}
+		MLoadKernelNTPDB(&kNtosValue, usingNtosPDB);
 	MAppSetStartingProgessText(L"Initializing...");
 	MAppMainCall(36, 0, 0);
 	return 0;

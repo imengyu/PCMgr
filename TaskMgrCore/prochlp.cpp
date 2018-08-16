@@ -85,6 +85,10 @@ _CryptUIDlgViewContext dCryptUIDlgViewContext;
 _CancelShutdown dCancelShutdown;
 //
 _GetPerTcpConnectionEStats dGetPerTcpConnectionEStats;
+_GetExtendedTcpTable dGetExtendedTcpTable;
+//imahlp api
+extern fnIMAGELOAD ImageLoad;
+extern fnIMAGEUNLOAD ImageUnload;
 
 //Enum apis
 EXTERN_C BOOL MAppVProcessAllWindows();
@@ -130,11 +134,38 @@ void MKillProcessUser(BOOL ask)
 			}
 			else if (status == STATUS_ACCESS_DENIED)
 				MShowErrorMessage((LPWSTR)str_item_access_denied.c_str(), (LPWSTR)str_item_kill_failed.c_str(), MB_ICONERROR, MB_OK);
-			else if (status == 0xC0000008 || status == 0xC000000B)
+			else if (status == STATUS_INVALID_CID || status == STATUS_INVALID_HANDLE)
 				MShowErrorMessage((LPWSTR)str_item_invalidproc.c_str(), (LPWSTR)str_item_kill_failed.c_str(), MB_ICONWARNING, MB_OK);
 			else ThrowErrorAndErrorCodeX(status, str_item_openprocfailed, (LPWSTR)str_item_kill_failed.c_str());
 		}
 	}
+}
+M_API BOOL MKillProcessUser2(DWORD pid, BOOL showErr)
+{
+	if (pid > 4)
+	{
+		HANDLE hProcess;
+		NTSTATUS status = MOpenProcessNt(pid, &hProcess);
+		if (status == STATUS_SUCCESS)
+		{
+			status = MTerminateProcessNt(pid, hProcess);
+			if (status == STATUS_ACCESS_DENIED && showErr)
+				MShowErrorMessage((LPWSTR)str_item_access_denied.c_str(), (LPWSTR)str_item_kill_failed.c_str(), MB_ICONERROR, MB_OK);
+			else if (status != STATUS_SUCCESS && showErr)
+				ThrowErrorAndErrorCodeX(status, str_item_endprocfailed, (LPWSTR)str_item_kill_failed.c_str());
+			else if (NT_SUCCESS(status))
+				return TRUE;
+		}
+		else if (status == STATUS_ACCESS_DENIED && showErr)
+			MShowErrorMessage((LPWSTR)str_item_access_denied.c_str(), (LPWSTR)str_item_kill_failed.c_str(), MB_ICONERROR, MB_OK);
+		else if ((status == STATUS_INVALID_CID || status == STATUS_INVALID_HANDLE) && showErr)
+			MShowErrorMessage((LPWSTR)str_item_invalidproc.c_str(), (LPWSTR)str_item_kill_failed.c_str(), MB_ICONWARNING, MB_OK);
+		else if(showErr)
+			ThrowErrorAndErrorCodeX(status, str_item_openprocfailed, (LPWSTR)str_item_kill_failed.c_str());
+		else if (NT_SUCCESS(status))
+			return TRUE;
+	}			
+	return 0;
 }
 M_API BOOL MGetPrivileges2()
 {
@@ -920,6 +951,19 @@ M_API VOID* MGetProcessThreads(DWORD pid)
 	}
 	return 0;
 }
+M_API PSYSTEM_PROCESSES MGetProcessInfo(DWORD pid)
+{
+	bool done = false;
+	//遍历进程列表
+	for (PSYSTEM_PROCESSES p = current_system_process; !done;
+		p = PSYSTEM_PROCESSES(PCHAR(p) + p->NextEntryDelta))
+	{
+		if (static_cast<DWORD>((ULONG_PTR)p->ProcessId) == pid)
+			return p;
+		done = p->NextEntryDelta == 0;
+	}
+	return 0;
+}
 M_API BOOL MGetProcessCommandLine(HANDLE handle, LPWSTR l, int maxcount, DWORD pid) {
 	if (handle && l) {
 		DWORD id = GetProcessId(handle);
@@ -1046,7 +1090,7 @@ M_API NTSTATUS MSuspendProcessNt(DWORD dwPId, HANDLE handle)
 			else {
 				if (rs == STATUS_ACCESS_DENIED && MCanUseKernel()) {
 					LogWarn(L"SuspendProcess failed in OpenProcess : (PID : %d) , Use kernel mode to Suspend it.");
-					M_SU_SuspendProcess(dwPId, 0, &rs);
+					M_SU_SuspendProcess(dwPId, &rs);
 					if (rs != STATUS_SUCCESS)
 						LogErr(L"SuspendProcess failed in kernel : (PID : %d) NTSTATUS : 0x%08X", dwPId, rs);
 				}
@@ -1055,7 +1099,7 @@ M_API NTSTATUS MSuspendProcessNt(DWORD dwPId, HANDLE handle)
 		}
 		else if (rs == STATUS_ACCESS_DENIED && MCanUseKernel()) {
 			LogWarn(L"SuspendProcess failed in OpenProcess : (PID : %d) , Use kernel mode to Suspend it.");
-			M_SU_SuspendProcess(dwPId, 0, &rs);
+			M_SU_SuspendProcess(dwPId, &rs);
 			if (rs != STATUS_SUCCESS)
 				LogErr(L"SuspendProcess failed in kernel : (PID : %d) NTSTATUS : 0x%08X", dwPId, rs);
 		}
@@ -1092,7 +1136,7 @@ M_API NTSTATUS MResumeProcessNt(DWORD dwPId, HANDLE handle)
 			else {
 				if (rs == STATUS_ACCESS_DENIED && MCanUseKernel()) {
 					LogWarn(L"RusemeProcess failed in OpenProcess : (PID : %d) , Use kernel mode to Ruseme it.");
-					M_SU_ResumeProcess(dwPId, 0, &rs);
+					M_SU_ResumeProcess(dwPId, &rs);
 					if (rs != STATUS_SUCCESS)
 						LogErr(L"RusemeProcess failed in kernel : (PID : %d) NTSTATUS : 0x%08X", dwPId, rs);
 				}
@@ -1101,7 +1145,7 @@ M_API NTSTATUS MResumeProcessNt(DWORD dwPId, HANDLE handle)
 		}
 		else if (rs == STATUS_ACCESS_DENIED && MCanUseKernel()) {
 			LogWarn(L"RusemeProcess failed in OpenProcess : (PID : %d) , Use kernel mode to Ruseme it.");
-			M_SU_ResumeProcess(dwPId, 0, &rs);
+			M_SU_ResumeProcess(dwPId, &rs);
 			if (rs != STATUS_SUCCESS)
 				LogErr(L"RusemeProcess failed in kernel : (PID : %d) NTSTATUS : 0x%08X", dwPId, rs);
 		}
@@ -1191,6 +1235,59 @@ M_API BOOL MRunUWPApp(LPWSTR packageName, LPWSTR name)
 }
 M_API NTSTATUS MCreateProcess() {
 	return 0;
+}
+//Process Privileges
+M_CAPI(BOOL) MEnumProcessPrivileges(DWORD dwId, EnumPrivilegesCallBack callBack)
+{
+	NTSTATUS status;
+	HANDLE hProcess;
+	HANDLE hToken;
+	if (M_SU_OpenProcess(dwId, &hProcess, &status) && status == STATUS_SUCCESS)
+	{
+		PTOKEN_PRIVILEGES pTp = NULL;
+		DWORD dwNeededSize = 0, dwI = 0;
+
+		if (!OpenProcessToken(hProcess, TOKEN_ALL_ACCESS, &hToken))
+		{
+			LogErr(L"OpenProcessToken failed pid : %d Error : %d", dwId, GetLastError());
+			return 0;
+		}
+		// 试探一下需要分配多少内存
+		GetTokenInformation(hToken, TokenPrivileges, NULL, dwNeededSize, &dwNeededSize);
+		// 分配所需内存大小
+		pTp = (PTOKEN_PRIVILEGES)malloc(dwNeededSize);
+		if (!GetTokenInformation(hToken, TokenPrivileges, pTp, dwNeededSize, &dwNeededSize))
+		{
+			free(pTp);
+			LogErr(L"GetTokenInformation failed pid : %d Error : %d", dwId, GetLastError());
+			return 0;
+		}
+		else
+		{
+			/////////////////////////////////////////////////////////
+			// 枚举进程权限
+			/////////////////////////////////////////////////////////
+			for (DWORD i = 0; i < pTp->PrivilegeCount; i++)
+			{
+				WCHAR *pUidName = NULL;    // 存权限名的指针
+				DWORD dwNameLen = 0;    // 权限名字长度
+				LookupPrivilegeName(NULL, &pTp->Privileges[i].Luid, NULL, &dwNameLen);
+				// 分配需要的内存
+				pUidName = (WCHAR *)malloc(dwNameLen*sizeof(WCHAR));
+				// 获取权限名
+				LookupPrivilegeName(NULL, &pTp->Privileges[i].Luid, pUidName, &dwNameLen);
+				// 如果该权限是启用状态就记录
+				if (pTp->Privileges[i].Attributes == SE_PRIVILEGE_ENABLED)
+				{
+					callBack(pUidName);
+				}
+				free(pUidName);
+			}
+		}
+		free(pTp);
+		CloseHandle(hToken);
+	}
+	return FALSE;
 }
 
 M_CAPI(int) MAppWorkShowMenuProcessPrepare(LPWSTR strFilePath, LPWSTR strFileName, DWORD pid, BOOL isImporant, BOOL isVeryImporant)
@@ -1368,7 +1465,9 @@ HINSTANCE hKernel32;
 HINSTANCE hUser32;
 HINSTANCE hCryptui;
 HINSTANCE hIphlpapi;
+HINSTANCE hImghlp;
 
+//动态加载api
 BOOL LoadDll()
 {
 	hNtDll = GetModuleHandle(L"ntdll.dll");
@@ -1377,6 +1476,7 @@ BOOL LoadDll()
 	hUser32 = GetModuleHandle(L"user32.dll");
 	hCryptui = LoadLibrary(L"Cryptui.dll");
 	hIphlpapi = LoadLibrary(L"IPHLPAPI.dll");
+	hImghlp = LoadLibrary(L"Imagehlp.dll");
 	thisCommandPath = new WCHAR[260];
 	thisCommandName = new WCHAR[260];
 	thisCommandUWPName = new WCHAR[260];
@@ -1399,24 +1499,27 @@ BOOL LoadDll()
 		KsSuspendProcess = (KsSuspendProcessFun)GetProcAddress(hMain, "KsSuspendProcess");
 		KsResusemeProcess = (KsResusemeProcessFun)GetProcAddress(hMain, "KsResusemeProcess");*/
 
+		//加载一些未文档化的函数
 		//ntdll
-		NtQuerySystemInformation = (NtQuerySystemInformationFun)GetProcAddress(hNtDll, "NtQuerySystemInformation");
+
 		ZwSuspendProcess = (ZwSuspendProcessFun)GetProcAddress(hNtDll, "ZwSuspendProcess");
 		ZwResumeProcess = (ZwResumeProcessFun)GetProcAddress(hNtDll, "ZwResumeProcess");
 		ZwTerminateProcess = (ZwTerminateProcessFun)GetProcAddress(hNtDll, "ZwTerminateProcess");
 		ZwOpenProcess = (ZwOpenProcessFun)GetProcAddress(hNtDll, "ZwOpenProcess");
 		ZwOpenThread = (ZwOpenThreadFun)GetProcAddress(hNtDll, "ZwOpenThread");
-		ZwQueryInformationThread = (ZwQueryInformationThreadFun)GetProcAddress(hNtDll, "ZwQueryInformationThread");
-		RtlNtStatusToDosError = (RtlNtStatusToDosErrorFun)GetProcAddress(hNtDll, "RtlNtStatusToDosError");
-		RtlGetLastWin32Error = (RtlGetLastWin32ErrorFun)GetProcAddress(hNtDll, "RtlGetLastWin32Error");
+		ZwQueryInformationThread = (ZwQueryInformationThreadFun)GetProcAddress(hNtDll, "ZwQueryInformationThread");		
 		ZwResumeThread = (ZwResumeThreadFun)GetProcAddress(hNtDll, "ZwResumeThread");
 		ZwTerminateThread = (ZwTerminateThreadFun)GetProcAddress(hNtDll, "ZwTerminateThread");
 		ZwSuspendThread = (ZwSuspendThreadFun)GetProcAddress(hNtDll, "ZwSuspendThread");
+		NtQueryObject = (NtQueryObjectFun)GetProcAddress(hNtDll, "NtQueryObject");
 		NtUnmapViewOfSection = (NtUnmapViewOfSectionFun)GetProcAddress(hNtDll, "NtUnmapViewOfSection");
+		NtQuerySystemInformation = (NtQuerySystemInformationFun)GetProcAddress(hNtDll, "NtQuerySystemInformation");
 		NtQueryInformationProcess = (NtQueryInformationProcessFun)GetProcAddress(hNtDll, "NtQueryInformationProcess");
 		LdrGetProcedureAddress = (LdrGetProcedureAddressFun)GetProcAddress(hNtDll, "LdrGetProcedureAddress");
 		RtlInitAnsiString = (RtlInitAnsiStringFun)GetProcAddress(hNtDll, "RtlInitAnsiString");
-		NtQueryObject = (NtQueryObjectFun)GetProcAddress(hNtDll, "NtQueryObject");
+		RtlNtStatusToDosError = (RtlNtStatusToDosErrorFun)GetProcAddress(hNtDll, "RtlNtStatusToDosError");
+		RtlGetLastWin32Error = (RtlGetLastWin32ErrorFun)GetProcAddress(hNtDll, "RtlGetLastWin32Error");
+
 		//shell32
 		RunFileDlg = (_RunFileDlg)MGetProcedureAddress(hShell32, NULL, 61);
 		//k32
@@ -1434,10 +1537,18 @@ BOOL LoadDll()
 		dCancelShutdown = (_CancelShutdown)GetProcAddress(hUser32, "CancelShutdown");
 		//
 		dGetPerTcpConnectionEStats = (_GetPerTcpConnectionEStats)GetProcAddress(hIphlpapi, "GetPerTcpConnectionEStats");
+		dGetExtendedTcpTable = (_GetExtendedTcpTable)GetProcAddress(hIphlpapi, "GetExtendedTcpTable");
+		//
+		ImageLoad = (fnIMAGELOAD)GetProcAddress(hImghlp, "ImageLoad");
+		ImageUnload = (fnIMAGEUNLOAD)GetProcAddress(hImghlp, "ImageUnload");
 		return TRUE;
 	}
 }
-void FreeDll() {
+void FreeDll()
+{
+	FreeLibrary(hCryptui);
+	FreeLibrary(hIphlpapi);
+	FreeLibrary(hImghlp);
 
 	delete thisCommandUWPName;
 	delete thisCommandPath;

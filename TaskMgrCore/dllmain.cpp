@@ -2,28 +2,19 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "sysfuns.h"
+#include "perfhlp.h"
+#include "kernelhlp.h"
+#include "prochlp.h"
+#include "mainprocs.h"
+#include "settinghlp.h"
+#include "lghlp.h"
+#include "vprocx.h"
 
 HINSTANCE hInst;
 
 extern HICON HIconDef;
 extern HCURSOR hCurLoading;
 extern MEMORYSTATUSEX memory_statuex;
-
-extern BOOL LoadDll();
-extern void FreeDll();
-extern void WindowEnumStart();
-extern void WindowEnumDestroy();
-extern void MPERF_FreeCpuInfos();
-extern void MLG_SetLanuageItems_Destroy();
-extern void MLG_Startup();
-extern BOOL MGetExeFileTrust(LPCWSTR lpFileName);
-extern BOOL MUnInitMyDbgView();
-extern void M_CFG_Init();
-extern BOOL MUnInitKernelNTPDB();
-extern _GetModuleFileNameW dGetModuleFileNameW;
-
-M_CAPI(int) MPERF_GetProcessNumber();
-extern void ShowMainCoreStartUp();
 
 void DllDestroy();
 void DllStartup();

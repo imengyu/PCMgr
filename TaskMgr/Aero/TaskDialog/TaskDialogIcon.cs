@@ -9,10 +9,9 @@
  *****************************************************/
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace PCMgr.Aero.TaskDialog {
+namespace PCMgr.Aero.TaskDialog
+{
 
     /// <summary>Common Task Dialog icons. Determine the look of the main instruction.</summary>
     public enum TaskDialogIcon : long {

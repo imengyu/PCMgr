@@ -117,8 +117,8 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="columnHeader4.Text" xml:space="preserve">
-    <value>对象</value>
+  <data name="&gt;&gt;columnHeader2.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ColumnHeader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="labelEnuming.Size" type="System.Drawing.Size, System.Drawing">
@@ -126,9 +126,6 @@
   </data>
   <data name="&gt;&gt;columnHeader6.Name" xml:space="preserve">
     <value>columnHeader6</value>
-  </data>
-  <data name="$this.Text" xml:space="preserve">
-    <value>查看进程句柄</value>
   </data>
   <data name="强制关闭句柄ToolStripMenuItem.Text" xml:space="preserve">
     <value>强制关闭句柄</value>
@@ -207,6 +204,9 @@
   <data name="&gt;&gt;listView1.Type" xml:space="preserve">
     <value>System.Windows.Forms.ListView, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="&gt;&gt;columnHeader5.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ColumnHeader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="columnHeader4.Width" type="System.Int32, mscorlib">
     <value>82</value>
   </data>
@@ -221,9 +221,6 @@
   </data>
   <data name="关闭句柄ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
     <value>148, 22</value>
-  </data>
-  <data name="labelEnuming.Text" xml:space="preserve">
-    <value>正在枚举中</value>
   </data>
   <data name="$this.StartPosition" type="System.Windows.Forms.FormStartPosition, System.Windows.Forms">
     <value>CenterParent</value>
@@ -243,17 +240,26 @@
   <data name="&gt;&gt;listView1.ZOrder" xml:space="preserve">
     <value>2</value>
   </data>
+  <data name="&gt;&gt;强制关闭句柄ToolStripMenuItem.Name" xml:space="preserve">
+    <value>强制关闭句柄ToolStripMenuItem</value>
+  </data>
   <data name="&gt;&gt;columnHeader1.Name" xml:space="preserve">
     <value>columnHeader1</value>
   </data>
   <data name="&gt;&gt;$this.Type" xml:space="preserve">
     <value>System.Windows.Forms.Form, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="&gt;&gt;columnHeader4.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ColumnHeader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="刷新ToolStripMenuItem.Text" xml:space="preserve">
     <value>刷新</value>
   </data>
   <data name="&gt;&gt;$this.Name" xml:space="preserve">
     <value>FormVHandles</value>
+  </data>
+  <data name="&gt;&gt;columnHeader1.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ColumnHeader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;columnHeader2.Name" xml:space="preserve">
     <value>columnHeader2</value>
@@ -267,17 +273,11 @@
   <data name="&gt;&gt;关闭句柄ToolStripMenuItem.Name" xml:space="preserve">
     <value>关闭句柄ToolStripMenuItem</value>
   </data>
-  <data name="&gt;&gt;columnHeader1.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ColumnHeader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="columnHeader4.Text" xml:space="preserve">
+    <value>对象</value>
   </data>
   <data name="&gt;&gt;labelEnuming.Type" xml:space="preserve">
     <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;columnHeader4.Name" xml:space="preserve">
-    <value>columnHeader4</value>
-  </data>
-  <data name="&gt;&gt;columnHeader3.Name" xml:space="preserve">
-    <value>columnHeader3</value>
   </data>
   <data name="columnHeader1.Text" xml:space="preserve">
     <value>句柄类型</value>
@@ -285,14 +285,14 @@
   <data name="&gt;&gt;强制关闭句柄ToolStripMenuItem.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;columnHeader5.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ColumnHeader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="&gt;&gt;columnHeader4.Name" xml:space="preserve">
+    <value>columnHeader4</value>
   </data>
   <data name="columnHeader3.Width" type="System.Int32, mscorlib">
     <value>94</value>
   </data>
-  <data name="&gt;&gt;columnHeader4.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ColumnHeader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="labelEnuming.Text" xml:space="preserve">
+    <value>正在枚举中</value>
   </data>
   <data name="listView1.Location" type="System.Drawing.Point, System.Drawing">
     <value>0, 0</value>
@@ -321,11 +321,11 @@
   <data name="columnHeader6.Text" xml:space="preserve">
     <value>句柄类型代号</value>
   </data>
-  <data name="&gt;&gt;columnHeader2.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ColumnHeader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="$this.Text" xml:space="preserve">
+    <value>查看进程句柄</value>
   </data>
-  <data name="&gt;&gt;强制关闭句柄ToolStripMenuItem.Name" xml:space="preserve">
-    <value>强制关闭句柄ToolStripMenuItem</value>
+  <data name="&gt;&gt;columnHeader3.Name" xml:space="preserve">
+    <value>columnHeader3</value>
   </data>
   <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>

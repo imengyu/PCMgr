@@ -44,6 +44,8 @@ M_CAPI(void) M_LOG_Init(BOOL showConsole)
 		AllocConsole();
 		hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
 		HWND hConsole = GetConsoleWindow();
+		FILE *file;
+		freopen_s(&file, "CONOUT$", "w", stdout);
 		SendMessage(hConsole, WM_SETICON, 0, (LPARAM)LoadIcon(hInst, MAKEINTRESOURCE(IDI_ICONCONSOLE)));
 		SetConsoleTitle(L"PCMgr Debug Outputs");
 	}
@@ -67,7 +69,7 @@ void M_LOG_LogX(LPWSTR orgFormat, WORD color, wchar_t const* const _Format, va_l
 }
 void M_LOG_LogX_WithFunAndLine(LPWSTR orgFormat, LPSTR fileName, LPSTR funName, INT lineNumber, WORD color, wchar_t const* const _Format, va_list arg)
 {
-	std::wstring format1 = FormatString(orgFormat, fileName, funName, lineNumber, _Format);
+	std::wstring format1 = FormatString(orgFormat, _Format, fileName, lineNumber, funName);
 	std::wstring buf = FormatString(format1.c_str(), arg);
 	if (tofile)
 	{
@@ -137,21 +139,21 @@ M_CAPI(void) M_LOG_LogErr_WithFunAndLine(LPSTR fileName, LPSTR funName, INT line
 {
 	va_list arg;
 	va_start(arg, _Format);
-	M_LOG_LogX_WithFunAndLine(L" [ERR:%hs:%hs(%d)] %s \n", fileName, funName, lineNumber, FOREGROUND_INTENSITY | FOREGROUND_RED, _Format, arg);
+	M_LOG_LogX_WithFunAndLine(L" [ERR] %s \n  [At] %S (%d) %S\n", fileName, funName, lineNumber, FOREGROUND_INTENSITY | FOREGROUND_RED, _Format, arg);
 	va_end(arg);
 }
 M_CAPI(void) M_LOG_LogWarn_WithFunAndLine(LPSTR fileName, LPSTR funName, INT lineNumber, _In_z_ _Printf_format_string_ wchar_t const* const _Format, ...)
 {
 	va_list arg;
 	va_start(arg, _Format);
-	M_LOG_LogX_WithFunAndLine(L"[WARN:%hs:%hs(%d)] %s \n", fileName, funName, lineNumber, FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN, _Format, arg);
+	M_LOG_LogX_WithFunAndLine(L"[WARN] %s \n  [At] %S (%d) %S\n", fileName, funName, lineNumber, FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN, _Format, arg);
 	va_end(arg);
 }
 M_CAPI(void) M_LOG_LogInfo_WithFunAndLine(LPSTR fileName, LPSTR funName, INT lineNumber, _In_z_ _Printf_format_string_ wchar_t const* const _Format, ...)
 {
 	va_list arg;
 	va_start(arg, _Format);
-	M_LOG_LogX_WithFunAndLine(L"[INFO:%hs:%hs(%d)] %s \n", fileName, funName, lineNumber, FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_BLUE, _Format, arg);
+	M_LOG_LogX_WithFunAndLine(L"[INFO] %s \n  [At] %S (%d) %S\n", fileName, funName, lineNumber, FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_BLUE, _Format, arg);
 	va_end(arg);
 }
 M_CAPI(void) M_LOG_Log_WithFunAndLine(LPSTR fileName, LPSTR funName, INT lineNumber, _In_z_ _Printf_format_string_ wchar_t const* const _Format, ...)
@@ -159,7 +161,7 @@ M_CAPI(void) M_LOG_Log_WithFunAndLine(LPSTR fileName, LPSTR funName, INT lineNum
 #ifdef _DEBUG
 	va_list arg;
 	va_start(arg, _Format);
-	M_LOG_LogX_WithFunAndLine(L" [LOG:%hs:%hs(%d)] %s \n", fileName, funName, lineNumber, FOREGROUND_INTENSITY | FOREGROUND_RED |
+	M_LOG_LogX_WithFunAndLine(L" [LOG] %s \n  [At] %S (%d) %S\n", fileName, funName, lineNumber, FOREGROUND_INTENSITY | FOREGROUND_RED |
 		FOREGROUND_GREEN |
 		FOREGROUND_BLUE, _Format, arg);
 	va_end(arg);

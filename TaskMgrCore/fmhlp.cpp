@@ -109,7 +109,6 @@ M_CAPI(BOOL) MFM_EnumFileHandles(const WCHAR* pszFilePath, MFUSEINGCALLBACK call
 	delete pSysHandleInformation;
 	return TRUE;
 }
-// 获取文件图标
 M_API HICON MFM_GetFileIcon(LPWSTR extention, LPWSTR s, int count)
 {
 	HICON icon = NULL;
@@ -129,7 +128,6 @@ M_API HICON MFM_GetFileIcon(LPWSTR extention, LPWSTR s, int count)
 	else SetLastError(ERROR_INVALID_PARAMETER);
 	return icon;
 }
-// 获取文件夹图标
 M_API HICON MFM_GetFolderIcon()
 {
 	if (hiconFolder == NULL) {
@@ -397,7 +395,7 @@ M_API void MFM_Refesh()
 }
 M_API void MFM_Recall(int id, LPWSTR path)
 {
-	mfmain_callback(id, path, 0);
+	if(mfmain_callback) mfmain_callback(id, path, 0);
 }
 M_API int MFM_CopyOrCutFileToClipboard(LPWSTR szFileName, BOOL isCopy)
 {
@@ -549,6 +547,13 @@ M_API BOOL MFM_SetFileArrtibute(const wchar_t* szFileDir, DWORD attr)
 	DWORD old_attr = GetFileAttributes(szFileDir);
 	if ((old_attr & attr) == attr)return TRUE;
 	old_attr |= attr;
+	return SetFileAttributes(szFileDir, old_attr);
+}
+M_API BOOL MFM_RemoveFileArrtibute(const wchar_t* szFileDir, DWORD attr)
+{
+	DWORD old_attr = GetFileAttributes(szFileDir);
+	if ((old_attr & attr) != attr)return FALSE;
+	old_attr ^= attr;
 	return SetFileAttributes(szFileDir, old_attr);
 }
 M_API BOOL MFM_FillData(const wchar_t* szFileDir, BOOL force, UINT fileSize)
@@ -709,7 +714,7 @@ BOOL MFM_RenameFile() {
 BOOL MFM_MoveFileToUser()
 {
 	WCHAR targetDir[MAX_PATH];
-	if (MChooseDir(hWndMain, NULL, (LPWSTR)str_item_choose_target_dir.c_str(), (LPWSTR*)&targetDir, sizeof(targetDir)))
+	if (MChooseDir(hWndMain, NULL, (LPWSTR)str_item_choose_target_dir.c_str(), targetDir, sizeof(targetDir)))
 	{
 		if (fmMutilSelect) {
 			std::wstring paths(fmCurrectSelectFilePath0);
@@ -751,7 +756,7 @@ BOOL MFM_MoveFileToUser()
 BOOL MFM_CopyFileToUser()
 {
 	WCHAR targetDir[MAX_PATH];
-	if (MChooseDir(hWndMain, NULL, (LPWSTR)str_item_choose_target_dir.c_str(), (LPWSTR*)&targetDir, sizeof(targetDir)))
+	if (MChooseDir(hWndMain, NULL, (LPWSTR)str_item_choose_target_dir.c_str(), targetDir, sizeof(targetDir)))
 	{
 		if (fmMutilSelect) {
 			std::wstring paths(fmCurrectSelectFilePath0);

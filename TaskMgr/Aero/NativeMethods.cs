@@ -322,5 +322,12 @@ namespace PCMgr.Aero
 
         public const int WM_USER = 0x400;
         public const int WM_APP = 0x8000;
+
+        public const int M_DRAW_EXPAND_NORMAL = 1;
+        public const int M_DRAW_EXPAND_HOVER = 2;
+        public const int M_DRAW_EXPAND_PRESSED = 3;
+
+        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void MExpandDrawButton(IntPtr hTheme, IntPtr hdc, int x, int y, int state, bool on);
     }
 }

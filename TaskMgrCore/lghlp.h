@@ -2,7 +2,14 @@
 #include "stdafx.h"
 #include <string>
 
+//语言模块
+//所有字符串都在此加载
+
+//设置退出时语言资源不回收
 M_CAPI(void) MLG_SetLanuageItems_NoRealloc();
+//设置菜单的语言资源
+//    appstarppath：当前程序启动目录
+//    name：语言资源名称（zh/en）
 M_CAPI(void) MLG_SetLanuageRes(LPWSTR appstarppath, LPWSTR name);
 
 extern std::wstring str_item_kill_ask_start;
@@ -16,7 +23,10 @@ extern std::wstring str_item_cantcopyfile;
 extern std::wstring str_item_cantmovefile;
 extern std::wstring str_item_choose_target_dir;
 
+void MLG_Startup();
+
 void MLG_SetLanuageItems_0(int id, LPWSTR msg, int size);
+void MLG_SetLanuageItems_Destroy();
 void MLG_SetLanuageItems_1(int id, LPWSTR msg, int size);
 void MLG_SetLanuageItems_2(int id, LPWSTR msg, int size);
 

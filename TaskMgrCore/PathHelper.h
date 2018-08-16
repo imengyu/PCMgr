@@ -24,6 +24,23 @@ public:
 	static bool CheckInvalidPathChars(LPWSTR path);
 	static std::wstring *GetFileName(LPWSTR path);
 	static std::wstring *GetDirectoryName(LPWSTR path);
+
+	static std::string *GetFileNameWithoutExtension(std::string * path);
+	static std::string *GetExtension(std::string* path);
+	static bool IsPathRooted(std::string * path1);
+	static bool HasExtension(std::string * path);
+	static bool CheckInvalidPathChars(std::string * path);
+	static std::string *GetFileName(std::string * path);
+	static std::string *GetDirectoryName(std::string * path);
+	static bool IsValidateFolderFileName(std::string * path);
+
+	static std::string *GetFileNameWithoutExtension(LPCSTR path);
+	static std::string *GetExtension(LPCSTR path);
+	static bool IsPathRooted(LPCSTR path1);
+	static bool HasExtension(LPCSTR path);
+	static bool CheckInvalidPathChars(LPCSTR path);
+	static std::string *GetFileName(LPCSTR path);
+	static std::string *GetDirectoryName(LPCSTR path);
 };
 
 

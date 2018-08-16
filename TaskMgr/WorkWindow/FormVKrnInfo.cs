@@ -1,13 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace PCMgr.WorkWindow
@@ -69,14 +61,18 @@ namespace PCMgr.WorkWindow
                     AddItem("ImageFileName", info.ImageFileName);
                 }
 
-                AddItem("ImageFileName", info.ImageFileName);
+                AddItem(FormMain.str_DblCklShow_EPROCESS, "", "_EPROCESS");
+                AddItem(FormMain.str_DblCklShow_PEB, "", "_PEB");
+                AddItem(FormMain.str_DblCklShow_KPROCESS, "", "_KPROCES");
+                AddItem(FormMain.str_DblCklShow_RTL_USER_PROCESS_PARAMETERS, "", "_RTL_USER_PROCESS_PARAMETERS");
             }
         }
 
-        private void AddItem(string name, string value)
+        private void AddItem(string name, string value, object tag = null)
         {
             ListViewItem li = new ListViewItem(name);
             li.SubItems.Add(value);
+            li.Tag = tag;
             listView1.Items.Add(li);
         }
         private void AddEmeptyItem()
@@ -111,10 +107,12 @@ namespace PCMgr.WorkWindow
             ((ListViewItemComparer)listView1.ListViewItemSorter).SortColum = e.Column;
             listView1.Sort();
         }
-
         private void listView1_MouseDoubleClick(object sender, MouseEventArgs e)
         {
+            if(e.Button == MouseButtons.Left)
+            {
 
+            }
         }
     }
 }

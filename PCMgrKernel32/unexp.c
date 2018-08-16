@@ -229,6 +229,15 @@ VOID KxGetStructOffestsFormPDBData(PNTOS_EPROCESS_OFF_DATA data) {
 	KxPrintInternalOffests();
 }
 
+ULONG_PTR _gptmrFirst = 0;
+ULONG_PTR _gphkFirst = 0;
+
+VOID KxGetWin32kFunctionsFormPDBData(PWIN32K_PDB_DATA data)
+{
+	_gptmrFirst = data->_gphkFirst;
+	_gphkFirst = data->_gphkFirst;
+}
+
 VOID KxPrintInternalFuns() 
 {
 #ifdef _AMD64_
@@ -259,7 +268,9 @@ VOID KxPrintInternalOffests()
 	KdPrint(("_PEB->Ldr : +0x%I64x", PEB_Ldr_Offest));
 	KdPrint(("_PEB->ProcessParameters : +0x%I64x", PEB_ProcessParameters_Offest));
 	KdPrint(("_RTL_USER_PROCESS_PARAMETERS->CommandLine : +0x%I64x", RTL_USER_PROCESS_PARAMETERS_CommandLine_Offest));
-
+	KdPrint(("WIN32K : "));
+	KdPrint(("_gptmrFirst : 0x%I64x", _gptmrFirst));
+	KdPrint(("_gphkFirst : 0x%I64x", _gphkFirst));
 #else
 	KdPrint(("_EPROCESS->ThreadListHead : +0x%x", EPROCESS_ThreadListHead_Offest));
 	KdPrint(("_EPROCESS->RundownProtect : +0x%x", EPROCESS_RundownProtect_Offest));
@@ -270,6 +281,10 @@ VOID KxPrintInternalOffests()
 	KdPrint(("_PEB->Ldr : +0x%x", PEB_Ldr_Offest));
 	KdPrint(("_PEB->ProcessParameters : +0x%x", PEB_ProcessParameters_Offest));
 	KdPrint(("_RTL_USER_PROCESS_PARAMETERS->CommandLine : +0x%x", RTL_USER_PROCESS_PARAMETERS_CommandLine_Offest));
+	KdPrint(("WIN32K : "));
+	KdPrint(("_gptmrFirst : 0x%x", _gptmrFirst));
+	KdPrint(("_gphkFirst : 0x%x", _gphkFirst));
+
 #endif
 }
 

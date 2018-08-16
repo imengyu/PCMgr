@@ -328,6 +328,9 @@ namespace PCMgr
         private static extern int MAppWorkShowMenuProcessPrepare([MarshalAs(UnmanagedType.LPWStr)]string strFilePath, [MarshalAs(UnmanagedType.LPWStr)]string strFileName, uint pid, bool isimporant, bool isveryimporant);
 
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        private static extern bool MKillProcessUser2(uint pid, bool showErr);
+
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern bool MAppVProcessModuls(uint dwPID, IntPtr hDlg, [MarshalAs(UnmanagedType.LPWStr)]string procName);
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern bool MAppVProcessThreads(uint dwPID, IntPtr hDlg, [MarshalAs(UnmanagedType.LPWStr)]string procName);
@@ -614,6 +617,8 @@ namespace PCMgr
         private const double PERF_LIMIT_MIN_DATA_DISK = 0.01;
         private const double PERF_LIMIT_MIN_DATA_NETWORK = PERF_LIMIT_MIN_DATA_DISK;
 
+        private Size lastSimpleSize = new Size();
+        private Size lastSize = new Size();
         private int nextSecType = -1;
         private int sortitem = -1;
         private bool sorta = false;
@@ -675,8 +680,38 @@ namespace PCMgr
             public uint pid;
         }
 
+        private bool isSimpleView
+        {
+            get { return _isSimpleView; }
+            set
+            {
+                _isSimpleView = value;
+                if (_isSimpleView)
+                {
+                    MAppWorkCall3(215, Handle, IntPtr.Zero);
+                    pl_simple.Show();
+                    tabControlMain.Hide();
+                    baseProcessRefeshTimer.Interval = 2000;
+                    baseProcessRefeshTimer.Start();
+                    BaseProcessRefeshTimer_Tick(this, null);
+                    baseProcessRefeshTimerLow.Start();
+                }
+                else
+                {
+                    MAppWorkCall3(216, Handle, IntPtr.Zero);
+                    listApps.Items.Clear();
+                    pl_simple.Hide();
+                    tabControlMain.Show();
+                    LoadRefeshRateSetting();
+                }
+            }
+        }
+
+
+        private bool _isSimpleView = false;
         private bool is64OS = false;
         private bool isSelectExplorer = false;
+        private uint currentProcessPid = 0;
         private List<uint> validPid = new List<uint>();
         private List<uwphostitem> uwpHostPid = new List<uwphostitem>();
         private List<PsItem> loadedPs = new List<PsItem>();
@@ -893,10 +928,18 @@ namespace PCMgr
 
         private void ProcessListInitIn1Slater()
         {
-            Timer t = new Timer();
-            t.Interval = 50;
-            t.Tick += ProcessListInitIn1T_Tick;
-            t.Start();//缓冲一下防止界面还未显示时卡顿
+            if (!processListInited)
+            {
+                Timer t = new Timer();
+                t.Interval = 50;
+                t.Tick += ProcessListInitIn1T_Tick;
+                t.Start();//缓冲一下防止界面还未显示时卡顿
+            }
+            else
+            {
+                if (!listProcess.Visible) listProcess.Show();
+                StartingProgressShowHide(false);
+            }
         }
         private void ProcessListInitIn1T_Tick(object sender, EventArgs e)
         {
@@ -936,6 +979,8 @@ namespace PCMgr
             //初始化
             if (!processListInited)
             {
+                currentProcessPid = (uint)MAppWorkCall3(180, IntPtr.Zero, IntPtr.Zero);
+
                 enumProcessCallBack = ProcessListHandle;
                 enumProcessCallBack2 = ProcessListHandle2;
 
@@ -1000,6 +1045,7 @@ namespace PCMgr
                     UWPListInit();
 
                 ProcessListRefesh();
+                ProcessListSimpleInit();
 
                 StartingProgressShowHide(false);
             }
@@ -1056,7 +1102,7 @@ namespace PCMgr
             listProcess.Locked = true;
             MEnumProcess2Refesh(enumProcessCallBack2_ptr);
             ProcessListClear();
-
+       
             //枚举一些UWP应用
             if (SysVer.IsWin8Upper()) MAppVProcessAllWindowsUWP();
 
@@ -1069,13 +1115,21 @@ namespace PCMgr
             ProcessListUpdateValues(refeshAColumData ? lvwColumnSorter.SortColumn : -1);
             ProcessListRefeshEndGroupWork();
 
-            if (refeshAColumData)
-                listProcess.Sort(false);//排序
-            listProcess.Locked = false;
-            //刷新列表
-            listProcess.SyncItems(true);
+            if (!isSimpleView)
+            {
+                if (refeshAColumData)
+                    listProcess.Sort(false);//排序
+                listProcess.Locked = false;
+                //刷新列表
+                listProcess.SyncItems(true);
 
-            lbProcessCount.Text = str_proc_count + " : " + listProcess.Items.Count;
+                lbProcessCount.Text = str_proc_count + " : " + listProcess.Items.Count;
+            }
+            else
+            {
+                listProcess.Locked = false;
+                ProcessListSimpleRefesh();
+            }
         }
         private void ProcessListRefeshEndGroupWork()
         {
@@ -1938,17 +1992,20 @@ namespace PCMgr
         {
             //update process perf data
 
-            foreach (TaskMgrListItem it in listProcess.Items)
+            if (!isSimpleView)
             {
-                if (refeshAllDataColum != -1)
-                    ProcessListUpdateOnePerfCloum(it.PID, it, refeshAllDataColum);
-            }
-            for (int i = 0; i < listProcess.ShowedItems.Count; i++)
-            {
-                //只刷新显示的条目
-                if (listProcess.ShowedItems[i].Type == TaskMgrListItemType.ItemUWPHost)
-                    ProcessListUpdate(listProcess.ShowedItems[i].PID, false, listProcess.ShowedItems[i], IntPtr.Zero, refeshAllDataColum);
-                else ProcessListUpdate(listProcess.ShowedItems[i].PID, false, listProcess.ShowedItems[i], ((PsItem)listProcess.ShowedItems[i].Tag).SYSTEM_PROCESSES, refeshAllDataColum);
+                foreach (TaskMgrListItem it in listProcess.Items)
+                {
+                    if (refeshAllDataColum != -1)
+                        ProcessListUpdateOnePerfCloum(it.PID, it, refeshAllDataColum);
+                }
+                for (int i = 0; i < listProcess.ShowedItems.Count; i++)
+                {
+                    //只刷新显示的条目
+                    if (listProcess.ShowedItems[i].Type == TaskMgrListItemType.ItemUWPHost)
+                        ProcessListUpdate(listProcess.ShowedItems[i].PID, false, listProcess.ShowedItems[i], IntPtr.Zero, refeshAllDataColum);
+                    else ProcessListUpdate(listProcess.ShowedItems[i].PID, false, listProcess.ShowedItems[i], ((PsItem)listProcess.ShowedItems[i].Tag).SYSTEM_PROCESSES, refeshAllDataColum);
+                }
             }
         }
     
@@ -1965,6 +2022,53 @@ namespace PCMgr
             if (taskMgrListItem == null) taskMgrListItem = ProcessListFindItem(pid);
             if (taskMgrListItem != null)
             {
+                if (taskMgrListItem.Type == TaskMgrListItemType.ItemProcessHost)
+                {
+                    foreach(TaskMgrListItem lichild in taskMgrListItem.Childs)
+                    {
+                        if (lichild.Type == TaskMgrListItemType.ItemProcess)
+                            MKillProcessUser2(lichild.PID, true);
+                    }
+
+                    MKillProcessUser2(taskMgrListItem.PID, true);
+                }
+                else if (taskMgrListItem.Type == TaskMgrListItemType.ItemUWPHost)
+                {
+                    foreach (TaskMgrListItem lichild in taskMgrListItem.Childs)
+                    {
+                        if (lichild.Type == TaskMgrListItemType.ItemProcess)
+                            MKillProcessUser2(lichild.PID, true);
+                    }
+                }
+                else if (taskMgrListItem.Type == TaskMgrListItemType.ItemProcess)
+                {
+                    bool ananyrs = false;
+                    PsItem p = taskMgrListItem.Tag as PsItem;
+                    if (p.isWindowShow && !p.isSvchost)
+                    {
+                        if (taskMgrListItem.Childs.Count > 0)
+                        {
+                            IntPtr target = IntPtr.Zero;
+                            foreach (TaskMgrListItemChild c in taskMgrListItem.Childs)
+                                if (c.Tag != null)
+                                {
+                                    target = (IntPtr)c.Tag;
+                                    if (target != IntPtr.Zero)
+                                        if(MAppWorkCall3(192, IntPtr.Zero, target) == 1)
+                                            ananyrs = true;
+                                }
+                        }
+                        else ananyrs = true;
+                    }
+                    if(ananyrs) MKillProcessUser2(taskMgrListItem.PID, true);
+                }
+            }
+        }
+        private void ProcessListSetTo(TaskMgrListItem taskMgrListItem)
+        {
+            //设置到
+            if (taskMgrListItem != null)
+            {
                 PsItem p = taskMgrListItem.Tag as PsItem;
                 if (p.isWindowShow && !p.isSvchost)
                 {
@@ -1977,11 +2081,41 @@ namespace PCMgr
                                 target = (IntPtr)c.Tag;
                                 break;
                             }
-                        if (target != IntPtr.Zero) MAppWorkCall3(192, IntPtr.Zero, target);
-                        return;
+                        if (target != IntPtr.Zero) MAppWorkCall3(213, target, target) ;
                     }
                 }
             }
+        }
+
+        private void ProcessListSimpleInit()
+        {
+            listApps.NoHeader = true;
+            expandFewerDetals.Show();
+            expandFewerDetals.Expanded = true;
+
+            isSimpleView = GetConfigBool("SimpleView", "AppSetting", true);
+        }
+        private void ProcessListSimpleExit()
+        {
+            if (isSimpleView)
+            {
+                lastSimpleSize = Size;
+            }
+            SetConfig("OldSizeSimple", "AppSetting", lastSimpleSize.Width + "-" + lastSimpleSize.Height);
+            SetConfigBool("SimpleView", "AppSetting", isSimpleView);
+        }
+        private void ProcessListSimpleRefesh()
+        {
+            listApps.Locked = true;
+            listApps.Items.Clear();
+            foreach (TaskMgrListItem li in listProcess.Items)
+            {
+                if (li.Group == listProcess.Groups[0])
+                    if (li.PID != currentProcessPid)
+                        listApps.Items.Add(li);
+            }
+            listApps.Locked = false;
+            listApps.SyncItems(true);
         }
 
         private void check_showAllProcess_CheckedChanged(object sender, EventArgs e)
@@ -1998,6 +2132,43 @@ namespace PCMgr
             }
             else check_showAllProcess.Hide();
         }
+        private void lbShowDetals_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            //if (!MAppVProcess(Handle)) TaskDialog.Show("无法打开详细信息窗口", str_AppTitle, "未知错误。", TaskDialogButton.OK, TaskDialogIcon.Stop);
+        }
+        private void expandFewerDetals_Click(object sender, EventArgs e)
+        {
+            if (!isSimpleView)
+            {
+                lastSize = Size;
+                isSimpleView = true;
+                if (Size.Width > lastSimpleSize.Width || Size.Height > lastSimpleSize.Height)
+                    Size = lastSimpleSize;
+            }
+        }
+        private void expandMoreDetals_Click(object sender, EventArgs e)
+        {
+            if (isSimpleView)
+            {
+                lastSimpleSize = Size;
+                isSimpleView = false;
+                if (Size.Width < lastSize.Width || Size.Height < lastSize.Height)
+                    Size = lastSize;
+            }
+        }
+
+        private void btnEndTaskSimple_Click(object sender, EventArgs e)
+        {
+            TaskMgrListItem taskMgrListItem = listApps.SelectedItem;
+            if (taskMgrListItem != null)
+                ProcessListEndTask(0, taskMgrListItem);
+        }
+        private void btnEndProcess_Click(object sender, EventArgs e)
+        {
+            TaskMgrListItem taskMgrListItem = listProcess.SelectedItem;
+            if (taskMgrListItem != null)
+                ProcessListEndTask(0, taskMgrListItem);
+        }
 
         private void BaseProcessRefeshTimerLowSc_Tick(object sender, EventArgs e)
         {
@@ -2012,6 +2183,76 @@ namespace PCMgr
 
         #region ListEvents
 
+        private void listApps_SelectItemChanged(object sender, EventArgs e)
+        {
+            btnEndTaskSimple.Enabled = listApps.SelectedItem != null;
+        }
+        private void listApps_KeyDown(object sender, KeyEventArgs e)
+        {
+            TaskMgrListItem li = listApps.SelectedItem;
+            if (li == null) return;
+            if (e.KeyCode == Keys.Delete)
+                ProcessListEndTask(0, li);
+            else if (e.KeyCode == Keys.Apps)
+            {
+                Point p = listApps.GetiItemPoint(li);
+                p = listApps.PointToScreen(p);
+                MAppWorkCall3(212, new IntPtr(p.X), new IntPtr(p.Y));
+                MAppWorkCall3(214, Handle, IntPtr.Zero);
+            }
+        }
+        private void listApps_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                if (listApps.SelectedItem != null)
+                {
+                    MAppWorkCall3(212, new IntPtr(MousePosition.X), new IntPtr(MousePosition.Y));
+                    MAppWorkCall3(214, Handle, IntPtr.Zero);
+                }
+            }
+        }
+        private void listApps_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                TaskMgrListItem li = listApps.SelectedItem;
+                if (li == null) return;
+                ProcessListSetTo(li);
+            }
+        }
+
+        private void listProcess_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            TaskMgrListItem li = listProcess.SelectedItem;
+            if (li == null) return;
+            if (e.Button == MouseButtons.Left)
+            {
+                if (li.OldSelectedItem != null)
+                {
+                    if (li.OldSelectedItem.Type == TaskMgrListItemType.ItemWindow && li.OldSelectedItem.Tag != null)
+                    {
+                        IntPtr data = (IntPtr)li.OldSelectedItem.Tag;
+                        MAppWorkCall3(213, data, IntPtr.Zero);
+                        WindowState = FormWindowState.Minimized;
+                    }
+                }
+                else if (li.Type == TaskMgrListItemType.ItemWindow)
+                {
+                    if (li.Tag != null)
+                    {
+                        IntPtr data = (IntPtr)li.Tag;
+                        MAppWorkCall3(213, data, IntPtr.Zero);
+                        WindowState = FormWindowState.Minimized;
+                    }
+                }
+                else if (li.Childs.Count > 0)
+                {
+                    li.ChildsOpened = !li.ChildsOpened;
+                    listProcess.SyncItems(true);
+                }
+            }
+        }
         private void listProcess_ShowMenuSelectItem(Point pos = default(Point))
         {
             TaskMgrListItem selectedItem = listProcess.SelectedItem.OldSelectedItem == null ?
@@ -2179,18 +2420,6 @@ namespace PCMgr
                 listProcess.Locked = false;
                 listProcess.Invalidate();
             }
-        }
-
-        private void btnEndProcess_Click(object sender, EventArgs e)
-        {
-            TaskMgrListItem taskMgrListItem = listProcess.SelectedItem;
-            if (taskMgrListItem != null)
-                ProcessListEndTask(0, taskMgrListItem);
-            MAppWorkCall3(190, Handle, IntPtr.Zero);
-        }
-        private void lbShowDetals_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            //if (!MAppVProcess(Handle)) TaskDialog.Show("无法打开详细信息窗口", str_AppTitle, "未知错误。", TaskDialogButton.OK, TaskDialogIcon.Stop);
         }
 
         private class TaskListViewColumnSorter : ListViewColumnSorter
@@ -3550,6 +3779,20 @@ namespace PCMgr
         public static string str_SuspendEnd = "";
         public static string str_SuspendWarnContent = "";
         public static string str_SuspendVeryImporantWarnContent = "";
+        public static string str_DblCklShow_EPROCESS = "";
+        public static string str_DblCklShow_KPROCESS = "";
+        public static string str_DblCklShow_PEB = "";
+        public static string str_DblCklShow_RTL_USER_PROCESS_PARAMETERS = "";
+        public static string str_CantFind = "";
+
+        /*
+        
+         * DblCklShow_EPROCESS	Double Click this item to show _EPROCESS of process	
+DblCklShow_KPROCESS	Double Click this item to show _KPROCESS of process	
+DblCklShow_PEB	Double Click this item to show _PEB of process	
+DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_PROCESS_PARAMETERS  of process	
+
+         */
 
         public static void InitLanuage()
         {
@@ -3666,6 +3909,11 @@ namespace PCMgr
                 str_SuspendEnd = LanuageMgr.GetStr("SuspendEnd");
                 str_SuspendWarnContent = LanuageMgr.GetStr("SuspendWarnContent");
                 str_SuspendVeryImporantWarnContent = LanuageMgr.GetStr("SuspendVeryImporantWarnContent");
+                str_DblCklShow_EPROCESS = LanuageMgr.GetStr("DblCklShow_EPROCESS");
+                str_DblCklShow_KPROCESS = LanuageMgr.GetStr("DblCklShow_KPROCESS");
+                str_DblCklShow_PEB = LanuageMgr.GetStr("DblCklShow_PEB");
+                str_DblCklShow_RTL_USER_PROCESS_PARAMETERS = LanuageMgr.GetStr("DblCklShow_RTL_USER_PROCESS_PARAMETERS");
+                str_CantFind = LanuageMgr.GetStr("CantFind");
 
                 MAppSetLanuageItems(0, 0, str_KillAskStart, 0);
                 MAppSetLanuageItems(0, 1, str_KillAskEnd, 0);
@@ -4044,6 +4292,9 @@ namespace PCMgr
             }
         }
 
+        private FormKernel formKernel = null;
+        private FormHooks formHooks = null;
+
         private ListViewItemComparerKr listViewItemComparerKr = new ListViewItemComparerKr();
         private bool showAllDriver = false;
         private bool canUseKernel = false;
@@ -4179,6 +4430,27 @@ namespace PCMgr
             SetConfig("LoadKernelDriver", "Configure", "TRUE");
             MAppRebotAdmin2("select kernel");
         }
+        private void linkLabelShowKernelTools_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            if (formKernel == null)
+            {
+                formKernel = new FormKernel();
+                formKernel.FormClosed += FormKernel_FormClosed;
+            }
+            formKernel.Show();
+            MAppWorkCall3(213, formKernel.Handle, IntPtr.Zero);
+        }
+
+        private void FormKernel_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            formKernel = null;
+        }
+        private void FormHooks_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            formHooks = null;
+        }
+
+
         private void listDrivers_MouseUp(object sender, MouseEventArgs e)
         {
             if (listDrivers.SelectedItems.Count > 0)
@@ -4198,12 +4470,23 @@ namespace PCMgr
             {
                 if (listDrivers.SelectedItems.Count > 0)
                 {
-                    ListViewItem item = listService.SelectedItems[0];
+                    ListViewItem item = listDrivers.SelectedItems[0];
                     Point p = item.Position; p.X = 0;
                     p = listService.PointToScreen(p);
-                    M_SU_EnumKernelModuls_ShowMenu((IntPtr)listDrivers.SelectedItems[0].Tag, showAllDriver, p.X, p.Y);
+                    M_SU_EnumKernelModuls_ShowMenu((IntPtr)item.Tag, showAllDriver, p.X, p.Y);
                 }
             }
+        }
+
+        public void ShowFormHooks()
+        {
+            if (formHooks == null)
+            {
+                formHooks = new FormHooks();
+                formHooks.FormClosed += FormHooks_FormClosed;
+            }
+            formHooks.Show();
+            MAppWorkCall3(213, formHooks.Handle, IntPtr.Zero);
         }
 
         #endregion
@@ -4276,11 +4559,14 @@ namespace PCMgr
             lbStartingStatus.Invoke(new Action(delegate { lbStartingStatus.Text = text; }));
         }
 
-        private void ShowNoPdbWarn()
+        private void ShowNoPdbWarn(string moduleName)
         {
-            TaskDialog noPdbWarnDialog = new TaskDialog(LanuageMgr.GetStr("NoPDBWarn"), str_TipTitle, LanuageMgr.GetStr("NoPDBWarnText"));
-            noPdbWarnDialog.EnableHyperlinks = true;
-            noPdbWarnDialog.Show(this);
+            Invoke(new Action(delegate
+            {
+                TaskDialog noPdbWarnDialog = new TaskDialog(string.Format(LanuageMgr.GetStr("NoPDBWarn"), moduleName), str_TipTitle, string.Format(LanuageMgr.GetStr("NoPDBWarnText"), moduleName, moduleName));
+                noPdbWarnDialog.EnableHyperlinks = true;
+                noPdbWarnDialog.Show(this);
+            }));
         }
 
         private bool TermintateImporantProcess(IntPtr name, int id)
@@ -4412,6 +4698,7 @@ namespace PCMgr
             }
         }
 
+        //Worker Callback
         private void AppWorkerCallBack(int msg, IntPtr wParam, IntPtr lParam)
         {
             //这是从 c++ 调用回来的函数
@@ -4562,6 +4849,7 @@ namespace PCMgr
                     }
                 case 22:
                     {
+                        AppWorkerCallBack(41, IntPtr.Zero, IntPtr.Zero);
                         if (MInitKernel(Application.StartupPath))
                             if (GetConfigBool("SelfProtect", "AppSetting"))
                                 MAppWorkCall3(203, IntPtr.Zero, IntPtr.Zero);
@@ -4596,11 +4884,13 @@ namespace PCMgr
                 case 28:
                     {
                         //timer
+                        new FormVTimers(Convert.ToUInt32(wParam.ToInt32()));
                         break;
                     }
                 case 29:
                     {
                         //hotkey
+                        new FormVHotKeys(Convert.ToUInt32(wParam.ToInt32()));
                         break;
                     }
                 case 30:
@@ -4620,7 +4910,7 @@ namespace PCMgr
                     }
                 case 32:
                     {
-                        new FormDA().ShowDialog(this);
+                        new FormKDA().ShowDialog(this);
                         break;
                     }
                 case 33:
@@ -4635,7 +4925,7 @@ namespace PCMgr
                     }
                 case 35:
                     {
-                        ShowNoPdbWarn();
+                        ShowNoPdbWarn(Marshal.PtrToStringAnsi(wParam));
                         break;
                     }
                 case 36:
@@ -4643,9 +4933,106 @@ namespace PCMgr
                         Invoke(new Action(AppLastLoadStep));
                         break;
                     }
+                case 37:
+                    {
+                        if (kDbgPrint == null)
+                        {
+                            kDbgPrint = new FormKDbgPrint();
+                            kDbgPrint.FormClosed += KDbgPrint_FormClosed;
+                        }
+                        kDbgPrint.Show();
+                        break;
+                    }
+                case 38:
+                    {
+                        if (kDbgPrint != null && !exitkDbgPrintCalled)
+                        {
+                            exitkDbgPrintCalled = true;
+                            kDbgPrint.Close();
+                            kDbgPrint = null;
+                            exitkDbgPrintCalled = false;
+                        }
+                        break;
+                    }
+                case 39:
+                    {
+                        if (kDbgPrint != null)
+                            kDbgPrint.Add(Marshal.PtrToStringUni(wParam));
+                        break;
+                    }
+                case 40:
+                    {
+                        if (kDbgPrint != null)
+                            kDbgPrint.Add("");
+                        break;
+                    }
+                case 41:
+                    {
+                        if (listProcess.Visible) listProcess.Invoke(new Action(listProcess.Hide));
+                        StartingProgressShowHide(true);
+                        break;
+                    }
+                case 42:
+                    {
+                        if (!listProcess.Visible) listProcess.Invoke(new Action(listProcess.Show));
+                        StartingProgressShowHide(false);
+                        break;
+                    }
+                case 51:
+                    {
+                        new FormVPrivilege(Convert.ToUInt32(wParam.ToInt32()), Marshal.PtrToStringUni(lParam)).ShowDialog();
+                        break;
+                    }
+                case 52:
+                    {
+                        linkLabelShowKernelTools_LinkClicked(this, null);
+                        break;
+                    }
+                case 53:
+                    {
+                        ShowFormHooks();
+                        break;
+                    }
+                case 54:
+                    {
+                        //netmon
+                        break;
+                    }
+                case 55:
+                    {
+                        //regedit
+                        break;
+                    }
+                case 56:
+                    {
+                        tabControlMain.SelectedTab = tabPageFileCtl;
+                        break;
+                    }
+                case 57:
+                    {
+                        
+                        break;
+                    }
+                case 58:
+                    {
+                        if (wParam.ToInt32() == 1)
+                        {
+                            TaskMgrListItem li = listApps.SelectedItem;
+                            if (li == null) return;
+                            ProcessListEndTask(0, li);
+                        }
+                        else if (wParam.ToInt32() == 0)
+                        {
+                            TaskMgrListItem li = listApps.SelectedItem;
+                            if (li == null) return;
+                            ProcessListSetTo(li);
+                        }
+                        break;
+                    }
             }
         }
 
+        //Load and exit
         private void AppLoad()
         {
             //初始化函数
@@ -4807,6 +5194,8 @@ namespace PCMgr
             {
                 baseProcessRefeshTimer.Stop();
 
+                ProcessListSimpleExit();
+                AppWorkerCallBack(38, IntPtr.Zero, IntPtr.Zero);
                 DelingDialogClose();
                 MPERF_NET_FreeAllProcessNetInfo();
                 PerfClear();
@@ -4852,6 +5241,13 @@ namespace PCMgr
                     new FormLoadDriver().ShowDialog();
             }
             return 0;
+        }
+
+        private FormKDbgPrint kDbgPrint = null;
+        private bool exitkDbgPrintCalled = false;
+        private void KDbgPrint_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            kDbgPrint = null;
         }
 
         private bool exitCalled = false;
@@ -4946,19 +5342,7 @@ namespace PCMgr
                 listProcessAddHeader("TitleNet", 75);
             }
 
-            string s2 = GetConfig("RefeshTime", "AppSetting");
-            switch (s2)
-            {
-                case "Stop":
-                    MAppWorkCall3(193, IntPtr.Zero, new IntPtr(0));
-                    break;
-                case "Slow":
-                    MAppWorkCall3(193, IntPtr.Zero, new IntPtr(1));
-                    break;
-                case "Fast":
-                    MAppWorkCall3(193, IntPtr.Zero, new IntPtr(2));
-                    break;
-            }
+            LoadRefeshRateSetting();
 
             MAppWorkCall3(194, IntPtr.Zero, GetConfig("TopMost", "AppSetting") == "TRUE" ? new IntPtr(1) : IntPtr.Zero);
             MAppWorkCall3(195, IntPtr.Zero, GetConfig("CloseHideToNotfication", "AppSetting") == "TRUE" ? new IntPtr(1) : IntPtr.Zero);
@@ -5010,7 +5394,8 @@ namespace PCMgr
                 WindowState = FormWindowState.Maximized;
             else
             {
-                string s = GetConfig("OldSize", "AppSetting");
+                bool s_isSimpleView = GetConfigBool("SimpleView", "AppSetting", true);
+
                 string p = GetConfig("OldPos", "AppSetting");
                 if (p.Contains("-"))
                 {
@@ -5019,9 +5404,33 @@ namespace PCMgr
                     {
                         Left = int.Parse(pp[0]);
                         Top = int.Parse(pp[1]);
+                        if (Left > Screen.PrimaryScreen.Bounds.Width)
+                            Left = 100;
+                        if (Top > Screen.PrimaryScreen.Bounds.Height)
+                            Top = 200;
                     }
                     catch { }
                 }
+
+                string sl = GetConfig("OldSizeSimple", "AppSetting","380-334");
+                if (sl.Contains("-"))
+                {
+                    string[] ss = sl.Split('-');
+                    try
+                    {
+                        int w = int.Parse(ss[0]); if (w + Left > Screen.PrimaryScreen.WorkingArea.Width) w = Screen.PrimaryScreen.WorkingArea.Width - Left;
+                        int h = int.Parse(ss[1]); if (h + Top > Screen.PrimaryScreen.WorkingArea.Height) h = Screen.PrimaryScreen.WorkingArea.Height - Top;
+                        lastSimpleSize = new Size(w, h);
+
+                        if (s_isSimpleView)
+                        {
+                            Width = w;
+                            Height = h;
+                        }
+                    }
+                    catch { }
+                }
+                string s = GetConfig("OldSize", "AppSetting","780-500");
                 if (s.Contains("-"))
                 {
                     string[] ss = s.Split('-');
@@ -5029,8 +5438,12 @@ namespace PCMgr
                     {
                         int w = int.Parse(ss[0]); if (w + Left > Screen.PrimaryScreen.WorkingArea.Width) w = Screen.PrimaryScreen.WorkingArea.Width - Left;
                         int h = int.Parse(ss[1]); if (h + Top > Screen.PrimaryScreen.WorkingArea.Height) h = Screen.PrimaryScreen.WorkingArea.Height - Top;
-                        Width = w;
-                        Height = h;
+                        lastSize = new Size(w, h);
+                        if (!s_isSimpleView)
+                        {
+                            Width = w;
+                            Height = h;
+                        }
                     }
                     catch { }
                 }
@@ -5059,6 +5472,22 @@ namespace PCMgr
 
                 showHideHotKetId = MAppRegShowHotKey(Handle, (uint)(int)kv1, (uint)(int)kv2);
                 MAppWorkCall3(209, Handle, IntPtr.Zero);
+            }
+        }
+        private void LoadRefeshRateSetting()
+        {
+            string s2 = GetConfig("RefeshTime", "AppSetting");
+            switch (s2)
+            {
+                case "Stop":
+                    MAppWorkCall3(193, IntPtr.Zero, new IntPtr(0));
+                    break;
+                case "Slow":
+                    MAppWorkCall3(193, IntPtr.Zero, new IntPtr(1));
+                    break;
+                case "Fast":
+                    MAppWorkCall3(193, IntPtr.Zero, new IntPtr(2));
+                    break;
             }
         }
 
@@ -5178,7 +5607,9 @@ namespace PCMgr
             SetConfig("ListSortIndex", "AppSetting", sortitem.ToString());
             if (sorta) SetConfig("ListSortDk", "AppSetting", "TRUE");
             else SetConfig("ListSortDk", "AppSetting", "FALSE");
-            SetConfig("OldSize", "AppSetting", Width.ToString() + "-" + Height.ToString());
+            if (!isSimpleView)
+                SetConfig("OldSize", "AppSetting", Width.ToString() + "-" + Height.ToString());
+            else SetConfig("OldSize", "AppSetting", lastSize.Width.ToString() + "-" + lastSize.Height.ToString());
             SetConfig("OldPos", "AppSetting", Left.ToString() + "-" + Top.ToString());
             SetConfigBool("OldIsMax", "AppSetting", WindowState == FormWindowState.Maximized);
 
@@ -5263,7 +5694,5 @@ namespace PCMgr
                 KernelListInit();
             }
         }
-
-
     }
 }

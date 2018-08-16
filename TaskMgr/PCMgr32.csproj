@@ -112,6 +112,9 @@
   <PropertyGroup />
   <PropertyGroup />
   <ItemGroup>
+    <Reference Include="AeroWizard">
+      <HintPath>..\..\..\范例\AeroWizard-master\src\Library\bin\Debug\v4.0\AeroWizard.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -119,22 +122,25 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Areo\CommandLink.cs">
+    <Compile Include="Aero\CommandLink.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Areo\NativeMethods.cs" />
-    <Compile Include="Areo\Progressbar.cs">
+    <Compile Include="Aero\ExpandButton.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Areo\TaskDialog\CustomButton.cs" />
-    <Compile Include="Areo\TaskDialog\EventArgs.cs" />
-    <Compile Include="Areo\TaskDialog\Message.cs" />
-    <Compile Include="Areo\TaskDialog\NativeMethods.cs" />
-    <Compile Include="Areo\TaskDialog\Results.cs" />
-    <Compile Include="Areo\TaskDialog\TaskDialog.cs" />
-    <Compile Include="Areo\TaskDialog\TaskDialogButton.cs" />
-    <Compile Include="Areo\TaskDialog\TaskDialogIcon.cs" />
-    <Compile Include="Areo\TaskDialog\TaskDialog_static.cs" />
+    <Compile Include="Aero\NativeMethods.cs" />
+    <Compile Include="Aero\Progressbar.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Aero\TaskDialog\CustomButton.cs" />
+    <Compile Include="Aero\TaskDialog\EventArgs.cs" />
+    <Compile Include="Aero\TaskDialog\Message.cs" />
+    <Compile Include="Aero\TaskDialog\NativeMethods.cs" />
+    <Compile Include="Aero\TaskDialog\Results.cs" />
+    <Compile Include="Aero\TaskDialog\TaskDialog.cs" />
+    <Compile Include="Aero\TaskDialog\TaskDialogButton.cs" />
+    <Compile Include="Aero\TaskDialog\TaskDialogIcon.cs" />
+    <Compile Include="Aero\TaskDialog\TaskDialog_static.cs" />
     <Compile Include="Ctls\IPerformancePage.cs" />
     <Compile Include="Ctls\PerformancePageCpu.cs">
       <SubType>UserControl</SubType>
@@ -175,6 +181,7 @@
     <Compile Include="Ctls\PerformanceTitle.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Ctls\TaskMgrListApis.cs" />
     <Compile Include="Ctls\TaskMgrListHeader.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -202,6 +209,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>LanuageResource_zh.resx</DependentUpon>
     </Compile>
+    <Compile Include="NativeMethods.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Ctls\TaskMgrList.cs">
@@ -219,11 +227,41 @@
     <Compile Include="WorkWindow\FormCheckFileUse.Designer.cs">
       <DependentUpon>FormCheckFileUse.cs</DependentUpon>
     </Compile>
-    <Compile Include="WorkWindow\FormDA.cs">
+    <Compile Include="WorkWindow\FormFirst.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="WorkWindow\FormDA.Designer.cs">
-      <DependentUpon>FormDA.cs</DependentUpon>
+    <Compile Include="WorkWindow\FormFirst.Designer.cs">
+      <DependentUpon>FormFirst.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WorkWindow\FormHooks.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WorkWindow\FormHooks.Designer.cs">
+      <DependentUpon>FormHooks.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WorkWindow\FormKernel.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WorkWindow\FormKernel.Designer.cs">
+      <DependentUpon>FormKernel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WorkWindow\FormVHotKeys.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WorkWindow\FormVHotKeys.Designer.cs">
+      <DependentUpon>FormVHotKeys.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WorkWindow\FormVTimers.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WorkWindow\FormVTimers.Designer.cs">
+      <DependentUpon>FormVTimers.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WorkWindow\Tools\FormKDA.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WorkWindow\Tools\FormKDA.Designer.cs">
+      <DependentUpon>FormKDA.cs</DependentUpon>
     </Compile>
     <Compile Include="WorkWindow\FormDelFileProgress.cs">
       <SubType>Form</SubType>
@@ -231,10 +269,10 @@
     <Compile Include="WorkWindow\FormDelFileProgress.Designer.cs">
       <DependentUpon>FormDelFileProgress.cs</DependentUpon>
     </Compile>
-    <Compile Include="WorkWindow\FormFileTool.cs">
+    <Compile Include="WorkWindow\Tools\FormFileTool.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="WorkWindow\FormFileTool.Designer.cs">
+    <Compile Include="WorkWindow\Tools\FormFileTool.Designer.cs">
       <DependentUpon>FormFileTool.cs</DependentUpon>
     </Compile>
     <Compile Include="WorkWindow\FormFillWithData.cs">
@@ -243,16 +281,22 @@
     <Compile Include="WorkWindow\FormFillWithData.Designer.cs">
       <DependentUpon>FormFillWithData.cs</DependentUpon>
     </Compile>
+    <Compile Include="WorkWindow\FormVPrivileges.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WorkWindow\FormVPrivileges.Designer.cs">
+      <DependentUpon>FormVPrivileges.cs</DependentUpon>
+    </Compile>
     <Compile Include="WorkWindow\FormVKrnInfo.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="WorkWindow\FormVKrnInfo.Designer.cs">
       <DependentUpon>FormVKrnInfo.cs</DependentUpon>
     </Compile>
-    <Compile Include="WorkWindow\FormLoadDriver.cs">
+    <Compile Include="WorkWindow\Tools\FormLoadDriver.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="WorkWindow\FormLoadDriver.Designer.cs">
+    <Compile Include="WorkWindow\Tools\FormLoadDriver.Designer.cs">
       <DependentUpon>FormLoadDriver.cs</DependentUpon>
     </Compile>
     <Compile Include="WorkWindow\FormMainListHeaders.cs">
@@ -284,6 +328,18 @@
     </Compile>
     <Compile Include="WorkWindow\FormVHandles.Designer.cs">
       <DependentUpon>FormVHandles.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WorkWindow\KDbgPrint\FormFind.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WorkWindow\KDbgPrint\FormFind.Designer.cs">
+      <DependentUpon>FormFind.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WorkWindow\KDbgPrint\FormKDbgPrint.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WorkWindow\KDbgPrint\FormKDbgPrint.Designer.cs">
+      <DependentUpon>FormKDbgPrint.cs</DependentUpon>
     </Compile>
     <EmbeddedResource Include="Ctls\PerformancePageCpu.en.resx">
       <DependentUpon>PerformancePageCpu.cs</DependentUpon>
@@ -319,14 +375,41 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>LanuageResource_en.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Include="WorkWindow\FormDA.en.resx">
-      <DependentUpon>FormDA.cs</DependentUpon>
+    <EmbeddedResource Include="WorkWindow\FormFirst.resx">
+      <DependentUpon>FormFirst.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="WorkWindow\FormDA.resx">
-      <DependentUpon>FormDA.cs</DependentUpon>
+    <EmbeddedResource Include="WorkWindow\FormHooks.resx">
+      <DependentUpon>FormHooks.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormKernel.resx">
+      <DependentUpon>FormKernel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormVHotKeys.en.resx">
+      <DependentUpon>FormVHotKeys.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormVHotKeys.resx">
+      <DependentUpon>FormVHotKeys.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormVTimers.en.resx">
+      <DependentUpon>FormVTimers.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormVTimers.resx">
+      <DependentUpon>FormVTimers.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\Tools\FormKDA.en.resx">
+      <DependentUpon>FormKDA.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\Tools\FormKDA.resx">
+      <DependentUpon>FormKDA.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="WorkWindow\FormDelFileProgress.en.resx">
       <DependentUpon>FormDelFileProgress.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormVPrivileges.en.resx">
+      <DependentUpon>FormVPrivileges.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormVPrivileges.resx">
+      <DependentUpon>FormVPrivileges.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="WorkWindow\FormVKrnInfo.en.resx">
       <DependentUpon>FormVKrnInfo.cs</DependentUpon>
@@ -334,10 +417,10 @@
     <EmbeddedResource Include="WorkWindow\FormVKrnInfo.resx">
       <DependentUpon>FormVKrnInfo.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="WorkWindow\FormLoadDriver.en.resx">
+    <EmbeddedResource Include="WorkWindow\Tools\FormLoadDriver.en.resx">
       <DependentUpon>FormLoadDriver.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="WorkWindow\FormLoadDriver.resx">
+    <EmbeddedResource Include="WorkWindow\Tools\FormLoadDriver.resx">
       <DependentUpon>FormLoadDriver.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="WorkWindow\FormSpeedBall.resx">
@@ -348,6 +431,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="WorkWindow\FormVHandles.resx">
       <DependentUpon>FormVHandles.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\KDbgPrint\FormFind.resx">
+      <DependentUpon>FormFind.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\KDbgPrint\FormKDbgPrint.resx">
+      <DependentUpon>FormKDbgPrint.cs</DependentUpon>
     </EmbeddedResource>
     <Resource Include="Lanuages\LanuageResource_zh-Hant.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -380,10 +469,10 @@
     <EmbeddedResource Include="WorkWindow\FormDelFileProgress.resx">
       <DependentUpon>FormDelFileProgress.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="WorkWindow\FormFileTool.en.resx">
+    <EmbeddedResource Include="WorkWindow\Tools\FormFileTool.en.resx">
       <DependentUpon>FormFileTool.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="WorkWindow\FormFileTool.resx">
+    <EmbeddedResource Include="WorkWindow\Tools\FormFileTool.resx">
       <DependentUpon>FormFileTool.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="WorkWindow\FormFillWithData.en.resx">
@@ -423,6 +512,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\WizardHat.ico" />
     <Content Include="icoPcmgr.ico" />
     <None Include="Resources\iconContextMenu.png" />
     <None Include="Resources\icoFiles.ico" />
@@ -481,6 +571,7 @@
       <Name>PCMgrUWP</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

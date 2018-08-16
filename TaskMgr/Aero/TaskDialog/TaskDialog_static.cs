@@ -9,11 +9,10 @@
  *****************************************************/
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace PCMgr.Aero.TaskDialog {
-	public partial class TaskDialog {
+namespace PCMgr.Aero.TaskDialog
+{
+    public partial class TaskDialog {
 
 		#region Static display methods
 

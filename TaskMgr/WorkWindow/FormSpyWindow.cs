@@ -21,6 +21,8 @@ namespace PCMgr.WorkWindow
 
         #region APIS
 
+        [DllImport("user32.dll")]
+        public static extern int GetWindowText(IntPtr hWnd, StringBuilder stringbulider, int nMaxCount);
         [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr MGetWindowIcon(IntPtr hWnd);
         [DllImport("user32.dll")]

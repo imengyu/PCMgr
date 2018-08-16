@@ -2,8 +2,9 @@
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LocalDebuggerDebuggerType>Mixed</LocalDebuggerDebuggerType>
-    <DebuggerFlavor>WindowsRemoteDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>select startmgr</LocalDebuggerCommandArguments>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <LocalDebuggerCommandArguments>
+    </LocalDebuggerCommandArguments>
     <RemoteDebuggerWorkingDirectory>C:\Program Files\MyApps\</RemoteDebuggerWorkingDirectory>
     <RemoteDebuggerConnection>RemoteWithoutAuthentication</RemoteDebuggerConnection>
     <RemoteDebuggerDebuggerType>Mixed</RemoteDebuggerDebuggerType>

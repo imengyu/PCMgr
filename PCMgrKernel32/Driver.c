@@ -13,6 +13,8 @@
 
 BOOLEAN kernelInited = FALSE;
 
+//已导出函数
+//
 strcat_s_ _strcat_s;
 strcpy_s_ _strcpy_s;
 memcpy_s_ _memcpy_s;
@@ -20,19 +22,23 @@ swprintf_s_ swprintf_s;
 wcscpy_s_ _wcscpy_s;
 wcscat_s_ _wcscat_s;
 memset_ _memset;
-
+//====================================================
+//
 PsResumeProcess_ _PsResumeProcess;
 PsSuspendProcess_ _PsSuspendProcess;
 PsLookupProcessByProcessId_ _PsLookupProcessByProcessId;
 PsLookupThreadByThreadId_ _PsLookupThreadByThreadId;
+//====================================================
 
 ULONG_PTR CurrentDbgViewProcess = 0;
 ULONG_PTR CurrentPCMgrProcess = 0;
 ULONG LoadedModuleOrder = 0;
+//====================================================
 PLIST_ENTRY PsLoadedModuleList = NULL;
 PLIST_ENTRY ListEntry = NULL;
 PLIST_ENTRY ListEntryScan = NULL;
 PEPROCESS PEprocessSystem = NULL;
+//====================================================
 
 extern BOOLEAN kxCanCreateProcess;
 extern BOOLEAN kxCanCreateThread;
@@ -42,6 +48,9 @@ ULONG_PTR kxNtosBaseAddress = 0;
 WCHAR kxNtosName[32];
 PRKEVENT kxEventObjectMain = NULL;
 OBJECT_HANDLE_INFORMATION kxObjectHandleInfoEventMain;
+
+#pragma region MyDbgView使用变量
+
 OBJECT_HANDLE_INFORMATION kxObjectHandleInfoDbgViewEvent;
 BOOLEAN kxMyDbgViewCanUse = FALSE;
 PVOID kxEventObjectDbgViewEvent = NULL;
@@ -50,6 +59,18 @@ PDBGPRINT_DATA kxMyDbgViewDataStart = NULL;
 PDBGPRINT_DATA kxMyDbgViewDataEnd = NULL;
 
 BOOLEAN kxMyDbgViewLastReceived = FALSE;
+
+#pragma endregion
+
+extern PGET_HOT_KEYS_CACHE getHotKeyCache;
+extern PGET_TIMERS_CACHE getTimersCache;
+
+#pragma region 全局退出清理资源的函数索引
+
+extern void KxGetProcessHotKeysClearCache();
+extern void KxGetProcessTimersClearCache();
+
+#pragma endregion
 
 NTSTATUS DriverEntry(IN PDRIVER_OBJECT pDriverObject, IN PUNICODE_STRING pRegPath)
 {
@@ -138,9 +159,12 @@ VOID DriverUnload(_In_ struct _DRIVER_OBJECT *pDriverObject)
 	PDEVICE_OBJECT  v1 = NULL;
 	PDEVICE_OBJECT  DeleteDeviceObject = NULL;
 
+	//退出清理资源
 	KxUnInitProtectProcess();
 	KxPsMonitorUnInit();
 	KxUnInitMyDbgView();
+	KxGetProcessHotKeysClearCache();
+	KxGetProcessTimersClearCache();
 
 	RtlInitUnicodeString(&DeviceLinkName, DEVICE_LINK_NAME);
 	IoDeleteSymbolicLink(&DeviceLinkName);
@@ -193,6 +217,7 @@ NTSTATUS IOControlDispatch(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp)
 			PNTOS_PDB_DATA data = (PNTOS_PDB_DATA)InputData;
 			KxGetFunctionsFormPDBData(data);
 			KxGetStructOffestsFormPDBData(&data->StructOffestData);
+			KxGetWin32kFunctionsFormPDBData(&data->Win32KData);
 			KdPrint(("Pdb Data received."));
 			kernelInited = TRUE;
 		}
@@ -557,10 +582,102 @@ NTSTATUS IOControlDispatch(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp)
 		}
 		break;
 	}
+	case CTL_GET_PROCESS_HOTKEYS: {
+		ULONG_PTR pid = *(ULONG_PTR*)InputData;
+		ULONG count = 0;
+		Status = KxGetProcessHotKeys(pid, &count);
+		Informaiton = sizeof(ULONG);
+		_memcpy_s(OutputData, sizeof(ULONG), &count, sizeof(ULONG));
+		break;
+	}
+	case CTL_GET_PROCESS_TIMERS: {
+		ULONG_PTR pid = *(ULONG_PTR*)InputData;
+		ULONG count = 0;
+		Status = KxGetProcessTimers(pid, &count);
+		Informaiton = sizeof(ULONG);
+		_memcpy_s(OutputData, sizeof(ULONG), &count, sizeof(ULONG));
+		break;
+	}
+	case CTL_GET_PROCESS_HOTKEYS_BUFFER: {
+		if (getHotKeyCache)
+		{
+			ULONG_PTR offest = 0;
+			PGET_HOT_KEYS_CACHE cur = getHotKeyCache;
+			PGET_HOT_KEYS_CACHE next = cur;
+			HOT_KEY_DATA data;
+			PHOT_KEY_ITEM item = NULL;
+			do {
+				_memset(&data, 0, sizeof(HOT_KEY_DATA));
+				if (offest > OutputDataLength - sizeof(HOT_KEY_DATA))
+				{
+					Status = STATUS_INFO_LENGTH_MISMATCH;
+					goto COMPLETE;
+				}
+
+				item = (PHOT_KEY_ITEM)next->Object;
+				data.ObjectPtr = (ULONG_PTR)next->Object;
+				data.fsModifiers = item->fsModifiers;
+				data.hWnd = item->hWnd;
+				data.id = item->id;
+				data.ThreadId = (ULONG)PsGetThreadId((PETHREAD)item->Thread);
+				PEPROCESS process = IoThreadToProcess((PETHREAD)item->Thread);
+				if (process) {
+					data.ProcessId = (ULONG)PsGetProcessId(process);
+					PUCHAR procName = PsGetProcessImageFileName(process);
+					size_t procNameSize = strlen(procName) + 1;
+					_memcpy_s(data.ImageFileName, sizeof(data.ImageFileName), procName, procNameSize);
+				}
+				_memcpy_s((PVOID)((ULONG_PTR)OutputData + offest), sizeof(HOT_KEY_DATA), &data, sizeof(HOT_KEY_DATA));
+				next = (PGET_HOT_KEYS_CACHE)cur->Next;
+				offest += sizeof(HOT_KEY_DATA);
+			} while (next);
+
+			Informaiton = offest;
+			Status = STATUS_SUCCESS;
+		}
+		break;
+	}	
+	case CTL_GET_PROCESS_TIMERS_BUFFER: {
+		if (getTimersCache)
+		{
+			ULONG_PTR offest = 0;
+			PGET_TIMERS_CACHE cur = getTimersCache;
+			PGET_TIMERS_CACHE next = cur;
+
+			TIMER_DATA data;
+			TIMER*item = NULL;
+			do {
+				_memset(&data, 0, sizeof(TIMER_DATA));
+				item = (PTIMER)next->Object;
+				data.ObjectPtr = (ULONG_PTR)next->Object;
+				data.cmsCountdown = item->cmsCountdown;
+				data.cmsRate = item->cmsRate;
+				data.flags = item->cmsRate;
+				data.nID = item->nID;
+				data.pfn = item->pfn;
+				data.pti = item->pti;
+				data.spwnd = item->spwnd;
+
+				if (offest > OutputDataLength - sizeof(TIMER_DATA))
+				{
+					Status = STATUS_INFO_LENGTH_MISMATCH;
+					goto COMPLETE;
+				}
+				_memcpy_s((PVOID)((ULONG_PTR)OutputData + offest), sizeof(TIMER_DATA), &data, sizeof(TIMER_DATA));
+				next = (PGET_TIMERS_CACHE)cur->Next;
+				offest += sizeof(TIMER_DATA);
+			} while (next);
+
+			Informaiton = offest;
+			Status = STATUS_SUCCESS;
+		}
+		break;
+	}
 	default:
 		break;
 	}
 
+	COMPLETE:
 	Irp->IoStatus.Status = Status;             //Ring3 GetLastError();
 	Irp->IoStatus.Information = Informaiton;
 	IoCompleteRequest(Irp, IO_NO_INCREMENT);  //将Irp返回给Io管理器
@@ -574,6 +691,7 @@ NTSTATUS CreateDispatch(IN PDEVICE_OBJECT DeviceObject,IN PIRP Irp)
 	return STATUS_SUCCESS;
 }
 
+//初始化
 NTSTATUS InitKernel(PKINITAGRS parm)
 {
 	NTSTATUS status = STATUS_SUCCESS;
@@ -594,6 +712,7 @@ NTSTATUS InitKernel(PKINITAGRS parm)
 	return status;
 }
 
+//获取一些已导出函数
 VOID KxLoadFunctions()
 {
 	UNICODE_STRING MemsetName;
@@ -634,11 +753,13 @@ VOID KxLoadFunctions()
 	
 }
 
+//DbgViewR3退出并重置
 void KxDbgViewR3Exited() {
 
 	KxMyDbgViewReset();
 }
 
+//DebugPrintCallback 拷贝数据到缓冲区中
 VOID KxMyDebugPrintCopyData(_In_ PSTRING Output)
 {
 	if (kxMyDbgViewDataEnd == NULL)
@@ -657,6 +778,7 @@ VOID KxMyDebugPrintCopyData(_In_ PSTRING Output)
 	for (int i = 0; i < Output->Length &&i < 256; i++)
 		kxMyDbgViewDataEnd->StrBuffer[i] = Output->Buffer[i];
 }
+//DebugPrintCallback
 VOID KxMyDebugPrintCallback(_In_ PSTRING Output, _In_ ULONG ComponentId, _In_ ULONG Level)
 {
 	kxMyDbgViewLastReceived = TRUE;
@@ -669,6 +791,7 @@ VOID KxMyDebugPrintCallback(_In_ PSTRING Output, _In_ ULONG ComponentId, _In_ UL
 	}
 }
 
+//DbgView 重置清空所有缓冲区
 void KxMyDbgViewFreeAllData() {
 	if (kxMyDbgViewDataStart)
 	{
@@ -688,6 +811,7 @@ void KxMyDbgViewFreeAllData() {
 		kxMyDbgViewDataEnd = NULL;
 	}
 }
+//DbgView 重置
 void KxMyDbgViewReset() {
 	kxMyDbgViewCanUse = FALSE;
 	if (kxEventObjectDbgViewEvent) {
@@ -697,6 +821,7 @@ void KxMyDbgViewReset() {
 	}
 	CurrentDbgViewProcess = 0;
 }
+//监测一下DbgView r3是不是正在运行
 BOOLEAN KxMyDbgViewWorking() {
 	if (kxEventObjectDbgViewEvent && CurrentDbgViewProcess != 0)
 	{
@@ -715,10 +840,12 @@ BOOLEAN KxMyDbgViewWorking() {
 	return FALSE;
 }
 
+//DebugPrintCallback卸载
 NTSTATUS KxUnInitMyDbgView() {
 	KxMyDbgViewFreeAllData();
 	return DbgSetDebugPrintCallback(KxMyDebugPrintCallback, FALSE);
 }
+//DebugPrintCallback安装
 NTSTATUS KxInitMyDbgView() {
 	return DbgSetDebugPrintCallback(KxMyDebugPrintCallback, TRUE);
 }

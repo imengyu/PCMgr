@@ -7,6 +7,8 @@ VOID KxGetFunctionsFormPDBData(PNTOS_PDB_DATA data);
 
 VOID KxGetStructOffestsFormPDBData(PNTOS_EPROCESS_OFF_DATA data);
 
+VOID KxGetWin32kFunctionsFormPDBData(PWIN32K_PDB_DATA data);
+
 VOID KxPrintInternalFuns();
 
 VOID KxPrintInternalOffests();

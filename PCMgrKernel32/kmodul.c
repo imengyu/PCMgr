@@ -3,7 +3,7 @@
 extern wcscpy_s_ _wcscpy_s;
 extern wcscat_s_ _wcscat_s;
 
-NTSTATUS KxUnLoadDrvObjectByDrvObject(wchar_t *pszDrvName, ULONG_PTR* pDrvObject)
+NTSTATUS KxUnLoadDrvObjectByDrvObject(ULONG_PTR pDrvObject)
 {
 	NTSTATUS status = STATUS_UNSUCCESSFUL;
 
@@ -65,16 +65,21 @@ NTSTATUS KxGetDrvObjectByName(wchar_t *pszDrvName, ULONG_PTR* pDrvObject)
 	}
 	else
 	{
-		//引用对象通过名字("\FileSystem\xxx")
-		status = ObReferenceObjectByName(&uniFileDev, OBJ_CASE_INSENSITIVE, NULL, FILE_ALL_ACCESS, *IoDriverObjectType, KernelMode, NULL, (PVOID *)&pDrvObj);
+		KdPrint(("ZwCreateFile (\"\\Driver\\%ws\") Failed! Status: 0x%x\n", uniObjName.Buffer, status));
+		//引用对象通过名字("\Driver\xxx")
+		status = ObReferenceObjectByName(&uniObjName, OBJ_CASE_INSENSITIVE, NULL, FILE_ALL_ACCESS, *IoDriverObjectType, KernelMode, NULL, (PVOID *)&pDrvObj);
 		if (!NT_SUCCESS(status))
 		{
-			KdPrint(("ObReferenceObjectByName(\"\\FileSystem\\xxx\") Failed! Status: 驱动名:%ws \t 0x%x\n", uniObjName.Buffer, status));
-			return status;
+			//引用对象通过名字("\FileSystem\xxx")
+			status = ObReferenceObjectByName(&uniFileDev, OBJ_CASE_INSENSITIVE, NULL, FILE_ALL_ACCESS, *IoDriverObjectType, KernelMode, NULL, (PVOID *)&pDrvObj);
+			if (!NT_SUCCESS(status))
+			{
+				KdPrint(("ObReferenceObjectByName(\"\\FileSystem\\xxx\") Failed! Status: 驱动名:%ws \t 0x%x\n", uniObjName.Buffer, status));
+				return status;
+			}
 		}
 	}
 	
-
 	//KdPrint(("驱动名:%ws \t 驱动对象:0x%08X\n", uniObjName.Buffer, pDrvObj));
 	*pDrvObject = (ULONG_PTR)pDrvObj;
 	//解除对象引用

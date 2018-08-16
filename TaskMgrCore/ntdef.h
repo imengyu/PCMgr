@@ -323,6 +323,7 @@ typedef enum _OBJECT_INFORMATION_CLASS {
 	ObjectTypeInformation = 2
 } OBJECT_INFORMATION_CLASS;
 
+
 typedef struct _PROCESS_BASIC_INFORMATION {
 	PVOID Reserved1;
 	PPEB PebBaseAddress;
@@ -450,16 +451,6 @@ typedef struct _SYSTEM_PROCESSES { // Information Class 5
 	SYSTEM_THREADS Threads[1];
 } SYSTEM_PROCESSES, *PSYSTEM_PROCESSES;
 
-/*typedef struct _SYSTEM_HANDLE_INFORMATION {
-	ULONG                ProcessId;
-	UCHAR                ObjectTypeNumber;
-	UCHAR                Flags;
-	USHORT               Handle;
-	PVOID                Object;
-	ACCESS_MASK          GrantedAccess;
-} SYSTEM_HANDLE_INFORMATION, *PSYSTEM_HANDLE_INFORMATION;*/
-
-
 typedef struct _SYSTEM_HANDLE_TABLE_ENTRY_INFO {
 	USHORT UniqueProcessId;
 	USHORT CreatorBackTraceIndex;
@@ -545,7 +536,6 @@ typedef struct _SYSTEM_HANDLE_INFORMATION {
 
 
 #endif
-
 
 typedef LONG(WINAPI * ZwQueryInformationThreadFun)(HANDLE ThreadHandle, THREADINFOCLASS ThreadInformationClass, PVOID ThreadInformation, ULONG ThreadInformationLength, PULONG ReturnLength OPTIONAL);
 typedef LONG(WINAPI * RtlNtStatusToDosErrorFun)(ULONG status);

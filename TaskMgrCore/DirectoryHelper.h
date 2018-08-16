@@ -14,5 +14,12 @@ public:
 	static bool Exists(WCHAR * path);
 	static bool Delete(std::wstring* path);
 	static bool Delete(WCHAR * path);
+
+	static bool Create(std::string* path);
+	static bool Create(CHAR * path);
+	static bool Exists(std::string* path);
+	static bool Exists(CHAR * path);
+	static bool Delete(std::string* path);
+	static bool Delete(CHAR * path);
 };
 

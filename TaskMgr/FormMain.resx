@@ -140,7 +140,7 @@
         AAEAAAD/////AQAAAAAAAAAMAgAAAFdTeXN0ZW0uV2luZG93cy5Gb3JtcywgVmVyc2lvbj00LjAuMC4w
         LCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODkFAQAAACZTeXN0
         ZW0uV2luZG93cy5Gb3Jtcy5JbWFnZUxpc3RTdHJlYW1lcgEAAAAERGF0YQcCAgAAAAkDAAAADwMAAADw
-        CAAAAk1TRnQBSQFMAgEBAwEAARABBgEQAQYBEAEAARABAAT/ASEBAAj/AUIBTQE2BwABNgMAASgDAAFA
+        CAAAAk1TRnQBSQFMAgEBAwEAAfABBgHwAQYBEAEAARABAAT/ASEBAAj/AUIBTQE2BwABNgMAASgDAAFA
         AwABEAMAAQEBAAEgBgABELYAAlgBYgHvAlgBYgHvDAACWAFiAe8CWAFiAe+EAAGyAgAB/wwAAmIBWAHv
         AdwBjwEAAf8B6AGXAQAB/wHoAZcBAAH/AegBlwEAAf8BwwIAAf8CRwFGAYAcAAGOAeQC/wGNAeMC/wGL
         AeMC/wGKAeIC/wGIAeIC/wGHAeEC/wIAAb4B/wIAAeYB/wIAAbwB/wEAAdYB/AH/AgABuQH/AgAB3gH/
@@ -188,7 +188,7 @@
     <value>0</value>
   </data>
   <data name="treeFmLeft.Size" type="System.Drawing.Size, System.Drawing">
-    <value>226, 488</value>
+    <value>226, 487</value>
   </data>
   <data name="treeFmLeft.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
@@ -260,7 +260,7 @@
     <value>0, 0</value>
   </data>
   <data name="listFm.Size" type="System.Drawing.Size, System.Drawing">
-    <value>670, 488</value>
+    <value>670, 487</value>
   </data>
   <metadata name="imageListFileTypeList.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>192, 17</value>
@@ -270,7 +270,7 @@
         AAEAAAD/////AQAAAAAAAAAMAgAAAFdTeXN0ZW0uV2luZG93cy5Gb3JtcywgVmVyc2lvbj00LjAuMC4w
         LCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODkFAQAAACZTeXN0
         ZW0uV2luZG93cy5Gb3Jtcy5JbWFnZUxpc3RTdHJlYW1lcgEAAAAERGF0YQcCAgAAAAkDAAAADwMAAACw
-        BAAAAk1TRnQBSQFMAwEBAAHYAQUB2AEFARABAAEQAQAE/wEhAQAI/wFCAU0BNgcAATYDAAEoAwABQAMA
+        BAAAAk1TRnQBSQFMAwEBAAG4AQYBuAEGARABAAEQAQAE/wEhAQAI/wFCAU0BNgcAATYDAAEoAwABQAMA
         ARADAAEBAQABIAYAARA8AAHNAf8MAAJQAVEBnwJQAVEBn8wAAvsB+gH/AvsB+gH/AvsB+gH/AvsB+gH/
         AvsB+gH/AvsB+gH/A/0B/wIAAdsB/wIAAdkB/wP9Af8CUAFRAZ8CAAHeAf8CUAFRAZ/MAAP7Af8B9wL2
         Af8B9wH2AfUB/wH3AfYB9QH/AfcB9gH1Af8B9wH2AfUB/wH3AfYB9QH/AvsB+gH/AgAB2wH/AgAB2QH/
@@ -321,7 +321,7 @@
     <value>1</value>
   </data>
   <data name="splitContainerFm.Size" type="System.Drawing.Size, System.Drawing">
-    <value>900, 488</value>
+    <value>900, 487</value>
   </data>
   <data name="splitContainerFm.SplitterDistance" type="System.Int32, mscorlib">
     <value>226</value>
@@ -354,7 +354,7 @@
     <value>233, 0</value>
   </data>
   <data name="sp3.Size" type="System.Drawing.Size, System.Drawing">
-    <value>1, 520</value>
+    <value>1, 519</value>
   </data>
   <data name="sp3.TabIndex" type="System.Int32, mscorlib">
     <value>1</value>
@@ -378,7 +378,7 @@
     <value>0, 0</value>
   </data>
   <data name="performanceLeftList.Size" type="System.Drawing.Size, System.Drawing">
-    <value>234, 520</value>
+    <value>234, 519</value>
   </data>
   <data name="performanceLeftList.TabIndex" type="System.Int32, mscorlib">
     <value>2</value>
@@ -420,7 +420,7 @@
     <value>1</value>
   </data>
   <data name="splitContainerPerfCtls.Size" type="System.Drawing.Size, System.Drawing">
-    <value>901, 520</value>
+    <value>901, 519</value>
   </data>
   <data name="splitContainerPerfCtls.SplitterDistance" type="System.Int32, mscorlib">
     <value>234</value>
@@ -443,34 +443,31 @@
   <data name="tabControlMain.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Top, Bottom, Left, Right</value>
   </data>
-  <data name="lbStartingStatus.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
-    <value>Left, Right</value>
+  <data name="sp4.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
+    <value>Bottom, Left</value>
   </data>
-  <data name="lbStartingStatus.Location" type="System.Drawing.Point, System.Drawing">
-    <value>3, 214</value>
+  <data name="sp4.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
-  <data name="lbStartingStatus.Size" type="System.Drawing.Size, System.Drawing">
-    <value>868, 84</value>
+  <data name="sp4.Location" type="System.Drawing.Point, System.Drawing">
+    <value>113, 540</value>
   </data>
-  <data name="lbStartingStatus.TabIndex" type="System.Int32, mscorlib">
-    <value>8</value>
+  <data name="sp4.Size" type="System.Drawing.Size, System.Drawing">
+    <value>1, 14</value>
   </data>
-  <data name="lbStartingStatus.Text" xml:space="preserve">
-    <value>正在初始化中...</value>
+  <data name="sp4.TabIndex" type="System.Int32, mscorlib">
+    <value>9</value>
   </data>
-  <data name="lbStartingStatus.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
-    <value>MiddleCenter</value>
+  <data name="&gt;&gt;sp4.Name" xml:space="preserve">
+    <value>sp4</value>
   </data>
-  <data name="&gt;&gt;lbStartingStatus.Name" xml:space="preserve">
-    <value>lbStartingStatus</value>
+  <data name="&gt;&gt;sp4.Type" xml:space="preserve">
+    <value>System.Windows.Forms.PictureBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;lbStartingStatus.Type" xml:space="preserve">
-    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;lbStartingStatus.Parent" xml:space="preserve">
+  <data name="&gt;&gt;sp4.Parent" xml:space="preserve">
     <value>tabPageProcCtl</value>
   </data>
-  <data name="&gt;&gt;lbStartingStatus.ZOrder" xml:space="preserve">
+  <data name="&gt;&gt;sp4.ZOrder" xml:space="preserve">
     <value>0</value>
   </data>
   <data name="check_showAllProcess.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
@@ -498,16 +495,16 @@
     <value>NoControl</value>
   </data>
   <data name="check_showAllProcess.Location" type="System.Drawing.Point, System.Drawing">
-    <value>87, 533</value>
+    <value>216, 535</value>
   </data>
   <data name="check_showAllProcess.Size" type="System.Drawing.Size, System.Drawing">
-    <value>168, 23</value>
+    <value>190, 23</value>
   </data>
   <data name="check_showAllProcess.TabIndex" type="System.Int32, mscorlib">
     <value>3</value>
   </data>
   <data name="check_showAllProcess.Text" xml:space="preserve">
-    <value>显示所有用户的进程</value>
+    <value>显示所有用户的进程(&amp;A)</value>
   </data>
   <data name="check_showAllProcess.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
     <value>MiddleCenter</value>
@@ -534,7 +531,7 @@
     <value>NoControl</value>
   </data>
   <data name="spl1.Location" type="System.Drawing.Point, System.Drawing">
-    <value>80, 537</value>
+    <value>204, 539</value>
   </data>
   <data name="spl1.Size" type="System.Drawing.Size, System.Drawing">
     <value>1, 14</value>
@@ -570,7 +567,7 @@
     <value>NoControl</value>
   </data>
   <data name="btnEndProcess.Location" type="System.Drawing.Point, System.Drawing">
-    <value>806, 531</value>
+    <value>806, 533</value>
   </data>
   <data name="btnEndProcess.Size" type="System.Drawing.Size, System.Drawing">
     <value>85, 24</value>
@@ -600,7 +597,7 @@
     <value>0, 0</value>
   </data>
   <data name="listProcess.Size" type="System.Drawing.Size, System.Drawing">
-    <value>898, 520</value>
+    <value>901, 525</value>
   </data>
   <data name="listProcess.TabIndex" type="System.Int32, mscorlib">
     <value>1</value>
@@ -633,7 +630,7 @@
     <value>NoControl</value>
   </data>
   <data name="lbProcessCount.Location" type="System.Drawing.Point, System.Drawing">
-    <value>8, 535</value>
+    <value>120, 537</value>
   </data>
   <data name="lbProcessCount.Size" type="System.Drawing.Size, System.Drawing">
     <value>66, 17</value>
@@ -655,6 +652,39 @@
   </data>
   <data name="&gt;&gt;lbProcessCount.ZOrder" xml:space="preserve">
     <value>5</value>
+  </data>
+  <data name="expandFewerDetals.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
+    <value>Bottom, Left</value>
+  </data>
+  <data name="expandFewerDetals.FlatStyle" type="System.Windows.Forms.FlatStyle, System.Windows.Forms">
+    <value>Flat</value>
+  </data>
+  <data name="expandFewerDetals.Location" type="System.Drawing.Point, System.Drawing">
+    <value>12, 535</value>
+  </data>
+  <data name="expandFewerDetals.Size" type="System.Drawing.Size, System.Drawing">
+    <value>95, 21</value>
+  </data>
+  <data name="expandFewerDetals.TabIndex" type="System.Int32, mscorlib">
+    <value>10</value>
+  </data>
+  <data name="expandFewerDetals.Text" xml:space="preserve">
+    <value>简略信息(&amp;D)</value>
+  </data>
+  <data name="expandFewerDetals.Visible" type="System.Boolean, mscorlib">
+    <value>False</value>
+  </data>
+  <data name="&gt;&gt;expandFewerDetals.Name" xml:space="preserve">
+    <value>expandFewerDetals</value>
+  </data>
+  <data name="&gt;&gt;expandFewerDetals.Type" xml:space="preserve">
+    <value>PCMgr.Aero.ExpandButton, PCMgrApp32, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+  </data>
+  <data name="&gt;&gt;expandFewerDetals.Parent" xml:space="preserve">
+    <value>tabPageProcCtl</value>
+  </data>
+  <data name="&gt;&gt;expandFewerDetals.ZOrder" xml:space="preserve">
+    <value>6</value>
   </data>
   <data name="tabPageProcCtl.Location" type="System.Drawing.Point, System.Drawing">
     <value>4, 26</value>
@@ -682,6 +712,66 @@
   </data>
   <data name="&gt;&gt;tabPageProcCtl.ZOrder" xml:space="preserve">
     <value>0</value>
+  </data>
+  <data name="sp5.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
+    <value>Bottom, Left</value>
+  </data>
+  <data name="sp5.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="sp5.Location" type="System.Drawing.Point, System.Drawing">
+    <value>88, 533</value>
+  </data>
+  <data name="sp5.Size" type="System.Drawing.Size, System.Drawing">
+    <value>1, 14</value>
+  </data>
+  <data name="sp5.TabIndex" type="System.Int32, mscorlib">
+    <value>14</value>
+  </data>
+  <data name="sp5.Visible" type="System.Boolean, mscorlib">
+    <value>False</value>
+  </data>
+  <data name="&gt;&gt;sp5.Name" xml:space="preserve">
+    <value>sp5</value>
+  </data>
+  <data name="&gt;&gt;sp5.Type" xml:space="preserve">
+    <value>System.Windows.Forms.PictureBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;sp5.Parent" xml:space="preserve">
+    <value>tabPageKernelCtl</value>
+  </data>
+  <data name="&gt;&gt;sp5.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="linkLabelShowKernelTools.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
+    <value>Bottom, Left</value>
+  </data>
+  <data name="linkLabelShowKernelTools.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="linkLabelShowKernelTools.Location" type="System.Drawing.Point, System.Drawing">
+    <value>97, 531</value>
+  </data>
+  <data name="linkLabelShowKernelTools.Size" type="System.Drawing.Size, System.Drawing">
+    <value>104, 17</value>
+  </data>
+  <data name="linkLabelShowKernelTools.TabIndex" type="System.Int32, mscorlib">
+    <value>13</value>
+  </data>
+  <data name="linkLabelShowKernelTools.Text" xml:space="preserve">
+    <value>显示内核管理工具</value>
+  </data>
+  <data name="&gt;&gt;linkLabelShowKernelTools.Name" xml:space="preserve">
+    <value>linkLabelShowKernelTools</value>
+  </data>
+  <data name="&gt;&gt;linkLabelShowKernelTools.Type" xml:space="preserve">
+    <value>System.Windows.Forms.LinkLabel, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;linkLabelShowKernelTools.Parent" xml:space="preserve">
+    <value>tabPageKernelCtl</value>
+  </data>
+  <data name="&gt;&gt;linkLabelShowKernelTools.ZOrder" xml:space="preserve">
+    <value>1</value>
   </data>
   <data name="pl_driverNotLoadTip.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>None</value>
@@ -786,7 +876,7 @@
     <value>tabPageKernelCtl</value>
   </data>
   <data name="&gt;&gt;pl_driverNotLoadTip.ZOrder" xml:space="preserve">
-    <value>0</value>
+    <value>2</value>
   </data>
   <data name="lbDriversCount.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Bottom, Left</value>
@@ -798,7 +888,7 @@
     <value>NoControl</value>
   </data>
   <data name="lbDriversCount.Location" type="System.Drawing.Point, System.Drawing">
-    <value>8, 535</value>
+    <value>11, 531</value>
   </data>
   <data name="lbDriversCount.Size" type="System.Drawing.Size, System.Drawing">
     <value>66, 17</value>
@@ -819,7 +909,7 @@
     <value>tabPageKernelCtl</value>
   </data>
   <data name="&gt;&gt;lbDriversCount.ZOrder" xml:space="preserve">
-    <value>1</value>
+    <value>3</value>
   </data>
   <data name="listDrivers.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Top, Bottom, Left, Right</value>
@@ -876,7 +966,7 @@
     <value>0, 0</value>
   </data>
   <data name="listDrivers.Size" type="System.Drawing.Size, System.Drawing">
-    <value>901, 520</value>
+    <value>901, 519</value>
   </data>
   <data name="listDrivers.TabIndex" type="System.Int32, mscorlib">
     <value>12</value>
@@ -891,7 +981,7 @@
     <value>tabPageKernelCtl</value>
   </data>
   <data name="&gt;&gt;listDrivers.ZOrder" xml:space="preserve">
-    <value>2</value>
+    <value>4</value>
   </data>
   <data name="tabPageKernelCtl.Location" type="System.Drawing.Point, System.Drawing">
     <value>4, 26</value>
@@ -900,7 +990,7 @@
     <value>3, 3, 3, 3</value>
   </data>
   <data name="tabPageKernelCtl.Size" type="System.Drawing.Size, System.Drawing">
-    <value>901, 564</value>
+    <value>901, 565</value>
   </data>
   <data name="tabPageKernelCtl.TabIndex" type="System.Int32, mscorlib">
     <value>1</value>
@@ -930,7 +1020,7 @@
     <value>NoControl</value>
   </data>
   <data name="linkLabelOpenPerfMon.Location" type="System.Drawing.Point, System.Drawing">
-    <value>13, 532</value>
+    <value>13, 530</value>
   </data>
   <data name="linkLabelOpenPerfMon.Size" type="System.Drawing.Size, System.Drawing">
     <value>112, 17</value>
@@ -966,7 +1056,7 @@
     <value>3, 3, 3, 3</value>
   </data>
   <data name="tabPagePerfCtl.Size" type="System.Drawing.Size, System.Drawing">
-    <value>901, 564</value>
+    <value>901, 565</value>
   </data>
   <data name="tabPagePerfCtl.TabIndex" type="System.Int32, mscorlib">
     <value>7</value>
@@ -1053,7 +1143,7 @@
     <value>0, 0</value>
   </data>
   <data name="listUwpApps.Size" type="System.Drawing.Size, System.Drawing">
-    <value>898, 520</value>
+    <value>898, 519</value>
   </data>
   <data name="listUwpApps.TabIndex" type="System.Int32, mscorlib">
     <value>12</value>
@@ -1077,7 +1167,7 @@
     <value>3, 3, 3, 3</value>
   </data>
   <data name="tabPageUWPCtl.Size" type="System.Drawing.Size, System.Drawing">
-    <value>901, 564</value>
+    <value>901, 565</value>
   </data>
   <data name="tabPageUWPCtl.TabIndex" type="System.Int32, mscorlib">
     <value>6</value>
@@ -1209,7 +1299,7 @@
     <value>NoControl</value>
   </data>
   <data name="sp2.Location" type="System.Drawing.Point, System.Drawing">
-    <value>90, 537</value>
+    <value>90, 534</value>
   </data>
   <data name="sp2.Size" type="System.Drawing.Size, System.Drawing">
     <value>1, 14</value>
@@ -1252,7 +1342,7 @@
     <value>NoControl</value>
   </data>
   <data name="linkOpenScMsc.Location" type="System.Drawing.Point, System.Drawing">
-    <value>94, 535</value>
+    <value>94, 532</value>
   </data>
   <data name="linkOpenScMsc.Size" type="System.Drawing.Size, System.Drawing">
     <value>79, 17</value>
@@ -1339,7 +1429,7 @@
     <value>0, 0</value>
   </data>
   <data name="listService.Size" type="System.Drawing.Size, System.Drawing">
-    <value>901, 520</value>
+    <value>901, 519</value>
   </data>
   <data name="listService.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
@@ -1366,7 +1456,7 @@
     <value>NoControl</value>
   </data>
   <data name="lbServicesCount.Location" type="System.Drawing.Point, System.Drawing">
-    <value>11, 535</value>
+    <value>11, 532</value>
   </data>
   <data name="lbServicesCount.Size" type="System.Drawing.Size, System.Drawing">
     <value>66, 17</value>
@@ -1396,7 +1486,7 @@
     <value>3, 3, 3, 3</value>
   </data>
   <data name="tabPageScCtl.Size" type="System.Drawing.Size, System.Drawing">
-    <value>901, 564</value>
+    <value>901, 565</value>
   </data>
   <data name="tabPageScCtl.TabIndex" type="System.Int32, mscorlib">
     <value>3</value>
@@ -1423,7 +1513,7 @@
     <value>0, 0</value>
   </data>
   <data name="listStartup.Size" type="System.Drawing.Size, System.Drawing">
-    <value>901, 520</value>
+    <value>901, 519</value>
   </data>
   <data name="listStartup.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
@@ -1450,7 +1540,7 @@
     <value>3, 3, 3, 3</value>
   </data>
   <data name="tabPageStartCtl.Size" type="System.Drawing.Size, System.Drawing">
-    <value>901, 564</value>
+    <value>901, 565</value>
   </data>
   <data name="tabPageStartCtl.TabIndex" type="System.Int32, mscorlib">
     <value>4</value>
@@ -1480,7 +1570,7 @@
     <value>NoControl</value>
   </data>
   <data name="lbFileMgrStatus.Location" type="System.Drawing.Point, System.Drawing">
-    <value>16, 532</value>
+    <value>16, 530</value>
   </data>
   <data name="lbFileMgrStatus.Size" type="System.Drawing.Size, System.Drawing">
     <value>32, 17</value>
@@ -1583,7 +1673,7 @@
     <value>3, 3, 3, 3</value>
   </data>
   <data name="tabPageFileCtl.Size" type="System.Drawing.Size, System.Drawing">
-    <value>901, 564</value>
+    <value>901, 565</value>
   </data>
   <data name="tabPageFileCtl.TabIndex" type="System.Int32, mscorlib">
     <value>5</value>
@@ -1615,6 +1705,9 @@
   <data name="tabControlMain.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
   </data>
+  <data name="tabControlMain.Visible" type="System.Boolean, mscorlib">
+    <value>False</value>
+  </data>
   <data name="&gt;&gt;tabControlMain.Name" xml:space="preserve">
     <value>tabControlMain</value>
   </data>
@@ -1625,6 +1718,39 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;tabControlMain.ZOrder" xml:space="preserve">
+    <value>3</value>
+  </data>
+  <data name="lbStartingStatus.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
+    <value>Left, Right</value>
+  </data>
+  <data name="lbStartingStatus.Font" type="System.Drawing.Font, System.Drawing">
+    <value>微软雅黑, 9pt</value>
+  </data>
+  <data name="lbStartingStatus.Location" type="System.Drawing.Point, System.Drawing">
+    <value>2, 225</value>
+  </data>
+  <data name="lbStartingStatus.Size" type="System.Drawing.Size, System.Drawing">
+    <value>900, 84</value>
+  </data>
+  <data name="lbStartingStatus.TabIndex" type="System.Int32, mscorlib">
+    <value>8</value>
+  </data>
+  <data name="lbStartingStatus.Text" xml:space="preserve">
+    <value>正在初始化中...</value>
+  </data>
+  <data name="lbStartingStatus.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleCenter</value>
+  </data>
+  <data name="&gt;&gt;lbStartingStatus.Name" xml:space="preserve">
+    <value>lbStartingStatus</value>
+  </data>
+  <data name="&gt;&gt;lbStartingStatus.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;lbStartingStatus.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;lbStartingStatus.ZOrder" xml:space="preserve">
     <value>2</value>
   </data>
   <data name="spBottom.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
@@ -1634,7 +1760,7 @@
     <value>NoControl</value>
   </data>
   <data name="spBottom.Location" type="System.Drawing.Point, System.Drawing">
-    <value>0, 545</value>
+    <value>0, 550</value>
   </data>
   <data name="spBottom.Size" type="System.Drawing.Size, System.Drawing">
     <value>907, 1</value>
@@ -1710,6 +1836,129 @@
   </data>
   <data name="$this.ClientSize" type="System.Drawing.Size, System.Drawing">
     <value>907, 593</value>
+  </data>
+  <data name="expandMoreDetals.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
+    <value>Bottom, Left</value>
+  </data>
+  <data name="expandMoreDetals.FlatStyle" type="System.Windows.Forms.FlatStyle, System.Windows.Forms">
+    <value>Flat</value>
+  </data>
+  <data name="expandMoreDetals.Font" type="System.Drawing.Font, System.Drawing">
+    <value>微软雅黑, 9pt</value>
+  </data>
+  <data name="expandMoreDetals.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="expandMoreDetals.Location" type="System.Drawing.Point, System.Drawing">
+    <value>16, 560</value>
+  </data>
+  <data name="expandMoreDetals.Size" type="System.Drawing.Size, System.Drawing">
+    <value>102, 21</value>
+  </data>
+  <data name="expandMoreDetals.TabIndex" type="System.Int32, mscorlib">
+    <value>14</value>
+  </data>
+  <data name="expandMoreDetals.Text" xml:space="preserve">
+    <value>详细信息(&amp;D)</value>
+  </data>
+  <data name="&gt;&gt;expandMoreDetals.Name" xml:space="preserve">
+    <value>expandMoreDetals</value>
+  </data>
+  <data name="&gt;&gt;expandMoreDetals.Type" xml:space="preserve">
+    <value>PCMgr.Aero.ExpandButton, PCMgrApp32, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+  </data>
+  <data name="&gt;&gt;expandMoreDetals.Parent" xml:space="preserve">
+    <value>pl_simple</value>
+  </data>
+  <data name="&gt;&gt;expandMoreDetals.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="btnEndTaskSimple.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
+    <value>Bottom, Right</value>
+  </data>
+  <data name="btnEndTaskSimple.Enabled" type="System.Boolean, mscorlib">
+    <value>False</value>
+  </data>
+  <data name="btnEndTaskSimple.Font" type="System.Drawing.Font, System.Drawing">
+    <value>微软雅黑, 9pt</value>
+  </data>
+  <data name="btnEndTaskSimple.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="btnEndTaskSimple.Location" type="System.Drawing.Point, System.Drawing">
+    <value>809, 558</value>
+  </data>
+  <data name="btnEndTaskSimple.Size" type="System.Drawing.Size, System.Drawing">
+    <value>85, 24</value>
+  </data>
+  <data name="btnEndTaskSimple.TabIndex" type="System.Int32, mscorlib">
+    <value>13</value>
+  </data>
+  <data name="btnEndTaskSimple.Text" xml:space="preserve">
+    <value>结束任务(&amp;E)</value>
+  </data>
+  <data name="&gt;&gt;btnEndTaskSimple.Name" xml:space="preserve">
+    <value>btnEndTaskSimple</value>
+  </data>
+  <data name="&gt;&gt;btnEndTaskSimple.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;btnEndTaskSimple.Parent" xml:space="preserve">
+    <value>pl_simple</value>
+  </data>
+  <data name="&gt;&gt;btnEndTaskSimple.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="listApps.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
+    <value>Top, Bottom, Left, Right</value>
+  </data>
+  <data name="listApps.Location" type="System.Drawing.Point, System.Drawing">
+    <value>0, 0</value>
+  </data>
+  <data name="listApps.Size" type="System.Drawing.Size, System.Drawing">
+    <value>907, 547</value>
+  </data>
+  <data name="listApps.TabIndex" type="System.Int32, mscorlib">
+    <value>11</value>
+  </data>
+  <data name="&gt;&gt;listApps.Name" xml:space="preserve">
+    <value>listApps</value>
+  </data>
+  <data name="&gt;&gt;listApps.Type" xml:space="preserve">
+    <value>PCMgr.Ctls.TaskMgrList, PCMgrApp32, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+  </data>
+  <data name="&gt;&gt;listApps.Parent" xml:space="preserve">
+    <value>pl_simple</value>
+  </data>
+  <data name="&gt;&gt;listApps.ZOrder" xml:space="preserve">
+    <value>2</value>
+  </data>
+  <data name="pl_simple.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
+    <value>Fill</value>
+  </data>
+  <data name="pl_simple.Location" type="System.Drawing.Point, System.Drawing">
+    <value>0, 0</value>
+  </data>
+  <data name="pl_simple.Size" type="System.Drawing.Size, System.Drawing">
+    <value>907, 593</value>
+  </data>
+  <data name="pl_simple.TabIndex" type="System.Int32, mscorlib">
+    <value>12</value>
+  </data>
+  <data name="pl_simple.Visible" type="System.Boolean, mscorlib">
+    <value>False</value>
+  </data>
+  <data name="&gt;&gt;pl_simple.Name" xml:space="preserve">
+    <value>pl_simple</value>
+  </data>
+  <data name="&gt;&gt;pl_simple.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Panel, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;pl_simple.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;pl_simple.ZOrder" xml:space="preserve">
+    <value>4</value>
   </data>
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
@@ -2336,7 +2585,7 @@
 </value>
   </data>
   <data name="$this.MinimumSize" type="System.Drawing.Size, System.Drawing">
-    <value>400, 300</value>
+    <value>200, 150</value>
   </data>
   <data name="$this.StartPosition" type="System.Windows.Forms.FormStartPosition, System.Windows.Forms">
     <value>CenterScreen</value>

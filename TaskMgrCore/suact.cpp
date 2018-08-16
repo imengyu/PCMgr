@@ -11,6 +11,8 @@
 #include "mapphlp.h"
 #include "fmhlp.h"
 #include "kda.h"
+#include "syshlp.h"
+#include "reghlp.h"
 #include "PathHelper.h"
 #include "StringHlp.h"
 #include "settinghlp.h"
@@ -23,7 +25,10 @@ extern HANDLE hKernelDevice;
 extern HWND hWndMain;
 extern HINSTANCE hInstRs;
 
+//内核进程控制系列函数
+
 M_CAPI(BOOL) M_SU_IsK(LPWSTR errTip, NTSTATUS* pStatus) {
+	//检查内核是否加载
 	if (MCanUseKernel())
 		return TRUE;
 	else {
@@ -138,7 +143,7 @@ M_CAPI(BOOL) M_SU_CloseHandleWithProcess(DWORD pid, LPVOID handleValue)
 	return rs;
 }
 
-M_CAPI(BOOL) M_SU_SuspendProcess(DWORD pid, UINT exitCode, NTSTATUS* pStatus)
+M_CAPI(BOOL) M_SU_SuspendProcess(DWORD pid, NTSTATUS* pStatus)
 {
 	BOOL rs = FALSE;
 	NTSTATUS status = 0;
@@ -152,7 +157,7 @@ M_CAPI(BOOL) M_SU_SuspendProcess(DWORD pid, UINT exitCode, NTSTATUS* pStatus)
 	}
 	return rs;
 }
-M_CAPI(BOOL) M_SU_ResumeProcess(DWORD pid, UINT exitCode, NTSTATUS* pStatus)
+M_CAPI(BOOL) M_SU_ResumeProcess(DWORD pid, NTSTATUS* pStatus)
 {
 	BOOL rs = FALSE;
 	if (M_SU_IsK(L"M_SU_ResumeProcess", pStatus)) {
@@ -196,54 +201,8 @@ M_CAPI(BOOL) M_SU_KDA(DACALLBACK callback, ULONG_PTR startaddress, ULONG_PTR siz
 	}
 	return FALSE;
 }
-M_CAPI(BOOL) M_SU_KDA_Test(DACALLBACK callback)
-{
-	if (!M_SU_IsK(L"M_SU_KDA_Test", NULL)) return  FALSE;
-	if (callback)
-	{
-		UCHAR test[57] = {
-			/*83EC1D35*/0x8b,0xff,//mov edi,edi
-			/*83EC1D37*/0x55,//push ebp
-			/*83EC1D38*/0x8b,0xec,//mov ebp,esp
-			/*83EC1D3A*/0x83,0xe4,0xf8,//and esp,FFFFFFF8
-			/*83EC1D3D*/0x83,0xec,0x18,//sub esp,18
-			/*83EC1D40*/0x53,//push ebx
-			/*83EC1D41*/0x33,0xdb,//xor ebx,ebx
-			/*83EC1D43*/0x56,//push esi
-			/*83EC1D44*/0x39,0x1d,0x80,0x60,0xf4,0x83,//cmp dword ptr[83F4600],ebx
-			/*83EC1D4A*/0x0f,0x84,0xa8,0x00,0x00,0x00,//je 83EC1DF8
-			/*83EC1D50*/0x38,0x5d,0x10,//cmp byte ptr[ebp+10],bl
-			/*83EC1D53*/0x0f,0x84,0x9f,0x00,0x00,0x00,//je 83EC1DF8
-			/*83EC1D59*/0x8d,0x44,0x24,0x14,//lea eax,[esp+14]
-			/*83EC1D5D*/0x50,//push eax
-			/*83EC1D5E*/0xff,0x75,0x0c,//push dword ptr[ebp+C]
-			/*83EC1D61*/0xe8,0x0f,0xe8,0x19,0x00,//call  84060575
-			/*83EC1D66*/0x85,0xc0,//test eax,eax
-			/*83EC1D68*/0x0f,0x8c,0x8a,0x00,0x00,0x00,//jl 83EC1DF8
-		};
-		BOOL rs = M_KDA_Dec(test, (ULONG_PTR)0x83EC1D35, callback, 57, TRUE);
-		return rs;
-	}
-	return FALSE;
-}
-M_CAPI(BOOL) M_SU_TerminateProcessPIDTest(DWORD pid, NTSTATUS* pStatus) {
-	BOOL rs = FALSE;
-	NTSTATUS status = STATUS_UNSUCCESSFUL;
-	Log(L"M_SU_TerminateProcessPID process id : %d", pid);
-	if (isKernelDriverLoaded) {
-		ULONG_PTR pid2 = pid;
-		DWORD ReturnLength = 0;
-		if (DeviceIoControl(hKernelDevice, CTL_TEST_KPROC, &pid2, sizeof(pid2), &status, sizeof(status), &ReturnLength, NULL))
-			rs = TRUE;
-		else {
-			LogErr(L"M_SU_TerminateProcessPID DeviceIoControl err : %d", GetLastError());
-			if (status == STATUS_SUCCESS)
-				rs = TRUE;
-		}
-		if (pStatus)*pStatus = status;
-	}
-	return rs;
-}
+
+//Sys & protect
 
 BOOL M_SU_ForceShutdown() {
 	DWORD ReturnLength = 0;
@@ -274,6 +233,8 @@ BOOL M_SU_UnProtectMySelf() {
 		return TRUE;
 	return FALSE;
 }
+
+//KrlMon settings
 
 M_CAPI(BOOL) M_SU_SetKrlMonSet_CreateProcess(BOOL allow)
 {
@@ -306,51 +267,12 @@ extern LPSERVICE_STORAGE pDrvscsNames;
 extern DWORD dwNumberOfDriverService;
 extern DWORD currentWindowsBulidVer;
 
-VOID M_SU_TestLastDbgPrint() {
-	UCHAR boolvalue = FALSE;
-	DWORD ReturnLength = 0;
-	if (DeviceIoControl(hKernelDevice, CTL_GET_DBGVIEW_LAST_REC, NULL, 0, &boolvalue, sizeof(boolvalue), &ReturnLength, NULL)) {
-		Log(L"M_SU_TestLastDbgPrint DeviceIoControl Success %s", (boolvalue == TRUE ? L"TRUE" : L"FALSE"));
-	}
-	else LogWarn(L"M_SU_TestLastDbgPrint DeviceIoControl failed : ", GetLastError());
-
-	CHAR drvoutBuffer[256];
-	memset(drvoutBuffer, 0, sizeof(drvoutBuffer));
-	if (DeviceIoControl(hKernelDevice, CTL_GET_DBGVIEW_BUFFER, NULL, 0, drvoutBuffer, sizeof(drvoutBuffer), &ReturnLength, NULL)) {
-		LPWSTR szw = MConvertLPCSTRToLPWSTR(drvoutBuffer);
-		Log(L"DbgPrint Last buffer : %s", szw);
-		delete szw;
-
-
-	}
-}
-M_CAPI(BOOL) M_SU_GetServiceReg(LPWSTR servicName, LPWSTR buf, size_t size)
-{
-	std::wstring s = FormatString(L"HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\services\\%s", servicName);
-	if (buf && size > s.size())
-	{
-		wcscpy_s(buf, size, s.c_str());
-		return TRUE;
-	}
-	return 0;
-}
-M_CAPI(VOID) M_SU_Test(LPCSTR instr) {
-	char str[128];
-	strcpy_s(str, instr);
-	DWORD ReturnLength = 0;
-	if (DeviceIoControl(hKernelDevice, CTL_TEST, &str, sizeof(str), NULL, 0, &ReturnLength, NULL)) {
-		Log(L"M_SU_Test DeviceIoControl Success (%hs)", str);
-	}
-}
-M_CAPI(VOID) M_SU_Test2() {
-	DWORD ReturnLength = 0;
-	DeviceIoControl(hKernelDevice, CTL_TEST2, NULL, 0, NULL, 0, &ReturnLength, NULL);
-}
+//初始化函数
 M_CAPI(VOID) M_SU_SetSysver(ULONG ver)
 {
 	//lastSetSysver = ver;
 }
-
+//初始化函数
 M_CAPI(BOOL) M_SU_Init(BOOL requestNtosValue, PKNTOSVALUE outValue) {
 	Log(L"M_SU_Init DeviceIoControl");
 	DWORD ReturnLength = 0;
@@ -383,6 +305,7 @@ M_CAPI(BOOL) M_SU_Init(BOOL requestNtosValue, PKNTOSVALUE outValue) {
 	LogErr(L"M_SU_Init 2 DeviceIoControl err : %d", GetLastError());
 	return FALSE;
 }
+
 M_CAPI(BOOL) M_SU_GetEPROCESS(DWORD pid, ULONG_PTR* lpEprocess, ULONG_PTR* lpPeb, ULONG_PTR* lpJob, LPWSTR imagename, LPWSTR path)
 {
 	BOOL rs = FALSE;
@@ -446,6 +369,8 @@ M_CAPI(BOOL) M_SU_GetProcessCommandLine(DWORD tid, LPWSTR outCmdLine)
 	}
 	return rs;
 }
+
+//EnumKernelModuls
 
 M_CAPI(void) M_SU_EnumKernelModulsItemDestroy(KernelModulSmallInfo*km)
 {
@@ -622,52 +547,6 @@ M_CAPI(void) M_SU_EnumKernelModuls_ShowMenu(KernelModulSmallInfo*kmi, BOOL showa
 		}
 	}
 }
-M_CAPI(BOOL) M_SU_SetDbgViewEvent(HANDLE hEvent)
-{
-	DBGVIEW_SENDER inbuf;
-	inbuf.ProcessId = GetCurrentProcessId();
-	inbuf.EventHandle = hEvent;
-
-	BOOLEAN result = FALSE;
-	DWORD ReturnLength = 0;
-	if (!DeviceIoControl(hKernelDevice, CTL_SET_DBGVIEW_EVENT, &inbuf, sizeof(inbuf), &result, sizeof(result), &ReturnLength, NULL)) {
-		LogWarn(L"M_SU_SetDbgViewEvent Failed");
-		return FALSE;
-	}
-	return result;
-}
-M_CAPI(BOOL) M_SU_ReSetDbgViewEvent()
-{
-	DWORD ReturnLength = 0;
-	if (!DeviceIoControl(hKernelDevice, CTL_RESET_DBGVIEW_EVENT, NULL, 0, NULL, 0, &ReturnLength, NULL)) {
-		LogWarn(L"M_SU_ReSetDbgViewEvent Failed");
-		return FALSE;
-	}
-	return TRUE;
-}
-M_CAPI(BOOL) M_SU_GetDbgViewLastBuffer(LPWSTR outbuffer, size_t bufsize, BOOL*hasMoreData) 
-{
-	DBGPRT_DATA_TRA drvoutBuffer;
-	memset(&drvoutBuffer, 0, sizeof(drvoutBuffer));
-	DWORD ReturnLength = 0;
-	if (DeviceIoControl(hKernelDevice, CTL_GET_DBGVIEW_BUFFER, NULL, 0, &drvoutBuffer, sizeof(drvoutBuffer), &ReturnLength, NULL)) {
-		if (drvoutBuffer.HasData) {
-			LPWSTR szw = MConvertLPCSTRToLPWSTR(drvoutBuffer.Data);
-			wcscpy_s(outbuffer, bufsize, szw);
-			delete szw;
-			if (hasMoreData)
-				*hasMoreData = drvoutBuffer.HasMoreData;
-		}
-		return TRUE;
-	}
-	return FALSE;
-}
-M_CAPI(BOOL) M_SU_PrintInternalFuns() {
-	DWORD ReturnLength = 0;
-	return DeviceIoControl(hKernelDevice, CTL_PRINT_INTERNAL_FUNS, NULL, 0, NULL, 0, &ReturnLength, NULL);
-}
-
-
 LRESULT M_SU_EnumKernelModuls_HandleWmCommand(WPARAM wParam)
 {
 	switch (wParam)
@@ -720,7 +599,7 @@ LRESULT M_SU_EnumKernelModuls_HandleWmCommand(WPARAM wParam)
 	case ID_MENUDRIVER_COPYREG: {
 		if (selectedKmi && !MStrEqualW(selectedKmi->szServiceName, L"")) {
 			WCHAR regpath[MAX_PATH];
-			if (M_SU_GetServiceReg(selectedKmi->szServiceName, regpath, MAX_PATH))
+			if (MREG_GetServiceReg(selectedKmi->szServiceName, regpath, MAX_PATH))
 				MCopyToClipboard(regpath, wcslen(regpath));
 		}
 		break;
@@ -731,7 +610,7 @@ LRESULT M_SU_EnumKernelModuls_HandleWmCommand(WPARAM wParam)
 		break;
 	}
 	case ID_MENUDRIVER_SHOWPROP: {
-	    if (selectedKmi && selectedKmi->szFullDllPath) MShowFileProp(selectedKmi->szFullDllPath);
+		if (selectedKmi && selectedKmi->szFullDllPath) MShowFileProp(selectedKmi->szFullDllPath);
 		break;
 	}
 	case ID_MENUDRIVER_START_BOOT: {
@@ -771,3 +650,158 @@ LRESULT M_SU_EnumKernelModuls_HandleWmCommand(WPARAM wParam)
 	}
 	return 0;
 }
+
+//MyDbgView
+
+M_CAPI(BOOL) M_SU_SetDbgViewEvent(HANDLE hEvent)
+{
+	DBGVIEW_SENDER inbuf;
+	inbuf.ProcessId = GetCurrentProcessId();
+	inbuf.EventHandle = hEvent;
+
+	BOOLEAN result = FALSE;
+	DWORD ReturnLength = 0;
+	if (!DeviceIoControl(hKernelDevice, CTL_SET_DBGVIEW_EVENT, &inbuf, sizeof(inbuf), &result, sizeof(result), &ReturnLength, NULL)) {
+		LogWarn(L"M_SU_SetDbgViewEvent Failed");
+		return FALSE;
+	}
+	return result;
+}
+M_CAPI(BOOL) M_SU_ReSetDbgViewEvent()
+{
+	DWORD ReturnLength = 0;
+	if (!DeviceIoControl(hKernelDevice, CTL_RESET_DBGVIEW_EVENT, NULL, 0, NULL, 0, &ReturnLength, NULL)) {
+		LogWarn(L"M_SU_ReSetDbgViewEvent Failed");
+		return FALSE;
+	}
+	return TRUE;
+}
+M_CAPI(BOOL) M_SU_GetDbgViewLastBuffer(LPWSTR outbuffer, size_t bufsize, BOOL*hasMoreData) 
+{
+	DBGPRT_DATA_TRA drvoutBuffer;
+	memset(&drvoutBuffer, 0, sizeof(drvoutBuffer));
+	DWORD ReturnLength = 0;
+	if (DeviceIoControl(hKernelDevice, CTL_GET_DBGVIEW_BUFFER, NULL, 0, &drvoutBuffer, sizeof(drvoutBuffer), &ReturnLength, NULL)) {
+		if (drvoutBuffer.HasData) {
+			LPWSTR szw = MConvertLPCSTRToLPWSTR(drvoutBuffer.Data);
+			wcscpy_s(outbuffer, bufsize, szw);
+			delete szw;
+			if (hasMoreData)
+				*hasMoreData = drvoutBuffer.HasMoreData;
+		}
+		return TRUE;
+	}
+	return FALSE;
+}
+M_CAPI(BOOL) M_SU_PrintInternalFuns() {
+	DWORD ReturnLength = 0;
+	return DeviceIoControl(hKernelDevice, CTL_PRINT_INTERNAL_FUNS, NULL, 0, NULL, 0, &ReturnLength, NULL);
+}
+
+//HotKeys & Timers
+
+M_CAPI(BOOL) M_SU_GetProcessHotKeys(DWORD pid, EnumProcessHotKeyCallBack callBack)
+{
+	BOOL rs = FALSE;
+	NTSTATUS status = 0;
+	if (!callBack) return FALSE;
+	if (M_SU_IsK(L"M_SU_GetProcessHotKeys", &status)) {
+		DWORD ReturnLength = 0;
+		ULONG_PTR pidInBuffer = pid;
+		ULONG outSize = 0;
+		if (!DeviceIoControl(hKernelDevice, CTL_GET_PROCESS_HOTKEYS, &pidInBuffer, sizeof(pidInBuffer), &outSize, sizeof(outSize), &ReturnLength, NULL))
+		{
+			LogErr(L"M_SU_GetProcessHotKeys DeviceIoControl err : %d", GetLastError());
+			return FALSE;
+		}
+		if (outSize < 0 || outSize > 128)return FALSE;
+		DWORD bufferSize = outSize * sizeof(HOT_KEY_DATA);
+		PHOT_KEY_DATA outBuffer = (PHOT_KEY_DATA)malloc(bufferSize);
+		if (!DeviceIoControl(hKernelDevice, CTL_GET_PROCESS_HOTKEYS_BUFFER, NULL, 0, &outBuffer, bufferSize, &ReturnLength, NULL))
+		{
+			LogErr(L"M_SU_GetProcessHotKeys DeviceIoControl err : %d", GetLastError());
+			return FALSE;
+		}
+
+		WCHAR objStr[32] = { 0 };
+		WCHAR keyStr[64] = { 0 };
+		WCHAR procName[128] = { 0 };
+
+		for (UINT i = 0; i < bufferSize; i++)
+		{
+			PHOT_KEY_DATA data = outBuffer + bufferSize * sizeof(HOT_KEY_DATA);
+#ifdef _AMD64_
+			swprintf_s(objStr, L"0x%I64X", data->ObjectPtr);
+#else
+			swprintf_s(objStr, L"0x%08X", data->ObjectPtr);
+#endif
+			MHotKeyToStr(data->fsModifiers, data->vk, keyStr, 64);
+
+			LPWSTR procNamew = A2W(data->ImageFileName);
+			callBack(data, objStr, data->id, keyStr, data->ProcessId, data->ThreadId, procNamew);
+			free(procNamew);
+		}
+		free(outBuffer);
+		rs = TRUE;
+	}
+	return rs;
+}
+M_CAPI(BOOL) M_SU_GetProcessTimers(DWORD pid, EnumProcessTimerCallBack callBack)
+{
+	BOOL rs = FALSE;
+	NTSTATUS status = 0;
+	if (!callBack) return FALSE;
+	if (M_SU_IsK(L"M_SU_GetProcessHotKeys", &status)) {
+		DWORD ReturnLength = 0;
+		ULONG_PTR pidInBuffer = pid;
+		ULONG outSize = 0;
+		if (!DeviceIoControl(hKernelDevice, CTL_GET_PROCESS_TIMERS, &pidInBuffer, sizeof(pidInBuffer), &outSize, sizeof(outSize), &ReturnLength, NULL))
+		{
+			LogErr(L"M_SU_GetProcessHotKeys DeviceIoControl err : %d", GetLastError());
+			return FALSE;
+		}
+		if (outSize < 0 || outSize > 128)return FALSE;
+		DWORD bufferSize = outSize * sizeof(TIMER_DATA);
+		PTIMER_DATA outBuffer = (PTIMER_DATA)malloc(bufferSize);
+		if (!DeviceIoControl(hKernelDevice, CTL_GET_PROCESS_TIMERS_BUFFER, NULL, 0, &outBuffer, bufferSize, &ReturnLength, NULL))
+		{
+			LogErr(L"M_SU_GetProcessHotKeys DeviceIoControl err : %d", GetLastError());
+			return FALSE;
+		}
+
+		WCHAR objStr[32] = { 0 };
+		WCHAR funStr[32] = { 0 };
+		WCHAR moduleStr[MAX_PATH] = { 0 };
+		WCHAR hwndStr[32] = { 0 };
+
+		for (UINT i = 0; i < bufferSize; i++)
+		{
+			PTIMER_DATA data = outBuffer + bufferSize * sizeof(TIMER_DATA);
+			DWORD thisWindowPid = 0;
+			DWORD thisWindowThreadId = GetWindowThreadProcessId((HWND)data->spwnd, &thisWindowPid);
+			if (pid == 0 || thisWindowPid == pid) 
+			{
+#ifdef _AMD64_
+				swprintf_s(objStr, L"0x%I64X", data->ObjectPtr);
+				swprintf_s(funStr, L"0x%I64X", data->pfn);
+				swprintf_s(hwndStr, L"0x%I64X", (ULONG_PTR)data->spwnd);
+#else
+				swprintf_s(objStr, L"0x%08X", data->ObjectPtr);
+				swprintf_s(funStr, L"0x%08X", data->pfn);
+				swprintf_s(hwndStr, L"0x%08X", (ULONG_PTR)data->spwnd);
+#endif
+
+				callBack(data, objStr, funStr, moduleStr, hwndStr,
+					(HWND)data->spwnd, thisWindowThreadId, data->nID, data->cmsRate, thisWindowPid);
+			}
+		}
+
+		free(outBuffer);
+		rs = TRUE;
+	}
+	return rs;
+}
+
+
+
+

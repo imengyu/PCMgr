@@ -7,4 +7,5 @@
 #define IDC_LISTMAIN 1004
 
 BOOL ShowMainCore(HWND hWnd);
+void ShowMainCoreStartUp();
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);

@@ -802,12 +802,12 @@ If the last program is stuck or unresponsive, you can also choose to Terminate t
     <value>Delete service failed</value>
   </data>
   <data name="NoPDBWarn" xml:space="preserve">
-    <value>Unable to download or load the NTOS symbol file</value>
+    <value>Unable to download or load the {0} symbol file</value>
   </data>
   <data name="NoPDBWarnText" xml:space="preserve">
-    <value>We need the pdb file of NTOS to analyze the kernel and display all the functions of the software. As a result, part of the kernel's functionality will be disabled.
+    <value>We need the pdb file of {0} to analyze the kernel and display all the functions of the software. As a result, part of the kernel's functionality will be disabled.
 
-You can also try to use WinDbg to download NTOS symbolic files, and then copy them to this software directory symbols folder, we will automatically load.</value>
+You can also try to use WinDbg to download  {1} symbol files, and then copy them to this software directory symbols folder, we will automatically load.</value>
   </data>
   <data name="LoadDriverErrNeed64" xml:space="preserve">
     <value>A 64 bit program is needed to load the kernel driver</value>
@@ -847,5 +847,20 @@ Therefore, the kernel function is not available. If you need to use the kernel f
   </data>
   <data name="TitleVeryWarn" xml:space="preserve">
     <value>An important warning</value>
+  </data>
+  <data name="DblCklShow_EPROCESS" xml:space="preserve">
+    <value>Double Click this item to show _EPROCESS of process</value>
+  </data>
+  <data name="DblCklShow_KPROCESS" xml:space="preserve">
+    <value>Double Click this item to show _KPROCESS of process</value>
+  </data>
+  <data name="DblCklShow_PEB" xml:space="preserve">
+    <value>Double Click this item to show _PEB of process</value>
+  </data>
+  <data name="DblCklShow_RTL_USER_PROCESS_PARAMETERS" xml:space="preserve">
+    <value>Double Click this item to show RTL_USER_PROCESS_PARAMETERS  of process</value>
+  </data>
+  <data name="CantFind" xml:space="preserve">
+    <value>Can not find any result of </value>
   </data>
 </root>

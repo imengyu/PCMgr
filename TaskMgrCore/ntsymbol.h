@@ -2,16 +2,6 @@
 #include "stdafx.h"
 #include <DbgHelp.h>
 
-extern "C" {
-	PLOADED_IMAGE
-		IMAGEAPI
-		ImageLoad(
-			_In_ PCSTR DllName,
-			_In_opt_ PCSTR DllPath
-		);
-}
-
-
 typedef BOOL (*MENUMSTRUCTOFFEST_CALLBACK)(_In_ LPCSTR structName,_In_ LPWSTR mumberName,	_In_opt_ DWORD mumberOffest);
 
 BOOL CALLBACKMEnumSymStruct_Off_EPROCESS_Routine(_In_ LPCSTR structName, _In_ LPWSTR mumberName, _In_opt_ DWORD mumberOffest);
@@ -19,11 +9,13 @@ BOOL CALLBACKMEnumSymStruct_Off_ETHREAD_Routine(LPCSTR structName, LPWSTR mumber
 
 BOOLEAN CALLBACK  CALLBACKMEnumSymStruct_EPROCESS_Routine(PSYMBOL_INFO psi, ULONG SymSize, PVOID Context);
 BOOLEAN CALLBACK CALLBACKMEnumSymStruct_ETHREAD_Routine(PSYMBOL_INFO psi, ULONG SymSize, PVOID Context);
-BOOLEAN CALLBACK MEnumSymRoutine(PSYMBOL_INFO psi, ULONG SymSize, PVOID Context);
+BOOLEAN CALLBACK MEnumSymNTOSRoutine(PSYMBOL_INFO psi, ULONG SymSize, PVOID Context);
+BOOLEAN CALLBACK MEnumSymWIN32KRoutine(PSYMBOL_INFO psi, ULONG SymSize, PVOID Context);
 
 BOOL MSendAllSymAddressToDriver();
 BOOLEAN InitSymHandler();
-BOOLEAN MEnumSyms(ULONG_PTR ModuleBase, PSYM_ENUMERATESYMBOLS_CALLBACK EnumRoutine, PVOID Context);
+BOOLEAN MEnumNTOSSyms(ULONG_PTR ModuleBase, PSYM_ENUMERATESYMBOLS_CALLBACK EnumRoutine, PVOID Context);
+BOOLEAN MEnumWIN32KSyms(ULONG_PTR ModuleBase, PSYM_ENUMERATESYMBOLS_CALLBACK EnumRoutine, PVOID Context);
 BOOLEAN MEnumSymsClear();
 
 

@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Windows.Forms;
 
 namespace PCMgr.Ctls
@@ -11,11 +10,6 @@ namespace PCMgr.Ctls
     public class TaskMgrList : Control
     {
         internal const int itemHeight = 28, groupHeaderHeight = 38, smallItemHeight = 22;
-
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern void MListDrawItem(IntPtr hWnd, IntPtr hdc, int x, int y, int w, int h, int state);
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern int MAppWorkCall3(int id, IntPtr hWnd, IntPtr data);
 
         public TaskMgrList()
         {
@@ -120,6 +114,8 @@ namespace PCMgr.Ctls
             else SyncItems(true);
         }
 
+        private IntPtr hThemeListView = IntPtr.Zero;
+        private IntPtr hThemeTreeView = IntPtr.Zero;
         private Timer t;
         private SolidBrush errTagSolidBrush = null;
         private SolidBrush defTagSolidBrush = null;
@@ -167,9 +163,35 @@ namespace PCMgr.Ctls
         private bool sorted = false;
         private StringFormat ChildStringFormat = null;
         private Image PauseUwpIco = null;
+        private bool noHeader = false;
 
         public bool isvs = false;
         public bool ishs = false;
+
+        /// <summary>
+        /// 获取一个值，用以指示 System.ComponentModel.Component 当前是否处于设计模式。
+        /// </summary>
+        protected new bool DesignMode
+        {
+            get
+            {
+
+#if DEBUG
+                bool returnFlag = false;
+                if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime)
+                {
+                    returnFlag = true;
+                }
+                else if (System.Diagnostics.Process.GetCurrentProcess().ProcessName.ToUpper().Equals("DEVENV"))
+                {
+                    returnFlag = true;
+                }
+                return returnFlag;
+#else
+                return base.DesignMode;
+#endif
+            }
+        }
 
         public TaskMgrListItem SelectedChildItem
         {
@@ -245,11 +267,29 @@ namespace PCMgr.Ctls
             get { return locked; }
             set { locked = value; }
         }
+        public bool NoHeader
+        {
+            get { return noHeader; }
+            set
+            {
+                noHeader = value;
+                if(noHeader)
+                {
+                    header.Hide();
+                    xOffest = 0;
+                }
+                else
+                {
+                    if(!header.Visible)
+                        header.Show();
+                }
+            }
+        }
         public bool DrawIcon
         {
             get;set;
         }
-        public void Sort(bool sync=true)
+        public void Sort(bool sync = true)
         {
             if (sorter != null)
             {
@@ -257,7 +297,7 @@ namespace PCMgr.Ctls
                 {
                     sorted = true;
                     items.Sort(sorter);
-                    if(sync) SyncItems(true);
+                    if (sync) SyncItems(true);
                 }
                 else sorted = false;
             }
@@ -265,9 +305,10 @@ namespace PCMgr.Ctls
         }
         public void SyncItems(bool paint)
         {
+            int headerHeigh= noHeader ? 0 : header.Height; ;
             b1 = true;
-            allItemHeight = header.Height;
-            int h = Height - header.Height;
+            allItemHeight = noHeader?0: header.Height;
+            int h = Height - headerHeigh;
 
             if (showGroup)
             {
@@ -287,8 +328,9 @@ namespace PCMgr.Ctls
                                 allItemHeight += groupHeaderHeight;
                                 groups[i].Tag = 1;
                             }
-                            items[i1].YPos = allItemHeight;                       
-                            allItemHeight += items[i1].ItemHeight;
+                            items[i1].YPos = allItemHeight;
+                            if (noHeader) allItemHeight += itemHeight;
+                            else allItemHeight += items[i1].ItemHeight;
                             icount++;
                         }
                     }
@@ -301,19 +343,20 @@ namespace PCMgr.Ctls
                 for (int i1 = 0; i1 < items.Count; i1++)
                 {
                     items[i1].YPos = allItemHeight;
-                    allItemHeight += items[i1].ItemHeight;
+                    if (noHeader) allItemHeight += itemHeight;
+                    else allItemHeight += items[i1].ItemHeight;
                 }
             }
 
             if (allItemHeight > h)
             {
                 isvs = true;
-                ougtHeight = allItemHeight - h - header.Height;
+                ougtHeight = allItemHeight - h - headerHeigh;
 
                 if (yOffest > ougtHeight && ougtHeight >= 0)
                     yOffest = ougtHeight + 16;
 
-                scrol.Maximum = allItemHeight - header.Height + 16;
+                scrol.Maximum = allItemHeight - headerHeigh + 16;
                 scrol.LargeChange = h < 0 ? 0 : h;
                 scrol.SmallChange = allItemHeight / 50;
                 scrol.Left = Width - 16;
@@ -324,7 +367,7 @@ namespace PCMgr.Ctls
                 else scrol.Height = h;
                 if (!scrol.Visible) scrol.Show();
 
-                header.Vsitem(true);
+                if(!noHeader) header.Vsitem(true);
             }
             else
             {
@@ -382,18 +425,18 @@ namespace PCMgr.Ctls
 
                 if (selectedItem == item)
                 {
-                    int height = item.ChildsOpened ? itemHeight + item.Childs.Count * smallItemHeight : itemHeight - 2;
-                    if (FocusedType) MListDrawItem(Handle, g.GetHdc(), 1 - xOffest, selectedItem.YPos + 1 - yOffest, header.AllWidth, height, 1);
-                    else MListDrawItem(Handle, g.GetHdc(), 1 - xOffest, selectedItem.YPos + 1 - yOffest, header.AllWidth, height, 2);
+                    int height = noHeader ? itemHeight : item.ChildsOpened ? itemHeight + item.Childs.Count * smallItemHeight : itemHeight - 2;
+                    if (FocusedType) TaskMgrListApis.MListDrawItem(hThemeListView, g.GetHdc(), 1 - xOffest, selectedItem.YPos + 1 - yOffest, noHeader ? Width : header.AllWidth, height, TaskMgrListApis.M_DRAW_LISTVIEW_SELECT);
+                    else TaskMgrListApis.MListDrawItem(hThemeListView, g.GetHdc(), 1 - xOffest, selectedItem.YPos + 1 - yOffest, noHeader ? Width : header.AllWidth, height, TaskMgrListApis.M_DRAW_LISTVIEW_SELECT_NOFOCUS);
                     g.ReleaseHdc();
                 }
                 else if (mouseenteredItem == item)
                 {
-                    MListDrawItem(Handle, g.GetHdc(), 1 - xOffest, mouseenteredItem.YPos + 1 - yOffest, header.AllWidth, item.ChildsOpened ? itemHeight + item.Childs.Count * smallItemHeight : itemHeight - 2, 3);
+                    TaskMgrListApis.MListDrawItem(hThemeListView, g.GetHdc(), 1 - xOffest, mouseenteredItem.YPos + 1 - yOffest, noHeader ? Width : header.AllWidth, noHeader ? itemHeight : item.ChildsOpened ? itemHeight + item.Childs.Count * smallItemHeight : itemHeight - 2, TaskMgrListApis.M_DRAW_LISTVIEW_HOT);
                     g.ReleaseHdc();
                 }
 
-                if (item.IsUWP)
+                if (item.IsUWP && !noHeader)
                 {
                     if (item.IsUWPButErrInfo) g.FillRectangle(errTagSolidBrush, new Rectangle(53 - xOffest, item.YPos - yOffest + 11, 6, 6));
                     else g.FillRectangle(defTagSolidBrush, new Rectangle(53 - xOffest, item.YPos - yOffest + 11, 6, 6));
@@ -402,59 +445,67 @@ namespace PCMgr.Ctls
             }
 
             #region SubItems
-
-            bool drawAsPausedIcon = false;
-            bool drawAsPausedGray = false;
-            if (item.DrawUWPPausedIconIndex != 0 && item.SubItems[item.DrawUWPPausedIconIndex].DrawUWPPausedIcon && item.SubItems[item.DrawUWPPausedIconIndex].Text == FormMain.str_status_paused)
+            if (noHeader)
             {
-                drawAsPausedIcon = true;
-                drawAsPausedGray = item.DrawUWPPausedGray;
+                 g.DrawString(item.Text, fnormalText2, item.SubItems[0].ForeColorSolidBrush, new Rectangle((DrawIcon ? 30 : 5) + (isChildItem ? 5 : 0), item.YPos - yOffest, Width - (DrawIcon ? 30 : 5) - (isChildItem ? 5 : 0), isChildItem ? smallItemHeight : itemHeight), ChildStringFormat);
             }
-
-            int currItemHeight = isChildItem ? smallItemHeight : itemHeight;
-            for (int i2 = 0; i2 < item.SubItems.Count && i2 < header.Items.Count; i2++)
+            else
             {
-                int x = header.Items[i2].X - xOffest;
-                if (x <= rect.Right && x + header.Items[i2].Width > rect.Left)
+                bool drawAsPausedIcon = false;
+                bool drawAsPausedGray = false;
+
+                if (item.DrawUWPPausedIconIndex != 0 && item.SubItems[item.DrawUWPPausedIconIndex].DrawUWPPausedIcon && item.SubItems[item.DrawUWPPausedIconIndex].Text == FormMain.str_status_paused)
                 {
-                    Color bgcolor = item.SubItems[i2].BackColor;
-                    StringFormat f = header.Items[i2].AlignmentStringFormat;
-                    if (bgcolor.A != 0 && !(bgcolor.R == 255 && bgcolor.G == 255 && bgcolor.B == 255))
-                    {
-                        using (SolidBrush s = (selectedItem == item || mouseenteredItem == item) ?
-                           new SolidBrush(Color.FromArgb(150, bgcolor)) : new SolidBrush(bgcolor))
-                            g.FillRectangle(s, x + 1, item.YPos - yOffest, header.Items[i2].Width - 1, currItemHeight);
-                    }
-
-                    if (i2 > 0 && item.SubItems[i2].Text != "") g.DrawString(item.SubItems[i2].Text, item.SubItems[i2].Font, drawAsPausedGray ? Brushes.Gray : item.SubItems[i2].ForeColorSolidBrush, new Rectangle(x + 6, item.YPos - yOffest, header.Items[i2].Width - 10, currItemHeight), f);
-                    else if (i2 == 0)
-                    {
-                        if (item.DisplayChildCount) g.DrawString(item.Text + " (" + item.Childs.Count + ")", fnormalText2, item.SubItems[0].ForeColorSolidBrush, new Rectangle(x + (DrawIcon ? 63 : 25) + (isChildItem ? 5 : 0), item.YPos - yOffest, header.Items[0].Width - (DrawIcon ? 60 : 25) - (isChildItem ? 5 : 0), currItemHeight), f);
-                        else g.DrawString(item.Text, fnormalText2, item.SubItems[0].ForeColorSolidBrush, new Rectangle(x + (DrawIcon ? 63 : 25) + (isChildItem ? 5 : 0), item.YPos - yOffest, header.Items[0].Width - (DrawIcon ? 60 : 25) - (isChildItem ? 5 : 0), currItemHeight), f);
-                    }
-
-                    if (drawAsPausedIcon && i2 == item.DrawUWPPausedIconIndex)
-                        g.DrawImage(PauseUwpIco, new Rectangle(x + header.Items[i2].Width - PauseUwpIco.Width - 2, item.YPos - yOffest + (isChildItem ? -2 : 2), PauseUwpIco.Width, PauseUwpIco.Height));
+                    drawAsPausedIcon = true;
+                    drawAsPausedGray = item.DrawUWPPausedGray;
                 }
-                else if (x > rect.Right) break;
+
+                int currItemHeight = isChildItem ? smallItemHeight : itemHeight;
+                for (int i2 = 0; i2 < item.SubItems.Count && i2 < header.Items.Count; i2++)
+                {
+                    int x = header.Items[i2].X - xOffest;
+                    if (x <= rect.Right && x + header.Items[i2].Width > rect.Left)
+                    {
+                        Color bgcolor = item.SubItems[i2].BackColor;
+                        StringFormat f = header.Items[i2].AlignmentStringFormat;
+                        if (bgcolor.A != 0 && !(bgcolor.R == 255 && bgcolor.G == 255 && bgcolor.B == 255))
+                        {
+                            using (SolidBrush s = (selectedItem == item || mouseenteredItem == item) ?
+                               new SolidBrush(Color.FromArgb(150, bgcolor)) : new SolidBrush(bgcolor))
+                                g.FillRectangle(s, x + 1, item.YPos - yOffest, header.Items[i2].Width - 1, currItemHeight);
+                        }
+
+                        if (i2 > 0 && item.SubItems[i2].Text != "") g.DrawString(item.SubItems[i2].Text, item.SubItems[i2].Font, drawAsPausedGray ? Brushes.Gray : item.SubItems[i2].ForeColorSolidBrush, new Rectangle(x + 6, item.YPos - yOffest, header.Items[i2].Width - 10, currItemHeight), f);
+                        else if (i2 == 0)
+                        {
+                            if (item.DisplayChildCount) g.DrawString(item.Text + " (" + item.Childs.Count + ")", fnormalText2, item.SubItems[0].ForeColorSolidBrush, new Rectangle(x + (DrawIcon ? 63 : 25) + (isChildItem ? 5 : 0), item.YPos - yOffest, header.Items[0].Width - (DrawIcon ? 60 : 25) - (isChildItem ? 5 : 0), currItemHeight), f);
+                            else g.DrawString(item.Text, fnormalText2, item.SubItems[0].ForeColorSolidBrush, new Rectangle(x + (DrawIcon ? 63 : 25) + (isChildItem ? 5 : 0), item.YPos - yOffest, header.Items[0].Width - (DrawIcon ? 60 : 25) - (isChildItem ? 5 : 0), currItemHeight), f);
+                        }
+
+                        if (drawAsPausedIcon && i2 == item.DrawUWPPausedIconIndex)
+                            g.DrawImage(PauseUwpIco, new Rectangle(x + header.Items[i2].Width - PauseUwpIco.Width - 2, item.YPos - yOffest + (isChildItem ? -2 : 2), PauseUwpIco.Width, PauseUwpIco.Height));
+                    }
+                    else if (x > rect.Right) break;
+                }
             }
+
             #endregion
 
             #region Childs
-            if (!isChildItem && (item.Childs.Count > 0))
+            if (!noHeader && !isChildItem && (item.Childs.Count > 0))
             {
                 if (item.ChildsOpened)
                 { 
-                    if (item.GlyphHoted && item == mouseenteredItem) MListDrawItem(Handle, g.GetHdc(), 4 - xOffest, item.YPos - yOffest + 5, 16, 16, 8);
-                    else MListDrawItem(Handle, g.GetHdc(), 4 - xOffest, item.YPos - yOffest + 5, 16, 16, 6);
+                    if (item.GlyphHoted && item == mouseenteredItem) TaskMgrListApis.MListDrawItem(hThemeTreeView, g.GetHdc(), 4 - xOffest, item.YPos - yOffest + 5, 16, 16, TaskMgrListApis.M_DRAW_TREEVIEW_GY_OPEN_HOT);
+                    else TaskMgrListApis.MListDrawItem(hThemeTreeView, g.GetHdc(), 4 - xOffest, item.YPos - yOffest + 5, 16, 16, TaskMgrListApis.M_DRAW_TREEVIEW_GY_OPEN);
                     g.ReleaseHdc();
 
                     for (int i2 = 0; i2 < item.Childs.Count; i2++)
                     {
                         if (item.Childs[i2] == item.OldSelectedItem || (item.Childs[i2] == mouseenteredItem))
                         {
-                            if (FocusedType) MListDrawItem(Handle, g.GetHdc(), 37 - xOffest, item.YPos - yOffest + i2 * smallItemHeight + itemHeight, header.AllWidth - 37, smallItemHeight, 4);
-                            else MListDrawItem(Handle, g.GetHdc(), 37 - xOffest, item.YPos - yOffest + i2 * smallItemHeight + itemHeight, header.AllWidth - 37, smallItemHeight, 2);
+                            if (FocusedType) TaskMgrListApis.MListDrawItem(hThemeListView, g.GetHdc(), 37 - xOffest, item.YPos - yOffest + i2 * smallItemHeight + itemHeight, header.AllWidth - 37, smallItemHeight, TaskMgrListApis.M_DRAW_LISTVIEW_HOT_SELECT);
+                            else TaskMgrListApis.MListDrawItem(hThemeListView, g.GetHdc(), 37 - xOffest, item.YPos - yOffest + i2 * smallItemHeight + itemHeight, header.AllWidth - 37, smallItemHeight, TaskMgrListApis.M_DRAW_LISTVIEW_SELECT_NOFOCUS);
                             g.ReleaseHdc();
                         }
                         if (item.Childs[i2].IsFullData)
@@ -468,19 +519,23 @@ namespace PCMgr.Ctls
                         if (item.Childs[i2].IsUWPICO)
                             g.FillRectangle(defTagSolidBrush, new Rectangle(40 - xOffest, item.YPos - yOffest + i2 * smallItemHeight + itemHeight + 4, 16, 16));
                         if (item.Childs[i2].Icon != null)
-                            g.DrawIcon(item.Childs[i2].Icon, new Rectangle(40 - xOffest, item.YPos - yOffest + i2 * smallItemHeight + itemHeight + 4, 16, 16));
+                        {
+                            TaskMgrListApis.MDrawIcon(item.Childs[i2].Icon.Handle, g.GetHdc(), 40 - xOffest, item.YPos - yOffest + i2 * smallItemHeight + itemHeight + 4);
+                            g.ReleaseHdc();
+                            //g.DrawIcon(, new Rectangle(40 - xOffest, item.YPos - yOffest + i2 * smallItemHeight + itemHeight + 4, 16, 16));
+                        }
                         else if (item.Childs[i2].Image != null)
                             g.DrawImage(item.Childs[i2].Image, new Rectangle(40 - xOffest, item.YPos - yOffest + i2 * smallItemHeight + itemHeight + 4, 16, 16));
                         else if (item.DisplayChildIndex)
-                            g.DrawString((i2+1).ToString(), fsmallText2, bsmallText2, 40 - xOffest, item.YPos - yOffest + i2 * smallItemHeight + itemHeight + 5);
+                            g.DrawString((i2 + 1).ToString(), fsmallText2, bsmallText2, 40 - xOffest, item.YPos - yOffest + i2 * smallItemHeight + itemHeight + 5);
                         //if (item.YPos + itemHeight - yOffest + i2 * smallItemHeight > rect.Bottom)
                        //     break;
                     }
                 }
                 else
                 {
-                    if (item.GlyphHoted && item == mouseenteredItem) MListDrawItem(Handle, g.GetHdc(), 4 - xOffest, item.YPos - yOffest + 5, 16, 16, 7);
-                    else MListDrawItem(Handle, g.GetHdc(), 4 - xOffest, item.YPos - yOffest + 5, 16, 16, 5);
+                    if (item.GlyphHoted && item == mouseenteredItem) TaskMgrListApis.MListDrawItem(hThemeTreeView, g.GetHdc(), 4 - xOffest, item.YPos - yOffest + 5, 16, 16, TaskMgrListApis.M_DRAW_TREEVIEW_GY_CLOSED_HOT);
+                    else TaskMgrListApis.MListDrawItem(hThemeTreeView, g.GetHdc(), 4 - xOffest, item.YPos - yOffest + 5, 16, 16, TaskMgrListApis.M_DRAW_TREEVIEW_GY_CLOSED);
                     g.ReleaseHdc();
                 }
             }
@@ -489,10 +544,16 @@ namespace PCMgr.Ctls
             #region Icons
             if (!isChildItem)
             {
+
                 if (item.Icon != null)
-                    g.DrawIcon(item.Icon, new Rectangle( 7 - xOffest + 25, item.YPos - YOffest + itemHeight / 2 - 8, 16, 16));
+                {
+                    IntPtr hdc = g.GetHdc();
+                    TaskMgrListApis.MDrawIcon(item.Icon.Handle, hdc, (noHeader ? 0 : 7) - xOffest + (noHeader ? 8 : 25), item.YPos - YOffest + itemHeight / 2 - 8);//new Rectangle(7 - xOffest + 25, item.YPos - YOffest + itemHeight / 2 - 8, 16, 16));
+                    g.ReleaseHdc();
+                }
                 else if (item.Image != null)
-                    g.DrawImage(item.Image, new Rectangle(7 - xOffest + 25, item.YPos - YOffest + itemHeight / 2 - 8, 16, 16));
+                    g.DrawImage(item.Image, new Rectangle((noHeader ? 0 : 7) - xOffest + (noHeader ? 8 : 25), item.YPos - YOffest + itemHeight / 2 - 8, 16, 16));
+
             }
             #endregion
         }
@@ -500,32 +561,35 @@ namespace PCMgr.Ctls
         {
             showedItems.Clear();
 
-            //draw lines
-            bool isFirstLine = true;
-            for (int i = 0; i < header.Items.Count; i++)
+            if (!noHeader)
             {
-                int x = header.Items[i].X - xOffest;
-                int xw = x + header.Items[i].Width;
-                if (x < r.Right && xw > 0)
+                //draw lines
+                bool isFirstLine = true;
+                for (int i = 0; i < header.Items.Count; i++)
                 {
-                    if (header.Items[i].IsNum)
+                    int x = header.Items[i].X - xOffest;
+                    int xw = x + header.Items[i].Width;
+                    if (x < r.Right && xw > 0)
                     {
-                        if(isFirstLine)
+                        if (header.Items[i].IsNum)
                         {
-                            if (header.Items[i].IsHot) g.DrawLine(hotLineColorPen, x, r.Top, x, r.Bottom);
-                            else g.DrawLine(defLineColorPen, x, r.Top, x, r.Bottom);
-                            isFirstLine = false;
+                            if (isFirstLine)
+                            {
+                                if (header.Items[i].IsHot) g.DrawLine(hotLineColorPen, x, r.Top, x, r.Bottom);
+                                else g.DrawLine(defLineColorPen, x, r.Top, x, r.Bottom);
+                                isFirstLine = false;
+                            }
+                            if (header.Items[i].IsHot)
+                            {
+                                g.DrawLine(hotLineColorPen, x, r.Top, x, r.Bottom);
+                                g.DrawLine(hotLineColorPen, xw, r.Top, xw, r.Bottom);
+                            }
+                            else g.DrawLine(defLineColorPen, xw, r.Top, xw, r.Bottom);
+                            g.FillRectangle(defBgSolidBrush, x + 2, r.Top, header.Items[i].Width - 2, r.Height);
                         }
-                        if (header.Items[i].IsHot)
-                        {
-                            g.DrawLine(hotLineColorPen, x, r.Top, x, r.Bottom);
-                            g.DrawLine(hotLineColorPen, xw, r.Top, xw, r.Bottom);
-                        }
-                        else g.DrawLine(defLineColorPen, xw, r.Top, xw, r.Bottom);
-                        g.FillRectangle(defBgSolidBrush, x + 2, r.Top, header.Items[i].Width - 2, r.Height);
                     }
+                    else if (x >= r.Right) break;
                 }
-                else if (x >= r.Right) break;
             }
 
             if (showGroup)
@@ -594,6 +658,20 @@ namespace PCMgr.Ctls
             }
         }
 
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (!DesignMode)
+                {
+                    TaskMgrListApis.MCloseThemeData(hThemeListView);
+                    TaskMgrListApis.MCloseThemeData(hThemeTreeView);
+                }
+                hThemeListView = IntPtr.Zero;
+                hThemeTreeView = IntPtr.Zero;
+            }
+            base.Dispose(disposing);
+        }
         protected override bool ProcessDialogKey(Keys keyData)
         {
             if(header.Focused)
@@ -696,7 +774,12 @@ namespace PCMgr.Ctls
         protected override void OnHandleCreated(EventArgs e)
         {
             base.OnHandleCreated(e);
-            if (!DesignMode) MAppWorkCall3(182, Handle, IntPtr.Zero);
+            if (DesignMode == false)
+            {
+                TaskMgrListApis.MSetAsExplorerTheme(Handle);
+                hThemeListView = TaskMgrListApis.MOpenThemeData(Handle, "LISTVIEW");
+                hThemeTreeView = TaskMgrListApis.MOpenThemeData(Handle, "TREEVIEW");
+            }
         }
         protected override void OnMouseWheel(MouseEventArgs e)
         {
@@ -860,57 +943,60 @@ namespace PCMgr.Ctls
         private void TestEnteredItem(Point e)
         {
             bool oldgy = false;
-            if (e.X > 0 && e.X < XOffest + header.AllWidth)
+            if (e.X < 0 || (!noHeader && e.X > XOffest + header.AllWidth))
             {
-                for (int i = showedItems.Count - 1; i >= 0; i--)
-                {
-                    if (showedItems[i].IsChildItem) continue;
-                    int y = showedItems[i].YPos - yOffest;               
-                    if (e.Y > y && e.Y < y + showedItems[i].ItemHeight)
-                    {
-                        oldgy = showedItems[i].GlyphHoted;
-                        if (e.Y < y + 30 && e.X >= 0 && e.X <= 22 - xOffest) showedItems[i].GlyphHoted = true;
-                        else if (showedItems[i].Childs.Count > 0 && showedItems[i].ChildsOpened)
-                        {
-                            showedItems[i].GlyphHoted = false;
-                            if (e.Y - y > itemHeight)
-                            {
-                                int iii = ((e.Y - y - itemHeight)) / smallItemHeight;
-                                if (iii >= 0 && iii < showedItems[i].Childs.Count)
-                                    showedItems[i].OldSelectedItem = showedItems[i].Childs[iii];
-                                else showedItems[i].OldSelectedItem = null;
-                            }
-                            else
-                            {
-                                showedItems[i].OldSelectedItem = null;
-                                selectedChildItem = null;
-                            }
-
-                            InvalidAItem(showedItems[i]);
-                        }
-                        else showedItems[i].GlyphHoted = false;
-                        if (oldgy != showedItems[i].GlyphHoted)
-                            Invalidate(new Rectangle(0, y, 22, 22));
-
-                        mouseenteredItem = showedItems[i];
-                        return;
-                    }
-                    else
-                    {
-                        if (showedItems[i].OldSelectedItem != null)
-                        {
-                            showedItems[i].OldSelectedItem = null;
-                            InvalidAItem(showedItems[i]);
-                        }
-                    }
-                }
                 if (mouseenteredItem != null)
                 {
                     mouseenteredItem = null;
                     InvalidAItem(mouseenteredItem);
                 }
+                return;
             }
-            else if (mouseenteredItem != null)
+
+            for (int i = showedItems.Count - 1; i >= 0; i--)
+            {
+                if (showedItems[i].IsChildItem) continue;
+                int y = showedItems[i].YPos - yOffest;
+                if (e.Y > y && e.Y < y + showedItems[i].ItemHeight)
+                {
+                    oldgy = showedItems[i].GlyphHoted;
+                    if (e.Y < y + 30 && e.X >= 0 && e.X <= 22 - xOffest) showedItems[i].GlyphHoted = true;
+                    else if (showedItems[i].Childs.Count > 0 && showedItems[i].ChildsOpened)
+                    {
+                        showedItems[i].GlyphHoted = false;
+                        if (e.Y - y > itemHeight)
+                        {
+                            int iii = ((e.Y - y - itemHeight)) / smallItemHeight;
+                            if (iii >= 0 && iii < showedItems[i].Childs.Count)
+                                showedItems[i].OldSelectedItem = showedItems[i].Childs[iii];
+                            else showedItems[i].OldSelectedItem = null;
+                        }
+                        else
+                        {
+                            showedItems[i].OldSelectedItem = null;
+                            selectedChildItem = null;
+                        }
+
+                        InvalidAItem(showedItems[i]);
+                    }
+                    else showedItems[i].GlyphHoted = false;
+                    if (oldgy != showedItems[i].GlyphHoted)
+                        Invalidate(new Rectangle(0, y, 22, 22));
+
+                    mouseenteredItem = showedItems[i];
+                    return;
+                }
+                else
+                {
+                    if (showedItems[i].OldSelectedItem != null)
+                    {
+                        showedItems[i].OldSelectedItem = null;
+                        InvalidAItem(showedItems[i]);
+                    }
+                }
+            }
+
+            if (mouseenteredItem != null)
             {
                 mouseenteredItem = null;
                 InvalidAItem(mouseenteredItem);
@@ -1142,8 +1228,8 @@ namespace PCMgr.Ctls
         {
             get
             {
-                if(IsChildItem)
-                return TaskMgrList.smallItemHeight;
+                if (IsChildItem)
+                    return TaskMgrList.smallItemHeight;
                 return TaskMgrList.itemHeight + (childsOpened ? (childs.Count * TaskMgrList.smallItemHeight) : 0);
             }
         }

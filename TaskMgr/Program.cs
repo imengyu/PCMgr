@@ -122,7 +122,7 @@ namespace PCMgr
                         return false;
                     case "kda":
                         FormMain.Log("MainRunAgrs run kda ");
-                        Application.Run(new WorkWindow.FormDA());
+                        Application.Run(new WorkWindow.FormKDA());
                         return false;
                 }
             }

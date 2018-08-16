@@ -1,12 +1,14 @@
 #include "proc.h"
 #include "protect.h"
 
+//未导出 进程/线程管理函数
 extern PspTerminateThreadByPointer_ PspTerminateThreadByPointer;
 extern PspExitThread_ PspExitThread;
 extern PsGetNextProcessThread_ PsGetNextProcessThread;
 extern PsTerminateProcess_ PsTerminateProcess;
 extern KeForceResumeThread_ KeForceResumeThread;
 
+//未导出 结构成员偏移
 extern ULONG_PTR EPROCESS_ThreadListHead_Offest;
 extern ULONG_PTR EPROCESS_RundownProtect_Offest;
 extern ULONG_PTR EPROCESS_Flags_Offest;
@@ -17,7 +19,18 @@ extern ULONG_PTR PEB_Ldr_Offest;
 extern ULONG_PTR PEB_ProcessParameters_Offest;
 extern ULONG_PTR RTL_USER_PROCESS_PARAMETERS_CommandLine_Offest;
 
+//win32k 定时器存储地址
+extern ULONG_PTR _gptmrFirst;
+//win32k 热键存储地址
+extern ULONG_PTR _gphkFirst;
+
+// KxGetNextProcessThread 64 位调用
+//     PEPROCESS Process：需要获取信息的进程结构
+//     PETHREAD Thread：当前线程，如为NULL则返回进程的第一个线程
 EXTERN_C PETHREAD KxGetNextProcessThread_x64Call(PEPROCESS Process, PETHREAD Thread);
+// KxGetNextProcessThread 32 位调用
+//     PEPROCESS Process：需要获取信息的进程结构
+//     PETHREAD Thread：当前线程，如为NULL则返回进程的第一个线程
 EXTERN_C PETHREAD KxGetNextProcessThread_x86Call(PEPROCESS Process, PETHREAD Thread);
 
 #ifdef _AMD64_
@@ -34,11 +47,14 @@ PETHREAD KxGetNextProcessThread_x64Call(PEPROCESS Process, PETHREAD Thread)
 }
 #endif
 
+//APC 结束进程回调
 VOID  KernelKillThreadRoutine(IN PKAPC Apc, IN OUT PKNORMAL_ROUTINE *NormalRoutine, IN OUT PVOID *NormalContext, IN OUT PVOID *SystemArgument1, IN OUT PVOID *SystemArgument2)
 {
 	PspExitThread(STATUS_SUCCESS);
 }
 
+//获取进程命令行信息
+//   PEPROCESS Process：需要获取信息的进程结构
 PUNICODE_STRING KxGetProcessCommandLine(PEPROCESS Process)
 {
 	if (PEB_Ldr_Offest && PEB_ProcessParameters_Offest && RTL_USER_PROCESS_PARAMETERS_CommandLine_Offest)
@@ -56,6 +72,8 @@ PUNICODE_STRING KxGetProcessCommandLine(PEPROCESS Process)
 	}
 	return NULL;
 }
+//获取进程位置路径
+//   PEPROCESS Process：需要获取信息的进程结构
 PUNICODE_STRING KxGetProcessFullPath(PEPROCESS Process)
 {
 	if (EPROCESS_SeAuditProcessCreationInfo_Offest)
@@ -70,15 +88,21 @@ PUNICODE_STRING KxGetProcessFullPath(PEPROCESS Process)
 	return NULL;
 }
 
+//强制恢复进程，在插入apc时使用
+//  PETHREAD Thread：需要操作的线程
 VOID KxForceResumeThread(PETHREAD Thread)
 {
 	PKTHREAD kThread = (PKTHREAD)((ULONG_PTR)Thread + ETHREAD_Tcb_Offest);
 	KeForceResumeThread(kThread);
 }
+//调用 PspTerminateThreadByPointer
+//  PETHREAD Thread：需要结束的线程
 NTSTATUS KxTerminateThread(PETHREAD Thread)
 {
 	return PspTerminateThreadByPointer(Thread, 0, FALSE);
 }
+//使用插入apc方法强制结束线程
+//  PETHREAD Thread：需要结束的线程
 NTSTATUS KxTerminateThreadApc(PETHREAD Thread)
 {
 	NTSTATUS Status = STATUS_SUCCESS;
@@ -139,6 +163,10 @@ NTSTATUS KxTerminateThreadApc(PETHREAD Thread)
 	return Status;
 }
 
+//使用TID强制结束线程
+//    ULONG_PTR tid：线程id
+//    ULONG exitCode：线程退出码
+//    BOOLEAN useapc：是否使用APC结束
 NTSTATUS KxTerminateThreadWithTid(ULONG_PTR tid, ULONG exitCode, BOOLEAN useapc)
 {
 	NTSTATUS Status = STATUS_SUCCESS;
@@ -167,6 +195,10 @@ NTSTATUS KxTerminateThreadWithTid(ULONG_PTR tid, ULONG exitCode, BOOLEAN useapc)
 	ObDereferenceObject(Thread);
 	return Status;
 }
+//使用PID强制结束进程
+//    ULONG_PTR pid：进程id
+//    ULONG exitCode：进程退出码
+//    BOOLEAN useapc：是否使用APC结束
 NTSTATUS KxTerminateProcessWithPid(ULONG_PTR pid, ULONG exitCode, BOOLEAN usepst, BOOLEAN useapc)
 {
 	NTSTATUS Status = STATUS_SUCCESS;
@@ -266,6 +298,7 @@ NTSTATUS KxTerminateProcessWithPid(ULONG_PTR pid, ULONG exitCode, BOOLEAN usepst
 	return Status;
 }
 
+//使用内存清零的方法结束进程（有点危险）
 NTSTATUS KxTerminateProcessByZero(ULONG_PTR PID)
 {
 	NTSTATUS ntStatus = STATUS_SUCCESS;
@@ -305,6 +338,7 @@ NTSTATUS KxTerminateProcessByZero(ULONG_PTR PID)
 
 	return ntStatus;
 }
+//测试
 NTSTATUS KxTerminateProcessTest(ULONG_PTR PID) 
 {
 	NTSTATUS status = STATUS_SUCCESS;
@@ -312,3 +346,117 @@ NTSTATUS KxTerminateProcessTest(ULONG_PTR PID)
 	KdPrint(("KxTerminateProcessTest STATUS_SUCCESS "));
 	return status;
 }
+
+PGET_HOT_KEYS_CACHE getHotKeyCache = NULL;
+PGET_HOT_KEYS_CACHE getHotKeyCacheEnd = NULL;
+
+PGET_TIMERS_CACHE getTimersCache = NULL;
+PGET_TIMERS_CACHE getTimersCacheEnd = NULL;
+
+void KxGetProcessHotKeysClearCache()
+{
+	if (getHotKeyCache != NULL)
+	{
+		PGET_HOT_KEYS_CACHE cur = getHotKeyCache;
+		PGET_HOT_KEYS_CACHE next = 0;
+		do {
+			next = (PGET_HOT_KEYS_CACHE)cur->Next;
+			ExFreePool(cur);
+		} while (next);
+	}
+}
+void KxGetProcessTimersClearCache()
+{
+	if (getTimersCache != NULL)
+	{
+		PGET_TIMERS_CACHE cur = getTimersCache;
+		PGET_TIMERS_CACHE next = 0;
+		do {
+			next = (PGET_TIMERS_CACHE)cur->Next;
+			ExFreePool(cur);
+		} while (next);
+	}
+}
+void KxGetProcessTimersCacheAdd(PTIMER pTimer)
+{
+	if (getTimersCacheEnd != NULL)
+	{
+		getTimersCacheEnd->Next = (struct tag_GET_TIMERS_CACHE*)ExAllocatePool(NonPagedPool, sizeof(GET_TIMERS_CACHE));
+		getTimersCacheEnd->Next->Object = (struct TIMER*)pTimer;
+		getTimersCacheEnd->Next->Next = NULL;
+	}
+	else
+	{
+		getTimersCache = (PGET_TIMERS_CACHE)ExAllocatePool(NonPagedPool, sizeof(GET_TIMERS_CACHE));
+		getTimersCache->Next = NULL;
+		getTimersCache->Object = (struct TIMER*)pTimer;
+		getTimersCacheEnd = getTimersCache;
+	}
+}
+void KxGetProcessHotKeysCacheAdd(PHOT_KEY_ITEM pHotkeyItem)
+{
+	if (getHotKeyCacheEnd != NULL)
+	{
+		getHotKeyCacheEnd->Next = (struct tag_GET_HOT_KEYS_CACHE*)ExAllocatePool(NonPagedPool, sizeof(GET_HOT_KEYS_CACHE));
+		getHotKeyCacheEnd->Next->Object = (struct HOT_KEY_ITEM*)pHotkeyItem;
+		getHotKeyCacheEnd->Next->Next = NULL;
+	}
+	else
+	{
+		getHotKeyCache = (PGET_HOT_KEYS_CACHE)ExAllocatePool(NonPagedPool, sizeof(GET_HOT_KEYS_CACHE));
+		getHotKeyCache->Next = NULL;
+		getHotKeyCache->Object = (struct HOT_KEY_ITEM*)pHotkeyItem;
+		getHotKeyCacheEnd = getHotKeyCache;
+	}
+}
+
+//获取进程的所有热键
+//    ULONG_PTR pid：进程id
+//    ULONG*outCount：输出一共有多少个热键
+NTSTATUS KxGetProcessHotKeys(ULONG_PTR PID, ULONG*outCount)
+{
+	if (_gphkFirst)
+	{
+		KxGetProcessHotKeysClearCache();
+
+		PHOT_KEY_ITEM gHotkeyItem = (PHOT_KEY_ITEM)_gphkFirst;
+		PHOT_KEY_ITEM pHotkeyItem = NULL;
+		LIST_ENTRY*entry;
+		for (entry = gHotkeyItem->ListEntry.Flink; entry != &gHotkeyItem->ListEntry; entry = entry->Flink)
+		{
+			pHotkeyItem = CONTAINING_RECORD(entry, HOT_KEY_ITEM, ListEntry);
+			ULONG_PTR thisPid = (ULONG_PTR)PsGetProcessId(IoThreadToProcess((PETHREAD)pHotkeyItem->Thread));
+			if (PID == 0 || thisPid == PID) KxGetProcessHotKeysCacheAdd(pHotkeyItem);
+			*outCount++;
+		}
+		return STATUS_SUCCESS;
+	}	
+	return STATUS_UNSUCCESSFUL;
+}
+//获取进程的所有定时器
+//    ULONG_PTR pid：进程id
+//    ULONG*outCount：输出一共有多少个定时器
+NTSTATUS KxGetProcessTimers(ULONG_PTR PID, ULONG*outCount)
+{
+	if (_gptmrFirst) {
+
+		KxGetProcessTimersClearCache();
+
+		PTIMER pTimer = (PTIMER)_gptmrFirst;
+		if (pTimer->ptmrNext != NULL) 
+		{
+			do {
+				if (pTimer->spwnd) {
+					if (pTimer->pti != 0) {
+						KxGetProcessTimersCacheAdd(pTimer);
+						*outCount++;
+					}
+				}		
+				pTimer = pTimer->ptmrNext;
+			} while (pTimer != NULL && (ULONG_PTR)pTimer != _gptmrFirst);
+			return STATUS_SUCCESS;
+		}
+	}
+	return STATUS_UNSUCCESSFUL;
+}
+
