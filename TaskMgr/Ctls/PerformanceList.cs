@@ -27,6 +27,7 @@ namespace PCMgr.Ctls
             scrol.Width = 16;
             scrol.ValueChanged += Scrol_ValueChanged; ;
             scrol.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            Controls.Add(scrol);
 
             t = new Timer();
             t.Tick += T_Tick;
@@ -59,7 +60,7 @@ namespace PCMgr.Ctls
         private PerformanceListItemCollection items = null;
         private int yOffest = 0;
         private int allItemHeight = 0;
-        private int outtHeight = 0;
+        private int outHeight = 0;
         private VScrollBar scrol = null;
         private PerformanceListItem mouseEnterItem = null;
         private PerformanceListItem selectedItem = null;
@@ -81,17 +82,17 @@ namespace PCMgr.Ctls
         public void SyncItems(bool paint)
         {
             allItemHeight = 0;
-           for(int i=0;i<items.Count;i++)
+            for(int i=0;i<items.Count;i++)
             {
                 items[i].ItemY = allItemHeight;
                 allItemHeight += items[i].ItemHeight;
             }
             if (allItemHeight > Height)
             {
-                outtHeight = allItemHeight - Height;
+                outHeight = allItemHeight - Height;
 
-                if (yOffest > outtHeight && outtHeight >= 0)
-                    yOffest = outtHeight + 16;
+                if (yOffest > outHeight && outHeight >= 0)
+                    yOffest = outHeight + 16;
 
                 scrol.Maximum = allItemHeight;
                 scrol.LargeChange = Height < 0 ? 0 : Height;
@@ -99,13 +100,15 @@ namespace PCMgr.Ctls
                 scrol.Left = Width - 16;
                 scrol.Value = yOffest + 16;
                 scrol.Height = Height;
-                if (!scrol.Visible) scrol.Show();
+                if (!scrol.Visible)
+                    scrol.Show();
             }
             else
             {
-                outtHeight = 0;
+                outHeight = 0;
                 yOffest = 0;
-                scrol.Hide();
+                if (scrol.Visible)
+                    scrol.Hide();
             }
             if (paint) Invalidate();
         }
@@ -131,6 +134,7 @@ namespace PCMgr.Ctls
         private void DrawItemDataGrid(Graphics g, PerformanceListItem it, int y)
         {
             Rectangle rect = new Rectangle(10, y + 10, 60, 40);
+            g.FillRectangle(Brushes.White, rect);
             if (it.Gray)
                 g.DrawRectangle(Pens.Gray, rect);
             else
@@ -284,6 +288,43 @@ namespace PCMgr.Ctls
                     }
                 }
             }
+        }
+        protected override void OnMouseWheel(MouseEventArgs e)
+        {
+            base.OnMouseWheel(e);
+            if (scrol.Visible)
+            {
+                if (e.Delta < 0)
+                {
+                    if (yOffest <= outHeight + 16 - scrol.SmallChange)
+                        yOffest += scrol.SmallChange;
+                    else
+                        yOffest = outHeight + 16;
+                    SyncItems(true);
+                }
+                else
+                {
+                    if (yOffest > scrol.SmallChange)
+                        yOffest -= scrol.SmallChange;
+                    else yOffest = 0;
+                    SyncItems(true);
+                }
+            }
+        }
+        protected override void OnMouseLeave(EventArgs e)
+        {
+            base.OnMouseLeave(e);
+            if(mouseEnterItem!=null)
+            {
+                mouseEnterItem = null;
+                PerformanceListItem o = mouseEnterItem;
+                InvalidAItem(o);
+            }
+        }
+        protected override void OnSizeChanged(EventArgs e)
+        {
+            base.OnSizeChanged(e);
+            SyncItems(true);
         }
         protected override void OnPaint(PaintEventArgs e)
         {

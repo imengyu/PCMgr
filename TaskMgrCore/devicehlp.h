@@ -11,7 +11,7 @@ struct MDevicePhysicalDisk
 	UINT32 Index;
 	WCHAR SizeStr[64];
 };
-//物理磁盘信息
+//内存信息
 struct MDeviceMemory
 {
 	WCHAR Name[64];

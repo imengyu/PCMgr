@@ -157,7 +157,7 @@ namespace PCMgr.Ctls
             }
         }
         private TaskMgrListItem selectedChildItem = null;
-        private int ougtHeight = 0;
+        private int outHeight = 0;
         private bool focused = false;
         private bool locked = false;
         private ListViewColumnSorter sorter = null;
@@ -366,10 +366,10 @@ namespace PCMgr.Ctls
             if (allItemHeight > h)
             {
                 isvs = true;
-                ougtHeight = allItemHeight - h - headerHeigh;
+                outHeight = allItemHeight - h - headerHeigh;
 
-                if (yOffest > ougtHeight && ougtHeight >= 0)
-                    yOffest = ougtHeight + 16;
+                if (yOffest > outHeight && outHeight >= 0)
+                    yOffest = outHeight + 16;
 
                 scrol.Maximum = allItemHeight - headerHeigh + 16;
                 scrol.LargeChange = h < 0 ? 0 : h;
@@ -387,7 +387,7 @@ namespace PCMgr.Ctls
             else
             {
                 isvs = false;
-                ougtHeight = 0;
+                outHeight = 0;
                 value = 0;
                 yOffest = 0;
                 scrol.Hide();
@@ -807,10 +807,10 @@ namespace PCMgr.Ctls
             {
                 if (e.Delta < 0)
                 {
-                    if (yOffest <= ougtHeight + 16 - scrol.SmallChange)
+                    if (yOffest <= outHeight + 16 - scrol.SmallChange)
                         yOffest += scrol.SmallChange;
                     else
-                        yOffest = ougtHeight + 16;
+                        yOffest = outHeight + 16;
                     SyncItems(true);
                 }
                 else
@@ -1282,6 +1282,7 @@ namespace PCMgr.Ctls
         public bool DisplayChildCount { get; set; }
         public bool DisplayChildIndex { get; set; }
 
+        public bool IsCloneItem { get; set; }
         public bool IsUWPICO { get; set; }
         public bool IsSelectingChilds { get; set; }
         public TaskMgrListItem Parent { get; set; }

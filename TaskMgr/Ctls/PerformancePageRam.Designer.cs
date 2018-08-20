@@ -45,7 +45,7 @@
             this.performanceInfos.FontTitle = new System.Drawing.Font("微软雅黑", 9F);
             this.performanceInfos.ItemMargan = 0;
             this.performanceInfos.LineOffest = 0;
-            this.performanceInfos.MaxSpeicalItemsWidth = 500;
+            this.performanceInfos.MaxSpeicalItemsWidth = 300;
             this.performanceInfos.Name = "performanceInfos";
             // 
             // performanceGridGlobal
@@ -58,6 +58,9 @@
             this.performanceGridGlobal.DrawData2 = false;
             this.performanceGridGlobal.DrawData2Bg = false;
             this.performanceGridGlobal.GridColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(222)))), ((int)(((byte)(240)))));
+            this.performanceGridGlobal.MaxScaleText = "";
+            this.performanceGridGlobal.MaxScaleValue = 0;
+            this.performanceGridGlobal.MaxValue = 100;
             this.performanceGridGlobal.Name = "performanceGridGlobal";
             this.performanceGridGlobal.TopTextHeight = 20;
             // 

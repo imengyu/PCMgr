@@ -334,6 +334,11 @@ namespace PCMgr
             TaskMgrListItem rs = null;
             foreach (TaskMgrListItem i in listProcess.Items)
             {
+                if (i.PID == pid)
+                {
+                    rs = i;
+                    return rs;
+                }
                 if (i.Type == TaskMgrListItemType.ItemProcessHost
                     || i.Type == TaskMgrListItemType.ItemUWPProcess)
                 {
@@ -345,11 +350,6 @@ namespace PCMgr
                             return rs;
                         }
                     }
-                }
-                if (i.PID == pid)
-                {
-                    rs = i;
-                    return rs;
                 }
             }
             return rs;
@@ -649,8 +649,15 @@ namespace PCMgr
             else if (stringBuilder.ToString() != "")
             {
                 StringBuilder exeDescribe = new StringBuilder(256);
+
                 if (MGetExeDescribe(stringBuilder.ToString(), exeDescribe, 256))
-                    taskMgrListItem = new TaskMgrListItem(exeDescribe.ToString());
+                {
+                    string exeDescribeStr = exeDescribe.ToString();
+                    exeDescribeStr = exeDescribeStr.Trim();
+                    if (exeDescribeStr != "")
+                        taskMgrListItem = new TaskMgrListItem(exeDescribeStr);
+                    else taskMgrListItem = new TaskMgrListItem(exename);
+                }
                 else taskMgrListItem = new TaskMgrListItem(exename);
             }
             else taskMgrListItem = new TaskMgrListItem(exename);
@@ -934,8 +941,8 @@ namespace PCMgr
                 }
                 else if (it.Type == TaskMgrListItemType.ItemProcessHost)
                 {
-                    it.Group = listProcess.Groups[0];
                     ProcessListUpdate_State(pid, it, (PsItem)it.Tag);
+                    ProcessListUpdate_WindowsAndGroup(pid, it, ((PsItem)it.Tag), isload);
                 }
 
                 //Performance 
@@ -943,11 +950,6 @@ namespace PCMgr
                 if (cpuindex != -1 && ipdateOneDataCloum != cpuindex)
                 {
                     double d = 0; int datacount = 0;
-                    if (it.Type == TaskMgrListItemType.ItemProcessHost)
-                    {
-                        d += it.SubItems[cpuindex].CustomData;
-                        datacount++;
-                    }
                     foreach (TaskMgrListItem ix in it.Childs)
                     {
                         if (ix.Type == TaskMgrListItemType.ItemProcess)
@@ -964,8 +966,6 @@ namespace PCMgr
                 if (ramindex != -1 && ipdateOneDataCloum != ramindex)
                 {
                     double d = 0;
-                    if (it.Type == TaskMgrListItemType.ItemProcessHost)
-                        d += it.SubItems[ramindex].CustomData;
                     foreach (TaskMgrListItem ix in it.Childs)
                         if (ix.Type == TaskMgrListItemType.ItemProcess)
                             d += ix.SubItems[ramindex].CustomData;
@@ -976,8 +976,6 @@ namespace PCMgr
                 if (diskindex != -1 && ipdateOneDataCloum != diskindex)
                 {
                     double d = 0;
-                    if (it.Type == TaskMgrListItemType.ItemProcessHost)
-                        d += it.SubItems[diskindex].CustomData;
                     foreach (TaskMgrListItem ix in it.Childs)
                         if (ix.Type == TaskMgrListItemType.ItemProcess)
                             d += ix.SubItems[diskindex].CustomData;
@@ -998,8 +996,6 @@ namespace PCMgr
                 if (netindex != -1 && ipdateOneDataCloum != netindex)
                 {
                     double d = 0;
-                    if (it.Type == TaskMgrListItemType.ItemProcessHost)
-                        d += it.SubItems[netindex].CustomData;
                     foreach (TaskMgrListItem ix in it.Childs)
                         if (ix.Type == TaskMgrListItemType.ItemProcess)
                             d += ix.SubItems[diskindex].CustomData;
@@ -1020,61 +1016,9 @@ namespace PCMgr
             }
             else
             {
-                //Child and group
                 PsItem p = ((PsItem)it.Tag);
                 p.SYSTEM_PROCESSES = system_process;
-                if (!p.isSvchost)
-                {
-                    //remove invalid windows
-                    for (int i = it.Childs.Count - 1; i >= 0; i--)
-                    {
-                        if (it.Childs[i].Type == TaskMgrListItemType.ItemWindow)
-                        {
-                            IntPtr h = (IntPtr)it.Childs[i].Tag;
-                            if (!IsWindow(h) || !IsWindowVisible(h))
-                                it.Childs.Remove(it.Childs[i]);
-                        }
-                    }
-                    if (!isload)
-                    {
-                        //update window
-                        thisLoadItem = it;
-                        MAppVProcessAllWindowsGetProcessWindow(pid);
-                        thisLoadItem = null;
-
-                        int windowCount = 0;
-                        for (int i = it.Childs.Count - 1; i >= 0; i--)
-                        {
-                            if (it.Childs[i].Type == TaskMgrListItemType.ItemWindow)
-                                windowCount++;
-                        }
-                        //group
-                        if (windowCount > 0)
-                        {
-                            it.Group = listProcess.Groups[0];
-                            p.isWindowShow = true;
-                            ProcessListUpdate_ChildItems(pid, it, p);
-                        }
-                        else if (p.isWindowsProcess)
-                        {
-                            it.Group = listProcess.Groups[2];
-                            p.isWindowShow = false;
-                        }
-                        else
-                        {
-                            it.Group = listProcess.Groups[1];
-                            p.isWindowShow = false;
-                        }
-                    }
-                }
-                else
-                {
-                    if (isload)
-                    {
-                        p.isWindowShow = false;
-                        it.Group = listProcess.Groups[p.isWindowsProcess ? 2 : 1];
-                    }
-                }
+                ProcessListUpdate_WindowsAndGroup(pid, it, p, isload);
 
                 if (stateindex != -1 && ipdateOneDataCloum != stateindex) ProcessListUpdate_State(pid, it, p);
                 if (cpuindex != -1 && ipdateOneDataCloum != cpuindex) ProcessListUpdatePerf_Cpu(pid, it, p);
@@ -1119,14 +1063,6 @@ namespace PCMgr
                 if (ipdateOneDataCloum > -1)
                 {
                     double d = 0; int datacount = 0;
-                    if (it.Type == TaskMgrListItemType.ItemProcessHost)
-                    {
-                        it.Type = TaskMgrListItemType.ItemProcess;
-                        ProcessListUpdateOnePerfCloum(it.PID, it, ipdateOneDataCloum);
-                        it.Type = TaskMgrListItemType.ItemProcessHost;
-                        d += it.SubItems[ipdateOneDataCloum].CustomData;
-                        datacount++;
-                    }
                     foreach (TaskMgrListItem ix in ii.Childs)
                     {
                         if (ix.Type == TaskMgrListItemType.ItemProcess)
@@ -1219,18 +1155,44 @@ namespace PCMgr
         }
         private void ProcessListUpdate_ChildItems(uint pid, TaskMgrListItem it, PsItem p)
         {
-            if (p.isWindowShow && p.childs.Count > 0 && !IsExplorer(p))
+            if (p.isWindowShow && p.childs.Count > 0 && !IsExplorer(p) && !it.IsCloneItem)
             {
                 if (it.Type != TaskMgrListItemType.ItemProcessHost)
+                {
                     it.Type = TaskMgrListItemType.ItemProcessHost;
+
+                    //Clone a child item
+                    TaskMgrListItem cloneItem = new TaskMgrListItem();
+                    cloneItem.Text = it.Text;
+                    cloneItem.PID = it.PID;
+                    cloneItem.Type = TaskMgrListItemType.ItemProcess;
+                    cloneItem.Tag = p;
+                    cloneItem.DisplayChildCount = false;
+                    cloneItem.DisplayChildValue = 0;
+                    cloneItem.IsCloneItem = true; cloneItem.IsFullData = true;
+                    cloneItem.Icon = it.Icon; cloneItem.Image = it.Image;
+                    //Copy 10 empty item
+                    for (int i = 0; i < 10; i++)
+                    {
+                        cloneItem.SubItems.Add(new TaskMgrListItem.TaskMgrListViewSubItem());
+                        cloneItem.SubItems[i].Text = it.SubItems[i].Text;
+                        cloneItem.SubItems[i].Font = it.SubItems[i].Font;
+                    }
+                    //Make it hight light
+                    cloneItem.SubItems[0].ForeColor = Color.FromArgb(0x11, 0x66, 0x00);
+                    it.Childs.Add(cloneItem);
+                }
+
                 it.DisplayChildCount = true;
-                it.DisplayChildValue = ProcessListUpdate_ChildItemsAdd(it, p);
+                it.DisplayChildValue = ProcessListUpdate_ChildItemsAdd(it, p) + 1;
             }
             else
             {
                 if (it.Type != TaskMgrListItemType.ItemProcess)
                     it.Type = TaskMgrListItemType.ItemProcess;
+
                 it.DisplayChildCount = false;
+
                 if (it.Childs.Count > 0)
                 {
                     for (int i = it.Childs.Count - 1; i >= 0; i--)
@@ -1248,15 +1210,83 @@ namespace PCMgr
         }
         private void ProcessListUpdate_GroupChilds(bool isload, TaskMgrListItem ii, int ipdateOneDataCloum = -1)
         {
-            if (ii.Type == TaskMgrListItemType.ItemProcessHost)
-            {
-                ii.Type = TaskMgrListItemType.ItemProcess;
-                ProcessListUpdate(ii.PID, isload, ii, ((PsItem)ii.Tag).SYSTEM_PROCESSES, ipdateOneDataCloum, true);
-                ii.Type = TaskMgrListItemType.ItemProcessHost;
-            }
             foreach (TaskMgrListItem ix in ii.Childs)
                 if (ix.Type == TaskMgrListItemType.ItemProcess)
                     ProcessListUpdate(ix.PID, isload, ix, ((PsItem)ix.Tag).SYSTEM_PROCESSES, ipdateOneDataCloum);
+        }
+
+        private void ProcessListUpdate_WindowsAndGroup(uint pid, TaskMgrListItem it, PsItem p, bool isload)
+        {
+            //Child and group
+            if (!p.isSvchost)
+            {
+                //remove invalid windows
+                for (int i = it.Childs.Count - 1; i >= 0; i--)
+                {
+                    if (it.Childs[i].Type == TaskMgrListItemType.ItemWindow)
+                    {
+                        IntPtr h = (IntPtr)it.Childs[i].Tag;
+                        if (!IsWindow(h) || !IsWindowVisible(h))
+                            it.Childs.Remove(it.Childs[i]);
+                    }
+                }
+                if (!isload)
+                {
+                    //update window
+                    thisLoadItem = it;
+                    MAppVProcessAllWindowsGetProcessWindow(pid);
+                    thisLoadItem = null;
+
+                    int windowCount = 0;
+                    for (int i = it.Childs.Count - 1; i >= 0; i--)
+                    {
+                        if (it.Childs[i].Type == TaskMgrListItemType.ItemWindow)
+                            windowCount++;
+                    }
+                    //group
+                    if (windowCount > 0)
+                    {
+                        p.isWindowShow = true;
+                        if (it.Group != listProcess.Groups[0])
+                            it.Group = listProcess.Groups[0];
+                        ProcessListUpdate_ChildItems(pid, it, p);
+                    }
+                    else
+                    {
+                        bool needBreak = false;
+
+                        if (p.isWindowsProcess)
+                        {
+                            if (it.Group != listProcess.Groups[2])
+                            {
+                                it.Group = listProcess.Groups[2];
+                                needBreak = true;
+                            }
+                            p.isWindowShow = false;
+                        }
+                        else
+                        {
+                            if (it.Group != listProcess.Groups[1])
+                            {
+                                it.Group = listProcess.Groups[1];
+                                needBreak = true;
+                            }
+                            p.isWindowShow = false;
+                        }
+
+                        if (needBreak && it.Childs.Count > 0)
+                            ProcessListUpdate_BreakProcHost(it);
+                    }
+                }
+            }
+            else
+            {
+                if (isload)
+                {
+                    p.isWindowShow = false;
+                    it.Group = listProcess.Groups[p.isWindowsProcess ? 2 : 1];
+                }
+            }
         }
         private void ProcessListUpdate_State(uint pid, TaskMgrListItem it, PsItem p)
         {
@@ -1360,6 +1390,18 @@ namespace PCMgr
             it.SubItems[netindex].CustomData = 0;
             it.SubItems[netindex].BackColor = dataGridZeroColor;
         }
+        private void ProcessListUpdate_BreakProcHost(TaskMgrListItem it)
+        {
+            if (it.Group != listProcess.Groups[0])
+            {
+                if (it.Childs.Count > 0)
+                {
+                    foreach (TaskMgrListItem lics in it.Childs)
+                        if (lics.Type == TaskMgrListItemType.ItemProcess && !lics.IsCloneItem)
+                            listProcess.Items.Add(lics);
+                }
+            }
+        }
 
         private void ProcessListPrepareClear()
         {
@@ -1369,7 +1411,7 @@ namespace PCMgr
         }
         private void ProcessListClear()
         {
-            //clear invalid items
+            //清除validPid里没有的项目
             uint pid = 0;
             for (int i = loadedPs.Count - 1; i >= 0; i--)
             {
@@ -1406,34 +1448,26 @@ namespace PCMgr
             MPERF_PerfDataDestroy(it.perfData);
             it.svcs.Clear();
             it.childs.Clear();
-            it.parent = null; 
-            loadedPs.Remove(it);
-            if (it.parent != null)
+            if (it.parent != null && it.parent.childs.Contains(it))
                 it.parent.childs.Remove(it);
+            it.parent = null;
             if (it.uwpItem != null)
                 it.uwpItem = null;
+
+            loadedPs.Remove(it);
+
             if (li != null)
             {
                 //is a group item
                 if (li.Type == TaskMgrListItemType.ItemUWPHost || li.Type == TaskMgrListItemType.ItemProcessHost)
                 {
-                    if (li.Childs.Count > 0)
-                    {
-                        foreach (TaskMgrListItem lics in li.Childs)
-                            if (lics.Type == TaskMgrListItemType.ItemProcess)
-                                listProcess.Items.Add(lics);
-                    }
+                    ProcessListUpdate_BreakProcHost(li);
                     listProcess.Items.Remove(li);
                 }
                 else
                 {
                     if (li.Parent != null)//is a child item
                     {
-                        if(it.parent!=null)
-                        {
-                            if (it.parent.childs.Contains(it))
-                                it.parent.childs.Remove(it);
-                        }
                         TaskMgrListItem iii = li.Parent;
                         iii.Childs.Remove(li);
                         if (iii.Type == TaskMgrListItemType.ItemUWPHost)
@@ -1454,12 +1488,6 @@ namespace PCMgr
                                     iii.Text = text + " (" + iii.Childs.Count + ")";
                                 }
                             }
-                        }
-                        else if (iii.Type == TaskMgrListItemType.ItemProcessHost)
-                        {
-                            if (iii.Childs.Count == 0)//o to remove
-                                iii.Type = TaskMgrListItemType.ItemProcess;
-                            iii.DisplayChildCount = iii.Childs.Count > 1;
                         }
                     }
                     else listProcess.Items.Remove(li);

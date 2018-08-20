@@ -237,7 +237,9 @@ M_CAPI(BOOL) MDEVICE_GetIsPageFileDisk(LPCSTR perfStr)
 	return FALSE;
 }
 
-M_CAPI(BOOL) MDEVICE_GetMemoryInfo()
+MDeviceMemory memoryInfo;
+
+M_CAPI(BOOL) MDEVICE_GetMemoryDeviceInfo()
 {
 	if (wmiInited)
 	{
@@ -270,11 +272,20 @@ M_CAPI(BOOL) MDEVICE_GetMemoryInfo()
 				break;
 
 			hr = pclsObj->Get(L"Name", 0, &vtProp, 0, 0);
+			wcscpy_s(memoryInfo.Name, vtProp.bstrVal);
+			VariantClear(&vtProp);
 
+			hr = pclsObj->Get(L"Model", 0, &vtProp, 0, 0);
+			wcscpy_s(memoryInfo.Model, vtProp.bstrVal);
+			VariantClear(&vtProp);
 
+			hr = pclsObj->Get(L"Speed", 0, &vtProp, 0, 0);
+			memoryInfo.Speed = vtProp.uintVal;
 			VariantClear(&vtProp);
 
 			pclsObj->Release();
+
+			break;
 		}
 
 		pEnumerator->Release();
@@ -282,3 +293,10 @@ M_CAPI(BOOL) MDEVICE_GetMemoryInfo()
 	}
 	return FALSE;
 }
+M_CAPI(LPWSTR) MDEVICE_GetMemoryDeviceName() {
+	return memoryInfo.Name;
+}
+M_CAPI(UINT32) MDEVICE_GetMemoryDeviceSpeed() {
+	return memoryInfo.Speed;
+}
+

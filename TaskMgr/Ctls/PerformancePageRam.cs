@@ -15,8 +15,6 @@ namespace PCMgr.Ctls
         [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern double MPERF_GetRamUseAge2();
         [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern ulong MGetAllRam();
-        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern bool MPERF_UpdatePerformance();
 
         [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
@@ -118,6 +116,8 @@ namespace PCMgr.Ctls
             performanceInfos.SpeicalItems.Add(item_nopagepool);
             all_ram = MPERF_GetAllRam();
             performanceGridGlobal.RightText = NativeMethods.FormatFileSize(all_ram);
+
+
         }
 
         public void PageFroceSetData(int s)

@@ -122,23 +122,23 @@
         AAEAAAD/////AQAAAAAAAAAMAgAAAFdTeXN0ZW0uV2luZG93cy5Gb3JtcywgVmVyc2lvbj00LjAuMC4w
         LCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODkFAQAAACZTeXN0
         ZW0uV2luZG93cy5Gb3Jtcy5JbWFnZUxpc3RTdHJlYW1lcgEAAAAERGF0YQcCAgAAAAkDAAAADwMAAAD+
-        CAAAAk1TRnQBSQFMAgEBAwEAAcwBAwHMAQMBEAEAARABAAT/ASEBAAj/AUIBTQE2BwABNgMAASgDAAFA
+        CAAAAk1TRnQBSQFMAgEBAwEAAdQBAwHUAQMBEAEAARABAAT/ASEBAAj/AUIBTQE2BwABNgMAASgDAAFA
         AwABEAMAAQEBAAEgBgABELYAAlgBYgHvAlgBYgHvDAACWAFiAe8CWAFiAe+EAAGyAgAB/wwAAmIBWAHv
-        AdwBjwEAAf8B6AGXAQAB/wHoAZcBAAH/AegBlwEAAf8BwwEDAQAB/wJHAUYBgBwAAY4B5AL/AY0B4wL/
+        AdwBjwEAAf8B6AGXAQAB/wHoAZcBAAH/AegBlwEAAf8BwwECAQAB/wJHAUYBgBwAAY4B5AL/AY0B4wL/
         AYsB4wL/AYoB4gL/AYgB4gL/AYcB4QL/AgABvgH/AgAB5gH/AgABvAH/AQAB1gH8Af8CAAG5Af8CAAHe
         Af8CWAFiAe9IACz/AzoBYAwAAccBhQEAAf8BzwGJAQAB/wI6ATkBYAHcAZABAAH/AegBmAEAAf8B6AGY
         AQAB/wHoAZgBAAH/AegBmAEAAf8B6AGYAQAB/wHoAZgBAAH/AegBmAEAAf8BsgIAAf8YAAGQAeQC/wG1
         Ae0C/wGNAeMC/wGLAeMC/wGKAeIC/wGIAeIC/wGHAeEC/wIAAb4B/wIAAeYB/wIAAcEB/wIAAeIB/wJY
         AWIB70gAAwwBEDD/DAABxwGFAQAB/wHoAZkBAAH/AegBmQEAAf8B6AGZAQAB/wHkAZYBAAH/AlwBVwHf
-        AyoBQAMqAUACTAFLAY8BwwEEAQAB/wHoAZkBAAH/AegBmQEAAf8BsgIAAf8UAAGRAeUC/wG3Ae0C/wGO
+        AyoBQAMqAUACTAFLAY8BwwEDAQAB/wHoAZkBAAH/AegBmQEAAf8BsgIAAf8UAAGRAeUC/wG3Ae0C/wGO
         AeQC/wGNAeMC/wGLAeMC/wGKAeIC/wGIAeIC/wGHAeEC/wIAAcQB/wIAAeYB/wIAAcEB/0wAA1wB3wMy
         AVAs/wMMARAIAAHHAYUBAAH/AegBmgEAAf8B6AGaAQAB/wHkAZcBAAH/AyEBMBQAAmIBWAHvAegBmgEA
         Af8B6AGaAQAB/wJHAUYBgBAAAZMB5QL/AbcB7gL/AZAB5AL/AY4B5AL/AY0B4wL/AYsB4wL/AYoB4gL/
         AgABwAH/AgAB6gH/AgABxAH/AgAB5gH/AlgBYgHvSAAE/wQALP8DXAHfCAABxwGGAQAB/wHoAZoBAAH/
-        AegBmgEAAf8B6AGaAQAB/wHPAYkBAAH/GAABxwEGAQAB/wHoAZoBAAH/AcMBAgEAAf8QAAGUAeYC/wG5
+        AegBmgEAAf8B6AGaAQAB/wHPAYkBAAH/GAABxwEFAQAB/wHoAZoBAAH/AcMBAQEAAf8QAAGUAeYC/wG5
         Ae4C/wGRAeUC/wGQAeQC/wGOAeQC/wGNAeMC/wIAAcMB/wIAAe4B/wIAAcAB/wEAAdIB9wH/AgABvgH/
-        AgAB5gH/AlgBYgHvRAAE/wNMAY8DUQGfLP8IAAG3AQMBAAH/AccBhQEAAf8BxwGFAQAB/wHHAYQBAAH/
-        AccBhAEAAf8BsgIAAf8UAAJMAUsBjwHHAQYBAAH/AccBBgEAAf8QAAGWAeYC/wG5Ae8C/wGTAeUC/wGR
+        AgAB5gH/AlgBYgHvRAAE/wNMAY8DUQGfLP8IAAG3AQIBAAH/AccBhQEAAf8BxwGFAQAB/wHHAYQBAAH/
+        AccBhAEAAf8BsgIAAf8UAAJMAUsBjwHHAQUBAAH/AccBBQEAAf8QAAGWAeYC/wG5Ae8C/wGTAeUC/wGR
         AeUC/wGQAeQC/wGOAeQC/wIAAbwB/wIAAcMB/wGMAeMC/wGMAd4B+AH/AVkCXAHPAlgBYgHvAlgBYgHv
         RAAI/wQALP8DTAGPTAABlwHnAv8BuwHvAv8BlAHmAv8BkwHlAv8BkQHlAv8BkAHkAv8BjgHkAv8BjQHj
         Av8BiwHjAv8BswHsAv9QAAj/AyoBQANcAc8s/0wAAZcB5wL/AbsB7wL/AZYB5gL/AZQB5gL/AZMB5QL/
@@ -186,7 +186,7 @@
         AAEAAAD/////AQAAAAAAAAAMAgAAAFdTeXN0ZW0uV2luZG93cy5Gb3JtcywgVmVyc2lvbj00LjAuMC4w
         LCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODkFAQAAACZTeXN0
         ZW0uV2luZG93cy5Gb3Jtcy5JbWFnZUxpc3RTdHJlYW1lcgEAAAAERGF0YQcCAgAAAAkDAAAADwMAAACw
-        BAAAAk1TRnQBSQFMAwEBAAGUAQMBlAEDARABAAEQAQAE/wEhAQAI/wFCAU0BNgcAATYDAAEoAwABQAMA
+        BAAAAk1TRnQBSQFMAwEBAAGcAQMBnAEDARABAAEQAQAE/wEhAQAI/wFCAU0BNgcAATYDAAEoAwABQAMA
         ARADAAEBAQABIAYAARA8AAHNAf8MAAJQAVEBnwJQAVEBn8wAAvsB+gH/AvsB+gH/AvsB+gH/AvsB+gH/
         AvsB+gH/AvsB+gH/A/0B/wIAAdsB/wIAAdkB/wP9Af8CUAFRAZ8CAAHeAf8CUAFRAZ/MAAP7Af8B9wL2
         Af8B9wH2AfUB/wH3AfYB9QH/AfcB9gH1Af8B9wH2AfUB/wH3AfYB9QH/AvsB+gH/AgAB2wH/AgAB2QH/
@@ -209,10 +209,13 @@
         Av8GAAs=
 </value>
   </data>
-  <data name="lbStartingStatus.Text" xml:space="preserve">
-    <value>Initializing...</value>
+  <data name="tabPageProcCtl.Text" xml:space="preserve">
+    <value>Process</value>
   </data>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="sp4.Location" type="System.Drawing.Point, System.Drawing">
+    <value>125, 540</value>
+  </data>
   <data name="check_showAllProcess.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAO
@@ -229,7 +232,7 @@
 </value>
   </data>
   <data name="check_showAllProcess.Location" type="System.Drawing.Point, System.Drawing">
-    <value>137, 533</value>
+    <value>258, 535</value>
   </data>
   <data name="check_showAllProcess.Size" type="System.Drawing.Size, System.Drawing">
     <value>209, 23</value>
@@ -238,7 +241,7 @@
     <value>Show process of all users</value>
   </data>
   <data name="spl1.Location" type="System.Drawing.Point, System.Drawing">
-    <value>130, 537</value>
+    <value>249, 539</value>
   </data>
   <data name="btnEndProcess.Location" type="System.Drawing.Point, System.Drawing">
     <value>794, 531</value>
@@ -249,18 +252,23 @@
   <data name="btnEndProcess.Text" xml:space="preserve">
     <value>&amp;End Process</value>
   </data>
+  <data name="lbProcessCount.Location" type="System.Drawing.Point, System.Drawing">
+    <value>133, 537</value>
+  </data>
   <data name="lbProcessCount.Size" type="System.Drawing.Size, System.Drawing">
     <value>113, 17</value>
   </data>
   <data name="lbProcessCount.Text" xml:space="preserve">
     <value>Process Count：--</value>
   </data>
-  <data name="tabPageProcCtl.Text" xml:space="preserve">
-    <value>Process</value>
+  <data name="expandFewerDetals.Size" type="System.Drawing.Size, System.Drawing">
+    <value>107, 21</value>
   </data>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="linkLabelShowKernelTools.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
-    <value>Bottom, Left</value>
+  <data name="expandFewerDetals.Text" xml:space="preserve">
+    <value>Fewer &amp;Detals</value>
+  </data>
+  <data name="tabPageKernelCtl.Text" xml:space="preserve">
+    <value>Kernel</value>
   </data>
   <data name="linkLabelShowKernelTools.Location" type="System.Drawing.Point, System.Drawing">
     <value>129, 535</value>
@@ -270,6 +278,12 @@
   </data>
   <data name="linkLabelShowKernelTools.Text" xml:space="preserve">
     <value>Open kernel tool</value>
+  </data>
+  <data name="pl_driverNotLoadTip.Location" type="System.Drawing.Point, System.Drawing">
+    <value>-4, 198</value>
+  </data>
+  <data name="pl_driverNotLoadTip.Size" type="System.Drawing.Size, System.Drawing">
+    <value>905, 103</value>
   </data>
   <data name="linkRestartAsAdminDriver.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
@@ -303,12 +317,6 @@
   </data>
   <data name="lbRestartAsAdminDriver.Text" xml:space="preserve">
     <value>Kernel driver not load</value>
-  </data>
-  <data name="pl_driverNotLoadTip.Location" type="System.Drawing.Point, System.Drawing">
-    <value>-4, 198</value>
-  </data>
-  <data name="pl_driverNotLoadTip.Size" type="System.Drawing.Size, System.Drawing">
-    <value>905, 103</value>
   </data>
   <data name="lbDriversCount.Size" type="System.Drawing.Size, System.Drawing">
     <value>103, 17</value>
@@ -347,8 +355,8 @@
   <data name="columnHeader23.Text" xml:space="preserve">
     <value>Publisher</value>
   </data>
-  <data name="tabPageKernelCtl.Text" xml:space="preserve">
-    <value>Kernel</value>
+  <data name="tabPagePerfCtl.Text" xml:space="preserve">
+    <value>Performance</value>
   </data>
   <data name="linkLabelOpenPerfMon.Size" type="System.Drawing.Size, System.Drawing">
     <value>165, 17</value>
@@ -356,14 +364,20 @@
   <data name="linkLabelOpenPerfMon.Text" xml:space="preserve">
     <value>Open resource monitor</value>
   </data>
-  <data name="tabPagePerfCtl.Text" xml:space="preserve">
-    <value>Performance</value>
+  <data name="tabPageUWPCtl.Text" xml:space="preserve">
+    <value>Universal apps</value>
   </data>
   <data name="lbUWPEnumFailText.Text" xml:space="preserve">
     <value>Unkow error</value>
   </data>
-  <data name="tabPageUWPCtl.Text" xml:space="preserve">
-    <value>Universal apps</value>
+  <data name="tabPageScCtl.Text" xml:space="preserve">
+    <value>Services</value>
+  </data>
+  <data name="pl_ScNeedAdminTip.Location" type="System.Drawing.Point, System.Drawing">
+    <value>0, 209</value>
+  </data>
+  <data name="pl_ScNeedAdminTip.Size" type="System.Drawing.Size, System.Drawing">
+    <value>898, 103</value>
   </data>
   <data name="linkRebootAsAdmin.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
@@ -397,12 +411,6 @@
   </data>
   <data name="lbScNeedAdminTip.Text" xml:space="preserve">
     <value>I need to run as administrator to enumlate service information.</value>
-  </data>
-  <data name="pl_ScNeedAdminTip.Location" type="System.Drawing.Point, System.Drawing">
-    <value>0, 209</value>
-  </data>
-  <data name="pl_ScNeedAdminTip.Size" type="System.Drawing.Size, System.Drawing">
-    <value>898, 103</value>
   </data>
   <data name="sp2.Location" type="System.Drawing.Point, System.Drawing">
     <value>130, 536</value>
@@ -474,11 +482,11 @@
   <data name="lbServicesCount.Text" xml:space="preserve">
     <value>Service Count：--</value>
   </data>
-  <data name="tabPageScCtl.Text" xml:space="preserve">
-    <value>Services</value>
-  </data>
   <data name="tabPageStartCtl.Text" xml:space="preserve">
     <value>Start apps</value>
+  </data>
+  <data name="tabPageFileCtl.Text" xml:space="preserve">
+    <value>File Manager</value>
   </data>
   <data name="lbFileMgrStatus.Size" type="System.Drawing.Size, System.Drawing">
     <value>44, 17</value>
@@ -502,8 +510,11 @@
         RK5CYII=
 </value>
   </data>
-  <data name="tabPageFileCtl.Text" xml:space="preserve">
-    <value>File Manager</value>
+  <data name="lbStartingStatus.Text" xml:space="preserve">
+    <value>Initializing...</value>
+  </data>
+  <data name="contextMenuStripUWP.Size" type="System.Drawing.Size, System.Drawing">
+    <value>204, 114</value>
   </data>
   <data name="打开应用ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
     <value>203, 22</value>
@@ -534,9 +545,6 @@
   </data>
   <data name="复制完整名称ToolStripMenuItem.Text" xml:space="preserve">
     <value>Copy full name</value>
-  </data>
-  <data name="contextMenuStripUWP.Size" type="System.Drawing.Size, System.Drawing">
-    <value>204, 114</value>
   </data>
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
@@ -2495,5 +2503,11 @@
   </data>
   <data name="notifyIcon.Text" xml:space="preserve">
     <value>PCMgr</value>
+  </data>
+  <data name="expandMoreDetals.Text" xml:space="preserve">
+    <value>More &amp;Detals</value>
+  </data>
+  <data name="btnEndTaskSimple.Text" xml:space="preserve">
+    <value>&amp;End Task</value>
   </data>
 </root>

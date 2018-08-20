@@ -107,12 +107,12 @@
             this.打开安装位置ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.复制名称ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.复制完整名称ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.fileSystemWatcher = new System.IO.FileSystemWatcher();
-            this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.listApps = new PCMgr.Ctls.TaskMgrList();
             this.pl_simple = new System.Windows.Forms.Panel();
             this.expandMoreDetals = new PCMgr.Aero.ExpandButton();
             this.btnEndTaskSimple = new System.Windows.Forms.Button();
+            this.fileSystemWatcher = new System.IO.FileSystemWatcher();
+            this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerFm)).BeginInit();
             this.splitContainerFm.Panel1.SuspendLayout();
             this.splitContainerFm.Panel2.SuspendLayout();
@@ -137,8 +137,8 @@
             this.tabPageFileCtl.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.spBottom)).BeginInit();
             this.contextMenuStripUWP.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.fileSystemWatcher)).BeginInit();
             this.pl_simple.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.fileSystemWatcher)).BeginInit();
             this.SuspendLayout();
             // 
             // splitContainerFm
@@ -721,20 +721,6 @@
             resources.ApplyResources(this.复制完整名称ToolStripMenuItem, "复制完整名称ToolStripMenuItem");
             this.复制完整名称ToolStripMenuItem.Click += new System.EventHandler(this.复制完整名称ToolStripMenuItem_Click);
             // 
-            // fileSystemWatcher
-            // 
-            this.fileSystemWatcher.EnableRaisingEvents = true;
-            this.fileSystemWatcher.SynchronizingObject = this;
-            this.fileSystemWatcher.Changed += new System.IO.FileSystemEventHandler(this.fileSystemWatcher_Changed);
-            this.fileSystemWatcher.Created += new System.IO.FileSystemEventHandler(this.fileSystemWatcher_Created);
-            this.fileSystemWatcher.Deleted += new System.IO.FileSystemEventHandler(this.fileSystemWatcher_Deleted);
-            this.fileSystemWatcher.Renamed += new System.IO.RenamedEventHandler(this.fileSystemWatcher_Renamed);
-            // 
-            // notifyIcon
-            // 
-            resources.ApplyResources(this.notifyIcon, "notifyIcon");
-            this.notifyIcon.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon_MouseDoubleClick);
-            // 
             // listApps
             // 
             resources.ApplyResources(this.listApps, "listApps");
@@ -775,6 +761,20 @@
             this.btnEndTaskSimple.Name = "btnEndTaskSimple";
             this.btnEndTaskSimple.UseVisualStyleBackColor = true;
             this.btnEndTaskSimple.Click += new System.EventHandler(this.btnEndTaskSimple_Click);
+            // 
+            // fileSystemWatcher
+            // 
+            this.fileSystemWatcher.EnableRaisingEvents = true;
+            this.fileSystemWatcher.SynchronizingObject = this;
+            this.fileSystemWatcher.Changed += new System.IO.FileSystemEventHandler(this.fileSystemWatcher_Changed);
+            this.fileSystemWatcher.Created += new System.IO.FileSystemEventHandler(this.fileSystemWatcher_Created);
+            this.fileSystemWatcher.Deleted += new System.IO.FileSystemEventHandler(this.fileSystemWatcher_Deleted);
+            this.fileSystemWatcher.Renamed += new System.IO.RenamedEventHandler(this.fileSystemWatcher_Renamed);
+            // 
+            // notifyIcon
+            // 
+            resources.ApplyResources(this.notifyIcon, "notifyIcon");
+            this.notifyIcon.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon_MouseDoubleClick);
             // 
             // FormMain
             // 
@@ -822,8 +822,8 @@
             this.tabPageFileCtl.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.spBottom)).EndInit();
             this.contextMenuStripUWP.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.fileSystemWatcher)).EndInit();
             this.pl_simple.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.fileSystemWatcher)).EndInit();
             this.ResumeLayout(false);
 
         }

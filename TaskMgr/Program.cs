@@ -49,7 +49,8 @@ namespace PCMgr
             if (agrs.Length > 0)
             {
                 NativeMethods.Log("MainRunAgrs 0 : " + agrs[0]);
-                switch(agrs[0])
+                if (agrs[0].StartsWith("-")) agrs[0] = agrs[0].Remove(0, 1);
+                switch (agrs[0])
                 {
                     case "reboot":
                         {

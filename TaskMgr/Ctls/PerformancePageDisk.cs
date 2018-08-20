@@ -94,8 +94,8 @@ namespace PCMgr.Ctls
             }
             //刷新最大速度标尺
             if (performanceGridSpeed.MaxValue != 100 && lastMaxSpeed != performanceGridSpeed.MaxData
-                && lastMaxSpeed > performanceGridSpeed.MaxValue * 0.20
-                && lastMaxSpeed < performanceGridSpeed.MaxValue * 0.95)
+                && lastMaxSpeed >= performanceGridSpeed.MaxValue * 0.10
+                && lastMaxSpeed <= performanceGridSpeed.MaxValue * 0.95)
             {
                 performanceGridSpeed.MaxScaleValue = lastMaxSpeed;
                 performanceGridSpeed.MaxScaleText = NativeMethods.FormatFileSize(lastMaxSpeed * 1024) + "/" + FormMain.str_sec;

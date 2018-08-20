@@ -85,9 +85,9 @@ namespace PCMgr.Ctls
         public string LeftText { get; set; }
         [Bindable(true), Localizable(true)]
         public string RightText { get; set; }
-        [Bindable(true), Localizable(true)]
+        [Localizable(true)]
         public string LeftBottomText { get; set; }
-        [Bindable(true), Localizable(true)]
+        [Localizable(true)]
         public string RightBottomText { get; set; }
 
         public int TopTextHeight { get; set; }
