@@ -73,30 +73,30 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <TargetName>PCMgr32</TargetName>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);E:\主数据库\编程\范例\capstone-master\include;C:\Program Files (x86)\Windows Kits\NETFXSDK\4.6.1\Include\um</IncludePath>
+    <IncludePath>$(VC_IncludePath);E:\主数据库\编程\范例\mono-master\msvc\include;$(WindowsSDK_IncludePath);E:\主数据库\编程\范例\capstone-master\include;C:\Program Files (x86)\Windows Kits\NETFXSDK\4.6.1\Include\um</IncludePath>
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
-    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);E:\主数据库\编程\范例\capstone-master\msvc\Debug;$(NETFXKitsDir)Lib\um\x86</LibraryPath>
+    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);E:\主数据库\编程\范例\mono-master\msvc\build\sgen\Win32\lib\Debug;$(NETFXKitsDir)Lib\um\x86;E:\主数据库\编程\范例\capstone-master\msvc\Debug</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <TargetName>PCMgr64</TargetName>
     <OutDir>$(SolutionDir)$(Configuration)_64\</OutDir>
-    <IncludePath>$(VC_IncludePath);C:\Program Files (x86)\Windows Kits\NETFXSDK\4.6.1\Include\um;$(WindowsSDK_IncludePath);E:\主数据库\编程\范例\capstone-master\include;</IncludePath>
-    <LibraryPath>$(VC_LibraryPath_x64);E:\主数据库\编程\范例\capstone-master\msvc\x64\Debug;$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <IncludePath>$(VC_IncludePath);E:\主数据库\编程\范例\mono-master\msvc\include;C:\Program Files (x86)\Windows Kits\NETFXSDK\4.6.1\Include\um;$(WindowsSDK_IncludePath);E:\主数据库\编程\范例\capstone-master\include;</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x64);E:\主数据库\编程\范例\capstone-master\msvc\x64\Debug;$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64;E:\主数据库\编程\范例\mono-master\msvc\build\sgen\x64\lib\Debug;</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);E:\主数据库\编程\范例\capstone-master\include;C:\Program Files (x86)\Windows Kits\NETFXSDK\4.6.1\Include\um;</IncludePath>
+    <IncludePath>$(VC_IncludePath);E:\主数据库\编程\范例\mono-master\msvc\include;$(WindowsSDK_IncludePath);E:\主数据库\编程\范例\capstone-master\include;C:\Program Files (x86)\Windows Kits\NETFXSDK\4.6.1\Include\um;</IncludePath>
     <TargetName>PCMgr32</TargetName>
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
-    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);E:\主数据库\编程\范例\capstone-master\msvc\Release;$(NETFXKitsDir)Lib\um\x86</LibraryPath>
+    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);E:\主数据库\编程\范例\mono-master\msvc\build\sgen\Win32\lib\Release;E:\主数据库\编程\范例\capstone-master\msvc\Release;$(NETFXKitsDir)Lib\um\x86</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <TargetName>PCMgr64</TargetName>
     <OutDir>$(SolutionDir)$(Configuration)_64\</OutDir>
-    <IncludePath>$(VC_IncludePath);C:\Program Files (x86)\Windows Kits\NETFXSDK\4.6.1\Include\um;$(WindowsSDK_IncludePath);E:\主数据库\编程\范例\capstone-master\include;</IncludePath>
-    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);E:\主数据库\编程\范例\capstone-master\msvc\x64\Release;$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <IncludePath>$(VC_IncludePath);E:\主数据库\编程\范例\mono-master\msvc\include;C:\Program Files (x86)\Windows Kits\NETFXSDK\4.6.1\Include\um;$(WindowsSDK_IncludePath);E:\主数据库\编程\范例\capstone-master\include;</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);E:\主数据库\编程\范例\capstone-master\msvc\x64\Release;$(NETFXKitsDir)Lib\um\x64;E:\主数据库\编程\范例\mono-master\msvc\build\sgen\x64\lib\Release</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -189,6 +189,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="comdlghlp.h" />
+    <ClInclude Include="devicehlp.h" />
     <ClInclude Include="DirectoryHelper.h" />
     <ClInclude Include="fmhlp.h" />
     <ClInclude Include="handlehlp.h" />
@@ -224,6 +225,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="comdlghlp.cpp" />
+    <ClCompile Include="devicehlp.cpp" />
     <ClCompile Include="DirectoryHelper.cpp" />
     <ClCompile Include="dllmain.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>

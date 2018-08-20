@@ -13,19 +13,19 @@ using PCMgr.Helpers;
 using PCMgr.Lanuages;
 using PCMgr.WorkWindow;
 using PCMgrUWP;
+using static PCMgr.NativeMethods;
+using static PCMgr.NativeMethods.Win32;
+using static PCMgr.NativeMethods.DeviceApi;
 
 namespace PCMgr
 {
     public partial class FormMain : Form
     {
-        public const string MICROSOFT = "Microsoft Corporation";
-
-        public static FormMain Instance { private set; get; }
-
         public FormMain(string[] agrs)
         {
             Instance = this;
             InitializeComponent();
+
             baseProcessRefeshTimer.Interval = 1000;
             baseProcessRefeshTimer.Tick += BaseProcessRefeshTimer_Tick;
             listProcess.Header.CloumClick += Header_CloumClick;
@@ -36,571 +36,11 @@ namespace PCMgr
             this.agrs = agrs;
         }
 
-        #region Apis
-
-        //所有 c++ 模块的api
-        //dll名称
-#if _X64_
-        public const string COREDLLNAME = "PCMgr64.dll";
-#else
-        public const string COREDLLNAME = "PCMgr32.dll";
-#endif
-
-        #region Config
-        public static bool SetConfigBool(string configkey, string configSection, bool configData)
-        {
-            return M_CFG_SetConfigBOOL(configkey, configSection, configData);
-        }
-        public static bool GetConfigBool(string configkey, string configSection, bool defaultValue = false)
-        {
-            return M_CFG_GetConfigBOOL(configkey, configSection, defaultValue);
-        }
-        public static bool SetConfig(string configkey, string configSection, string configData)
-        {
-            long OpStation = WritePrivateProfileString(configSection, configkey, configData, cfgFilePath);
-            return (OpStation != 0);
-        }
-        public static string GetConfig(string configkey, string configSection, string configDefData = "")
-        {
-            StringBuilder temp = new StringBuilder(1024);
-            GetPrivateProfileString(configSection, configkey, configDefData, temp, 1024, cfgFilePath);
-            return temp.ToString();
-        }
+        public static string cfgFilePath = "";
+        private string[] agrs = null;
 
         //private bool showSystemProcess = false;
         private bool showHiddenFiles = false;
-
-        #endregion
-
-        #region MainApi
-
-        public static void AppHWNDSendMessage(uint message, IntPtr wParam, IntPtr lParam)
-        {
-            MAppWorkCall2(message, wParam, lParam);
-        }
-
-        private const int MB_OK = 0x00000000;
-        private const int MB_OKCANCEL = 0x00000001;
-        private const int MB_ABORTRETRYIGNORE = 0x00000002;
-        private const int MB_YESNOCANCEL = 0x00000003;
-        private const int MB_YESNO = 0x00000004;
-        private const int MB_RETRYCANCEL = 0x00000005;
-        private const int MB_ICONHAND = 0x00000010;
-        private const int MB_ICONQUESTION = 0x00000020;
-        private const int MB_ICONEXCLAMATION = 0x00000030;
-        private const int MB_ICONASTERISK = 0x00000040;
-        private const int MB_ICONWARNING = MB_ICONEXCLAMATION;
-        private const int MB_ICONERROR = MB_ICONHAND;
-
-        public const int WM_SYSCOMMAND = 0x0112;
-        public const int WM_COMMAND = 0x0111;
-        public const int WM_HOTKEY = 0x0312;
-
-        [DllImport("kernel32")]
-        public static extern uint GetLastError();
-        [DllImport("kernel32")]
-        private static extern long WritePrivateProfileString(string section, string key, string val, string filePath);
-        [DllImport("kernel32")]
-        private static extern long GetPrivateProfileString(string section, string key, string def, StringBuilder retVal, int size, string filePath);
-        [DllImport("user32")]
-        private static extern bool IsHungAppWindow(IntPtr hWnd);
-        [DllImport("user32")]
-        private static extern bool IsWindowVisible(IntPtr hWnd);
-        [DllImport("user32")]
-        public static extern IntPtr GetDesktopWindow();
-
-        private int TaskDialogCallback(IntPtr hwnd, string text, string title, string instruction, int ico, int button)
-        {
-            TaskDialogIcon tico = TaskDialogIcon.None;
-            if (ico == MB_ICONERROR)
-                tico = TaskDialogIcon.Stop;
-            else if (ico == MB_ICONWARNING)
-                tico = TaskDialogIcon.Warning;
-            else if (ico == MB_ICONASTERISK)
-                tico = TaskDialogIcon.Information;
-
-            TaskDialogButton tbtn = TaskDialogButton.OK;
-            if (button == MB_OK)
-                tbtn = TaskDialogButton.OK;
-            else if (button == MB_OKCANCEL)
-                tbtn = TaskDialogButton.OK | TaskDialogButton.Cancel;
-            else if (button == MB_YESNO)
-                tbtn = TaskDialogButton.Yes | TaskDialogButton.No;
-            else if (button == MB_YESNOCANCEL)
-                tbtn = TaskDialogButton.Yes | TaskDialogButton.No | TaskDialogButton.Cancel;
-            else if (button == MB_ABORTRETRYIGNORE)
-                tbtn = TaskDialogButton.Retry | TaskDialogButton.Cancel;
-
-            TaskDialog t = new TaskDialog(instruction, title, text, tbtn, tico);
-            return t.Show(hwnd).ButtonID;
-        }
-
-        public static string cfgFilePath = "";
-
-        private WNDPROC coreWndProc = null;
-        private EXITCALLBACK exitCallBack;
-        private WORKERCALLBACK workerCallBack;
-        private taskdialogcallback taskDialogCallBack;
-        private TerminateImporantWarnCallBack terminateImporantWarnCallBack;
-
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate void WORKERCALLBACK(int msg, IntPtr lParam, IntPtr wParam);
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate long WNDPROC(IntPtr hWnd, uint msg, IntPtr lParam, IntPtr wParam);
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate void EXITCALLBACK();
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate bool TerminateImporantWarnCallBack(IntPtr name,  int id);
-
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool M_CFG_GetConfigBOOL([MarshalAs(UnmanagedType.LPWStr)]string configkey, [MarshalAs(UnmanagedType.LPWStr)]string configSection, bool defaultValue);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool M_CFG_SetConfigBOOL([MarshalAs(UnmanagedType.LPWStr)]string configkey, [MarshalAs(UnmanagedType.LPWStr)] string configSection, bool defaultValue);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr M_CFG_GetCfgFilePath();
-
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool MRunExe([MarshalAs(UnmanagedType.LPWStr)]string path, [MarshalAs(UnmanagedType.LPWStr)]string args, bool runAsadmin = false, IntPtr hWnd = default(IntPtr));
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool MCopyToClipboard2([MarshalAs(UnmanagedType.LPWStr)]string path);
-
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool MAppStartTryCloseLastApp([MarshalAs(UnmanagedType.LPWStr)]string windowTitle);
-
-
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool MIsKernelNeed64();
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void M_SU_Test([MarshalAs(UnmanagedType.LPStr)]string instr);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern bool MAppStartEnd();
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void M_LOG_Init(bool forecConsole);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern void M_LOG_Close();
-
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "M_LOG_Error_ForceFile")]
-        public static extern void FLogErr([MarshalAs(UnmanagedType.LPWStr)]string format);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "M_LOG_Warning_ForceFile")]
-        public static extern void FLogWarn([MarshalAs(UnmanagedType.LPWStr)]string format);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "M_LOG_Info_ForceFile")]
-        public static extern void FLogInfo([MarshalAs(UnmanagedType.LPWStr)]string format);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "M_LOG_Str_ForceFile")]
-        public static extern void FLog([MarshalAs(UnmanagedType.LPWStr)]string format);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "M_LOG_LogErr")]
-        public static extern void LogErr([MarshalAs(UnmanagedType.LPWStr)]string format);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "M_LOG_LogWarn")]
-        public static extern void LogWarn([MarshalAs(UnmanagedType.LPWStr)]string format);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "M_LOG_LogInfo")]
-        public static extern void LogInfo([MarshalAs(UnmanagedType.LPWStr)]string format);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "M_LOG_Log")]
-        public static extern void Log([MarshalAs(UnmanagedType.LPWStr)]string format);
-
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool MGetPrivileges();
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void M_SU_SetSysver(uint ver);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern bool MGetPrivileges2();
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool MAppStartTest();
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool MAppKillOld([MarshalAs(UnmanagedType.LPWStr)]string procname);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr MAppSetCallBack(IntPtr ptr, int id);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void MAppWorkCall2(uint msg, IntPtr wParam, IntPtr lParam);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int MAppWorkCall3(int id, IntPtr hWnd, IntPtr data);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern void MAppExit();
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern void MAppRebot();
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool MIs64BitOS();
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool MIsRunasAdmin();
-        public static bool MIsFinded64()
-        {
-            return MFM_FileExist(Application.StartupPath + "\\PCMgr64.exe");
-        }
-        public static bool MRun64()
-        {
-            return MFM_OpenFile(Application.StartupPath + "\\PCMgr64.exe", IntPtr.Zero);
-        }
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void MAppRebotAdmin();
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void MAppRebotAdmin2([MarshalAs(UnmanagedType.LPWStr)]string agrs);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void MAppSetLanuageItems(int i, int id, [MarshalAs(UnmanagedType.LPWStr)]string s, int size);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void MLG_SetLanuageRes([MarshalAs(UnmanagedType.LPWStr)]string s0, [MarshalAs(UnmanagedType.LPWStr)]string s);
-
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern int MAppRegShowHotKey(IntPtr hWnd, uint vkkey, uint key);
-
-        private static LanuageItems_CallBack lanuageItems_CallBack;
-
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern bool MFM_FileExist([MarshalAs(UnmanagedType.LPWStr)]string path);
-
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void MLG_SetLanuageItems_CallBack(IntPtr callback);
-        [return: MarshalAs(UnmanagedType.LPWStr)]
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        private delegate string LanuageItems_CallBack([MarshalAs(UnmanagedType.LPWStr)]string s);
-
-        #endregion
-
-        #region PROC API
-
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate void EnumProcessCallBack2(uint pid, IntPtr system_process);
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate void EnumProcessCallBack(uint pid, uint ppid, IntPtr name, IntPtr exefullpath, int tp, IntPtr hprocess, IntPtr system_process);
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate int taskdialogcallback(IntPtr hwnd, [MarshalAs(UnmanagedType.LPWStr)]string text, [MarshalAs(UnmanagedType.LPWStr)] string title, [MarshalAs(UnmanagedType.LPWStr)]string apptl, int ico, int button);
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate void EnumWinsCallBack(IntPtr hWnd, IntPtr hWndParent);
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate void GetWinsCallBack(IntPtr hWnd, IntPtr hWndParent, int i);
-
-        private const int MENU_SELECTED_PROCESS_KILL_ACT_KILL = 0;
-        private const int MENU_SELECTED_PROCESS_KILL_ACT_REBOOT = 1;
-        private const int MENU_SELECTED_PROCESS_KILL_ACT_RESENT_BACK = 2;
-        private const int MENU_SELECTED_PROCESS_KILL_ACT_UWP_RESENT_BACK = 3;
-
-        private EnumProcessCallBack enumProcessCallBack;
-        private EnumProcessCallBack2 enumProcessCallBack2;
-        private EnumWinsCallBack enumWinsCallBack;
-        private GetWinsCallBack getWinsCallBack;
-
-        private IntPtr enumProcessCallBack_ptr;
-        private IntPtr enumProcessCallBack2_ptr;
-
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool M_SU_SetKrlMonSet_CreateProcess(bool allow);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool M_SU_SetKrlMonSet_CreateThread(bool allow);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool M_SU_SetKrlMonSet_LoadImage(bool allow);
-
-        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-        public struct PEOCESSKINFO
-        {
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
-            public string Eprocess;
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
-            public string PebAddress;
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
-            public string JobAddress;
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
-            public string ImageFileName;
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
-            public string ImageFullName;
-        }
-
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        private static extern bool MCommandLineToFilePath(string pszFullPath, StringBuilder b, int maxcount);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern int MGetProcessState(IntPtr system_process, IntPtr hwnd);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern bool MGetProcessEprocess(uint pid, ref PEOCESSKINFO infoStruct);
-
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        private static extern bool MGetExeInfo(string strFilePath, string InfoItem, StringBuilder b, int maxcount);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        private static extern bool MGetExeDescribe(string pszFullPath, StringBuilder b, int maxcount);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        private static extern bool MGetExeCompany(string pszFullPath, StringBuilder b, int maxcount);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        private static extern IntPtr MGetExeIcon(string pszFullPath);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern double MPERF_GetCupUseAge();
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern double MGetRamUseAge();
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern double MGetDiskUseAge();
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern int MAppWorkShowMenuProcess([MarshalAs(UnmanagedType.LPWStr)]string strFilePath, [MarshalAs(UnmanagedType.LPWStr)]string strFileName, uint pid, IntPtr hWnd, int data, int type, int x, int y);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern int MAppWorkShowMenuProcessPrepare([MarshalAs(UnmanagedType.LPWStr)]string strFilePath, [MarshalAs(UnmanagedType.LPWStr)]string strFileName, uint pid, bool isimporant, bool isveryimporant);
-
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        private static extern bool MKillProcessUser2(uint pid, bool showErr);
-
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern bool MAppVProcessModuls(uint dwPID, IntPtr hDlg, [MarshalAs(UnmanagedType.LPWStr)]string procName);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern bool MAppVProcessThreads(uint dwPID, IntPtr hDlg, [MarshalAs(UnmanagedType.LPWStr)]string procName);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern bool MAppVProcessWindows(uint dwPID, IntPtr hDlg, [MarshalAs(UnmanagedType.LPWStr)]string procName);
-
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        private static extern bool MGetProcessCommandLine(IntPtr handle, StringBuilder b, int m, uint pid);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern bool MAppVProcess(IntPtr hWnd);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern void MEnumProcess(IntPtr callback);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern void MEnumProcess2Refesh(IntPtr callback);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern void MEnumProcessFree();
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern bool MAppVProcessAllWindowsGetProcessWindow(uint pid);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern bool MAppVProcessAllWindowsGetProcessWindow2(uint pid);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern bool MCloseHandle(IntPtr handle);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern bool MReUpdateProcess(uint pid, IntPtr callback);
-
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern bool MRunUWPApp([MarshalAs(UnmanagedType.LPWStr)]string packageName, [MarshalAs(UnmanagedType.LPWStr)]string appname);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern bool MUnInstallUWPApp([MarshalAs(UnmanagedType.LPWStr)]string appname);
-
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern IntPtr MPERF_PerfDataCreate();
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern void MPERF_PerfDataDestroy(IntPtr data);
-
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern bool MPERF_NET_UpdateAllProcessNetInfo();
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern void MPERF_CpuTimeUpdate();
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern uint MPERF_GetProcessRam(IntPtr handle);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern double MPERF_GetProcessCpuUseAge(IntPtr handle, IntPtr perfdata);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern ulong MPERF_GetProcessDiskRate(IntPtr handle, IntPtr perfdata);
-
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern ulong MPERF_GetProcessNetWorkRate(uint pid, IntPtr perfdata);
-
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern bool MPERF_NET_IsProcessInNet(uint pid);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern void MPERF_NET_FreeAllProcessNetInfo();
-
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern bool MGetProcessIsUWP(IntPtr handle);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern bool MGetProcessIs32Bit(IntPtr handle);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern bool MGetUWPPackageId(IntPtr handle, IntPtr data);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        private static extern bool MGetUWPPackageFullName(IntPtr handle, ref int len, StringBuilder buf);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        private static extern void MAppVProcessAllWindowsUWP();
-
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        private static extern void MShowExeFileSignatureInfo([MarshalAs(UnmanagedType.LPWStr)]string filePath);
-
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool MCanUseKernel();
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern bool MUninitKernel();
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        private static extern bool MInitKernel(string currDir);
-
-        #endregion
-
-        #region FM API
-
-        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-        private struct WIN32_FIND_DATA
-        {
-            public uint dwFileAttributes;
-            public System.Runtime.InteropServices.ComTypes.FILETIME ftCreationTime;
-            public System.Runtime.InteropServices.ComTypes.FILETIME ftLastAccessTime;
-            public System.Runtime.InteropServices.ComTypes.FILETIME ftLastWriteTime;
-            public uint nFileSizeHigh;
-            public uint nFileSizeLow;
-            uint dwReserved0;
-            uint dwReserved1;
-
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
-            public string cFileName;
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 14)]
-            public string cAlternateFileName;
-        };
-
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate IntPtr MFCALLBACK(int msg, IntPtr lParam, IntPtr wParam);
-
-        private MFCALLBACK fileMgrCallBack;
-
-        [DllImport(COREDLLNAME, EntryPoint = "MFM_GetFileAttr", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        private static extern bool MFM_GetFileAttr(uint attr, StringBuilder sb, int maxcount, ref bool bout);
-        [DllImport(COREDLLNAME, EntryPoint = "MFM_GetFileTime", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        private static extern bool MFM_GetFileTime(ref System.Runtime.InteropServices.ComTypes.FILETIME fILETIME, StringBuilder sb, int maxcount);
-        [DllImport(COREDLLNAME, EntryPoint = "MFM_GetFileIcon", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        private static extern IntPtr MFM_GetFileIcon([MarshalAs(UnmanagedType.LPWStr)] string fileExt, StringBuilder sb, int maxcount);
-        [DllImport(COREDLLNAME, EntryPoint = "MFM_GetFolderIcon", CallingConvention = CallingConvention.Cdecl)]
-        private static extern IntPtr MFM_GetFolderIcon();
-        [DllImport(COREDLLNAME, EntryPoint = "MFM_GetMyComputerIcon", CallingConvention = CallingConvention.Cdecl)]
-        private static extern IntPtr MFM_GetMyComputerIcon();
-        [DllImport(COREDLLNAME, EntryPoint = "MFM_SetCallBack", CallingConvention = CallingConvention.Cdecl)]
-        private static extern void MFM_SetCallBack(IntPtr cp);
-        [DllImport(COREDLLNAME, EntryPoint = "MFM_GetRoots", CallingConvention = CallingConvention.Cdecl)]
-        private static extern void MFM_GetRoots();
-        [DllImport(COREDLLNAME, EntryPoint = "MFM_GetFolders", CallingConvention = CallingConvention.Cdecl)]
-        private static extern bool MFM_GetFolders([MarshalAs(UnmanagedType.LPWStr)] string filePath);
-        [DllImport(COREDLLNAME, EntryPoint = "MFM_GetFiles", CallingConvention = CallingConvention.Cdecl)]
-        private static extern bool MFM_GetFiles([MarshalAs(UnmanagedType.LPWStr)] string filePath);
-        [DllImport(COREDLLNAME, EntryPoint = "MFM_GetMyComputerName", CallingConvention = CallingConvention.Cdecl)]
-        private static extern IntPtr MFM_GetMyComputerName();
-        [DllImport(COREDLLNAME, EntryPoint = "MFM_OpenFile", CallingConvention = CallingConvention.Cdecl)]
-        private static extern bool MFM_OpenFile([MarshalAs(UnmanagedType.LPWStr)] string filePath, IntPtr hWnd);
-        [DllImport(COREDLLNAME, EntryPoint = "MAppWorkShowMenuFM", CallingConvention = CallingConvention.Cdecl)]
-        private static extern int MAppWorkShowMenuFM([MarshalAs(UnmanagedType.LPWStr)] string filePath, bool mutilSelect, int selectCount);
-        [DllImport(COREDLLNAME, EntryPoint = "MAppWorkShowMenuFMF", CallingConvention = CallingConvention.Cdecl)]
-        private static extern int MAppWorkShowMenuFMF([MarshalAs(UnmanagedType.LPWStr)] string filePath);
-        [DllImport(COREDLLNAME, EntryPoint = "MFM_IsValidateFolderFileName", CallingConvention = CallingConvention.Cdecl)]
-        private static extern bool MFM_IsValidateFolderFileName([MarshalAs(UnmanagedType.LPWStr)] string name);
-        [DllImport(COREDLLNAME, EntryPoint = "MFM_CreateDir", CallingConvention = CallingConvention.Cdecl)]
-        private static extern bool MFM_CreateDir([MarshalAs(UnmanagedType.LPWStr)] string path);
-        [DllImport(COREDLLNAME, EntryPoint = "MFM_UpdateFile", CallingConvention = CallingConvention.Cdecl)]
-        private static extern bool MFM_UpdateFile([MarshalAs(UnmanagedType.LPWStr)] string fullPath, [MarshalAs(UnmanagedType.LPWStr)] string dirPath);
-        [DllImport(COREDLLNAME, EntryPoint = "MFM_ReUpdateFile", CallingConvention = CallingConvention.Cdecl)]
-        private static extern bool MFM_ReUpdateFile([MarshalAs(UnmanagedType.LPWStr)] string fullPath, [MarshalAs(UnmanagedType.LPWStr)] string dirPath);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern void MFM_SetShowHiddenFiles(bool b);
-
-        public static String FormatFileSize(UInt64 fileSize)
-        {
-            if (fileSize < 0)
-            {
-                throw new ArgumentOutOfRangeException("fileSize");
-            }
-            else if (fileSize >= 1073741824)
-            {
-                return string.Format("{0:########0.00} GB", ((Double)fileSize) / (1024 * 1024 * 1024));
-            }
-            else if (fileSize >= 1048576)
-            {
-                return string.Format("{0:####0.00} MB", ((Double)fileSize) / (1024 * 1024));
-            }
-            else if (fileSize >= 1024)
-            {
-                return string.Format("{0:####0.00} KB", ((Double)fileSize) / 1024);
-            }
-            else return string.Format("{0} B", fileSize);
-        }
-        public static String FormatFileSize(Int64 fileSize)
-        {
-            if (fileSize < 0)
-            {
-                throw new ArgumentOutOfRangeException("fileSize");
-            }
-            else if (fileSize >= 1073741824)
-            {
-                return string.Format("{0:########0.00} GB", ((Double)fileSize) / (1024 * 1024 * 1024));
-            }
-            else if (fileSize >= 1048576)
-            {
-                return string.Format("{0:####0.00} MB", ((Double)fileSize) / (1024 * 1024));
-            }
-            else if (fileSize >= 1024)
-            {
-                return string.Format("{0:####0.00} KB", ((Double)fileSize) / 1024);
-            }
-            else
-            {
-                return string.Format("{0} B", fileSize);
-            }
-        }
-        public static String FormatFileSize1(Int64 fileSize)
-        {
-            if (fileSize < 0)
-            {
-                throw new ArgumentOutOfRangeException("fileSize");
-            }
-            else if (fileSize >= 1073741824)
-                return string.Format("{0:########0.0} GB", ((Double)fileSize) / (1024 * 1024 * 1024));
-            else if (fileSize >= 1048576)
-                return string.Format("{0:####0.0} MB", ((Double)fileSize) / (1024 * 1024));
-            else if (fileSize >= 1024)
-                return string.Format("{0:####0.0} KB", ((Double)fileSize) / 1024);
-            else return string.Format("{0} B", fileSize);
-        }
-        public static String FormatFileSizeMen(Int64 fileSize)
-        {
-            if (fileSize < 0)
-                throw new ArgumentOutOfRangeException("fileSize");
-            else if (fileSize >= 1073741824)
-                return string.Format("{0:########0.0} GB", ((Double)fileSize) / (1024 * 1024 * 1024));
-            else
-            {
-                if (fileSize >= 1048576) return string.Format("{0:####0.0} MB", ((Double)fileSize) / (1024 * 1024));
-                else return "0.1 MB";
-            }
-        }
-
-        #endregion
-
-        #region SC API
-
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate void EnumServicesCallBack(IntPtr dspName, IntPtr scName, uint scType, uint currentState, uint dwProcessId, bool syssc,
-            uint dwStartType, IntPtr lpBinaryPathName, IntPtr lpLoadOrderGroup);
-
-        private EnumServicesCallBack scMgrEnumServicesCallBack;
-        private IntPtr scMgrEnumServicesCallBackPtr = IntPtr.Zero;
-
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        private static extern bool MSCM_Init();
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        private static extern void MSCM_Exit();
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        private static extern bool MEnumServices(IntPtr callback);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        private static extern void MSCM_ShowMenu(IntPtr hDlg, [MarshalAs(UnmanagedType.LPWStr)] string serviceName, uint running, uint startType, [MarshalAs(UnmanagedType.LPWStr)] string path, int x, int y);
-
-
-        #endregion
-
-        #region SM API
-
-        private EnumStartupsCallBack enumStartupsCallBack;
-        private IntPtr enumStartupsCallBackPtr = IntPtr.Zero;
-
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate void EnumStartupsCallBack(IntPtr name, IntPtr type, IntPtr path, IntPtr rootregpath, IntPtr regpath, IntPtr regvalue);
-
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        private static extern bool MEnumStartups(IntPtr callback);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        private static extern void MStartupsMgr_ShowMenu(IntPtr rootkey, [MarshalAs(UnmanagedType.LPWStr)]string path, [MarshalAs(UnmanagedType.LPWStr)] string filepath, [MarshalAs(UnmanagedType.LPWStr)]string regvalue, uint id, int x, int y);
-
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        private static extern IntPtr MREG_ROOTKEYToStr(IntPtr krootkey);
-
-        #endregion
-
-        #region KRNL API
-
-        private EnumKernelModulsCallBack enumKernelModulsCallBack;
-        private IntPtr enumKernelModulsCallBackPtr = IntPtr.Zero;
-
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate void EnumKernelModulsCallBack(IntPtr kmi, IntPtr BaseDllName, IntPtr FullDllPath, IntPtr FullDllPathOrginal, IntPtr szEntryPoint, IntPtr SizeOfImage, IntPtr szDriverObject, IntPtr szBase, IntPtr szServiceName, uint Order);
-
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        private static extern bool M_SU_EnumKernelModuls(IntPtr callback, bool showall);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern void M_SU_EnumKernelModulsItemDestroy(IntPtr kmi);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern void M_SU_EnumKernelModuls_ShowMenu(IntPtr kmi, bool showall, int x, int y);
-
-        #endregion
-
-        #endregion
-
-        private string[] agrs = null;
 
         private bool processListInited = false;
         private bool driverListInited = false;
@@ -612,11 +52,15 @@ namespace PCMgr
         private bool perfMainInited = false;
         private bool perfMainInitFailed = false;
 
+        public static FormMain Instance { private set; get; }
+        public const string MICROSOFT = "Microsoft Corporation";
+
         #region ProcessListWork
 
         private const double PERF_LIMIT_MIN_DATA_DISK = 0.01;
         private const double PERF_LIMIT_MIN_DATA_NETWORK = PERF_LIMIT_MIN_DATA_DISK;
 
+        private bool refeshLowLock = false;
         private Size lastSimpleSize = new Size();
         private Size lastSize = new Size();
         private int nextSecType = -1;
@@ -627,11 +71,7 @@ namespace PCMgr
         private Timer baseProcessRefeshTimer = new Timer();
         private Timer baseProcessRefeshTimerLow = new Timer();
         private Timer baseProcessRefeshTimerLowSc = new Timer();
-        public static string currentProcessName = "";
         private TaskListViewColumnSorter lvwColumnSorter = null;
-
-        public PerformanceCounter performanceCounter_disk_total = null;
-        public PerformanceCounter performanceCounter_net_total = null;
 
         private class PsItem
         {
@@ -695,6 +135,7 @@ namespace PCMgr
                     baseProcessRefeshTimer.Start();
                     BaseProcessRefeshTimer_Tick(this, null);
                     baseProcessRefeshTimerLow.Start();
+                    listProcess.Locked = true;
                 }
                 else
                 {
@@ -703,6 +144,8 @@ namespace PCMgr
                     pl_simple.Hide();
                     tabControlMain.Show();
                     LoadRefeshRateSetting();
+                    listProcess.Locked = false;
+                    ProcessListForceRefeshAll();
                 }
             }
         }
@@ -721,6 +164,7 @@ namespace PCMgr
         private List<string> veryimporantProcess = new List<string>();
         private Color dataGridZeroColor = Color.FromArgb(255, 244, 196);
 
+        private TaskMgrListItem nextKillItem = null;
         private bool isRunAsAdmin = false;
         private bool firstLoad = true;
         private Font smallListFont = new Font("微软雅黑", 9f);
@@ -730,7 +174,7 @@ namespace PCMgr
         {
             if (i == 1)
             {
-                if (FormSpyWindow.IsWindowVisible(hWnd))
+                if (IsWindowVisible(hWnd))
                 {
                     uwpwinitem item = new uwpwinitem();
                     item.hWnd = hWnd;
@@ -746,9 +190,9 @@ namespace PCMgr
                     {
                         if (!thisLoadItem.HasWindowChild(hWnd))
                         {
-                            if (FormSpyWindow.IsWindowVisible(hWnd))
+                            if (IsWindowVisible(hWnd))
                             {
-                                IntPtr icon = FormSpyWindow.MGetWindowIcon(hWnd);
+                                IntPtr icon = MGetWindowIcon(hWnd);
                                 TaskMgrListItemChild c = new TaskMgrListItemChild(Marshal.PtrToStringAuto(data), icon != IntPtr.Zero ? Icon.FromHandle(icon) : PCMgr.Properties.Resources.icoShowedWindow);
                                 c.Tag = hWnd;
                                 c.Type = TaskMgrListItemType.ItemWindow;
@@ -950,28 +394,24 @@ namespace PCMgr
         private void ProcessListInitLater()
         {
             if (!perfMainInited && !perfMainInitFailed)
-                new System.Threading.Thread(ProcessListInitPerfs).Start();//放到新线程里防止卡顿
+                ProcessListInitPerfs();
         }
         private void ProcessListInitPerfs()
         {
             if (!perfMainInitFailed)
             {
                 //初始化整体性能计数器
-                try
-                {
-                    performanceCounter_disk_total = new PerformanceCounter("PhysicalDisk", "% Disk Time", "_Total", true);
-                    performanceCounter_net_total = new PerformanceCounter("Network Interface", "Bytes Total/sec", "", true);
-                    string[] instanceNames = new PerformanceCounterCategory(performanceCounter_net_total.CategoryName).GetInstanceNames();
-                    performanceCounter_net_total.InstanceName = instanceNames[0];
-                    perfMainInited = true;
-
-                    Invoke(new Action(ProcessListForceRefeshAll));
-                }
-                catch (Exception e)
-                {
-                    perfMainInitFailed = true;
-                    LogErr(e.ToString());
-                }
+                MPERF_Init3PerformanceCounters();
+                ProcessListForceRefeshAll();
+                perfMainInited = true; 
+            }
+        }
+        private void ProcessListUnInitPerfs()
+        {
+            if (perfMainInited)
+            {
+                //释放计数器
+                MPERF_Destroy3PerformanceCounters();
             }
         }
         private void ProcessListInit()
@@ -1069,8 +509,9 @@ namespace PCMgr
         {
             //加载结束
             if (firstLoad) ProcessListLoadFinished();
+
             ProcessListClear();
-            ProcessListRefeshEndGroupWork();
+            ProcessListRefeshPidTree();
             lbProcessCount.Text = str_proc_count + " : " + listProcess.Items.Count;
             if (isFirstLoad)
             {
@@ -1088,6 +529,9 @@ namespace PCMgr
                 }
                 isFirstLoad = false;
             }
+            refeshLowLock = true;
+            ProcessListForceRefeshAll();
+            refeshLowLock = false;
             listProcess.Locked = false;
             listProcess.SyncItems(true);
         }
@@ -1113,7 +557,7 @@ namespace PCMgr
                 || lvwColumnSorter.SortColumn == netindex
                 || lvwColumnSorter.SortColumn == stateindex;
             ProcessListUpdateValues(refeshAColumData ? lvwColumnSorter.SortColumn : -1);
-            ProcessListRefeshEndGroupWork();
+            ProcessListRefeshPidTree();
 
             if (!isSimpleView)
             {
@@ -1130,19 +574,26 @@ namespace PCMgr
                 listProcess.Locked = false;
                 ProcessListSimpleRefesh();
             }
-        }
-        private void ProcessListRefeshEndGroupWork()
-        {
-            /*foreach (PsItem p in loadedPs)
-            { 
-                if(p.isWindowShow)
-                {
-                    if (p.hostitem == null)
-                    {
 
-                    }
+            ProcessListKillLastEndItem();
+        }
+        private void ProcessListRefeshPidTree()
+        {
+            //Refesh Pid tree
+            foreach (PsItem p in loadedPs)
+                p.childs.Clear();
+            foreach (PsItem p in loadedPs)
+            {
+                PsItem parent = ProcessListFindPsItem(p.ppid);
+                if (parent != null)
+                    parent.childs.Add(p);
+                else if (p.parent != null)
+                {
+                    if (p.parent.childs.Contains(p))
+                        p.parent.childs.Remove(p);
                 }
-            }*/
+                p.parent = p;
+            }
         }
         private void ProcessListForceRefeshAll()
         {
@@ -1454,16 +905,23 @@ namespace PCMgr
                 //Group uppdate
                 ProcessListUpdate_GroupChilds(isload, it, ipdateOneDataCloum);
 
-                bool running = false;
                 if (it.Type == TaskMgrListItemType.ItemUWPHost)
                 {
+                    bool running = false;
+                    bool ispause = false;
                     if (stateindex != -1 && ipdateOneDataCloum != stateindex && it.Childs.Count > 0)
+                    {
                         foreach (TaskMgrListItem ix in it.Childs)
                             if (ix.Type == TaskMgrListItemType.ItemProcess)
                             {
-                                it.SubItems[stateindex].Text = ix.SubItems[stateindex].Text;
-                                break;
+                                if (ix.SubItems[stateindex].Text == str_status_paused)
+                                {
+                                    ispause = true;
+                                    break;
+                                }
                             }
+                        it.SubItems[stateindex].Text = ispause ? str_status_paused : "";
+                    }
                     running = ProcessListGetUwpIsRunning(it.Text);
                     if (running && stateindex != -1)
                     {
@@ -1472,6 +930,7 @@ namespace PCMgr
                                 running = false;
                     }
                     it.Group = running ? listProcess.Groups[0] : listProcess.Groups[1];
+
                 }
                 else if (it.Type == TaskMgrListItemType.ItemProcessHost)
                 {
@@ -1572,7 +1031,7 @@ namespace PCMgr
                         if (it.Childs[i].Type == TaskMgrListItemType.ItemWindow)
                         {
                             IntPtr h = (IntPtr)it.Childs[i].Tag;
-                            if (!FormSpyWindow.IsWindow(h) || !FormSpyWindow.IsWindowVisible(h))
+                            if (!IsWindow(h) || !IsWindowVisible(h))
                                 it.Childs.Remove(it.Childs[i]);
                         }
                     }
@@ -1583,11 +1042,18 @@ namespace PCMgr
                         MAppVProcessAllWindowsGetProcessWindow(pid);
                         thisLoadItem = null;
 
+                        int windowCount = 0;
+                        for (int i = it.Childs.Count - 1; i >= 0; i--)
+                        {
+                            if (it.Childs[i].Type == TaskMgrListItemType.ItemWindow)
+                                windowCount++;
+                        }
                         //group
-                        if (it.Childs.Count > 0)
+                        if (windowCount > 0)
                         {
                             it.Group = listProcess.Groups[0];
                             p.isWindowShow = true;
+                            ProcessListUpdate_ChildItems(pid, it, p);
                         }
                         else if (p.isWindowsProcess)
                         {
@@ -1598,7 +1064,6 @@ namespace PCMgr
                         {
                             it.Group = listProcess.Groups[1];
                             p.isWindowShow = false;
-                            ProcessListUpdate_ParentProcess(pid, it, p);
                         }
                     }
                 }
@@ -1625,21 +1090,30 @@ namespace PCMgr
                 TaskMgrListItem ii = it as TaskMgrListItem;
                 if (stateindex != -1 && ipdateOneDataCloum == stateindex)
                 {
-                    bool running = ProcessListGetUwpIsRunning(it.Text);
-                    if (running && stateindex != -1)
-                        foreach (TaskMgrListItem ix in it.Childs)
-                            if (ix.Type == TaskMgrListItemType.ItemProcess && it.SubItems[stateindex].Text == str_status_paused)
-                                running = false;
-                    it.Group = running ? listProcess.Groups[0] : listProcess.Groups[1];
-
+                    if (it.Type == TaskMgrListItemType.ItemUWPHost)
+                    {
+                        bool running = ProcessListGetUwpIsRunning(it.Text);
+                        if (running && stateindex != -1)
+                            foreach (TaskMgrListItem ix in it.Childs)
+                                if (ix.Type == TaskMgrListItemType.ItemProcess && it.SubItems[stateindex].Text == str_status_paused)
+                                    running = false;
+                        it.Group = running ? listProcess.Groups[0] : listProcess.Groups[1];
+                    }
                     if (stateindex != -1 && ipdateOneDataCloum == stateindex && it.Childs.Count > 0)
                     {
-                        if (it.Childs.Count > 0)
-                        {
-                            PsItem p = ((PsItem)it.Childs[0].Tag);
-                            ProcessListUpdate_State(p.pid, it.Childs[0], p);
-                            it.SubItems[stateindex].Text = it.Childs[0].SubItems[stateindex].Text;
-                        }
+                        bool ispause = false;
+                        foreach (TaskMgrListItem ix in it.Childs)
+                            if (ix.Type == TaskMgrListItemType.ItemProcess)
+                            {
+                                PsItem p = ((PsItem)ix.Tag);
+                                ProcessListUpdate_State(ix.PID, ix, p);
+                                if (ix.SubItems[stateindex].Text == str_status_paused)
+                                {
+                                    ispause = true;
+                                    break;
+                                }
+                            }
+                        it.SubItems[stateindex].Text = ispause ? str_status_paused : "";
                     }
                 }
                 if (ipdateOneDataCloum > -1)
@@ -1647,6 +1121,9 @@ namespace PCMgr
                     double d = 0; int datacount = 0;
                     if (it.Type == TaskMgrListItemType.ItemProcessHost)
                     {
+                        it.Type = TaskMgrListItemType.ItemProcess;
+                        ProcessListUpdateOnePerfCloum(it.PID, it, ipdateOneDataCloum);
+                        it.Type = TaskMgrListItemType.ItemProcessHost;
                         d += it.SubItems[ipdateOneDataCloum].CustomData;
                         datacount++;
                     }
@@ -1715,39 +1192,71 @@ namespace PCMgr
             }
         }
 
+        private int ProcessListUpdate_ChildItemsAdd(TaskMgrListItem it, PsItem p)
+        {
+            int allCount = 0;
+            //递归添加所有子进程
+            foreach (PsItem child in p.childs)
+            {
+                if (!child.isWindowShow)
+                {
+                    allCount++;
+                    if (!it.Childs.Contains(child.item))
+                        it.Childs.Add(child.item);
+                    if (listProcess.Items.Contains(child.item))
+                        listProcess.Items.Remove(child.item);
+                    if (child.childs.Count > 0)
+                        allCount += ProcessListUpdate_ChildItemsAdd(it, child);
+                }
+                else if(it.Childs.Contains(child.item))
+                {
+                    it.Childs.Remove(child.item);
+                    if (!listProcess.Items.Contains(child.item))
+                        listProcess.Items.Add(child.item);
+                }
+            }
+            return allCount;
+        }
+        private void ProcessListUpdate_ChildItems(uint pid, TaskMgrListItem it, PsItem p)
+        {
+            if (p.isWindowShow && p.childs.Count > 0 && !IsExplorer(p))
+            {
+                if (it.Type != TaskMgrListItemType.ItemProcessHost)
+                    it.Type = TaskMgrListItemType.ItemProcessHost;
+                it.DisplayChildCount = true;
+                it.DisplayChildValue = ProcessListUpdate_ChildItemsAdd(it, p);
+            }
+            else
+            {
+                if (it.Type != TaskMgrListItemType.ItemProcess)
+                    it.Type = TaskMgrListItemType.ItemProcess;
+                it.DisplayChildCount = false;
+                if (it.Childs.Count > 0)
+                {
+                    for (int i = it.Childs.Count - 1; i >= 0; i--)
+                    {
+                        TaskMgrListItem childit = it.Childs[i];
+                        if (childit.Type == TaskMgrListItemType.ItemProcess)
+                        {
+                            it.Childs.Remove(childit);
+                            if (!listProcess.Items.Contains(childit))
+                                listProcess.Items.Add(childit);
+                        }
+                    }
+                }
+            }
+        }
         private void ProcessListUpdate_GroupChilds(bool isload, TaskMgrListItem ii, int ipdateOneDataCloum = -1)
         {
             if (ii.Type == TaskMgrListItemType.ItemProcessHost)
+            {
+                ii.Type = TaskMgrListItemType.ItemProcess;
                 ProcessListUpdate(ii.PID, isload, ii, ((PsItem)ii.Tag).SYSTEM_PROCESSES, ipdateOneDataCloum, true);
+                ii.Type = TaskMgrListItemType.ItemProcessHost;
+            }
             foreach (TaskMgrListItem ix in ii.Childs)
                 if (ix.Type == TaskMgrListItemType.ItemProcess)
                     ProcessListUpdate(ix.PID, isload, ix, ((PsItem)ix.Tag).SYSTEM_PROCESSES, ipdateOneDataCloum);
-        }
-        private void ProcessListUpdate_ParentProcess(uint pid, TaskMgrListItem it, PsItem p)
-        {
-            if (mergeApps && it.Parent == null)
-            {
-                PsItem parentItem = ProcessListFindPsItem(p.ppid);
-                if (parentItem == null || parentItem.isSvchost) return;
-                if (IsExplorer(parentItem)) return;
-
-                TaskMgrListItem parentItemT = parentItem.item;
-                if (parentItemT != null
-                    && (parentItemT.Type == TaskMgrListItemType.ItemProcess
-                    || parentItemT.Type == TaskMgrListItemType.ItemProcessHost)
-                    && (parentItemT.Childs.Count > 0 || parentItemT.IsChildItem))
-                {
-
-                    if (parentItemT.IsChildItem) parentItemT = parentItemT.Parent;
-
-                    if (parentItemT.Type != TaskMgrListItemType.ItemProcessHost)
-                        parentItemT.Type = TaskMgrListItemType.ItemProcessHost;
-                    parentItemT.Childs.Add(it);
-                    listProcess.Items.Remove(it);
-
-                    parentItemT.DisplayChildCount = parentItemT.Childs.Count > 1;
-                }
-            }
         }
         private void ProcessListUpdate_State(uint pid, TaskMgrListItem it, PsItem p)
         {
@@ -1782,6 +1291,7 @@ namespace PCMgr
         {
             if (pid != 0 && p.SYSTEM_PROCESSES != IntPtr.Zero)
             {
+
                 double ii = MPERF_GetProcessCpuUseAge(p.SYSTEM_PROCESSES, p.perfData);
                 it.SubItems[cpuindex].Text = ii.ToString("0.0") + "%";
                 it.SubItems[cpuindex].BackColor = ProcessListGetColorFormValue(ii, 100);
@@ -1798,7 +1308,7 @@ namespace PCMgr
         {
             if (p.SYSTEM_PROCESSES != IntPtr.Zero)
             {
-                uint ii = MPERF_GetProcessRam(p.SYSTEM_PROCESSES);
+                uint ii = MPERF_GetProcessRam(p.SYSTEM_PROCESSES, p.handle);
                 it.SubItems[ramindex].Text = FormatFileSizeMen(Convert.ToInt64(ii));
                 it.SubItems[ramindex].BackColor = ProcessListGetColorFormValue(ii / 1048576, 1024);
                 it.SubItems[ramindex].CustomData = ii / 1024d;
@@ -1895,6 +1405,8 @@ namespace PCMgr
 
             MPERF_PerfDataDestroy(it.perfData);
             it.svcs.Clear();
+            it.childs.Clear();
+            it.parent = null; 
             loadedPs.Remove(it);
             if (it.parent != null)
                 it.parent.childs.Remove(it);
@@ -1917,6 +1429,11 @@ namespace PCMgr
                 {
                     if (li.Parent != null)//is a child item
                     {
+                        if(it.parent!=null)
+                        {
+                            if (it.parent.childs.Contains(it))
+                                it.parent.childs.Remove(it);
+                        }
                         TaskMgrListItem iii = li.Parent;
                         iii.Childs.Remove(li);
                         if (iii.Type == TaskMgrListItemType.ItemUWPHost)
@@ -1954,8 +1471,6 @@ namespace PCMgr
             //the exit clear
             uwps.Clear();
             uwpHostPid.Clear();
-            if (performanceCounter_disk_total != null) performanceCounter_disk_total.Close();
-            if (performanceCounter_net_total != null) performanceCounter_net_total.Close();
             for (int i = 0; i < loadedPs.Count; i++)
                 ProcessListFree(loadedPs[i]);
             loadedPs.Clear();
@@ -2001,6 +1516,7 @@ namespace PCMgr
                 }
                 for (int i = 0; i < listProcess.ShowedItems.Count; i++)
                 {
+                    if (listProcess.ShowedItems[i].Parent != null) continue;
                     //只刷新显示的条目
                     if (listProcess.ShowedItems[i].Type == TaskMgrListItemType.ItemUWPHost)
                         ProcessListUpdate(listProcess.ShowedItems[i].PID, false, listProcess.ShowedItems[i], IntPtr.Zero, refeshAllDataColum);
@@ -2024,13 +1540,37 @@ namespace PCMgr
             {
                 if (taskMgrListItem.Type == TaskMgrListItemType.ItemProcessHost)
                 {
-                    foreach(TaskMgrListItem lichild in taskMgrListItem.Childs)
+                    bool ananyrs = false;
+                    PsItem p = taskMgrListItem.Tag as PsItem;
+                    if (p.isWindowShow && !p.isSvchost)
                     {
-                        if (lichild.Type == TaskMgrListItemType.ItemProcess)
-                            MKillProcessUser2(lichild.PID, true);
+                        if (taskMgrListItem.Childs.Count > 0)
+                        {
+                            IntPtr target = IntPtr.Zero;
+                            for (int i = taskMgrListItem.Childs.Count - 1; i >= 0; i--)
+                                if (taskMgrListItem.Childs[i].Type == TaskMgrListItemType.ItemWindow)
+                                {
+                                    target = (IntPtr)taskMgrListItem.Childs[i].Tag;
+                                    if (target != IntPtr.Zero)
+                                        if (MAppWorkCall3(192, IntPtr.Zero, target) == 1)
+                                            ananyrs = true;
+                                }
+                        }
+                        else ananyrs = true;
                     }
 
-                    MKillProcessUser2(taskMgrListItem.PID, true);
+                    if (!ananyrs)
+                        nextKillItem = taskMgrListItem;
+                    else
+                    {
+                        foreach (TaskMgrListItem lichild in taskMgrListItem.Childs)
+                        {
+                            if (lichild.Type == TaskMgrListItemType.ItemProcess)
+                                if (!MKillProcessUser2(lichild.PID, false))
+                                    break;
+                        }
+                        MKillProcessUser2(taskMgrListItem.PID, true);
+                    }
                 }
                 else if (taskMgrListItem.Type == TaskMgrListItemType.ItemUWPHost)
                 {
@@ -2049,18 +1589,18 @@ namespace PCMgr
                         if (taskMgrListItem.Childs.Count > 0)
                         {
                             IntPtr target = IntPtr.Zero;
-                            foreach (TaskMgrListItemChild c in taskMgrListItem.Childs)
-                                if (c.Tag != null)
-                                {
-                                    target = (IntPtr)c.Tag;
+                            for (int i = taskMgrListItem.Childs.Count - 1; i >= 0; i--)
+                                if (taskMgrListItem.Childs[i].Tag != null)
+                                { 
+                                    target = (IntPtr)taskMgrListItem.Childs[i].Tag;
                                     if (target != IntPtr.Zero)
-                                        if(MAppWorkCall3(192, IntPtr.Zero, target) == 1)
+                                        if (MAppWorkCall3(192, IntPtr.Zero, target) == 1)
                                             ananyrs = true;
                                 }
                         }
                         else ananyrs = true;
                     }
-                    if(ananyrs) MKillProcessUser2(taskMgrListItem.PID, true);
+                    if (ananyrs) MKillProcessUser2(taskMgrListItem.PID, true);
                 }
             }
         }
@@ -2084,6 +1624,23 @@ namespace PCMgr
                         if (target != IntPtr.Zero) MAppWorkCall3(213, target, target) ;
                     }
                 }
+            }
+        }
+        private void ProcessListKillLastEndItem()
+        {
+            if (nextKillItem != null)
+            {
+                if (listProcess.Items.Contains(nextKillItem))
+                {
+                    foreach (TaskMgrListItem lichild in nextKillItem.Childs)
+                    {
+                        if (lichild.Type == TaskMgrListItemType.ItemProcess)
+                            if (!MKillProcessUser2(lichild.PID, false))
+                                break;
+                    }
+                    MKillProcessUser2(nextKillItem.PID, true);
+                }
+                nextKillItem = null;
             }
         }
 
@@ -2111,11 +1668,17 @@ namespace PCMgr
             foreach (TaskMgrListItem li in listProcess.Items)
             {
                 if (li.Group == listProcess.Groups[0])
+                {
+                    if (li.Type == TaskMgrListItemType.ItemProcess)
+                        if (IsExplorer((PsItem)li.Tag))
+                            continue;
                     if (li.PID != currentProcessPid)
                         listApps.Items.Add(li);
+                }
             }
             listApps.Locked = false;
             listApps.SyncItems(true);
+            listApps_SelectItemChanged(null, null);
         }
 
         private void check_showAllProcess_CheckedChanged(object sender, EventArgs e)
@@ -2177,8 +1740,10 @@ namespace PCMgr
         }
         private void BaseProcessRefeshTimerLow_Tick(object sender, EventArgs e)
         {
+            refeshLowLock = true;
             if (tabControlMain.SelectedTab == tabPageProcCtl)
                 ProcessListForceRefeshAll();
+            refeshLowLock = false;
         }
 
         #region ListEvents
@@ -3105,7 +2670,7 @@ namespace PCMgr
 
         #region ScMgrWork
 
-        public class ListViewItemComparer : IComparer
+        private class ListViewItemComparer : IComparer
         {
             private int col;
             private bool asdening = false;
@@ -3532,9 +3097,16 @@ namespace PCMgr
 
         private class PerfItemHeader
         {
+            public IntPtr performanceCounterNative = IntPtr.Zero;
             public PerformanceListItem item = null;
-            public PerformanceCounter performanceCounter = null;
-            public float x = 1;
+            public IPerformancePage performancePage = null;
+
+            public override string ToString()
+            {
+                if (item != null)
+                    return item.ToString();
+                return base.ToString();
+            }
         }
 
         private List<PerfItemHeader> perfItems = new List<PerfItemHeader>();
@@ -3589,6 +3161,8 @@ namespace PCMgr
         {
             if (!perfInited)
             {
+                MDEVICE_Init();
+
                 perf_cpu.Name = "CPU";
                 perf_cpu.SmallText = "0 %";
                 perf_cpu.BasePen = new Pen(CpuDrawColor, 2);
@@ -3603,50 +3177,51 @@ namespace PCMgr
 
                 PerfPagesInit();
 
-                string[] disk_instanceNames = new PerformanceCounterCategory("PhysicalDisk").GetInstanceNames();
-                foreach (string s in disk_instanceNames)
-                {
-                    if (s != "_Total")
-                    {
-                        PerfItemHeader perfItemHeader = new PerfItemHeader();
-                        perfItemHeader.performanceCounter = new PerformanceCounter("PhysicalDisk", "Avg. Disk Queue Length", "", true);
-                        perfItemHeader.performanceCounter.InstanceName = s;
-                        perfItemHeader.item = new PerformanceListItem();
-                        perfItemHeader.item.Name = LanuageMgr.GetStr("TitleDisk") + s;
-                        perfItemHeader.item.BasePen = new Pen(DiskDrawColor);
-                        perfItemHeader.item.BgBrush = new SolidBrush(DiskBgColor);
-                        perfItems.Add(perfItemHeader);
-
-                        PerformancePageDisk performancedisk = new PerformancePageDisk(s);
-                        PerfPagesAddToCtl(performancedisk);
-                        perfPages.Add(performancedisk);
-
-                        perfItemHeader.item.PageIndex = perfPages.Count - 1;
-
-
-                        performanceLeftList.Items.Add(perfItemHeader.item);
-                    }
-                }
-
-                string[] network_instanceNames = new PerformanceCounterCategory("Network Interface").GetInstanceNames();
-                foreach (string s in network_instanceNames)
+                MDEVICE_GetLogicalDiskInfo();
+                uint count = MPERF_InitDisksPerformanceCounters();
+                for (int i = 0; i < count; i++)
                 {
                     PerfItemHeader perfItemHeader = new PerfItemHeader();
-                    perfItemHeader.performanceCounter = new PerformanceCounter("Network Interface", "Bytes Total/sec", "", true);
-                    perfItemHeader.performanceCounter.InstanceName = s;
+                    perfItemHeader.performanceCounterNative = MPERF_GetDisksPerformanceCounters(i);
+                    perfItemHeader.item = new PerformanceListItem();
+
+                    StringBuilder sb = new StringBuilder(32);
+                    MPERF_GetDisksPerformanceCountersInstanceName(perfItemHeader.performanceCounterNative, sb, 32);
+                    uint diskIndex = (uint)(count - i -1);// MDEVICE_GetPhysicalDriveFromPartitionLetter(sb.ToString()[2]);
+
+                    perfItemHeader.item.Name = LanuageMgr.GetStr("TitleDisk") + sb.ToString();
+                    perfItemHeader.item.BasePen = new Pen(DiskDrawColor);
+                    perfItemHeader.item.BgBrush = new SolidBrush(DiskBgColor);
+                    perfItems.Add(perfItemHeader);
+
+                    PerformancePageDisk performancedisk = new PerformancePageDisk(perfItemHeader.performanceCounterNative, diskIndex);
+                    PerfPagesAddToCtl(performancedisk);
+                    perfPages.Add(performancedisk);
+
+                    perfItemHeader.performancePage = performancedisk;
+
+                    perfItemHeader.item.PageIndex = perfPages.Count - 1;
+                    performanceLeftList.Items.Add(perfItemHeader.item);
+                }
+
+                count = MPERF_InitNetworksPerformanceCounters();
+                for (int i = 0; i < count; i++)
+                {
+                    PerfItemHeader perfItemHeader = new PerfItemHeader();
+                    perfItemHeader.performanceCounterNative = MPERF_GetNetworksPerformanceCounters(i);
                     perfItemHeader.item = new PerformanceListItem();
                     perfItemHeader.item.Name = LanuageMgr.GetStr("TitleNet");
                     perfItemHeader.item.BasePen = new Pen(NetDrawColor);
                     perfItemHeader.item.BgBrush = new SolidBrush(NetBgColor);
-                    perfItemHeader.x = 0.0001f;
                     perfItems.Add(perfItemHeader);
 
-                    PerformancePageNet performancedisk = new PerformancePageNet(s);
-                    PerfPagesAddToCtl(performancedisk);
-                    perfPages.Add(performancedisk);
+                    PerformancePageNet performancenet = new PerformancePageNet(perfItemHeader.performanceCounterNative);
+                    PerfPagesAddToCtl(performancenet);
+                    perfPages.Add(performancenet);
+
+                    perfItemHeader.performancePage = performancenet;
 
                     perfItemHeader.item.PageIndex = perfPages.Count - 1;
-
                     performanceLeftList.Items.Add(perfItemHeader.item);
                 }
 
@@ -3655,6 +3230,8 @@ namespace PCMgr
 
                 PerfPagesTo(0);
 
+
+
                 perfInited = true;
             }
         }
@@ -3662,7 +3239,8 @@ namespace PCMgr
         {
             foreach (PerfItemHeader h in perfItems)
             {
-                float data = (h.performanceCounter.NextValue() * h.x);
+                double data = h.performancePage.PageUpdateSimple();
+                h.performancePage.PageFroceSetData((int)data);
                 h.item.SmallText = data.ToString("0.0") + "%";
                 h.item.AddData((int)data);
             }
@@ -3675,12 +3253,21 @@ namespace PCMgr
             foreach (IPerformancePage h in perfPages)
                 h.PageDelete();
             perfPages.Clear();
-            foreach (PerfItemHeader h in perfItems)
-            {
-                h.performanceCounter.Close();
-                h.item = null;
-            }
+
+            MPERF_DestroyDisksPerformanceCounters();
             perfItems.Clear();
+
+            MDEVICE_DestroyLogicalDiskInfo();
+            MDEVICE_UnInit();
+        }
+        private void PerfUpdateGridUnit()
+        {
+            string unistr = "";
+            if (baseProcessRefeshTimer.Interval != 0)
+                unistr = (baseProcessRefeshTimer.Interval / 1000 * 60).ToString() + str_sec;
+            else unistr = str_status_paused;
+            foreach (IPerformancePage p in perfPages)
+                p.PageSetGridUnit(unistr);
         }
 
         private void linkLabelOpenPerfMon_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -3692,16 +3279,16 @@ namespace PCMgr
 
         #region LanuageWork
 
-        private static string str_idle_process = "";
-        private static string str_service_host = "";
+        public static string str_idle_process = "";
+        public static string str_service_host = "";
         public static string str_status_paused = "";
-        private static string str_status_hung = "";
-        private static string str_status_running = "";
-        private static string str_status_stopped = "";
+        public static string str_status_hung = "";
+        public static string str_status_running = "";
+        public static string str_status_stopped = "";
 
         public static string str_proc_count = "";
-        private static string str_proc_32 = "";
-        private static string str_get_failed = "";
+        public static string str_proc_32 = "";
+        public static string str_get_failed = "";
         public static string str_sec = "";
         public static string str_loading = "";
         public static string str_frocedelsuccess = "";
@@ -3711,39 +3298,39 @@ namespace PCMgr
         public static string str_filenotexist = "";
         public static string str_failed = "";
 
-        private static string str_endproc = "";
-        private static string str_endtask = "";
-        private static string str_resrat = "";
+        public static string str_endproc = "";
+        public static string str_endtask = "";
+        public static string str_resrat = "";
 
-        private static string str_VisitFolderFailed = "";
+        public static string str_VisitFolderFailed = "";
         public static string str_TipTitle = "";
         public static string str_ErrTitle = "";
         public static string str_AskTitle = "";
         public static string str_PathUnExists = "";
-        private static string str_PleaseEnterPath = "";
-        private static string str_Ready = "";
-        private static string str_ReadyStatus = "";
-        private static string str_ReadyStatusEnd = "";
-        private static string str_ReadyStatusEnd2 = "";
-        private static string str_FileCuted = "";
-        private static string str_FileCopyed = "";
-        private static string str_NewFolderFailed = "";
-        private static string str_NewFolderSuccess = "";
-        private static string str_PathCopyed = "";
-        private static string str_FolderCuted = "";
-        private static string str_FolderCopyed = "";
-        private static string str_FolderHasExist = "";
-        private static string str_OpenAsk = "";
-        private static string str_PathStart = "";
-        private static string str_DriverLoad = "";
-        private static string str_AutoStart = "";
-        private static string str_DemandStart = "";
-        private static string str_Disabled = "";
-        private static string str_FileSystem = "";
-        private static string str_KernelDriver = "";
-        private static string str_UserService = "";
-        private static string str_SystemService = "";
-        private static string str_InvalidFileName = "";
+        public static string str_PleaseEnterPath = "";
+        public static string str_Ready = "";
+        public static string str_ReadyStatus = "";
+        public static string str_ReadyStatusEnd = "";
+        public static string str_ReadyStatusEnd2 = "";
+        public static string str_FileCuted = "";
+        public static string str_FileCopyed = "";
+        public static string str_NewFolderFailed = "";
+        public static string str_NewFolderSuccess = "";
+        public static string str_PathCopyed = "";
+        public static string str_FolderCuted = "";
+        public static string str_FolderCopyed = "";
+        public static string str_FolderHasExist = "";
+        public static string str_OpenAsk = "";
+        public static string str_PathStart = "";
+        public static string str_DriverLoad = "";
+        public static string str_AutoStart = "";
+        public static string str_DemandStart = "";
+        public static string str_Disabled = "";
+        public static string str_FileSystem = "";
+        public static string str_KernelDriver = "";
+        public static string str_UserService = "";
+        public static string str_SystemService = "";
+        public static string str_InvalidFileName = "";
         public static string str_RefeshSuccess = "";
         public static string str_InvalidHwnd = "";
         public static string str_ChangeWindowTextAsk = "";
@@ -3757,12 +3344,12 @@ namespace PCMgr
         public static string str_DriverUnLoadSuccessFull = "";
         public static string str_DriverUnLoadFailed = "";
         public static string str_PleaseEnterDriverServiceName = "";
-        private static string str_DriverCount = "";
+        public static string str_DriverCount = "";
         public static string str_FileNotExist = "";
-        private static string str_DriverCountLoaded = "";
+        public static string str_DriverCountLoaded = "";
         public static string str_AppTitle = "";
         public static string str_FileTrust = "";
-        private static string str_FileTrustViewCrt = "";
+        public static string str_FileTrustViewCrt = "";
         public static string str_FunCreateing = "";
         public static string str_PleaseEnterTargetAddress = "";
         public static string str_PleaseEnterDaSize = "";
@@ -3784,6 +3371,8 @@ namespace PCMgr
         public static string str_DblCklShow_PEB = "";
         public static string str_DblCklShow_RTL_USER_PROCESS_PARAMETERS = "";
         public static string str_CantFind = "";
+        public static string str_No = "";
+        public static string str_Yes = "";
 
         /*
         
@@ -3820,12 +3409,16 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
             InitLanuageItems();
             if (lanuage != "" && lanuage != "zh" && lanuage != "zh-CN") System.Threading.Thread.CurrentThread.CurrentUICulture = new System.Globalization.CultureInfo(lanuage);
 
-            MLG_SetLanuageRes(Application.StartupPath, lanuage);
+            MLG_SetLanuageRes(null, lanuage);
         }
-        public static void InitLanuageItems()
+        private static void InitLanuageItems()
         {
             try
             {
+                MLG_SetLanuageItems_CanRealloc();
+
+                str_No = LanuageMgr.GetStr("No");
+                str_Yes = LanuageMgr.GetStr("Yes");
                 str_DblClickToDa = LanuageMgr.GetStr("DblClickToDa");
                 str_FunCreateing = LanuageMgr.GetStr("FunCreateing");
                 str_FileTrustViewCrt = LanuageMgr.GetStr("FileTrustViewCrt");
@@ -4263,7 +3856,7 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
 
         #region KernelMWork
 
-        public class ListViewItemComparerKr : IComparer
+        private class ListViewItemComparerKr : IComparer
         {
             private int col;
             private bool asdening = false;
@@ -4635,6 +4228,34 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
 
         #endregion
 
+        #region Callbacks
+
+        private static LanuageItems_CallBack lanuageItems_CallBack;
+
+        private EnumProcessCallBack enumProcessCallBack;
+        private EnumProcessCallBack2 enumProcessCallBack2;
+        private EnumWinsCallBack enumWinsCallBack;
+        private GetWinsCallBack getWinsCallBack;
+
+        private IntPtr enumProcessCallBack_ptr;
+        private IntPtr enumProcessCallBack2_ptr;
+        private WNDPROC coreWndProc = null;
+        private EXITCALLBACK exitCallBack;
+        private WORKERCALLBACK workerCallBack;
+        private TerminateImporantWarnCallBack terminateImporantWarnCallBack;
+        private MFCALLBACK fileMgrCallBack;
+
+        private EnumServicesCallBack scMgrEnumServicesCallBack;
+        private IntPtr scMgrEnumServicesCallBackPtr = IntPtr.Zero;
+
+        private EnumStartupsCallBack enumStartupsCallBack;
+        private IntPtr enumStartupsCallBackPtr = IntPtr.Zero;
+
+        private EnumKernelModulsCallBack enumKernelModulsCallBack;
+        private IntPtr enumKernelModulsCallBackPtr = IntPtr.Zero;
+
+        #endregion
+
         private void BaseProcessRefeshTimer_Tick(object sender, EventArgs e)
         {
             //整体刷新定时器
@@ -4647,6 +4268,8 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                 {
                     //Refesh perfs
                     listProcess.Locked = true;
+                    if (cpuindex != -1 || ramindex != -1 || diskindex != -1 || netindex != -1)
+                        MPERF_GlobalUpdatePerformanceCounters();
                     if (cpuindex != -1)
                     {
                         int cpu = (int)(MPERF_GetCupUseAge());
@@ -4657,7 +4280,7 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                     }
                     if (ramindex != -1)
                     {
-                        int ram = (int)(MGetRamUseAge() * 100);
+                        int ram = (int)(MPERF_GetRamUseAge2() * 100);
                         listProcess.Colunms[ramindex].TextBig = ram + "%";
                         if (ram >= 95)
                             listProcess.Colunms[ramindex].IsHot = true;
@@ -4665,11 +4288,19 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                     }
                     if (diskindex != -1)
                     {
-                        listProcess.Colunms[diskindex].TextBig = ((int)(performanceCounter_disk_total.NextValue() / 10)) + "%";
+                        int disk = (int)(MPERF_GetDiskUseage() * 100);
+                        listProcess.Colunms[diskindex].TextBig = disk + "%";
+                        if (disk >= 95)
+                            listProcess.Colunms[diskindex].IsHot = true;
+                        else listProcess.Colunms[diskindex].IsHot = false;
                     }
                     if (netindex != -1)
                     {
-                        listProcess.Colunms[netindex].TextBig = ((int)(performanceCounter_net_total.NextValue() * 0.00001)) + "%";
+                        int net = (int)(MPERF_GetNetWorkUseage() * 100);
+                        listProcess.Colunms[netindex].TextBig = net + "%";
+                        if (net >= 95)
+                            listProcess.Colunms[netindex].IsHot = true;
+                        else listProcess.Colunms[netindex].IsHot = false;
                     }
                 }
                 //Refesh Process List
@@ -4679,13 +4310,15 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
             }
             else if (tabControlMain.SelectedTab == tabPagePerfCtl)
             {
+                MPERF_GlobalUpdatePerformanceCounters();
+
                 int cpu = (int)(MPERF_GetCupUseAge());
                 perf_cpu.SmallText = cpu + " %";
                 perf_cpu.AddData(cpu);
 
                 perfPages[0].PageFroceSetData(cpu);
 
-                int ram = (int)(MGetRamUseAge() * 100);
+                int ram = (int)(MPERF_GetRamUseAge2() * 100);
                 perf_ram.SmallText = ram + " %";
                 perf_ram.AddData(ram);
 
@@ -4709,10 +4342,12 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                         int c = wParam.ToInt32();
                         if (c == 0)
                         {
+                            baseProcessRefeshTimer.Interval = 0;
                             baseProcessRefeshTimer.Stop();
                             SetConfig("RefeshTime", "AppSetting", "Stop");
                             baseProcessRefeshTimerLow.Stop();
                             baseProcessRefeshTimerLowSc.Stop();
+                            PerfUpdateGridUnit();
                         }
                         else
                         {
@@ -4721,6 +4356,7 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                             baseProcessRefeshTimer.Start();
                             baseProcessRefeshTimerLow.Start();
                             baseProcessRefeshTimerLowSc.Start();
+                            PerfUpdateGridUnit();
                         }
                         break;
                     }
@@ -4850,7 +4486,7 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                 case 22:
                     {
                         AppWorkerCallBack(41, IntPtr.Zero, IntPtr.Zero);
-                        if (MInitKernel(Application.StartupPath))
+                        if (MInitKernel(null))
                             if (GetConfigBool("SelfProtect", "AppSetting"))
                                 MAppWorkCall3(203, IntPtr.Zero, IntPtr.Zero);
                         break;
@@ -5043,7 +4679,6 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
 
             exitCallBack = AppExit;
             terminateImporantWarnCallBack = TermintateImporantProcess;
-            taskDialogCallBack = TaskDialogCallback;
             enumProcessCallBack = ProcessListHandle;
             enumWinsCallBack = MainEnumWinsCallBack;
             getWinsCallBack = MainGetWinsCallBack;
@@ -5051,7 +4686,7 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
             workerCallBack = AppWorkerCallBack;
             lanuageItems_CallBack = Native_LanuageItems_CallBack;
 
-            MAppSetCallBack(Marshal.GetFunctionPointerForDelegate(exitCallBack), 1);
+             MAppSetCallBack(Marshal.GetFunctionPointerForDelegate(exitCallBack), 1);
             MAppSetCallBack(Marshal.GetFunctionPointerForDelegate(terminateImporantWarnCallBack), 2);
             MAppSetCallBack(Marshal.GetFunctionPointerForDelegate(enumWinsCallBack), 3);
             MAppSetCallBack(Marshal.GetFunctionPointerForDelegate(getWinsCallBack), 4);
@@ -5061,10 +4696,6 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
             MAppWorkCall3(181, IntPtr.Zero, IntPtr.Zero);
             MAppWorkCall3(183, Handle, IntPtr.Zero);
             coreWndProc = (WNDPROC)Marshal.GetDelegateForFunctionPointer(MAppSetCallBack(IntPtr.Zero, 0), typeof(WNDPROC));
-
-            IntPtr strAppDir = Marshal.StringToHGlobalUni(Application.StartupPath);
-            MAppWorkCall3(199, IntPtr.Zero, strAppDir);
-            Marshal.FreeHGlobal(strAppDir);
 
             SetConfig("LastWindowTitle", "AppSetting", Text);
 
@@ -5158,7 +4789,7 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
             if (GetConfigBool("LoadKernelDriver", "Configure"))
             {
                 Log("Loading Kernel...");
-                if (!MInitKernel(Application.StartupPath))
+                if (!MInitKernel(null))
                 {
                     if (eprocessindex != -1)
                     {
@@ -5199,6 +4830,7 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                 DelingDialogClose();
                 MPERF_NET_FreeAllProcessNetInfo();
                 PerfClear();
+                ProcessListUnInitPerfs();
                 ProcessListFreeAll();
                 MSCM_Exit();
                 MEnumProcessFree();
@@ -5344,9 +4976,9 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
 
             LoadRefeshRateSetting();
 
-            MAppWorkCall3(194, IntPtr.Zero, GetConfig("TopMost", "AppSetting") == "TRUE" ? new IntPtr(1) : IntPtr.Zero);
-            MAppWorkCall3(195, IntPtr.Zero, GetConfig("CloseHideToNotfication", "AppSetting") == "TRUE" ? new IntPtr(1) : IntPtr.Zero);
-            MAppWorkCall3(196, IntPtr.Zero, GetConfig("MinHide", "AppSetting") == "TRUE" ? new IntPtr(1) : IntPtr.Zero);
+            MAppWorkCall3(194, IntPtr.Zero, GetConfigBool("TopMost", "AppSetting", false) ? new IntPtr(1) : IntPtr.Zero);
+            MAppWorkCall3(195, IntPtr.Zero, GetConfigBool("CloseHideToNotfication", "AppSetting", false) ? new IntPtr(1) : IntPtr.Zero);
+            MAppWorkCall3(196, IntPtr.Zero, GetConfigBool("MinHide", "AppSetting", false) ? new IntPtr(1) : IntPtr.Zero);
 
             nameindex = listProcessGetListIndex("TitleProcName");
             companyindex = listProcessGetListIndex("TitlePublisher");
@@ -5502,6 +5134,7 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
         private void FormMain_Load(object sender, EventArgs e)
         {
             Text = GetConfig("Title", "AppSetting", "任务管理器");
+
             if (Text == "") Text = str_AppTitle;
 
             LoadHotKey();
@@ -5593,6 +5226,10 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                             MAppWorkCall3(202, IntPtr.Zero, IntPtr.Zero);
                         break;
                     }
+                case 41153:
+                    {
+                        break;
+                    }
             }
         }
         private void FormMain_FormClosing(object sender, FormClosingEventArgs e)
@@ -5659,6 +5296,11 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                     Hide();
             }
             coreWndProc?.Invoke(m.HWnd, Convert.ToUInt32(m.Msg), m.WParam, m.LParam);
+        }
+
+        public static void AppHWNDSendMessage(uint message, IntPtr wParam, IntPtr lParam)
+        {
+            MAppWorkCall2(message, wParam, lParam);
         }
 
         #endregion

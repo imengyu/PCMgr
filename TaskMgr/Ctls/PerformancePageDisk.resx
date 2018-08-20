@@ -117,154 +117,151 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="&gt;&gt;performanceGridDiskTime.Name" xml:space="preserve">
-    <value>performanceGridDiskTime</value>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="performanceInfos.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
+    <value>Bottom</value>
   </data>
-  <data name="&gt;&gt;performanceGridSpeed.Name" xml:space="preserve">
-    <value>performanceGridSpeed</value>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="performanceInfos.Location" type="System.Drawing.Point, System.Drawing">
+    <value>0, 482</value>
+  </data>
+  <data name="performanceInfos.Size" type="System.Drawing.Size, System.Drawing">
+    <value>768, 116</value>
   </data>
   <assembly alias="mscorlib" name="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="performanceInfos.TabIndex" type="System.Int32, mscorlib">
     <value>3</value>
   </data>
-  <data name="performanceGridDiskTime.TabIndex" type="System.Int32, mscorlib">
-    <value>0</value>
+  <data name="performanceInfos.Text" xml:space="preserve">
+    <value>performanceInfos1</value>
   </data>
-  <data name="&gt;&gt;performanceGridDiskTime.Type" xml:space="preserve">
-    <value>PCMgr.Ctls.PerformanceGrid, PCMgrApp32, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+  <data name="&gt;&gt;performanceInfos.Name" xml:space="preserve">
+    <value>performanceInfos</value>
   </data>
-  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-  <data name="$this.AutoScaleDimensions" type="System.Drawing.SizeF, System.Drawing">
-    <value>6, 12</value>
+  <data name="&gt;&gt;performanceInfos.Type" xml:space="preserve">
+    <value>PCMgr.Ctls.PerformanceInfos, PCMgrApp32, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;performanceInfos.Parent" xml:space="preserve">
     <value>$this</value>
   </data>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="performanceTitle1.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
-    <value>Top</value>
-  </data>
-  <data name="&gt;&gt;performanceGridDiskTime.Parent" xml:space="preserve">
-    <value>$this</value>
-  </data>
-  <data name="&gt;&gt;performanceTitle1.Parent" xml:space="preserve">
-    <value>$this</value>
-  </data>
-  <data name="performanceTitle1.SmallTitle" xml:space="preserve">
-    <value>磁盘名称</value>
-  </data>
-  <data name="&gt;&gt;$this.Type" xml:space="preserve">
-    <value>System.Windows.Forms.UserControl, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;$this.Name" xml:space="preserve">
-    <value>PerformancePageDisk</value>
+  <data name="&gt;&gt;performanceInfos.ZOrder" xml:space="preserve">
+    <value>0</value>
   </data>
   <data name="performanceGridSpeed.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Bottom, Left, Right</value>
   </data>
-  <data name="performanceInfos.Size" type="System.Drawing.Size, System.Drawing">
-    <value>588, 81</value>
-  </data>
-  <data name="performanceGridDiskTime.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
-    <value>Top, Bottom, Left, Right</value>
-  </data>
   <data name="performanceGridSpeed.LeftBottomText" xml:space="preserve">
     <value>60s</value>
   </data>
-  <data name="performanceInfos.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
-    <value>Bottom</value>
+  <data name="performanceGridSpeed.LeftText" xml:space="preserve">
+    <value>磁盘传输速率</value>
   </data>
-  <data name="performanceGridDiskTime.RightText" xml:space="preserve">
+  <data name="performanceGridSpeed.Location" type="System.Drawing.Point, System.Drawing">
+    <value>3, 400</value>
+  </data>
+  <data name="performanceGridSpeed.RightBottomText" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="performanceGridSpeed.RightText" xml:space="preserve">
     <value>100%</value>
   </data>
-  <data name="performanceTitle1.TabIndex" type="System.Int32, mscorlib">
-    <value>1</value>
+  <data name="performanceGridSpeed.Size" type="System.Drawing.Size, System.Drawing">
+    <value>765, 76</value>
   </data>
   <data name="performanceGridSpeed.TabIndex" type="System.Int32, mscorlib">
     <value>2</value>
+  </data>
+  <data name="&gt;&gt;performanceGridSpeed.Name" xml:space="preserve">
+    <value>performanceGridSpeed</value>
+  </data>
+  <data name="&gt;&gt;performanceGridSpeed.Type" xml:space="preserve">
+    <value>PCMgr.Ctls.PerformanceGrid, PCMgrApp32, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+  </data>
+  <data name="&gt;&gt;performanceGridSpeed.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;performanceGridSpeed.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="performanceTitle1.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
+    <value>Top</value>
   </data>
   <data name="performanceTitle1.Location" type="System.Drawing.Point, System.Drawing">
     <value>0, 0</value>
   </data>
   <data name="performanceTitle1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>588, 35</value>
+    <value>768, 35</value>
   </data>
-  <data name="&gt;&gt;performanceGridSpeed.ZOrder" xml:space="preserve">
+  <data name="performanceTitle1.SmallTitle" xml:space="preserve">
+    <value>磁盘名称</value>
+  </data>
+  <data name="performanceTitle1.TabIndex" type="System.Int32, mscorlib">
     <value>1</value>
-  </data>
-  <data name="&gt;&gt;performanceInfos.ZOrder" xml:space="preserve">
-    <value>0</value>
-  </data>
-  <data name="performanceInfos.Location" type="System.Drawing.Point, System.Drawing">
-    <value>0, 285</value>
-  </data>
-  <data name="&gt;&gt;performanceGridSpeed.Type" xml:space="preserve">
-    <value>PCMgr.Ctls.PerformanceGrid, PCMgrApp32, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</value>
-  </data>
-  <data name="performanceGridDiskTime.Location" type="System.Drawing.Point, System.Drawing">
-    <value>3, 41</value>
-  </data>
-  <data name="performanceGridSpeed.LeftText" xml:space="preserve">
-    <value>Disk transfer rate</value>
-  </data>
-  <data name="performanceGridDiskTime.Size" type="System.Drawing.Size, System.Drawing">
-    <value>585, 136</value>
-  </data>
-  <data name="$this.Size" type="System.Drawing.Size, System.Drawing">
-    <value>588, 366</value>
-  </data>
-  <data name="performanceGridDiskTime.LeftBottomText" xml:space="preserve">
-    <value>60秒</value>
-  </data>
-  <data name="&gt;&gt;performanceTitle1.ZOrder" xml:space="preserve">
-    <value>2</value>
-  </data>
-  <data name="performanceGridSpeed.RightText" xml:space="preserve">
-    <value>100%</value>
-  </data>
-  <data name="&gt;&gt;performanceGridSpeed.Parent" xml:space="preserve">
-    <value>$this</value>
-  </data>
-  <data name="&gt;&gt;performanceTitle1.Name" xml:space="preserve">
-    <value>performanceTitle1</value>
-  </data>
-  <data name="performanceGridDiskTime.LeftText" xml:space="preserve">
-    <value>活动时间</value>
-  </data>
-  <data name="&gt;&gt;performanceGridDiskTime.ZOrder" xml:space="preserve">
-    <value>3</value>
-  </data>
-  <data name="performanceGridSpeed.Location" type="System.Drawing.Point, System.Drawing">
-    <value>3, 183</value>
-  </data>
-  <data name="performanceInfos.Text" xml:space="preserve">
-    <value>performanceInfos1</value>
-  </data>
-  <data name="performanceGridSpeed.RightBottomText" xml:space="preserve">
-    <value>0</value>
-  </data>
-  <data name="&gt;&gt;performanceTitle1.Type" xml:space="preserve">
-    <value>PCMgr.Ctls.PerformanceTitle, PCMgrApp32, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="performanceTitle1.Title" xml:space="preserve">
     <value>磁盘序号</value>
   </data>
-  <data name="&gt;&gt;performanceInfos.Type" xml:space="preserve">
-    <value>PCMgr.Ctls.PerformanceInfos, PCMgrApp32, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+  <data name="&gt;&gt;performanceTitle1.Name" xml:space="preserve">
+    <value>performanceTitle1</value>
+  </data>
+  <data name="&gt;&gt;performanceTitle1.Type" xml:space="preserve">
+    <value>PCMgr.Ctls.PerformanceTitle, PCMgrApp32, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+  </data>
+  <data name="&gt;&gt;performanceTitle1.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;performanceTitle1.ZOrder" xml:space="preserve">
+    <value>2</value>
+  </data>
+  <data name="performanceGridDiskTime.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
+    <value>Top, Bottom, Left, Right</value>
+  </data>
+  <data name="performanceGridDiskTime.LeftBottomText" xml:space="preserve">
+    <value>60秒</value>
+  </data>
+  <data name="performanceGridDiskTime.LeftText" xml:space="preserve">
+    <value>活动时间</value>
+  </data>
+  <data name="performanceGridDiskTime.Location" type="System.Drawing.Point, System.Drawing">
+    <value>3, 41</value>
   </data>
   <data name="performanceGridDiskTime.RightBottomText" xml:space="preserve">
     <value>0</value>
   </data>
-  <data name="&gt;&gt;performanceInfos.Name" xml:space="preserve">
-    <value>performanceInfos</value>
+  <data name="performanceGridDiskTime.RightText" xml:space="preserve">
+    <value>100%</value>
   </data>
-  <data name="performanceGridSpeed.Size" type="System.Drawing.Size, System.Drawing">
-    <value>585, 96</value>
+  <data name="performanceGridDiskTime.Size" type="System.Drawing.Size, System.Drawing">
+    <value>765, 353</value>
+  </data>
+  <data name="performanceGridDiskTime.TabIndex" type="System.Int32, mscorlib">
+    <value>0</value>
+  </data>
+  <data name="&gt;&gt;performanceGridDiskTime.Name" xml:space="preserve">
+    <value>performanceGridDiskTime</value>
+  </data>
+  <data name="&gt;&gt;performanceGridDiskTime.Type" xml:space="preserve">
+    <value>PCMgr.Ctls.PerformanceGrid, PCMgrApp32, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+  </data>
+  <data name="&gt;&gt;performanceGridDiskTime.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;performanceGridDiskTime.ZOrder" xml:space="preserve">
+    <value>3</value>
   </data>
   <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
-  <metadata name="$this.Language" type="System.Globalization.CultureInfo, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-    <value>en</value>
-  </metadata>
+  <data name="$this.AutoScaleDimensions" type="System.Drawing.SizeF, System.Drawing">
+    <value>6, 12</value>
+  </data>
+  <data name="$this.Size" type="System.Drawing.Size, System.Drawing">
+    <value>768, 598</value>
+  </data>
+  <data name="&gt;&gt;$this.Name" xml:space="preserve">
+    <value>PerformancePageDisk</value>
+  </data>
+  <data name="&gt;&gt;$this.Type" xml:space="preserve">
+    <value>System.Windows.Forms.UserControl, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
 </root>

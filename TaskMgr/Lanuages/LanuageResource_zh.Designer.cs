@@ -223,6 +223,15 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 容量 的本地化字符串。
+        /// </summary>
+        internal static string Capacity {
+            get {
+                return ResourceManager.GetString("Capacity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 无法改变服务设置 的本地化字符串。
         /// </summary>
         internal static string ChangeScStartTypeFailed {
@@ -736,6 +745,15 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 已格式化 的本地化字符串。
+        /// </summary>
+        internal static string Formatted {
+            get {
+                return ResourceManager.GetString("Formatted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 卸载模块错误 的本地化字符串。
         /// </summary>
         internal static string FreeFailed {
@@ -840,6 +858,15 @@ namespace PCMgr.Lanuages {
         internal static string InvThread {
             get {
                 return ResourceManager.GetString("InvThread", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 系统磁盘 的本地化字符串。
+        /// </summary>
+        internal static string IsSystemDir {
+            get {
+                return ResourceManager.GetString("IsSystemDir", resourceCulture);
             }
         }
         
@@ -1196,6 +1223,15 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 否 的本地化字符串。
+        /// </summary>
+        internal static string No {
+            get {
+                return ResourceManager.GetString("No", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 请在刚才的对话框中选择”是“或者”确定“来赋予本程序管理员权限。 的本地化字符串。
         /// </summary>
         internal static string NoAdminTipText {
@@ -1301,6 +1337,15 @@ namespace PCMgr.Lanuages {
         internal static string PagedPool {
             get {
                 return ResourceManager.GetString("PagedPool", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 页面文件 的本地化字符串。
+        /// </summary>
+        internal static string PageFile {
+            get {
+                return ResourceManager.GetString("PageFile", resourceCulture);
             }
         }
         
@@ -2279,6 +2324,15 @@ namespace PCMgr.Lanuages {
         internal static string X64WarnTitle {
             get {
                 return ResourceManager.GetString("X64WarnTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 是 的本地化字符串。
+        /// </summary>
+        internal static string Yes {
+            get {
+                return ResourceManager.GetString("Yes", resourceCulture);
             }
         }
     }

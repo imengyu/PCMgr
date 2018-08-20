@@ -50,10 +50,10 @@ namespace PCMgr.WorkWindow
             AddEmeptyItem();
 
 
-            FormMain.PEOCESSKINFO info = new FormMain.PEOCESSKINFO();
-            if (FormMain.MCanUseKernel())
+            NativeMethods.PEOCESSKINFO info = new NativeMethods.PEOCESSKINFO();
+            if (NativeMethods.MCanUseKernel())
             {
-                if (FormMain.MGetProcessEprocess(currentPid, ref info))
+                if (NativeMethods.MGetProcessEprocess(currentPid, ref info))
                 {
                     AddItem("Eprocess", info.Eprocess);
                     AddItem("Peb", info.PebAddress);
@@ -85,7 +85,7 @@ namespace PCMgr.WorkWindow
         {
             if (listView1.SelectedItems.Count > 0)
             {
-                FormMain.MCopyToClipboard2(listView1.SelectedItems[0].Text + ":" + listView1.SelectedItems[0].SubItems[1].Text);
+                NativeMethods.MCopyToClipboard2(listView1.SelectedItems[0].Text + ":" + listView1.SelectedItems[0].SubItems[1].Text);
             }
         }
 

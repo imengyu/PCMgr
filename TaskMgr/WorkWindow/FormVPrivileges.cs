@@ -20,7 +20,7 @@ namespace PCMgr.WorkWindow
         private string currentName = "";
         private uint currentPid = 0;
 
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern bool MEnumProcessPrivileges(uint pid, IntPtr callback);
 
         private IntPtr CallbackPtr = IntPtr.Zero;
@@ -31,7 +31,7 @@ namespace PCMgr.WorkWindow
 
         private void FormVHandles_Load(object sender, EventArgs e)
         {
-            FormMain.MAppWorkCall3(182, listView1.Handle, IntPtr.Zero);
+            NativeMethods.MAppWorkCall3(182, listView1.Handle, IntPtr.Zero);
             listView1.ListViewItemSorter = new ListViewItemComparer();
 
             Callback = _EnumPrivilegesCallBack;

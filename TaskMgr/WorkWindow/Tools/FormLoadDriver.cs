@@ -2,6 +2,7 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using static PCMgr.NativeMethods;
 
 namespace PCMgr.WorkWindow
 {
@@ -12,11 +13,11 @@ namespace PCMgr.WorkWindow
             InitializeComponent(); 
         }
 
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern bool MUnLoadKernelDriver([MarshalAs(UnmanagedType.LPWStr)]string szSvrName);
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern bool MLoadKernelDriver([MarshalAs(UnmanagedType.LPWStr)]string lpszDriverName, [MarshalAs(UnmanagedType.LPWStr)]string driverPath, [MarshalAs(UnmanagedType.LPWStr)]string lpszDisplayName);
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern bool MFM_FileExist([MarshalAs(UnmanagedType.LPWStr)]string path);
 
         private void buttonChoose_Click(object sender, EventArgs e)
@@ -30,7 +31,7 @@ namespace PCMgr.WorkWindow
             string path = textBoxDriverPath.Text;
             if (path == "")
             {
-                TaskDialog.Show(FormMain.str_PleaseChooseDriver,FormMain.str_TipTitle);
+                TaskDialog.Show(FormMain.str_PleaseChooseDriver, FormMain.str_TipTitle);
                 return;
             }
             if(!MFM_FileExist(path))
@@ -44,7 +45,7 @@ namespace PCMgr.WorkWindow
             if (MLoadKernelDriver(textBoxServName.Text, path, textBoxDrvServDsb.Text))
                 TaskDialog.Show(FormMain.str_DriverLoadSuccessFull, FormMain.str_TipTitle);
             else
-                TaskDialog.Show(string.Format(FormMain.str_DriverLoadFailed, FormMain.GetLastError()), FormMain.str_TipTitle);
+                TaskDialog.Show(string.Format(FormMain.str_DriverLoadFailed, Win32.GetLastError()), FormMain.str_TipTitle);
         }
         private void buttonUnLoad_Click(object sender, EventArgs e)
         {
@@ -57,7 +58,7 @@ namespace PCMgr.WorkWindow
             if (MUnLoadKernelDriver(textBoxServName.Text))
                 TaskDialog.Show(FormMain.str_DriverUnLoadSuccessFull, FormMain.str_TipTitle);
             else
-                TaskDialog.Show(string.Format(FormMain.str_DriverUnLoadFailed, FormMain.GetLastError()), FormMain.str_TipTitle);
+                TaskDialog.Show(string.Format(FormMain.str_DriverUnLoadFailed, Win32.GetLastError()), FormMain.str_TipTitle);
         }
 
         private void textBoxDriverPath_DragDrop(object sender, DragEventArgs e)

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using static PCMgr.NativeMethods;
 
 namespace PCMgr.WorkWindow
 {
@@ -19,7 +20,7 @@ namespace PCMgr.WorkWindow
         private string filePath = "";
         private void FormCheckFileUse_Load(object sender, EventArgs e)
         {
-            FormMain.MAppWorkCall3(182, listViewUsing.Handle, IntPtr.Zero);
+            MAppWorkCall3(182, listViewUsing.Handle, IntPtr.Zero);
 
             Callback = _MFUSEINGCALLBACK;
             CallbackPtr = Marshal.GetFunctionPointerForDelegate(Callback);
@@ -28,12 +29,10 @@ namespace PCMgr.WorkWindow
         }
 
 
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern bool MFM_FileExist([MarshalAs(UnmanagedType.LPWStr)]string filepath);
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern bool MFM_EnumFileHandles([MarshalAs(UnmanagedType.LPWStr)]string filepath, IntPtr callback);
 
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern bool M_SU_CloseHandleWithProcess(IntPtr handle);
 
 

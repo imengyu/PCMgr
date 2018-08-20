@@ -2,6 +2,8 @@
 using System.Windows.Forms;
 using System.Diagnostics;
 using PCMgr.Lanuages;
+using System.Text;
+using System.Drawing;
 
 namespace PCMgr.Ctls
 {
@@ -11,17 +13,15 @@ namespace PCMgr.Ctls
         {
             InitializeComponent();
         }
-        public PerformancePageNet(string netadapter)
+        public PerformancePageNet(IntPtr netadapter)
         {
             InitializeComponent(); currNet = netadapter;
         }
 
-        private string currNet = "";
+        private IntPtr currNet = IntPtr.Zero;
 
         public void PageDelete()
         {
-            if (performanceCounter_sent != null) performanceCounter_sent.Close();
-            if (performanceCounter_receive != null) performanceCounter_receive.Close();
         }
         public void PageFroceSetData(int s)
         {
@@ -41,26 +41,33 @@ namespace PCMgr.Ctls
         }
         public void PageUpdate()
         {
-            float sent = performanceCounter_sent.NextValue();
-            float receive = performanceCounter_receive.NextValue();
-            item_readSpeed.Value= FormMain.FormatFileSize(Convert.ToInt64(sent)) + "/" + FormMain.str_sec;
-            item_writeSpeed.Value = FormMain.FormatFileSize(Convert.ToInt64(receive)) + "/" + FormMain.str_sec;
+            double sent = 0;
+            double receive = 0;
 
-            performanceGrid.AddData((int)(sent * 0.0001));
-            performanceGrid.AddData2((int)(receive * 0.0001));
+            NativeMethods.MPERF_GetNetworksPerformanceCountersValues(currNet, ref sent, ref receive);
+
+            item_readSpeed.Value= NativeMethods.FormatFileSize(Convert.ToInt64(sent)) + "/" + FormMain.str_sec;
+            item_writeSpeed.Value = NativeMethods.FormatFileSize(Convert.ToInt64(receive)) + "/" + FormMain.str_sec;
+
+            performanceGrid.AddData2((int)(sent * 0.0001));
+            performanceGrid.AddData((int)(receive * 0.0001));
             performanceGrid.Invalidate();
 
             performanceInfos.UpdateSpeicalItems();
         }
+        public double PageUpdateSimple()
+        {
+            return NativeMethods.MPERF_GetNetworksPerformanceCountersSimpleValues(currNet);
+        }
 
         private PerformanceInfos.PerformanceInfoSpeicalItem item_readSpeed = null;
         private PerformanceInfos.PerformanceInfoSpeicalItem item_writeSpeed = null;
-        private PerformanceCounter performanceCounter_sent;
-        private PerformanceCounter performanceCounter_receive;
 
         private void PerformancePageNet_Load(object sender, EventArgs e)
         {
-            performanceTitle.SmallTitle = currNet;
+            StringBuilder sb = new StringBuilder(64);
+            NativeMethods.MPERF_GetNetworksPerformanceCountersInstanceName(currNet, sb, 64);
+            performanceTitle.SmallTitle = sb.ToString();
 
             item_readSpeed = new PerformanceInfos.PerformanceInfoSpeicalItem();
             item_writeSpeed = new PerformanceInfos.PerformanceInfoSpeicalItem();
@@ -69,15 +76,16 @@ namespace PCMgr.Ctls
             item_writeSpeed.Name = LanuageMgr.GetStr("Receive");
             item_readSpeed.DrawFrontLine = true;
             item_readSpeed.FrontLineColor = FormMain.NetDrawColor;
+            item_readSpeed.FrontLineIsDotted = true;
             item_writeSpeed.DrawFrontLine = true;
             item_writeSpeed.FrontLineColor = FormMain.NetDrawColor;
-            item_writeSpeed.FrontLineIsDotted = true;
 
-            performanceCounter_sent = new PerformanceCounter("Network Interface", "Bytes Sent/sec", currNet, true);
-            performanceCounter_receive = new PerformanceCounter("Network Interface", "Bytes Received/sec", currNet, true);
 
+            performanceInfos.FontTitle = new Font("微软雅黑", 9);
             performanceInfos.SpeicalItems.Add(item_readSpeed);
             performanceInfos.SpeicalItems.Add(item_writeSpeed);
         }
+
+
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using static PCMgr.NativeMethods;
 
 namespace PCMgr.WorkWindow
 {
@@ -17,13 +18,13 @@ namespace PCMgr.WorkWindow
         }
 
 #if _X64_
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern bool M_SU_KDA(IntPtr callback, UInt64 startaddress, UInt64 size);
 #else
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern bool M_SU_KDA(IntPtr callback, uint startaddress, uint size);
 #endif
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern bool M_SU_KDA_Test(IntPtr callback);
 
         private IntPtr CallbackPtr = IntPtr.Zero;
@@ -98,7 +99,7 @@ namespace PCMgr.WorkWindow
             showedsize = 0;
             listViewDA.Items.Clear();
             textBoxBariny.Text = "";
-            if (!FormMain.MCanUseKernel())
+            if (!MCanUseKernel())
             {
                 show_err(FormMain.str_DriverLoadFailed);
                 return;
@@ -135,7 +136,7 @@ namespace PCMgr.WorkWindow
             if (size > oncemaxdsize)
                 rs = M_SU_KDA(CallbackPtr, address, oncemaxdsize);
             else rs = M_SU_KDA(CallbackPtr, address, size);
-            if (!rs) FormMain.LogErr("KDA Failed!");
+            if (!rs) NativeMethods.LogErr("KDA Failed!");
         }
         private void show_err(string s)
         {
@@ -178,19 +179,19 @@ namespace PCMgr.WorkWindow
 
         private void 复制地址ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            FormMain.MCopyToClipboard2(listViewDA.SelectedItems[0].SubItems[0].Text);
+            MCopyToClipboard2(listViewDA.SelectedItems[0].SubItems[0].Text);
         }
         private void 复制二进制码ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            FormMain.MCopyToClipboard2(listViewDA.SelectedItems[0].SubItems[1].Text);
+            MCopyToClipboard2(listViewDA.SelectedItems[0].SubItems[1].Text);
         }
         private void 复制OpCodeToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            FormMain.MCopyToClipboard2(listViewDA.SelectedItems[0].SubItems[2].Text);
+            MCopyToClipboard2(listViewDA.SelectedItems[0].SubItems[2].Text);
         }
         private void 复制汇编代码ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            FormMain.MCopyToClipboard2(listViewDA.SelectedItems[0].SubItems[3].Text);
+            MCopyToClipboard2(listViewDA.SelectedItems[0].SubItems[3].Text);
         }
 
         private void listViewDA_MouseClick(object sender, MouseEventArgs e)

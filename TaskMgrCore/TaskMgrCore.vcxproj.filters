@@ -123,6 +123,9 @@
     <ClInclude Include="ntsymbol.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="devicehlp.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -204,6 +207,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="ntsymbol.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="devicehlp.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

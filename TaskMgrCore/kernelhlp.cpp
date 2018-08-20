@@ -27,6 +27,8 @@ HANDLE hEventDbgView = NULL;
 BOOL isMyDbgViewLoaded = FALSE;
 BOOL isMyDbgViewRunning = FALSE;
 
+extern WCHAR appDir[MAX_PATH];
+
 //加载驱动
 //    lpszDriverName：驱动的服务名
 //    driverPath：驱动的完整路径
@@ -297,7 +299,7 @@ M_CAPI(BOOL) MInitKernel(LPWSTR currentPath)
 {
 	WCHAR currentDir[MAX_PATH];
 	if (currentPath == 0 || MStrEqual(currentPath, L""))
-		GetCurrentDirectory(MAX_PATH, currentDir);
+		wcscpy_s(currentDir, appDir);
 	else wcscpy_s(currentDir, currentPath);
 	Log(L"MInitKernel (%s)...", currentDir);
 	MAppSetStartingProgessText(L"Loading kernel driver...");

@@ -93,7 +93,7 @@ namespace PCMgr.Ctls
                 DrawFrontLine = false;
                 FrontLineColor = Color.White;
                 FrontLineIsDotted = false;
-                FrontLineWidth = 3;
+                FrontLineWidth = 2;
             }
 
             public bool DrawFrontLine { get; set; }
@@ -142,8 +142,9 @@ namespace PCMgr.Ctls
                         using (Pen p = new Pen(it.FrontLineColor, it.FrontLineWidth))
                         {
                             if (it.FrontLineIsDotted) p.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
-                            g.DrawLine(p, drawedX - LineOffest, curY, drawedX - LineOffest, curY + FontTitleHeight + FontTextSpeicalHeight + 5);
+                            g.DrawLine(p, drawedX - LineOffest, curY + 2, drawedX - LineOffest, curY + FontTitleHeight + FontTextSpeicalHeight + 2);
                         }
+                        drawedX += 5;
                     }
                     drawedX += w + ItemMargan;
                 }

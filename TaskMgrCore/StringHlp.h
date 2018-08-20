@@ -25,3 +25,8 @@ EXTERN_C M_API std::wstring * FormatStringPtrW(const wchar_t *format, ...);
 EXTERN_C M_API std::string *FormatStringPtrA(const char *format, ...);
 
 EXTERN_C M_API void FormatStringPtrDel(void * ptr);
+
+M_CAPI(wchar_t*) Utf8ToUnicode(const char* szU8);
+M_CAPI(char*) UnicodeToAnsi(const wchar_t* szStr);
+M_CAPI(char*) UnicodeToUtf8(const wchar_t* unicode);
+M_CAPI(wchar_t*) AnsiToUnicode(const char* szStr);

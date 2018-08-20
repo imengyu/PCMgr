@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
+using static PCMgr.NativeMethods;
 
 namespace PCMgr.WorkWindow
 {
@@ -21,11 +22,11 @@ namespace PCMgr.WorkWindow
         private string currentName = "";
         private uint currentPid = 0;
 
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern bool M_SU_CloseHandleWithProcess(uint pid, IntPtr handle);
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern bool M_EH_CloseHandle(uint pid, IntPtr handle);
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern bool MEnumProcessHandles(uint pid, IntPtr callback);
 
         private IntPtr CallbackPtr = IntPtr.Zero;
@@ -36,7 +37,7 @@ namespace PCMgr.WorkWindow
 
         private void FormVHandles_Load(object sender, EventArgs e)
         {
-            FormMain.MAppWorkCall3(182, listView1.Handle, IntPtr.Zero);
+            MAppWorkCall3(182, listView1.Handle, IntPtr.Zero);
             listView1.ListViewItemSorter = new ListViewItemComparer();
 
             Callback = _EHCALLBACK;

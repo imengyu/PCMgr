@@ -140,7 +140,7 @@
         AAEAAAD/////AQAAAAAAAAAMAgAAAFdTeXN0ZW0uV2luZG93cy5Gb3JtcywgVmVyc2lvbj00LjAuMC4w
         LCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODkFAQAAACZTeXN0
         ZW0uV2luZG93cy5Gb3Jtcy5JbWFnZUxpc3RTdHJlYW1lcgEAAAAERGF0YQcCAgAAAAkDAAAADwMAAADw
-        CAAAAk1TRnQBSQFMAgEBAwEAAfABBgHwAQYBEAEAARABAAT/ASEBAAj/AUIBTQE2BwABNgMAASgDAAFA
+        CAAAAk1TRnQBSQFMAgEBAwEAAQgBBwEIAQcBEAEAARABAAT/ASEBAAj/AUIBTQE2BwABNgMAASgDAAFA
         AwABEAMAAQEBAAEgBgABELYAAlgBYgHvAlgBYgHvDAACWAFiAe8CWAFiAe+EAAGyAgAB/wwAAmIBWAHv
         AdwBjwEAAf8B6AGXAQAB/wHoAZcBAAH/AegBlwEAAf8BwwIAAf8CRwFGAYAcAAGOAeQC/wGNAeMC/wGL
         AeMC/wGKAeIC/wGIAeIC/wGHAeEC/wIAAb4B/wIAAeYB/wIAAbwB/wEAAdYB/AH/AgABuQH/AgAB3gH/
@@ -188,7 +188,7 @@
     <value>0</value>
   </data>
   <data name="treeFmLeft.Size" type="System.Drawing.Size, System.Drawing">
-    <value>226, 487</value>
+    <value>226, 493</value>
   </data>
   <data name="treeFmLeft.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
@@ -260,7 +260,7 @@
     <value>0, 0</value>
   </data>
   <data name="listFm.Size" type="System.Drawing.Size, System.Drawing">
-    <value>670, 487</value>
+    <value>670, 493</value>
   </data>
   <metadata name="imageListFileTypeList.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>192, 17</value>
@@ -270,7 +270,7 @@
         AAEAAAD/////AQAAAAAAAAAMAgAAAFdTeXN0ZW0uV2luZG93cy5Gb3JtcywgVmVyc2lvbj00LjAuMC4w
         LCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODkFAQAAACZTeXN0
         ZW0uV2luZG93cy5Gb3Jtcy5JbWFnZUxpc3RTdHJlYW1lcgEAAAAERGF0YQcCAgAAAAkDAAAADwMAAACw
-        BAAAAk1TRnQBSQFMAwEBAAG4AQYBuAEGARABAAEQAQAE/wEhAQAI/wFCAU0BNgcAATYDAAEoAwABQAMA
+        BAAAAk1TRnQBSQFMAwEBAAHQAQYB0AEGARABAAEQAQAE/wEhAQAI/wFCAU0BNgcAATYDAAEoAwABQAMA
         ARADAAEBAQABIAYAARA8AAHNAf8MAAJQAVEBnwJQAVEBn8wAAvsB+gH/AvsB+gH/AvsB+gH/AvsB+gH/
         AvsB+gH/AvsB+gH/A/0B/wIAAdsB/wIAAdkB/wP9Af8CUAFRAZ8CAAHeAf8CUAFRAZ/MAAP7Af8B9wL2
         Af8B9wH2AfUB/wH3AfYB9QH/AfcB9gH1Af8B9wH2AfUB/wH3AfYB9QH/AvsB+gH/AgAB2wH/AgAB2QH/
@@ -321,7 +321,7 @@
     <value>1</value>
   </data>
   <data name="splitContainerFm.Size" type="System.Drawing.Size, System.Drawing">
-    <value>900, 487</value>
+    <value>900, 493</value>
   </data>
   <data name="splitContainerFm.SplitterDistance" type="System.Int32, mscorlib">
     <value>226</value>
@@ -354,7 +354,7 @@
     <value>233, 0</value>
   </data>
   <data name="sp3.Size" type="System.Drawing.Size, System.Drawing">
-    <value>1, 519</value>
+    <value>1, 526</value>
   </data>
   <data name="sp3.TabIndex" type="System.Int32, mscorlib">
     <value>1</value>
@@ -378,7 +378,7 @@
     <value>0, 0</value>
   </data>
   <data name="performanceLeftList.Size" type="System.Drawing.Size, System.Drawing">
-    <value>234, 519</value>
+    <value>234, 526</value>
   </data>
   <data name="performanceLeftList.TabIndex" type="System.Int32, mscorlib">
     <value>2</value>
@@ -420,7 +420,7 @@
     <value>1</value>
   </data>
   <data name="splitContainerPerfCtls.Size" type="System.Drawing.Size, System.Drawing">
-    <value>901, 519</value>
+    <value>901, 526</value>
   </data>
   <data name="splitContainerPerfCtls.SplitterDistance" type="System.Int32, mscorlib">
     <value>234</value>
@@ -720,16 +720,13 @@
     <value>NoControl</value>
   </data>
   <data name="sp5.Location" type="System.Drawing.Point, System.Drawing">
-    <value>88, 533</value>
+    <value>93, 539</value>
   </data>
   <data name="sp5.Size" type="System.Drawing.Size, System.Drawing">
     <value>1, 14</value>
   </data>
   <data name="sp5.TabIndex" type="System.Int32, mscorlib">
     <value>14</value>
-  </data>
-  <data name="sp5.Visible" type="System.Boolean, mscorlib">
-    <value>False</value>
   </data>
   <data name="&gt;&gt;sp5.Name" xml:space="preserve">
     <value>sp5</value>
@@ -750,7 +747,7 @@
     <value>True</value>
   </data>
   <data name="linkLabelShowKernelTools.Location" type="System.Drawing.Point, System.Drawing">
-    <value>97, 531</value>
+    <value>102, 537</value>
   </data>
   <data name="linkLabelShowKernelTools.Size" type="System.Drawing.Size, System.Drawing">
     <value>104, 17</value>
@@ -888,7 +885,7 @@
     <value>NoControl</value>
   </data>
   <data name="lbDriversCount.Location" type="System.Drawing.Point, System.Drawing">
-    <value>11, 531</value>
+    <value>16, 537</value>
   </data>
   <data name="lbDriversCount.Size" type="System.Drawing.Size, System.Drawing">
     <value>66, 17</value>
@@ -990,7 +987,7 @@
     <value>3, 3, 3, 3</value>
   </data>
   <data name="tabPageKernelCtl.Size" type="System.Drawing.Size, System.Drawing">
-    <value>901, 565</value>
+    <value>901, 564</value>
   </data>
   <data name="tabPageKernelCtl.TabIndex" type="System.Int32, mscorlib">
     <value>1</value>
@@ -1020,7 +1017,7 @@
     <value>NoControl</value>
   </data>
   <data name="linkLabelOpenPerfMon.Location" type="System.Drawing.Point, System.Drawing">
-    <value>13, 530</value>
+    <value>13, 536</value>
   </data>
   <data name="linkLabelOpenPerfMon.Size" type="System.Drawing.Size, System.Drawing">
     <value>112, 17</value>
@@ -1033,9 +1030,6 @@
   </data>
   <data name="linkLabelOpenPerfMon.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
     <value>MiddleRight</value>
-  </data>
-  <data name="linkLabelOpenPerfMon.Visible" type="System.Boolean, mscorlib">
-    <value>False</value>
   </data>
   <data name="&gt;&gt;linkLabelOpenPerfMon.Name" xml:space="preserve">
     <value>linkLabelOpenPerfMon</value>
@@ -1056,7 +1050,7 @@
     <value>3, 3, 3, 3</value>
   </data>
   <data name="tabPagePerfCtl.Size" type="System.Drawing.Size, System.Drawing">
-    <value>901, 565</value>
+    <value>901, 564</value>
   </data>
   <data name="tabPagePerfCtl.TabIndex" type="System.Int32, mscorlib">
     <value>7</value>
@@ -1143,7 +1137,7 @@
     <value>0, 0</value>
   </data>
   <data name="listUwpApps.Size" type="System.Drawing.Size, System.Drawing">
-    <value>898, 519</value>
+    <value>898, 525</value>
   </data>
   <data name="listUwpApps.TabIndex" type="System.Int32, mscorlib">
     <value>12</value>
@@ -1167,7 +1161,7 @@
     <value>3, 3, 3, 3</value>
   </data>
   <data name="tabPageUWPCtl.Size" type="System.Drawing.Size, System.Drawing">
-    <value>901, 565</value>
+    <value>901, 564</value>
   </data>
   <data name="tabPageUWPCtl.TabIndex" type="System.Int32, mscorlib">
     <value>6</value>
@@ -1299,7 +1293,7 @@
     <value>NoControl</value>
   </data>
   <data name="sp2.Location" type="System.Drawing.Point, System.Drawing">
-    <value>90, 534</value>
+    <value>90, 538</value>
   </data>
   <data name="sp2.Size" type="System.Drawing.Size, System.Drawing">
     <value>1, 14</value>
@@ -1342,7 +1336,7 @@
     <value>NoControl</value>
   </data>
   <data name="linkOpenScMsc.Location" type="System.Drawing.Point, System.Drawing">
-    <value>94, 532</value>
+    <value>94, 536</value>
   </data>
   <data name="linkOpenScMsc.Size" type="System.Drawing.Size, System.Drawing">
     <value>79, 17</value>
@@ -1429,7 +1423,7 @@
     <value>0, 0</value>
   </data>
   <data name="listService.Size" type="System.Drawing.Size, System.Drawing">
-    <value>901, 519</value>
+    <value>901, 525</value>
   </data>
   <data name="listService.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
@@ -1456,7 +1450,7 @@
     <value>NoControl</value>
   </data>
   <data name="lbServicesCount.Location" type="System.Drawing.Point, System.Drawing">
-    <value>11, 532</value>
+    <value>11, 536</value>
   </data>
   <data name="lbServicesCount.Size" type="System.Drawing.Size, System.Drawing">
     <value>66, 17</value>
@@ -1486,7 +1480,7 @@
     <value>3, 3, 3, 3</value>
   </data>
   <data name="tabPageScCtl.Size" type="System.Drawing.Size, System.Drawing">
-    <value>901, 565</value>
+    <value>901, 564</value>
   </data>
   <data name="tabPageScCtl.TabIndex" type="System.Int32, mscorlib">
     <value>3</value>
@@ -1513,7 +1507,7 @@
     <value>0, 0</value>
   </data>
   <data name="listStartup.Size" type="System.Drawing.Size, System.Drawing">
-    <value>901, 519</value>
+    <value>901, 525</value>
   </data>
   <data name="listStartup.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
@@ -1540,7 +1534,7 @@
     <value>3, 3, 3, 3</value>
   </data>
   <data name="tabPageStartCtl.Size" type="System.Drawing.Size, System.Drawing">
-    <value>901, 565</value>
+    <value>901, 564</value>
   </data>
   <data name="tabPageStartCtl.TabIndex" type="System.Int32, mscorlib">
     <value>4</value>
@@ -1570,7 +1564,7 @@
     <value>NoControl</value>
   </data>
   <data name="lbFileMgrStatus.Location" type="System.Drawing.Point, System.Drawing">
-    <value>16, 530</value>
+    <value>16, 535</value>
   </data>
   <data name="lbFileMgrStatus.Size" type="System.Drawing.Size, System.Drawing">
     <value>32, 17</value>
@@ -1673,7 +1667,7 @@
     <value>3, 3, 3, 3</value>
   </data>
   <data name="tabPageFileCtl.Size" type="System.Drawing.Size, System.Drawing">
-    <value>901, 565</value>
+    <value>901, 564</value>
   </data>
   <data name="tabPageFileCtl.TabIndex" type="System.Int32, mscorlib">
     <value>5</value>

@@ -12,9 +12,9 @@ namespace PCMgr.WorkWindow
             InitializeComponent();
         }
 
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         private static extern bool MFM_DeleteFileForce(string path);
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         private static extern bool MFM_GetFileInformationString(string szFile, StringBuilder strbuf, uint bufsize);
 
         private void btnChooseFile_Click(object sender, EventArgs e)

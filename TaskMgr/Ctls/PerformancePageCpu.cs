@@ -6,6 +6,7 @@ using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
 using PCMgr.Lanuages;
+using static PCMgr.NativeMethods;
 
 namespace PCMgr.Ctls
 {
@@ -16,34 +17,34 @@ namespace PCMgr.Ctls
             InitializeComponent();
         }
 
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern uint MPERF_GetCpuL1Cache();
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern uint MPERF_GetCpuL2Cache();
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern uint MPERF_GetCpuL3Cache();
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern uint MPERF_GetCpuPackage();
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern uint MPERF_GetCpuNodeCount();
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern bool MPERF_GetCpuInfos();
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern bool MPERF_UpdatePerformance();     
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        private static extern bool MPERF_UpdatePerformance();
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         private static extern bool MPERF_GetCpuName(StringBuilder buf, int size);
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern int MPERF_GetCpuFrequency();
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern int MPERF_GetProcessNumber();
 
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern uint MPERF_GetThreadCount();
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern uint MPERF_GetHandleCount();
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern uint MPERF_GetProcessCount();
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern Int64 MPERF_GetRunTime();
 
         private TimeSpan times;
@@ -81,14 +82,15 @@ namespace PCMgr.Ctls
         }
         public void PageDelete()
         {
-            foreach (PerformanceCounter p in performanceCounterCpusList)
-            {
-                p.Close();
-            }
+            MPERF_DestroyCpuDetalsPerformanceCounters();
         }
         public void PageSetGridUnit(string s)
         {
             performanceGridGlobal.LeftBottomText = s;
+        }
+        public double PageUpdateSimple()
+        {
+            return 0;
         }
 
         PerformanceInfos.PerformanceInfoSpeicalItem item_cpuuseage = null;
@@ -98,7 +100,6 @@ namespace PCMgr.Ctls
         PerformanceInfos.PerformanceInfoSpeicalItem item_handle_count = null;
         PerformanceInfos.PerformanceInfoSpeicalItem item_run_time = null;
 
-        private List<PerformanceCounter> performanceCounterCpusList = new List<PerformanceCounter>();
         private StringFormat performanceCpusText = null;
         private Font performanceCpusTextFont = null;
         private Brush performanceCpusTextBrush = null;
@@ -118,9 +119,9 @@ namespace PCMgr.Ctls
             if (MPERF_GetCpuInfos())
             {
                 performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem(LanuageMgr.GetStr("CpuPackageCount"), MPERF_GetCpuPackage().ToString()));
-                performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem("L" + 1 + LanuageMgr.GetStr("Cache"), FormMain.FormatFileSize1(Convert.ToInt32(MPERF_GetCpuL1Cache()))));
-                performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem("L" + 2 + LanuageMgr.GetStr("Cache"), FormMain.FormatFileSize1(Convert.ToInt32(MPERF_GetCpuL2Cache()))));
-                if (MPERF_GetCpuL3Cache() != 0) performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem("L" + 3 + LanuageMgr.GetStr("Cache"), FormMain.FormatFileSize1(Convert.ToInt32(MPERF_GetCpuL3Cache()))));
+                performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem("L" + 1 + LanuageMgr.GetStr("Cache"), FormatFileSize1(Convert.ToInt32(MPERF_GetCpuL1Cache()))));
+                performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem("L" + 2 + LanuageMgr.GetStr("Cache"), FormatFileSize1(Convert.ToInt32(MPERF_GetCpuL2Cache()))));
+                if (MPERF_GetCpuL3Cache() != 0) performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem("L" + 3 + LanuageMgr.GetStr("Cache"), FormatFileSize1(Convert.ToInt32(MPERF_GetCpuL3Cache()))));
             }
         }
         private void InitRuntimeInfo()
@@ -135,8 +136,8 @@ namespace PCMgr.Ctls
             item_thread_count = new PerformanceInfos.PerformanceInfoSpeicalItem();
             item_thread_count.Name = LanuageMgr.GetStr("ThreadCount");
             item_handle_count = new PerformanceInfos.PerformanceInfoSpeicalItem();
-            item_handle_count.Name = LanuageMgr.GetStr("HandleCount"); 
-             item_run_time = new PerformanceInfos.PerformanceInfoSpeicalItem();
+            item_handle_count.Name = LanuageMgr.GetStr("HandleCount");
+            item_run_time = new PerformanceInfos.PerformanceInfoSpeicalItem();
             item_run_time.Name = LanuageMgr.GetStr("RunTime");
             performanceInfos.SpeicalItems.Add(item_cpuuseage);
             performanceInfos.SpeicalItems.Add(item_cpuuseage_freq);
@@ -152,12 +153,8 @@ namespace PCMgr.Ctls
             performanceCpusText = new StringFormat();
             performanceCpusText.Alignment = StringAlignment.Center;
             performanceCpusText.LineAlignment = StringAlignment.Center;
-            string[] cpus = new PerformanceCounterCategory("Processor Information").GetInstanceNames();
-            foreach(string cpu in cpus)
-            {
-                if(!cpu.Contains("_Total"))
-                    performanceCounterCpusList.Add(new PerformanceCounter("Processor Information", "% Processor Time", cpu, true));
-            }
+
+            MPERF_InitCpuDetalsPerformanceCounters();
         }
 
         private void PerformanceCpu_Load(object sender, EventArgs e)
@@ -198,22 +195,24 @@ namespace PCMgr.Ctls
             {
                 int width = performanceCpus.Width / cpuCount;
                 int x = 0;
-                for (int i = 0; i < performanceCounterCpusList.Count; i++)
+                int performanceCounterCpusListCount = MPERF_GetCpuDetalsPerformanceCountersCount();
+                for (int i = 0; i < performanceCounterCpusListCount; i++)
                 {
-                    int useage = (int)performanceCounterCpusList[i].NextValue();
+                    double useage = MPERF_GetCpuDetalsCpuUsage(i);
 
-                    using (SolidBrush s = new SolidBrush(performanceCpus_GetColorFormValue(useage)))
+                    using (SolidBrush s = new SolidBrush(performanceCpus_GetColorFormValue((int)(useage))))
                     {
                         Rectangle r = new Rectangle(x, 1, width, performanceCpus.Height - 2);
                         g.FillRectangle(s, r);
-                        g.DrawString(useage + "%", performanceCpusTextFont, performanceCpusTextBrush, r, performanceCpusText);
+                        g.DrawString(useage.ToString("0.0") + "%", performanceCpusTextFont, performanceCpusTextBrush, r, performanceCpusText);
                     }
 
                     x += width;
                 }
             }
-            g.DrawRectangle(performanceGridGlobal.DrawPen, 0, 0, performanceCpus.Width-1, performanceCpus.Height-1);
+            g.DrawRectangle(performanceGridGlobal.DrawPen, 0, 0, performanceCpus.Width - 1, performanceCpus.Height - 1);
         }
+
 
     }
 }

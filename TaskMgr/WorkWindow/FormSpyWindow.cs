@@ -4,6 +4,8 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
+using static PCMgr.NativeMethods;
+using static PCMgr.NativeMethods.Win32;
 
 namespace PCMgr.WorkWindow
 {
@@ -18,105 +20,6 @@ namespace PCMgr.WorkWindow
         {
             Close();
         }
-
-        #region APIS
-
-        [DllImport("user32.dll")]
-        public static extern int GetWindowText(IntPtr hWnd, StringBuilder stringbulider, int nMaxCount);
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr MGetWindowIcon(IntPtr hWnd);
-        [DllImport("user32.dll")]
-        public static extern int GetWindowText(IntPtr hWnd, byte[] byBuffer, int nMaxCount);
-        [DllImport("user32.dll")]
-        public static extern int SetWindowText(IntPtr hWnd, string text);
-        [DllImport("user32.dll")]
-        public static extern int GetClassName(IntPtr hWnd, byte[] byBuffer, int nMaxCount);
-        [DllImport("user32.dll")]
-        public static extern IntPtr GetDesktopWindow();
-        [DllImport("user32.dll")]
-        public static extern IntPtr FindWindowEx(IntPtr hWndParent, IntPtr hChildAfter, string lpszClass, string lpszWindowText);
-        [DllImport("user32.dll")]
-        public static extern IntPtr WindowFromPoint(POINT pt);
-        [DllImport("user32.dll")]
-        public static extern bool ShowWindow(IntPtr hWnd, int cmd);
-        [DllImport("user32.dll")]
-        public static extern bool CloseWindow(IntPtr hWnd);
-        [DllImport("user32.dll")]
-        public static extern bool IsWindow(IntPtr hWnd);
-        [DllImport("user32.dll")]
-        public static extern int GetDlgCtrlID(IntPtr hWnd);
-        [DllImport("user32.dll")]
-        public static extern bool DestroyWindow(IntPtr hWnd);
-        [DllImport("user32.dll")]
-        public static extern bool IsWindowVisible(IntPtr hWnd);
-        [DllImport("user32.dll")]
-        public static extern bool GetWindowInfo(IntPtr hWnd, ref WINDOWINFO lpWindowInfo);
-        [DllImport("user32.dll")]
-        public static extern long GetWindowLong(IntPtr hWnd, int nIndex);
-        [DllImport("user32.dll")]
-        public static extern int GetSystemMetrics(int nIndex);
-        [DllImport("user32.dll")]
-        public static extern int GetWindowThreadProcessId(IntPtr hWnd, ref int lpDwProcessId);
-        [DllImport("user32.dll")]
-        public static extern int SendMessage(IntPtr hWnd, uint uMsg, IntPtr wParam, IntPtr lParam);
-        [DllImport("user32", EntryPoint = "RegisterWindowMessage")]
-        public static extern int RegisterWindowMessage(string lpString);
-        [DllImport("OLEACC.DLL", EntryPoint = "ObjectFromLresult")]
-        public static extern int ObjectFromLresult(
-            int lResult,
-            ref System.Guid riid,
-            int wParam,
-            [MarshalAs(UnmanagedType.Interface), System.Runtime.InteropServices.In, System.Runtime.InteropServices.Out]ref System.Object ppvObject
-        );
-        [DllImport("user32.dll")]
-        public static extern bool InvalidateRect(IntPtr hWnd,[MarshalAs(UnmanagedType.LPStruct)] RECT lpRect, bool bErase);
-        [DllImport("user32.dll")]
-        public static extern bool InvalidateRect(IntPtr hWnd, IntPtr lpRect, bool bErase);
-
-        public const int GWL_STYLE = -16;
-        public const int GWL_EXSTYLE = -20;
-        public const long WS_VISIBLE = 0x10000000;
-        public const long WS_EX_TRANSPARENT = 0x20;
-        public const long GWL_HWNDPARENT = -8;
-
-        public const uint WM_GETICON = 0x7F;
-        public const int ICON_SMALL = 0;
-
-        public const int SM_XVIRTUALSCREEN = 76;
-        public const int SM_YVIRTUALSCREEN = 77;
-        public const int SM_CXVIRTUALSCREEN = 78;
-        public const int SM_CYVIRTUALSCREEN = 79;
-
-        public struct POINT
-        {
-            public int X;
-            public int Y;
-        }
-        public struct RECT
-        {
-            public int Left;
-            public int Top;
-            public int Right;
-            public int Bottom;
-            public System.Drawing.Rectangle ToRectangle()
-            {
-                return new System.Drawing.Rectangle(Left, Top, Right - Left, Bottom - Top);
-            }
-        }
-        public struct WINDOWINFO
-        {
-            public uint cbSize;
-            public RECT rcWindow;
-            public RECT rcClient;
-            public uint dwStyle;
-            public uint dwExStyle;
-            public uint dwWindowStatus;
-            public uint cxWindowBorders;
-            public uint cyWindowBorders;
-            public short atomWindowType;
-            public short wCreatorVersion;
-        }
-        #endregion
 
         public class WindowInfo
         {
@@ -145,7 +48,7 @@ namespace PCMgr.WorkWindow
             }
 
             private WINDOWINFO _WndInfo;
-            public WINDOWINFO WndInfo
+            internal WINDOWINFO WndInfo
             {
                 get { return _WndInfo; }
                 set { _WndInfo = value; }
@@ -435,7 +338,7 @@ namespace PCMgr.WorkWindow
         {
             WindowInfo windowInfo = new WindowInfo(hWnd);
             WINDOWINFO wi = new WINDOWINFO();
-            GetWindowInfo(hWnd, ref wi);
+            NativeMethods.Win32.GetWindowInfo(hWnd, ref wi);
             //GetWindowInfo返回的ExStyle貌似有些问题
             wi.dwExStyle = (uint)GetWindowLong(hWnd, GWL_EXSTYLE);
             int len = GetClassName(hWnd, m_byTextBuffer, m_byTextBuffer.Length);
@@ -541,7 +444,7 @@ namespace PCMgr.WorkWindow
         {
             if (treeViewMain.SelectedNode != null)
             {
-                FormMain.MAppWorkCall3(205, selectHwnd, IntPtr.Zero);
+                MAppWorkCall3(205, selectHwnd, IntPtr.Zero);
                 refeshitem();
             }
         }
@@ -549,7 +452,7 @@ namespace PCMgr.WorkWindow
         {
             if (treeViewMain.SelectedNode != null)
             {
-                FormMain.MAppWorkCall3(200, selectHwnd, IntPtr.Zero);
+                MAppWorkCall3(200, selectHwnd, IntPtr.Zero);
                 refeshitem();
             }
         }
@@ -587,12 +490,12 @@ namespace PCMgr.WorkWindow
         private void 启用窗口ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (treeViewMain.SelectedNode != null)
-                FormMain.MAppWorkCall3(211, selectHwnd, IntPtr.Zero);
+                MAppWorkCall3(211, selectHwnd, IntPtr.Zero);
         }
         private void 禁用窗口ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (treeViewMain.SelectedNode != null)
-                FormMain.MAppWorkCall3(210, selectHwnd, IntPtr.Zero);
+                MAppWorkCall3(210, selectHwnd, IntPtr.Zero);
         }
 
         private void 显示逻辑区域ToolStripMenuItem_Click(object sender, EventArgs e)

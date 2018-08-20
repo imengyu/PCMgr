@@ -146,6 +146,10 @@ EXTERN_C M_API BOOL MGetProcessIs32Bit(HANDLE handle);
 //    pid：进程id
 //  对 M_SU_GetEPROCESS 的封装
 EXTERN_C M_API BOOL MGetProcessEprocess(DWORD pid, PPEOCESSKINFO info);
+//获取进程内存专用工作集
+//    hProcess：进程句柄
+//    pageSize：分页一页大小
+M_API ULONG_PTR MGetProcessWorkingSetPrivate(HANDLE hProcess, SIZE_T pageSize);
 //获取UWP应用完整包名
 //    handle：进程句柄
 //    [OUT] len：输出字符串缓冲区字符个数

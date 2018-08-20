@@ -74,6 +74,7 @@ BOOLEAN LoadSymModule(char* ImageName, ULONG_PTR ModuleBase)
 	{
 		CHAR ModuleSymPathDir[MAX_PATH] = { 0 };
 		strcpy_s(ModuleSymPathDir, SymPathDir);
+		ModuleSymPathDir[strlen(ModuleSymPathDir) - 1] = '\0';
 		strcat_s(ModuleSymPathDir, "\\");
 		strcat_s(ModuleSymPathDir, ImageName);
 		if (!Directory::Exists(ModuleSymPathDir))
@@ -82,7 +83,7 @@ BOOLEAN LoadSymModule(char* ImageName, ULONG_PTR ModuleBase)
 		CHAR ModuleSymPathDir2Size[MAX_PATH] = { 0 };
 		sprintf_s(ModuleSymPathDir2Size, "%X", ImageInfo->SizeOfImage);
 		CHAR ModuleSymPathDir2[MAX_PATH] = { 0 };
-		strcpy_s(ModuleSymPathDir2, SymPathDir);
+		strcpy_s(ModuleSymPathDir2, ModuleSymPathDir);
 		strcat_s(ModuleSymPathDir2, "\\");
 		strcat_s(ModuleSymPathDir2, ModuleSymPathDir2Size);
 		if (!Directory::Exists(ModuleSymPathDir2))
@@ -91,9 +92,14 @@ BOOLEAN LoadSymModule(char* ImageName, ULONG_PTR ModuleBase)
 		CHAR ModuleSymPathFile[MAX_PATH] = { 0 };
 		strcpy_s(ModuleSymPathFile, ModuleSymPathDir2);
 		strcat_s(ModuleSymPathFile, "\\");
-		strcat_s(ModuleSymPathDir, ImageName);
-		if (!MFM_FileExistA(ModuleSymPathFile))
-			useOrginalExe = !CopyFileA(ModuleSymPathFile, ImageInfo->ModuleName, TRUE);
+		strcat_s(ModuleSymPathFile, ImageName);
+		if (!MFM_FileExistA(ModuleSymPathFile)) {
+			useOrginalExe = !CopyFileA(ImageInfo->ModuleName, ModuleSymPathFile, TRUE);
+			Log(L"Copy File %hs to %hs : %s", ImageInfo->ModuleName, ModuleSymPathFile, useOrginalExe ? L"" : L"");
+			if(useOrginalExe) Log2(L"CopyFile failed : %d", GetLastError());
+		}
+		else useOrginalExe = FALSE;
+		strcpy_s(SymFileOrginalExe, ModuleSymPathFile);
 	}
 
 	LPCSTR targerFile = useOrginalExe ? ImageInfo->ModuleName : SymFileOrginalExe;

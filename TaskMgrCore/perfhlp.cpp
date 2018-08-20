@@ -2,12 +2,17 @@
 #include "perfhlp.h"
 #include "ntdef.h"
 #include "sysfuns.h"
+#include "loghlp.h"
+#include "prochlp.h"
+#include "StringHlp.h"
 #include <Psapi.h>
 #include <winsock2.h>
 #include <Ws2tcpip.h>
 #include <iphlpapi.h>
 #include <Tcpestats.h>
+#include <vector>
 
+#define PAGE_SIZE 0x1000
 
 int cpu_Count = 0;
 __int64 LastTime;
@@ -30,6 +35,24 @@ void MPERF_FreeCpuInfos()
 {
 	if (buffer)
 		delete buffer;
+}
+
+//声明查询句柄hquery
+HQUERY hQuery = NULL; 
+
+M_CAPI(BOOL) MPERF_GlobalInit() {
+
+	MPERF_UpdatePerformance();	
+
+	PDH_STATUS pdhstatus = PdhOpenQuery(0, 0, &hQuery);
+	return (pdhstatus == ERROR_SUCCESS);
+}
+M_CAPI(VOID) MPERF_GlobalDestroy() {
+	PdhCloseQuery(hQuery);
+}
+M_CAPI(BOOL) MPERF_GlobalUpdatePerformanceCounters()
+{
+	return !PdhCollectQueryData(hQuery);
 }
 
 M_CAPI(ULONGLONG) MPERF_GetAllRam()
@@ -65,14 +88,6 @@ M_CAPI(ULONGLONG) MPERF_GetRamAvail() {
 }
 M_CAPI(ULONGLONG) MPERF_GetRamAvailPageFile() {
 	return performance_info.CommitLimit*performance_info.PageSize;
-}
-M_CAPI(double) MPERF_GetRamUseAge2()
-{
-	return ((memory_statuex.ullTotalPhys - memory_statuex.ullAvailPhys) / (double)memory_statuex.ullTotalPhys);
-}
-M_CAPI(BOOL) MPERF_GetRamUseAge()
-{
-	return GlobalMemoryStatusEx(&memory_statuex);
 }
 M_CAPI(LONGLONG) MPERF_GetRunTime()
 {
@@ -205,8 +220,120 @@ __int64 CompareFileTime(FILETIME time1, FILETIME time2)
 FILETIME LastIdleTime, LastKernelTime, LastUserTime;
 FILETIME IdleTime, KernelTime, UserTime;
 
-M_CAPI(double)MPERF_GetCupUseAge() {
+PDH_HCOUNTER *counter3cpu = NULL;//CPU性能计数器
+PDH_HCOUNTER *counter3disk = NULL;//磁盘性能计数器
+PDH_HCOUNTER *counter3network = NULL;//网络性能计数器
+BOOL counter3Inited = FALSE;
 
+//Computer Performance
+
+M_CAPI(LPWSTR) MPERF_EnumPerformanceCounterInstanceNames(LPWSTR counterName)
+{
+	PDH_STATUS status = ERROR_SUCCESS;
+
+	LPWSTR pwsCounterListBuffer = NULL;
+	DWORD dwCounterListSize = 0;
+	LPWSTR pwsInstanceListBuffer = NULL;
+	DWORD dwInstanceListSize = 0;
+
+	status = PdhEnumObjectItems(NULL, NULL, counterName, pwsCounterListBuffer, &dwCounterListSize, pwsInstanceListBuffer, &dwInstanceListSize, PERF_DETAIL_WIZARD, 0);
+	if (status == PDH_MORE_DATA || (status == PDH_INVALID_ARGUMENT && dwInstanceListSize > 0))
+	{
+		// Allocate the buffers and try the call again.
+		pwsCounterListBuffer = (LPWSTR)malloc(dwCounterListSize * sizeof(WCHAR));
+		pwsInstanceListBuffer = (LPWSTR)malloc(dwInstanceListSize * sizeof(WCHAR));
+
+		status = PdhEnumObjectItems(NULL, NULL, counterName, 
+			pwsCounterListBuffer,
+			&dwCounterListSize,
+			pwsInstanceListBuffer,
+			&dwInstanceListSize, PERF_DETAIL_WIZARD, 0);
+
+		free(pwsCounterListBuffer);
+
+		if (status == ERROR_SUCCESS)
+			return pwsInstanceListBuffer;
+		else LogErr(L"Second PdhEnumObjectItems \"Network Interface\" failed : 0x%X (Counter name : %s)", status, counterName);
+		free(pwsInstanceListBuffer);
+	}
+	else LogErr(L"First PdhEnumObjectItems \"Network Interface\" failed : 0x%X (Counter name : %s)", status, counterName);
+	return NULL;
+}
+
+M_CAPI(BOOL) MPERF_Init3PerformanceCounters()
+{
+	BOOL rs = FALSE;
+	if (hQuery)
+	{
+		if (!counter3Inited)
+		{
+			//为计数器分配存储空间
+			counter3cpu = (PDH_HCOUNTER*)GlobalAlloc(GPTR, (sizeof(PDH_HCOUNTER)));
+			counter3disk = (PDH_HCOUNTER*)GlobalAlloc(GPTR, (sizeof(PDH_HCOUNTER)));
+			counter3network = (PDH_HCOUNTER*)GlobalAlloc(GPTR, (sizeof(PDH_HCOUNTER)));
+
+			//添加性能计数器
+			PDH_STATUS status = ERROR_SUCCESS;
+			status = PdhAddCounter(hQuery, L"\\Processor Information(_Total)\\% Processor Time", 0, counter3cpu);
+			if (status != ERROR_SUCCESS) {
+				GlobalFree(counter3cpu);
+				counter3cpu = NULL;
+				LogErr(L"Add Performance Counter \"Processor Information(_Total)\\% Processor Time\" failed : 0x%X", status);
+			}
+			status = PdhAddCounter(hQuery, L"\\PhysicalDisk(_Total)\\% Disk Time", 0, counter3disk);
+			if (status != ERROR_SUCCESS) {
+				GlobalFree(counter3disk);
+				counter3disk = NULL;
+				LogErr(L"Add Performance Counter \"PhysicalDisk(_Total)\\% Disk Time\" failed : 0x%X", status);
+			}
+
+
+			LPWSTR netInstanceNames = MPERF_EnumPerformanceCounterInstanceNames(L"Network Interface");
+			if (netInstanceNames) 
+			{
+				std::wstring netCounterName = FormatString(L"\\Network Interface(%s)\\Bytes Total/sec", netInstanceNames);
+				status = PdhAddCounter(hQuery, netCounterName.c_str(), 0, counter3network);
+				if (status != ERROR_SUCCESS)
+				{
+					LogErr(L"Add Performance Counter \"%s\" failed : 0x%X", netCounterName.c_str(), status);
+					GlobalFree(counter3network);
+					counter3network = NULL;
+				}
+				free(netInstanceNames);
+			}
+
+			counter3Inited = TRUE;
+		}
+	}
+	return rs;
+}
+M_CAPI(BOOL) MPERF_Destroy3PerformanceCounters()
+{
+	if (hQuery)
+	{
+		//释放计数器
+		if (counter3cpu) {
+			PdhRemoveCounter(*counter3cpu);
+			GlobalFree(counter3cpu);
+		}
+		if (counter3disk) {
+			PdhRemoveCounter(*counter3disk);
+			GlobalFree(counter3disk);
+		}
+		if (counter3network) {
+			PdhRemoveCounter(*counter3network);
+			GlobalFree(counter3network);
+		}
+
+		counter3Inited = FALSE;
+
+		return TRUE;
+	}
+	return FALSE;
+}
+
+M_CAPI(double)MPERF_GetCupUseAge_OrgCalcute()
+{
 	memcpy_s(&LastIdleTime, sizeof(FILETIME), &IdleTime, sizeof(FILETIME));
 	memcpy_s(&LastKernelTime, sizeof(FILETIME), &KernelTime, sizeof(FILETIME));
 	memcpy_s(&LastUserTime, sizeof(FILETIME), &LastUserTime, sizeof(FILETIME));
@@ -219,6 +346,57 @@ M_CAPI(double)MPERF_GetCupUseAge() {
 
 	return static_cast<double>((double)(kernel + user - idle) * 100 / (double)(kernel + user));
 }
+M_CAPI(double)MPERF_GetCupUseAge_Pdh()
+{
+	if (counter3cpu)
+	{
+		PDH_FMT_COUNTERVALUE pdh_counter_value;
+		DWORD pdh_counter_value_type;
+		PdhGetFormattedCounterValue(*counter3cpu, PDH_FMT_DOUBLE, &pdh_counter_value_type, &pdh_counter_value);
+		return pdh_counter_value.doubleValue;
+	}
+	return 0;
+}
+
+M_CAPI(double)MPERF_GetCupUseAge() {
+	if (counter3cpu)
+		return MPERF_GetCupUseAge_Pdh();
+	else return MPERF_GetCupUseAge_OrgCalcute();
+}
+M_CAPI(double)MPERF_GetRamUseAge2()
+{
+	if (MPERF_GetRamUseAge())
+		return  (double)((memory_statuex.ullTotalPhys - memory_statuex.ullAvailPhys) / (double)memory_statuex.ullTotalPhys);
+	return 0.0;
+}
+M_CAPI(BOOL) MPERF_GetRamUseAge()
+{
+	return GlobalMemoryStatusEx(&memory_statuex);
+}
+M_CAPI(double)MPERF_GetDiskUseage() 
+{
+	if (counter3disk)
+	{
+		PDH_FMT_COUNTERVALUE pdh_counter_value;
+		DWORD pdh_counter_value_type;
+		PdhGetFormattedCounterValue(*counter3disk, PDH_FMT_DOUBLE, &pdh_counter_value_type, &pdh_counter_value);
+		return pdh_counter_value.doubleValue / 100;
+	}
+	return 0;
+}
+M_CAPI(double)MPERF_GetNetWorkUseage() 
+{
+	if (counter3network)
+	{
+		PDH_FMT_COUNTERVALUE pdh_counter_value;
+		DWORD pdh_counter_value_type;
+		PdhGetFormattedCounterValue(*counter3network, PDH_FMT_DOUBLE, &pdh_counter_value_type, &pdh_counter_value);
+		return (pdh_counter_value.doubleValue * 0.0000001);
+	}
+	return 0;
+}
+
+//Process Performance
 
 M_CAPI(MPerfAndProcessData*) MPERF_PerfDataCreate()
 {
@@ -253,10 +431,12 @@ M_CAPI(double) MPERF_GetProcessCpuUseAge(PSYSTEM_PROCESSES p, MPerfAndProcessDat
 	}
 	return -1;
 }
-M_CAPI(SIZE_T) MPERF_GetProcessRam(PSYSTEM_PROCESSES p)
+M_CAPI(SIZE_T) MPERF_GetProcessRam(PSYSTEM_PROCESSES p, HANDLE hProcess)
 {
-	if (p)
-		return p->VmCounters.WorkingSetSize;
+	if (p) {	
+		return p->WorkingSetPrivateSize.QuadPart;
+		//return p->VmCounters.WorkingSetSize;
+	}
 	return 0;
 }
 M_CAPI(DWORD) MPERF_GetProcessDiskRate(PSYSTEM_PROCESSES p, MPerfAndProcessData*data)
@@ -281,6 +461,7 @@ M_CAPI(DWORD) MPERF_GetProcessDiskRate(PSYSTEM_PROCESSES p, MPerfAndProcessData*
 	return 0;
 }
 
+//Process Net Work Performance
 
 PMIB_TCPTABLE_OWNER_PID netProcess = NULL;
 
@@ -301,7 +482,6 @@ M_CAPI(BOOL) MPERF_GetConnectNetWorkAllBuffer(DWORD dwLocalAddr, DWORD dwLocalPo
 	{
 		data->NetWorkInBandWidth += rod.InboundBandwidth;
 		data->NetWorkOutBandWidth += rod.OutboundBandwidth;
-
 		return TRUE;
 	}
 	return 0;
@@ -361,7 +541,7 @@ M_CAPI(BOOL)MPERF_NET_UpdateAllProcessNetInfo()
 		DWORD realSize = sizeof(DWORD) + dwSize * sizeof(MIB_TCPROW_OWNER_PID);
 		netProcess = (PMIB_TCPTABLE_OWNER_PID)malloc(realSize);
 		memset(netProcess, 0, sizeof(realSize));
-		if (GetExtendedTcpTable(netProcess, &dwSize, TRUE, AF_INET, TCP_TABLE_OWNER_PID_CONNECTIONS, 0) != NO_ERROR)
+		if (dGetExtendedTcpTable(netProcess, &dwSize, TRUE, AF_INET, TCP_TABLE_OWNER_PID_CONNECTIONS, 0) != NO_ERROR)
 		{
 			MPERF_NET_FreeAllProcessNetInfo();
 			return FALSE;
@@ -373,3 +553,359 @@ M_CAPI(void)MPERF_GetNetInfo()
 {
 	MPERF_NET_FreeAllProcessNetInfo();
 }
+
+//Cpus Performance
+std::vector<PDH_HCOUNTER*> cpuCounters;
+
+M_CAPI(BOOL) MPERF_InitCpuDetalsPerformanceCounters()
+{
+	if (hQuery)
+	{
+		LPWSTR cpuInstanceNames = MPERF_EnumPerformanceCounterInstanceNames(L"Processor Information");
+		if (cpuInstanceNames)
+		{
+			for (LPWSTR pTemp = cpuInstanceNames; *pTemp != 0; pTemp += wcslen(pTemp) + 1)
+			{
+				if (wcscmp(pTemp, L"_Total") != 0 && wcscmp(pTemp, L"0,_Total") != 0)
+				{
+					
+					std::wstring cpuCounterName = FormatString(L"\\Processor Information(%s)\\%% Processor Time", pTemp);
+					PDH_HCOUNTER*thisCounter = (PDH_HCOUNTER*)GlobalAlloc(GPTR, (sizeof(PDH_HCOUNTER)));
+					PDH_STATUS status = PdhAddCounter(hQuery, cpuCounterName.c_str(), 0, thisCounter);
+					if (status != ERROR_SUCCESS)
+					{
+						GlobalFree(thisCounter);
+						LogErr(L"Add Performance Counter \"%s\" failed : 0x%X", cpuCounterName.c_str(), status);
+					}
+					else cpuCounters.push_back(thisCounter);
+				}
+			}
+			free(cpuInstanceNames);
+		}
+		return TRUE;
+	}
+	return FALSE;
+}
+M_CAPI(BOOL) MPERF_DestroyCpuDetalsPerformanceCounters()
+{
+	if (hQuery)
+	{
+		for (auto it = cpuCounters.begin(); it != cpuCounters.end(); it++) 
+		{
+			PdhRemoveCounter(*(*it));
+			GlobalFree(*it);
+		}
+
+		cpuCounters.clear();
+		return TRUE;
+	}
+	return FALSE;
+}
+M_CAPI(int) MPERF_GetCpuDetalsPerformanceCountersCount() 
+{
+	return static_cast<int>(cpuCounters.size());
+}
+M_CAPI(double) MPERF_GetCpuDetalsCpuUsage(int index)
+{
+	if (index >= 0 && (UINT)index < cpuCounters.size())
+	{
+		PDH_FMT_COUNTERVALUE pdh_counter_value;
+		DWORD pdh_counter_value_type;
+		PdhGetFormattedCounterValue(*cpuCounters[index], PDH_FMT_DOUBLE, &pdh_counter_value_type, &pdh_counter_value);
+		return pdh_counter_value.doubleValue;
+	}
+	return 0;
+}
+
+//Disks Performance
+std::vector<MPerfDiskData*> diskCounters;
+
+M_CAPI(UINT) MPERF_InitDisksPerformanceCounters()
+{
+	if (hQuery)
+	{
+		PDH_STATUS status;
+		LPWSTR diskInstanceNames = MPERF_EnumPerformanceCounterInstanceNames(L"PhysicalDisk");
+		if (diskInstanceNames)
+		{
+			for (LPWSTR pTemp = diskInstanceNames; *pTemp != 0; pTemp += wcslen(pTemp) + 1)
+			{
+				if (wcscmp(pTemp, L"_Total") != 0)
+				{
+					MPerfDiskData *data = (MPerfDiskData*)malloc(sizeof(MPerfDiskData));
+					memset(data, 0, sizeof(MPerfDiskData));
+					wcscpy_s(data->performanceCounter_Name, pTemp);
+
+					std::wstring cpuCounterName = FormatString(L"\\PhysicalDisk(%s)\\Avg. Disk Queue Length", pTemp);
+					data->performanceCounter_avgQue = (PDH_HCOUNTER*)GlobalAlloc(GPTR, (sizeof(PDH_HCOUNTER)));
+					status = PdhAddCounter(hQuery, cpuCounterName.c_str(), 0, data->performanceCounter_avgQue);
+					if (status != ERROR_SUCCESS)
+					{
+						GlobalFree(data->performanceCounter_avgQue);
+						data->performanceCounter_avgQue = nullptr;
+						LogErr(L"Add Performance Counter \"%s\" failed : 0x%X", cpuCounterName.c_str(), status);
+					}
+
+					cpuCounterName = FormatString(L"\\PhysicalDisk(%s)\\Disk Reads/sec", pTemp);
+					data->performanceCounter_read = (PDH_HCOUNTER*)GlobalAlloc(GPTR, (sizeof(PDH_HCOUNTER)));
+					status = PdhAddCounter(hQuery, cpuCounterName.c_str(), 0, data->performanceCounter_read);
+					if (status != ERROR_SUCCESS)
+					{
+						GlobalFree(data->performanceCounter_avgQue);
+						data->performanceCounter_avgQue = nullptr;
+						LogErr(L"Add Performance Counter \"%s\" failed : 0x%X", cpuCounterName.c_str(), status);
+					}
+
+					cpuCounterName = FormatString(L"\\PhysicalDisk(%s)\\Disk Writes/sec", pTemp);
+					data->performanceCounter_write = (PDH_HCOUNTER*)GlobalAlloc(GPTR, (sizeof(PDH_HCOUNTER)));
+					status = PdhAddCounter(hQuery, cpuCounterName.c_str(), 0, data->performanceCounter_write);
+					if (status != ERROR_SUCCESS)
+					{
+						GlobalFree(data->performanceCounter_write);
+						data->performanceCounter_write = nullptr;
+						LogErr(L"Add Performance Counter \"%s\" failed : 0x%X", cpuCounterName.c_str(), status);
+					}
+
+					cpuCounterName = FormatString(L"\\PhysicalDisk(%s)\\Disk Read Bytes/sec", pTemp);
+					data->performanceCounter_readSpeed = (PDH_HCOUNTER*)GlobalAlloc(GPTR, (sizeof(PDH_HCOUNTER)));
+					status = PdhAddCounter(hQuery, cpuCounterName.c_str(), 0, data->performanceCounter_readSpeed);
+					if (status != ERROR_SUCCESS)
+					{
+						GlobalFree(data->performanceCounter_readSpeed);
+						data->performanceCounter_readSpeed = nullptr;
+						LogErr(L"Add Performance Counter \"%s\" failed : 0x%X", cpuCounterName.c_str(), status);
+					}
+
+					cpuCounterName = FormatString(L"\\PhysicalDisk(%s)\\Disk Write Bytes/sec", pTemp);
+					data->performanceCounter_writeSpeed = (PDH_HCOUNTER*)GlobalAlloc(GPTR, (sizeof(PDH_HCOUNTER)));
+					status = PdhAddCounter(hQuery, cpuCounterName.c_str(), 0, data->performanceCounter_writeSpeed);
+					if (status != ERROR_SUCCESS)
+					{
+						GlobalFree(data->performanceCounter_writeSpeed);
+						data->performanceCounter_writeSpeed = nullptr;
+						LogErr(L"Add Performance Counter \"%s\" failed : 0x%X", cpuCounterName.c_str(), status);
+					}
+
+					diskCounters.push_back(data);
+				}
+			}
+
+			return (UINT)diskCounters.size();
+			free(diskInstanceNames);
+		}
+	}
+	return FALSE;
+}
+M_CAPI(BOOL) MPERF_DestroyDisksPerformanceCounters()
+{
+	if (hQuery)
+	{
+		for (auto it = diskCounters.begin(); it != diskCounters.end(); it++)
+		{
+			MPerfDiskData *data = (*it);
+			if (data->performanceCounter_avgQue)
+			{
+				PdhRemoveCounter(*data->performanceCounter_avgQue);
+				GlobalFree(data->performanceCounter_avgQue);
+			}
+			if (data->performanceCounter_read)
+			{
+				PdhRemoveCounter(*data->performanceCounter_read);
+				GlobalFree(data->performanceCounter_read);
+			}
+			if (data->performanceCounter_readSpeed)
+			{
+				PdhRemoveCounter(*data->performanceCounter_readSpeed);
+				GlobalFree(data->performanceCounter_readSpeed);
+			}
+			if (data->performanceCounter_write)
+			{
+				PdhRemoveCounter(*data->performanceCounter_write);
+				GlobalFree(data->performanceCounter_write);
+			}
+			if (data->performanceCounter_writeSpeed)
+			{
+				PdhRemoveCounter(*data->performanceCounter_writeSpeed);
+				GlobalFree(data->performanceCounter_writeSpeed);
+			}
+
+			free(data);
+		}
+	}
+	return FALSE;
+}
+M_CAPI(MPerfDiskData*) MPERF_GetDisksPerformanceCounters(int index)
+{
+	if (index >= 0 && (UINT)index < diskCounters.size())
+		return diskCounters[index];
+	return 0;
+}
+M_CAPI(BOOL) MPERF_GetDisksPerformanceCountersValues(MPerfDiskData*data,
+	double*out_readSpeed, double*out_writeSpeed, double*out_read, double*out_write, double*out_readavgQue)
+{
+	if (data)
+	{
+		PDH_FMT_COUNTERVALUE pdh_counter_value;
+		DWORD pdh_counter_value_type;
+		if (out_readSpeed)
+		{
+			PdhGetFormattedCounterValue(*data->performanceCounter_readSpeed, PDH_FMT_DOUBLE, &pdh_counter_value_type, &pdh_counter_value);
+			*out_readSpeed = pdh_counter_value.doubleValue;
+		}
+		if (out_writeSpeed)
+		{
+			PdhGetFormattedCounterValue(*data->performanceCounter_writeSpeed, PDH_FMT_DOUBLE, &pdh_counter_value_type, &pdh_counter_value);
+			*out_writeSpeed = pdh_counter_value.doubleValue;
+		}
+		if (out_read)
+		{
+			PdhGetFormattedCounterValue(*data->performanceCounter_read, PDH_FMT_DOUBLE, &pdh_counter_value_type, &pdh_counter_value);
+			*out_read = pdh_counter_value.doubleValue;
+		}
+		if (out_write)
+		{
+			PdhGetFormattedCounterValue(*data->performanceCounter_write, PDH_FMT_DOUBLE, &pdh_counter_value_type, &pdh_counter_value);
+			*out_write = pdh_counter_value.doubleValue;
+		}
+		if (out_readavgQue)
+		{
+			PdhGetFormattedCounterValue(*data->performanceCounter_avgQue, PDH_FMT_DOUBLE, &pdh_counter_value_type, &pdh_counter_value);
+			*out_readavgQue = pdh_counter_value.doubleValue / 100;
+		}
+	}
+	return FALSE;
+}
+M_CAPI(BOOL) MPERF_GetDisksPerformanceCountersInstanceName(MPerfDiskData*data, LPWSTR buf, int size) {
+	if (data)
+	{
+		wcscpy_s(buf, size, data->performanceCounter_Name);
+		return TRUE;
+	}
+	return FALSE;
+}
+M_CAPI(double)MPERF_GetDisksPerformanceCountersSimpleValues(MPerfDiskData*data)
+{
+	if (data && data->performanceCounter_avgQue)
+	{
+		PDH_FMT_COUNTERVALUE pdh_counter_value;
+		DWORD pdh_counter_value_type;
+		PdhGetFormattedCounterValue(*data->performanceCounter_avgQue, PDH_FMT_DOUBLE, &pdh_counter_value_type, &pdh_counter_value);
+		return pdh_counter_value.doubleValue * 100;
+	}
+	return 0;
+}
+
+//Network Performance
+std::vector<MPerfNetData*> netCounters;
+
+M_CAPI(UINT) MPERF_InitNetworksPerformanceCounters()
+{
+	if (hQuery)
+	{
+		PDH_STATUS status;
+		DWORD netsInstanceNamesSize = 0;
+		LPWSTR netInstanceNames = MPERF_EnumPerformanceCounterInstanceNames(L"Network Interface");
+		if (netInstanceNames)
+		{
+			for (LPWSTR pTemp = netInstanceNames; *pTemp != 0; pTemp += wcslen(pTemp) + 1)
+			{
+				MPerfNetData *data = (MPerfNetData*)malloc(sizeof(MPerfNetData));
+				memset(data, 0, sizeof(MPerfNetData));
+				wcscpy_s(data->performanceCounter_Name, pTemp);
+
+				std::wstring cpuCounterName = FormatString(L"\\Network Interface(%s)\\Bytes Sent/sec", pTemp);
+				data->performanceCounter_sent = (PDH_HCOUNTER*)GlobalAlloc(GPTR, (sizeof(PDH_HCOUNTER)));
+				status = PdhAddCounter(hQuery, cpuCounterName.c_str(), 0, data->performanceCounter_sent);
+				if (status != ERROR_SUCCESS)
+				{
+					GlobalFree(data->performanceCounter_sent);
+					data->performanceCounter_sent = 0;
+					LogErr(L"Add Performance Counter \"%s\" failed : 0x%X", cpuCounterName.c_str(), status);
+				}
+
+				cpuCounterName = FormatString(L"\\Network Interface(%s)\\Bytes Received/sec", pTemp);
+				data->performanceCounter_receive = (PDH_HCOUNTER*)GlobalAlloc(GPTR, (sizeof(PDH_HCOUNTER)));
+				status = PdhAddCounter(hQuery, cpuCounterName.c_str(), 0, data->performanceCounter_receive);
+				if (status != ERROR_SUCCESS)
+				{
+					GlobalFree(data->performanceCounter_receive);
+					data->performanceCounter_receive = 0;
+					LogErr(L"Add Performance Counter \"%s\" failed : 0x%X", cpuCounterName.c_str(), status);
+				}
+
+				netCounters.push_back(data);
+			}		
+			free(netInstanceNames);
+			return (UINT)diskCounters.size();
+		}
+	}
+	return FALSE;
+}
+M_CAPI(BOOL) MPERF_DestroyNetworksPerformanceCounters()
+{
+	if (hQuery)
+	{
+		for (auto it = netCounters.begin(); it != netCounters.end(); it++)
+		{
+			MPerfNetData *data = (*it);
+			if (data->performanceCounter_receive)
+			{
+				PdhRemoveCounter(*data->performanceCounter_receive);
+				GlobalFree(data->performanceCounter_receive);
+			}
+			if (data->performanceCounter_sent)
+			{
+				PdhRemoveCounter(*data->performanceCounter_sent);
+				GlobalFree(data->performanceCounter_sent);
+			}
+
+			free(data);
+		}
+	}
+	return FALSE;
+}
+M_CAPI(MPerfNetData*) MPERF_GetNetworksPerformanceCounters(int index)
+{
+	if (index >= 0 && (UINT)index < netCounters.size())
+		return netCounters[index];
+	return 0;
+}
+M_CAPI(BOOL) MPERF_GetNetworksPerformanceCountersValues(MPerfNetData*data, double*out_sent, double*out_receive)
+{
+	if (data)
+	{
+		PDH_FMT_COUNTERVALUE pdh_counter_value;
+		DWORD pdh_counter_value_type;
+		if (out_sent)
+		{
+			PdhGetFormattedCounterValue(*data->performanceCounter_sent, PDH_FMT_DOUBLE, &pdh_counter_value_type, &pdh_counter_value);
+			*out_sent = pdh_counter_value.doubleValue;
+		}
+		if (out_receive)
+		{
+			PdhGetFormattedCounterValue(*data->performanceCounter_receive, PDH_FMT_DOUBLE, &pdh_counter_value_type, &pdh_counter_value);
+			*out_receive = pdh_counter_value.doubleValue;
+		}
+	}
+	return FALSE;
+}
+M_CAPI(BOOL) MPERF_GetNetworksPerformanceCountersInstanceName(MPerfNetData*data, LPWSTR buf, int size) {
+	if (data)
+	{
+		wcscpy_s(buf, size, data->performanceCounter_Name);
+		return TRUE;
+	}
+	return FALSE;
+}
+M_CAPI(double)MPERF_GetNetworksPerformanceCountersSimpleValues(MPerfNetData*data)
+{
+	if (data && data->performanceCounter_total)
+	{
+		PDH_FMT_COUNTERVALUE pdh_counter_value;
+		DWORD pdh_counter_value_type;
+		PdhGetFormattedCounterValue(*data->performanceCounter_total, PDH_FMT_DOUBLE, &pdh_counter_value_type, &pdh_counter_value);
+		return pdh_counter_value.doubleValue * 0.00001;
+	}
+	return 0;
+}
+

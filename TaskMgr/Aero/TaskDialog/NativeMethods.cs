@@ -17,13 +17,13 @@ namespace PCMgr.Aero.TaskDialog
     internal class NativeMethods {
 
         /// <summary>Direct Task Dialog call.</summary>
-        [DllImport(FormMain.COREDLLNAME, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(PCMgr.NativeMethods.COREDLLNAME, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
         public static extern int MTaskDialog(IntPtr hWndParent, IntPtr hInstance,
             string pszWindowTitle, string pszMainInstruction, string pszContent,
             int dwCommonButtons, IntPtr pszIcon, out int pnButton);
 
         /// <summary>Indirect Task Dialog call. Allows complex dialogs with interaction logic (via callback).</summary>
-        [DllImport(FormMain.COREDLLNAME, CharSet = CharSet.Unicode, PreserveSig = false, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(PCMgr.NativeMethods.COREDLLNAME, CharSet = CharSet.Unicode, PreserveSig = false, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr MTaskDialogIndirect(ref TaskDialogConfig pTaskConfig,
             out int pnButton, out int pnRadioButton, out bool pfVerificationFlagChecked);
 

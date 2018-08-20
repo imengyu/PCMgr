@@ -23,7 +23,7 @@ namespace PCMgr.WorkWindow
             for (int i = 0; i < listView1.Items.Count; i++)
                 if (listView1.Items[i].Checked)
                     headers = headers + "#" + ((aa)listView1.Items[i].Tag).a + "-" + ((aa)listView1.Items[i].Tag).b;
-            FormMain.SetConfig("MainHeaders", "AppSetting", headers);
+            NativeMethods.SetConfig("MainHeaders", "AppSetting", headers);
             f.saveheader = false;
         }
 

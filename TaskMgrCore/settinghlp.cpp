@@ -5,16 +5,6 @@
 
 WCHAR iniPath[MAX_PATH];
 
-void M_CFG_Init() {
-	WCHAR szFileFullPath[MAX_PATH];
-	GetModuleFileName(NULL, szFileFullPath, MAX_PATH);
-	std::wstring*exename = Path::GetFileNameWithoutExtension(szFileFullPath);
-	std::wstring*dir = Path::GetDirectoryName(szFileFullPath);
-	std::wstring inipath = *dir + L"\\" + *exename + L".ini";
-	wcscpy_s(iniPath, inipath.c_str());
-	delete dir;	delete exename;
-}
-
 M_CAPI(LPWSTR) M_CFG_GetCfgFilePath() {
 	return iniPath;
 }

@@ -120,4 +120,7 @@
   <data name="performanceGridDiskTime.LeftText" xml:space="preserve">
     <value>Active time</value>
   </data>
+  <data name="performanceGridSpeed.LeftText" xml:space="preserve">
+    <value>Disk</value>
+  </data>
 </root>

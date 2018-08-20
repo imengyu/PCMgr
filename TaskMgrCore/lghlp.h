@@ -5,6 +5,9 @@
 //语言模块
 //所有字符串都在此加载
 
+//设置退出时语言资源回收
+M_CAPI(void) MLG_SetLanuageItems_CanRealloc();
+
 //设置退出时语言资源不回收
 M_CAPI(void) MLG_SetLanuageItems_NoRealloc();
 //设置菜单的语言资源

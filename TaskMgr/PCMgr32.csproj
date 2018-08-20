@@ -112,14 +112,12 @@
   <PropertyGroup />
   <PropertyGroup />
   <ItemGroup>
-    <Reference Include="AeroWizard">
-      <HintPath>..\..\..\范例\AeroWizard-master\src\Library\bin\Debug\v4.0\AeroWizard.dll</HintPath>
+    <Reference Include="AeroWizard32">
+      <HintPath>..\AeroWizard32.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Aero\CommandLink.cs">

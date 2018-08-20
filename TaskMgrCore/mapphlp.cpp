@@ -57,7 +57,7 @@ HANDLE hMutex;
 
 WCHAR appDir[MAX_PATH];
 DWORD dwMainAppRet = 0;
-
+extern WCHAR iniPath[MAX_PATH];
 
 int menu_last_x = 0,
 menu_last_y = 0;
@@ -88,6 +88,7 @@ void print(LPWSTR str)
 bool MLoadAppBackUp();
 LONG WINAPI MUnhandledExceptionFilter(struct _EXCEPTION_POINTERS *lpExceptionInfo);
 
+//Worker Calls
 M_API BOOL MAppStartEnd() {
 	return CloseHandle(hMutex);
 }
@@ -295,9 +296,6 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 	case 198:
 		selectItem4 = (HWND)data;
 		break;
-	case 199:
-		wcscpy_s(appDir, (LPWSTR)data);
-		break;
 	case 200:
 		ShowWindow(hWnd, SW_HIDE);
 		break;
@@ -461,7 +459,7 @@ M_API void MAppSetStartingProgessText(LPWSTR text)
 {
 	MAppMainCall(34, text, NULL);
 }
-
+//...
 M_API HICON MGetWindowIcon(HWND hWnd)
 {
 	HICON m_hSmallIcon;
@@ -478,9 +476,22 @@ M_API BOOL MIsSystemSupport()
 	return IsWindows7OrGreater();
 }
 
+//mono runtime
+
 LPWSTR*argsStrs = NULL;
 
+//App help
+M_API void MGlobalAppInitialize()
+{
+	GetModuleFileName(NULL, appDir, MAX_PATH);
+	PathRemoveFileSpec(appDir);
 
+	GetModuleFileName(0, iniPath, MAX_PATH);
+	PathRenameExtension(iniPath, (LPWSTR)L".ini");
+
+	MLG_SetLanuageItems_NoRealloc();
+	M_LOG_Init(M_CFG_GetConfigBOOL(L"ShowDebugWindow", L"Configure", FALSE));
+}
 M_API void MAppMainExit(UINT exitcode)
 {
 	ExitProcess(exitcode);
@@ -489,13 +500,11 @@ M_API DWORD MAppMainGetExitCode()
 {
 	return dwMainAppRet;
 }
-M_API void MAppMainRun()
+M_API BOOL MAppMainRun()
 {
-	M_LOG_Init(M_CFG_GetConfigBOOL(L"ShowDebugWindow", L"Configure", FALSE));
-	MLG_SetLanuageItems_NoRealloc();
+	BOOL rs = FALSE;
 
-	GetModuleFileName(NULL, appDir, MAX_PATH);
-	PathRemoveFileSpec(appDir);
+	MGlobalAppInitialize();
 
 	WCHAR mainDllPath[MAX_PATH];
 	wcscpy_s(mainDllPath, appDir);
@@ -508,12 +517,10 @@ M_API void MAppMainRun()
 	{
 		MShowErrorMessage(L"Not found Main Dll.", L"Load app failed", MB_ICONERROR);
 		LogErr(L"Main Dll missing : %s", mainDllPath);
-		return;
+		return rs;
 	}
 
-	typedef HRESULT (WINAPI*_CLRCreateInstance)(REFCLSID clsid, REFIID riid, LPVOID *ppInterface);
-
-	_CLRCreateInstance c = (_CLRCreateInstance)GetProcAddress(GetModuleHandle(L"mscoree.dll"), "CLRCreateInstance");
+	CLRCreateInstanceFnPtr c = (CLRCreateInstanceFnPtr)GetProcAddress(GetModuleHandle(L"mscoree.dll"), "CLRCreateInstance");
 	if (c)
 	{
 		ICLRMetaHost *pMetaHost = nullptr;
@@ -541,7 +548,12 @@ M_API void MAppMainRun()
 
 		LogInfo(L"Load main app : %s", mainDllPath);
 		hr = pRuntimeHost->ExecuteInDefaultAppDomain(mainDllPath, L"PCMgr.Program", L"ProgramEntry", GetCommandLine(), &dwMainAppRet);
-		if (FAILED(hr)) LogErr(L"ExecuteInDefaultAppDomain %s failed HRESULT : 0x%08X", mainDllPath, hr);
+		if (FAILED(hr)) {
+			std::wstring hResultSr = FormatString(L"App : %s Start failed\nHRESULT : 0x%08X", mainDllPath, hr);
+			MShowErrorMessage((LPWSTR)hResultSr.c_str(), L"Load app failed", MB_ICONERROR);
+			LogErr(L"ExecuteInDefaultAppDomain %s failed HRESULT : 0x%08X", mainDllPath, hr);
+		}
+		else rs = TRUE;
 		hr = pRuntimeHost->Stop();
 
 	cleanup:
@@ -562,21 +574,23 @@ M_API void MAppMainRun()
 		MShowErrorMessage(L"Not found .NET framework in your computer.", L"Load app failed", MB_ICONERROR);
 		LogErr(L"Load mscoree.dll failed !");
 	}
+	return rs;
 }
+//App agrs
 M_API int MAppMainGetArgs(LPWSTR cmdline) {
 	int argc = 0;
 	argsStrs = CommandLineToArgvW(cmdline, &argc);
-
 	return argc;
 }
 M_API LPWSTR MAppMainGetArgsStr(int index)
 {
 	return argsStrs[index];
 }
-M_API void MAppMainGetArgsFreAall() {
+M_API void MAppMainGetArgsFreeAll() {
 	if (argsStrs) LocalFree(argsStrs);
 }
 
+//old init funs
 typedef void(*startfun)();
 
 EXTERN_C BOOL STDMETHODCALLTYPE _CorDllMain(HINSTANCE hInst, DWORD dwReason, LPVOID lpReserved);
@@ -602,6 +616,7 @@ M_API void MAppRun2() {
 	MLoadAppBackUp();
 }
 
+//global ex
 M_API void MAppExit() {
 	if (hMainExitCallBack)
 		hMainExitCallBack();
@@ -1365,6 +1380,7 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	return (INT_PTR)FALSE;
 }
 
+//Dialog boxs
 void MPrintErrorMessage(LPWSTR str, int icon)
 {
 	MShowErrorMessage(str, L"", icon, MB_OK);
@@ -1397,6 +1413,7 @@ int MShowMessageDialog(HWND hwnd, LPWSTR text, LPWSTR title, LPWSTR instruction,
 }
 int MShowErrorMessage(LPWSTR text, LPWSTR intr, int ico, int btn)
 {
+	if (ico == 0)ico = MB_ICONERROR;
 	return MShowMessageDialog(hWndMain, text, DEFDIALOGGTITLE, intr, ico, btn);
 }
 int MShowErrorMessageWithLastErr(LPWSTR text, LPWSTR intr, int ico, int btn)
@@ -1406,6 +1423,7 @@ int MShowErrorMessageWithLastErr(LPWSTR text, LPWSTR intr, int ico, int btn)
 	return MShowMessageDialog(hWndMain, (LPWSTR)w.c_str(), DEFDIALOGGTITLE, intr, ico, btn);
 }
 
+//TaskDialog
 EXTERN_C M_API HRESULT MTaskDialogIndirect(_In_ const TASKDIALOGCONFIG *pTaskConfig, _Out_opt_ int *pnButton, _Out_opt_ int *pnRadioButton, _Out_opt_ BOOL *pfVerificationFlagChecked)
 {
 	return TaskDialogIndirect(pTaskConfig, pnButton, pnRadioButton, pfVerificationFlagChecked);
@@ -1423,19 +1441,11 @@ M_API void MConvertStrDel(void*str)
 }
 M_API LPWSTR MConvertLPCSTRToLPWSTR(const char * szString)
 {
-	size_t dwLen = strlen(szString) + 1;
-	int nwLen = MultiByteToWideChar(CP_ACP, 0, szString, static_cast<int>(dwLen), NULL, 0);
-	LPWSTR lpszPath = new WCHAR[dwLen];
-	MultiByteToWideChar(CP_ACP, 0, szString, static_cast<int>(dwLen), lpszPath, nwLen);
-	return lpszPath;
+	return AnsiToUnicode(szString);
 }
 M_API LPCSTR MConvertLPWSTRToLPCSTR(const WCHAR * szString)
 {
-	size_t dwLen = wcslen(szString) + 1;
-	char *pChar = new char[dwLen];
-	WideCharToMultiByte(CP_ACP, 0, szString, -1,
-		pChar, static_cast<int>(dwLen), NULL, NULL);
-	return pChar;
+	return UnicodeToAnsi(szString);
 }
 
 M_API LPWSTR MStrUpW(const LPWSTR str)
@@ -1612,6 +1622,15 @@ M_API BOOL MStrContainsW(const LPWSTR str, const LPWSTR testStr, LPWSTR *resultS
 	return result;
 }
 
+M_API BOOL MStrContainsCharA(const LPCSTR str, const CHAR testStr)
+{
+	return strchr(str, testStr) != NULL;
+}
+M_API BOOL MStrContainsCharW(const LPWSTR str, const WCHAR testStr)
+{
+	return wcsrchr(str, testStr) != NULL;
+}
+
 M_API int MHexStrToIntW(wchar_t *s)
 {
 	size_t i, m = lstrlen(s);
@@ -1652,15 +1671,9 @@ M_API long long MHexStrToLongW(wchar_t *s)
 }
 #pragma endregion
 
-int GenerateMiniDump(PEXCEPTION_POINTERS pExceptionPointers);
+//Crush annd MiniDump
 
-LONG WINAPI MUnhandledExceptionFilter(struct _EXCEPTION_POINTERS *lpExceptionInfo)
-{
-	// 这里做一些异常的过滤或提示
-	if (IsDebuggerPresent())
-		return EXCEPTION_CONTINUE_SEARCH;
-	return GenerateMiniDump(lpExceptionInfo);
-}
+//Create MiniDump file
 int GenerateMiniDump(PEXCEPTION_POINTERS pExceptionPointers)
 {
 	// 创建 dmp 文件件
@@ -1735,4 +1748,14 @@ int GenerateMiniDump(PEXCEPTION_POINTERS pExceptionPointers)
 	}
 	return EXCEPTION_EXECUTE_HANDLER;
 }
+//UnhandledExceptionFilter
+LONG WINAPI MUnhandledExceptionFilter(struct _EXCEPTION_POINTERS *lpExceptionInfo)
+{
+	// 这里做一些异常的过滤或提示
+	if (IsDebuggerPresent())
+		return EXCEPTION_CONTINUE_SEARCH;
+	return GenerateMiniDump(lpExceptionInfo);
+}
+
+
 

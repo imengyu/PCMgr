@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static PCMgr.NativeMethods;
 
 namespace PCMgr.WorkWindow
 {
@@ -19,9 +20,9 @@ namespace PCMgr.WorkWindow
 
         private FormFind formFind = null;
 
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private extern static void MOnCloseMyDbgView();
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         private extern static bool MSaveFileSingal(IntPtr hWnd, string startDir, string title, string fileFilter, string fileName, string defExt, StringBuilder strrs, uint bufsize);
 
 
@@ -108,7 +109,7 @@ namespace PCMgr.WorkWindow
                 nextItem.Selected = true;
                 listViewOutPut.EnsureVisible(listViewOutPut.Items.IndexOf(nextItem));
                 formFind.Hide();
-                FormMain.MAppWorkCall3(213, Handle, IntPtr.Zero);
+                MAppWorkCall3(213, Handle, IntPtr.Zero);
             }
             else MessageBox.Show(FormMain.str_CantFind + " \"" + keyword + "\"");
         }
@@ -144,7 +145,7 @@ namespace PCMgr.WorkWindow
 
         private void FormKDbgPrint_Load(object sender, EventArgs e)
         {
-            string set = FormMain.GetConfig("DbgPrintViewPosSize", "AppSetting", "");
+            string set = GetConfig("DbgPrintViewPosSize", "AppSetting", "");
             if (set != "" && set.Contains("#"))
             {
                 string[] vals = set.Split('#');
@@ -178,7 +179,7 @@ namespace PCMgr.WorkWindow
         private void FormKDbgPrint_FormClosing(object sender, FormClosingEventArgs e)
         {
             MOnCloseMyDbgView();
-            FormMain.SetConfig("DbgPrintViewPosSize", "AppSetting", Left + "#" + Top + "#" + Width + "#" + Height);
+            SetConfig("DbgPrintViewPosSize", "AppSetting", Left + "#" + Top + "#" + Width + "#" + Height);
         }
     }
 }

@@ -35,6 +35,11 @@ namespace PCMgr.Ctls
                 par.Controls.Add(vs);
             }
             lineBrush = new LinearGradientBrush(new Point(0, 0), new Point(0, 60), Color.Transparent, Color.FromArgb(187, 187, 187));
+            hotBrush = new LinearGradientBrush(new Point(0, 0), new Point(0, 60), Color.FromArgb(254, 216, 200), Color.FromArgb(254, 192, 166));
+            hotBrushHover = new LinearGradientBrush(new Point(0, 0), new Point(0, 60), Color.FromArgb(254, 242, 237), Color.FromArgb(254, 212, 194));
+            tipToolTip = new ToolTip();
+
+            CanSizeCloum = true;
         }
 
         private void Vs_ValueChanged(object sender, EventArgs e)
@@ -44,7 +49,7 @@ namespace PCMgr.Ctls
                 m = true;
                 t.Start();
                 {
-                    XOffiest = ((HScrollBar)sender).Value - ((HScrollBar)sender).Minimum;
+                    XOffest = ((HScrollBar)sender).Value - ((HScrollBar)sender).Minimum;
                     XOffestChanged?.Invoke(this, EventArgs.Empty);
                 }
             }
@@ -67,6 +72,8 @@ namespace PCMgr.Ctls
             Vsitem();
         }
 
+        private LinearGradientBrush hotBrushHover = null;
+        private LinearGradientBrush hotBrush = null;
         private LinearGradientBrush lineBrush = null;
         private IntPtr hTheme = IntPtr.Zero;
         private HScrollBar vs = null;
@@ -75,9 +82,16 @@ namespace PCMgr.Ctls
         private Timer t = new Timer();
         private bool mouseDowned = false, m = false;
         private TaskMgrListHeaderItemCollection items;
+        private TaskMgrListHeaderItem lastTooltipItem = null;
         private TaskMgrListHeaderItem enteredItem = null;
         private TaskMgrListHeaderItem arredItem = null;
         private TaskMgrListHeaderItem resizeItem = null;
+        private TaskMgrListHeaderItem moveItem = null;
+        private ToolTip tipToolTip = null;
+        private int mouseDownXInBlock = 0;
+        private int firstBlockW = 0;
+        private int mouseDownXPos = 0;
+
         private Font fb = new Font("微软雅黑", 12f);
         private Font fs = new Font("微软雅黑", 8.5f);
         private int allWidth = 0;
@@ -91,11 +105,20 @@ namespace PCMgr.Ctls
         {
             get { return items; }
         }
-        public int XOffiest
+        public int XOffest
         {
             get { return xOffiest; }
             set { xOffiest = value;vsed = false; Vsitem(); Invalidate(); XOffestChanged?.Invoke(this, null); }
         }
+        public bool CanMoveCloum
+        {
+            get;set;
+        }
+        public bool CanSizeCloum
+        {
+            get; set;
+        }
+
         /// <summary>
         /// 获取一个值，用以指示 System.ComponentModel.Component 当前是否处于设计模式。
         /// </summary>
@@ -127,12 +150,12 @@ namespace PCMgr.Ctls
             int xrpos = item.X - xOffiest;
             if (xrpos < 0)
             {
-                XOffiest = item.X;
+                XOffest = item.X;
                 return true;
             }
             else if (xrpos + item.Width > Width)
             {
-                XOffiest = item.X - Width + item.Width;
+                XOffest = item.X - Width + item.Width;
                 return true;
             }
             return false;
@@ -150,6 +173,27 @@ namespace PCMgr.Ctls
                 enteredItem.ArrowType = TaskMgrListHeaderSortArrow.Ascending;
             arredItem = enteredItem;
             Invalidate();
+        }
+        private void ExchangeTwoCloseItem(int index1, bool isNext)
+        {
+            if (isNext)
+            {
+                int index2 = index1 + 1;
+                TaskMgrListHeaderItem li = items[index1];
+                items[index1] = items[index2];
+                items[index2] = li;
+
+                items[index2].X = items[index1].X - items[index2].Width;
+            }
+            else
+            {
+                int index2 = index1 - 1;
+                TaskMgrListHeaderItem li = items[index1];
+                items[index1] = items[index2];
+                items[index2] = li;
+
+                items[index2].X = items[index1].X + items[index1].Width;
+            }
         }
 
         protected override bool ProcessDialogKey(Keys keyData)
@@ -259,23 +303,35 @@ namespace PCMgr.Ctls
         }
         protected override void OnMouseDown(MouseEventArgs e)
         {
+            if (moveItem != null)
+            {
+                mouseDownXPos = e.X;
+                if (items.Count > 0)
+                    firstBlockW = items[0].Width;
+                mouseDownXInBlock = e.X - (moveItem.X - XOffest);
+            }
             mouseDowned = true;
             base.OnMouseDown(e);
         }
         protected override void OnMouseUp(MouseEventArgs e)
         {
-            mouseDowned = false;
-            base.OnMouseUp(e);
-        }
-        protected override void OnMouseClick(MouseEventArgs e)
-        {
-            if (enteredItem != null)
+            if (moveItem != null)
             {
-                if (e.Button == MouseButtons.Left && e.Clicks == 1)
+                CloumIndexChanged?.Invoke(this, null);
+                moveItem = null;
+            }
+            else if (resizeItem != null)
+            {
+                resizeItem = null;
+            }
+            else if (enteredItem != null)
+            {
+                if (e.Button == MouseButtons.Left)
                     ReSetEnterItemArrow();
                 CloumClick?.Invoke(this, new TaskMgrListHeaderEventArgs(enteredItem, items.IndexOf(enteredItem), e));
             }
-            base.OnMouseClick(e);
+            mouseDowned = false;
+            base.OnMouseUp(e);
         }
         protected override void OnMouseMove(MouseEventArgs e)
         {
@@ -286,13 +342,53 @@ namespace PCMgr.Ctls
                 t.Start();
                 if (mouseDowned && resizeItem != null)
                 {
-                    if (x - resizeItem.X > 35)
+                    if (x - (resizeItem.X - XOffest) > 35)
                     {
-                        resizeItem.Width = x - resizeItem.X;
+                        resizeItem.Width = x - (resizeItem.X - XOffest);
                         vsed = false;
                         Vsitem();
                         Invalidate();
-                        HearderWidthChanged?.Invoke(this, null);
+                        CloumWidthChanged?.Invoke(this, null);
+                    }
+                }
+                else if (mouseDowned && moveItem != null)
+                {
+                    int mxr = e.X + XOffest;
+                    int mx = mxr + XOffest;
+                    if (mx > firstBlockW)
+                    {
+                        moveItem.X = mx;
+
+                        //向左移动
+                        if (e.X < mouseDownXPos)
+                        {
+                            int indexthis = items.IndexOf(moveItem);
+                            if (items.IndexOf(moveItem) >= 2)
+                            {
+                                int indexlast = indexthis - 1;
+                                //超过上一个块的位置
+                                if (mxr < items[indexlast].X)
+                                {
+                                    //交换
+                                    ExchangeTwoCloseItem(indexthis, false);
+                                }
+                            }
+                        }
+                        //向右移动
+                        else if (e.X > mouseDownXPos)
+                        {
+                            int indexthis = items.IndexOf(moveItem);
+                            if (indexthis <= items.Count - 2)
+                            {
+                                int indexlast = indexthis + 1;
+                                //超过上一个块的位置
+                                if (mxr < items[indexlast].X)
+                                {
+                                    //交换
+                                    ExchangeTwoCloseItem(indexthis, true);
+                                }
+                            }
+                        }
                     }
                 }
                 else
@@ -301,17 +397,30 @@ namespace PCMgr.Ctls
                     {
                         int xx = items[i].X - xOffiest;
                         int ii = xx + items[i].Width;
-                        if (x > ii - 3 && x < ii + 3)
+                        if (CanSizeCloum && x > ii - 3 && x < ii + 3)
                         {
                             Cursor = Cursors.SizeWE;
                             if (enteredItem != null)
                                 enteredItem.MouseEntered = false;
                             enteredItem = null;
                             resizeItem = items[i];
+                            moveItem = null;
+                            break;
+                        }
+                        else if (CanMoveCloum && x > xx + 3 && x < ii - 3)
+                        {
+                            if (enteredItem != null)
+                            {
+                                enteredItem.MouseEntered = false;
+                                enteredItem = null;
+                            }
+                            resizeItem = null;
+                            moveItem = items[i];
                             break;
                         }
                         else
                         {
+                            moveItem = null;
                             resizeItem = null;
                             Cursor = Cursors.Default;
                             if (x > xx && x < (xx + items[i].Width))
@@ -323,12 +432,31 @@ namespace PCMgr.Ctls
                                 Invalidate();
                                 break;
                             }
-
                         }
                     }
                 }
             }
             base.OnMouseMove(e);
+        }
+        protected override void OnMouseHover(EventArgs e)
+        {
+            base.OnMouseHover(e);
+            if (enteredItem != null && lastTooltipItem == null)
+            {
+                if (!string.IsNullOrEmpty(enteredItem.ToolTip))
+                {
+                    tipToolTip.Show(enteredItem.ToolTip, this, MousePosition);
+                    lastTooltipItem = enteredItem;
+                }
+            }
+            else if (enteredItem == null)
+            {
+                if(lastTooltipItem != null)
+                {
+                    tipToolTip.Hide(this);
+                    lastTooltipItem = null;
+                }
+            }
         }
         protected override void OnMouseLeave(EventArgs e)
         {
@@ -343,6 +471,7 @@ namespace PCMgr.Ctls
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
+
             if (Vsitem())
                 return;
 
@@ -354,20 +483,20 @@ namespace PCMgr.Ctls
                 bool arrdrawed = false;
                 for (int i = 0; i < Items.Count; i++)
                 {
-                    int x = thisWidth + items[i].Width;
+                    int x = items[i].X - XOffest;
 
                     g.DrawLine(p, new Point(x, 0), new Point(x, h));
 
                     if (items[i] == enteredItem)
                     {
-                        TaskMgrListApis.MHeaderDrawItem(hTheme, g.GetHdc(), (thisWidth + 1), 0, items[i].Width - 1, h, TaskMgrListApis.M_DRAW_HEADER_HOT);
-                        g.ReleaseHdc();
+                        if (items[i].IsHot)
+                            g.FillRectangle(hotBrushHover, new Rectangle((thisWidth + 1), 0, items[i].Width - 1, h));
+                        else {
+                            TaskMgrListApis.MHeaderDrawItem(hTheme, g.GetHdc(), (thisWidth + 1), 0, items[i].Width - 1, h, TaskMgrListApis.M_DRAW_HEADER_HOT);
+                            g.ReleaseHdc();
+                        }
                     }
-                    else if (items[i].IsHot)
-                    {
-                        TaskMgrListApis.MHeaderDrawItem(hTheme, g.GetHdc(), (thisWidth + 1), 0, items[i].Width - 1, h, TaskMgrListApis.M_DRAW_HEADER_PRESSED);
-                        g.ReleaseHdc();
-                    }
+                    else if (items[i].IsHot) g.FillRectangle(hotBrush, new Rectangle((thisWidth + 1), 0, items[i].Width - 1, h));
 
                     string tb = items[i].TextBig;
                     string ts = items[i].TextSmall;
@@ -399,9 +528,12 @@ namespace PCMgr.Ctls
                 }
                 g.DrawLine(new Pen(Color.FromArgb(160, 160, 160)), new Point(0, Height - 1), new Point(Width, Height - 1));
             }
+
         }
-        public bool Vsitem(bool b=false)
+
+        public bool Vsitem(bool b = false)
         {
+            if (moveItem != null) return false;
             if (b && parent.ishs)
             {
                 HScrollBar vs = (HScrollBar)(parent.Controls["HScrollBarBase"]);
@@ -428,9 +560,9 @@ namespace PCMgr.Ctls
                     if (thisWidth > Width)
                     {
                         parent.ishs = true;
-                        if(!vs.Visible)
+                        if (!vs.Visible)
                             vs.Show();
-                        if(vs.Width==0) vs.Width = Width;
+                        if (vs.Width == 0) vs.Width = Width;
                         vs.Maximum = thisWidth;
                         vs.LargeChange = parent.Width;
                         vs.SmallChange = 5;
@@ -450,8 +582,9 @@ namespace PCMgr.Ctls
             return false;
         }
 
-        public event EventHandler HearderWidthChanged;
         public event EventHandler XOffestChanged;
+        public event EventHandler CloumWidthChanged;
+        public event EventHandler CloumIndexChanged;
         public event TaskMgrListHeaderEventHandler CloumClick;
 
         public class TaskMgrListHeaderEventArgs : EventArgs
@@ -561,6 +694,7 @@ namespace PCMgr.Ctls
         StringFormat format = null;
         bool m1 = false;
 
+        public string ToolTip { get; set; }
         public string Identifier { get; set; }
         public bool IsNum { get; set; }
         public bool IsHot

@@ -490,11 +490,11 @@ BOOL MAppVThreads(DWORD dwPID, HWND hDlg, LPWSTR procName)
 
 	bool done = false;
 	for (PSYSTEM_PROCESSES p = current_system_process; !done;
-		p = PSYSTEM_PROCESSES(PCHAR(p) + p->NextEntryDelta))
+		p = PSYSTEM_PROCESSES(PCHAR(p) + p->NextEntryOffset))
 	{
 		if (static_cast<DWORD>((ULONG_PTR)p->ProcessId) == dwPID)
 		{
-			for (ULONG i = 0; i < p->ThreadCount; i++)
+			for (ULONG i = 0; i < p->NumberOfThreads; i++)
 			{
 				SYSTEM_THREADS systemThread = p->Threads[i];
 				ULONG_PTR tid = (ULONG_PTR)systemThread.ClientId.UniqueThread;
@@ -652,7 +652,7 @@ BOOL MAppVThreads(DWORD dwPID, HWND hDlg, LPWSTR procName)
 
 			return TRUE;
 		}
-		done = p->NextEntryDelta == 0;
+		done = p->NextEntryOffset == 0;
 	}
 	LogWarn(L"Not found process : %d", dwPID);
 	return 0;

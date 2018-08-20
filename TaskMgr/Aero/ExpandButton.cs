@@ -66,7 +66,7 @@ namespace PCMgr.Aero
         {
             if (m.Msg == WM_UPDATEUISTATE)
             {
-                if (PCMgr.NativeMethods.LOWORD((uint)m.WParam.ToInt32()) == 1)
+                if (PCMgr.NativeMethods.Win32.LOWORD((uint)m.WParam.ToInt32()) == 1)
                 {
                     if (stringFormat.HotkeyPrefix == System.Drawing.Text.HotkeyPrefix.Show)
                         stringFormat.HotkeyPrefix = System.Drawing.Text.HotkeyPrefix.Hide;

@@ -1,7 +1,9 @@
 #pragma once
 #include "stdafx.h"
-#include "appmodel.h"
-#include "appxpackaging.h"
+#include <appmodel.h>
+#include <appxpackaging.h>
+#include <Pdh.h>
+#include <PdhMsg.h>
 
 //获取CPU核心数
 M_CAPI(int) MPERF_GetProcessNumber();
@@ -12,6 +14,10 @@ M_CAPI(BOOL) MPERF_GetRamUseAge();
 //获取内存使用率，在调用 MPERF_GetRamUseAge 后有效
 M_CAPI(double) MPERF_GetRamUseAge2();
 
+//初始化PDH库
+M_CAPI(BOOL) MPERF_GlobalInit();
+//释放PDH库
+M_CAPI(VOID) MPERF_GlobalDestroy();
 void MPERF_FreeCpuInfos();
 
 //获取所有内存大小
@@ -32,6 +38,8 @@ M_CAPI(ULONGLONG) MPERF_GetCommitPeak();
 M_CAPI(ULONGLONG) MPERF_GetRamAvail();
 //获取可用分页内存
 M_CAPI(ULONGLONG) MPERF_GetRamAvailPageFile();
+//刷新性能信息，刷新以后上面的函数才能用
+M_CAPI(BOOL) MPERF_UpdatePerformance();
 
 //进程性能信息结构
 struct MPerfAndProcessData
@@ -71,6 +79,42 @@ M_CAPI(int) MPERF_GetCpuFrequency();
 //获取所有CPU信息，只有使用此方法以后 MPERF_GetCpuxxx 获取的信息才有效
 M_CAPI(BOOL) MPERF_GetCpuInfos();
 
+//枚举性能计数器下所有的实例名称
+//    counterName：需要枚举的性能计数器
+//    返回：返回所有实例名称（以"\0\0"结尾，需要手动调用free释放）
+M_CAPI(LPWSTR) MPERF_EnumPerformanceCounterInstanceNames(LPWSTR counterName);
+
+//磁盘性能计数器结构
+struct MPerfDiskData
+{
+	//Disk Reads/sec
+	PDH_HCOUNTER*performanceCounter_read;
+	//Disk Writes/sec
+	PDH_HCOUNTER*performanceCounter_write;
+	//Disk Read Bytes/sec
+	PDH_HCOUNTER*performanceCounter_readSpeed;
+	//Disk Write Bytes/sec
+	PDH_HCOUNTER*performanceCounter_writeSpeed;
+	//Avg. Disk Queue Length
+	PDH_HCOUNTER*performanceCounter_avgQue;
+
+	//Name
+	WCHAR performanceCounter_Name[32];
+
+};
+//网络性能计数器结构
+struct MPerfNetData
+{
+	//Bytes Sent/sec
+	PDH_HCOUNTER*performanceCounter_sent;
+	//Bytes Received/sec
+	PDH_HCOUNTER*performanceCounter_receive;
+	//Bytes Total/sec
+	PDH_HCOUNTER*performanceCounter_total;
+
+	//Name
+	WCHAR performanceCounter_Name[64];
+};
 
 
 

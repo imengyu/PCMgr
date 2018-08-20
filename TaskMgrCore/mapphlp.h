@@ -44,13 +44,14 @@ int MShowErrorMessageWithLastErr(LPWSTR text, LPWSTR intr, int ico, int btn);
 EXTERN_C M_API BOOL MIsSystemSupport();
 EXTERN_C M_API BOOL MAppMainCanRun();
 EXTERN_C M_API void MAppRun2();
+EXTERN_C M_API void MGlobalAppInitialize();
 EXTERN_C M_API void MAppMainExit(UINT exitcode);
 EXTERN_C M_API DWORD MAppMainGetExitCode();
-EXTERN_C M_API void MAppMainRun();
+EXTERN_C M_API BOOL MAppMainRun();
 
 EXTERN_C M_API int MAppMainGetArgs(LPWSTR cmdline);
 EXTERN_C M_API LPWSTR MAppMainGetArgsStr(int index);
-EXTERN_C M_API void MAppMainGetArgsFreAall();
+EXTERN_C M_API void MAppMainGetArgsFreeAll();
 
 EXTERN_C M_API void MAppHideCos();
 EXTERN_C M_API void* MAppSetCallBack(void* cp, int id);
@@ -62,6 +63,7 @@ EXTERN_C M_API void MAppExit();
 EXTERN_C M_API void MAppRebot();
 EXTERN_C M_API void MAppRebotAdmin();
 EXTERN_C M_API void MAppRebotAdmin2(LPWSTR agrs);
+
 EXTERN_C M_API HANDLE MOpenThemeData(HWND hWnd, LPWSTR className);
 EXTERN_C M_API void MCloseThemeData(HANDLE hTheme);
 EXTERN_C M_API void MSetAsExplorerTheme(HWND hWnd);
@@ -112,6 +114,8 @@ EXTERN_C M_API DWORD MStrSplitA(char * str, const LPCSTR splitStr, LPCSTR * resu
 EXTERN_C M_API DWORD MStrSplitW(LPWSTR str, const LPWSTR splitStr, LPWSTR * result, wchar_t ** lead);
 EXTERN_C M_API BOOL MStrContainsA(const LPCSTR str, const LPCSTR testStr, LPCSTR * resultStr);
 EXTERN_C M_API BOOL MStrContainsW(const LPWSTR str, const LPWSTR testStr, LPWSTR * resultStr);
+EXTERN_C M_API BOOL MStrContainsCharA(const LPCSTR str, const CHAR testStr);
+EXTERN_C M_API BOOL MStrContainsCharW(const LPWSTR str, const WCHAR testStr);
 EXTERN_C M_API int MHexStrToIntW(wchar_t *s);
 EXTERN_C M_API long long MHexStrToLongW(wchar_t *s);
 

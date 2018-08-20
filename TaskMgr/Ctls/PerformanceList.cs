@@ -10,9 +10,6 @@ namespace PCMgr.Ctls
     {
         public const int max_small_data_count = 30;
 
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern void MListDrawItem(IntPtr hWnd, IntPtr hdc, int x, int y, int w, int h, int state);
-
         public PerformanceList()
         {
             SetStyle(ControlStyles.Selectable, true);
@@ -54,6 +51,7 @@ namespace PCMgr.Ctls
         { 
         }
 
+        private IntPtr hThemeListView = IntPtr.Zero;
         private bool m = false;
         private Timer t;
         private Font hugeTextFont = new Font("微软雅黑", 10.5f);
@@ -71,7 +69,7 @@ namespace PCMgr.Ctls
         public PerformanceListItem Selectedtem { get { return selectedItem; } set { selectedItem = value;Invalidate(); } }
         public PerformanceListItemCollection Items { get { return items; } }
 
-        protected virtual void OnSelectedtndexChanged(EventArgs e)
+        private void OnSelectedtndexChanged(EventArgs e)
         {
             SelectedtndexChanged?.Invoke(this, e);
         }
@@ -116,12 +114,12 @@ namespace PCMgr.Ctls
         {
             if (it == mouseEnterItem)
             {
-                MListDrawItem(Handle, g.GetHdc(), 2, mouseEnterItem.ItemY + 1 - yOffest, Width - 6, mouseEnterItem.ItemHeight - 2, 1);
+                TaskMgrListApis.MListDrawItem(hThemeListView, g.GetHdc(), 2, mouseEnterItem.ItemY + 1 - yOffest, Width - 6, mouseEnterItem.ItemHeight - 2, TaskMgrListApis.M_DRAW_LISTVIEW_HOT);
                 g.ReleaseHdc();
             }
             else if (it == selectedItem)
             {
-                MListDrawItem(Handle, g.GetHdc(), 2, selectedItem.ItemY + 1 - yOffest, Width - 6, selectedItem.ItemHeight - 2, 4);
+                TaskMgrListApis.MListDrawItem(hThemeListView, g.GetHdc(), 2, selectedItem.ItemY + 1 - yOffest, Width - 6, selectedItem.ItemHeight - 2, TaskMgrListApis.M_DRAW_LISTVIEW_SELECT);
                 g.ReleaseHdc();
             }
 
@@ -147,16 +145,20 @@ namespace PCMgr.Ctls
                 ps.Add(new PointF(rect.Left, rect.Top + rect.Height));
                 ps.Add(new PointF(rect.Left + offset + 0 * single, rect.Top + rect.Height - it.Data[0] * division));
 
+
+
                 if (it.BgBrush != Brushes.White)
                 {
                     for (int i = 1; i < it.Data.Count; i++)
                     {
-                        ps.Add(new PointF(rect.Left + offset + i * single, rect.Top + rect.Height - it.Data[i] * division));
+                        float ypos = rect.Top + rect.Height - it.Data[i] * division;
+                        if (ypos < rect.Top) ypos = rect.Top;
+                        ps.Add(new PointF(rect.Left + offset + i * single, ypos));
                         g.DrawLine(it.BasePen, ps[ps.Count - 2], ps[ps.Count - 1]);
                     }
+
                     ps.Add(new PointF(rect.Left + rect.Width, rect.Top + rect.Height));
-                    g.FillClosedCurve(it.BgBrush, ps.ToArray());
-                    
+                    g.FillClosedCurve(it.BgBrush, ps.ToArray());              
                 }
                 else
                 {
@@ -219,6 +221,24 @@ namespace PCMgr.Ctls
             return base.ProcessDialogKey(keyData);
         }
 
+        protected override void CreateHandle()
+        {
+            base.CreateHandle();
+            if (!DesignMode)
+            {
+                TaskMgrListApis.MSetAsExplorerTheme(Handle);
+                hThemeListView = TaskMgrListApis.MOpenThemeData(Handle, "LISTVIEW");
+            }
+        }
+        protected override void DestroyHandle()
+        {
+            if (!DesignMode)
+            {
+                TaskMgrListApis.MCloseThemeData(hThemeListView);
+                hThemeListView = IntPtr.Zero;
+            }
+            base.DestroyHandle();
+        }
         protected override void OnGotFocus(EventArgs e)
         {
             if (selectedItem == null)
@@ -281,6 +301,32 @@ namespace PCMgr.Ctls
                 if (drawedHeight > refrect.Bottom) break;
             }
         }
+
+        /// <summary>
+        /// 获取一个值，用以指示 System.ComponentModel.Component 当前是否处于设计模式。
+        /// </summary>
+        protected new bool DesignMode
+        {
+            get
+            {
+
+#if DEBUG
+                bool returnFlag = false;
+                if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime)
+                {
+                    returnFlag = true;
+                }
+                else if (System.Diagnostics.Process.GetCurrentProcess().ProcessName.ToUpper().Equals("DEVENV"))
+                {
+                    returnFlag = true;
+                }
+                return returnFlag;
+#else
+                return base.DesignMode;
+#endif
+            }
+        }
+
     }
     public class PerformanceListItem
     {
@@ -328,6 +374,11 @@ namespace PCMgr.Ctls
         public int ItemY { get; set; }
         public int ItemHeight { get { return 60; } }
         public string SmallText { get; set; }
+
+        public override string ToString()
+        {
+            return Name;
+        }
 
         private bool b = false;
         private Pen basePen = null;

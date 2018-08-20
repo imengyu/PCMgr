@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
+
 using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -25,7 +25,7 @@ namespace PCMgr.WorkWindow
 
         private uint processId = 0;
 
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern bool M_SU_GetProcessHotKeys(uint pid, IntPtr callback);
 
         private IntPtr CallbackPtr = IntPtr.Zero;
@@ -69,7 +69,7 @@ namespace PCMgr.WorkWindow
                     s += " " + listViewHotKeys.Columns[i].Text + " : ";
                     s += listViewHotKeys.SelectedItems[0].SubItems[i];
                 }
-                FormMain.MCopyToClipboard2(s);
+                NativeMethods.MCopyToClipboard2(s);
             }
         }
 

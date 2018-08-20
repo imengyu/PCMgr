@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
+
 using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -25,7 +25,7 @@ namespace PCMgr.WorkWindow
 
         private uint processId = 0;
 
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern bool M_SU_GetProcessTimers(uint pid, IntPtr callback);
 
         private IntPtr CallbackPtr = IntPtr.Zero;
@@ -52,7 +52,7 @@ namespace PCMgr.WorkWindow
             li.SubItems.Add(Marshal.PtrToStringUni(hwndStr));
 
             StringBuilder sbText = new StringBuilder(128);
-            FormSpyWindow.GetWindowText(hwnd, sbText, 128);
+            NativeMethods.Win32.GetWindowText(hwnd, sbText, 128);
             li.SubItems.Add(sbText.ToString());
             li.SubItems.Add(nID.ToString());
             li.SubItems.Add(Marshal.PtrToStringUni(funStr));
@@ -76,7 +76,7 @@ namespace PCMgr.WorkWindow
                     s += " " + listViewTimers.Columns[i].Text + " : ";
                     s += listViewTimers.SelectedItems[0].SubItems[i];
                 }
-                FormMain.MCopyToClipboard2(s);
+                NativeMethods.MCopyToClipboard2(s);
             }
         }
         private void 移除DToolStripMenuItem_Click(object sender, EventArgs e)

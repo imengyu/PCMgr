@@ -12,35 +12,39 @@ namespace PCMgr.Ctls
             InitializeComponent();
         }
 
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern double MPERF_GetRamUseAge2();
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern ulong MGetAllRam();
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern bool MPERF_UpdatePerformance();
 
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern ulong MPERF_GetPageSize();
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern ulong MPERF_GetKernelPaged();
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern ulong MPERF_GetKernelNonpaged();
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern ulong MPERF_GetSystemCacheSize();
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern ulong MPERF_GetCommitTotal();
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern ulong MPERF_GetCommitPeak();
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern ulong MPERF_GetRamAvail();
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern ulong MPERF_GetRamAvailPageFile();
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern ulong MPERF_GetAllRam();
         
 
         private ulong all_ram = 0;
 
+        public double PageUpdateSimple()
+        {
+            return 0;
+        }
         public void PageDelete()
         {
         }
@@ -69,13 +73,13 @@ namespace PCMgr.Ctls
                 performanceRamPoolGrid.VauleCompressed = (double)(avpaged / 1048576) / (double)(all_ram / 1048576);
                 performanceRamPoolGrid.Invalidate();
 
-                item_ramuseage.Value = FormMain.FormatFileSize(used) + " (" + FormMain.FormatFileSize(avpaged) + ")";
-                item_ramcanuse.Value = FormMain.FormatFileSize(av);
+                item_ramuseage.Value = NativeMethods.FormatFileSize(used) + " (" + NativeMethods.FormatFileSize(avpaged) + ")";
+                item_ramcanuse.Value = NativeMethods.FormatFileSize(av);
 
-                item_sended.Value = FormMain.FormatFileSize(pagesize * MPERF_GetCommitTotal()) + "/" + FormMain.FormatFileSize(pagesize * MPERF_GetCommitPeak());
-                item_cached.Value = FormMain.FormatFileSize(pagesize * MPERF_GetSystemCacheSize());
-                item_nopagepool.Value = FormMain.FormatFileSize(pagesize * MPERF_GetKernelNonpaged());
-                item_pagepool.Value = FormMain.FormatFileSize(pagesize * MPERF_GetKernelPaged());
+                item_sended.Value = NativeMethods.FormatFileSize(pagesize * MPERF_GetCommitTotal()) + "/" + NativeMethods.FormatFileSize(pagesize * MPERF_GetCommitPeak());
+                item_cached.Value = NativeMethods.FormatFileSize(pagesize * MPERF_GetSystemCacheSize());
+                item_nopagepool.Value = NativeMethods.FormatFileSize(pagesize * MPERF_GetKernelNonpaged());
+                item_pagepool.Value = NativeMethods.FormatFileSize(pagesize * MPERF_GetKernelPaged());
                 performanceInfos.Invalidate();
             }
         }
@@ -113,7 +117,7 @@ namespace PCMgr.Ctls
             performanceInfos.SpeicalItems.Add(item_pagepool);
             performanceInfos.SpeicalItems.Add(item_nopagepool);
             all_ram = MPERF_GetAllRam();
-            performanceGridGlobal.RightText = FormMain.FormatFileSize(all_ram);
+            performanceGridGlobal.RightText = NativeMethods.FormatFileSize(all_ram);
         }
 
         public void PageFroceSetData(int s)

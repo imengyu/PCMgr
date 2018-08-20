@@ -213,14 +213,16 @@ NTSTATUS IOControlDispatch(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp)
 		break;
 	}
 	case CTL_KERNEL_INIT_WITH_PDB_DATA: {
+
+		PNTOS_PDB_DATA data = (PNTOS_PDB_DATA)InputData;
+		KxGetFunctionsFormPDBData(data);
+		KxGetStructOffestsFormPDBData(&data->StructOffestData);
+		KxGetWin32kFunctionsFormPDBData(&data->Win32KData);
 		if (!kernelInited) {
-			PNTOS_PDB_DATA data = (PNTOS_PDB_DATA)InputData;
-			KxGetFunctionsFormPDBData(data);
-			KxGetStructOffestsFormPDBData(&data->StructOffestData);
-			KxGetWin32kFunctionsFormPDBData(&data->Win32KData);
 			KdPrint(("Pdb Data received."));
 			kernelInited = TRUE;
 		}
+		else KdPrint(("Reload Pdb Data."));
 		Status = STATUS_SUCCESS;
 		break;
 	}
@@ -619,10 +621,10 @@ NTSTATUS IOControlDispatch(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp)
 				data.fsModifiers = item->fsModifiers;
 				data.hWnd = item->hWnd;
 				data.id = item->id;
-				data.ThreadId = (ULONG)PsGetThreadId((PETHREAD)item->Thread);
+				data.ThreadId = (ULONG)(ULONG_PTR)PsGetThreadId((PETHREAD)item->Thread);
 				PEPROCESS process = IoThreadToProcess((PETHREAD)item->Thread);
 				if (process) {
-					data.ProcessId = (ULONG)PsGetProcessId(process);
+					data.ProcessId = (ULONG)(ULONG_PTR)PsGetProcessId(process);
 					PUCHAR procName = PsGetProcessImageFileName(process);
 					size_t procNameSize = strlen(procName) + 1;
 					_memcpy_s(data.ImageFileName, sizeof(data.ImageFileName), procName, procNameSize);

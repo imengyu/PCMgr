@@ -394,6 +394,34 @@ typedef struct _OBJECT_BASIC_INFORMATION {
 	LARGE_INTEGER           CreationTime;
 } OBJECT_BASIC_INFORMATION, *POBJECT_BASIC_INFORMATION;
 
+typedef struct _MEMORY_WORKING_SET_BLOCK
+{
+	ULONG_PTR Protection : 5;
+	ULONG_PTR ShareCount : 3;
+	ULONG_PTR Shared : 1;
+	ULONG_PTR Node : 3;
+#ifdef _WIN64
+	ULONG_PTR VirtualPage : 52;
+#else
+	ULONG VirtualPage : 20;
+#endif
+} MEMORY_WORKING_SET_BLOCK, *PMEMORY_WORKING_SET_BLOCK;
+typedef struct _MEMORY_WORKING_SET_INFORMATION
+{
+	ULONG_PTR NumberOfEntries;
+	MEMORY_WORKING_SET_BLOCK WorkingSetInfo[1];
+} MEMORY_WORKING_SET_INFORMATION, *PMEMORY_WORKING_SET_INFORMATION;
+typedef enum _MEMORY_INFORMATION_CLASS
+{
+	MemoryBasicInformation, // MEMORY_BASIC_INFORMATION
+	MemoryWorkingSetInformation, // MEMORY_WORKING_SET_INFORMATION
+	MemoryMappedFilenameInformation, // UNICODE_STRING
+	MemoryRegionInformation, // MEMORY_REGION_INFORMATION
+	MemoryWorkingSetExInformation, // MEMORY_WORKING_SET_EX_INFORMATION
+	MemorySharedCommitInformation, // MEMORY_SHARED_COMMIT_INFORMATION
+	MemoryImageInformation // MEMORY_IMAGE_INFORMATION
+} MEMORY_INFORMATION_CLASS;
+
 typedef struct _SYSTEMMODULELIST {
 	ULONG ulCount;
 	SYSTEM_MODULE_INFORMATION smi[1];
@@ -401,18 +429,19 @@ typedef struct _SYSTEMMODULELIST {
 
 #ifndef _X64_
 typedef struct _VM_COUNTERS {
-	ULONG PeakVirtualSize;
-	ULONG VirtualSize;
+	ULONG_PTR PeakVirtualSize;
+	ULONG_PTR VirtualSize;
 	ULONG PageFaultCount;
-	ULONG PeakWorkingSetSize;
-	ULONG WorkingSetSize;
-	ULONG QuotaPeakPagedPoolUsage;
-	ULONG QuotaPagedPoolUsage;
-	ULONG QuotaPeakNonPagedPoolUsage;
-	ULONG QuotaNonPagedPoolUsage;
-	ULONG PagefileUsage;
-	ULONG PeakPagefileUsage;
-} VM_COUNTERS, *PVM_COUNTERS;
+	ULONG_PTR PeakWorkingSetSize;
+	ULONG_PTR WorkingSetSize;
+	ULONG_PTR QuotaPeakPagedPoolUsage;
+	ULONG_PTR QuotaPagedPoolUsage;
+	ULONG_PTR QuotaPeakNonPagedPoolUsage;
+	ULONG_PTR QuotaNonPagedPoolUsage;
+	ULONG_PTR PagefileUsage;
+	ULONG_PTR PeakPagefileUsage;
+	ULONG_PTR PrivatePageCount;
+}VM_COUNTERS, *PVM_COUNTERS;
 
 typedef struct _SYSTEM_THREADS {
 	LARGE_INTEGER KernelTime;
@@ -432,22 +461,25 @@ typedef struct _SYSTEM_THREADS {
 	//DWORD dwWaitReason;
 } SYSTEM_THREADS, *PSYSTEM_THREADS;
 
-typedef struct _SYSTEM_PROCESSES { // Information Class 5
-	ULONG NextEntryDelta;
-	ULONG ThreadCount;
-	ULONG Reserved1[6];
+typedef struct _SYSTEM_PROCESSES { // Information Class 5 (Latest win10)(Before win7)
+	ULONG NextEntryOffset;
+	ULONG NumberOfThreads;
+	LARGE_INTEGER WorkingSetPrivateSize;
+	ULONG HardFaultCount;
+	ULONG NumberOfThreadsHighWatermark;
+	ULONGLONG CycleTime;
 	LARGE_INTEGER CreateTime;
 	LARGE_INTEGER UserTime;
 	LARGE_INTEGER KernelTime;
-	UNICODE_STRING ProcessName;
-	//KPRIORITY BasePriority;
+	UNICODE_STRING ImageName;
 	LONG BasePriority;
 	ULONG ProcessId;
 	ULONG InheritedFromProcessId;
 	ULONG HandleCount;
-	ULONG Reserved2[2];
+	ULONG SessionId;
+	ULONG_PTR UniqueProcessKey;
 	VM_COUNTERS VmCounters;
-	IO_COUNTERS IoCounters; // Windows 2000 only
+	IO_COUNTERS IoCounters;
 	SYSTEM_THREADS Threads[1];
 } SYSTEM_PROCESSES, *PSYSTEM_PROCESSES;
 
@@ -469,17 +501,18 @@ typedef struct _SYSTEM_HANDLE_INFORMATION {
 #else
 typedef struct _VM_COUNTERS
 {
-	SIZE_T PeakVirtualSize;
-	SIZE_T VirtualSize;
+	ULONG_PTR PeakVirtualSize;
+	ULONG_PTR VirtualSize;
 	ULONG PageFaultCount;
-	SIZE_T PeakWorkingSetSize;
-	SIZE_T WorkingSetSize;
-	SIZE_T QuotaPeakPagedPoolUsage;
-	SIZE_T QuotaPagedPoolUsage;
-	SIZE_T QuotaPeakNonPagedPoolUsage;
-	SIZE_T QuotaNonPagedPoolUsage;
-	SIZE_T PagefileUsage;
-	SIZE_T PeakPagefileUsage;
+	ULONG_PTR PeakWorkingSetSize;
+	ULONG_PTR WorkingSetSize;
+	ULONG_PTR QuotaPeakPagedPoolUsage;
+	ULONG_PTR QuotaPagedPoolUsage;
+	ULONG_PTR QuotaPeakNonPagedPoolUsage;
+	ULONG_PTR QuotaNonPagedPoolUsage;
+	ULONG_PTR PagefileUsage;
+	ULONG_PTR PeakPagefileUsage;
+	ULONG_PTR PrivatePageCount;
 } VM_COUNTERS, *PVM_COUNTERS;
 
 typedef struct _SYSTEM_THREADS
@@ -500,23 +533,25 @@ typedef struct _SYSTEM_THREADS
 
 typedef struct _SYSTEM_PROCESSES
 {
-	ULONG    NextEntryDelta;
-	ULONG    ThreadCount;
-	ULONG    Reserved[6];
-	LARGE_INTEGER  CreateTime;
-	LARGE_INTEGER  UserTime;
-	LARGE_INTEGER  KernelTime;
-	UNICODE_STRING  ProcessName;
-	KPRIORITY   BasePriority;
-	HANDLE   ProcessId;  //Modify
-	HANDLE   InheritedFromProcessId;//Modify
-	ULONG    HandleCount;
-	ULONG    SessionId;
-	ULONG_PTR  PageDirectoryBase;
+	ULONG NextEntryOffset;
+	ULONG NumberOfThreads;
+	LARGE_INTEGER WorkingSetPrivateSize;
+	ULONG HardFaultCount;
+	ULONG NumberOfThreadsHighWatermark;
+	ULONGLONG CycleTime;
+	LARGE_INTEGER CreateTime;
+	LARGE_INTEGER UserTime;
+	LARGE_INTEGER KernelTime;
+	UNICODE_STRING ImageName;
+	LONG BasePriority;
+	PVOID ProcessId;
+	PVOID InheritedFromProcessId;
+	ULONG HandleCount;
+	ULONG SessionId;
+	ULONG_PTR UniqueProcessKey;
 	VM_COUNTERS VmCounters;
-	SIZE_T    PrivatePageCount;//Add
-	IO_COUNTERS  IoCounters; //windows 2000 only
-	struct _SYSTEM_THREADS Threads[1];
+	IO_COUNTERS IoCounters;
+	SYSTEM_THREADS Threads[1];
 }SYSTEM_PROCESSES, *PSYSTEM_PROCESSES;
 
 typedef struct _SYSTEM_HANDLE_TABLE_ENTRY_INFO {
@@ -539,21 +574,23 @@ typedef struct _SYSTEM_HANDLE_INFORMATION {
 
 typedef LONG(WINAPI * ZwQueryInformationThreadFun)(HANDLE ThreadHandle, THREADINFOCLASS ThreadInformationClass, PVOID ThreadInformation, ULONG ThreadInformationLength, PULONG ReturnLength OPTIONAL);
 typedef LONG(WINAPI * RtlNtStatusToDosErrorFun)(ULONG status);
-typedef DWORD(WINAPI * RtlGetLastWin32ErrorFun)();
-typedef DWORD(WINAPI * ZwOpenThreadFun)(PHANDLE ThreadHandle, ACCESS_MASK DesiredAccess, POBJECT_ATTRIBUTES ObjectAttributes, PCLIENT_ID ClientId);
-typedef DWORD(WINAPI * ZwTerminateThreadFun)(HANDLE ThreadHandle, DWORD ExitCode);
-typedef DWORD(WINAPI * ZwSuspendThreadFun)(HANDLE ThreadHandle, PULONG PreviousSuspendCount OPTIONAL);
-typedef DWORD(NTAPI *ZwResumeThreadFun)(HANDLE ThreadHandle, PULONG SuspendCount OPTIONAL);
+typedef NTSTATUS(WINAPI * RtlGetLastWin32ErrorFun)();
+typedef NTSTATUS(WINAPI * ZwOpenThreadFun)(PHANDLE ThreadHandle, ACCESS_MASK DesiredAccess, POBJECT_ATTRIBUTES ObjectAttributes, PCLIENT_ID ClientId);
+typedef NTSTATUS(WINAPI * ZwTerminateThreadFun)(HANDLE ThreadHandle, DWORD ExitCode);
+typedef NTSTATUS(WINAPI * ZwSuspendThreadFun)(HANDLE ThreadHandle, PULONG PreviousSuspendCount OPTIONAL);
+typedef NTSTATUS(NTAPI *ZwResumeThreadFun)(HANDLE ThreadHandle, PULONG SuspendCount OPTIONAL);
 
-typedef ULONG(WINAPI *NtQueryInformationProcessFun)(HANDLE ProcessHandle, DWORD ProcessInformationClass, PVOID ProcessInformation, ULONG ProcessInformationLength, PULONG ReturnLength);
-typedef ULONG(WINAPI *NtQuerySystemInformationFun)(IN ULONG SysInfoClass, IN OUT PVOID SystemInformation, IN ULONG SystemInformationLength, OUT PULONG nRet);
-typedef ULONG(WINAPI *NtQueryInformationThreadFun)(HANDLE ThreadHandle, ULONG ThreadInformationClass, PVOID ThreadInformation, ULONG ThreadInformationLength, PULONG ReturnLength OPTIONAL);
-typedef DWORD(WINAPI *ZwSuspendProcessFun)(HANDLE);
-typedef DWORD(WINAPI *ZwResumeProcessFun)(HANDLE);
-typedef DWORD(WINAPI *ZwTerminateProcessFun)(HANDLE, DWORD);
-typedef DWORD(WINAPI *ZwOpenProcessFun)(PHANDLE ProcessHandle, ACCESS_MASK DesiredAccess, POBJECT_ATTRIBUTES ObjectAttributes, PCLIENT_ID ClientId);
-typedef DWORD(WINAPI *NtUnmapViewOfSectionFun)(IN HANDLE ProcessHandle, IN PVOID BaseAddress);
-typedef DWORD(NTAPI* NtQueryObjectFun)(HANDLE Handle, OBJECT_INFORMATION_CLASS Info, PVOID Buffer, ULONG BufferSize, PULONG ReturnLength);
+
+typedef NTSTATUS(WINAPI *NtQueryVirtualMemoryFun)(_In_ HANDLE ProcessHandle, _In_ PVOID BaseAddress, _In_ MEMORY_INFORMATION_CLASS MemoryInformationClass, _Out_writes_bytes_(MemoryInformationLength) PVOID MemoryInformation, _In_ SIZE_T MemoryInformationLength, _Out_opt_ PSIZE_T ReturnLength);
+typedef NTSTATUS(WINAPI *NtQueryInformationProcessFun)(HANDLE ProcessHandle, DWORD ProcessInformationClass, PVOID ProcessInformation, ULONG ProcessInformationLength, PULONG ReturnLength);
+typedef NTSTATUS(WINAPI *NtQuerySystemInformationFun)(IN ULONG SysInfoClass, IN OUT PVOID SystemInformation, IN ULONG SystemInformationLength, OUT PULONG nRet);
+typedef NTSTATUS(WINAPI *NtQueryInformationThreadFun)(HANDLE ThreadHandle, ULONG ThreadInformationClass, PVOID ThreadInformation, ULONG ThreadInformationLength, PULONG ReturnLength OPTIONAL);
+typedef NTSTATUS(WINAPI *ZwSuspendProcessFun)(HANDLE);
+typedef NTSTATUS(WINAPI *ZwResumeProcessFun)(HANDLE);
+typedef NTSTATUS(WINAPI *ZwTerminateProcessFun)(HANDLE, DWORD);
+typedef NTSTATUS(WINAPI *ZwOpenProcessFun)(PHANDLE ProcessHandle, ACCESS_MASK DesiredAccess, POBJECT_ATTRIBUTES ObjectAttributes, PCLIENT_ID ClientId);
+typedef NTSTATUS(WINAPI *NtUnmapViewOfSectionFun)(IN HANDLE ProcessHandle, IN PVOID BaseAddress);
+typedef NTSTATUS(NTAPI* NtQueryObjectFun)(HANDLE Handle, OBJECT_INFORMATION_CLASS Info, PVOID Buffer, ULONG BufferSize, PULONG ReturnLength);
 
 typedef DWORD(WINAPI *LdrGetProcedureAddressFun)(_In_ PVOID DllHandle, _In_opt_ PANSI_STRING ProcedureName, _In_opt_ ULONG ProcedureNumber, _Out_ PVOID* ProcedureAddress);
 typedef VOID(WINAPI *RtlInitAnsiStringFun)(_Out_ PANSI_STRING DestinationString, _In_opt_ PSTR SourceString);

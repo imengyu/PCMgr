@@ -114,7 +114,7 @@ typedef struct tag_TIMER_DATA {
 	INT cmsRate;
 	UINT flags;
 	// º¯ÊýÈë¿Ú
-	ULONG pfn;
+	ULONG_PTR pfn;
 }TIMER_DATA, *PTIMER_DATA;
 
 

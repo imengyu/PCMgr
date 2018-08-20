@@ -68,6 +68,7 @@ RtlInitAnsiStringFun RtlInitAnsiString;
 RtlNtStatusToDosErrorFun RtlNtStatusToDosError;
 RtlGetLastWin32ErrorFun RtlGetLastWin32Error;
 NtQueryObjectFun NtQueryObject;
+NtQueryVirtualMemoryFun NtQueryVirtualMemory;
 
 //K32 api
 _IsWow64Process dIsWow64Process;
@@ -151,19 +152,18 @@ M_API BOOL MKillProcessUser2(DWORD pid, BOOL showErr)
 			status = MTerminateProcessNt(pid, hProcess);
 			if (status == STATUS_ACCESS_DENIED && showErr)
 				MShowErrorMessage((LPWSTR)str_item_access_denied.c_str(), (LPWSTR)str_item_kill_failed.c_str(), MB_ICONERROR, MB_OK);
-			else if (status != STATUS_SUCCESS && showErr)
+			else if (!NT_SUCCESS(status) && showErr)
 				ThrowErrorAndErrorCodeX(status, str_item_endprocfailed, (LPWSTR)str_item_kill_failed.c_str());
-			else if (NT_SUCCESS(status))
-				return TRUE;
+			else return TRUE;
 		}
 		else if (status == STATUS_ACCESS_DENIED && showErr)
 			MShowErrorMessage((LPWSTR)str_item_access_denied.c_str(), (LPWSTR)str_item_kill_failed.c_str(), MB_ICONERROR, MB_OK);
 		else if ((status == STATUS_INVALID_CID || status == STATUS_INVALID_HANDLE) && showErr)
 			MShowErrorMessage((LPWSTR)str_item_invalidproc.c_str(), (LPWSTR)str_item_kill_failed.c_str(), MB_ICONWARNING, MB_OK);
-		else if(showErr)
-			ThrowErrorAndErrorCodeX(status, str_item_openprocfailed, (LPWSTR)str_item_kill_failed.c_str());
 		else if (NT_SUCCESS(status))
 			return TRUE;
+		else if(showErr)
+			ThrowErrorAndErrorCodeX(status, str_item_openprocfailed, (LPWSTR)str_item_kill_failed.c_str());
 	}			
 	return 0;
 }
@@ -252,14 +252,14 @@ M_API void MEnumProcess(EnumProcessCallBack calBack)
 		MEnumProcessCore();
 		bool done = false;
 		int ix = 0;
-		for (PSYSTEM_PROCESSES p = current_system_process; !done; p = PSYSTEM_PROCESSES(PCHAR(p) + p->NextEntryDelta))
+		for (PSYSTEM_PROCESSES p = current_system_process; !done; p = PSYSTEM_PROCESSES(PCHAR(p) + p->NextEntryOffset))
 		{
 			memset(exeFullPath, 0, sizeof(exeFullPath));
 			hProcess = NULL;
-			MGetProcessFullPathEx(static_cast<DWORD>((ULONG_PTR)p->ProcessId), exeFullPath, &hProcess, p->ProcessName.Buffer);
-			calBack(static_cast<DWORD>((ULONG_PTR)p->ProcessId), static_cast<DWORD>((ULONG_PTR)p->InheritedFromProcessId), p->ProcessName.Buffer, exeFullPath, 1, hProcess, p);
+			MGetProcessFullPathEx(static_cast<DWORD>((ULONG_PTR)p->ProcessId), exeFullPath, &hProcess, p->ImageName.Buffer);
+			calBack(static_cast<DWORD>((ULONG_PTR)p->ProcessId), static_cast<DWORD>((ULONG_PTR)p->InheritedFromProcessId), p->ImageName.Buffer, exeFullPath, 1, hProcess, p);
 			ix++;
-			done = p->NextEntryDelta == 0;
+			done = p->NextEntryOffset == 0;
 		}
 		calBack(ix, 0, NULL, NULL, 0, 0, NULL);
 	}
@@ -271,10 +271,10 @@ M_API void MEnumProcess2Refesh(EnumProcessCallBack2 callBack)
 		MAppVProcessAllWindows();
 		MEnumProcessCore();
 		bool done = false;
-		for (PSYSTEM_PROCESSES p = current_system_process; !done; p = PSYSTEM_PROCESSES(PCHAR(p) + p->NextEntryDelta))
+		for (PSYSTEM_PROCESSES p = current_system_process; !done; p = PSYSTEM_PROCESSES(PCHAR(p) + p->NextEntryOffset))
 		{
 			callBack(static_cast<DWORD>((ULONG_PTR)p->ProcessId), p);
-			done = p->NextEntryDelta == 0;
+			done = p->NextEntryOffset == 0;
 		}
 	}
 }
@@ -282,19 +282,19 @@ M_API BOOL MReUpdateProcess(DWORD pid, EnumProcessCallBack calBack)
 {
 	bool done = false;
 	for (PSYSTEM_PROCESSES p = current_system_process; !done;
-		p = PSYSTEM_PROCESSES(PCHAR(p) + p->NextEntryDelta))
+		p = PSYSTEM_PROCESSES(PCHAR(p) + p->NextEntryOffset))
 	{
 		if (static_cast<DWORD>((ULONG_PTR)p->ProcessId) == pid)
 		{
 			HANDLE hProcess = 0;
 			WCHAR exeFullPath[260];
 			memset(exeFullPath, 0, sizeof(exeFullPath));
-			MGetProcessFullPathEx(static_cast<DWORD>((ULONG_PTR)p->ProcessId), exeFullPath, &hProcess, p->ProcessName.Buffer);
-			calBack(static_cast<DWORD>((ULONG_PTR)p->ProcessId), static_cast<DWORD>((ULONG_PTR)p->InheritedFromProcessId), p->ProcessName.Buffer, exeFullPath, 1, hProcess, p);
+			MGetProcessFullPathEx(static_cast<DWORD>((ULONG_PTR)p->ProcessId), exeFullPath, &hProcess, p->ImageName.Buffer);
+			calBack(static_cast<DWORD>((ULONG_PTR)p->ProcessId), static_cast<DWORD>((ULONG_PTR)p->InheritedFromProcessId), p->ImageName.Buffer, exeFullPath, 1, hProcess, p);
 			done = true;
 			return TRUE;
 		}
-		done = p->NextEntryDelta == 0;
+		done = p->NextEntryOffset == 0;
 	}			
 	return 0;
 }
@@ -943,11 +943,11 @@ M_API VOID* MGetProcessThreads(DWORD pid)
 	bool done = false;
 	//遍历进程列表
 	for (PSYSTEM_PROCESSES p = current_system_process; !done;
-		p = PSYSTEM_PROCESSES(PCHAR(p) + p->NextEntryDelta))
+		p = PSYSTEM_PROCESSES(PCHAR(p) + p->NextEntryOffset))
 	{
 		if (static_cast<DWORD>((ULONG_PTR)p->ProcessId) == pid)
 			return p->Threads;
-		done = p->NextEntryDelta == 0; 
+		done = p->NextEntryOffset == 0;
 	}
 	return 0;
 }
@@ -956,11 +956,11 @@ M_API PSYSTEM_PROCESSES MGetProcessInfo(DWORD pid)
 	bool done = false;
 	//遍历进程列表
 	for (PSYSTEM_PROCESSES p = current_system_process; !done;
-		p = PSYSTEM_PROCESSES(PCHAR(p) + p->NextEntryDelta))
+		p = PSYSTEM_PROCESSES(PCHAR(p) + p->NextEntryOffset))
 	{
 		if (static_cast<DWORD>((ULONG_PTR)p->ProcessId) == pid)
 			return p;
-		done = p->NextEntryDelta == 0;
+		done = p->NextEntryOffset == 0;
 	}
 	return 0;
 }
@@ -1024,6 +1024,38 @@ M_API BOOL MGetProcessEprocess(DWORD pid, PPEOCESSKINFO info)
 		return TRUE;
 }
 	return FALSE;
+}
+M_API ULONG_PTR MGetProcessWorkingSetPrivate(HANDLE hProcess, SIZE_T pageSize)
+{
+	NTSTATUS status;
+	PMEMORY_WORKING_SET_INFORMATION buffer;
+	SIZE_T bufferSize;
+
+	bufferSize = sizeof(MEMORY_WORKING_SET_INFORMATION);
+	buffer = (PMEMORY_WORKING_SET_INFORMATION)malloc(bufferSize);
+	memset(buffer, 0, bufferSize);
+
+	status = NtQueryVirtualMemory(hProcess, NULL, MemoryWorkingSetInformation, buffer, bufferSize, NULL);
+	if (status == STATUS_INFO_LENGTH_MISMATCH)
+	{
+		bufferSize = sizeof(buffer->NumberOfEntries) + buffer->NumberOfEntries * sizeof(MEMORY_WORKING_SET_BLOCK);
+		free(buffer);
+		buffer = (PMEMORY_WORKING_SET_INFORMATION)malloc(bufferSize);
+
+		status = NtQueryVirtualMemory(hProcess, NULL, MemoryWorkingSetInformation, buffer, bufferSize, NULL);
+		if (NT_SUCCESS(status))
+		{
+			SIZE_T workSetPrivate = 0;
+			for (ULONG_PTR i = 0; i < buffer->NumberOfEntries; ++i)
+				if (!buffer->WorkingSetInfo[i].Shared) workSetPrivate++;
+
+			workSetPrivate *= pageSize;
+			free(buffer);
+			return workSetPrivate;
+		}
+		free(buffer);
+	}
+	return 0;
 }
 
 //UWP
@@ -1444,19 +1476,6 @@ M_CAPI(int) MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWOR
 
 extern MEMORYSTATUSEX memory_statuex;
 
-//Ram
-M_API double MGetRamUseAge()
-{
-	MPERF_GetRamUseAge();
-	double ram = ((memory_statuex.ullTotalPhys - memory_statuex.ullAvailPhys) / (double)memory_statuex.ullTotalPhys);
-	return ram;
-}
-M_API ULONG MGetAllRam()
-{
-	MPERF_GetRamUseAge();
-	return static_cast<ULONG>(memory_statuex.ullTotalPhys / 1048576);
-}
-
 //ntdll apis
 
 HINSTANCE hNtDll;
@@ -1519,6 +1538,7 @@ BOOL LoadDll()
 		RtlInitAnsiString = (RtlInitAnsiStringFun)GetProcAddress(hNtDll, "RtlInitAnsiString");
 		RtlNtStatusToDosError = (RtlNtStatusToDosErrorFun)GetProcAddress(hNtDll, "RtlNtStatusToDosError");
 		RtlGetLastWin32Error = (RtlGetLastWin32ErrorFun)GetProcAddress(hNtDll, "RtlGetLastWin32Error");
+		NtQueryVirtualMemory = (NtQueryVirtualMemoryFun)GetProcAddress(hNtDll, "NtQueryVirtualMemory");
 
 		//shell32
 		RunFileDlg = (_RunFileDlg)MGetProcedureAddress(hShell32, NULL, 61);

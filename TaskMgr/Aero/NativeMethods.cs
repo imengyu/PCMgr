@@ -327,7 +327,7 @@ namespace PCMgr.Aero
         public const int M_DRAW_EXPAND_HOVER = 2;
         public const int M_DRAW_EXPAND_PRESSED = 3;
 
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(PCMgr.NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern void MExpandDrawButton(IntPtr hTheme, IntPtr hdc, int x, int y, int state, bool on);
     }
 }

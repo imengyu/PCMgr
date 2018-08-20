@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Windows.Forms;
 using PCMgr.Lanuages;
+using static PCMgr.NativeMethods;
 
 namespace PCMgr.WorkWindow
 {
@@ -44,7 +45,7 @@ namespace PCMgr.WorkWindow
         }
         private void load_settings()
         {
-            string setting_lg = FormMain.GetConfig("Lanuage", "AppSetting");
+            string setting_lg = GetConfig("Lanuage", "AppSetting");
             switch (setting_lg)
             {
                 case "zh":
@@ -59,27 +60,27 @@ namespace PCMgr.WorkWindow
 
             }
 
-            checkBoxAbortShutdown.Checked = FormMain.GetConfigBool("AbortShutdown", "AppSetting", false);
-            checkBoxTop.Checked = FormMain.GetConfigBool("TopMost", "AppSetting", false);
-            checkBoxCloseHide.Checked = FormMain.GetConfigBool("CloseHideToNotfication", "AppSetting", false);
-            checkBoxSelfProtect.Checked = FormMain.GetConfigBool("SelfProtect", "AppSetting", false);
+            checkBoxAbortShutdown.Checked = GetConfigBool("AbortShutdown", "AppSetting", false);
+            checkBoxTop.Checked = GetConfigBool("TopMost", "AppSetting", false);
+            checkBoxCloseHide.Checked = GetConfigBool("CloseHideToNotfication", "AppSetting", false);
+            checkBoxSelfProtect.Checked = GetConfigBool("SelfProtect", "AppSetting", false);
 
-            labelDriverLoadStatus.Text = FormMain.MCanUseKernel() ? "Driver Loaded" : "Driver not load";
+            labelDriverLoadStatus.Text = MCanUseKernel() ? "Driver Loaded" : "Driver not load";
 
-            checkBoxAutoLoadDriver.Checked = FormMain.GetConfigBool("LoadKernelDriver", "Configure", false);
-            checkBoxHighLightNoSystetm.Checked = FormMain.GetConfigBool("HighLightNoSystetm", "Configure", false);
-            checkBoxShowDebugWindow.Checked = FormMain.GetConfigBool("ShowDebugWindow", "Configure", false);
-            checkBoxNTOSPDB.Checked = FormMain.GetConfigBool("UseKrnlPDB", "Configure", true);
+            checkBoxAutoLoadDriver.Checked = GetConfigBool("LoadKernelDriver", "Configure", false);
+            checkBoxHighLightNoSystetm.Checked = GetConfigBool("HighLightNoSystetm", "Configure", false);
+            checkBoxShowDebugWindow.Checked = GetConfigBool("ShowDebugWindow", "Configure", false);
+            checkBoxNTOSPDB.Checked = GetConfigBool("UseKrnlPDB", "Configure", true);
 
-            textBoxTitle.Text = FormMain.GetConfig("Title", "AppSetting", "");
+            textBoxTitle.Text = GetConfig("Title", "AppSetting", "");
 
-            checkBoxShowHotKey.Checked = FormMain.GetConfigBool("HotKey", "AppSetting", true);
-            comboBoxShowHotKey1.SelectedItem = FormMain.GetConfig("HotKey1", "AppSetting", "(None)");
-            comboBoxShowHotKey2.SelectedItem = FormMain.GetConfig("HotKey2", "AppSetting", "T");
+            checkBoxShowHotKey.Checked = GetConfigBool("HotKey", "AppSetting", true);
+            comboBoxShowHotKey1.SelectedItem = GetConfig("HotKey1", "AppSetting", "(None)");
+            comboBoxShowHotKey2.SelectedItem = GetConfig("HotKey2", "AppSetting", "T");
 
-            checkBoxUseMyDbgView.Checked = FormMain.GetConfigBool("LogDbgPrint", "Configure", true);
+            checkBoxUseMyDbgView.Checked = GetConfigBool("LogDbgPrint", "Configure", true);
 
-            string terproc = FormMain.GetConfig("TerProcFun", "Configure", "PspTerProc");
+            string terproc = GetConfig("TerProcFun", "Configure", "PspTerProc");
             radioButtonPspTerProc.Checked = terproc == "PspTerProc";
             radioButtonApcPspTerProc.Checked = terproc == "ApcPspTerProc";
         }
@@ -88,36 +89,36 @@ namespace PCMgr.WorkWindow
             switch (comboBox_lg.SelectedIndex)
             {
                 case 0:
-                    FormMain.SetConfig("Lanuage", "AppSetting", "zh");
+                    SetConfig("Lanuage", "AppSetting", "zh");
                     break;
                 case 1:
-                    FormMain.SetConfig("Lanuage", "AppSetting", "zh-Hant");
+                    SetConfig("Lanuage", "AppSetting", "zh-Hant");
                     break;
                 case 2:
-                    FormMain.SetConfig("Lanuage", "AppSetting", "en");
+                    SetConfig("Lanuage", "AppSetting", "en");
                     break;
 
             }
-            FormMain.SetConfigBool("AbortShutdown", "AppSetting", checkBoxAbortShutdown.Checked);
+            SetConfigBool("AbortShutdown", "AppSetting", checkBoxAbortShutdown.Checked);
             if (radioButtonPspTerProc.Checked)
-                FormMain.SetConfig("TerProcFun", "Configure", "PspTerProc");
+                SetConfig("TerProcFun", "Configure", "PspTerProc");
             else if (radioButtonPspTerProc.Checked)
-                FormMain.SetConfig("TerProcFun", "Configure", "ApcPspTerProc");
+                SetConfig("TerProcFun", "Configure", "ApcPspTerProc");
 
-            FormMain.SetConfigBool("LogDbgPrint", "Configure", checkBoxUseMyDbgView.Checked);
-            FormMain.SetConfigBool("UseKrnlPDB", "Configure", checkBoxNTOSPDB.Checked);
+            SetConfigBool("LogDbgPrint", "Configure", checkBoxUseMyDbgView.Checked);
+            SetConfigBool("UseKrnlPDB", "Configure", checkBoxNTOSPDB.Checked);
 
-            FormMain.SetConfigBool("LoadKernelDriver", "Configure", checkBoxAutoLoadDriver.Checked);
-            FormMain.SetConfigBool("HighLightNoSystetm", "Configure", checkBoxHighLightNoSystetm.Checked);
-            FormMain.SetConfigBool("ShowDebugWindow", "Configure", checkBoxShowDebugWindow.Checked);
-            FormMain.SetConfigBool("HotKey", "AppSetting", checkBoxShowHotKey.Checked);
-            FormMain.SetConfigBool("SelfProtect", "AppSetting", checkBoxSelfProtect.Checked);
-            FormMain.SetConfig("Title", "AppSetting", textBoxTitle.Text);
+            SetConfigBool("LoadKernelDriver", "Configure", checkBoxAutoLoadDriver.Checked);
+            SetConfigBool("HighLightNoSystetm", "Configure", checkBoxHighLightNoSystetm.Checked);
+            SetConfigBool("ShowDebugWindow", "Configure", checkBoxShowDebugWindow.Checked);
+            SetConfigBool("HotKey", "AppSetting", checkBoxShowHotKey.Checked);
+            SetConfigBool("SelfProtect", "AppSetting", checkBoxSelfProtect.Checked);
+            SetConfig("Title", "AppSetting", textBoxTitle.Text);
             if (textBoxTitle.Text != "")
                 FormMain.Instance.Text = textBoxTitle.Text;
             else FormMain.Instance.Text = FormMain.str_AppTitle;
-            FormMain.SetConfig("HotKey1", "AppSetting", comboBoxShowHotKey1.SelectedItem.ToString());
-            FormMain.SetConfig("HotKey2", "AppSetting", comboBoxShowHotKey2.SelectedItem.ToString());
+            SetConfig("HotKey1", "AppSetting", comboBoxShowHotKey1.SelectedItem.ToString());
+            SetConfig("HotKey2", "AppSetting", comboBoxShowHotKey2.SelectedItem.ToString());
 
             Close();
         }
@@ -129,28 +130,28 @@ namespace PCMgr.WorkWindow
 
         private void checkBoxTop_CheckedChanged(object sender, EventArgs e)
         {
-            FormMain.AppHWNDSendMessage(FormMain.WM_COMMAND, new IntPtr(40117), IntPtr.Zero);
-            //FormMain.SetConfigBool("TopMost", "AppSetting", checkBoxTop.Checked);
+            FormMain.AppHWNDSendMessage(Win32.WM_COMMAND, new IntPtr(40117), IntPtr.Zero);
+            //SetConfigBool("TopMost", "AppSetting", checkBoxTop.Checked);
         }
         private void checkBoxCloseHide_CheckedChanged(object sender, EventArgs e)
         {
-            FormMain.AppHWNDSendMessage(FormMain.WM_COMMAND, new IntPtr(40120), IntPtr.Zero);
-            //FormMain.SetConfigBool("CloseHideToNotfication", "AppSetting", checkBoxCloseHide.Checked);
+            FormMain.AppHWNDSendMessage(Win32.WM_COMMAND, new IntPtr(40120), IntPtr.Zero);
+            //SetConfigBool("CloseHideToNotfication", "AppSetting", checkBoxCloseHide.Checked);
         }
 
         private void checkBoxCannotCreateProc_CheckedChanged(object sender, EventArgs e)
         {
-            if (!FormMain.M_SU_SetKrlMonSet_CreateProcess(checkBoxCannotCreateProc.Checked))
+            if (!M_SU_SetKrlMonSet_CreateProcess(checkBoxCannotCreateProc.Checked))
                 MessageBox.Show(FormMain.str_failed);
         }
         private void checkBoxCannotCreateThread_CheckedChanged(object sender, EventArgs e)
         {
-            if (!FormMain.M_SU_SetKrlMonSet_CreateThread(checkBoxCannotCreateThread.Checked))
+            if (!M_SU_SetKrlMonSet_CreateThread(checkBoxCannotCreateThread.Checked))
                 MessageBox.Show(FormMain.str_failed);
         }
         private void checkBoxCannotLoadDriver_CheckedChanged(object sender, EventArgs e)
         {
-            if (!FormMain.M_SU_SetKrlMonSet_LoadImage(checkBoxCannotLoadDriver.Checked))
+            if (!M_SU_SetKrlMonSet_LoadImage(checkBoxCannotLoadDriver.Checked))
                 MessageBox.Show(FormMain.str_failed);
         }
     }

@@ -16,9 +16,9 @@ namespace PCMgr.WorkWindow
 
         private string file = "";
 
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         private extern static bool MFM_FillData(string szFileDir, bool force, uint fileSize);
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         private extern static bool MFM_EmeptyFile(string szFileDir, bool force);
 
         private void buttonStart_Click(object sender, EventArgs e)

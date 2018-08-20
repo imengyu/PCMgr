@@ -15,7 +15,7 @@ namespace PCMgr.WorkWindow
 #if _X64_
             labelOsVer.Text = "64 Bit Version";
 #else
-            labelOsVer.Text = "32 Bit Version" + (FormMain.MIs64BitOS() ? " (But in 64 OS)" : "");
+            labelOsVer.Text = "32 Bit Version" + (NativeMethods.MIs64BitOS() ? " (But in 64 OS)" : "");
 #endif
         }
     }

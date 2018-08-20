@@ -16,7 +16,9 @@ extern HICON HIconDef;
 extern HCURSOR hCurLoading;
 extern MEMORYSTATUSEX memory_statuex;
 
+//Dll Õ∑≈
 void DllDestroy();
+//Dll≥ı ºªØ
 void DllStartup();
 void DllAnti();
 bool DllAntiCheckVery();
@@ -29,7 +31,6 @@ BOOL APIENTRY DllMain( HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpRese
 	case DLL_PROCESS_ATTACH:	
 		hInst = (HINSTANCE)hModule;
 		DllStartup();
-		DllAnti();
 		break;
 	case DLL_THREAD_ATTACH:
 	case DLL_THREAD_DETACH:
@@ -44,10 +45,10 @@ BOOL APIENTRY DllMain( HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpRese
 void DllStartup() {
 	HIconDef = (HICON)LoadImage(hInst, MAKEINTRESOURCE(IDI_ICONDEFAPP), IMAGE_ICON, 16, 16, 0);
 	LoadDll();
-	M_CFG_Init();
 	MLG_Startup();
 	hCurLoading = LoadCursor(NULL, IDC_WAIT);
 	ShowMainCoreStartUp();
+	MPERF_GlobalInit();
 	MPERF_GetProcessNumber();
 	WindowEnumStart();
 	memory_statuex.dwLength = sizeof(memory_statuex);
@@ -57,33 +58,8 @@ void DllDestroy() {
 	MUnInitKernelNTPDB();
 	MLG_SetLanuageItems_Destroy();
 	MPERF_FreeCpuInfos();
+	MPERF_GlobalDestroy();
 	WindowEnumDestroy();
 	MUnInitMyDbgView();
 	FreeDll();
-}
-void DllAnti() 
-{
-	bool needCrush = false;
-	//if (!DllAntiCheckVery())
-	//	needCrush = true;
-
-	//WCHAR fileName[MAX_PATH];
-	//dGetModuleFileNameW(NULL, fileName, MAX_PATH);
-	//if (MGetExeFileTrust(fileName))
-	//	needCrush = true;
-
-	if (needCrush) 
-		DllAntiCrush();
-}
-bool DllAntiCheckVery()
-{
-	//WCHAR fileName[MAX_PATH];
-	//dGetModuleFileNameW(hInst, fileName, MAX_PATH);
-	//if (MGetExeFileTrust(fileName))
-		return true;
-	//return false;
-}
-void DllAntiCrush()
-{
-	DllDestroy();
 }

@@ -315,6 +315,7 @@
             this.listProcess.ListViewItemSorter = null;
             this.listProcess.Name = "listProcess";
             this.listProcess.NoHeader = false;
+            this.listProcess.SelectedItem = null;
             this.listProcess.ShowGroup = false;
             this.listProcess.Value = 0D;
             this.listProcess.XOffest = 0;
@@ -492,6 +493,7 @@
             this.listUwpApps.ListViewItemSorter = null;
             this.listUwpApps.Name = "listUwpApps";
             this.listUwpApps.NoHeader = false;
+            this.listUwpApps.SelectedItem = null;
             this.listUwpApps.ShowGroup = false;
             this.listUwpApps.Value = 0D;
             this.listUwpApps.XOffest = 0;
@@ -628,6 +630,7 @@
             this.listStartup.ListViewItemSorter = null;
             this.listStartup.Name = "listStartup";
             this.listStartup.NoHeader = false;
+            this.listStartup.SelectedItem = null;
             this.listStartup.ShowGroup = false;
             this.listStartup.Value = 0D;
             this.listStartup.XOffest = 0;
@@ -740,6 +743,7 @@
             this.listApps.ListViewItemSorter = null;
             this.listApps.Name = "listApps";
             this.listApps.NoHeader = false;
+            this.listApps.SelectedItem = null;
             this.listApps.ShowGroup = false;
             this.listApps.Value = 0D;
             this.listApps.XOffest = 0;

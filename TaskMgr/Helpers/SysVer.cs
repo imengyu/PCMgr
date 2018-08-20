@@ -6,9 +6,9 @@ namespace PCMgr.Helpers
     {
         private static bool _isWin8Upper = false;
 
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern bool MGetWindowsWin8Upper();
-        [DllImport(FormMain.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern bool MGetWindowsBulidVersion();
 
         public static bool IsWin8Upper()

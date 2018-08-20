@@ -863,4 +863,22 @@ PCMgr 需要管理员权限 才能对系统进行控制和管理。
   <data name="CantFind" xml:space="preserve">
     <value>无法找到：</value>
   </data>
+  <data name="Capacity" xml:space="preserve">
+    <value>容量</value>
+  </data>
+  <data name="Formatted" xml:space="preserve">
+    <value>已格式化</value>
+  </data>
+  <data name="IsSystemDir" xml:space="preserve">
+    <value>系统磁盘</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>否</value>
+  </data>
+  <data name="PageFile" xml:space="preserve">
+    <value>页面文件</value>
+  </data>
+  <data name="Yes" xml:space="preserve">
+    <value>是</value>
+  </data>
 </root>

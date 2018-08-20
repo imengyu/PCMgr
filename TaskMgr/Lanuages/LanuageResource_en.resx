@@ -863,4 +863,22 @@ Therefore, the kernel function is not available. If you need to use the kernel f
   <data name="CantFind" xml:space="preserve">
     <value>Can not find any result of </value>
   </data>
+  <data name="Capacity" xml:space="preserve">
+    <value>Capacity</value>
+  </data>
+  <data name="Formatted" xml:space="preserve">
+    <value>Formatted Capacity</value>
+  </data>
+  <data name="IsSystemDir" xml:space="preserve">
+    <value>Is System Disk</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="PageFile" xml:space="preserve">
+    <value>Page File</value>
+  </data>
+  <data name="Yes" xml:space="preserve">
+    <value>Yes</value>
+  </data>
 </root>

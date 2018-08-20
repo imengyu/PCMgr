@@ -5,6 +5,8 @@
 #include <string>
 #include "StringHlp.h"
 
+extern WCHAR appDir[MAX_PATH];
+
 typedef LPWSTR(*LanuageItems_CallBack)(LPWSTR name);
 
 std::wstring str_item_kill_ask_start;
@@ -113,6 +115,9 @@ extern HINSTANCE hInst;
 HINSTANCE hInstRs = NULL;
 BOOL lgRealloc = TRUE;
 
+M_CAPI(void) MLG_SetLanuageItems_CanRealloc() {
+	lgRealloc = TRUE;
+}
 M_CAPI(void) MLG_SetLanuageItems_NoRealloc() {
 	lgRealloc = FALSE;
 }
@@ -121,9 +126,9 @@ M_CAPI(void) MLG_SetLanuageRes(LPWSTR appstarppath, LPWSTR name)
 	if (!MStrEqualW(name, L"zh") && !MStrEqualW(name, L"zh-CN"))
 	{
 #if _X64_
-		std::wstring  s = FormatString(L"%s\\%s\\PCMgrApp64.resource2.dll", appstarppath, name);
+		std::wstring  s = FormatString(L"%s\\%s\\PCMgrApp64.resource2.dll", appDir, name);
 #else
-		std::wstring  s = FormatString(L"%s\\%s\\PCMgrApp32.resource2.dll", appstarppath, name);
+		std::wstring  s = FormatString(L"%s\\%s\\PCMgrApp32.resource2.dll", appDir, name);
 #endif
 		hInstRs = LoadLibrary((LPWSTR)s.c_str());
 		if(!hInstRs) hInstRs = hInst;
