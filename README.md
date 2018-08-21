@@ -16,6 +16,8 @@ Copyright © 2018 By DreamFish<br/>
 截图 ScreenShot
 ---
 ![Image1](https://raw.githubusercontent.com/717021/PCMgr/master/image1.png)<br/>
+![Image11](https://raw.githubusercontent.com/717021/PCMgr/master/image11.png)<br/>
+![Image10](https://raw.githubusercontent.com/717021/PCMgr/master/image10.png)<br/>
 ![Image2](https://raw.githubusercontent.com/717021/PCMgr/master/image2.png)<br/>
 ![Image3](https://raw.githubusercontent.com/717021/PCMgr/master/image3.png)<br/>
 ![Image4](https://raw.githubusercontent.com/717021/PCMgr/master/image4.png)<br/>
@@ -24,4 +26,4 @@ Copyright © 2018 By DreamFish<br/>
 ![Image7](https://raw.githubusercontent.com/717021/PCMgr/master/image7.png)<br/>
 ![Image8](https://raw.githubusercontent.com/717021/PCMgr/master/image8.png)<br/>
 ![Image9](https://raw.githubusercontent.com/717021/PCMgr/master/image9.png)<br/>
-![Image10](https://raw.githubusercontent.com/717021/PCMgr/master/image10.png)<br/>
+
