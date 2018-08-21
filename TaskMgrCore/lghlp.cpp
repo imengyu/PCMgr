@@ -108,6 +108,9 @@ LPWSTR str_item_filenottrust;
 LPWSTR str_item_opensc_err;
 LPWSTR str_item_delsc_err;
 LPWSTR str_item_setscstart_err;
+LPWSTR str_item_set_to;
+LPWSTR str_item_killtree_end;
+LPWSTR str_item_killtree_content;
 
 #define HASSTR(x) x=(LPWSTR)malloc(size*sizeof(WCHAR));wcscpy_s(x, size, msg)
 
@@ -210,6 +213,9 @@ void MLG_SetLanuageItems_Destroy()
 	delete str_item_opensc_err;
 	delete str_item_delsc_err;
 	delete str_item_setscstart_err;
+	delete str_item_set_to;
+	delete str_item_killtree_end;
+	delete str_item_killtree_content;
 }
 void MLG_SetLanuageItems_1(int id, LPWSTR msg, int size)
 {
@@ -284,7 +290,9 @@ void MLG_SetLanuageItems_2(int id, LPWSTR msg, int size)
 	case 9: HASSTR(str_item_opensc_err); break;
 	case 10: HASSTR(str_item_delsc_err); break;
 	case 11: HASSTR(str_item_setscstart_err); break;
-		
+	case 12: HASSTR(str_item_set_to); break;
+	case 13: HASSTR(str_item_killtree_end); break;
+	case 14: HASSTR(str_item_killtree_content); break;
 	}
 
 }

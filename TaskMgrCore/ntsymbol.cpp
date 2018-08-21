@@ -5,6 +5,7 @@
 #include "ioctls.h"
 #include "sysstructs.h"
 #include "sysfuns.h"
+#include "cscall.h"
 #include "mapphlp.h"
 #include "DirectoryHelper.h"
 #include "PathHelper.h"
@@ -107,7 +108,7 @@ BOOLEAN LoadSymModule(char* ImageName, ULONG_PTR ModuleBase)
 	if (!SymGetSymbolFile(hProcess, NULL, targerFile, sfPdb, SymFile, MAX_PATH, SymFile, MAX_PATH))
 	{
 		LogErr2(L"Cannot get symbol file of %hs  (%hs), error: %d", ImageName, targerFile, GetLastError());
-		MAppMainCall(35, ImageName, 0);
+		MAppMainCall(M_CALLBACK_SHOW_NOPDB_WARN, ImageName, 0);
 		ImageUnload(ImageInfo);
 		return rs;
 	}

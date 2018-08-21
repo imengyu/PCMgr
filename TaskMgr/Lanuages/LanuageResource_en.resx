@@ -881,4 +881,16 @@ Therefore, the kernel function is not available. If you need to use the kernel f
   <data name="Yes" xml:space="preserve">
     <value>Yes</value>
   </data>
+  <data name="Speed" xml:space="preserve">
+    <value>Speed</value>
+  </data>
+  <data name="SetTo" xml:space="preserve">
+    <value>Set &amp;To</value>
+  </data>
+  <data name="KillTreeAskEnd" xml:space="preserve">
+    <value>process tree?</value>
+  </data>
+  <data name="KillTreeContent" xml:space="preserve">
+    <value>If multiple open programs or processes are associated with this process tree, these programs or processes are closed and all unsaved data is lost. If you end a system process, it may cause the system to be unstable. Are you sure you want to continue?</value>
+  </data>
 </root>

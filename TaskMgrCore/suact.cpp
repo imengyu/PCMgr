@@ -552,7 +552,7 @@ LRESULT M_SU_EnumKernelModuls_HandleWmCommand(WPARAM wParam)
 	switch (wParam)
 	{
 	case ID_MENUDRIVER_REFESH: {
-		MAppMainCall(24, 0, 0);
+		MAppMainCall(M_CALLBACK_KERNEL_INIT_LIST, 0, 0);
 		return 0;
 	}
 	case ID_MENUDRIVER_DELETE: {
@@ -575,7 +575,7 @@ LRESULT M_SU_EnumKernelModuls_HandleWmCommand(WPARAM wParam)
 			if (MFM_FileExist(selectedKmi->szFullDllPath))
 			{
 				if (MGetExeFileTrust(selectedKmi->szFullDllPath))
-					MAppMainCall(30, selectedKmi->szFullDllPath, 0);
+					MAppMainCall(M_CALLBACK_SHOW_TRUSTED_DLG, selectedKmi->szFullDllPath, 0);
 				else
 					MShowMessageDialog(hWndMain, selectedKmi->szFullDllPath, str_item_tip, str_item_filenottrust, 0, 0);
 			}
@@ -588,7 +588,7 @@ LRESULT M_SU_EnumKernelModuls_HandleWmCommand(WPARAM wParam)
 		break;
 	}
 	case ID_MENUDRIVER_SHOWALLDRIVER: {
-		MAppMainCall(25, 0, 0);
+		MAppMainCall(M_CALLBACK_KERNEL_SWITCH_SHOWALLDRV, 0, 0);
 		break;
 	}
 	case ID_MENUDRIVER_COPYPATH: {

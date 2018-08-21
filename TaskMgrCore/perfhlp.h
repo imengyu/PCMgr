@@ -1,7 +1,6 @@
 #pragma once
 #include "stdafx.h"
-#include <appmodel.h>
-#include <appxpackaging.h>
+#include "uwphlp.h"
 #include <Pdh.h>
 #include <PdhMsg.h>
 
@@ -32,8 +31,8 @@ M_CAPI(ULONGLONG) MPERF_GetKernelNonpaged();
 M_CAPI(ULONGLONG) MPERF_GetSystemCacheSize();
 //获取所有已提交大小
 M_CAPI(ULONGLONG) MPERF_GetCommitTotal();
-//获取所有已提交大小低
-M_CAPI(ULONGLONG) MPERF_GetCommitPeak();
+//获取所有已提交大上限
+M_CAPI(ULONGLONG) MPERF_GetCommitLimit();
 //获取可用内存
 M_CAPI(ULONGLONG) MPERF_GetRamAvail();
 //获取可用分页内存

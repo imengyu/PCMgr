@@ -189,6 +189,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="comdlghlp.h" />
+    <ClInclude Include="cscall.h" />
     <ClInclude Include="devicehlp.h" />
     <ClInclude Include="DirectoryHelper.h" />
     <ClInclude Include="fmhlp.h" />
@@ -220,6 +221,7 @@
     <ClInclude Include="sysstructs.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="thdhlp.h" />
+    <ClInclude Include="uwphlp.h" />
     <ClInclude Include="VersionHelpers.h" />
     <ClInclude Include="vprocx.h" />
   </ItemGroup>
@@ -269,6 +271,7 @@
     <ClCompile Include="suact.cpp" />
     <ClCompile Include="syshlp.cpp" />
     <ClCompile Include="thdhlp.cpp" />
+    <ClCompile Include="uwphlp.cpp" />
     <ClCompile Include="vprocx.cpp" />
   </ItemGroup>
   <ItemGroup>

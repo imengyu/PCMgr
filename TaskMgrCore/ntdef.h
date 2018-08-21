@@ -427,7 +427,6 @@ typedef struct _SYSTEMMODULELIST {
 	SYSTEM_MODULE_INFORMATION smi[1];
 } SYSTEMMODULELIST, *PSYSTEMMODULELIST;
 
-#ifndef _X64_
 typedef struct _VM_COUNTERS {
 	ULONG_PTR PeakVirtualSize;
 	ULONG_PTR VirtualSize;
@@ -450,17 +449,12 @@ typedef struct _SYSTEM_THREADS {
 	ULONG WaitTime;
 	PVOID StartAddress;
 	CLIENT_ID ClientId;
-	//KPRIORITY Priority;
-	LONG Priority;
-	//KPRIORITY BasePriority;
-	LONG BasePriority;
+	KPRIORITY Priority;
+	KPRIORITY BasePriority;
 	ULONG ContextSwitchCount;
 	THREAD_STATE ThreadState;
-	//DWORD dwState;
 	KWAIT_REASON WaitReason;
-	//DWORD dwWaitReason;
 } SYSTEM_THREADS, *PSYSTEM_THREADS;
-
 typedef struct _SYSTEM_PROCESSES { // Information Class 5 (Latest win10)(Before win7)
 	ULONG NextEntryOffset;
 	ULONG NumberOfThreads;
@@ -472,7 +466,7 @@ typedef struct _SYSTEM_PROCESSES { // Information Class 5 (Latest win10)(Before 
 	LARGE_INTEGER UserTime;
 	LARGE_INTEGER KernelTime;
 	UNICODE_STRING ImageName;
-	LONG BasePriority;
+	KPRIORITY BasePriority;
 	ULONG ProcessId;
 	ULONG InheritedFromProcessId;
 	ULONG HandleCount;
@@ -482,7 +476,6 @@ typedef struct _SYSTEM_PROCESSES { // Information Class 5 (Latest win10)(Before 
 	IO_COUNTERS IoCounters;
 	SYSTEM_THREADS Threads[1];
 } SYSTEM_PROCESSES, *PSYSTEM_PROCESSES;
-
 typedef struct _SYSTEM_HANDLE_TABLE_ENTRY_INFO {
 	USHORT UniqueProcessId;
 	USHORT CreatorBackTraceIndex;
@@ -492,85 +485,91 @@ typedef struct _SYSTEM_HANDLE_TABLE_ENTRY_INFO {
 	PVOID Object;
 	ULONG GrantedAccess;
 } SYSTEM_HANDLE_TABLE_ENTRY_INFO, *PSYSTEM_HANDLE_TABLE_ENTRY_INFO;
-
 typedef struct _SYSTEM_HANDLE_INFORMATION {
 	ULONG NumberOfHandles;
 	SYSTEM_HANDLE_TABLE_ENTRY_INFO Handles[1];
 } SYSTEM_HANDLE_INFORMATION, *PSYSTEM_HANDLE_INFORMATION;
-
-#else
-typedef struct _VM_COUNTERS
+typedef struct _SYSTEM_PERFORMANCE_INFORMATION
 {
-	ULONG_PTR PeakVirtualSize;
-	ULONG_PTR VirtualSize;
+	LARGE_INTEGER IdleProcessTime;
+	LARGE_INTEGER IoReadTransferCount;
+	LARGE_INTEGER IoWriteTransferCount;
+	LARGE_INTEGER IoOtherTransferCount;
+	ULONG IoReadOperationCount;
+	ULONG IoWriteOperationCount;
+	ULONG IoOtherOperationCount;
+	ULONG AvailablePages;//可用
+	ULONG CommittedPages;//已提交
+	ULONG CommitLimit;//提交上限
+	ULONG PeakCommitment;//提交峰值
 	ULONG PageFaultCount;
-	ULONG_PTR PeakWorkingSetSize;
-	ULONG_PTR WorkingSetSize;
-	ULONG_PTR QuotaPeakPagedPoolUsage;
-	ULONG_PTR QuotaPagedPoolUsage;
-	ULONG_PTR QuotaPeakNonPagedPoolUsage;
-	ULONG_PTR QuotaNonPagedPoolUsage;
-	ULONG_PTR PagefileUsage;
-	ULONG_PTR PeakPagefileUsage;
-	ULONG_PTR PrivatePageCount;
-} VM_COUNTERS, *PVM_COUNTERS;
-
-typedef struct _SYSTEM_THREADS
-{
-	LARGE_INTEGER KernelTime;
-	LARGE_INTEGER UserTime;
-	LARGE_INTEGER CreateTime;
-	ULONG WaitTime;
-	PVOID StartAddress;
-	CLIENT_ID ClientId;
-	KPRIORITY Priority;
-	KPRIORITY BasePriority;
-	ULONG ContextSwitchCount;
-	THREAD_STATE ThreadState;
-	KWAIT_REASON WaitReason;
-	ULONG Reserved;
-} SYSTEM_THREADS, *PSYSTEM_THREADS;
-
-typedef struct _SYSTEM_PROCESSES
-{
-	ULONG NextEntryOffset;
-	ULONG NumberOfThreads;
-	LARGE_INTEGER WorkingSetPrivateSize;
-	ULONG HardFaultCount;
-	ULONG NumberOfThreadsHighWatermark;
-	ULONGLONG CycleTime;
-	LARGE_INTEGER CreateTime;
-	LARGE_INTEGER UserTime;
-	LARGE_INTEGER KernelTime;
-	UNICODE_STRING ImageName;
-	LONG BasePriority;
-	PVOID ProcessId;
-	PVOID InheritedFromProcessId;
-	ULONG HandleCount;
-	ULONG SessionId;
-	ULONG_PTR UniqueProcessKey;
-	VM_COUNTERS VmCounters;
-	IO_COUNTERS IoCounters;
-	SYSTEM_THREADS Threads[1];
-}SYSTEM_PROCESSES, *PSYSTEM_PROCESSES;
-
-typedef struct _SYSTEM_HANDLE_TABLE_ENTRY_INFO {
-	USHORT	UniqueProcessId;
-	USHORT	CreatorBackTraceIndex;
-	UCHAR	ObjectTypeIndex;
-	UCHAR	HandleAttributes;
-	USHORT	HandleValue;
-	PVOID	Object;
-	ULONG	GrantedAccess;
-} SYSTEM_HANDLE_TABLE_ENTRY_INFO, *PSYSTEM_HANDLE_TABLE_ENTRY_INFO;
-
-typedef struct _SYSTEM_HANDLE_INFORMATION {
-	ULONG NumberOfHandles;
-	SYSTEM_HANDLE_TABLE_ENTRY_INFO Handles[1];
-} SYSTEM_HANDLE_INFORMATION, *PSYSTEM_HANDLE_INFORMATION;
-
-
-#endif
+	ULONG CopyOnWriteCount;
+	ULONG TransitionCount;
+	ULONG CacheTransitionCount;
+	ULONG DemandZeroCount;
+	ULONG PageReadCount;
+	ULONG PageReadIoCount;
+	ULONG CacheReadCount;
+	ULONG CacheIoCount;
+	ULONG DirtyPagesWriteCount;
+	ULONG DirtyWriteIoCount;
+	ULONG MappedPagesWriteCount;
+	ULONG MappedWriteIoCount;
+	ULONG PagedPoolPages;//分页缓冲池
+	ULONG NonPagedPoolPages;//非分页缓冲池
+	ULONG PagedPoolAllocs;
+	ULONG PagedPoolFrees;
+	ULONG NonPagedPoolAllocs;
+	ULONG NonPagedPoolFrees;
+	ULONG FreeSystemPtes;
+	ULONG ResidentSystemCodePage;
+	ULONG TotalSystemDriverPages;
+	ULONG TotalSystemCodePages;
+	ULONG NonPagedPoolLookasideHits;
+	ULONG PagedPoolLookasideHits;
+	ULONG AvailablePagedPoolPages;
+	ULONG ResidentSystemCachePage;
+	ULONG ResidentPagedPoolPage;
+	ULONG ResidentSystemDriverPage;
+	ULONG CcFastReadNoWait;
+	ULONG CcFastReadWait;
+	ULONG CcFastReadResourceMiss;
+	ULONG CcFastReadNotPossible;
+	ULONG CcFastMdlReadNoWait;
+	ULONG CcFastMdlReadWait;
+	ULONG CcFastMdlReadResourceMiss;
+	ULONG CcFastMdlReadNotPossible;
+	ULONG CcMapDataNoWait;
+	ULONG CcMapDataWait;
+	ULONG CcMapDataNoWaitMiss;
+	ULONG CcMapDataWaitMiss;
+	ULONG CcPinMappedDataCount;
+	ULONG CcPinReadNoWait;
+	ULONG CcPinReadWait;
+	ULONG CcPinReadNoWaitMiss;
+	ULONG CcPinReadWaitMiss;
+	ULONG CcCopyReadNoWait;
+	ULONG CcCopyReadWait;
+	ULONG CcCopyReadNoWaitMiss;
+	ULONG CcCopyReadWaitMiss;
+	ULONG CcMdlReadNoWait;
+	ULONG CcMdlReadWait;
+	ULONG CcMdlReadNoWaitMiss;
+	ULONG CcMdlReadWaitMiss;
+	ULONG CcReadAheadIos;
+	ULONG CcLazyWriteIos;
+	ULONG CcLazyWritePages;
+	ULONG CcDataFlushes;
+	ULONG CcDataPages;
+	ULONG ContextSwitches;
+	ULONG FirstLevelTbFills;
+	ULONG SecondLevelTbFills;
+	ULONG SystemCalls;
+	ULONGLONG CcTotalDirtyPages;
+	ULONGLONG CcDirtyPageThreshold;
+	LONGLONG ResidentAvailablePages;
+	ULONGLONG SharedCommittedPages;
+}SYSTEM_PERFORMANCE_INFORMATION, *PSYSTEM_PERFORMANCE_INFORMATION;
 
 typedef LONG(WINAPI * ZwQueryInformationThreadFun)(HANDLE ThreadHandle, THREADINFOCLASS ThreadInformationClass, PVOID ThreadInformation, ULONG ThreadInformationLength, PULONG ReturnLength OPTIONAL);
 typedef LONG(WINAPI * RtlNtStatusToDosErrorFun)(ULONG status);

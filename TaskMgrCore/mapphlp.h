@@ -1,6 +1,7 @@
 #pragma once
 #include "stdafx.h"
 #include "ntdef.h"
+#include "cscall.h"
 
 #define M_DRAW_HEADER_HOT 1
 #define M_DRAW_HEADER_PRESSED 2

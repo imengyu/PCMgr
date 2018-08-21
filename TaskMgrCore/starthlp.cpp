@@ -260,7 +260,7 @@ void MSM_DelSelectedReg()
 			LogWarn(L"Delete reg key %s\\%s\\%s failed : %d", MREG_ROOTKEYToStr(selectedRootkey), selectedKey, selectedValue, GetLastError());
 			MessageBox(hWndMain, L"Failed delete reg", (LPWSTR)str_item_op_failed.c_str(), MB_OK);
 		}
-		else MAppMainCall(26, (LPVOID)(ULONG_PTR)selectedId, 0);
+		else MAppMainCall(M_CALLBACK_START_ITEM_REMVED, (LPVOID)(ULONG_PTR)selectedId, 0);
 	}
 }
 void MSM_DelSelectedFile()

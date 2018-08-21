@@ -18,6 +18,7 @@ BOOL LoadDll();
 void FreeDll();
 void MFroceKillProcessUser();
 void MKillProcessUser(BOOL ask);
+void MKillProcessTreeUser();
 
 EXTERN_C M_API BOOL MKillProcessUser2(DWORD pid, BOOL showErr);
 

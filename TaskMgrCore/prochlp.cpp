@@ -101,7 +101,7 @@ void MFroceKillProcessUser()
 		if (thisCommandIsVeryImporant && !hTerminateImporantWarnCallBack(thisCommandName, 3))return;
 		if (!thisCommandIsVeryImporant && thisCommandIsImporant && !hTerminateImporantWarnCallBack(thisCommandName, 1))return;
 		if ((!thisCommandIsVeryImporant && thisCommandIsImporant) || (!thisCommandIsImporant && MShowMessageDialog(hWndMain, (LPWSTR)str_item_kill_ast_content.c_str(), DEFDIALOGGTITLE,
-			(LPWSTR)(str_item_kill_ask_start + thisCommandName + str_item_kill_ask_end).c_str(), NULL, MB_YESNO) == IDYES))
+			(LPWSTR)(str_item_kill_ask_start + L" " + thisCommandName + L" " + str_item_kill_ask_end).c_str(), NULL, MB_YESNO) == IDYES))
 		{
 			NTSTATUS status = 0;
 			if (!M_SU_TerminateProcessPID(thisCommandPid, 0, &status, use_apc))
@@ -121,7 +121,7 @@ void MKillProcessUser(BOOL ask)
 		if (thisCommandIsVeryImporant && !hTerminateImporantWarnCallBack(thisCommandName, 3))return;
 		if (!thisCommandIsVeryImporant && thisCommandIsImporant && !hTerminateImporantWarnCallBack(thisCommandName, 1))return;
 		if ((!thisCommandIsVeryImporant && thisCommandIsImporant) || !ask || isKillingExplorer || (!thisCommandIsImporant && MShowMessageDialog(hWndMain, (LPWSTR)str_item_kill_ast_content.c_str(), DEFDIALOGGTITLE,
-			(LPWSTR)(str_item_kill_ask_start + thisCommandName + str_item_kill_ask_end).c_str(), NULL, MB_YESNO) == IDYES))
+			(LPWSTR)(str_item_kill_ask_start + L" " + thisCommandName + L" " + str_item_kill_ask_end).c_str(), NULL, MB_YESNO) == IDYES))
 		{
 			HANDLE hProcess;
 			NTSTATUS status = MOpenProcessNt(thisCommandPid, &hProcess);
@@ -139,6 +139,17 @@ void MKillProcessUser(BOOL ask)
 				MShowErrorMessage((LPWSTR)str_item_invalidproc.c_str(), (LPWSTR)str_item_kill_failed.c_str(), MB_ICONWARNING, MB_OK);
 			else ThrowErrorAndErrorCodeX(status, str_item_openprocfailed, (LPWSTR)str_item_kill_failed.c_str());
 		}
+	}
+}
+void MKillProcessTreeUser()
+{
+	if (thisCommandPid > 4 && !isKillingExplorer)
+	{
+		if (thisCommandIsVeryImporant && !hTerminateImporantWarnCallBack(thisCommandName, 3))return;
+		if (!thisCommandIsVeryImporant && thisCommandIsImporant && !hTerminateImporantWarnCallBack(thisCommandName, 1))return;
+		if ((!thisCommandIsVeryImporant && thisCommandIsImporant) || (!thisCommandIsImporant && MShowMessageDialog(hWndMain, str_item_killtree_content, DEFDIALOGGTITLE,
+			(LPWSTR)(str_item_kill_ask_start + L" " + thisCommandName + L" " + str_item_killtree_end).c_str(), NULL, MB_YESNO) == IDYES))
+			MAppMainCall(M_CALLBACK_KILLPROCTREE, (LPVOID)thisCommandPid, 0);
 	}
 }
 M_API BOOL MKillProcessUser2(DWORD pid, BOOL showErr)
@@ -1322,6 +1333,8 @@ M_CAPI(BOOL) MEnumProcessPrivileges(DWORD dwId, EnumPrivilegesCallBack callBack)
 	return FALSE;
 }
 
+extern HWND selectItem4;
+
 M_CAPI(int) MAppWorkShowMenuProcessPrepare(LPWSTR strFilePath, LPWSTR strFileName, DWORD pid, BOOL isImporant, BOOL isVeryImporant)
 {
 	thisCommandIsVeryImporant = isVeryImporant;
@@ -1344,7 +1357,7 @@ M_CAPI(int) MAppWorkShowMenuProcessPrepare(LPWSTR strFilePath, LPWSTR strFileNam
 	return 0;
 }
 //MENU
-M_CAPI(int) MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWORD pid, HWND hDlg, int data, int type, int x, int y)
+M_CAPI(int) MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWORD pid, HWND hDlg, HWND selectHWND, int data, int type, int x, int y)
 {
 	thisCommandPid = pid;
 	HMENU hroot = LoadMenu(hInstRs, MAKEINTRESOURCE(IDR_MENUTASK));
@@ -1388,6 +1401,12 @@ M_CAPI(int) MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWOR
 
 		if (!can_debug)EnableMenuItem(hpop, IDM_DEBUG, MF_DISABLED);
 
+		if (selectHWND)
+		{
+			selectItem4 = selectHWND;
+			InsertMenu(hpop, 1, MF_BYPOSITION, IDM_SETTO, str_item_set_to);
+		}
+
 		killUWPCmdSendBack = type == 3;
 		killCmdSendBack = type == 2;
 		isKillingExplorer = type == 1;
@@ -1421,6 +1440,8 @@ M_CAPI(int) MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWOR
 				EnableMenuItem(hpop, IDM_VKSTRUCTS, MF_DISABLED);
 				EnableMenuItem(hpop, IDM_VHOTKEY, MF_DISABLED);
 				EnableMenuItem(hpop, IDM_VTIMER, MF_DISABLED);
+				EnableMenuItem(hpop, IDM_VPRIVILEGE, MF_DISABLED);
+				EnableMenuItem(hpop, IDM_DEBUG, MF_DISABLED);
 			}
 		}
 
@@ -1452,7 +1473,9 @@ M_CAPI(int) MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWOR
 		EnableMenuItem(hpop, IDM_VKSTRUCTS, MF_DISABLED);
 		EnableMenuItem(hpop, IDM_VHOTKEY, MF_DISABLED);
 		EnableMenuItem(hpop, IDM_VTIMER, MF_DISABLED);
+		EnableMenuItem(hpop, IDM_VPRIVILEGE, MF_DISABLED);
 		EnableMenuItem(hpop, IDM_FILEPROP, MF_DISABLED);
+		EnableMenuItem(hpop, IDM_DEBUG, MF_DISABLED);
 
 		if (MStrEqualW(strFilePath, L"") || MStrEqualW(strFilePath, L"-")) {
 			EnableMenuItem(hpop, IDM_OPENPATH, MF_DISABLED);

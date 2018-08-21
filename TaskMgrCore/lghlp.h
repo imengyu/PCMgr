@@ -98,7 +98,9 @@ extern LPWSTR str_item_filenottrust;
 extern LPWSTR str_item_opensc_err;
 extern LPWSTR str_item_delsc_err;
 extern LPWSTR str_item_setscstart_err;
-
+extern LPWSTR str_item_set_to;
+extern LPWSTR str_item_killtree_end;
+extern LPWSTR str_item_killtree_content;
 
 
 

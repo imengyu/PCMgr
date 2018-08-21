@@ -10,6 +10,7 @@
 #include "settinghlp.h"
 #include "thdhlp.h"
 #include "ntsymbol.h"
+#include "cscall.h"
 #include "sysstructs.h"
 #include "StringHlp.h"
 #include <io.h>
@@ -398,7 +399,7 @@ BOOL MShowMyDbgView()
 {
 	if (!isMyDbgViewLoaded)
 		MInitMyDbgView();
-	else MAppMainCall(38, 0, 0);
+	else MAppMainCall(M_CALLBACK_DBGPRINT_CLOSE, 0, 0);
 	return 1;
 }
 
@@ -410,7 +411,7 @@ M_CAPI(VOID) MOnCloseMyDbgView() {
 BOOL MUnInitMyDbgView() {
 	if (isMyDbgViewLoaded)
 	{
-		MAppMainCall(38, 0, 0);
+		MAppMainCall(M_CALLBACK_DBGPRINT_CLOSE, 0, 0);
 		M_SU_ReSetDbgViewEvent();
 		if (hEventDbgView) { CloseHandle(hEventDbgView); hEventDbgView = 0; }
 		isMyDbgViewRunning = FALSE;
@@ -443,7 +444,7 @@ BOOL MInitMyDbgView()
 		hThreadDbgView = CreateThread(NULL, 0, MDbgViewReceiveThread, NULL, 0, NULL);
 		if (hThreadDbgView) {
 			isMyDbgViewLoaded = TRUE;
-			MAppMainCall(37, 0, 0);
+			MAppMainCall(M_CALLBACK_DBGPRINT_SHOW, 0, 0);
 			LogInfo(L"MyDbgView started.");
 			return isMyDbgViewLoaded;
 		}
@@ -473,8 +474,8 @@ DWORD WINAPI MDbgViewReceiveThread(LPVOID lpParameter)
 		if (M_SU_GetDbgViewLastBuffer(lastBuffer, 256, &hasMoreData))
 		{
 			if (MStrEqualW(lastBuffer, L""))
-				MAppMainCall(40, 0, 0);
-			else MAppMainCall(39, lastBuffer, 0);
+				MAppMainCall(M_CALLBACK_DBGPRINT_EMEPTY, 0, 0);
+			else MAppMainCall(M_CALLBACK_DBGPRINT_DATA, lastBuffer, 0);
 
 			if (hasMoreData) goto CONTINUE;
 		}
@@ -495,6 +496,6 @@ DWORD WINAPI MLoadingThread(LPVOID lpParameter)
 	if (!kNtosValue.KernelDataInited)
 		MLoadKernelNTPDB(&kNtosValue, usingNtosPDB);
 	MAppSetStartingProgessText(L"Initializing...");
-	MAppMainCall(36, 0, 0);
+	MAppMainCall(M_CALLBACK_INVOKE_LASTLOAD_STEP, 0, 0);
 	return 0;
 }

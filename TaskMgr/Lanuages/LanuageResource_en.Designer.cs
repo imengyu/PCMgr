@@ -979,6 +979,24 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 process tree? 的本地化字符串。
+        /// </summary>
+        internal static string KillTreeAskEnd {
+            get {
+                return ResourceManager.GetString("KillTreeAskEnd", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 If multiple open programs or processes are associated with this process tree, these programs or processes are closed and all unsaved data is lost. If you end a system process, it may cause the system to be unstable. Are you sure you want to continue? 的本地化字符串。
+        /// </summary>
+        internal static string KillTreeContent {
+            get {
+                return ResourceManager.GetString("KillTreeContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Language settings will only take effect when you open the software next time. 的本地化字符串。
         /// </summary>
         internal static string LanuageChangedTip {
@@ -1636,11 +1654,29 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 Set &amp;To 的本地化字符串。
+        /// </summary>
+        internal static string SetTo {
+            get {
+                return ResourceManager.GetString("SetTo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Size 的本地化字符串。
         /// </summary>
         internal static string Size {
             get {
                 return ResourceManager.GetString("Size", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Speed 的本地化字符串。
+        /// </summary>
+        internal static string Speed {
+            get {
+                return ResourceManager.GetString("Speed", resourceCulture);
             }
         }
         

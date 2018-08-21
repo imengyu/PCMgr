@@ -140,7 +140,7 @@
         AAEAAAD/////AQAAAAAAAAAMAgAAAFdTeXN0ZW0uV2luZG93cy5Gb3JtcywgVmVyc2lvbj00LjAuMC4w
         LCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODkFAQAAACZTeXN0
         ZW0uV2luZG93cy5Gb3Jtcy5JbWFnZUxpc3RTdHJlYW1lcgEAAAAERGF0YQcCAgAAAAkDAAAADwMAAADw
-        CAAAAk1TRnQBSQFMAgEBAwEAASgBBwEoAQcBEAEAARABAAT/ASEBAAj/AUIBTQE2BwABNgMAASgDAAFA
+        CAAAAk1TRnQBSQFMAgEBAwEAATABBwEwAQcBEAEAARABAAT/ASEBAAj/AUIBTQE2BwABNgMAASgDAAFA
         AwABEAMAAQEBAAEgBgABELYAAlgBYgHvAlgBYgHvDAACWAFiAe8CWAFiAe+EAAGyAgAB/wwAAmIBWAHv
         AdwBjwEAAf8B6AGXAQAB/wHoAZcBAAH/AegBlwEAAf8BwwIAAf8CRwFGAYAcAAGOAeQC/wGNAeMC/wGL
         AeMC/wGKAeIC/wGIAeIC/wGHAeEC/wIAAb4B/wIAAeYB/wIAAbwB/wEAAdYB/AH/AgABuQH/AgAB3gH/
@@ -270,7 +270,7 @@
         AAEAAAD/////AQAAAAAAAAAMAgAAAFdTeXN0ZW0uV2luZG93cy5Gb3JtcywgVmVyc2lvbj00LjAuMC4w
         LCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODkFAQAAACZTeXN0
         ZW0uV2luZG93cy5Gb3Jtcy5JbWFnZUxpc3RTdHJlYW1lcgEAAAAERGF0YQcCAgAAAAkDAAAADwMAAACw
-        BAAAAk1TRnQBSQFMAwEBAAHwAQYB8AEGARABAAEQAQAE/wEhAQAI/wFCAU0BNgcAATYDAAEoAwABQAMA
+        BAAAAk1TRnQBSQFMAwEBAAH4AQYB+AEGARABAAEQAQAE/wEhAQAI/wFCAU0BNgcAATYDAAEoAwABQAMA
         ARADAAEBAQABIAYAARA8AAHNAf8MAAJQAVEBnwJQAVEBn8wAAvsB+gH/AvsB+gH/AvsB+gH/AvsB+gH/
         AvsB+gH/AvsB+gH/A/0B/wIAAdsB/wIAAdkB/wP9Af8CUAFRAZ8CAAHeAf8CUAFRAZ/MAAP7Af8B9wL2
         Af8B9wH2AfUB/wH3AfYB9QH/AfcB9gH1Af8B9wH2AfUB/wH3AfYB9QH/AvsB+gH/AgAB2wH/AgAB2QH/
@@ -1778,37 +1778,43 @@
     <value>735, 17</value>
   </metadata>
   <data name="打开应用ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>148, 22</value>
+    <value>166, 22</value>
   </data>
   <data name="打开应用ToolStripMenuItem.Text" xml:space="preserve">
-    <value>打开应用</value>
+    <value>打开应用(&amp;O)</value>
   </data>
   <data name="卸载应用ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>148, 22</value>
+    <value>166, 22</value>
   </data>
   <data name="卸载应用ToolStripMenuItem.Text" xml:space="preserve">
-    <value>卸载应用</value>
+    <value>卸载应用(&amp;U)</value>
   </data>
   <data name="打开安装位置ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>148, 22</value>
+    <value>166, 22</value>
   </data>
   <data name="打开安装位置ToolStripMenuItem.Text" xml:space="preserve">
-    <value>打开安装位置</value>
+    <value>打开安装位置(&amp;D)</value>
   </data>
   <data name="复制名称ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>148, 22</value>
+    <value>166, 22</value>
   </data>
   <data name="复制名称ToolStripMenuItem.Text" xml:space="preserve">
-    <value>复制名称</value>
+    <value>复制名称(&amp;N)</value>
   </data>
   <data name="复制完整名称ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>148, 22</value>
+    <value>166, 22</value>
   </data>
   <data name="复制完整名称ToolStripMenuItem.Text" xml:space="preserve">
-    <value>复制完整名称</value>
+    <value>复制完整名称(&amp;N)</value>
+  </data>
+  <data name="复制发布者ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>166, 22</value>
+  </data>
+  <data name="复制发布者ToolStripMenuItem.Text" xml:space="preserve">
+    <value>复制(&amp;C)</value>
   </data>
   <data name="contextMenuStripUWP.Size" type="System.Drawing.Size, System.Drawing">
-    <value>149, 114</value>
+    <value>167, 158</value>
   </data>
   <data name="&gt;&gt;contextMenuStripUWP.Name" xml:space="preserve">
     <value>contextMenuStripUWP</value>
@@ -2784,6 +2790,12 @@
   </data>
   <data name="&gt;&gt;notifyIcon.Type" xml:space="preserve">
     <value>System.Windows.Forms.NotifyIcon, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;复制发布者ToolStripMenuItem.Name" xml:space="preserve">
+    <value>复制发布者ToolStripMenuItem</value>
+  </data>
+  <data name="&gt;&gt;复制发布者ToolStripMenuItem.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;$this.Name" xml:space="preserve">
     <value>FormMain</value>

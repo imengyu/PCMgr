@@ -633,13 +633,13 @@ M_API BOOL MFM_ShowInExplorer(const wchar_t* szFile)
 DWORD WINAPI MFM_DeleteDirThread(LPVOID lpThreadParameter)
 {
 	needDeletedFileCount = 0;
-	MAppMainCall(21, 0, 0);
+	MAppMainCall(M_CALLBACK_UPDATE_PROGRESS_DLG_TO_COLLECTING, 0, 0);
 	MFM_CalcFileCount((LPWSTR)lpThreadParameter);
 
 	deletedFileCount = 0;
-	MAppMainCall(18, 0, 0);
+	MAppMainCall(M_CALLBACK_SHOW_PROGRESS_DLG, 0, 0);
 	MFM_DeleteDirInnern((LPWSTR)lpThreadParameter);
-	MAppMainCall(19, 0, 0);
+	MAppMainCall(M_CALLBACK_UPDATE_PROGRESS_DLG_TO_DELETEING, 0, 0);
 
 	free(lpThreadParameter);
 	return 0;
@@ -667,7 +667,7 @@ BOOL MFM_DeleteDirInnern(const wchar_t* szFileDir)
 		}
 		else {
 
-			MAppMainCall(20, (void*)path, (void*)(ULONG_PTR)((int)((double)deletedFileCount / (double)needDeletedFileCount) * 100));
+			MAppMainCall(M_CALLBACK_UPDATE_PROGRESS_DLG_TO_DELETEING, (void*)path, (void*)(ULONG_PTR)((int)((double)deletedFileCount / (double)needDeletedFileCount) * 100));
 
 			if (!DeleteFile(path)) {
 				DWORD lasterr = GetLastError();
@@ -863,7 +863,7 @@ BOOL MFM_DelFileForeverUser()
 				showstatus = true;
 				needDeletedFileCount = fmMutilSelectCount;
 				deletedFileCount = 0;
-				MAppMainCall(18, 0, 0);
+				MAppMainCall(M_CALLBACK_SHOW_PROGRESS_DLG, 0, 0);
 			}
 			LPWSTR buf;
 			for (int i = 0; i < fmMutilSelectCount; i++)
@@ -871,12 +871,12 @@ BOOL MFM_DelFileForeverUser()
 				if (i == 0)buf = fmCurrectSelectFilePath0;
 				else buf = MFM_GetSeledItemPath(i);
 
-				if (showstatus) MAppMainCall(20, (void*)buf, (void*)(ULONG_PTR)((int)((double)deletedFileCount / (double)needDeletedFileCount) * 100));
+				if (showstatus) MAppMainCall(M_CALLBACK_UPDATE_PROGRESS_DLG_TO_DELETEING, (void*)buf, (void*)(ULONG_PTR)((int)((double)deletedFileCount / (double)needDeletedFileCount) * 100));
 				if (!DeleteFile(buf)) MShowErrorMessageWithLastErr(buf, str_item_delfailed, MB_ICONEXCLAMATION, 0);
 
 				if (i != 0)MFM_GetSeledItemFree(buf);
 			}
-			if (showstatus)MAppMainCall(19, 0, 0);
+			if (showstatus)MAppMainCall(M_CALLBACK_UPDATE_PROGRESS_DLG_TO_DELETEING, 0, 0);
 		}
 		else return 1;
 	}

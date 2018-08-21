@@ -10,7 +10,6 @@ using Windows.Management.Deployment;
 
 namespace PCMgrUWP
 {
-
     public class UWPPackage
     {
         public string Name = "";
@@ -18,6 +17,7 @@ namespace PCMgrUWP
         public string Publisher = "";
         public string Description = "";
         public string InstalledLocation = "";
+        public string MainAppDisplayName = "";
         public string[] Apps;
         public string IconPath = null;
 
@@ -29,36 +29,47 @@ namespace PCMgrUWP
     }
     public class UWPManager
     {
+        //Apis
 #if _X64_
         public const string COREDLLNAME = "PCMgr64.dll";
 #else
         public const string COREDLLNAME = "PCMgr32.dll";
 #endif
-
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern bool MFM_FileExist([MarshalAs(UnmanagedType.LPWStr)]string path);
-
         [DllImport("shlwapi.dll", BestFitMapping = false, CharSet = CharSet.Unicode, ExactSpelling = true, SetLastError = false, ThrowOnUnmappableChar = true)]
         private static extern int SHLoadIndirectString(string pszSource, StringBuilder pszOutBuf, int cchOutBuf, IntPtr ppvReserved);
         private static string ExtractStringFromPRIFile(string pathToPRI, string resourceKey)
         {
-            string sWin8ManifestString = string.Format("@{{{0}? {1}}}", pathToPRI, resourceKey);
+            string sWin8ManifestString = string.Format("@{{{0}?{1}}}", pathToPRI, resourceKey);
             var outBuff = new StringBuilder(1024);
             int result = SHLoadIndirectString(sWin8ManifestString, outBuff, outBuff.Capacity, IntPtr.Zero);
             return outBuff.ToString();
         }
 
+        //
         private PackageManager packageManager = new PackageManager();
         private bool enumlated = false;
+
+        //
         private int packageCount = 0;
+        private static string stringLocate = "zh-CN";
         private List<UWPPackage> packageDatas = new List<UWPPackage>();
 
         public int PackageCount { get { return packageCount; } }
         public List<UWPPackage> Packages { get { return packageDatas; } }
 
+        /// <summary>
+        /// 获取或设置查找字符串的地区语言
+        /// </summary>
+        public static string StringLocate
+        {
+            get { return stringLocate; }
+            set { stringLocate = value; }
+        }
         public static string DisplayNameTozhCN(string dsb)
         {
-            switch(dsb)
+            /*switch(dsb)
             {
                 case "Get Help":
                     return "获取帮助";
@@ -88,98 +99,138 @@ namespace PCMgrUWP
                     return "邮件和日历";
                 case "Windows Camera":
                     return "相机";
-            }
+            }*/
             return dsb;
         }
 
-        private static string ExtractDisplayIcon(string dir, string logoPath)
+        /// <summary>
+        /// 导出图标
+        /// </summary>
+        /// <param name="dir">UWP 安装目录</param>
+        /// <param name="package"></param>
+        /// <param name="logoPath">图标位置</param>
+        /// <returns></returns>
+        private static string ExtractDisplayIcon(string dir, Package package, string logoPath)
         {
-            var imageFile = Path.Combine(dir, logoPath);
-            var dir2 = Path.GetDirectoryName(imageFile);
-            var name = Path.GetFileName(imageFile);
-            var 
-            scaleImage = Path.ChangeExtension(imageFile, "scale-200.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
-            scaleImage = Path.ChangeExtension(imageFile, "scale-100.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
-            scaleImage = Path.ChangeExtension(imageFile, "contrast-black_scale-200.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
-            scaleImage = Path.ChangeExtension(imageFile, "contrast-black_scale-100.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
-            scaleImage = Path.ChangeExtension(imageFile, "scale-200_contrast-black.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
-            scaleImage = Path.ChangeExtension(imageFile, "scale-100_contrast-black.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
-            scaleImage = Path.ChangeExtension(imageFile, "Theme-Dark_Scale-200.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
-            scaleImage = Path.ChangeExtension(imageFile, "Theme-Dark_Scale-100.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
-            imageFile = Path.Combine(dir + "\\contrast-black", name);
-            scaleImage = Path.ChangeExtension(imageFile, "scale-200.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
-            scaleImage = Path.ChangeExtension(imageFile, "scale-100.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
-            scaleImage = Path.ChangeExtension(imageFile, "contrast-black_scale-200.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
-            scaleImage = Path.ChangeExtension(imageFile, "contrast-black_scale-100.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
-            scaleImage = Path.ChangeExtension(imageFile, "scale-200_contrast-black.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
-            scaleImage = Path.ChangeExtension(imageFile, "scale-100_contrast-black.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
-            scaleImage = Path.ChangeExtension(imageFile, "Theme-Dark_Scale-200.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
-            scaleImage = Path.ChangeExtension(imageFile, "Theme-Dark_Scale-100.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
-            imageFile = Path.Combine(dir2 + "\\contrast-black", name);
-            scaleImage = Path.ChangeExtension(imageFile, "scale-200.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
-            scaleImage = Path.ChangeExtension(imageFile, "scale-100.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
-            scaleImage = Path.ChangeExtension(imageFile, "contrast-black_scale-200.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
-            scaleImage = Path.ChangeExtension(imageFile, "contrast-black_scale-100.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
-            scaleImage = Path.ChangeExtension(imageFile, "scale-200_contrast-black.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
-            scaleImage = Path.ChangeExtension(imageFile, "scale-100_contrast-black.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
-            scaleImage = Path.ChangeExtension(imageFile, "Theme-Dark_Scale-200.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
-            scaleImage = Path.ChangeExtension(imageFile, "Theme-Dark_Scale-100.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
-            imageFile = Path.Combine(dir, logoPath);
-
-            if (MFM_FileExist(imageFile)) return imageFile;
-
-            imageFile = Path.Combine(dir, "en-us", logoPath);
-            if (MFM_FileExist(imageFile)) return imageFile;
-            return Path.ChangeExtension(imageFile, "scale-16.png");
-        }
-        private static string ExtractDisplayName(string dir, Package package, string displayName)
-        {
-            bool k1 = false;
-            var priPath = Path.Combine(dir, "\\pris\\resources.zh-CN.pri");
-            if (!MFM_FileExist(priPath)) { priPath = Path.Combine(dir, "resources.pri"); k1 = true; }
-
-            if (!Uri.TryCreate(displayName, UriKind.Absolute, out Uri uri))
-                Uri.TryCreate("ms-resource:ApplicationDisplayName", UriKind.Absolute, out uri);
-
-            string resource = "";
-            string name = "";
-
-            resource = displayName;
-            name = ExtractStringFromPRIFile(priPath, resource);
-            if (!string.IsNullOrWhiteSpace(name)) return name;
-
-            resource = string.Format("ms-resource://{0}/resources/{1}", package.Id.Name, uri.Segments.Last());
-            name = ExtractStringFromPRIFile(priPath, resource);
-            if (!string.IsNullOrWhiteSpace(name)) return name;
-
-
-            if (!k1)
+            /*string path = "";
+            logoPath = logoPath.Replace("\\", "/");
+            if (logoPath.StartsWith("ms-resource:"))
             {
-                priPath = Path.Combine(dir, "resources.pri");
-                name = ExtractStringFromPRIFile(priPath, resource);
-                if (!string.IsNullOrWhiteSpace(name)) return name;
+                path = ExtractStringFromPRIFile(package.Id.FullName, logoPath);
+                if (!string.IsNullOrWhiteSpace(path)) return path;
             }
+            else
+            {
+                path = ExtractStringFromPRIFile(package.Id.FullName, "ms-resource://" + logoPath);
+                if (!string.IsNullOrWhiteSpace(path)) return path;
+            }
+            return path;*/
+            //if (string.IsNullOrWhiteSpace(path)) 
+            {
+                //Force search
+                var imageFile = Path.Combine(dir, logoPath);
+                var dir2 = Path.GetDirectoryName(imageFile);
+                var name = Path.GetFileName(imageFile);
+                var
+                scaleImage = Path.ChangeExtension(imageFile, "scale-200.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
+                scaleImage = Path.ChangeExtension(imageFile, "scale-100.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
+                scaleImage = Path.ChangeExtension(imageFile, "contrast-black_scale-200.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
+                scaleImage = Path.ChangeExtension(imageFile, "contrast-black_scale-100.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
+                scaleImage = Path.ChangeExtension(imageFile, "scale-200_contrast-black.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
+                scaleImage = Path.ChangeExtension(imageFile, "scale-100_contrast-black.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
+                scaleImage = Path.ChangeExtension(imageFile, "Theme-Dark_Scale-200.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
+                scaleImage = Path.ChangeExtension(imageFile, "Theme-Dark_Scale-100.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
+                imageFile = Path.Combine(dir + "\\contrast-black", name);
+                scaleImage = Path.ChangeExtension(imageFile, "scale-200.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
+                scaleImage = Path.ChangeExtension(imageFile, "scale-100.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
+                scaleImage = Path.ChangeExtension(imageFile, "contrast-black_scale-200.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
+                scaleImage = Path.ChangeExtension(imageFile, "contrast-black_scale-100.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
+                scaleImage = Path.ChangeExtension(imageFile, "scale-200_contrast-black.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
+                scaleImage = Path.ChangeExtension(imageFile, "scale-100_contrast-black.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
+                scaleImage = Path.ChangeExtension(imageFile, "Theme-Dark_Scale-200.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
+                scaleImage = Path.ChangeExtension(imageFile, "Theme-Dark_Scale-100.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
+                imageFile = Path.Combine(dir2 + "\\contrast-black", name);
+                scaleImage = Path.ChangeExtension(imageFile, "scale-200.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
+                scaleImage = Path.ChangeExtension(imageFile, "scale-100.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
+                scaleImage = Path.ChangeExtension(imageFile, "contrast-black_scale-200.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
+                scaleImage = Path.ChangeExtension(imageFile, "contrast-black_scale-100.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
+                scaleImage = Path.ChangeExtension(imageFile, "scale-200_contrast-black.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
+                scaleImage = Path.ChangeExtension(imageFile, "scale-100_contrast-black.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
+                scaleImage = Path.ChangeExtension(imageFile, "Theme-Dark_Scale-200.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
+                scaleImage = Path.ChangeExtension(imageFile, "Theme-Dark_Scale-100.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
+                imageFile = Path.Combine(dir, logoPath);
 
-            var res = string.Concat(uri.Segments.Skip(1));
-            resource = string.Format("ms-resource://{0}/{1}", package.Id.Name, res);
-            name = ExtractStringFromPRIFile(priPath, resource);
-            if (!string.IsNullOrWhiteSpace(name)) return name;
+                if (MFM_FileExist(imageFile)) return imageFile;
 
-            name = ExtractStringFromPRIFile(priPath, "ms-resource:ApplicationDisplayName");
-            if (!string.IsNullOrWhiteSpace(name)) return name;
+                imageFile = Path.Combine(dir, "en-us", logoPath);
+                if (MFM_FileExist(imageFile)) return imageFile;
 
-            return displayName;
+                return Path.ChangeExtension(imageFile, "scale-16.png");
+            }
         }
-
-        public void StartApp(string packageName)
+        /// <summary>
+        /// 导出 ms-resource: 的字符串资源
+        /// </summary>
+        /// <param name="dir">UWP 安装目录</param>
+        /// <param name="package">包</param>
+        /// <param name="resource">resource key</param>
+        /// <returns></returns>
+        private static string ExtractMSResourceString(string dir, Package package, string resource)
         {
-            
-        }
-        public void UnInstallAppAsync(string packageName)
-        {
-            packageManager.RemovePackageAsync(packageName);
+            if (resource.StartsWith("ms-resource:"))
+            {
+                var priPath = dir + "\\pris\\resources." + stringLocate + ".pri";
+                if (!MFM_FileExist(priPath)) priPath = dir + "\\resources.pri";
+
+                if (resource.Contains("/"))
+                {
+                    //检查reskey是否合法
+                    string resourceRevStart = resource.Replace("ms-resource:", "");//去掉msresource
+                    string[] resourceSps = resourceRevStart.Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+                    if (resourceSps.Length > 0 && resourceSps[0] == package.Id.Name)
+                    {
+                        //说明开头是package.Id.Name
+                        string resourceKeyReal = "ms-resource:";
+                        if (resourceRevStart.Contains("ms-resource:"))
+                            resourceRevStart = resourceRevStart.Replace("ms-resource:", "");
+                        resourceKeyReal += resourceRevStart;
+                        string name = ExtractStringFromPRIFile(priPath, resourceKeyReal);
+                        if (!string.IsNullOrWhiteSpace(name))
+                            return name;//成功返回
+                    }
+                    else
+                    {
+                        //说明开头不是是package.Id.Name，需要添加
+                        string resourceKeyReal = "ms-resource://" + package.Id.Name;
+                        foreach (string s in resourceSps)
+                            if (s.Contains("ms-resource:"))
+                                resourceKeyReal += "/" + s.Replace("ms-resource:", "");
+                            else resourceKeyReal += "/" + s;
+                        string name = ExtractStringFromPRIFile(priPath, resourceKeyReal);
+                        if (!string.IsNullOrWhiteSpace(name))
+                            return name;//成功返回
+                    }
+                }
+                else
+                {
+                    string name = "";
+
+                    string reskeyold = resource.StartsWith("ms-resource:") ? resource.Replace("ms-resource:", "") : resource;
+                    //if (reskeyold == "AppxManifest_DisplayName")
+                    //    resource = string.Format("ms-resource://{0}/resources/DisplayName", package.Id.Name);
+                    //else
+                        resource = string.Format("ms-resource://{0}/resources/{1}", package.Id.Name, reskeyold);
+                    name = ExtractStringFromPRIFile(priPath, resource);
+                    if (!string.IsNullOrWhiteSpace(name)) return name;
+                }
+            }
+            return resource;
         }
 
+        /// <summary>
+        /// 枚举所有 UWP 应用
+        /// </summary>
+        /// <returns>返回是否成功</returns>
         public bool EnumlateAll()
         {
             if (!enumlated)
@@ -193,66 +244,88 @@ namespace PCMgrUWP
                     string dsbText = "";
                     string dsbName = "";
                     string dsbPublisher = "";
-                    XmlDocument xml = new XmlDocument();
+                    string dsbMainApp = "";
 
                     string dir = package.InstalledLocation.Path;
                     string file = Path.Combine(dir, "AppxManifest.xml");
 
-                    xml.Load(file);
-                    XmlNode nRoot = xml.ChildNodes[1].Name == "Package" ? xml.ChildNodes[1] : xml.ChildNodes[0];
-                    XmlNode nProp = null;
-                    foreach (XmlNode n in nRoot)
-                        if (n.Name == "Properties")
-                        {
-                            nProp = n;
-                            break;
-                        }
-                    if (nProp != null)
-                        for (int i = 0; i < nProp.ChildNodes.Count; i++)
-                        {
-                            XmlNode propItem = nProp.ChildNodes[i];
-                            if (propItem.Name == "DisplayName")
-                                dsbName = propItem.InnerText;
-                            else if (propItem.Name == "PublisherDisplayName")
-                                dsbPublisher = propItem.InnerText;
-                            else if (propItem.Name == "Description")
-                                dsbText = propItem.InnerText;
-                            else if (propItem.Name == "Logo")
-                                logoPath = propItem.InnerText;
-                        }
-                    XmlNode nApps = null;
-                    foreach (XmlNode n in nRoot)
-                        if (n.Name == "Applications")
-                        {
-                            nApps = n;
-                            break;
-                        }
-                    if (nApps != null)
+                    if (MFM_FileExist(file))
                     {
-                        List<string> apps = new List<string>();
-                        for (int i = 0; i < nApps.ChildNodes.Count; i++)
-                        {
-                            XmlNode apptem = nApps.ChildNodes[i];
-                            if (apptem.Name == "Application")
+                        //Load xml to read AppxManifest
+                        XmlDocument xml = new XmlDocument();
+                        xml.Load(file);
+                        XmlNode nRoot = xml.ChildNodes[1].Name == "Package" ? xml.ChildNodes[1] : xml.ChildNodes[0];
+                        XmlNode nProp = null;
+                        foreach (XmlNode n in nRoot)
+                            if (n.Name == "Properties")
                             {
-                                if (apptem.Attributes["Id"] != null)
-                                    apps.Add(apptem.Attributes["Id"].InnerText);
+                                nProp = n;
+                                break;
                             }
+                        if (nProp != null)
+                            for (int i = 0; i < nProp.ChildNodes.Count; i++)
+                            {
+                                XmlNode propItem = nProp.ChildNodes[i];
+                                if (propItem.Name == "DisplayName")
+                                    dsbName = propItem.InnerText;
+                                else if (propItem.Name == "PublisherDisplayName")
+                                    dsbPublisher = propItem.InnerText;
+                                else if (propItem.Name == "Description")
+                                    dsbText = propItem.InnerText;
+                                else if (propItem.Name == "Logo")
+                                    logoPath = propItem.InnerText;
+                            }
+                        XmlNode nApps = null;
+                        foreach (XmlNode n in nRoot)
+                            if (n.Name == "Applications")
+                            {
+                                nApps = n;
+                                break;
+                            }
+                        if (nApps != null)
+                        {
+                            List<string> apps = new List<string>();
+                            for (int i = 0; i < nApps.ChildNodes.Count; i++)
+                            {
+                                XmlNode apptem = nApps.ChildNodes[i];
+                                if (apptem.Name == "Application")
+                                {
+                                    if (apptem.Attributes["Id"] != null)
+                                        apps.Add(apptem.Attributes["Id"].InnerText);
+                                    for (int i1 = 0; i1 < apptem.ChildNodes.Count; i1++)
+                                    {
+                                        XmlNode apppropItem = apptem.ChildNodes[i1];
+                                        if (apppropItem.Name == "uap:VisualElements" || apppropItem.Name == "VisualElements")
+                                        {
+                                            if (apppropItem.Attributes["DisplayName"] != null)
+                                                dsbMainApp = apppropItem.Attributes["DisplayName"].InnerText;
+                                        }
+                                    }
+                                }
+                            }
+                            p.Apps = apps.ToArray();
                         }
-                        p.Apps = apps.ToArray();
                     }
 
                     p.InstalledLocation = dir;
                     p.FullName = package.Id.FullName;
 
                     //ms-resource:AppxManifest_DisplayName
+                    //1527c705-839a-4832-9118-54d4Bd6a0c89_10.0.17134.1_neutral_neutral_cw5n1h2txyewy
+                    //
 
-                    if (dsbText != "") p.Description = dsbText.StartsWith("ms-resource:") ? ExtractDisplayName(p.InstalledLocation, package, dsbText) : dsbText;
-                    if (dsbName != "") p.Name = dsbName.StartsWith("ms-resource:") ? ExtractDisplayName(p.InstalledLocation, package, dsbName) : dsbName;
-                    if (dsbPublisher != "") p.Publisher = dsbPublisher.StartsWith("ms-resource:") ? ExtractDisplayName(p.InstalledLocation, package, dsbPublisher) : dsbPublisher;
-                    if (logoPath != "") p.IconPath = ExtractDisplayIcon(p.InstalledLocation, logoPath);
+                   // if (p.FullName == "1527c705-839a-4832-9118-54d4Bd6a0c89_10.0.17134.1_neutral_neutral_cw5n1h2txyewy")
+                   //     ;
 
-                    xml.Clone();
+                    if (dsbText != "") p.Description = ExtractMSResourceString(p.InstalledLocation, package, dsbText);
+                    if (dsbName != "") p.Name = ExtractMSResourceString(p.InstalledLocation, package, dsbName);
+                    if (dsbPublisher != "") p.Publisher = ExtractMSResourceString(p.InstalledLocation, package, dsbPublisher);
+                    if (logoPath != "") p.IconPath = ExtractDisplayIcon(p.InstalledLocation, package, logoPath);
+                    if (dsbMainApp != "") dsbMainApp = ExtractMSResourceString(p.InstalledLocation, package, dsbMainApp);
+                    else dsbMainApp = p.Name;
+                    p.MainAppDisplayName = dsbMainApp;
+
+
 
                     if (p.Name != "")
                         packageDatas.Add(p);

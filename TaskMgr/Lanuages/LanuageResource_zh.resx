@@ -881,4 +881,16 @@ PCMgr 需要管理员权限 才能对系统进行控制和管理。
   <data name="Yes" xml:space="preserve">
     <value>是</value>
   </data>
+  <data name="Speed" xml:space="preserve">
+    <value>速度</value>
+  </data>
+  <data name="SetTo" xml:space="preserve">
+    <value>切换到(&amp;T)</value>
+  </data>
+  <data name="KillTreeAskEnd" xml:space="preserve">
+    <value>的进程树吗?</value>
+  </data>
+  <data name="KillTreeContent" xml:space="preserve">
+    <value>如果多个打开的程序或进程与此进程树关联，则会关闭这些程序或进程并且将丢失所有未保存的数据。如果结束某个系统进程，则可能导致系统不稳定。你确定要继续吗?</value>
+  </data>
 </root>

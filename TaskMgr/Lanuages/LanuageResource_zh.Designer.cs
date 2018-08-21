@@ -988,6 +988,24 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 的进程树吗? 的本地化字符串。
+        /// </summary>
+        internal static string KillTreeAskEnd {
+            get {
+                return ResourceManager.GetString("KillTreeAskEnd", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 如果多个打开的程序或进程与此进程树关联，则会关闭这些程序或进程并且将丢失所有未保存的数据。如果结束某个系统进程，则可能导致系统不稳定。你确定要继续吗? 的本地化字符串。
+        /// </summary>
+        internal static string KillTreeContent {
+            get {
+                return ResourceManager.GetString("KillTreeContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 语言设置只有您重新打开软件才会生效 的本地化字符串。
         /// </summary>
         internal static string LanuageChangedTip {
@@ -1642,11 +1660,29 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 切换到(&amp;T) 的本地化字符串。
+        /// </summary>
+        internal static string SetTo {
+            get {
+                return ResourceManager.GetString("SetTo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 大小 的本地化字符串。
         /// </summary>
         internal static string Size {
             get {
                 return ResourceManager.GetString("Size", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 速度 的本地化字符串。
+        /// </summary>
+        internal static string Speed {
+            get {
+                return ResourceManager.GetString("Speed", resourceCulture);
             }
         }
         

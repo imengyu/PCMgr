@@ -456,7 +456,7 @@ namespace PCMgr.Ctls
                     if (item.IsUWPButErrInfo) g.FillRectangle(errTagSolidBrush, new Rectangle(53 - xOffest, item.YPos - yOffest + 11, 6, 6));
                     else g.FillRectangle(defTagSolidBrush, new Rectangle(53 - xOffest, item.YPos - yOffest + 11, 6, 6));
                 }
-                if (item.IsUWPICO) g.FillRectangle(defTagSolidBrush, new Rectangle(7 - xOffest + 25, item.YPos - YOffest + itemHeight / 2 - 8, 16, 16));
+                if (item.IsUWPICO) g.FillRectangle(defTagSolidBrush, new Rectangle((noHeader ? 0 : 7) - xOffest + (noHeader ? 8 : 25), item.YPos - YOffest + itemHeight / 2 - 8, 16, 16));
             }
 
             #region SubItems
@@ -563,7 +563,6 @@ namespace PCMgr.Ctls
             #region Icons
             if (!isChildItem)
             {
-
                 if (item.Icon != null)
                 {
                     IntPtr hdc = g.GetHdc();
@@ -572,7 +571,6 @@ namespace PCMgr.Ctls
                 }
                 else if (item.Image != null)
                     g.DrawImage(item.Image, new Rectangle((noHeader ? 0 : 7) - xOffest + (noHeader ? 8 : 25), item.YPos - YOffest + itemHeight / 2 - 8, 16, 16));
-
             }
             #endregion
         }

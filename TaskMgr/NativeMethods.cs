@@ -360,7 +360,7 @@ namespace PCMgr
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern IntPtr MGetExeIcon(string pszFullPath);
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int MAppWorkShowMenuProcess([MarshalAs(UnmanagedType.LPWStr)]string strFilePath, [MarshalAs(UnmanagedType.LPWStr)]string strFileName, uint pid, IntPtr hWnd, int data, int type, int x, int y);
+        public static extern int MAppWorkShowMenuProcess([MarshalAs(UnmanagedType.LPWStr)]string strFilePath, [MarshalAs(UnmanagedType.LPWStr)]string strFileName, uint pid, IntPtr hWnd, IntPtr selectedhWnd, int data, int type, int x, int y);
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern int MAppWorkShowMenuProcessPrepare([MarshalAs(UnmanagedType.LPWStr)]string strFilePath, [MarshalAs(UnmanagedType.LPWStr)]string strFileName, uint pid, bool isimporant, bool isveryimporant);
 
@@ -729,7 +729,65 @@ namespace PCMgr
             public static extern bool MDEVICE_GetIsSystemDisk([MarshalAs(UnmanagedType.LPStr)]string perfstr);
             [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
             public static extern bool MDEVICE_GetIsPageFileDisk([MarshalAs(UnmanagedType.LPStr)]string perfstr);
-            
+
+
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+            public static extern bool MDEVICE_GetMemoryDeviceInfo();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+            public static extern IntPtr MDEVICE_GetMemoryDeviceName();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+            public static extern UInt32 MDEVICE_GetMemoryDeviceSpeed();
+        }
+
+        public static class CSCall
+        {
+            public const int M_CALLBACK_SWITCH_REFESHRATE_SET = 5;
+            public const int M_CALLBACK_SWITCH_TOPMOST_SET = 6;
+            public const int M_CALLBACK_SWITCH_CLOSEHIDE_SET = 7;
+            public const int M_CALLBACK_SWITCH_MINHIDE_SET = 8;
+            public const int M_CALLBACK_GOTO_SERVICE = 9;
+            public const int M_CALLBACK_REFESH_SCLIST = 10;
+            public const int M_CALLBACK_KILLPROCTREE = 11;
+            public const int M_CALLBACK_SPY_TOOL = 12;
+            public const int M_CALLBACK_FILE_TOOL = 13;
+            public const int M_CALLBACK_ABOUT = 14;
+            public const int M_CALLBACK_ENDTASK = 15;
+            public const int M_CALLBACK_LOADDRIVER_TOOL = 16;
+            public const int M_CALLBACK_SCITEM_REMOVED = 17;
+            public const int M_CALLBACK_SHOW_PROGRESS_DLG = 18;
+            public const int M_CALLBACK_UPDATE_PROGRESS_DLG_TO_DELETEING = 19;
+            public const int M_CALLBACK_UPDATE_PROGRESS_DLG_ALL = 20;
+            public const int M_CALLBACK_UPDATE_PROGRESS_DLG_TO_COLLECTING = 21;
+            public const int M_CALLBACK_KERNEL_INIT = 22;
+            public const int M_CALLBACK_VIEW_HANDLES = 23;
+            public const int M_CALLBACK_KERNEL_INIT_LIST = 24;
+            public const int M_CALLBACK_KERNEL_SWITCH_SHOWALLDRV = 25;
+            public const int M_CALLBACK_START_ITEM_REMVED = 26;
+            public const int M_CALLBACK_VIEW_KSTRUCTS = 27;
+            public const int M_CALLBACK_VIEW_TIMER = 28;
+            public const int M_CALLBACK_VIEW_HOTKEY = 29;
+            public const int M_CALLBACK_SHOW_TRUSTED_DLG = 30;
+
+            public const int M_CALLBACK_KDA = 32; 
+
+            public const int M_CALLBACK_UPDATE_LOAD_STATUS = 34;
+            public const int M_CALLBACK_SHOW_NOPDB_WARN = 35;
+            public const int M_CALLBACK_INVOKE_LASTLOAD_STEP = 36;
+            public const int M_CALLBACK_DBGPRINT_SHOW = 37;
+            public const int M_CALLBACK_DBGPRINT_CLOSE = 38;
+            public const int M_CALLBACK_DBGPRINT_DATA = 39;
+            public const int M_CALLBACK_DBGPRINT_EMEPTY = 40;
+            public const int M_CALLBACK_SHOW_LOAD_STATUS = 41;
+            public const int M_CALLBACK_HLDE_LOAD_STATUS = 42;
+            public const int M_CALLBACK_KERNEL_VIELL_PRGV = 51;
+            public const int M_CALLBACK_KERNEL_TOOL = 52;
+            public const int M_CALLBACK_HOOKS = 53;
+            public const int M_CALLBACK_NETMON = 54;           
+            public const int M_CALLBACK_REGEDIT = 55;
+            public const int M_CALLBACK_FILEMGR = 56;
+
+            public const int M_CALLBACK_SIMPLEVIEW_ACT = 58;
+            public const int M_CALLBACK_UWPKILL = 59;
         }
     }
 

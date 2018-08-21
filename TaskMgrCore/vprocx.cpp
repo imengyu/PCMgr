@@ -34,16 +34,33 @@ extern ZwQueryInformationThreadFun ZwQueryInformationThread;
 
 using namespace std;
 
+typedef struct tag_UWPWindow
+{
+	HWND hWndHost;
+	HWND hWndCoreWindow;
+	DWORD hostPid;
+	BOOL notFoundRealWindow;
+}UWPWindow,*PUWPWindow;
+
 list<HWND> *hAllWins = nullptr;
-list<HWND> *hUWPWins = nullptr;
+list<PUWPWindow> *hUWPWins = nullptr;
+list<HWND> *hUWPBrokedWins = nullptr;
+HDESK hDesk = NULL;
 
 void WindowEnumStart() {
+	hDesk = OpenDesktop(L"Default", 0, FALSE, DESKTOP_ENUMERATE);
 	hAllWins = new list<HWND>();
-	hUWPWins = new list<HWND>();
+	hUWPBrokedWins = new list<HWND>();
+	hUWPWins = new list<PUWPWindow>();
 
 }
 void WindowEnumDestroy() {
+	CloseDesktop(hDesk);
+	for (auto it = hUWPWins->begin(); it != hUWPWins->end(); it++)
+		free(*it);
+	hUWPWins->clear();
 	delete hUWPWins;
+	delete hUWPBrokedWins;
 	delete hAllWins;
 }
 
@@ -200,6 +217,7 @@ bool ResusemeThread()
 	return false;
 }
 
+BOOL CALLBACK lpEnumFunc3(HWND hWnd, LPARAM lParam);
 BOOL CALLBACK lpEnumFunc(HWND hWnd, LPARAM lParam)
 {
 	DWORD processId;
@@ -271,7 +289,26 @@ BOOL CALLBACK lpEnumFunc2(HWND hWnd, LPARAM lParam)
 		long ls = GetWindowLong(hWnd, GWL_STYLE);
 		wchar_t clsn[50];
 		GetClassName(hWnd, clsn, 50);
-		if (!MStrEqualW(clsn, L"ApplicationFrameWindow"))
+		if (MStrEqualW(clsn, L"ApplicationFrameWindow"))
+		{
+			//This is a uwp host window
+			if ((l & WS_EX_APPWINDOW) == WS_EX_APPWINDOW || (l & WS_EX_OVERLAPPEDWINDOW) == WS_EX_OVERLAPPEDWINDOW || (ls & WS_CAPTION) == WS_CAPTION)
+			{
+				PUWPWindow uwpWindow = (PUWPWindow)malloc(sizeof(UWPWindow));
+				uwpWindow->hWndHost = hWnd;
+				uwpWindow->notFoundRealWindow = TRUE;
+				uwpWindow->hostPid = 0;
+				EnumChildWindows(hWnd, lpEnumFunc3, (LPARAM)uwpWindow);
+				hUWPWins->push_back(uwpWindow);
+			}
+		}
+		else if (MStrEqualW(clsn, L"Windows.UI.Core.CoreWindow"))
+		{
+			//This is a broaked uwp window
+			if ((ls & WS_VISIBLE) == WS_VISIBLE)
+				hUWPBrokedWins->push_back(hWnd);
+		}
+		else
 		{
 			if ((l & WS_EX_TOOLWINDOW) != WS_EX_TOOLWINDOW) {
 				if ((l & WS_EX_APPWINDOW) == WS_EX_APPWINDOW
@@ -283,12 +320,22 @@ BOOL CALLBACK lpEnumFunc2(HWND hWnd, LPARAM lParam)
 				}
 			}
 		}
-		else
+	}
+	return TRUE;
+}
+BOOL CALLBACK lpEnumFunc3(HWND hWnd, LPARAM lParam)
+{
+	if (lParam)
+	{
+		WCHAR className[32];
+		GetClassName(hWnd, className, 32);
+		if (MStrEqual(className, L"Windows.UI.Core.CoreWindow"))
 		{
-			if ((l & WS_EX_APPWINDOW) == WS_EX_APPWINDOW || (l & WS_EX_OVERLAPPEDWINDOW) == WS_EX_OVERLAPPEDWINDOW)
-				hUWPWins->push_back(hWnd);
-			else if ((ls & WS_CAPTION) == WS_CAPTION)
-				hUWPWins->push_back(hWnd);
+			PUWPWindow window = (PUWPWindow)lParam;
+			window->hWndCoreWindow = hWnd;
+			window->notFoundRealWindow = FALSE;
+			GetWindowThreadProcessId(hWnd, &window->hostPid);
+			return FALSE;
 		}
 	}
 	return TRUE;
@@ -296,30 +343,51 @@ BOOL CALLBACK lpEnumFunc2(HWND hWnd, LPARAM lParam)
 
 M_API void MAppVProcessAllWindowsUWP()
 {
-	list<HWND>::iterator it;
-	for (it = hUWPWins->begin(); it != hUWPWins->end(); it++)
-	{
-		wchar_t text[512];
-		GetWindowText(*it, text, 512);
-		if (hGetWinsWinsCallBack)hGetWinsWinsCallBack(*it, (HWND)&text, 1);
+	if (hGetWinsWinsCallBack) {
+		list<UWPWindow*>::iterator it;
+		for (it = hUWPWins->begin(); it != hUWPWins->end(); it++) 
+		{
+			PUWPWindow window = *it;
+			if (window->notFoundRealWindow) 
+			{
+				WCHAR windowNameThis[64];
+				GetWindowText(window->hWndHost, windowNameThis, 64);
+				WCHAR windowNameFind[64];
+				list<HWND>::iterator iter;
+				for (iter = hUWPBrokedWins->begin(); iter != hUWPBrokedWins->end(); iter++)
+				{
+					GetWindowText((*iter), windowNameFind, 64);
+					if (MStrEqual(windowNameThis, windowNameFind))
+					{
+						window->hWndCoreWindow = (*iter);
+						GetWindowThreadProcessId(window->hWndCoreWindow, &window->hostPid);
+						break;
+					}
+				}
+			}
+			hGetWinsWinsCallBack(window->hWndHost, (HWND)window->hostPid, 1);
+		}
 	}
 }
 M_API BOOL MAppVProcessAllWindowsGetProcessWindow(DWORD pid)
 {
-	list<HWND>::iterator it;
-	for (it = hAllWins->begin(); it != hAllWins->end(); it++)
+	if (hGetWinsWinsCallBack) 
 	{
-		DWORD processId = 0;
-		GetWindowThreadProcessId(*it, &processId);
-		if (processId == pid)
+		list<HWND>::iterator it;
+		for (it = hAllWins->begin(); it != hAllWins->end(); it++)
 		{
-			wchar_t text[512];
-			GetWindowText(*it, text, 512);
-			if (hGetWinsWinsCallBack)hGetWinsWinsCallBack(*it, (HWND)&text, 0);
-			else return FALSE;
-		}
+			DWORD processId = 0;
+			GetWindowThreadProcessId(*it, &processId);
+			if (processId == pid)
+			{
+				wchar_t text[512];
+				GetWindowText(*it, text, 512);
+				hGetWinsWinsCallBack(*it, (HWND)&text, 0);
+			}
+		}	
+		return TRUE;
 	}
-	return TRUE;
+	return FALSE;
 }
 M_API BOOL MAppVProcessAllWindowsGetProcessWindow2(DWORD pid)
 {
@@ -382,12 +450,17 @@ M_API BOOL MAppVProcess(HWND hWndParent)
 }
 M_API BOOL MAppVProcessAllWindows()
 {
+	for (auto it = hUWPWins->begin(); it != hUWPWins->end(); it++)
+		free(*it);
+	hUWPBrokedWins->clear();
+	hUWPWins->clear();
 	hAllWins->clear();
-	HDESK hDesk = OpenDesktop(L"Default", 0, FALSE, DESKTOP_ENUMERATE);
+	
 	if (EnumDesktopWindows(hDesk, lpEnumFunc2, NULL))
 	{
 		return TRUE;
 	}
+
 	return 0;
 }
 

@@ -314,10 +314,10 @@ namespace PCMgr.Ctls
         protected override void OnMouseLeave(EventArgs e)
         {
             base.OnMouseLeave(e);
-            if(mouseEnterItem!=null)
+            if (mouseEnterItem != null)
             {
-                mouseEnterItem = null;
                 PerformanceListItem o = mouseEnterItem;
+                mouseEnterItem = null;
                 InvalidAItem(o);
             }
         }

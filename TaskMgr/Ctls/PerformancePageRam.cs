@@ -28,7 +28,7 @@ namespace PCMgr.Ctls
         [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern ulong MPERF_GetCommitTotal();
         [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern ulong MPERF_GetCommitPeak();
+        private static extern ulong MPERF_GetCommitLimit();
         [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern ulong MPERF_GetRamAvail();
         [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
@@ -65,16 +65,16 @@ namespace PCMgr.Ctls
                 ulong pagesize = MPERF_GetPageSize();
                 ulong av = MPERF_GetRamAvail();
                 ulong used = all_ram - av;
-                ulong avpaged = MPERF_GetRamAvailPageFile();
+                ulong compressed = 0;
 
                 performanceRamPoolGrid.VauleUsing = (double)(used / 1048576) / (double)(all_ram / 1048576);
-                performanceRamPoolGrid.VauleCompressed = (double)(avpaged / 1048576) / (double)(all_ram / 1048576);
+                performanceRamPoolGrid.VauleCompressed = (double)(compressed / 1048576) / (double)(all_ram / 1048576);
                 performanceRamPoolGrid.Invalidate();
 
-                item_ramuseage.Value = NativeMethods.FormatFileSize(used) + " (" + NativeMethods.FormatFileSize(avpaged) + ")";
+                item_ramuseage.Value = NativeMethods.FormatFileSize(used) + " (" + NativeMethods.FormatFileSize(compressed) + ")";
                 item_ramcanuse.Value = NativeMethods.FormatFileSize(av);
 
-                item_sended.Value = NativeMethods.FormatFileSize(pagesize * MPERF_GetCommitTotal()) + "/" + NativeMethods.FormatFileSize(pagesize * MPERF_GetCommitPeak());
+                item_sended.Value = NativeMethods.FormatFileSize(pagesize * MPERF_GetCommitTotal()) + "/" + NativeMethods.FormatFileSize(pagesize * MPERF_GetCommitLimit());
                 item_cached.Value = NativeMethods.FormatFileSize(pagesize * MPERF_GetSystemCacheSize());
                 item_nopagepool.Value = NativeMethods.FormatFileSize(pagesize * MPERF_GetKernelNonpaged());
                 item_pagepool.Value = NativeMethods.FormatFileSize(pagesize * MPERF_GetKernelPaged());
@@ -117,7 +117,11 @@ namespace PCMgr.Ctls
             all_ram = MPERF_GetAllRam();
             performanceGridGlobal.RightText = NativeMethods.FormatFileSize(all_ram);
 
+            NativeMethods.DeviceApi.MDEVICE_GetMemoryDeviceInfo();
 
+            performanceTitle.SmallTitle = Marshal.PtrToStringUni(NativeMethods.DeviceApi.MDEVICE_GetMemoryDeviceName());
+
+            performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem(LanuageMgr.GetStr("Speed"), NativeMethods.FormatFileSizeKBUnit(Convert.ToInt64(NativeMethods.DeviceApi.MDEVICE_GetMemoryDeviceSpeed() / 1024))));
         }
 
         public void PageFroceSetData(int s)

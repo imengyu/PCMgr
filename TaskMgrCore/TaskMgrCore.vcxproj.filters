@@ -126,6 +126,12 @@
     <ClInclude Include="devicehlp.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="uwphlp.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="cscall.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -210,6 +216,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="devicehlp.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="uwphlp.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

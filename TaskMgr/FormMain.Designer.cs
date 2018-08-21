@@ -113,6 +113,7 @@
             this.btnEndTaskSimple = new System.Windows.Forms.Button();
             this.fileSystemWatcher = new System.IO.FileSystemWatcher();
             this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
+            this.复制发布者ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerFm)).BeginInit();
             this.splitContainerFm.Panel1.SuspendLayout();
             this.splitContainerFm.Panel2.SuspendLayout();
@@ -687,7 +688,8 @@
             this.卸载应用ToolStripMenuItem,
             this.打开安装位置ToolStripMenuItem,
             this.复制名称ToolStripMenuItem,
-            this.复制完整名称ToolStripMenuItem});
+            this.复制完整名称ToolStripMenuItem,
+            this.复制发布者ToolStripMenuItem});
             this.contextMenuStripUWP.Name = "contextMenuStripUWP";
             resources.ApplyResources(this.contextMenuStripUWP, "contextMenuStripUWP");
             // 
@@ -775,6 +777,12 @@
             // 
             resources.ApplyResources(this.notifyIcon, "notifyIcon");
             this.notifyIcon.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon_MouseDoubleClick);
+            // 
+            // 复制发布者ToolStripMenuItem
+            // 
+            this.复制发布者ToolStripMenuItem.Name = "复制发布者ToolStripMenuItem";
+            resources.ApplyResources(this.复制发布者ToolStripMenuItem, "复制发布者ToolStripMenuItem");
+            this.复制发布者ToolStripMenuItem.Click += new System.EventHandler(this.复制发布者ToolStripMenuItem_Click);
             // 
             // FormMain
             // 
@@ -913,6 +921,7 @@
         private Aero.ExpandButton expandMoreDetals;
         private System.Windows.Forms.Button btnEndTaskSimple;
         private Ctls.TaskMgrList listApps;
+        private System.Windows.Forms.ToolStripMenuItem 复制发布者ToolStripMenuItem;
     }
 }
 

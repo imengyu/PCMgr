@@ -271,23 +271,23 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 		CheckMenuItem(h, IDM_REFESH_FAST, (!refesh_paused && refesh_fast) ? MF_CHECKED : MF_UNCHECKED);
 		CheckMenuItem(h, IDM_REFESH_PAUSED, refesh_paused ? MF_CHECKED : MF_UNCHECKED);
 		CheckMenuItem(h, IDM_REFESH_SLOW, (!refesh_paused && !refesh_fast) ? MF_CHECKED : MF_UNCHECKED);
-		hWorkerCallBack(5, (LPVOID)static_cast<ULONG_PTR>(c), 0);
+		hWorkerCallBack(M_CALLBACK_SWITCH_REFESHRATE_SET, (LPVOID)static_cast<ULONG_PTR>(c), 0);
 		break;
 	}
 	case 194:
 		top_most = static_cast<int>((ULONG_PTR)data);
 		CheckMenuItem(hMenuMainSet, IDM_TOPMOST, top_most ? MF_CHECKED : MF_UNCHECKED);
-		hWorkerCallBack(6, (LPVOID)static_cast<ULONG_PTR>(top_most), 0);
+		hWorkerCallBack(M_CALLBACK_SWITCH_TOPMOST_SET, (LPVOID)static_cast<ULONG_PTR>(top_most), 0);
 		break;
 	case 195:
 		close_hide = static_cast<int>((ULONG_PTR)data);
 		CheckMenuItem(hMenuMainSet, IDM_CLOSETOHIDE, close_hide ? MF_CHECKED : MF_UNCHECKED);
-		hWorkerCallBack(6, (LPVOID)static_cast<ULONG_PTR>(close_hide), 0);
+		hWorkerCallBack(M_CALLBACK_SWITCH_CLOSEHIDE_SET, (LPVOID)static_cast<ULONG_PTR>(close_hide), 0);
 		break;
 	case 196:
 		min_hide = static_cast<int>((ULONG_PTR)data);
 		CheckMenuItem(hMenuMainSet, IDM_MINHIDE, min_hide ? MF_CHECKED : MF_UNCHECKED);
-		hWorkerCallBack(7, (LPVOID)static_cast<ULONG_PTR>(min_hide), 0);
+		hWorkerCallBack(M_CALLBACK_SWITCH_MINHIDE_SET, (LPVOID)static_cast<ULONG_PTR>(min_hide), 0);
 		break;
 	case 197:
 		if (data)
@@ -457,7 +457,7 @@ M_API int MAppRegShowHotKey(HWND hWnd, UINT vkkey, UINT key)
 }
 M_API void MAppSetStartingProgessText(LPWSTR text)
 {
-	MAppMainCall(34, text, NULL);
+	MAppMainCall(M_CALLBACK_UPDATE_LOAD_STATUS, text, NULL);
 }
 //...
 M_API HICON MGetWindowIcon(HWND hWnd)
@@ -776,13 +776,13 @@ void MAppWmCommandTools(WPARAM wParam)
 	switch (wParam)
 	{
 	case IDC_SOFTACT_SHOWDRIVER_LOADERTOOL: 
-		MAppMainCall(16, GetDesktopWindow(), 0);
+		MAppMainCall(M_CALLBACK_LOADDRIVER_TOOL, GetDesktopWindow(), 0);
 		break;
 	case IDC_SOFTACT_SHOWSPY:
-		MAppMainCall(12, GetDesktopWindow(), 0);
+		MAppMainCall(M_CALLBACK_SPY_TOOL, GetDesktopWindow(), 0);
 		break;
 	case IDC_SOFTACT_SHOWFILETOOL:
-		MAppMainCall(13, 0, 0);
+		MAppMainCall(M_CALLBACK_FILE_TOOL, 0, 0);
 		break;
 	default:
 		break;
@@ -846,7 +846,7 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		switch (wParam)
 		{
 		case IDM_LOAD_DRIVER: {
-			MAppMainCall(22, 0, 0);
+			MAppMainCall(M_CALLBACK_KERNEL_INIT, 0, 0);
 			break;
 		}
 		case IDM_UNLOAD_DRIVER: {
@@ -888,7 +888,7 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 		case IDM_ABOUT: {
 			//DialogBox(hInstRs, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
-			MAppMainCall(14, 0, 0);
+			MAppMainCall(M_CALLBACK_ABOUT, 0, 0);
 			break;
 		}
 		case IDM_TEXIT: {
@@ -901,14 +901,18 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 		case IDM_KILL: {
 			if (killCmdSendBack)
-				MAppMainCall(15, (LPVOID)(ULONG_PTR)thisCommandPid, 0);
+				MAppMainCall(M_CALLBACK_ENDTASK, (LPVOID)(ULONG_PTR)thisCommandPid, 0);
 			else if (killUWPCmdSendBack)
-				MAppMainCall(37, (LPVOID)thisCommandUWPName, 0);
+				MAppMainCall(M_CALLBACK_UWPKILL, (LPVOID)thisCommandUWPName, 0);
 			else MKillProcessUser(TRUE);
 			break;
 		}
 		case IDM_KILLKERNEL: {
 			MFroceKillProcessUser();
+			break;
+		}
+		case IDM_KILLPROCTREE: {
+			MKillProcessTreeUser();
 			break;
 		}
 		case IDM_FILEPROP: {
@@ -941,12 +945,12 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 		case IDM_VHANDLES: {
 			if (thisCommandPid > 4)
-				MAppMainCall(23, (LPVOID)(ULONG_PTR)thisCommandPid, thisCommandName);
+				MAppMainCall(M_CALLBACK_VIEW_HANDLES, (LPVOID)(ULONG_PTR)thisCommandPid, thisCommandName);
 			break;
 		}
 		case IDM_VPRIVILEGE: {
 			if (thisCommandPid > 4)
-				MAppMainCall(51, (LPVOID)(ULONG_PTR)thisCommandPid, thisCommandName);
+				MAppMainCall(M_CALLBACK_KERNEL_VIELL_PRGV, (LPVOID)(ULONG_PTR)thisCommandPid, thisCommandName);
 			break;
 		}
 		case IDM_SUPROC: {
@@ -980,17 +984,17 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		case IDM_VKSTRUCTS: {
-			MAppMainCall(27, (LPVOID)(ULONG_PTR)thisCommandPid, thisCommandName);
+			MAppMainCall(M_CALLBACK_VIEW_KSTRUCTS, (LPVOID)(ULONG_PTR)thisCommandPid, thisCommandName);
 			break;
 		}
 		case IDM_VTIMER: {
 			if (thisCommandPid > 4)
-				MAppMainCall(28, (LPVOID)(ULONG_PTR)thisCommandPid, thisCommandName);
+				MAppMainCall(M_CALLBACK_VIEW_TIMER, (LPVOID)(ULONG_PTR)thisCommandPid, thisCommandName);
 			break;
 		}
 		case IDM_VHOTKEY: {
 			if (thisCommandPid > 4)
-				MAppMainCall(29, (LPVOID)(ULONG_PTR)thisCommandPid, thisCommandName);
+				MAppMainCall(M_CALLBACK_VIEW_HOTKEY, (LPVOID)(ULONG_PTR)thisCommandPid, thisCommandName);
 			break;
 		}
 		case IDM_DEBUG: {
@@ -1007,7 +1011,7 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				if (MFM_FileExist(thisCommandPath))
 				{
 					if (MGetExeFileTrust(thisCommandPath))
-						MAppMainCall(30, thisCommandPath, 0);
+						MAppMainCall(M_CALLBACK_SHOW_TRUSTED_DLG, thisCommandPath, 0);
 					else MShowMessageDialog(hWndMain, thisCommandPath, str_item_tip, str_item_filenottrust, 0, 0);
 				}
 				else MShowMessageDialog(hWndMain, str_item_filenotexist, (LPWSTR)str_item_op_failed.c_str(), L"");
@@ -1025,19 +1029,19 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		case IDC_SOFTACT_SHOW_KDA: {
-			MAppMainCall(32, 0, 0);
+			MAppMainCall(M_CALLBACK_KDA, 0, 0);
 			break;
 		}
 		case IDC_PCMGR_KERNEL_TOOL: {
-			MAppMainCall(52, 0, 0);
+			MAppMainCall(M_CALLBACK_KERNEL_TOOL, 0, 0);
 			break;
 		}
 		case IDC_PCMGR_HOOK_TOOL: {
-			MAppMainCall(53, 0, 0);
+			MAppMainCall(M_CALLBACK_HOOKS, 0, 0);
 			break;
 		}
 		case IDC_PCMGR_NETMON: {
-			MAppMainCall(54, 0, 0);
+			MAppMainCall(M_CALLBACK_NETMON, 0, 0);
 			break;
 		}
 		case IDC_PCMGR_REGEDIT: {
@@ -1045,7 +1049,7 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		case IDC_PCMGR_FILEMGR: {
-			MAppMainCall(56, 0, 0);
+			MAppMainCall(M_CALLBACK_FILEMGR, 0, 0);
 			break;
 		}
 		case IDM_DBGVIEW: {
@@ -1056,17 +1060,19 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		case IDM_RELOADPDB: {
 			if (MCanUseKernel())
 			{
-				MAppMainCall(41, 0, 0);
+				MAppMainCall(M_CALLBACK_SHOW_LOAD_STATUS, 0, 0);
 				KNTOSVALUE kNtosValue = { 0 };
 				MLoadKernelNTPDB(&kNtosValue, M_CFG_GetConfigBOOL(L"UseKrnlPDB", L"Configure", true));
-				MAppMainCall(42, 0, 0);
+				MAppMainCall(M_CALLBACK_HLDE_LOAD_STATUS, 0, 0);
 			}
 			break;
 		}
+		case IDM_SETTO:
 		case ID_MAINWINMENU_SETTO: {
 			if (IsWindow(selectItem4))
 			{
-				ShowWindow(selectItem4, SW_RESTORE);
+				if (IsIconic(selectItem4))
+					ShowWindow(selectItem4, SW_RESTORE);
 				SetForegroundWindow(selectItem4);
 			}
 			break;
@@ -1321,11 +1327,11 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		case ID_SIMPPROC_ENDTASK: {
-			MAppMainCall(58, (LPVOID)1, 0);
+			MAppMainCall(M_CALLBACK_SIMPLEVIEW_ACT, (LPVOID)1, 0);
 			break;
 		}
 		case ID_SIMPPROC_SETTO: {
-			MAppMainCall(58, 0, 0);
+			MAppMainCall(M_CALLBACK_SIMPLEVIEW_ACT, 0, 0);
 			break;
 		}
 		default:

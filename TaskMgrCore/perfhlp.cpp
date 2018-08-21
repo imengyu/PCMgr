@@ -79,9 +79,9 @@ M_CAPI(ULONGLONG) MPERF_GetCommitTotal()
 {
 	return performance_info.CommitTotal;
 }
-M_CAPI(ULONGLONG) MPERF_GetCommitPeak()
+M_CAPI(ULONGLONG) MPERF_GetCommitLimit()
 {
-	return performance_info.CommitPeak;
+	return performance_info.CommitLimit;
 }
 M_CAPI(ULONGLONG) MPERF_GetRamAvail() {
 	return memory_statuex.ullAvailPhys;
@@ -434,7 +434,7 @@ M_CAPI(double) MPERF_GetProcessCpuUseAge(PSYSTEM_PROCESSES p, MPerfAndProcessDat
 M_CAPI(SIZE_T) MPERF_GetProcessRam(PSYSTEM_PROCESSES p, HANDLE hProcess)
 {
 	if (p) {	
-		return p->WorkingSetPrivateSize.QuadPart;
+		return (SIZE_T)p->WorkingSetPrivateSize.QuadPart;
 		//return p->VmCounters.WorkingSetSize;
 	}
 	return 0;

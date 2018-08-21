@@ -145,6 +145,7 @@
 #define ID_SIMPPROC_NEWTASK             40183
 #define ID_SIMPPROC_ENDTASK             40184
 #define ID_SIMPPROC_SETTO               40185
+#define IDM_SETTO               40186
 #define ID_THREADMENU_KILLKERNEL        41008
 #define ID_WINSMENU_SHOWWND             41009
 #define IDM_REFESH                      41012

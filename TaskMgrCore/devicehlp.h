@@ -15,7 +15,6 @@ struct MDevicePhysicalDisk
 struct MDeviceMemory
 {
 	WCHAR Name[64];
-	WCHAR Model[64];
 	UINT64 Size;
 	UINT32 Speed;
 };

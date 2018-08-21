@@ -236,7 +236,7 @@ M_CAPI(BOOL) MSCM_DeleteService(LPWSTR scname, LPWSTR errText)
 			ThrowErrorAndErrorCodeX(GetLastError(), L"DeleteService", errText, FALSE);
 		}
 		else {
-			MAppMainCall(15, currSc, 0);
+			MAppMainCall(M_CALLBACK_SCITEM_REMOVED, currSc, 0);
 		    return TRUE;
 		}
 		CloseServiceHandle(hSc);
@@ -393,7 +393,7 @@ LRESULT MSCM_HandleWmCommand(WPARAM wParam)
 		break;
 	}
 	case ID_SCMAIN_REFESH: {
-		MAppMainCall(10, 0, 0);
+		MAppMainCall(M_CALLBACK_REFESH_SCLIST, 0, 0);
 		break;
 	}
 	case ID_SCMAIN_RESU: {
@@ -407,7 +407,7 @@ LRESULT MSCM_HandleWmCommand(WPARAM wParam)
 		break;
 	}
 	case ID_SCSMALL_GOTOSC: {
-		MAppMainCall(9, currSc, 0);
+		MAppMainCall(M_CALLBACK_GOTO_SERVICE, currSc, 0);
 		break;
 	}
 	}    
