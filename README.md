@@ -1,17 +1,23 @@
 ﻿# PCMgr
-一个windows任务管理器 A taskmgr for windows
+ Windows任务管理器加强改进版 Advance and more powerful Windows task manager
 ===
-这是一个 Windows 平台的任务管理器/进程管理器
-使用windows api开发，可以进行查看进程、获取路径、结束进程等。<br/>
+这是一个 Windows 任务管理器加强版，添加了任务管理器不具有的功能，并且已有与Windows任务管理器可以媲美。<br/>
+使用WinAPI以及C#开发，可以进行查看进程、进程信息、结束进程等。<br/>
 目前只完成部分功能。<br/>
 
-This is a task manager / process manager on the Windows platform.<br/>
-Use Windows API, you can view the process, get the path of process, end the process, etc. <br/>
-Only part of the function is done at the moment.<br/>
+This is an enhanced rebulid version of the Windows Task Manager that adds features that the Task Manager does not have, And it is very similar to the Windows task manager. <br/>
+Use WinAPI and C# development, you can view the process, process information, end the process, etc. <br/>
+At present, only part of the functions are completed.
 
-版权所有 Copyright
+编译 Bulid
 ---
-Copyright © 2018 By DreamFish<br/>
+你至少需要使用 Visual Studio 2017 进行编译，需要C#和C++的生成工具。其中内核驱动最好使用WDK10<br/>
+You need to use Visual Studio 2017 to compile at least, and must install C# and C++ in Visual studio. The kernel driver is best to use WDK10.
+
+需求 Requirement
+---
+至少需要Windows7，并且需要.Net Framework 4.0<br/>
+At least in Windows7 and installed .Net Framework 4.0<br/>
 
 截图 ScreenShot
 ---
