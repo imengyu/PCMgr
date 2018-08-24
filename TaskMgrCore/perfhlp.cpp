@@ -431,11 +431,70 @@ M_CAPI(double) MPERF_GetProcessCpuUseAge(PSYSTEM_PROCESSES p, MPerfAndProcessDat
 	}
 	return -1;
 }
+M_CAPI(ULONGLONG) MPERF_GetProcessCpuTime(PSYSTEM_PROCESSES p)
+{
+	if (p)
+		return (ULONGLONG)(p->KernelTime.QuadPart + p->UserTime.QuadPart);
+	return -1;
+}
+M_CAPI(ULONGLONG) MPERF_GetProcessCycle(PSYSTEM_PROCESSES p)
+{
+	if (p)
+		return (ULONGLONG)(p->CycleTime);
+	return -1;
+}
 M_CAPI(SIZE_T) MPERF_GetProcessRam(PSYSTEM_PROCESSES p, HANDLE hProcess)
 {
 	if (p) {	
 		return (SIZE_T)p->WorkingSetPrivateSize.QuadPart;
 		//return p->VmCounters.WorkingSetSize;
+	}
+	return 0;
+}
+M_CAPI(SIZE_T) MPERF_GetProcessMemoryInfo(PSYSTEM_PROCESSES p, int col)
+{
+	if (p) {
+		switch (col) {
+		case M_GET_PROCMEM_WORKINGSET:
+			return (SIZE_T)p->VmCounters.WorkingSetSize;
+		case M_GET_PROCMEM_WORKINGSETPRIVATE:
+			return (SIZE_T)p->WorkingSetPrivateSize.QuadPart;
+		case M_GET_PROCMEM_WORKINGSETSHARE:
+			return (SIZE_T)(p->VmCounters.WorkingSetSize - (SIZE_T)p->WorkingSetPrivateSize.QuadPart);
+		case M_GET_PROCMEM_PEAKWORKINGSET:
+			return (SIZE_T)p->VmCounters.PeakWorkingSetSize;
+		case M_GET_PROCMEM_COMMITEDSIZE:
+			return (SIZE_T)0;
+		case M_GET_PROCMEM_NONPAGEDPOOL:
+			return (SIZE_T)p->VmCounters.QuotaNonPagedPoolUsage;
+		case M_GET_PROCMEM_PAGEDPOOL:
+			return (SIZE_T)p->VmCounters.QuotaPagedPoolUsage;
+		case M_GET_PROCMEM_PAGEDFAULT:
+			return (SIZE_T)p->VmCounters.PageFaultCount;
+		}
+	}
+	return 0;
+}
+M_CAPI(ULONGLONG) MPERF_GetProcessIOInfo(PSYSTEM_PROCESSES p, int col)
+{
+	if (p) {
+		switch (col)
+		{
+		case M_GET_PROCIO_READ :
+			return p->IoCounters.ReadOperationCount;
+		case M_GET_PROCIO_WRITE :
+			return p->IoCounters.WriteOperationCount;
+		case M_GET_PROCIO_OTHER :
+			return p->IoCounters.OtherOperationCount;
+		case M_GET_PROCIO_READ_BYTES:
+			return p->IoCounters.ReadTransferCount;
+		case M_GET_PROCIO_WRITE_BYTES:
+			return p->IoCounters.WriteTransferCount;
+		case M_GET_PROCIO_OTHER_BYTES:
+			return p->IoCounters.OtherTransferCount;
+		default:
+			break;
+		}
 	}
 	return 0;
 }

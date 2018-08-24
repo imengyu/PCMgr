@@ -6,6 +6,13 @@
 typedef void(__cdecl*EnumProcessCallBack)(DWORD pid, DWORD parentid, LPWSTR exename, LPWSTR exefullpath, int tp, HANDLE hProcess, PSYSTEM_PROCESSES proc);
 typedef void(__cdecl*EnumProcessCallBack2)(DWORD pid, PSYSTEM_PROCESSES proc);
 
+typedef struct tag_USERNAME {
+	PSID Sid;
+	WCHAR UserName[64];
+	WCHAR DomainName[128];
+
+}USERNAME,*PUSERNAME;
+
 typedef struct tag_PEOCESSKINFO {
 	WCHAR Eprocess[32];
 	WCHAR PebAddress[32];
@@ -13,6 +20,8 @@ typedef struct tag_PEOCESSKINFO {
 	WCHAR ImageFileName[MAX_PATH];
 	WCHAR ImageFullName[MAX_PATH];
 }PEOCESSKINFO,*PPEOCESSKINFO;
+
+VOID MAnitInjectLow();
 
 BOOL LoadDll();
 void FreeDll();
@@ -150,7 +159,21 @@ EXTERN_C M_API BOOL MGetProcessEprocess(DWORD pid, PPEOCESSKINFO info);
 //获取进程内存专用工作集
 //    hProcess：进程句柄
 //    pageSize：分页一页大小
-M_API ULONG_PTR MGetProcessWorkingSetPrivate(HANDLE hProcess, SIZE_T pageSize);
+EXTERN_C M_API ULONG_PTR MGetProcessWorkingSetPrivate(HANDLE hProcess, SIZE_T pageSize);
+//获取进程会话ID
+//    pid：进程id
+EXTERN_C M_API DWORD MGetProcessSessionID(DWORD pid);
+//获取进程用户名
+//    hProcess：进程句柄
+//    [OUT] buffer：输出字符串缓冲区
+//    len：输出字符串缓冲区字符个数
+EXTERN_C M_API BOOL MGetProcessUserName(HANDLE hProcess, LPWSTR buffer, int maxcount);
+//PSID->PUSERNAME
+EXTERN_C M_API PUSERNAME MGetUserNameBySID(PSID sid);
+//获取进程线程数
+EXTERN_C M_API ULONG MGetProcessThreadsCount(PSYSTEM_PROCESSES p);
+//获取进程句柄数
+EXTERN_C M_API ULONG MGetProcessHandlesCount(PSYSTEM_PROCESSES p);
 //获取UWP应用完整包名
 //    handle：进程句柄
 //    [OUT] len：输出字符串缓冲区字符个数

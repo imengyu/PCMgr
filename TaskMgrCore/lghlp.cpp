@@ -44,7 +44,7 @@ void MLG_SetLanuageItems_0(int id, LPWSTR msg, int size)
 
 LanuageItems_CallBack callBack;
 
-LPWSTR str_item_copying;
+LPWSTR str_item_copying = 0;
 LPWSTR str_item_moveing;
 LPWSTR str_item_fileexisted;
 LPWSTR str_item_fileexisted_ask;
@@ -150,6 +150,7 @@ LPWSTR MLG_GetLanuageItem(LPWSTR name)
 void MLG_SetLanuageItems_Destroy()
 {
 	if (!lgRealloc)return;
+	if(str_item_copying==0)return;
 	delete str_item_copying;
 	delete str_item_moveing;
 	delete str_item_fileexisted;

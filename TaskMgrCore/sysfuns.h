@@ -5,6 +5,7 @@
 #include <iphlpapi.h>
 #include <DbgHelp.h>
 
+typedef FARPROC (*_MGetProcAddressCore)(_In_ HMODULE hModule,_In_ LPCSTR lpProcName);
 typedef BOOL(WINAPI *_RunFileDlg)(_In_ HWND hwndOwner, _In_opt_ HICON hIcon, _In_opt_ LPCWSTR lpszDirectory, _In_opt_ LPCWSTR lpszTitle, _In_opt_ LPCWSTR lpszDescription, _In_ ULONG uFlags);
 typedef BOOL(WINAPI *_IsImmersiveProcess)(_In_ HANDLE hProcess);
 typedef LONG(WINAPI *_GetPackageFullName)(	HANDLE hProcess,UINT32 *packageFullNameLength, PWSTR packageFullName);
@@ -22,3 +23,6 @@ typedef BOOL(WINAPI*_CancelShutdown)();
 
 typedef BOOL(WINAPI *fnIMAGEUNLOAD)(__in PLOADED_IMAGE LoadedImage);
 typedef PLOADED_IMAGE(WINAPI *fnIMAGELOAD)(__in PSTR DllName,	__in  PSTR DllPath);
+
+typedef HMODULE(WINAPI *fnLoadLibraryA)(LPCSTR lpLibFileName);
+typedef HMODULE(WINAPI *fnLoadLibraryW)(LPCWSTR lpLibFileName);

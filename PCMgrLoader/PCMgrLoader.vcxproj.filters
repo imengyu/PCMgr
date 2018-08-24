@@ -27,12 +27,30 @@
     <ClInclude Include="PCMgrLoader.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="PCMgrPELoader.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DyFuns.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="mcrt.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="PCMgrLoader.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="PCMgrPELoader.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DyFuns.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="mcrt.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -51,5 +69,16 @@
     <Image Include="..\TaskMgr\icoPcmgr.ico">
       <Filter>资源文件</Filter>
     </Image>
+    <Image Include="..\TaskMgr\icoPcmgrCos.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="shellcode_x86.asm">
+      <Filter>源文件</Filter>
+    </CustomBuild>
+    <CustomBuild Include="shellcode_x64.asm">
+      <Filter>源文件</Filter>
+    </CustomBuild>
   </ItemGroup>
 </Project>

@@ -17,13 +17,14 @@
 #include "StringHlp.h"
 #include "settinghlp.h"
 
-extern ZwTerminateThreadFun ZwTerminateThread;
-extern ZwTerminateProcessFun ZwTerminateProcess;
+extern NtTerminateThreadFun NtTerminateThread;
+extern NtTerminateProcessFun NtTerminateProcess;
 
 extern BOOL isKernelDriverLoaded;
 extern HANDLE hKernelDevice;
 extern HWND hWndMain;
 extern HINSTANCE hInstRs;
+extern bool executeByLoader;
 
 //内核进程控制系列函数
 

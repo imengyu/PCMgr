@@ -893,4 +893,121 @@ Therefore, the kernel function is not available. If you need to use the kernel f
   <data name="KillTreeContent" xml:space="preserve">
     <value>If multiple open programs or processes are associated with this process tree, these programs or processes are closed and all unsaved data is lost. If you end a system process, it may cause the system to be unstable. Are you sure you want to continue?</value>
   </data>
+  <data name="TitleCommited" xml:space="preserve">
+    <value>Commited</value>
+  </data>
+  <data name="TitleCPUTime" xml:space="preserve">
+    <value>CPU Time</value>
+  </data>
+  <data name="TitleDEP" xml:space="preserve">
+    <value>DEP</value>
+  </data>
+  <data name="TitleGdiObject" xml:space="preserve">
+    <value>GDI iObject</value>
+  </data>
+  <data name="TitleGPU" xml:space="preserve">
+    <value>GPU</value>
+  </data>
+  <data name="TitleGPUEngine" xml:space="preserve">
+    <value>GPU Engine</value>
+  </data>
+  <data name="TitleGPUPrivateMemory" xml:space="preserve">
+    <value>Private GPU Memory</value>
+  </data>
+  <data name="TitleGPUShareMemory" xml:space="preserve">
+    <value>Share GPU Memory</value>
+  </data>
+  <data name="TitleHandleCount" xml:space="preserve">
+    <value>Handle Count</value>
+  </data>
+  <data name="TitleIOOther" xml:space="preserve">
+    <value>I/O Other</value>
+  </data>
+  <data name="TitleIOOtherBytes" xml:space="preserve">
+    <value>I/O Other Bytes</value>
+  </data>
+  <data name="TitleIORead" xml:space="preserve">
+    <value>I/O Read</value>
+  </data>
+  <data name="TitleIOReadBytes" xml:space="preserve">
+    <value>I/O Read Bytes</value>
+  </data>
+  <data name="TitleIOWrite" xml:space="preserve">
+    <value>I/O Write</value>
+  </data>
+  <data name="TitleIOWriteBytes" xml:space="preserve">
+    <value>I/O Write Bytes</value>
+  </data>
+  <data name="TitleJobID" xml:space="preserve">
+    <value>JobID</value>
+  </data>
+  <data name="TitleNonPagedPool" xml:space="preserve">
+    <value>NonPaged Pool</value>
+  </data>
+  <data name="TitleOperationSystemContext" xml:space="preserve">
+    <value>Operating system context</value>
+  </data>
+  <data name="TitlePackageName" xml:space="preserve">
+    <value>Package Name</value>
+  </data>
+  <data name="TitlePagedError" xml:space="preserve">
+    <value>Page error</value>
+  </data>
+  <data name="TitlePagedErrorCrease" xml:space="preserve">
+    <value>Page error increment</value>
+  </data>
+  <data name="TitlePagedPool" xml:space="preserve">
+    <value>Paged Pool</value>
+  </data>
+  <data name="TitlePeakWorkingSet" xml:space="preserve">
+    <value>Peak Working Set</value>
+  </data>
+  <data name="TitlePlatform" xml:space="preserve">
+    <value>Platform</value>
+  </data>
+  <data name="TitlePriority" xml:space="preserve">
+    <value>Priority</value>
+  </data>
+  <data name="TitlePrivilege" xml:space="preserve">
+    <value>Privilege</value>
+  </data>
+  <data name="TitleSessionID" xml:space="preserve">
+    <value>Session ID</value>
+  </data>
+  <data name="TitleThreadCount" xml:space="preserve">
+    <value>Thread Count</value>
+  </data>
+  <data name="TitleUACVirtualization" xml:space="preserve">
+    <value>UAC Virtualization</value>
+  </data>
+  <data name="TitleUserName" xml:space="preserve">
+    <value>User Name</value>
+  </data>
+  <data name="TitleUserObject" xml:space="preserve">
+    <value>UserObject</value>
+  </data>
+  <data name="TitleWorkingSet" xml:space="preserve">
+    <value>Working Set</value>
+  </data>
+  <data name="TitleWorkingSetCrease" xml:space="preserve">
+    <value>Working set increment (memory)</value>
+  </data>
+  <data name="TitleWorkingSetPrivate" xml:space="preserve">
+    <value>Working Set Private</value>
+  </data>
+  <data name="TitleWorkingSetShare" xml:space="preserve">
+    <value>Working Set Share</value>
+  </data>
+  <data name="MaxShow16Item" xml:space="preserve">
+    <value>You can choose only 16 items at most.</value>
+  </data>
+  <data name="Process64Bit" xml:space="preserve">
+    <value>64 Bit</value>
+  </data>
+  <data name="TitleParentPID" xml:space="preserve">
+    <value>Parent PID</value>
+  </data>
+  <data name="TitleCycle" xml:space="preserve">
+    <value>Cycle</value>
+  </data>
 </root>

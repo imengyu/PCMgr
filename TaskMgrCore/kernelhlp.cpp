@@ -28,6 +28,7 @@ HANDLE hEventDbgView = NULL;
 BOOL isMyDbgViewLoaded = FALSE;
 BOOL isMyDbgViewRunning = FALSE;
 
+extern bool executeByLoader;
 extern WCHAR appDir[MAX_PATH];
 
 //¼ÓÔØÇý¶¯
@@ -202,6 +203,12 @@ BOOL MInitKernelDriverHandle() {
 	if (hKernelDevice == INVALID_HANDLE_VALUE)
 	{
 		LogErr(L"Get Kernel driver handle (CreateFile) failed : %d . ", GetLastError());
+		return FALSE;
+	}
+
+	if (!executeByLoader) {
+		CloseHandle(hKernelDevice);
+		hKernelDevice = NULL;
 		return FALSE;
 	}
 

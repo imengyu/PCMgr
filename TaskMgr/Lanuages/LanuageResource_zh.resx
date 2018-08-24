@@ -893,4 +893,121 @@ PCMgr 需要管理员权限 才能对系统进行控制和管理。
   <data name="KillTreeContent" xml:space="preserve">
     <value>如果多个打开的程序或进程与此进程树关联，则会关闭这些程序或进程并且将丢失所有未保存的数据。如果结束某个系统进程，则可能导致系统不稳定。你确定要继续吗?</value>
   </data>
+  <data name="TitleCommited" xml:space="preserve">
+    <value>提交大小</value>
+  </data>
+  <data name="TitleCPUTime" xml:space="preserve">
+    <value>CPU时间</value>
+  </data>
+  <data name="TitleDEP" xml:space="preserve">
+    <value>数据执行保护</value>
+  </data>
+  <data name="TitleGdiObject" xml:space="preserve">
+    <value>GDI对象</value>
+  </data>
+  <data name="TitleGPU" xml:space="preserve">
+    <value>GPU</value>
+  </data>
+  <data name="TitleGPUEngine" xml:space="preserve">
+    <value>GPU 引擎</value>
+  </data>
+  <data name="TitleGPUPrivateMemory" xml:space="preserve">
+    <value>专用 GPU 内存</value>
+  </data>
+  <data name="TitleGPUShareMemory" xml:space="preserve">
+    <value>共享 GPU 内存</value>
+  </data>
+  <data name="TitleHandleCount" xml:space="preserve">
+    <value>句柄数</value>
+  </data>
+  <data name="TitleIOOther" xml:space="preserve">
+    <value>I/O 其他</value>
+  </data>
+  <data name="TitleIOOtherBytes" xml:space="preserve">
+    <value>I/O 其他字节</value>
+  </data>
+  <data name="TitleIORead" xml:space="preserve">
+    <value>I/O 读取</value>
+  </data>
+  <data name="TitleIOReadBytes" xml:space="preserve">
+    <value>I/O 写入字节</value>
+  </data>
+  <data name="TitleIOWrite" xml:space="preserve">
+    <value>I/O 写入</value>
+  </data>
+  <data name="TitleIOWriteBytes" xml:space="preserve">
+    <value>I/O 读取字节</value>
+  </data>
+  <data name="TitleJobID" xml:space="preserve">
+    <value>作业对象ID</value>
+  </data>
+  <data name="TitleNonPagedPool" xml:space="preserve">
+    <value>非分页缓冲池</value>
+  </data>
+  <data name="TitleOperationSystemContext" xml:space="preserve">
+    <value>操作系统上下文</value>
+  </data>
+  <data name="TitlePackageName" xml:space="preserve">
+    <value>程序包名称</value>
+  </data>
+  <data name="TitlePagedError" xml:space="preserve">
+    <value>页面错误</value>
+  </data>
+  <data name="TitlePagedErrorCrease" xml:space="preserve">
+    <value>页面错误增量</value>
+  </data>
+  <data name="TitlePagedPool" xml:space="preserve">
+    <value>分页缓冲池</value>
+  </data>
+  <data name="TitlePeakWorkingSet" xml:space="preserve">
+    <value>峰值工作集(内存)</value>
+  </data>
+  <data name="TitlePlatform" xml:space="preserve">
+    <value>平台</value>
+  </data>
+  <data name="TitlePriority" xml:space="preserve">
+    <value>基本优先级</value>
+  </data>
+  <data name="TitlePrivilege" xml:space="preserve">
+    <value>特权</value>
+  </data>
+  <data name="TitleSessionID" xml:space="preserve">
+    <value>会话ID</value>
+  </data>
+  <data name="TitleThreadCount" xml:space="preserve">
+    <value>线程数</value>
+  </data>
+  <data name="TitleUACVirtualization" xml:space="preserve">
+    <value>UAC虚拟化</value>
+  </data>
+  <data name="TitleUserName" xml:space="preserve">
+    <value>用户名</value>
+  </data>
+  <data name="TitleUserObject" xml:space="preserve">
+    <value>用户对象</value>
+  </data>
+  <data name="TitleWorkingSet" xml:space="preserve">
+    <value>工作集设置(内存)</value>
+  </data>
+  <data name="TitleWorkingSetCrease" xml:space="preserve">
+    <value>工作集增量(内存)</value>
+  </data>
+  <data name="TitleWorkingSetPrivate" xml:space="preserve">
+    <value>专用工作集(内存)</value>
+  </data>
+  <data name="TitleWorkingSetShare" xml:space="preserve">
+    <value>共享工作集(内存)</value>
+  </data>
+  <data name="MaxShow16Item" xml:space="preserve">
+    <value>您最多只能选择16个项目显示哦</value>
+  </data>
+  <data name="Process64Bit" xml:space="preserve">
+    <value>64位</value>
+  </data>
+  <data name="TitleParentPID" xml:space="preserve">
+    <value>父 PID</value>
+  </data>
+  <data name="TitleCycle" xml:space="preserve">
+    <value>周期</value>
+  </data>
 </root>

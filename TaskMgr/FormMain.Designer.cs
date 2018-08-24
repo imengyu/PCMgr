@@ -92,6 +92,10 @@
             this.columnHeader14 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader21 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.lbServicesCount = new System.Windows.Forms.Label();
+            this.tabPageDetals = new System.Windows.Forms.TabPage();
+            this.btnEndProcessDetals = new System.Windows.Forms.Button();
+            this.listProcessDetals = new System.Windows.Forms.ListView();
+            this.imageListProcessDetalsIcons = new System.Windows.Forms.ImageList(this.components);
             this.tabPageStartCtl = new System.Windows.Forms.TabPage();
             this.listStartup = new PCMgr.Ctls.TaskMgrList();
             this.tabPageFileCtl = new System.Windows.Forms.TabPage();
@@ -107,13 +111,16 @@
             this.打开安装位置ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.复制名称ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.复制完整名称ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.复制发布者ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.listApps = new PCMgr.Ctls.TaskMgrList();
             this.pl_simple = new System.Windows.Forms.Panel();
             this.expandMoreDetals = new PCMgr.Aero.ExpandButton();
             this.btnEndTaskSimple = new System.Windows.Forms.Button();
             this.fileSystemWatcher = new System.IO.FileSystemWatcher();
             this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
-            this.复制发布者ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.contextMenuStripProcDetalsCol = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.隐藏列ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.选择列ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerFm)).BeginInit();
             this.splitContainerFm.Panel1.SuspendLayout();
             this.splitContainerFm.Panel2.SuspendLayout();
@@ -134,12 +141,14 @@
             this.tabPageScCtl.SuspendLayout();
             this.pl_ScNeedAdminTip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.sp2)).BeginInit();
+            this.tabPageDetals.SuspendLayout();
             this.tabPageStartCtl.SuspendLayout();
             this.tabPageFileCtl.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.spBottom)).BeginInit();
             this.contextMenuStripUWP.SuspendLayout();
             this.pl_simple.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.fileSystemWatcher)).BeginInit();
+            this.contextMenuStripProcDetalsCol.SuspendLayout();
             this.SuspendLayout();
             // 
             // splitContainerFm
@@ -258,6 +267,7 @@
             this.tabControlMain.Controls.Add(this.tabPagePerfCtl);
             this.tabControlMain.Controls.Add(this.tabPageUWPCtl);
             this.tabControlMain.Controls.Add(this.tabPageScCtl);
+            this.tabControlMain.Controls.Add(this.tabPageDetals);
             this.tabControlMain.Controls.Add(this.tabPageStartCtl);
             this.tabControlMain.Controls.Add(this.tabPageFileCtl);
             this.tabControlMain.Cursor = System.Windows.Forms.Cursors.Default;
@@ -615,6 +625,41 @@
             resources.ApplyResources(this.lbServicesCount, "lbServicesCount");
             this.lbServicesCount.Name = "lbServicesCount";
             // 
+            // tabPageDetals
+            // 
+            this.tabPageDetals.Controls.Add(this.btnEndProcessDetals);
+            this.tabPageDetals.Controls.Add(this.listProcessDetals);
+            resources.ApplyResources(this.tabPageDetals, "tabPageDetals");
+            this.tabPageDetals.Name = "tabPageDetals";
+            this.tabPageDetals.UseVisualStyleBackColor = true;
+            // 
+            // btnEndProcessDetals
+            // 
+            resources.ApplyResources(this.btnEndProcessDetals, "btnEndProcessDetals");
+            this.btnEndProcessDetals.Name = "btnEndProcessDetals";
+            this.btnEndProcessDetals.UseVisualStyleBackColor = true;
+            this.btnEndProcessDetals.Click += new System.EventHandler(this.btnEndProcessDetals_Click);
+            // 
+            // listProcessDetals
+            // 
+            this.listProcessDetals.AllowColumnReorder = true;
+            resources.ApplyResources(this.listProcessDetals, "listProcessDetals");
+            this.listProcessDetals.FullRowSelect = true;
+            this.listProcessDetals.MultiSelect = false;
+            this.listProcessDetals.Name = "listProcessDetals";
+            this.listProcessDetals.SmallImageList = this.imageListProcessDetalsIcons;
+            this.listProcessDetals.UseCompatibleStateImageBehavior = false;
+            this.listProcessDetals.View = System.Windows.Forms.View.Details;
+            this.listProcessDetals.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listProcessDetals_ColumnClick);
+            this.listProcessDetals.SelectedIndexChanged += new System.EventHandler(this.listProcessDetals_SelectedIndexChanged);
+            this.listProcessDetals.MouseClick += new System.Windows.Forms.MouseEventHandler(this.listProcessDetals_MouseClick);
+            // 
+            // imageListProcessDetalsIcons
+            // 
+            this.imageListProcessDetalsIcons.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageListProcessDetalsIcons.ImageStream")));
+            this.imageListProcessDetalsIcons.TransparentColor = System.Drawing.Color.Transparent;
+            this.imageListProcessDetalsIcons.Images.SetKeyName(0, "err");
+            // 
             // tabPageStartCtl
             // 
             this.tabPageStartCtl.Controls.Add(this.listStartup);
@@ -723,6 +768,12 @@
             resources.ApplyResources(this.复制完整名称ToolStripMenuItem, "复制完整名称ToolStripMenuItem");
             this.复制完整名称ToolStripMenuItem.Click += new System.EventHandler(this.复制完整名称ToolStripMenuItem_Click);
             // 
+            // 复制发布者ToolStripMenuItem
+            // 
+            this.复制发布者ToolStripMenuItem.Name = "复制发布者ToolStripMenuItem";
+            resources.ApplyResources(this.复制发布者ToolStripMenuItem, "复制发布者ToolStripMenuItem");
+            this.复制发布者ToolStripMenuItem.Click += new System.EventHandler(this.复制发布者ToolStripMenuItem_Click);
+            // 
             // listApps
             // 
             resources.ApplyResources(this.listApps, "listApps");
@@ -778,11 +829,25 @@
             resources.ApplyResources(this.notifyIcon, "notifyIcon");
             this.notifyIcon.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon_MouseDoubleClick);
             // 
-            // 复制发布者ToolStripMenuItem
+            // contextMenuStripProcDetalsCol
             // 
-            this.复制发布者ToolStripMenuItem.Name = "复制发布者ToolStripMenuItem";
-            resources.ApplyResources(this.复制发布者ToolStripMenuItem, "复制发布者ToolStripMenuItem");
-            this.复制发布者ToolStripMenuItem.Click += new System.EventHandler(this.复制发布者ToolStripMenuItem_Click);
+            this.contextMenuStripProcDetalsCol.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.隐藏列ToolStripMenuItem,
+            this.选择列ToolStripMenuItem});
+            this.contextMenuStripProcDetalsCol.Name = "contextMenuStripProcDetalsCol";
+            resources.ApplyResources(this.contextMenuStripProcDetalsCol, "contextMenuStripProcDetalsCol");
+            // 
+            // 隐藏列ToolStripMenuItem
+            // 
+            this.隐藏列ToolStripMenuItem.Name = "隐藏列ToolStripMenuItem";
+            resources.ApplyResources(this.隐藏列ToolStripMenuItem, "隐藏列ToolStripMenuItem");
+            this.隐藏列ToolStripMenuItem.Click += new System.EventHandler(this.隐藏列ToolStripMenuItem_Click);
+            // 
+            // 选择列ToolStripMenuItem
+            // 
+            this.选择列ToolStripMenuItem.Name = "选择列ToolStripMenuItem";
+            resources.ApplyResources(this.选择列ToolStripMenuItem, "选择列ToolStripMenuItem");
+            this.选择列ToolStripMenuItem.Click += new System.EventHandler(this.选择列ToolStripMenuItem_Click);
             // 
             // FormMain
             // 
@@ -825,6 +890,7 @@
             this.pl_ScNeedAdminTip.ResumeLayout(false);
             this.pl_ScNeedAdminTip.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.sp2)).EndInit();
+            this.tabPageDetals.ResumeLayout(false);
             this.tabPageStartCtl.ResumeLayout(false);
             this.tabPageFileCtl.ResumeLayout(false);
             this.tabPageFileCtl.PerformLayout();
@@ -832,6 +898,7 @@
             this.contextMenuStripUWP.ResumeLayout(false);
             this.pl_simple.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.fileSystemWatcher)).EndInit();
+            this.contextMenuStripProcDetalsCol.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -922,6 +989,13 @@
         private System.Windows.Forms.Button btnEndTaskSimple;
         private Ctls.TaskMgrList listApps;
         private System.Windows.Forms.ToolStripMenuItem 复制发布者ToolStripMenuItem;
+        private System.Windows.Forms.TabPage tabPageDetals;
+        private System.Windows.Forms.ListView listProcessDetals;
+        private System.Windows.Forms.Button btnEndProcessDetals;
+        private System.Windows.Forms.ImageList imageListProcessDetalsIcons;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStripProcDetalsCol;
+        private System.Windows.Forms.ToolStripMenuItem 隐藏列ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 选择列ToolStripMenuItem;
     }
 }
 

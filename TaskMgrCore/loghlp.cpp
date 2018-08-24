@@ -5,12 +5,14 @@
 #include "StringHlp.h"
 #include "resource.h"
 #include "mapphlp.h"
+#include <Shlwapi.h>
 
 bool tofile = false;
 bool showConsole = false;
 
 FILE *logFile = NULL;
 HANDLE hOutput = NULL;
+WCHAR logPath[MAX_PATH];
 
 extern HINSTANCE hInst;
 
@@ -23,7 +25,9 @@ M_CAPI(void) M_LOG_Close()
 		CloseHandle(hOutput);
 		FreeConsole();
 	}
-	if (logFile) fclose(logFile);
+	if (logFile) 
+		fclose(logFile);
+	logFile = NULL;
 }
 M_CAPI(void) M_LOG_Init_InConsole() {
 	hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -34,11 +38,11 @@ M_CAPI(void) M_LOG_Init(BOOL showConsole)
 {
 	::showConsole = showConsole;
 	tofile = !IsDebuggerPresent();
-#if _X64_
-	_wfopen_s(&logFile, L"PCMgr64.log", L"wb");
-#else
-	_wfopen_s(&logFile, L"PCMgr32.log", L"wb");
-#endif
+
+	GetModuleFileName(0, logPath, MAX_PATH);
+	PathRenameExtension(logPath, (LPWSTR)L".log");
+
+	_wfopen_s(&logFile, logPath, L"w");
 
 	if (showConsole && tofile)
 	{

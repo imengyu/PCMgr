@@ -21,7 +21,13 @@
 #define IDR_MENUTASK                    118
 #define IDI_ICONCONSOLE                 118
 #define IDR_MENUSIMPPROC                119
+#define IDS_STRING_RUN2TITLE            120
+#define IDS_STRING_RUN2TEXT             121
+#define IDS_STRING_CONRUN               122
+#define IDS_STRING_CANRUN               123
+#define IDS_STRING_KILLOLD              124
 #define IDD_VWINS                       125
+#define IDS_STRING_KILLOLDFAILED 126
 #define IDI_ICONACTIVEDWIN              206
 #define IDR_WINSMENU                    209
 #define IDR_MODULSMENU                  214
@@ -82,7 +88,7 @@
 #define ID_FMMAIN_NEW                   40066
 #define ID_FMMAIN_NEWFOLDER             40067
 #define ID_WINSMENU_HIDEWINDOW          40068
-#define ID_FMMAIN_SELALL                40068
+#define ID_FMMAIN_SELALL                40078
 #define ID_FMMAIN_NOSEL                 40069
 #define ID_FMMAIN_RESEL                 40070
 #define ID_FMMAIN_PROP                  40071
@@ -145,7 +151,7 @@
 #define ID_SIMPPROC_NEWTASK             40183
 #define ID_SIMPPROC_ENDTASK             40184
 #define ID_SIMPPROC_SETTO               40185
-#define IDM_SETTO               40186
+#define IDM_SETTO                       40186
 #define ID_THREADMENU_KILLKERNEL        41008
 #define ID_WINSMENU_SHOWWND             41009
 #define IDM_REFESH                      41012
@@ -200,7 +206,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        120
+#define _APS_NEXT_RESOURCE_VALUE        121
 #define _APS_NEXT_COMMAND_VALUE         40186
 #define _APS_NEXT_CONTROL_VALUE         1001
 #define _APS_NEXT_SYMED_VALUE           101

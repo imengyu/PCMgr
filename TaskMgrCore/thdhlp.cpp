@@ -4,11 +4,11 @@
 #include "prochlp.h"
 #include <Psapi.h>
 
-extern ZwSuspendThreadFun ZwSuspendThread;
-extern ZwResumeThreadFun ZwResumeThread;
-extern ZwTerminateThreadFun ZwTerminateThread;
-extern ZwOpenThreadFun ZwOpenThread;
-extern ZwQueryInformationThreadFun ZwQueryInformationThread;
+extern NtSuspendThreadFun NtSuspendThread;
+extern NtResumeThreadFun NtResumeThread;
+extern NtTerminateThreadFun NtTerminateThread;
+extern NtOpenThreadFun NtOpenThread;
+extern NtQueryInformationThreadFun NtQueryInformationThread;
 extern RtlNtStatusToDosErrorFun RtlNtStatusToDosError;
 extern RtlGetLastWin32ErrorFun RtlGetLastWin32Error;
 extern NtQuerySystemInformationFun NtQuerySystemInformation;
@@ -29,7 +29,7 @@ M_API NTSTATUS MOpenThreadNt(DWORD dwId, PHANDLE pLandle, DWORD dwPId)
 	ClientId.UniqueThread = ((PVOID)(ULONG_PTR)dwId);
 	ClientId.UniqueProcess = ((PVOID)(ULONG_PTR)dwPId);
 
-	DWORD NtStatus = ZwOpenThread(
+	DWORD NtStatus = NtOpenThread(
 		&hThread,
 		THREAD_ALL_ACCESS,
 		&ObjectAttributes,
@@ -46,15 +46,15 @@ M_API NTSTATUS MOpenThreadNt(DWORD dwId, PHANDLE pLandle, DWORD dwPId)
 
 M_API NTSTATUS MTerminateThreadNt(HANDLE handle)
 {
-	return ZwTerminateThread(handle, 0);
+	return NtTerminateThread(handle, 0);
 }
 M_API NTSTATUS MResumeThreadNt(HANDLE handle)
 {
 	ULONG count = 0;
-	return ZwResumeThread(handle, &count);
+	return NtResumeThread(handle, &count);
 }
 M_API NTSTATUS MSuspendThreadNt(HANDLE handle)
 {
 	ULONG count = 0;
-	return ZwSuspendThread(handle, &count);
+	return NtSuspendThread(handle, &count);
 }

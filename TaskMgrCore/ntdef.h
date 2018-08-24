@@ -50,26 +50,43 @@ typedef struct _PEB_LDR_DATA {
 	LIST_ENTRY InMemoryOrderModuleList;
 } PEB_LDR_DATA, *PPEB_LDR_DATA;
 typedef struct _PEB {
-	BYTE Reserved1[2];
-	BYTE BeingDebugged;
-	BYTE Reserved2[1];
-	PVOID Reserved3[2];
-	PPEB_LDR_DATA Ldr;
-	PRTL_USER_PROCESS_PARAMETERS ProcessParameters;
-	PVOID Reserved4[3];
-	PVOID AtlThunkSListPtr;
-	PVOID Reserved5;
-	ULONG Reserved6;
-	PVOID Reserved7;
-	ULONG Reserved8;
-	ULONG AtlThunkSListPtr32;
-	PVOID Reserved9[45];
-	BYTE Reserved10[96];
+	BYTE                          Reserved1[2];
+	BYTE                          BeingDebugged;
+	BYTE                          Reserved2[1];
+	PVOID                         Reserved3[2];
+	PPEB_LDR_DATA                 Ldr;
+	PRTL_USER_PROCESS_PARAMETERS  ProcessParameters;
+	PVOID                         Reserved4[3];
+	PVOID                         AtlThunkSListPtr;
+	PVOID                         Reserved5;
+	ULONG                         Reserved6;
+	PVOID                         Reserved7;
+	ULONG                         Reserved8;
+	ULONG                         AtlThunkSListPtr32;
+	PVOID                         Reserved9[45];
+	BYTE                          Reserved10[96];
 	PPS_POST_PROCESS_INIT_ROUTINE PostProcessInitRoutine;
-	BYTE Reserved11[128];
-	PVOID Reserved12[1];
-	ULONG SessionId;
+	BYTE                          Reserved11[128];
+	PVOID                         Reserved12[1];
+	ULONG                         SessionId;
 } PEB, *PPEB;
+
+typedef struct _LDR_MODULE {
+	LIST_ENTRY              InLoadOrderModuleList;//代表按加载顺序构成的模块链表
+	LIST_ENTRY              InMemoryOrderModuleList;//代表按内存顺序构成的模块链表
+	LIST_ENTRY            InInitializationOrderModuleList;//代表按初始化顺序构成的模块链表
+	PVOID                   BaseAddress;//该模块的基地址
+	PVOID                   EntryPoint;//该模块的入口
+	ULONG                   SizeOfImage;//该模块的影像大小
+	UNICODE_STRING          FullDllName;//包含路径的模块名
+	UNICODE_STRING          BaseDllName;//不包含路径的模块名
+	ULONG                   Flags;
+	SHORT                   LoadCount;//该模块的引用计数
+	SHORT                   TlsIndex;
+	HANDLE                  SectionHandle;
+	ULONG                   CheckSum;
+	ULONG                   TimeDateStamp;
+} LDR_MODULE, *PLDR_MODULE;
 
 typedef struct _CLIENT_ID
 {
@@ -467,8 +484,13 @@ typedef struct _SYSTEM_PROCESSES { // Information Class 5 (Latest win10)(Before 
 	LARGE_INTEGER KernelTime;
 	UNICODE_STRING ImageName;
 	KPRIORITY BasePriority;
+#ifdef _WIN64
+	PVOID ProcessId;
+	PVOID InheritedFromProcessId;
+#else
 	ULONG ProcessId;
 	ULONG InheritedFromProcessId;
+#endif
 	ULONG HandleCount;
 	ULONG SessionId;
 	ULONG_PTR UniqueProcessKey;
@@ -571,23 +593,22 @@ typedef struct _SYSTEM_PERFORMANCE_INFORMATION
 	ULONGLONG SharedCommittedPages;
 }SYSTEM_PERFORMANCE_INFORMATION, *PSYSTEM_PERFORMANCE_INFORMATION;
 
-typedef LONG(WINAPI * ZwQueryInformationThreadFun)(HANDLE ThreadHandle, THREADINFOCLASS ThreadInformationClass, PVOID ThreadInformation, ULONG ThreadInformationLength, PULONG ReturnLength OPTIONAL);
 typedef LONG(WINAPI * RtlNtStatusToDosErrorFun)(ULONG status);
 typedef NTSTATUS(WINAPI * RtlGetLastWin32ErrorFun)();
-typedef NTSTATUS(WINAPI * ZwOpenThreadFun)(PHANDLE ThreadHandle, ACCESS_MASK DesiredAccess, POBJECT_ATTRIBUTES ObjectAttributes, PCLIENT_ID ClientId);
-typedef NTSTATUS(WINAPI * ZwTerminateThreadFun)(HANDLE ThreadHandle, DWORD ExitCode);
-typedef NTSTATUS(WINAPI * ZwSuspendThreadFun)(HANDLE ThreadHandle, PULONG PreviousSuspendCount OPTIONAL);
-typedef NTSTATUS(NTAPI *ZwResumeThreadFun)(HANDLE ThreadHandle, PULONG SuspendCount OPTIONAL);
+typedef NTSTATUS(WINAPI * NtOpenThreadFun)(PHANDLE ThreadHandle, ACCESS_MASK DesiredAccess, POBJECT_ATTRIBUTES ObjectAttributes, PCLIENT_ID ClientId);
+typedef NTSTATUS(WINAPI * NtTerminateThreadFun)(HANDLE ThreadHandle, DWORD ExitCode);
+typedef NTSTATUS(WINAPI * NtSuspendThreadFun)(HANDLE ThreadHandle, PULONG PreviousSuspendCount OPTIONAL);
+typedef NTSTATUS(NTAPI *NtResumeThreadFun)(HANDLE ThreadHandle, PULONG SuspendCount OPTIONAL);
 
 
 typedef NTSTATUS(WINAPI *NtQueryVirtualMemoryFun)(_In_ HANDLE ProcessHandle, _In_ PVOID BaseAddress, _In_ MEMORY_INFORMATION_CLASS MemoryInformationClass, _Out_writes_bytes_(MemoryInformationLength) PVOID MemoryInformation, _In_ SIZE_T MemoryInformationLength, _Out_opt_ PSIZE_T ReturnLength);
 typedef NTSTATUS(WINAPI *NtQueryInformationProcessFun)(HANDLE ProcessHandle, DWORD ProcessInformationClass, PVOID ProcessInformation, ULONG ProcessInformationLength, PULONG ReturnLength);
 typedef NTSTATUS(WINAPI *NtQuerySystemInformationFun)(IN ULONG SysInfoClass, IN OUT PVOID SystemInformation, IN ULONG SystemInformationLength, OUT PULONG nRet);
 typedef NTSTATUS(WINAPI *NtQueryInformationThreadFun)(HANDLE ThreadHandle, ULONG ThreadInformationClass, PVOID ThreadInformation, ULONG ThreadInformationLength, PULONG ReturnLength OPTIONAL);
-typedef NTSTATUS(WINAPI *ZwSuspendProcessFun)(HANDLE);
-typedef NTSTATUS(WINAPI *ZwResumeProcessFun)(HANDLE);
-typedef NTSTATUS(WINAPI *ZwTerminateProcessFun)(HANDLE, DWORD);
-typedef NTSTATUS(WINAPI *ZwOpenProcessFun)(PHANDLE ProcessHandle, ACCESS_MASK DesiredAccess, POBJECT_ATTRIBUTES ObjectAttributes, PCLIENT_ID ClientId);
+typedef NTSTATUS(WINAPI *NtSuspendProcessFun)(HANDLE);
+typedef NTSTATUS(WINAPI *NtResumeProcessFun)(HANDLE);
+typedef NTSTATUS(WINAPI *NtTerminateProcessFun)(HANDLE, DWORD);
+typedef NTSTATUS(WINAPI *NtOpenProcessFun)(PHANDLE ProcessHandle, ACCESS_MASK DesiredAccess, POBJECT_ATTRIBUTES ObjectAttributes, PCLIENT_ID ClientId);
 typedef NTSTATUS(WINAPI *NtUnmapViewOfSectionFun)(IN HANDLE ProcessHandle, IN PVOID BaseAddress);
 typedef NTSTATUS(NTAPI* NtQueryObjectFun)(HANDLE Handle, OBJECT_INFORMATION_CLASS Info, PVOID Buffer, ULONG BufferSize, PULONG ReturnLength);
 

@@ -15,7 +15,7 @@ extern _RunFileDlg RunFileDlg;
 extern LdrGetProcedureAddressFun LdrGetProcedureAddress;
 extern RtlInitAnsiStringFun RtlInitAnsiString;
 extern NtQuerySystemInformationFun NtQuerySystemInformation;
-
+_MGetProcAddressCore MGetProcAddressCore;
 
 M_CAPI(BOOL) MRunExe(LPWSTR path, LPWSTR args, BOOL runAsadmin, HWND hWnd)
 {
@@ -127,6 +127,7 @@ M_CAPI(BOOL) MIsRunasAdmin()
 	return _IsRunasAdmin;
 }
 
+
 M_CAPI(PVOID) MGetProcedureAddress(_In_ PVOID DllHandle, _In_opt_ PSTR ProcedureName, _In_opt_ ULONG ProcedureNumber)
 {
 	NTSTATUS status;
@@ -164,7 +165,7 @@ M_CAPI(PVOID) MGetProcedureAddress(_In_ PVOID DllHandle, _In_opt_ PSTR Procedure
 }
 M_CAPI(PVOID) MGetProcAddress(_In_ PVOID DllHandle, _In_opt_ PSTR ProcedureName)
 {
-	return GetProcAddress((HMODULE)DllHandle, ProcedureName);
+	return MGetProcAddressCore((HMODULE)DllHandle, ProcedureName);
 }
 
 M_CAPI(BOOL) MCommandLineToFilePath(LPWSTR cmdline, LPWSTR buffer, int size)

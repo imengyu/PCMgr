@@ -13,6 +13,7 @@
 #include "settinghlp.h"
 #include "kernelhlp.h"
 #include "VersionHelpers.h"
+#include "PathHelper.h"
 #include "StringHlp.h"
 #include "loghlp.h"
 #include "nthlp.h"
@@ -32,15 +33,19 @@ processorArchitecture = '*' publicKeyToken = '6595b64144ccf1df' language = '*'\"
 
 #define WM_S_APPBAR 900
 #define WM_S_MESSAGE_EXIT 901
+#define WM_S_MESSAGE_ACTIVE 902
 
 extern HINSTANCE hInst;
 extern HINSTANCE hInstRs;
-
+extern HINSTANCE hClr;
 extern _CancelShutdown dCancelShutdown;
 
+extern NtQuerySystemInformationFun NtQuerySystemInformation;
+extern _MGetProcAddressCore MGetProcAddressCore;
 extern LPWSTR fmCurrectSelectFilePath0;
 extern bool fmMutilSelect;
 extern int fmMutilSelectCount;
+extern void* clrcreateinstance;
 
 typedef HRESULT(WINAPI*CLRCreateInstanceFun)(REFCLSID clsid, REFIID riid, LPVOID *ppInterface);
 
@@ -55,7 +60,9 @@ WorkerCallBack hWorkerCallBack;
 TerminateImporantWarnCallBack hTerminateImporantWarnCallBack;
 HANDLE hMutex;
 
+WCHAR thisGuid[MAX_PATH];
 WCHAR appDir[MAX_PATH];
+WCHAR appName[MAX_PATH];
 DWORD dwMainAppRet = 0;
 extern WCHAR iniPath[MAX_PATH];
 
@@ -69,6 +76,7 @@ HWND selectItem4;
 int HotKeyId = 0;
 bool has_fullscreen_window = false;
 
+bool executeByLoader = false;
 extern BOOL killUWPCmdSendBack;
 extern BOOL killCmdSendBack;
 bool refesh_fast = false;
@@ -79,6 +87,7 @@ bool top_most = false;
 
 bool can_debug = false;
 bool use_apc = false;
+int IDC_MAINLIST_HEADER = 0;
 
 void print(LPWSTR str)
 {
@@ -89,14 +98,46 @@ bool MLoadAppBackUp();
 LONG WINAPI MUnhandledExceptionFilter(struct _EXCEPTION_POINTERS *lpExceptionInfo);
 
 //Worker Calls
-M_API BOOL MAppStartEnd() {
+BOOL MAppStartLoadSomeZZ()
+{
+	return FreeLibrary(GetModuleHandle(L"mscoree.dll"));
+}
+BOOL MAppStartGGUID()
+{
+	wchar_t w1 = 1;
+	memset(thisGuid, 0, sizeof(thisGuid));
+	for (int i = 0; i < 32; i++)
+	{
+		w1 = i * 2;
+		if (w1 > 16)
+			w1 = i / 2 + w1;
+		thisGuid[i] = w1;
+	}
+	return 1;
+}
+BOOL MAppStartTestZz(void*v) 
+{
+	LPWSTR vs = (LPWSTR)v;
+	int maxlen = vs[4] * 2;
+	if ((int)wcslen(vs) >= maxlen)
+	{
+		if (vs[vs[0]] == vs[8] && vs[7] == maxlen) {
+			executeByLoader = true;
+			return 0;
+		}
+	}
+	if (!executeByLoader)
+		MAppStartLoadSomeZZ();
+	return TRUE;
+}
+BOOL MAppStartEnd() {
 	return CloseHandle(hMutex);
 }
-M_API BOOL MAppStartTryCloseLastApp(LPWSTR windowTitle) {
+BOOL MAppStartTryActiveLastApp(LPWSTR windowTitle) {
 	HWND hWnd = FindWindow(NULL, windowTitle);
 	if (IsWindow(hWnd))
 	{
-		if (SendMessageTimeout(hWnd, WM_S_MESSAGE_EXIT, NULL, NULL, SMTO_BLOCK, 500, 0) == 0)
+		if (SendMessageTimeout(hWnd, WM_S_MESSAGE_ACTIVE, NULL, NULL, SMTO_BLOCK, 500, 0) == 0)
 			return FALSE;
 		else return TRUE;
 	}		
@@ -124,13 +165,58 @@ M_API BOOL MAppKillOld(LPWSTR procName)
 	CloseHandle(hSnapshot);
 	return ended;
 }
-M_API BOOL MAppStartTest()
+BOOL MAppStartTest()
 {
 	hMutex = CreateMutex(NULL, false, L"PCMGR");
 	if (GetLastError() == ERROR_ALREADY_EXISTS)
 	{
 		CloseHandle(hMutex);
 		return TRUE;
+	}
+	return FALSE;
+}
+BOOL MAppStartShowRun2Warn()
+{
+	WCHAR run2Tilte[16];
+	LoadString(hInst, IDS_STRING_RUN2TITLE, run2Tilte, 16);
+	WCHAR run2Text[32];
+	LoadString(hInst, IDS_STRING_RUN2TEXT, run2Text, 32);
+
+	WCHAR run2Con[16];
+	LoadString(hInst, IDS_STRING_CONRUN, run2Con, 16);
+	WCHAR run2Can[16];
+	LoadString(hInst, IDS_STRING_CANRUN, run2Can, 16);
+	WCHAR run2Killold[16];
+	LoadString(hInst, IDS_STRING_KILLOLD, run2Killold, 16);
+	WCHAR run2KilloldFailed[32];
+	LoadString(hInst, IDS_STRING_KILLOLDFAILED, run2KilloldFailed, 32);
+
+	TASKDIALOGCONFIG cfg = { 0 };
+	cfg.cbSize = sizeof(TASKDIALOGCONFIG);
+	cfg.hInstance = hInst;
+	cfg.dwFlags = TDF_USE_COMMAND_LINKS_NO_ICON;
+	cfg.pszWindowTitle = DEFDIALOGGTITLE;
+	cfg.pszMainInstruction = run2Tilte;
+	cfg.pszContent = run2Text;
+
+	TASKDIALOG_BUTTON btn[3] = { 0 };
+	btn[0] = TASKDIALOG_BUTTON{ 1, run2Can };
+	btn[1] = TASKDIALOG_BUTTON{ 2, run2Con };
+	btn[2] = TASKDIALOG_BUTTON{ 3, run2Killold };
+	cfg.pButtons = btn;
+	cfg.cButtons = 3;
+
+	int selectButton = 0;
+	if(SUCCEEDED(TaskDialogIndirect(&cfg, &selectButton, NULL, NULL)))
+	{
+		if (selectButton == 1)
+			return TRUE;
+		else if (selectButton == 3)
+		{
+			if (!MAppKillOld(appName))
+				MessageBox(NULL, run2KilloldFailed, DEFDIALOGGTITLE, MB_ICONWARNING);
+			MAppStartTest();
+		}
 	}
 	return FALSE;
 }
@@ -142,6 +228,19 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 {
 	switch (id)
 	{
+	case 176: {
+
+		break;
+	}
+	case 178: {
+		SendMessage(hWnd, WM_COMMAND, IDM_KILL, 0);
+		break;
+	}
+	case 179: {
+		ListView_SetExtendedListViewStyleEx(hWnd, 0, LVS_EX_FULLROWSELECT | LVS_EX_TWOCLICKACTIVATE);
+		SendMessage(hWnd, LVM_SETEXTENDEDLISTVIEWSTYLE, LVS_EX_DOUBLEBUFFER, LVS_EX_DOUBLEBUFFER);
+		break;
+	}
 	case 180: return GetCurrentProcessId();
 	case 181: {
 		SetUnhandledExceptionFilter(NULL);
@@ -459,6 +558,39 @@ M_API void MAppSetStartingProgessText(LPWSTR text)
 {
 	MAppMainCall(M_CALLBACK_UPDATE_LOAD_STATUS, text, NULL);
 }
+M_API void MAppSet(int id, void*v)
+{
+	switch (id)
+	{
+	case 0:
+		break;
+	case 1:
+		MAppStartTestZz(v);
+		break;
+	case 2:
+		MGetProcAddressCore = (_MGetProcAddressCore)v;
+		break;
+	case 8:
+		if (v) {
+			MAppStartGGUID();
+			*((WCHAR**)v) = thisGuid;
+		}
+		break;
+	}
+}
+M_API void MAppTest(int id, void*v) {
+	switch (id)
+	{
+	case 0:
+		FreeLibrary(hInst);
+		break;
+	case 1:
+		break;
+	default:
+		break;
+	}
+}
+
 //...
 M_API HICON MGetWindowIcon(HWND hWnd)
 {
@@ -476,22 +608,8 @@ M_API BOOL MIsSystemSupport()
 	return IsWindows7OrGreater();
 }
 
-//mono runtime
-
 LPWSTR*argsStrs = NULL;
 
-//App help
-M_API void MGlobalAppInitialize()
-{
-	GetModuleFileName(NULL, appDir, MAX_PATH);
-	PathRemoveFileSpec(appDir);
-
-	GetModuleFileName(0, iniPath, MAX_PATH);
-	PathRenameExtension(iniPath, (LPWSTR)L".ini");
-
-	MLG_SetLanuageItems_NoRealloc();
-	M_LOG_Init(M_CFG_GetConfigBOOL(L"ShowDebugWindow", L"Configure", FALSE));
-}
 M_API void MAppMainExit(UINT exitcode)
 {
 	ExitProcess(exitcode);
@@ -504,7 +622,38 @@ M_API BOOL MAppMainRun()
 {
 	BOOL rs = FALSE;
 
-	MGlobalAppInitialize();
+	if (!executeByLoader)
+	{
+		MessageBox(0, L"Only pcmgr can use this function.", L"illegal use", 0);
+	}
+
+	GetModuleFileName(NULL, appDir, MAX_PATH);
+	std::wstring *w = Path::GetFileName(appDir);
+	wcscpy_s(appName, w->c_str());
+	delete w;
+	PathRemoveFileSpec(appDir);
+
+	GetModuleFileName(0, iniPath, MAX_PATH);
+	PathRenameExtension(iniPath, (LPWSTR)L".ini");
+
+	WCHAR lastWindowTitle[64];
+	GetPrivateProfileString(L"AppSetting", L"LastWindowTitle", L"", lastWindowTitle, 64, iniPath);
+
+	WCHAR lastLg[16];
+	GetPrivateProfileString(L"AppSetting", L"Lanuage", L"", lastLg, 16, iniPath);
+	
+	MLG_SetLanuageItems_NoRealloc();
+	MLG_SetLanuageRes(appDir, lastLg);
+
+	if (MAppStartTest())
+	{
+		if (MAppStartTryActiveLastApp(lastWindowTitle))
+			return TRUE;
+		else if (MAppStartShowRun2Warn())
+			return TRUE;
+	}
+
+	M_LOG_Init(M_CFG_GetConfigBOOL(L"ShowDebugWindow", L"Configure", FALSE));
 
 	WCHAR mainDllPath[MAX_PATH];
 	wcscpy_s(mainDllPath, appDir);
@@ -520,6 +669,7 @@ M_API BOOL MAppMainRun()
 		return rs;
 	}
 
+	//CLRCreateInstance º¯Êý
 	CLRCreateInstanceFnPtr c = (CLRCreateInstanceFnPtr)GetProcAddress(GetModuleHandle(L"mscoree.dll"), "CLRCreateInstance");
 	if (c)
 	{
@@ -530,6 +680,9 @@ M_API BOOL MAppMainRun()
 
 		HRESULT hr = c(CLSID_CLRMetaHost, IID_ICLRMetaHost, (LPVOID*)&pMetaHost);
 		hr = pMetaHost->GetRuntime(L"v4.0.30319", IID_PPV_ARGS(&pRuntimeInfo));
+
+		hClr = GetModuleHandle(L"clr.dll");
+
 
 		if (FAILED(hr)) {
 			MShowErrorMessage(L"Not found .NET framework runtime v4.0.30319.", L"Load app failed", MB_ICONERROR);
@@ -574,6 +727,9 @@ M_API BOOL MAppMainRun()
 		MShowErrorMessage(L"Not found .NET framework in your computer.", L"Load app failed", MB_ICONERROR);
 		LogErr(L"Load mscoree.dll failed !");
 	}
+
+	MAppStartEnd();
+
 	return rs;
 }
 //App agrs
@@ -771,6 +927,33 @@ M_API void MListDrawItem(HANDLE hTheme, HDC hdc, int x, int y, int w, int h, int
 	}
 }
 
+M_CAPI(void) MListViewSetColumnSortArrow(HWND hListHeader, int index, BOOL isUp, BOOL no) {
+	HDITEM item = { 0 };
+	item.mask = HDI_FORMAT;
+	Header_GetItem(hListHeader, index, &item);
+	if (no) {
+		if ((item.fmt & HDF_SORTDOWN) == HDF_SORTDOWN) item.fmt ^= HDF_SORTDOWN;
+		if ((item.fmt & HDF_SORTUP) == HDF_SORTUP) item.fmt ^= HDF_SORTUP;
+	}
+	else {
+		if (isUp) {
+			if ((item.fmt & HDF_SORTDOWN) == HDF_SORTDOWN) item.fmt ^= HDF_SORTDOWN;
+			item.fmt |= HDF_SORTUP;
+		}
+		else {
+			if ((item.fmt & HDF_SORTUP) == HDF_SORTUP) item.fmt ^= HDF_SORTUP;
+			item.fmt |= HDF_SORTDOWN;
+		}
+	}
+	Header_SetItem(hListHeader, index, &item);
+}
+M_CAPI(HWND) MListViewGetHeaderControl(HWND hList) {
+	HWND hListHeader = FindWindowEx(hList, NULL, L"SysHeader32", NULL);;
+	if(hListHeader)
+		IDC_MAINLIST_HEADER = GetDlgCtrlID(hListHeader);
+	return hListHeader;
+}
+
 void MAppWmCommandTools(WPARAM wParam)
 {
 	switch (wParam)
@@ -842,7 +1025,11 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 		break;
 	}
-	case WM_COMMAND:
+	case WM_S_MESSAGE_ACTIVE: {
+		MAppWorkCall3(208, hWnd, 0);
+		break;
+	}
+	case WM_COMMAND: {
 		switch (wParam)
 		{
 		case IDM_LOAD_DRIVER: {
@@ -1000,7 +1187,7 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		case IDM_DEBUG: {
 			if (thisCommandPid > 4)
 			{
-				std::wstring cmd = FormatString(L"-p %d", thisCommandPid);
+				std::wstring cmd = FormatString(L"-p %u", thisCommandPid);
 				ShellExecute(hWndMain, L"open", L"C:\\Windows\\System32\\vsjitdebugger.exe", (LPWSTR)cmd.c_str(), NULL, 5);
 			}
 			break;
@@ -1338,12 +1525,34 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		break;
-	case WM_SYSCOMMAND:
+	}
+	case WM_SYSCOMMAND: {
 		if (wParam == SC_MINIMIZE)
 		{
 			if (min_hide) ShowWindow(hWnd, SW_HIDE);
 		}
 		break;
+	}
+	case WM_NOTIFY: {
+		if (LOWORD(wParam) == IDC_MAINLIST_HEADER)
+		{
+			switch (((LPNMHDR)lParam)->code)
+			{
+			case HDN_ITEMCLICK: {
+				LPNMHEADER pNMHeader = (LPNMHEADER)lParam;
+				if (pNMHeader->iButton == 1)//Right
+					MAppMainCall(M_CALLBACK_MDETALS_LIST_HEADER_RIGHTCLICK, (LPVOID)pNMHeader->iItem, 0);
+				break;
+			}
+			case HDN_ITEMKEYDOWN: {
+				LPNMHEADER pNMHeader = (LPNMHEADER)lParam;
+				MAppMainCall(M_CALLBACK_MDETALS_LIST_HEADER_RIGHTCLICK, (LPVOID)pNMHeader->iItem, 0);
+				break;
+			}
+			}
+		}
+		break;
+	}
 	default:
 		break;
 	}

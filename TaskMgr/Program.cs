@@ -16,9 +16,7 @@ namespace PCMgr
         public static void Main(string[]agrs)
         {
             FormMain.cfgFilePath = Marshal.PtrToStringUni(NativeMethods.M_CFG_GetCfgFilePath());
-            NativeMethods.Log("cfgFilePath : " + FormMain.cfgFilePath);
             FormMain.InitLanuage();
-
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
@@ -29,9 +27,6 @@ namespace PCMgr
             if (agrs.Length > 0)
                 run = MainRunAgrs(agrs);
 
-            if (run && NativeMethods.MAppStartTest() && !TryCloseLastApp())
-                run = ShowRun2Warn();
-
             if (run && !NativeMethods.MIsRunasAdmin())
                 run = ShowNOADMINWarn();
 #if !_X64_
@@ -41,7 +36,6 @@ namespace PCMgr
             
             //Application.Run(new WorkWindow.FormAbout());
             if (run) Application.Run(new FormMain(agrs));
-            else NativeMethods.Log("Cancel run.");
         }
 
         private static bool MainRunAgrs(string[] agrs)
@@ -129,46 +123,10 @@ namespace PCMgr
             return true;
         }
 
-        private static bool TryCloseLastApp()
-        {
-            string lastTitle = NativeMethods.GetConfig("LastWindowTitle", "AppSetting");
-            if (lastTitle != "")
-                return NativeMethods.MAppStartTryCloseLastApp(lastTitle);
-            return false;
-        }
-        private static bool ShowRun2Warn()
-        {
-            TaskDialog t = new TaskDialog("", FormMain.str_AppTitle);
-            t.Content = LanuageMgr.GetStr("Run2WarnText");
-            t.CommonIcon = TaskDialogIcon.None;
-            CustomButton[] btns = new CustomButton[3];
-            btns[0] = new CustomButton(Result.Yes, LanuageMgr.GetStr("ContinueRun"));
-            btns[1] = new CustomButton(Result.No, LanuageMgr.GetStr("CancelRun"));
-            btns[2] = new CustomButton(Result.Ignore, LanuageMgr.GetStr("Run2KillOld"));
-            t.CustomButtons = btns;
-            t.UseCommandLinks = true;
-            t.CanBeMinimized = false;
-            t.EnableHyperlinks = true;
-            Results rs = t.Show();
-            if (rs.CommonButton == Result.No) return false;
-            else if (rs.CommonButton == Result.Yes) return true;
-            else if (rs.CommonButton == Result.Ignore)
-            {
-                if (NativeMethods.MAppKillOld(System.Diagnostics.Process.GetCurrentProcess().ProcessName + ".exe"))
-                {
-                    TaskDialog.Show(LanuageMgr.GetStr("KillOldSuccess"), FormMain.str_AppTitle);
-                    NativeMethods.MAppStartTest();
-                }
-                else TaskDialog.Show(LanuageMgr.GetStr("KillOldFailed"), FormMain.str_AppTitle);
-                return true;
-            }
-            return true;
-        }
         private static bool Show64Warn()
         {
             if (NativeMethods.GetConfigBool("X32Warning", "AppSetting", true))
             {
-
                 TaskDialog t = new TaskDialog(LanuageMgr.GetStr("X64WarnTitle"), FormMain.str_AppTitle);
                 t.Content = LanuageMgr.GetStr("X64WarnText");
                 t.CommonIcon = TaskDialogIcon.Warning;

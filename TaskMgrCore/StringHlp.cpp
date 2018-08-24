@@ -36,7 +36,6 @@ std::wstring & FormatString(std::wstring & _str, const wchar_t * _Format, ...) {
 	return _str;
 }
 
-
 std::wstring FormatString(const wchar_t *_Format, va_list marker)
 {
 	std::wstring tmp;

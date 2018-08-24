@@ -272,7 +272,7 @@ M_CAPI(BOOL) MDEVICE_GetMemoryDeviceInfo()
 				break;
 
 			hr = pclsObj->Get(L"Model", 0, &vtProp, 0, 0);
-			wcscpy_s(memoryInfo.Name, vtProp.bstrVal);
+			if(vtProp.bstrVal) wcscpy_s(memoryInfo.Name, vtProp.bstrVal);
 			VariantClear(&vtProp);
 
 			hr = pclsObj->Get(L"Speed", 0, &vtProp, 0, 0);

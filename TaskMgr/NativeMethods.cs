@@ -184,6 +184,9 @@ namespace PCMgr
         public const string COREDLLNAME = "PCMgr32.dll";
 #endif
 
+        [DllImport(@"E:\主数据库\编程\方案V5\DllTest\Debug\DllMon.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void DllMonStart();
+
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void WORKERCALLBACK(int msg, IntPtr lParam, IntPtr wParam);
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -206,15 +209,9 @@ namespace PCMgr
         public static extern bool MCopyToClipboard2([MarshalAs(UnmanagedType.LPWStr)]string path);
 
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool MAppStartTryCloseLastApp([MarshalAs(UnmanagedType.LPWStr)]string windowTitle);
-
-
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern bool MIsKernelNeed64();
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern void M_SU_Test([MarshalAs(UnmanagedType.LPStr)]string instr);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool MAppStartEnd();
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern void M_LOG_Init(bool forecConsole);
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
@@ -243,8 +240,6 @@ namespace PCMgr
         public static extern void M_SU_SetSysver(uint ver);
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern bool MGetPrivileges2();
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool MAppStartTest();
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern bool MAppKillOld([MarshalAs(UnmanagedType.LPWStr)]string procname);
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
@@ -277,6 +272,9 @@ namespace PCMgr
 
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern bool MFM_FileExist([MarshalAs(UnmanagedType.LPWStr)]string path);
+
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void MAppTest(int id, IntPtr ptr);
 
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern void MLG_SetLanuageItems_CallBack(IntPtr callback);
@@ -399,6 +397,11 @@ namespace PCMgr
         public static extern bool MUnInstallUWPApp([MarshalAs(UnmanagedType.LPWStr)]string appname);
 
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern uint MGetProcessThreadsCount(IntPtr p);
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern uint MGetProcessHandlesCount(IntPtr p);
+
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern bool MGetProcessIsUWP(IntPtr handle);
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern bool MGetProcessIs32Bit(IntPtr handle);
@@ -406,8 +409,13 @@ namespace PCMgr
         public static extern bool MGetUWPPackageId(IntPtr handle, IntPtr data);
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern bool MGetUWPPackageFullName(IntPtr handle, ref int len, StringBuilder buf);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern void MAppVProcessAllWindowsUWP();
+
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern uint MGetProcessSessionID(IntPtr handle);
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern bool MGetProcessUserName(IntPtr handle, StringBuilder buf, int len);
 
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern void MShowExeFileSignatureInfo([MarshalAs(UnmanagedType.LPWStr)]string filePath);
@@ -422,6 +430,32 @@ namespace PCMgr
         #endregion
 
         #region PERF API
+
+        public static int M_GET_PROCMEM_WORKINGSET = 0;
+        public static int M_GET_PROCMEM_WORKINGSETPRIVATE = 1;
+        public static int M_GET_PROCMEM_WORKINGSETSHARE = 2;
+        public static int M_GET_PROCMEM_PEAKWORKINGSET = 3;
+        public static int M_GET_PROCMEM_COMMITEDSIZE = 4;
+        public static int M_GET_PROCMEM_NONPAGEDPOOL = 5;
+        public static int M_GET_PROCMEM_PAGEDPOOL = 6;
+        public static int M_GET_PROCMEM_PAGEDFAULT = 7;
+
+        public static int M_GET_PROCIO_READ = 0;
+        public static int M_GET_PROCIO_WRITE = 1;
+        public static int M_GET_PROCIO_OTHER = 2;
+        public static int M_GET_PROCIO_READ_BYTES = 3;
+        public static int M_GET_PROCIO_WRITE_BYTES = 4;
+        public static int M_GET_PROCIO_OTHER_BYTES = 5;
+
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern UInt32 MPERF_GetProcessMemoryInfo(IntPtr p, int col);
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern UInt64 MPERF_GetProcessIOInfo(IntPtr p, int col);
+
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern UInt64 MPERF_GetProcessCpuTime(IntPtr p);
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern UInt64 MPERF_GetProcessCycle(IntPtr p);
 
         //3 get value
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
@@ -656,6 +690,18 @@ namespace PCMgr
                 else return "0.1 MB";
             }
         }
+        public static String FormatFileSizeMenSingal(Int64 fileSize)
+        {
+            if (fileSize < 0)
+                throw new ArgumentOutOfRangeException("fileSize");
+            return (fileSize / 1024).ToString("0") + " K";
+        }
+        public static String FormatFileSizeMenSingal(UInt64 fileSize)
+        {
+            if (fileSize < 0)
+                throw new ArgumentOutOfRangeException("fileSize");
+            return (fileSize / 1024).ToString("0") + " K";
+        }
 
         #endregion
 
@@ -738,6 +784,14 @@ namespace PCMgr
             [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
             public static extern UInt32 MDEVICE_GetMemoryDeviceSpeed();
         }
+        public static class ComCtlApi
+        {
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+            public static extern IntPtr MListViewGetHeaderControl(IntPtr hList);
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+            public static extern void MListViewSetColumnSortArrow(IntPtr hListHeader, int index, bool isUp, bool no);
+
+        }
 
         public static class CSCall
         {
@@ -767,7 +821,7 @@ namespace PCMgr
             public const int M_CALLBACK_VIEW_TIMER = 28;
             public const int M_CALLBACK_VIEW_HOTKEY = 29;
             public const int M_CALLBACK_SHOW_TRUSTED_DLG = 30;
-
+            public const int M_CALLBACK_MDETALS_LIST_HEADER_RIGHTCLICK = 31;
             public const int M_CALLBACK_KDA = 32; 
 
             public const int M_CALLBACK_UPDATE_LOAD_STATUS = 34;
@@ -779,6 +833,7 @@ namespace PCMgr
             public const int M_CALLBACK_DBGPRINT_EMEPTY = 40;
             public const int M_CALLBACK_SHOW_LOAD_STATUS = 41;
             public const int M_CALLBACK_HLDE_LOAD_STATUS = 42;
+
             public const int M_CALLBACK_KERNEL_VIELL_PRGV = 51;
             public const int M_CALLBACK_KERNEL_TOOL = 52;
             public const int M_CALLBACK_HOOKS = 53;

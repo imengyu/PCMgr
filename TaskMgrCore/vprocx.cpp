@@ -30,7 +30,8 @@ LPWSTR curretProcName = 0;
 HIMAGELIST hImgListWinSm;
 HCURSOR hCurLoading;
 
-extern ZwQueryInformationThreadFun ZwQueryInformationThread;
+extern NtQueryInformationThreadFun NtQueryInformationThread;
+extern NtQueryInformationProcessFun NtQueryInformationProcess;
 
 using namespace std;
 
@@ -483,70 +484,69 @@ BOOL MAppVModuls(DWORD dwPID, HWND hDlg, LPWSTR procName)
 	else if (rs == STATUS_SUCCESS && hProcess) {
 
 		BOOL bRet = FALSE;
-		HANDLE hModuleSnap = NULL;
-		MODULEENTRY32 me32 = { 0 };
+		
+		ULONG outLength = 0;
+		PROCESS_BASIC_INFORMATION basicInfo = { 0 };
+		if (NT_SUCCESS(NtQueryInformationProcess(hProcess, ProcessBasicInformation, &basicInfo, sizeof(PROCESS_BASIC_INFORMATION), &outLength)))
+		{
+			PPEB_LDR_DATA pLdr = basicInfo.PebBaseAddress->Ldr;
 
-		hModuleSnap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, static_cast<DWORD>(dwPID));
-		if (hModuleSnap == INVALID_HANDLE_VALUE) {
-			if (GetLastError() == 299) SetWindowText(htitle, (LPWSTR)str_item_invalidproc.c_str());
-			else {
-				LogWarn(L"View Modules Failed in CreateToolhelp32Snapshot : %d", GetLastError());
-				wstring str = FormatString(L"%s\nLast Error : 0x%08x", str_item_enum_modulefailed, GetLastError());
-				SetWindowText(htitle, str.c_str());
-			}
-			return FALSE;
-		}
+			PLIST_ENTRY list_head = &pLdr->InMemoryOrderModuleList;
+			PLIST_ENTRY p = &pLdr->InMemoryOrderModuleList;
 
-		me32.dwSize = sizeof(MODULEENTRY32);
-		int i = 0;
-		BOOL fOk;
-		for (fOk = Module32First(hModuleSnap, &me32); fOk; fOk = Module32Next(hModuleSnap, &me32)) {
-			LVITEM vitem;
-			vitem.mask = LVIF_TEXT;
-			vitem.iSubItem = 0;
-			vitem.iItem = 0;
-			vitem.iSubItem = 0;
-			vitem.lParam = (LPARAM)me32.hModule;
-			vitem.pszText = me32.szModule;
-			ListView_InsertItem(hListModuls, &vitem);
-			TCHAR mpath[MAX_PATH];
-			vitem.iSubItem = 1;
-			if (GetModuleFileNameExW(hProcess, me32.hModule, mpath, MAX_PATH))
-				vitem.pszText = mpath;
-			else {
-				vitem.pszText = me32.szExePath;
-				wcscpy_s(mpath, me32.szExePath);
-			}
-			ListView_SetItem(hListModuls, &vitem);
-			vitem.iSubItem = 2;
-			TCHAR addr[20];
+			int i = 0;
+			WCHAR thisName[MAX_PATH];
+			for (p = list_head->Flink; p != list_head; p = p->Flink) {
+				PLDR_MODULE thisModule = CONTAINING_RECORD(p, LDR_MODULE, InMemoryOrderModuleList);
+				if (thisModule->BaseDllName.Buffer != NULL) {
+					wcscpy_s(thisName, thisModule->BaseDllName.Buffer);
+
+					LVITEM vitem;
+					vitem.mask = LVIF_TEXT;
+					vitem.iSubItem = 0;
+					vitem.iItem = 0;
+					vitem.iSubItem = 0;
+					vitem.lParam = (LPARAM)thisModule->BaseAddress;
+					vitem.pszText = thisName;
+					ListView_InsertItem(hListModuls, &vitem);
+
+					vitem.iSubItem = 1;
+					if (thisModule->FullDllName.Buffer != NULL)
+						vitem.pszText = thisModule->FullDllName.Buffer;
+					else vitem.pszText = L"-";
+					ListView_SetItem(hListModuls, &vitem);
+					vitem.iSubItem = 2;
+					TCHAR addr[20];
 #ifdef _AMD64_
-			swprintf_s(addr, L"0x%I64X", (ULONG_PTR)me32.modBaseAddr);
+					swprintf_s(addr, L"0x%I64X", (ULONG_PTR)thisModule->BaseAddress);
 #else
-			swprintf_s(addr, L"0x%08X", (ULONG_PTR)me32.modBaseAddr);
+					swprintf_s(addr, L"0x%08X", (ULONG_PTR)thisModule->BaseAddress);
 #endif
-			vitem.pszText = addr;
-			ListView_SetItem(hListModuls, &vitem);
-			vitem.iSubItem = 3;
-			TCHAR sz[20];
-			swprintf_s(sz, L"%d", me32.modBaseSize);
-			vitem.pszText = sz;
-			ListView_SetItem(hListModuls, &vitem);
-			vitem.iSubItem = 4;
+					vitem.pszText = addr;
+					ListView_SetItem(hListModuls, &vitem);
+					vitem.iSubItem = 3;
+					TCHAR sz[20];
+					swprintf_s(sz, L"%d", thisModule->SizeOfImage);
+					vitem.pszText = sz;
+					ListView_SetItem(hListModuls, &vitem);
+					vitem.iSubItem = 4;
+					if (thisModule->FullDllName.Buffer != NULL) {
+						WCHAR company[256];
+						if (MGetExeCompany(thisModule->FullDllName.Buffer, company, 255))
+							vitem.pszText = company;
+						else vitem.pszText = L"";
+					}
+					else vitem.pszText = L"";
+					ListView_SetItem(hListModuls, &vitem);
 
-			WCHAR company[256];
-			if (MGetExeCompany(mpath, company, 255))
-				vitem.pszText = company;
-			else vitem.pszText = L"";
+					i++;
+				}
+			}
 
-			ListView_SetItem(hListModuls, &vitem);
-
-			i++;
+			wstring str = FormatString(str_item_vmodulestitle, procName, dwPID, i);
+			SetWindowText(hDlg, str.c_str());
+			return TRUE;
 		}
-		wstring str = FormatString(str_item_vmodulestitle, procName, dwPID, i);
-		SetWindowText(hDlg, str.c_str());
-		CloseHandle(hModuleSnap);
-		return TRUE;
 	}
 	else {
 		LogWarn(L"View Modules Failed in OpenProcess : 0x%08X", rs);
@@ -554,6 +554,7 @@ BOOL MAppVModuls(DWORD dwPID, HWND hDlg, LPWSTR procName)
 		SetWindowText(htitle, str.c_str());
 		return 0;
 	}
+	return FALSE;
 }
 BOOL MAppVThreads(DWORD dwPID, HWND hDlg, LPWSTR procName)
 {
@@ -575,7 +576,6 @@ BOOL MAppVThreads(DWORD dwPID, HWND hDlg, LPWSTR procName)
 				NTSTATUS status = STATUS_SUCCESS;
 				HANDLE hThread = NULL;
 				MOpenThreadNt(static_cast<DWORD>((ULONG_PTR)systemThread.ClientId.UniqueThread), &hThread, static_cast<DWORD>((ULONG_PTR)systemThread.ClientId.UniqueProcess));
-
 
 				LVITEM vitem;
 				vitem.mask = LVIF_TEXT;
@@ -610,7 +610,7 @@ BOOL MAppVThreads(DWORD dwPID, HWND hDlg, LPWSTR procName)
 
 				if (hThread) {
 					THREAD_BASIC_INFORMATION tbi;
-					status = ZwQueryInformationThread(hThread, ThreadBasicInformation, &tbi, sizeof(tbi), NULL);
+					status = NtQueryInformationThread(hThread, ThreadBasicInformation, &tbi, sizeof(tbi), NULL);
 					if (status == STATUS_SUCCESS) {
 						TCHAR modname1[32];
 #ifdef _X64_
@@ -645,25 +645,14 @@ BOOL MAppVThreads(DWORD dwPID, HWND hDlg, LPWSTR procName)
 				ListView_SetItem(hListThreads, &vitem);
 				vitem.iSubItem++;
 
-				PVOID startaddr = 0;
-				if (hThread) {
-					status = ZwQueryInformationThread(hThread, ThreadQuerySetWin32StartAddress, &startaddr, sizeof(startaddr), NULL);
-					if (status == STATUS_SUCCESS) {
-						TCHAR modname1[32];
+				PVOID startaddr = systemThread.StartAddress;
+				TCHAR modname1[32];
 #ifdef _X64_
-						swprintf_s(modname1, L"0x%I64X", (ULONG_PTR)startaddr);
+				swprintf_s(modname1, L"0x%I64X", (ULONG_PTR)startaddr);
 #else
-						swprintf_s(modname1, L"0x%08X", (ULONG_PTR)startaddr);
+				swprintf_s(modname1, L"0x%08X", (ULONG_PTR)startaddr);
 #endif
-						vitem.pszText = modname1;
-					}
-					else {
-						TCHAR err[18];
-						swprintf_s(err, L"ERROR:0x%08X", status);
-						vitem.pszText = err;
-					}
-				}
-				else vitem.pszText = L"-";
+				vitem.pszText = modname1;
 				ListView_SetItem(hListThreads, &vitem);
 				vitem.iSubItem++;
 

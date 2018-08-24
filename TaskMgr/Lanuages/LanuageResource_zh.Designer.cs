@@ -1115,6 +1115,15 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 您最多只能选择16个项目显示哦 的本地化字符串。
+        /// </summary>
+        internal static string MaxShow16Item {
+            get {
+                return ResourceManager.GetString("MaxShow16Item", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 最大速度： 的本地化字符串。
         /// </summary>
         internal static string MaxSpeed {
@@ -1454,6 +1463,15 @@ namespace PCMgr.Lanuages {
         internal static string Process32Bit {
             get {
                 return ResourceManager.GetString("Process32Bit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 64位 的本地化字符串。
+        /// </summary>
+        internal static string Process64Bit {
+            get {
+                return ResourceManager.GetString("Process64Bit", resourceCulture);
             }
         }
         
@@ -1886,6 +1904,15 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 提交大小 的本地化字符串。
+        /// </summary>
+        internal static string TitleCommited {
+            get {
+                return ResourceManager.GetString("TitleCommited", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 确定继续吗？ 的本地化字符串。
         /// </summary>
         internal static string TitleContinue {
@@ -1900,6 +1927,33 @@ namespace PCMgr.Lanuages {
         internal static string TitleCPU {
             get {
                 return ResourceManager.GetString("TitleCPU", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 CPU时间 的本地化字符串。
+        /// </summary>
+        internal static string TitleCPUTime {
+            get {
+                return ResourceManager.GetString("TitleCPUTime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 周期 的本地化字符串。
+        /// </summary>
+        internal static string TitleCycle {
+            get {
+                return ResourceManager.GetString("TitleCycle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 数据执行保护 的本地化字符串。
+        /// </summary>
+        internal static string TitleDEP {
+            get {
+                return ResourceManager.GetString("TitleDEP", resourceCulture);
             }
         }
         
@@ -2021,11 +2075,128 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 GDI对象 的本地化字符串。
+        /// </summary>
+        internal static string TitleGdiObject {
+            get {
+                return ResourceManager.GetString("TitleGdiObject", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 GPU 的本地化字符串。
+        /// </summary>
+        internal static string TitleGPU {
+            get {
+                return ResourceManager.GetString("TitleGPU", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 GPU 引擎 的本地化字符串。
+        /// </summary>
+        internal static string TitleGPUEngine {
+            get {
+                return ResourceManager.GetString("TitleGPUEngine", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 专用 GPU 内存 的本地化字符串。
+        /// </summary>
+        internal static string TitleGPUPrivateMemory {
+            get {
+                return ResourceManager.GetString("TitleGPUPrivateMemory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 共享 GPU 内存 的本地化字符串。
+        /// </summary>
+        internal static string TitleGPUShareMemory {
+            get {
+                return ResourceManager.GetString("TitleGPUShareMemory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 句柄数 的本地化字符串。
+        /// </summary>
+        internal static string TitleHandleCount {
+            get {
+                return ResourceManager.GetString("TitleHandleCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 安装路径 的本地化字符串。
         /// </summary>
         internal static string TitleInstallDir {
             get {
                 return ResourceManager.GetString("TitleInstallDir", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 I/O 其他 的本地化字符串。
+        /// </summary>
+        internal static string TitleIOOther {
+            get {
+                return ResourceManager.GetString("TitleIOOther", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 I/O 其他字节 的本地化字符串。
+        /// </summary>
+        internal static string TitleIOOtherBytes {
+            get {
+                return ResourceManager.GetString("TitleIOOtherBytes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 I/O 读取 的本地化字符串。
+        /// </summary>
+        internal static string TitleIORead {
+            get {
+                return ResourceManager.GetString("TitleIORead", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 I/O 写入字节 的本地化字符串。
+        /// </summary>
+        internal static string TitleIOReadBytes {
+            get {
+                return ResourceManager.GetString("TitleIOReadBytes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 I/O 写入 的本地化字符串。
+        /// </summary>
+        internal static string TitleIOWrite {
+            get {
+                return ResourceManager.GetString("TitleIOWrite", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 I/O 读取字节 的本地化字符串。
+        /// </summary>
+        internal static string TitleIOWriteBytes {
+            get {
+                return ResourceManager.GetString("TitleIOWriteBytes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 作业对象ID 的本地化字符串。
+        /// </summary>
+        internal static string TitleJobID {
+            get {
+                return ResourceManager.GetString("TitleJobID", resourceCulture);
             }
         }
         
@@ -2057,11 +2228,110 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 非分页缓冲池 的本地化字符串。
+        /// </summary>
+        internal static string TitleNonPagedPool {
+            get {
+                return ResourceManager.GetString("TitleNonPagedPool", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 操作系统上下文 的本地化字符串。
+        /// </summary>
+        internal static string TitleOperationSystemContext {
+            get {
+                return ResourceManager.GetString("TitleOperationSystemContext", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 程序包名称 的本地化字符串。
+        /// </summary>
+        internal static string TitlePackageName {
+            get {
+                return ResourceManager.GetString("TitlePackageName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 页面错误 的本地化字符串。
+        /// </summary>
+        internal static string TitlePagedError {
+            get {
+                return ResourceManager.GetString("TitlePagedError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 页面错误增量 的本地化字符串。
+        /// </summary>
+        internal static string TitlePagedErrorCrease {
+            get {
+                return ResourceManager.GetString("TitlePagedErrorCrease", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 分页缓冲池 的本地化字符串。
+        /// </summary>
+        internal static string TitlePagedPool {
+            get {
+                return ResourceManager.GetString("TitlePagedPool", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 父 PID 的本地化字符串。
+        /// </summary>
+        internal static string TitleParentPID {
+            get {
+                return ResourceManager.GetString("TitleParentPID", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 峰值工作集(内存) 的本地化字符串。
+        /// </summary>
+        internal static string TitlePeakWorkingSet {
+            get {
+                return ResourceManager.GetString("TitlePeakWorkingSet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 PID 的本地化字符串。
         /// </summary>
         internal static string TitlePID {
             get {
                 return ResourceManager.GetString("TitlePID", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 平台 的本地化字符串。
+        /// </summary>
+        internal static string TitlePlatform {
+            get {
+                return ResourceManager.GetString("TitlePlatform", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 基本优先级 的本地化字符串。
+        /// </summary>
+        internal static string TitlePriority {
+            get {
+                return ResourceManager.GetString("TitlePriority", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 特权 的本地化字符串。
+        /// </summary>
+        internal static string TitlePrivilege {
+            get {
+                return ResourceManager.GetString("TitlePrivilege", resourceCulture);
             }
         }
         
@@ -2138,6 +2408,15 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 会话ID 的本地化字符串。
+        /// </summary>
+        internal static string TitleSessionID {
+            get {
+                return ResourceManager.GetString("TitleSessionID", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 您即将关机 的本地化字符串。
         /// </summary>
         internal static string TitleShutdown {
@@ -2156,6 +2435,42 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 线程数 的本地化字符串。
+        /// </summary>
+        internal static string TitleThreadCount {
+            get {
+                return ResourceManager.GetString("TitleThreadCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 UAC虚拟化 的本地化字符串。
+        /// </summary>
+        internal static string TitleUACVirtualization {
+            get {
+                return ResourceManager.GetString("TitleUACVirtualization", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 用户名 的本地化字符串。
+        /// </summary>
+        internal static string TitleUserName {
+            get {
+                return ResourceManager.GetString("TitleUserName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 用户对象 的本地化字符串。
+        /// </summary>
+        internal static string TitleUserObject {
+            get {
+                return ResourceManager.GetString("TitleUserObject", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 重要警告 的本地化字符串。
         /// </summary>
         internal static string TitleVeryWarn {
@@ -2170,6 +2485,42 @@ namespace PCMgr.Lanuages {
         internal static string TitleWinApp {
             get {
                 return ResourceManager.GetString("TitleWinApp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 工作集设置(内存) 的本地化字符串。
+        /// </summary>
+        internal static string TitleWorkingSet {
+            get {
+                return ResourceManager.GetString("TitleWorkingSet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 工作集增量(内存) 的本地化字符串。
+        /// </summary>
+        internal static string TitleWorkingSetCrease {
+            get {
+                return ResourceManager.GetString("TitleWorkingSetCrease", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 专用工作集(内存) 的本地化字符串。
+        /// </summary>
+        internal static string TitleWorkingSetPrivate {
+            get {
+                return ResourceManager.GetString("TitleWorkingSetPrivate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 共享工作集(内存) 的本地化字符串。
+        /// </summary>
+        internal static string TitleWorkingSetShare {
+            get {
+                return ResourceManager.GetString("TitleWorkingSetShare", resourceCulture);
             }
         }
         

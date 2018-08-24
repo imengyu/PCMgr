@@ -225,6 +225,12 @@
     <Compile Include="WorkWindow\FormCheckFileUse.Designer.cs">
       <DependentUpon>FormCheckFileUse.cs</DependentUpon>
     </Compile>
+    <Compile Include="WorkWindow\FormDetalsistHeaders.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WorkWindow\FormDetalsistHeaders.Designer.cs">
+      <DependentUpon>FormDetalsistHeaders.cs</DependentUpon>
+    </Compile>
     <Compile Include="WorkWindow\FormFirst.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -372,6 +378,12 @@
     <EmbeddedResource Include="Lanuages\LanuageResource_en.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>LanuageResource_en.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormDetalsistHeaders.en.resx">
+      <DependentUpon>FormDetalsistHeaders.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormDetalsistHeaders.resx">
+      <DependentUpon>FormDetalsistHeaders.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="WorkWindow\FormFirst.resx">
       <DependentUpon>FormFirst.cs</DependentUpon>

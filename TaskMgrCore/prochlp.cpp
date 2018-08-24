@@ -10,7 +10,9 @@
 #include "resource.h"
 #include "kernelhlp.h"
 #include "suact.h"
+#include "kda.h"
 #include "fmhlp.h"
+#include "PathHelper.h"
 #include "StringHlp.h"
 #include <Psapi.h>
 #include <process.h>
@@ -21,12 +23,14 @@
 #include <wintrust.h>
 #include <cryptuiapi.h>
 #include <mscat.h>
+#include <list>
 
 #define ENCODING (X509_ASN_ENCODING | PKCS_7_ASN_ENCODING)
 
 extern HINSTANCE hInstRs;
 extern TerminateImporantWarnCallBack hTerminateImporantWarnCallBack;
 
+HANDLE nextShouldTerminateThread = NULL;
 LPWSTR thisCommandPath = NULL;
 LPWSTR thisCommandName = NULL;
 LPWSTR thisCommandUWPName = NULL;
@@ -50,16 +54,16 @@ extern bool can_debug;
 //shell32
 _RunFileDlg RunFileDlg;
 //ntdll
-ZwSuspendThreadFun ZwSuspendThread;
-ZwResumeThreadFun ZwResumeThread;
-ZwTerminateThreadFun ZwTerminateThread;
-ZwTerminateProcessFun ZwTerminateProcess;
-ZwOpenThreadFun ZwOpenThread;
-ZwQueryInformationThreadFun ZwQueryInformationThread;
-ZwSuspendProcessFun ZwSuspendProcess;
-ZwResumeProcessFun ZwResumeProcess;
+NtSuspendThreadFun NtSuspendThread;
+NtResumeThreadFun NtResumeThread;
+NtTerminateThreadFun NtTerminateThread;
+NtTerminateProcessFun NtTerminateProcess;
+NtOpenThreadFun NtOpenThread;
+NtQueryInformationThreadFun NtQueryInformationThread;
+NtSuspendProcessFun NtSuspendProcess;
+NtResumeProcessFun NtResumeProcess;
 
-ZwOpenProcessFun ZwOpenProcess;
+NtOpenProcessFun NtOpenProcess;
 NtQuerySystemInformationFun NtQuerySystemInformation;
 NtUnmapViewOfSectionFun NtUnmapViewOfSection;
 NtQueryInformationProcessFun NtQueryInformationProcess;
@@ -79,6 +83,8 @@ _ClosePackageInfo dClosePackageInfo;
 _OpenPackageInfoByFullName dOpenPackageInfoByFullName;
 _GetPackageId dGetPackageId;
 _GetModuleFileNameW dGetModuleFileNameW;
+fnLoadLibraryA dLoadLibraryA;
+fnLoadLibraryW dLoadLibraryW;
 //
 _CryptUIDlgViewCertificateW dCryptUIDlgViewCertificateW;
 _CryptUIDlgViewContext dCryptUIDlgViewContext;
@@ -1068,6 +1074,104 @@ M_API ULONG_PTR MGetProcessWorkingSetPrivate(HANDLE hProcess, SIZE_T pageSize)
 	}
 	return 0;
 }
+M_API DWORD MGetProcessSessionID(PSYSTEM_PROCESSES p)
+{
+	if (p) return p->SessionId;
+	return 0;
+}
+M_API BOOL MGetProcessUserName(HANDLE hProcess, LPWSTR buffer, int maxcount)
+{
+	if (!buffer) return FALSE;
+
+	BOOL result = FALSE;
+	HANDLE hToken;
+	if (!OpenProcessToken(hProcess, TOKEN_QUERY, &hToken))
+		return FALSE;
+
+	PTOKEN_USER pTokenUser = NULL;
+	DWORD dwSize = 0;
+
+	if (!GetTokenInformation(hToken, TokenUser, pTokenUser, dwSize, &dwSize))
+	{
+		if (GetLastError() != ERROR_INSUFFICIENT_BUFFER)
+			return FALSE;
+	}
+
+	pTokenUser = NULL;
+	pTokenUser = (PTOKEN_USER)malloc(dwSize);
+	if (pTokenUser == NULL)
+		result = FALSE;
+
+	if (!GetTokenInformation(hToken, TokenUser, pTokenUser, dwSize, &dwSize)) {
+		if (pTokenUser) free(pTokenUser);
+		return FALSE;
+	}
+
+	PUSERNAME userName = MGetUserNameBySID(pTokenUser->User.Sid);
+	if (userName) {
+		wcscpy_s(buffer, maxcount, userName->UserName);
+		result = TRUE;
+	}
+
+	if (pTokenUser) free(pTokenUser);
+
+	return result;
+}
+M_API ULONG MGetProcessThreadsCount(PSYSTEM_PROCESSES p)
+{
+	if(p) return p->NumberOfThreads;
+	return 0;
+}
+M_API ULONG MGetProcessHandlesCount(PSYSTEM_PROCESSES p)
+{
+	if (p) return p->HandleCount;
+	return 0;
+}
+
+//User names
+std::list<PUSERNAME> allUserNames;
+//User name
+
+VOID MUserNameSIDsDeleteAll() {
+	for (auto it = allUserNames.begin(); it != allUserNames.end(); it++)
+		free(*it);
+	allUserNames.clear();
+}
+PUSERNAME MFindUserNameBySID(PSID sid) {
+	if (sid)
+	{
+		for (auto it = allUserNames.begin(); it != allUserNames.end(); it++)
+		{
+			if ((*it)->Sid == sid)
+				return *it;
+		}
+	}
+	return NULL;
+}
+M_API PUSERNAME MGetUserNameBySID(PSID sid) {
+	if (sid)
+	{
+		PUSERNAME addedItem = MFindUserNameBySID(sid);
+		if (addedItem)return addedItem;
+		else {
+			DWORD dwNameSize = 64;
+			DWORD dwDomainSize = 128;
+			SID_NAME_USE SNU;
+
+			addedItem = (PUSERNAME)malloc(sizeof(USERNAME));
+			addedItem->Sid = sid;
+			if (LookupAccountSid(NULL, sid, addedItem->UserName, &dwNameSize, addedItem->DomainName, &dwDomainSize, &SNU) != 0)
+				allUserNames.push_back(addedItem);
+			else {
+				free(addedItem);
+				addedItem = nullptr;
+			}
+			return addedItem;
+		}
+	}
+	return NULL;
+}
+
 
 //UWP
 /*M_API BOOL MGetUWPPackageId(HANDLE handle, MPerfAndProcessData*data)
@@ -1121,7 +1225,7 @@ M_API NTSTATUS MSuspendProcessNt(DWORD dwPId, HANDLE handle)
 		NTSTATUS rs = MOpenProcessNt(dwPId, &hProcess);
 		if (rs == STATUS_SUCCESS) {
 			if (hProcess) {
-				rs = ZwSuspendProcess(hProcess);
+				rs = NtSuspendProcess(hProcess);
 				MCloseHandle(hProcess);
 				if (rs == STATUS_SUCCESS)
 					return STATUS_SUCCESS;
@@ -1151,7 +1255,7 @@ M_API NTSTATUS MSuspendProcessNt(DWORD dwPId, HANDLE handle)
 	}
 	else if (handle)
 	{
-		NTSTATUS  rs = ZwSuspendProcess(handle);
+		NTSTATUS  rs = NtSuspendProcess(handle);
 		if (rs == 0) return STATUS_SUCCESS;
 		else {
 			LogErr(L"SuspendProcess failed NTSTATUS : 0x%08X", rs);
@@ -1168,7 +1272,7 @@ M_API NTSTATUS MResumeProcessNt(DWORD dwPId, HANDLE handle)
 		if (rs == STATUS_SUCCESS) {
 			if (hProcess)
 			{
-				rs = ZwResumeProcess(hProcess);
+				rs = NtResumeProcess(hProcess);
 				MCloseHandle(hProcess);
 				if (rs == STATUS_SUCCESS) return STATUS_SUCCESS;
 				else {
@@ -1197,7 +1301,7 @@ M_API NTSTATUS MResumeProcessNt(DWORD dwPId, HANDLE handle)
 	}
 	else if (handle)
 	{
-		NTSTATUS rs = ZwResumeProcess(handle);
+		NTSTATUS rs = NtResumeProcess(handle);
 		if (rs == 0)return STATUS_SUCCESS;
 		else
 		{
@@ -1223,7 +1327,7 @@ M_API NTSTATUS MOpenProcessNt(DWORD dwId, PHANDLE pLandle)
 	ClientId.UniqueThread = 0;
 	ClientId.UniqueProcess = (HANDLE)(long long)dwId;
 
-	NTSTATUS NtStatus = ZwOpenProcess(
+	NTSTATUS NtStatus = NtOpenProcess(
 		&hProcess,
 		PROCESS_ALL_ACCESS,
 		&ObjectAttributes,
@@ -1238,7 +1342,7 @@ M_API NTSTATUS MOpenProcessNt(DWORD dwId, PHANDLE pLandle)
 M_API NTSTATUS MTerminateProcessNt(DWORD dwId, HANDLE handle)
 {
 	if (handle) {
-		NTSTATUS rs = ZwTerminateProcess(handle, 0);
+		NTSTATUS rs = NtTerminateProcess(handle, 0);
 		if (rs == 0) return STATUS_SUCCESS;
 		else {
 			LogErr(L"TerminateProcess failed NTSTATUS : 0x%08X", rs);
@@ -1252,7 +1356,7 @@ M_API NTSTATUS MTerminateProcessNt(DWORD dwId, HANDLE handle)
 			NTSTATUS rs = MOpenProcessNt(dwId, &hProcess);
 			if (hProcess)
 			{
-				rs = ZwTerminateProcess(hProcess, 0);
+				rs = NtTerminateProcess(hProcess, 0);
 				MCloseHandle(hProcess);
 				if (rs == 0) return STATUS_SUCCESS;
 				else {
@@ -1499,26 +1603,37 @@ M_CAPI(int) MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWOR
 
 extern MEMORYSTATUSEX memory_statuex;
 
-//ntdll apis
+extern HINSTANCE hInst;
 
+HINSTANCE hLoader;
 HINSTANCE hNtDll;
 HINSTANCE hShell32;
 HINSTANCE hKernel32;
+HINSTANCE hKernelBase;
 HINSTANCE hUser32;
 HINSTANCE hCryptui;
 HINSTANCE hIphlpapi;
 HINSTANCE hImghlp;
+HINSTANCE hPerfDisk;
+HINSTANCE hComBase;
+HINSTANCE hClr;
+HINSTANCE hGdiPlus;
 
 //动态加载api
 BOOL LoadDll()
 {
+	hLoader = GetModuleHandle(NULL);
 	hNtDll = GetModuleHandle(L"ntdll.dll");
 	hShell32 = GetModuleHandle(L"shell32.dll");
+	hKernelBase = GetModuleHandle(L"kernelbase.dll");
 	hKernel32 = GetModuleHandle(L"kernel32.dll");
 	hUser32 = GetModuleHandle(L"user32.dll");
 	hCryptui = LoadLibrary(L"Cryptui.dll");
 	hIphlpapi = LoadLibrary(L"IPHLPAPI.dll");
 	hImghlp = LoadLibrary(L"Imagehlp.dll");
+	hPerfDisk = LoadLibrary(L"perfdisk.dll");
+	hComBase = LoadLibrary(L"combase.dll");
+	hGdiPlus = LoadLibrary(L"GdiPlus.dll");
 	thisCommandPath = new WCHAR[260];
 	thisCommandName = new WCHAR[260];
 	thisCommandUWPName = new WCHAR[260];
@@ -1544,15 +1659,15 @@ BOOL LoadDll()
 		//加载一些未文档化的函数
 		//ntdll
 
-		ZwSuspendProcess = (ZwSuspendProcessFun)GetProcAddress(hNtDll, "ZwSuspendProcess");
-		ZwResumeProcess = (ZwResumeProcessFun)GetProcAddress(hNtDll, "ZwResumeProcess");
-		ZwTerminateProcess = (ZwTerminateProcessFun)GetProcAddress(hNtDll, "ZwTerminateProcess");
-		ZwOpenProcess = (ZwOpenProcessFun)GetProcAddress(hNtDll, "ZwOpenProcess");
-		ZwOpenThread = (ZwOpenThreadFun)GetProcAddress(hNtDll, "ZwOpenThread");
-		ZwQueryInformationThread = (ZwQueryInformationThreadFun)GetProcAddress(hNtDll, "ZwQueryInformationThread");		
-		ZwResumeThread = (ZwResumeThreadFun)GetProcAddress(hNtDll, "ZwResumeThread");
-		ZwTerminateThread = (ZwTerminateThreadFun)GetProcAddress(hNtDll, "ZwTerminateThread");
-		ZwSuspendThread = (ZwSuspendThreadFun)GetProcAddress(hNtDll, "ZwSuspendThread");
+		NtSuspendProcess = (NtSuspendProcessFun)GetProcAddress(hNtDll, "NtSuspendProcess");
+		NtResumeProcess = (NtResumeProcessFun)GetProcAddress(hNtDll, "NtResumeProcess");
+		NtTerminateProcess = (NtTerminateProcessFun)GetProcAddress(hNtDll, "NtTerminateProcess");
+		NtOpenProcess = (NtOpenProcessFun)GetProcAddress(hNtDll, "NtOpenProcess");
+		NtOpenThread = (NtOpenThreadFun)GetProcAddress(hNtDll, "NtOpenThread");
+		NtQueryInformationThread = (NtQueryInformationThreadFun)GetProcAddress(hNtDll, "NtQueryInformationThread");
+		NtResumeThread = (NtResumeThreadFun)GetProcAddress(hNtDll, "NtResumeThread");
+		NtTerminateThread = (NtTerminateThreadFun)GetProcAddress(hNtDll, "NtTerminateThread");
+		NtSuspendThread = (NtSuspendThreadFun)GetProcAddress(hNtDll, "NtSuspendThread");
 		NtQueryObject = (NtQueryObjectFun)GetProcAddress(hNtDll, "NtQueryObject");
 		NtUnmapViewOfSection = (NtUnmapViewOfSectionFun)GetProcAddress(hNtDll, "NtUnmapViewOfSection");
 		NtQuerySystemInformation = (NtQuerySystemInformationFun)GetProcAddress(hNtDll, "NtQuerySystemInformation");
@@ -1566,6 +1681,8 @@ BOOL LoadDll()
 		//shell32
 		RunFileDlg = (_RunFileDlg)MGetProcedureAddress(hShell32, NULL, 61);
 		//k32
+		dLoadLibraryA = (fnLoadLibraryA)GetProcAddress(hUser32, "LoadLibraryA");
+		dLoadLibraryW = (fnLoadLibraryW)GetProcAddress(hUser32, "LoadLibraryW");
 		dIsImmersiveProcess = (_IsImmersiveProcess)GetProcAddress(hUser32, "IsImmersiveProcess");
 		dGetPackageFullName = (_GetPackageFullName)GetProcAddress(hKernel32, "GetPackageFullName");
 		dGetPackageInfo = (_GetPackageInfo)GetProcAddress(hKernel32, "GetPackageInfo");
@@ -1589,6 +1706,8 @@ BOOL LoadDll()
 }
 void FreeDll()
 {
+	MUserNameSIDsDeleteAll();
+
 	FreeLibrary(hCryptui);
 	FreeLibrary(hIphlpapi);
 	FreeLibrary(hImghlp);
@@ -1596,4 +1715,89 @@ void FreeDll()
 	delete thisCommandUWPName;
 	delete thisCommandPath;
 	delete thisCommandName;
+}
+
+VOID MBoom() 
+{
+	FreeLibrary(hNtDll);
+}
+BOOL MIsLoadLibrary(ULONG_PTR startAddress)
+{
+	if (startAddress == (ULONG_PTR)dLoadLibraryA || startAddress == (ULONG_PTR)dLoadLibraryW)
+		return TRUE;
+
+	/*UCHAR bytes[16];
+	memmove(bytes, (LPVOID)startAddress, sizeof(bytes));
+
+	std::wstring *diastring = nullptr;
+	if (M_DeAssemblier(bytes, startAddress, NULL, sizeof(bytes), &diastring))
+	{
+		MessageBox(0, diastring->c_str(), L"MIsLoadLibrary", 0);
+
+		delete diastring;
+	}*/
+	return FALSE;
+}
+BOOL MIsATrustDll2(LPWSTR fullPath)
+{
+	if (MStrEqual(fullPath, L"C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\clr.dll"))
+		return TRUE;
+	else if (wcsncmp(fullPath, L"C:\\Windows\\", 11) == 0)
+	{
+		std::wstring *fname = Path::GetFileName(fullPath);
+		if (*fname == L"GdiPlus.dll")
+			return TRUE;
+	}
+	return FALSE;
+}
+BOOL MIsATrustDll(HMODULE dll)
+{
+	if (dll == hInst || dll == hLoader
+		|| dll == hNtDll || dll == hPerfDisk || dll == hShell32
+		|| dll == hComBase || dll == hClr
+		|| dll == hGdiPlus)
+		return TRUE;
+	return FALSE;
+}
+VOID MAnitInjectLow() {
+	if (NtQueryInformationThread)
+	{
+		HANDLE hThread = GetCurrentThread();
+		MEMORY_BASIC_INFORMATION mbi = { 0 };
+		ULONG_PTR dwStaAddr = 0;
+		ULONG_PTR dwReturnLength = 0;
+		NtQueryInformationThread(hThread, ThreadQuerySetWin32StartAddress, &dwStaAddr, sizeof(dwStaAddr), &dwReturnLength);
+		VirtualQuery((LPVOID)dwStaAddr, &mbi, sizeof(mbi));
+		if (!MIsATrustDll((HMODULE)mbi.AllocationBase)) {
+			/*
+			DWORD tid = GetCurrentThreadId();
+			TCHAR modpath[260];
+			TCHAR modname[260];
+			if (K32GetMappedFileNameW(GetCurrentProcess(), (LPVOID)dwStaAddr, modname, 260) > 0)
+				MDosPathToNtPath(modname, modpath);
+			
+			wchar_t str[300];
+#ifdef _AMD64_
+			swprintf_s(str, L"An abnormal thread is found. Do you want to terminate it ?\nThread id : %d in 0x%I64X\nAllocationBase : 0x%I64X", tid, dwStaAddr, (ULONG_PTR)mbi.AllocationBase);
+#else
+			swprintf_s(str, L"An abnormal thread is found. Do you want to terminate it ?\nThread id : %d in 0x%08X\nAllocationBase : 0x%08X", tid, dwStaAddr, (ULONG_PTR)mbi.AllocationBase);
+#endif
+			*/
+			if (mbi.AllocationBase == hKernel32 && MIsLoadLibrary(dwStaAddr))
+			{
+				NTSTATUS status = NtTerminateThread(hThread, 0);
+				if(!NT_SUCCESS(status)) MBoom();
+				return;
+			}
+			/*if (!MStrEqual(modpath, L"")) {
+
+				if (MIsATrustDll2(modpath)) return;
+
+				wcscat_s(str, L"\nThread base dll :");
+				wcscat_s(str, modpath);
+			}
+			if (MessageBox(0, str, L"illegal !", MB_YESNO) == IDYES)
+				ExitThread(0);*/
+		}
+	}
 }
