@@ -20,9 +20,6 @@ extern MEMORYSTATUSEX memory_statuex;
 void DllDestroy();
 //Dll≥ı ºªØ
 void DllStartup();
-void DllAnti();
-bool DllAntiCheckVery();
-void DllAntiCrush();
 
 BOOL APIENTRY DllMain( HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved)
 {

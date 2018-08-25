@@ -4,6 +4,9 @@
 //强制删除驱动服务的注册表
 M_CAPI(BOOL) MREG_ForceDeleteServiceRegkey(LPWSTR lpszDriverName);
 //获取服务的注册表键值路径
+//    servicName：服务名称
+//    [OUT] buf：输出注册表键值路径
+//    size：buf缓冲区大小（字符）
 M_CAPI(BOOL) MREG_GetServiceReg(LPWSTR servicName, LPWSTR buf, size_t size);
 //尝试转换CLSID
 M_CAPI(HKEY) MREG_CLSIDToHKEY(HKEY hRootKey, LPWSTR clsid);

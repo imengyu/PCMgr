@@ -397,3 +397,24 @@ M_CAPI(BOOL) MHotKeyToStr(UINT fsModifiers, UINT vk, LPWSTR buffer, int size)
 	wcscpy_s(buffer, size, strBuffer);
 	return TRUE;
 }
+
+M_API BOOL MCopyToClipboard(const WCHAR* pszData, const size_t nDataLen)
+{
+	if (OpenClipboard(NULL))
+	{
+		EmptyClipboard();
+		HGLOBAL clipbuffer;
+		WCHAR *buffer;
+		clipbuffer = GlobalAlloc(GMEM_DDESHARE, (nDataLen + 1) * sizeof(WCHAR));
+		buffer = (WCHAR*)GlobalLock(clipbuffer);
+		wcscpy_s(buffer, nDataLen + 1, pszData);
+		GlobalUnlock(clipbuffer);
+		SetClipboardData(CF_UNICODETEXT, clipbuffer);
+		CloseClipboard();
+		return TRUE;
+	}
+	return FALSE;
+}
+M_API BOOL MCopyToClipboard2(const WCHAR* pszData) {
+	return MCopyToClipboard(pszData, (wcslen(pszData) + 1) * sizeof(WCHAR));
+}

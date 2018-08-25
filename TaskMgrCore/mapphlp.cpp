@@ -17,6 +17,7 @@
 #include "StringHlp.h"
 #include "loghlp.h"
 #include "nthlp.h"
+#include <Windowsx.h>
 #include <shellapi.h>
 #include <Vsstyle.h>
 #include <vssym32.h>
@@ -26,11 +27,15 @@
 #include <dbghelp.h>
 #include <mscoree.h>
 #include <Metahost.h>
-
+#include <corerror.h>
+#include <comdef.h>
 #pragma comment(linker,"\"/manifestdependency:type='win32' \
 name = 'Microsoft.Windows.Common-Controls' version = '6.0.0.0' \
 processorArchitecture = '*' publicKeyToken = '6595b64144ccf1df' language = '*'\"")
 
+#ifdef _AMD64_
+#define GWL_WNDPROC         (-4)
+#endif
 #define WM_S_APPBAR 900
 #define WM_S_MESSAGE_EXIT 901
 #define WM_S_MESSAGE_ACTIVE 902
@@ -46,6 +51,8 @@ extern LPWSTR fmCurrectSelectFilePath0;
 extern bool fmMutilSelect;
 extern int fmMutilSelectCount;
 extern void* clrcreateinstance;
+
+BOOL appLoadSucessfuly = FALSE;
 
 typedef HRESULT(WINAPI*CLRCreateInstanceFun)(REFCLSID clsid, REFIID riid, LPVOID *ppInterface);
 
@@ -85,14 +92,17 @@ bool min_hide = false;
 bool close_hide = false;
 bool top_most = false;
 
+M_CAPI(VOID) TryCallThis()
+{
+	MAppWorkCall3(176, 0, 0);
+}
+
 bool can_debug = false;
 bool use_apc = false;
 int IDC_MAINLIST_HEADER = 0;
-
-void print(LPWSTR str)
-{
-	MessageBox(0, str, DEFDIALOGGTITLE, MB_OK);
-}
+WNDPROC procListWndProc = NULL;
+BOOL procListLock = FALSE;
+HWND hListHeaderMainProcList;
 
 bool MLoadAppBackUp();
 LONG WINAPI MUnhandledExceptionFilter(struct _EXCEPTION_POINTERS *lpExceptionInfo);
@@ -229,7 +239,11 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 	switch (id)
 	{
 	case 176: {
-
+		MessageBox(0, L"Welcome to my Github https://github.com/717021 . This software is open source. You can download the full source code there.", L"YouCanFindProjectOnGithub", MB_OK);
+		break;
+	}
+	case 177: {
+		appLoadSucessfuly = TRUE;
 		break;
 	}
 	case 178: {
@@ -627,6 +641,7 @@ M_API BOOL MAppMainRun()
 		MessageBox(0, L"Only pcmgr can use this function.", L"illegal use", 0);
 	}
 
+
 	GetModuleFileName(NULL, appDir, MAX_PATH);
 	std::wstring *w = Path::GetFileName(appDir);
 	wcscpy_s(appName, w->c_str());
@@ -653,7 +668,8 @@ M_API BOOL MAppMainRun()
 			return TRUE;
 	}
 
-	M_LOG_Init(M_CFG_GetConfigBOOL(L"ShowDebugWindow", L"Configure", FALSE));
+	M_LOG_Init(M_CFG_GetConfigBOOL(L"ShowDebugWindow", L"Configure", FALSE), 
+		M_CFG_GetConfigBOOL(L"LogToFile", L"Configure", FALSE));
 
 	WCHAR mainDllPath[MAX_PATH];
 	wcscpy_s(mainDllPath, appDir);
@@ -681,9 +697,6 @@ M_API BOOL MAppMainRun()
 		HRESULT hr = c(CLSID_CLRMetaHost, IID_ICLRMetaHost, (LPVOID*)&pMetaHost);
 		hr = pMetaHost->GetRuntime(L"v4.0.30319", IID_PPV_ARGS(&pRuntimeInfo));
 
-		hClr = GetModuleHandle(L"clr.dll");
-
-
 		if (FAILED(hr)) {
 			MShowErrorMessage(L"Not found .NET framework runtime v4.0.30319.", L"Load app failed", MB_ICONERROR);
 			LogErr(L"GetRuntime v4.0.30319 failed HRESULT : 0x%08X", hr);
@@ -699,12 +712,19 @@ M_API BOOL MAppMainRun()
 		hr = pRuntimeHost->Start();
 		if (FAILED(hr)) { LogErr(L"Start RuntimeHost failed HRESULT : 0x%08X", hr); goto cleanup; }
 
+		ICLRErrorReportingManager *manager = nullptr;
+		pRuntimeHost->GetCLRControl((ICLRControl**)&manager);
+
 		LogInfo(L"Load main app : %s", mainDllPath);
 		hr = pRuntimeHost->ExecuteInDefaultAppDomain(mainDllPath, L"PCMgr.Program", L"ProgramEntry", GetCommandLine(), &dwMainAppRet);
 		if (FAILED(hr)) {
-			std::wstring hResultSr = FormatString(L"App : %s Start failed\nHRESULT : 0x%08X", mainDllPath, hr);
-			MShowErrorMessage((LPWSTR)hResultSr.c_str(), L"Load app failed", MB_ICONERROR);
 			LogErr(L"ExecuteInDefaultAppDomain %s failed HRESULT : 0x%08X", mainDllPath, hr);
+			if (!appLoadSucessfuly) {
+				_com_error err(hr);
+				LPCTSTR errMsg = err.ErrorMessage();
+				std::wstring hResultSr = FormatString(L"App : %s Start failed\n%s\nHRESULT : 0x%08X", mainDllPath, errMsg, hr);
+				MShowErrorMessage((LPWSTR)hResultSr.c_str(), L"Load app failed", MB_ICONERROR);
+			}
 		}
 		else rs = TRUE;
 		hr = pRuntimeHost->Stop();
@@ -732,6 +752,7 @@ M_API BOOL MAppMainRun()
 
 	return rs;
 }
+
 //App agrs
 M_API int MAppMainGetArgs(LPWSTR cmdline) {
 	int argc = 0;
@@ -756,7 +777,6 @@ bool MLoadApp() {
 }
 bool MLoadAppBackUp()
 {
-	MAppRun2();
 	HMODULE hI = LoadLibrary(L"PCMgrInit32.dll");
 	if (hI)
 	{
@@ -769,6 +789,7 @@ bool MLoadAppBackUp()
 	return false;
 }
 M_API void MAppRun2() {
+	MLoadApp();
 	MLoadAppBackUp();
 }
 
@@ -947,11 +968,21 @@ M_CAPI(void) MListViewSetColumnSortArrow(HWND hListHeader, int index, BOOL isUp,
 	}
 	Header_SetItem(hListHeader, index, &item);
 }
-M_CAPI(HWND) MListViewGetHeaderControl(HWND hList) {
-	HWND hListHeader = FindWindowEx(hList, NULL, L"SysHeader32", NULL);;
-	if(hListHeader)
-		IDC_MAINLIST_HEADER = GetDlgCtrlID(hListHeader);
+M_CAPI(HWND) MListViewGetHeaderControl(HWND hList, BOOL isMain) {
+	HWND hListHeader = FindWindowEx(hList, NULL, L"SysHeader32", NULL);
+	if (isMain) {
+		if (hListHeader)
+			IDC_MAINLIST_HEADER = GetDlgCtrlID(hListHeader);
+		hListHeaderMainProcList = hListHeader;
+	}
 	return hListHeader;
+}
+M_CAPI(void) MListViewProcListWndProc(HWND hList) {
+	procListWndProc = (WNDPROC)GetWindowLongPtr(hList, GWL_WNDPROC);
+	SetWindowLongPtr(hList, GWL_WNDPROC, (LONG_PTR)MProcListWinProc);
+}
+M_CAPI(void) MListViewProcListLock(BOOL lock) {
+	procListLock = lock;
 }
 
 void MAppWmCommandTools(WPARAM wParam)
@@ -1533,26 +1564,6 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 		break;
 	}
-	case WM_NOTIFY: {
-		if (LOWORD(wParam) == IDC_MAINLIST_HEADER)
-		{
-			switch (((LPNMHDR)lParam)->code)
-			{
-			case HDN_ITEMCLICK: {
-				LPNMHEADER pNMHeader = (LPNMHEADER)lParam;
-				if (pNMHeader->iButton == 1)//Right
-					MAppMainCall(M_CALLBACK_MDETALS_LIST_HEADER_RIGHTCLICK, (LPVOID)pNMHeader->iItem, 0);
-				break;
-			}
-			case HDN_ITEMKEYDOWN: {
-				LPNMHEADER pNMHeader = (LPNMHEADER)lParam;
-				MAppMainCall(M_CALLBACK_MDETALS_LIST_HEADER_RIGHTCLICK, (LPVOID)pNMHeader->iItem, 0);
-				break;
-			}
-			}
-		}
-		break;
-	}
 	default:
 		break;
 	}
@@ -1594,6 +1605,49 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	}
 	return (INT_PTR)FALSE;
 }
+LRESULT MProcListWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch (msg)
+	{
+	case WM_PAINT: {
+		if (procListLock)return 0;
+		else return procListWndProc(hWnd, msg, wParam, lParam);
+	}
+	case WM_NOTIFY: {
+		int loword = LOWORD(wParam);
+		if (loword == IDC_MAINLIST_HEADER)
+		{
+			switch (((LPNMHDR)lParam)->code)
+			{
+			case NM_RCLICK: {
+				int index = - 1;
+				LPNMHDR lpnmh = (LPNMHDR)lParam;
+				DWORD pos = GetMessagePos();
+
+				RECT rcCol = { 0 };
+				POINT pt = { GET_X_LPARAM(pos), GET_Y_LPARAM(pos) };
+				ScreenToClient(hListHeaderMainProcList, &pt);
+				for (int i = 0; Header_GetItemRect(hListHeaderMainProcList, i, &rcCol); i++)
+				{
+					if (rcCol.left<pt.x && rcCol.right>pt.x
+						&& rcCol.top<pt.y && rcCol.bottom>pt.y)
+					{
+						index = i;
+						break;
+					}
+				}
+				if (index >= 0) MAppMainCall(M_CALLBACK_MDETALS_LIST_HEADER_RIGHTCLICK, (LPVOID)(ULONG_PTR)index, 0);
+				break;
+			}
+			}
+		}
+		break;
+	}
+	}
+	return procListWndProc(hWnd, msg, wParam, lParam);
+}
+
+
 
 //Dialog boxs
 void MPrintErrorMessage(LPWSTR str, int icon)
@@ -1905,7 +1959,7 @@ int GenerateMiniDump(PEXCEPTION_POINTERS pExceptionPointers)
 
 	if (INVALID_HANDLE_VALUE == hDumpFile)
 	{
-		M_LOG_Error_ForceFile(L"Application crashed!\nDump File Create failed! (ErrorCode: %d)", GetLastError());
+		FLogErr(L"Application crashed!\nDump File Create failed! (ErrorCode: %d)", GetLastError());
 		return EXCEPTION_CONTINUE_EXECUTION;
 
 	}
@@ -1920,7 +1974,7 @@ int GenerateMiniDump(PEXCEPTION_POINTERS pExceptionPointers)
 	CloseHandle(hDumpFile);
 	if (pExceptionPointers) {
 		if (pExceptionPointers->ContextRecord&&pExceptionPointers->ExceptionRecord) {
-			M_LOG_Error_ForceFile(L"Application crashed!\nA Dump file was created.\n  Dump file: %s\nPlease send this Error Description file to us.\n\
+			FLogErr(L"Application crashed!\nA Dump file was created.\n  Dump file: %s\nPlease send this Error Description file to us.\n\
 		        Details:  ExceptionAddress:%d\nExceptionCode:%d\nExceptionFlags:%u\
                 ContextFlags:%d\n\
 				Dr0:%d\n\

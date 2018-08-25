@@ -43,6 +43,18 @@ M_API NTSTATUS MOpenThreadNt(DWORD dwId, PHANDLE pLandle, DWORD dwPId)
 		return 0;
 	}
 }
+M_API PTEB MGetThreadPeb(HANDLE hThread) {
+	THREAD_BASIC_INFORMATION tbi;
+	if (NtQueryInformationThread(hThread, ThreadBasicInformation, &tbi, sizeof(tbi), NULL) == STATUS_SUCCESS)
+		return tbi.TebBaseAddress;
+	return NULL;
+}
+M_API PVOID MGetThreadWin32StartAddress(HANDLE hThread) {
+	PVOID startaddr = 0;
+	if (NtQueryInformationThread(hThread, ThreadQuerySetWin32StartAddress, &startaddr, sizeof(startaddr), NULL) == STATUS_SUCCESS)
+		return startaddr;
+	return NULL;
+}
 
 M_API NTSTATUS MTerminateThreadNt(HANDLE handle)
 {
@@ -58,3 +70,5 @@ M_API NTSTATUS MSuspendThreadNt(HANDLE handle)
 	ULONG count = 0;
 	return NtSuspendThread(handle, &count);
 }
+
+

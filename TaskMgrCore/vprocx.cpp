@@ -22,6 +22,7 @@ int selectItem2 = 0, selectItem1 = 0, winscount = 0, winicoidx = 0, threadscount
 HWND selectItem3 = 0;
 
 HWND hListModuls = NULL, hListWins = NULL, hListThreads = NULL, hListHandles = NULL;
+HWND hListHeader = NULL;
 HMODULE selectHModule = NULL;
 extern HANDLE hMainDevice;
 extern HINSTANCE hInstRs;
@@ -32,6 +33,7 @@ HCURSOR hCurLoading;
 
 extern NtQueryInformationThreadFun NtQueryInformationThread;
 extern NtQueryInformationProcessFun NtQueryInformationProcess;
+extern NtReadVirtualMemoryFun NtReadVirtualMemory;
 
 using namespace std;
 
@@ -366,7 +368,7 @@ M_API void MAppVProcessAllWindowsUWP()
 					}
 				}
 			}
-			hGetWinsWinsCallBack(window->hWndHost, (HWND)window->hostPid, 1);
+			hGetWinsWinsCallBack(window->hWndHost, (HWND)(ULONG_PTR)window->hostPid, 1);
 		}
 	}
 }
@@ -472,67 +474,80 @@ BOOL MAppVModuls(DWORD dwPID, HWND hDlg, LPWSTR procName)
 	BOOL bFound = FALSE;
 	HANDLE hProcess;
 	HWND htitle = GetDlgItem(hDlg, IDC_TITLE);
-	NTSTATUS rs = MOpenProcessNt(dwPID, &hProcess);
-	if (rs == 0xC0000008 || rs == 0xC000000B) {
+	NTSTATUS status = MOpenProcessNt(dwPID, &hProcess);
+	if (status == STATUS_INVALID_HANDLE || status == STATUS_INVALID_CID) {
 		SetWindowText(htitle, (LPWSTR)str_item_invalidproc.c_str());
 		return -1;
 	}	
-	else if (rs == STATUS_ACCESS_DENIED) {
+	else if (status == STATUS_ACCESS_DENIED) {
 		SetWindowText(htitle, (LPWSTR)str_item_access_denied.c_str());
 		return -1;
 	}
-	else if (rs == STATUS_SUCCESS && hProcess) {
+	else if (status == STATUS_SUCCESS && hProcess) {
 
 		BOOL bRet = FALSE;
 		
-		ULONG outLength = 0;
-		PROCESS_BASIC_INFORMATION basicInfo = { 0 };
-		if (NT_SUCCESS(NtQueryInformationProcess(hProcess, ProcessBasicInformation, &basicInfo, sizeof(PROCESS_BASIC_INFORMATION), &outLength)))
+		PPEB pPeb = MGetProcessPeb(hProcess);
+		PPEB_LDR_DATA pLdr = NULL;
+		if (pPeb != 0)
 		{
-			PPEB_LDR_DATA pLdr = basicInfo.PebBaseAddress->Ldr;
+			status = NtReadVirtualMemory(hProcess, PTR_ADD_OFFSET(pPeb, FIELD_OFFSET(PEB, Ldr)), &pLdr, sizeof(PPEB_LDR_DATA), NULL);
+			if (!NT_SUCCESS(status)) return FALSE;
 
-			PLIST_ENTRY list_head = &pLdr->InMemoryOrderModuleList;
-			PLIST_ENTRY p = &pLdr->InMemoryOrderModuleList;
+			PLIST_ENTRY list_head = (PLIST_ENTRY)PTR_ADD_OFFSET(pLdr, FIELD_OFFSET(PEB_LDR_DATA, InMemoryOrderModuleList));
+			PLIST_ENTRY p = list_head;
+			LIST_ENTRY thisListEntry;
+			status = NtReadVirtualMemory(hProcess, list_head, &thisListEntry, sizeof(LIST_ENTRY), NULL);
 
 			int i = 0;
 			WCHAR thisName[MAX_PATH];
-			for (p = list_head->Flink; p != list_head; p = p->Flink) {
-				PLDR_MODULE thisModule = CONTAINING_RECORD(p, LDR_MODULE, InMemoryOrderModuleList);
-				if (thisModule->BaseDllName.Buffer != NULL) {
-					wcscpy_s(thisName, thisModule->BaseDllName.Buffer);
+			for (p = thisListEntry.Flink; p != list_head; p= thisListEntry.Flink)
+			{
+				LDR_MODULE thisModule;
+				status = NtReadVirtualMemory(hProcess, CONTAINING_RECORD(p, LDR_MODULE, InMemoryOrderModuleList), &thisModule, sizeof(LDR_MODULE), NULL);
+				status = NtReadVirtualMemory(hProcess, p, &thisListEntry, sizeof(LIST_ENTRY), NULL);
+
+				if (thisModule.BaseDllName.Buffer != NULL) {
+					WCHAR baseDllNameBuffer[MAX_PATH];
+					status = NtReadVirtualMemory(hProcess, thisModule.BaseDllName.Buffer, &baseDllNameBuffer, sizeof(baseDllNameBuffer), NULL);
+					wcscpy_s(thisName, baseDllNameBuffer);
 
 					LVITEM vitem;
 					vitem.mask = LVIF_TEXT;
 					vitem.iSubItem = 0;
 					vitem.iItem = 0;
 					vitem.iSubItem = 0;
-					vitem.lParam = (LPARAM)thisModule->BaseAddress;
+					vitem.lParam = (LPARAM)thisModule.BaseAddress;
 					vitem.pszText = thisName;
 					ListView_InsertItem(hListModuls, &vitem);
 
+					WCHAR fullDllNameBuffer[MAX_PATH];
+
 					vitem.iSubItem = 1;
-					if (thisModule->FullDllName.Buffer != NULL)
-						vitem.pszText = thisModule->FullDllName.Buffer;
+					if (thisModule.FullDllName.Buffer != NULL) {
+						status = NtReadVirtualMemory(hProcess, thisModule.FullDllName.Buffer, &fullDllNameBuffer, sizeof(fullDllNameBuffer), NULL);
+						vitem.pszText = fullDllNameBuffer;
+					}
 					else vitem.pszText = L"-";
 					ListView_SetItem(hListModuls, &vitem);
 					vitem.iSubItem = 2;
 					TCHAR addr[20];
 #ifdef _AMD64_
-					swprintf_s(addr, L"0x%I64X", (ULONG_PTR)thisModule->BaseAddress);
+					swprintf_s(addr, L"0x%I64X", (ULONG_PTR)thisModule.BaseAddress);
 #else
-					swprintf_s(addr, L"0x%08X", (ULONG_PTR)thisModule->BaseAddress);
+					swprintf_s(addr, L"0x%08X", (ULONG_PTR)thisModule.BaseAddress);
 #endif
 					vitem.pszText = addr;
 					ListView_SetItem(hListModuls, &vitem);
 					vitem.iSubItem = 3;
 					TCHAR sz[20];
-					swprintf_s(sz, L"%d", thisModule->SizeOfImage);
+					swprintf_s(sz, L"%d", thisModule.SizeOfImage);
 					vitem.pszText = sz;
 					ListView_SetItem(hListModuls, &vitem);
 					vitem.iSubItem = 4;
-					if (thisModule->FullDllName.Buffer != NULL) {
-						WCHAR company[256];
-						if (MGetExeCompany(thisModule->FullDllName.Buffer, company, 255))
+					if (thisModule.FullDllName.Buffer != NULL) {
+						WCHAR company[256] = { 0 };
+						if (MGetExeCompany(fullDllNameBuffer, company, 255))
 							vitem.pszText = company;
 						else vitem.pszText = L"";
 					}
@@ -540,6 +555,9 @@ BOOL MAppVModuls(DWORD dwPID, HWND hDlg, LPWSTR procName)
 					ListView_SetItem(hListModuls, &vitem);
 
 					i++;
+
+					if (i > 512)//Too big
+						break;
 				}
 			}
 
@@ -547,10 +565,17 @@ BOOL MAppVModuls(DWORD dwPID, HWND hDlg, LPWSTR procName)
 			SetWindowText(hDlg, str.c_str());
 			return TRUE;
 		}
+		else {
+			LogWarn(L"View Modules Failed in MGetProcessPeb");
+			wstring str = FormatString(L"%s\n%s\nError Code : 0x%08x", str_item_enum_modulefailed, L"Failed to get peb", status);
+			SetWindowText(htitle, str.c_str());
+		}
+
+		MCloseHandle(hProcess);
 	}
 	else {
-		LogWarn(L"View Modules Failed in OpenProcess : 0x%08X", rs);
-		wstring str = FormatString(L"%d , %d\nError Code : 0x%08x", str_item_enum_modulefailed, str_item_openprocfailed, rs);
+		LogWarn(L"View Modules Failed in OpenProcess : 0x%08X", status);
+		wstring str = FormatString(L"%s\n%s\nError Code : 0x%08x", str_item_enum_modulefailed, str_item_openprocfailed, status);
 		SetWindowText(htitle, str.c_str());
 		return 0;
 	}
@@ -575,7 +600,7 @@ BOOL MAppVThreads(DWORD dwPID, HWND hDlg, LPWSTR procName)
 
 				NTSTATUS status = STATUS_SUCCESS;
 				HANDLE hThread = NULL;
-				MOpenThreadNt(static_cast<DWORD>((ULONG_PTR)systemThread.ClientId.UniqueThread), &hThread, static_cast<DWORD>((ULONG_PTR)systemThread.ClientId.UniqueProcess));
+				MOpenThreadNt(static_cast<DWORD>(tid), &hThread, static_cast<DWORD>((ULONG_PTR)systemThread.ClientId.UniqueProcess));
 
 				LVITEM vitem;
 				vitem.mask = LVIF_TEXT;
@@ -608,15 +633,14 @@ BOOL MAppVThreads(DWORD dwPID, HWND hDlg, LPWSTR procName)
 				ListView_SetItem(hListThreads, &vitem);
 				vitem.iSubItem++;
 
-				if (hThread) {
-					THREAD_BASIC_INFORMATION tbi;
-					status = NtQueryInformationThread(hThread, ThreadBasicInformation, &tbi, sizeof(tbi), NULL);
+				if (hThread && teb == 0) {
+					teb = (ULONG_PTR)MGetThreadPeb(hThread);
 					if (status == STATUS_SUCCESS) {
 						TCHAR modname1[32];
 #ifdef _X64_
-						swprintf_s(modname1, L"0x%I64X", (ULONG_PTR)tbi.TebBaseAddress);
+						swprintf_s(modname1, L"0x%I64X", (ULONG_PTR)teb);
 #else
-						swprintf_s(modname1, L"0x%08X", (ULONG_PTR)tbi.TebBaseAddress);
+						swprintf_s(modname1, L"0x%08X", (ULONG_PTR)teb);
 #endif
 						vitem.pszText = modname1;
 					}
@@ -645,12 +669,14 @@ BOOL MAppVThreads(DWORD dwPID, HWND hDlg, LPWSTR procName)
 				ListView_SetItem(hListThreads, &vitem);
 				vitem.iSubItem++;
 
-				PVOID startaddr = systemThread.StartAddress;
-				TCHAR modname1[32];
+				PVOID startaddr = 0;
+				if (hThread)
+					startaddr = MGetThreadWin32StartAddress(hThread);
+				WCHAR modname1[32];
 #ifdef _X64_
-				swprintf_s(modname1, L"0x%I64X", (ULONG_PTR)startaddr);
+				swprintf_s(modname1, L"0x%I64X", (ULONG_PTR)(startaddr));
 #else
-				swprintf_s(modname1, L"0x%08X", (ULONG_PTR)startaddr);
+				swprintf_s(modname1, L"0x%08X", (ULONG_PTR)(startaddr));
 #endif
 				vitem.pszText = modname1;
 				ListView_SetItem(hListThreads, &vitem);
@@ -660,14 +686,15 @@ BOOL MAppVThreads(DWORD dwPID, HWND hDlg, LPWSTR procName)
 					HANDLE hProcess = NULL;
 					if (MOpenProcessNt(static_cast<DWORD>((ULONG_PTR)systemThread.ClientId.UniqueProcess), &hProcess) == STATUS_SUCCESS)
 					{
-						TCHAR modpath[260];
-						TCHAR modname[260];
-						if (K32GetMappedFileNameW(hProcess, startaddr, modname, 260) > 0) {
+						WCHAR modpath[260];
+						WCHAR modname[260];
+						if (MGetProcessMappedFileName(hProcess, startaddr, modname, 260) > 0) {
 							MDosPathToNtPath(modname, modpath);
 							vitem.pszText = modpath;
 						}
 						else vitem.pszText = L"-";
 					}
+					else vitem.pszText = L"-";
 					CloseHandle(hProcess);
 				}
 				else vitem.pszText = L"-";
@@ -678,19 +705,19 @@ BOOL MAppVThreads(DWORD dwPID, HWND hDlg, LPWSTR procName)
 				switch (ts)
 				{
 				case THREAD_STATE::StateReady:
-					vitem.pszText = L"就绪 (StateReady)";
+					vitem.pszText = L"StateReady";
 					break;
 				case THREAD_STATE::StateRunning:
-					vitem.pszText = L"运行 (StateRunning)";
+					vitem.pszText = L"StateRunning";
 					break;
 				case THREAD_STATE::StateWait:
-					vitem.pszText = L"等待 (StateWait)";
+					vitem.pszText = L"StateWait";
 					break;
 				case THREAD_STATE::StateTerminated:
-					vitem.pszText = L"终止 (StateTerminated)";
+					vitem.pszText = L"StateTerminated";
 					break;
 				case 9:
-					vitem.pszText = L"等待 (StateWait 已挂起)";
+					vitem.pszText = L"StateWait";
 					break;
 				default:
 					vitem.pszText = L"0";
@@ -699,7 +726,7 @@ BOOL MAppVThreads(DWORD dwPID, HWND hDlg, LPWSTR procName)
 				ListView_SetItem(hListThreads, &vitem);
 				vitem.iSubItem++;
 
-				TCHAR tswc[16];
+				WCHAR tswc[16];
 				swprintf_s(tswc, L"%d", systemThread.ContextSwitchCount);
 				vitem.pszText = tswc;
 				ListView_SetItem(hListThreads, &vitem);
@@ -785,6 +812,9 @@ BOOL MAppVWins(DWORD dwPID, HWND hDlg, LPWSTR procName)
 	return FALSE;
 }
 
+bool sortAscending = false;
+int oldSortItem = 0;
+
 int CALLBACK Sort_VMODULS(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 {
 	if (lParam1 == lParam2)
@@ -797,7 +827,9 @@ int CALLBACK Sort_VMODULS(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 		wchar_t s2[MAX_PATH];
 		ListView_GetItemText(hListModuls, lParam1, cloums, s1, MAX_PATH);
 		ListView_GetItemText(hListModuls, lParam2, cloums, s2, MAX_PATH);
-		return wcscmp(s1, s2);
+		if (sortAscending)
+			return wcscmp(s1, s2);
+		else return -wcscmp(s1, s2);
 	}
 	case 0:
 	case 2:
@@ -807,7 +839,9 @@ int CALLBACK Sort_VMODULS(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 		wchar_t s2[64];
 		ListView_GetItemText(hListModuls, lParam1, cloums, s1, 64);
 		ListView_GetItemText(hListModuls, lParam2, cloums, s2, 64);
-		return wcscmp(s1, s2);
+		if (sortAscending)
+			return wcscmp(s1, s2);
+		else return -wcscmp(s1, s2);
 	}
 	default:
 		break;
@@ -823,21 +857,25 @@ int CALLBACK Sort_VTHREADS(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 	{
 	case 0:
 	case 7: {
+		int rs = 0;
 		wchar_t s1[64];
 		wchar_t s2[64];
 		ListView_GetItemText(hListThreads, lParam1, cloums, s1, 64);
 		ListView_GetItemText(hListThreads, lParam2, cloums, s2, 64);
 		int i1 = _wtoi(s1), i2 = _wtoi(s2);
-		if (i1 == i2)return 0;
-		if (i1 > i2) return 1;
-		else return  -1;
+		if (i1 == i2)return rs;
+		if (i1 > i2) rs= 1;
+		else rs= -1;
+		return sortAscending ? rs : -rs;
 	}
 	case 5: {
 		wchar_t s1[MAX_PATH];
 		wchar_t s2[MAX_PATH];
 		ListView_GetItemText(hListThreads, lParam1, cloums, s1, MAX_PATH);
 		ListView_GetItemText(hListThreads, lParam2, cloums, s2, MAX_PATH);
-		return wcscmp(s1, s2);
+		if (sortAscending)
+			return wcscmp(s1, s2);
+		else return -wcscmp(s1, s2);
 	}
 	case 1:
 	case 2:
@@ -848,7 +886,9 @@ int CALLBACK Sort_VTHREADS(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 		wchar_t s2[64];
 		ListView_GetItemText(hListThreads, lParam1, cloums, s1, 64);
 		ListView_GetItemText(hListThreads, lParam2, cloums, s2, 64);
-		return wcscmp(s1, s2);
+		if (sortAscending)
+			return wcscmp(s1, s2);
+		else return -wcscmp(s1, s2);
 	}
 	default:
 		break;
@@ -864,15 +904,16 @@ int CALLBACK Sort_VWINS(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 	int cloums = static_cast<int>(lParamSort);
 	ListView_GetItemText(hListWins, lParam1, cloums, s1, 64);
 	ListView_GetItemText(hListWins, lParam2, cloums, s2, 64);
-	return wcscmp(s1, s2);
-	return 0;
+	if (sortAscending)
+		return wcscmp(s1, s2);
+	else return -wcscmp(s1, s2);
 }
 
 INT_PTR CALLBACK VWinsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg)
 	{
-	case WM_INITDIALOG:
+	case WM_INITDIALOG: {
 		SendMessage(hDlg, WM_SETICON, ICON_SMALL, (LPARAM)LoadIcon(hInstRs, MAKEINTRESOURCE(IDI_ICONAPP)));
 		hListWins = GetDlgItem(hDlg, IDC_WINSLIST);
 		LV_COLUMN lvc;
@@ -897,13 +938,16 @@ INT_PTR CALLBACK VWinsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 		SetWindowTheme(hListWins, L"explorer", NULL);
 		ListView_SetExtendedListViewStyleEx(hListWins, 0, LVS_EX_FULLROWSELECT | LVS_EX_TWOCLICKACTIVATE);
 		SendMessage(hListWins, LVM_SETEXTENDEDLISTVIEWSTYLE, LVS_EX_DOUBLEBUFFER, LVS_EX_DOUBLEBUFFER);
+		hListHeader = MListViewGetHeaderControl(hListWins);
 		break;
-	case WM_SYSCOMMAND:
+	}
+	case WM_SYSCOMMAND: {
 		if (wParam == SC_CLOSE) {
 			EndDialog(hDlg, 0);
 		}
 		return 0;
-	case WM_COMMAND:
+	}
+	case WM_COMMAND: {
 		switch (wParam)
 		{
 		case ID_WINSMENU_SPYWIN:
@@ -996,6 +1040,7 @@ INT_PTR CALLBACK VWinsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 		}
 		break;
+	}
 	case WM_SIZE: {
 		RECT rc;
 		GetClientRect(hDlg, &rc);
@@ -1046,6 +1091,17 @@ INT_PTR CALLBACK VWinsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 				break;
 			}
 			case LVN_COLUMNCLICK:{
+				if (oldSortItem != ((LPNMLISTVIEW)lParam)->iSubItem)
+				{
+					MListViewSetColumnSortArrow(hListHeader, oldSortItem, false, true);
+					sortAscending = true;
+					oldSortItem = ((LPNMLISTVIEW)lParam)->iSubItem;
+					MListViewSetColumnSortArrow(hListHeader, oldSortItem, sortAscending, false);
+				}
+				else {
+					sortAscending = !sortAscending;
+					MListViewSetColumnSortArrow(hListHeader, oldSortItem, sortAscending, false);
+				}
 				ListView_SortItemsEx(hListWins, Sort_VWINS, ((LPNMLISTVIEW)lParam)->iSubItem);
 				break;
 			}
@@ -1120,6 +1176,7 @@ INT_PTR CALLBACK VModulsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 		SetWindowTheme(hListModuls, L"explorer", NULL);
 		ListView_SetExtendedListViewStyleEx(hListModuls, 0, LVS_EX_FULLROWSELECT | LVS_EX_TWOCLICKACTIVATE);
 		SendMessage(hListModuls, LVM_SETEXTENDEDLISTVIEWSTYLE, LVS_EX_DOUBLEBUFFER, LVS_EX_DOUBLEBUFFER);
+		hListHeader = MListViewGetHeaderControl(hListModuls);
 		if (MAppVModuls(currentPid, hDlg, curretProcName) == 1) {
 			ShowWindow(hListModuls, SW_SHOW);
 			ShowWindow(GetDlgItem(hDlg, IDC_TITLE), SW_HIDE);
@@ -1130,11 +1187,12 @@ INT_PTR CALLBACK VModulsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 		}
 		return 0;
 	}
-	case WM_SYSCOMMAND:
+	case WM_SYSCOMMAND: {
 		if (wParam == SC_CLOSE) {
 			EndDialog(hDlg, 0);
 		}
 		return 0;
+	}
 	case WM_COMMAND:
 		switch (wParam)
 		{
@@ -1214,7 +1272,18 @@ INT_PTR CALLBACK VModulsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 				}
 				break;
 			}
-			case LVN_COLUMNCLICK: {											
+			case LVN_COLUMNCLICK: {					
+				if (oldSortItem != ((LPNMLISTVIEW)lParam)->iSubItem)
+				{
+					MListViewSetColumnSortArrow(hListHeader, oldSortItem, false, true);
+					sortAscending = true;
+					oldSortItem = ((LPNMLISTVIEW)lParam)->iSubItem;
+					MListViewSetColumnSortArrow(hListHeader, oldSortItem, sortAscending, false);
+				}
+				else {
+					sortAscending = !sortAscending;
+					MListViewSetColumnSortArrow(hListHeader, oldSortItem, sortAscending, false);
+				}
 				ListView_SortItemsEx(hListModuls, Sort_VMODULS, ((LPNMLISTVIEW)lParam)->iSubItem);
 				break;
 			}
@@ -1284,14 +1353,16 @@ INT_PTR CALLBACK VThreadsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPar
 		lvc.pszText = L"ID";
 		lvc.cx = 60;
 		SendMessage(hListThreads, LVM_INSERTCOLUMN, 0, (LPARAM)&lvc);
+		hListHeader = MListViewGetHeaderControl(hListThreads);
 		SendMessage(hDlg, WM_COMMAND, 16765, 0);
 		return 0;
 	}
-	case WM_SYSCOMMAND:
+	case WM_SYSCOMMAND: {
 		if (wParam == SC_CLOSE) {
 			EndDialog(hDlg, 0);
 		}
 		return 0;
+	}
 	case WM_COMMAND:
 		switch (wParam)
 		{
@@ -1393,6 +1464,17 @@ INT_PTR CALLBACK VThreadsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPar
 				break;
 			}
 			case LVN_COLUMNCLICK: {
+				if (oldSortItem != ((LPNMLISTVIEW)lParam)->iSubItem)
+				{
+					MListViewSetColumnSortArrow(hListHeader, oldSortItem, false, true);
+					sortAscending = true;
+					oldSortItem = ((LPNMLISTVIEW)lParam)->iSubItem;
+					MListViewSetColumnSortArrow(hListHeader, oldSortItem, sortAscending, false);
+				}
+				else {
+					sortAscending = !sortAscending;
+					MListViewSetColumnSortArrow(hListHeader, oldSortItem, sortAscending, false);
+				}
 				ListView_SortItemsEx(hListThreads, Sort_VTHREADS, ((LPNMLISTVIEW)lParam)->iSubItem);
 				break;
 			}

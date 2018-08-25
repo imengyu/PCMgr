@@ -32,7 +32,7 @@ M_CAPI(void) MSCM_SetCurrSelSc(LPWSTR scname);
 
 LRESULT MSCM_HandleWmCommand(WPARAM wParam);
 
-//初始化，返回释放成功
+//初始化，返回是否成功
 //  首先调用此函数
 M_CAPI(BOOL) MSCM_Init();
 //退出释放资源

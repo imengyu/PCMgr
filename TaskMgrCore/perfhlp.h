@@ -1,23 +1,38 @@
 #pragma once
 #include "stdafx.h"
 #include "uwphlp.h"
+#include "ntdef.h"
 #include <Pdh.h>
 #include <PdhMsg.h>
 
+//内存工作集设置
 #define M_GET_PROCMEM_WORKINGSET 0
+//专用内存工作集
 #define M_GET_PROCMEM_WORKINGSETPRIVATE 1
+//共享内存工作集
 #define M_GET_PROCMEM_WORKINGSETSHARE 2
+//峰值内存工作集设置
 #define M_GET_PROCMEM_PEAKWORKINGSET 3
+//提交大小
 #define M_GET_PROCMEM_COMMITEDSIZE 4
+//非分页内存
 #define M_GET_PROCMEM_NONPAGEDPOOL 5
+//分页内存
 #define M_GET_PROCMEM_PAGEDPOOL 6
+//页面错误
 #define M_GET_PROCMEM_PAGEDFAULT 7
 
+//IO读取操作数
 #define M_GET_PROCIO_READ 0
+//IO写入操作数
 #define M_GET_PROCIO_WRITE 1
+//IO其他操作数
 #define M_GET_PROCIO_OTHER 2
+//IO读取字节
 #define M_GET_PROCIO_READ_BYTES 3
+//IO写入字节
 #define M_GET_PROCIO_WRITE_BYTES 4
+//IO其他字节
 #define M_GET_PROCIO_OTHER_BYTES 5
 
 //获取CPU核心数
@@ -56,7 +71,7 @@ M_CAPI(ULONGLONG) MPERF_GetRamAvailPageFile();
 //刷新性能信息，刷新以后上面的函数才能用
 M_CAPI(BOOL) MPERF_UpdatePerformance();
 
-//进程性能信息结构
+//进程性能信息暂存结构
 struct MPerfAndProcessData
 {
 	__int64 NowCpuTime;
@@ -130,6 +145,39 @@ struct MPerfNetData
 	//Name
 	WCHAR performanceCounter_Name[64];
 };
+
+//创建进程性能数据暂存结构（计算每秒的使用率/速度的时候要用，不用的时候要释放）
+M_CAPI(MPerfAndProcessData*) MPERF_PerfDataCreate();
+//释放进程性能数据暂存结构
+M_CAPI(void) MPERF_PerfDataDestroy(MPerfAndProcessData*data);
+//刷新CPU时间间隔（计算cpu使用率用率时请每隔一段时间调用）
+M_CAPI(void) MPERF_CpuTimeUpdate();
+//获取进程CPU使用率
+//    p：进程信息句柄
+//    data：性能数据暂存结构
+M_CAPI(double) MPERF_GetProcessCpuUseAge(PSYSTEM_PROCESSES p, MPerfAndProcessData*data);
+//获取进程总的CPU时间
+//    p：进程信息句柄
+M_CAPI(ULONGLONG) MPERF_GetProcessCpuTime(PSYSTEM_PROCESSES p);
+//获取进程周期
+//    p：进程信息句柄
+M_CAPI(ULONGLONG) MPERF_GetProcessCycle(PSYSTEM_PROCESSES p);
+//获取进程内存专用工作集
+//    p：进程信息句柄
+//    hProcess：Reserved
+M_CAPI(SIZE_T) MPERF_GetProcessRam(PSYSTEM_PROCESSES p, HANDLE hProcess);
+//获取进程内存信息
+//    p：进程信息句柄
+//    col：信息类别（M_GET_PROCMEM_*）在上面有定义
+M_CAPI(SIZE_T) MPERF_GetProcessMemoryInfo(PSYSTEM_PROCESSES p, int col);
+//获取进程IO信息
+//    p：进程信息句柄
+//    col：信息类别（M_GET_PROCIO_*）在上面有定义
+M_CAPI(ULONGLONG) MPERF_GetProcessIOInfo(PSYSTEM_PROCESSES p, int col);
+//获取进程磁盘使用率
+//    p：进程信息句柄
+//    data：性能数据暂存结构
+M_CAPI(DWORD) MPERF_GetProcessDiskRate(PSYSTEM_PROCESSES p, MPerfAndProcessData*data);
 
 
 

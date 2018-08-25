@@ -10,7 +10,7 @@
 #include "suact.h"
 #include "lghlp.h"
 #include "loghlp.h"
-
+#include "syshlp.h"
 
 extern NtQuerySystemInformationFun NtQuerySystemInformation;
 
@@ -188,26 +188,6 @@ M_API VOID MShowFileProp(LPWSTR file)
 	info.nShow = SW_SHOW;
 	info.fMask = SEE_MASK_INVOKEIDLIST;
 	ShellExecuteEx(&info);
-}
-M_API BOOL MCopyToClipboard(const WCHAR* pszData, const size_t nDataLen)
-{
-	if (OpenClipboard(NULL))
-	{
-		EmptyClipboard();
-		HGLOBAL clipbuffer;
-		WCHAR *buffer;
-		clipbuffer = GlobalAlloc(GMEM_DDESHARE, (nDataLen + 1) * sizeof(WCHAR));
-		buffer = (WCHAR*)GlobalLock(clipbuffer);
-		wcscpy_s(buffer, nDataLen + 1, pszData);
-		GlobalUnlock(clipbuffer);
-		SetClipboardData(CF_UNICODETEXT, clipbuffer);
-		CloseClipboard();
-		return TRUE;
-	}
-	return FALSE;
-}
-M_API BOOL MCopyToClipboard2(const WCHAR* pszData) {
-	return MCopyToClipboard(pszData, (wcslen(pszData) + 1) * sizeof(WCHAR));
 }
 
 M_API void MFM_GetRoots()

@@ -1,11 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace PCMgr.WorkWindow
@@ -32,7 +25,7 @@ namespace PCMgr.WorkWindow
                 ListViewItem item = new ListViewItem();
                 item.Name = s;
                 item.Text = Lanuages.LanuageMgr.GetStr(s);
-                if (formMain.ProcessListDetalsGetListIndex(s) != -1)
+                if (formMain.ProcessListDetailsGetListIndex(s) != -1)
                 {
                     item.Tag = "OldShow";
                     item.Checked = true;
@@ -57,10 +50,11 @@ namespace PCMgr.WorkWindow
             foreach (ListViewItem item in listItems.Items)
             {
                 if (item.Tag.ToString() == "OldShow" && item.Checked == false)
-                    formMain.ProcessListDetalsRemoveHeader(item.Name);
+                    formMain.ProcessListDetailsRemoveHeader(item.Name);
                 if (item.Tag.ToString() == "NewShow" && item.Checked)
-                    formMain.ProcessListDetalsAddHeader(item.Name);
+                    formMain.ProcessListDetailsAddHeader(item.Name);
             }
+            formMain.ProcessListDetailsGetColumnsIndex();
             Close();
         }
     }

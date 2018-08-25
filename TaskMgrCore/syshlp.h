@@ -3,7 +3,10 @@
 #include "ntdef.h"
 #include "sysfuns.h"
 
-//显示”运行“对话框
+#define PTR_ADD_OFFSET(Pointer, Offset) ((PVOID)((ULONG_PTR)(Pointer) + (ULONG_PTR)(Offset)))
+#define PTR_SUB_OFFSET(Pointer, Offset) ((PVOID)((ULONG_PTR)(Pointer) - (ULONG_PTR)(Offset)))
+
+//显示”运行“对话框（hwndOwner填自己的窗口句柄，其他全部填NULL）
 M_CAPI(BOOL) MRunFileDlg(HWND hwndOwner, HICON hIcon, LPCWSTR lpszDirectory, LPCWSTR lpszTitle, LPCWSTR lpszDescription, ULONG uFlags);
 //系统是否是64位
 M_CAPI(BOOL) MIs64BitOS();
@@ -17,7 +20,7 @@ M_CAPI(BOOL) MIsRunasAdmin();
 //    ProcedureName：函数名（如果为 NULL 则使用 ProcedureNumber 来查找）
 //    ProcedureNumber：函数导出序号
 M_CAPI(PVOID) MGetProcedureAddress(PVOID DllHandle, PSTR ProcedureName, ULONG ProcedureNumber);
-//等于 GetProcAddress
+//等于 GetProcAddress（自及实现的）
 M_CAPI(PVOID) MGetProcAddress(PVOID DllHandle, PSTR ProcedureName);
 
 //命令行转为文件路径
@@ -37,7 +40,8 @@ M_CAPI(BOOL) MGetWindowsBulidVersion();
 //运行一个EXE
 //    path：路径
 //    args：参数
-//    runAsadmin：是否已
+//    runAsadmin：是否以管理员身份运行
+//    hWnd：调用者窗口
 M_CAPI(BOOL) MRunExe(LPWSTR path, LPWSTR args, BOOL runAsadmin, HWND hWnd);
 
 //获取 Ntos And Win32 的基地址
@@ -47,4 +51,12 @@ M_CAPI(BOOL) MGetNtosAndWin32kfullNameAndStartAddress(LPWSTR name, size_t buffer
 M_CAPI(LPWSTR) MKeyToStr(UINT vk);
 //热键转为字符串
 M_CAPI(BOOL) MHotKeyToStr(UINT fsModifiers, UINT vk, LPWSTR buffer, int size);
+
+//复制字符串到剪贴板中
+//    const WCHAR * pszData：需要复制的字符串
+//    const size_t nDataLen ：需要复制的字符串字符个数（包括\0）
+EXTERN_C M_API BOOL MCopyToClipboard(const WCHAR * pszData, const size_t nDataLen);
+//复制字符串到剪贴板中
+//    const WCHAR * pszData：需要复制的字符串
+EXTERN_C M_API BOOL MCopyToClipboard2(const WCHAR * pszData);
 

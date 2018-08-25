@@ -7,6 +7,7 @@
 #include "mapphlp.h"
 #include "reghlp.h"
 #include "StringHlp.h"
+#include "syshlp.h"
 #include <list>
 
 using namespace std;

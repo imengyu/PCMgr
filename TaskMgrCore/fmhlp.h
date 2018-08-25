@@ -10,13 +10,7 @@ typedef void* (__cdecl*MFCALLBACK)(int msg, void* lParam, void* wParam);
 //显示文件属性对话框
 //    LPWSTR file：文件路径
 EXTERN_C M_API VOID MShowFileProp(LPWSTR file);
-//复制字符串到剪贴板中
-//    const WCHAR * pszData：需要复制的字符串
-//    const size_t nDataLen ：需要复制的字符串字符个数（包括\0）
-EXTERN_C M_API BOOL MCopyToClipboard(const WCHAR * pszData, const size_t nDataLen);
-//复制字符串到剪贴板中
-//    const WCHAR * pszData：需要复制的字符串
-EXTERN_C M_API BOOL MCopyToClipboard2(const WCHAR * pszData);
+
 
 //获取文件扩展名对应的图标以及文件扩展名说明文字
 //    LPWSTR extention：扩展名（.txt）

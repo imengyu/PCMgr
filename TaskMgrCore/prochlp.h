@@ -3,8 +3,49 @@
 #include "perfhlp.h"
 #include "ntdef.h"
 
-typedef void(__cdecl*EnumProcessCallBack)(DWORD pid, DWORD parentid, LPWSTR exename, LPWSTR exefullpath, int tp, HANDLE hProcess, PSYSTEM_PROCESSES proc);
-typedef void(__cdecl*EnumProcessCallBack2)(DWORD pid, PSYSTEM_PROCESSES proc);
+//枚举进程模块回调
+//返回FALSE中停止枚举
+typedef BOOL(__cdecl*EnumProcessModulesCallBack)(
+	LPWSTR moduleName, //模块名称
+	LPWSTR fullDllName, //模块完整路径
+	PVOID baseAddress, //模块基地址（全局）
+	ULONG sizeOfImage, //模块大小
+	LPVOID customData//自定义数据
+	);
+//枚举进程窗口回调
+//返回FALSE中停止枚举
+typedef BOOL(__cdecl*EnumProcessWindowsCallBack)(
+	HWND hWnd, //窗口句柄
+	LPWSTR windowText, //窗口文字
+	LPVOID customData//自定义数据
+	);
+//枚举进程线程回调
+//返回FALSE中停止枚举
+typedef BOOL(__cdecl*EnumProcessThreadsCallBack)(
+	DWORD tid, //线程id
+	DWORD pid, //进程id
+	PVOID startAddress, //起始地址（非Win32StartAddress，如要获取Win32StartAddress请使用MGetThreadWin32StartAddress）
+	PSYSTEM_THREADS t, //线程信息数据结构（回调结束以后会被释放）
+	LPVOID customData//自定义数据
+	);
+//枚举进程回调
+//返回FALSE中停止枚举
+typedef BOOL(__cdecl*EnumProcessCallBack)(
+	DWORD pid,//进程id
+	DWORD parentid, //父进程id
+	LPWSTR exename, //进程名称
+	LPWSTR exefullpath,//进程完整路径
+	int tp, //是否是最后一个模块，当枚举完成以后会再调用一次回调，tp=0，pid存放的是进程数量
+	HANDLE hProcess, //当前进程句柄
+	PSYSTEM_PROCESSES proc, //进程信息数据结构（下一次调用MEnumProcess/MEnumProcessCore之后会被释放）
+	LPVOID customData//自定义数据
+	);
+//简单枚举进程回调
+//返回FALSE中停止枚举
+typedef void(__cdecl*EnumProcessCallBack2)(
+	DWORD pid, //进程id
+	PSYSTEM_PROCESSES proc//进程信息数据结构（下一次调用MEnumProcess/MEnumProcessCore之后会被释放）
+	);
 
 typedef struct tag_USERNAME {
 	PSID Sid;
@@ -12,7 +53,11 @@ typedef struct tag_USERNAME {
 	WCHAR DomainName[128];
 
 }USERNAME,*PUSERNAME;
-
+typedef struct tag_EPW_ARG {
+	DWORD pid;
+	EnumProcessWindowsCallBack c;
+	LPVOID data;
+}EPW_ARG,*PEPW_ARG;
 typedef struct tag_PEOCESSKINFO {
 	WCHAR Eprocess[32];
 	WCHAR PebAddress[32];
@@ -20,6 +65,8 @@ typedef struct tag_PEOCESSKINFO {
 	WCHAR ImageFileName[MAX_PATH];
 	WCHAR ImageFullName[MAX_PATH];
 }PEOCESSKINFO,*PPEOCESSKINFO;
+
+//Not use
 
 VOID MAnitInjectLow();
 
@@ -29,21 +76,34 @@ void MFroceKillProcessUser();
 void MKillProcessUser(BOOL ask);
 void MKillProcessTreeUser();
 
+//Do not use
 EXTERN_C M_API BOOL MKillProcessUser2(DWORD pid, BOOL showErr);
 
 //进程提权
 EXTERN_C M_API BOOL MGetPrivileges2();
 //刷新进程列表
-EXTERN_C M_API void MEnumProcessCore();
+EXTERN_C M_API BOOL MEnumProcessCore();
 //刷新进程列表的释放资源工作
 EXTERN_C M_API void MEnumProcessFree();
-//枚举进程
+//枚举进程（返回 进程信息信息）
 //    callBack：回调
-EXTERN_C M_API void MEnumProcess(EnumProcessCallBack callBack);
-//简单枚举进程
+EXTERN_C M_API BOOL MEnumProcess(EnumProcessCallBack callBack, LPVOID customData);
+//简单枚举进程（仅仅返回 PID，通常用于刷新）
 //    callBack：简单回调
-EXTERN_C M_API void MEnumProcess2Refesh(EnumProcessCallBack2 callBack);
-EXTERN_C M_API BOOL MReUpdateProcess(DWORD pid, EnumProcessCallBack calBack);
+EXTERN_C M_API BOOL MEnumProcess2Refesh(EnumProcessCallBack2 callBack);
+//从进程列表中找指定PID并调用 calBack
+//（MEnumProcess/MEnumProcessCore之后使用）
+EXTERN_C M_API BOOL MUpdateProcess(DWORD pid, EnumProcessCallBack calBack, LPVOID customData);
+//在已枚举的进程列表中找指定PID的进程信息
+//（MEnumProcess/MEnumProcessCore之后使用）
+EXTERN_C M_API PSYSTEM_PROCESSES MFindProcessInLoadedProcesses(DWORD pid);
+//在已枚举的进程列表中找指定PID的进程，枚举其线程
+//（MEnumProcess/MEnumProcessCore之后使用）
+EXTERN_C M_API BOOL MEnumProcessThreads(PSYSTEM_PROCESSES p, EnumProcessThreadsCallBack c, LPVOID customData);
+//枚举进程所有窗口
+//    dwPID：进程pid
+//    callBack：回调
+EXTERN_C M_API BOOL MEnumProcessWindow(DWORD dwPID, EnumProcessWindowsCallBack callback, LPVOID customData);
 
 //把带符号链接的路径转为可访问的文件路径
 //    pszNtPath：输入路径
@@ -138,9 +198,9 @@ EXTERN_C M_API NTSTATUS MTerminateProcessNt(DWORD dwId, HANDLE handle);
 
 //运行UWP应用
 //    packageName：完整包名
-//    name：包中的 App 名称
+//    appName：要启动的包中的 App 名称
 //  具体请Google ”How to start a uwp app“
-EXTERN_C M_API BOOL MRunUWPApp(LPWSTR packageName, LPWSTR name);
+EXTERN_C M_API BOOL MRunUWPApp(LPWSTR packageName, LPWSTR appName);
 
 //获取进程命令行参数
 //    handle：进程句柄，为 NULL 时则使用 pid
@@ -174,24 +234,26 @@ EXTERN_C M_API PUSERNAME MGetUserNameBySID(PSID sid);
 EXTERN_C M_API ULONG MGetProcessThreadsCount(PSYSTEM_PROCESSES p);
 //获取进程句柄数
 EXTERN_C M_API ULONG MGetProcessHandlesCount(PSYSTEM_PROCESSES p);
+//=K32GetMappedFileName
+EXTERN_C M_API NTSTATUS MGetProcessMappedFileName(HANDLE ProcessHandle, PVOID BaseAddress, LPWSTR OutFileName, int BufferSize);
+//获取进程PEB地址
+//    hProcess：进程句柄
+EXTERN_C M_API PPEB MGetProcessPeb(HANDLE hProcess);
+
 //获取UWP应用完整包名
 //    handle：进程句柄
 //    [OUT] len：输出字符串缓冲区字符个数
 //    [OUT] buffer：输出字符串缓冲区
 EXTERN_C M_API BOOL MGetUWPPackageFullName(HANDLE handle, int * len, LPWSTR buffer);
 //获取进程状态
-//  2：暂停/1：正在运行/0：未知
-//    p：枚举所给的参数
-//    hWnd：0
+//  3：无响应/2：暂停/1：正在运行/0：未知
+//    p：枚举所给的进程信息结构
+//    hWnd：这个进程的主窗口
 EXTERN_C M_API int MGetProcessState(PSYSTEM_PROCESSES p, HWND hWnd);
 //获取SYSTEM_PROCESSES下的SYSTEM_THREADS
-EXTERN_C M_API VOID* MGetProcessThreads(DWORD pid);
+EXTERN_C M_API PSYSTEM_THREADS MGetProcessThreads(DWORD pid);
 //获取根据pid在进程列表里获取 SYSTEM_PROCESSES 结构（需调用 MEnumProcessCore(); 刷新列表）
 EXTERN_C M_API PSYSTEM_PROCESSES MGetProcessInfo(DWORD pid);
-//获取系统内存使用率（0-1）
-EXTERN_C M_API double MGetRamUseAge();
-//获取系统所有内存大小（MB）
-EXTERN_C M_API ULONG MGetAllRam();
 
 
 

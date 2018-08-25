@@ -166,7 +166,7 @@
       <PreprocessorDefinitions>_DDK_;_X86_;;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks />
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <BufferSecurityCheck />
+      <BufferSecurityCheck>false</BufferSecurityCheck>
       <CallingConvention>StdCall</CallingConvention>
     </ClCompile>
     <Link>
@@ -177,6 +177,7 @@
       <EntryPointSymbol>DriverEntry</EntryPointSymbol>
       <SubSystem>Native</SubSystem>
       <Driver>Driver</Driver>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

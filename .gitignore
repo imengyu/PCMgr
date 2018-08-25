@@ -19,3 +19,6 @@ depends.exe - 快捷方式.lnk
 *.config
 *.xml
 *.diagsession
+*.iobj
+*.ipdb
+*.enc

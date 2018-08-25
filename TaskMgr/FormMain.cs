@@ -54,7 +54,7 @@ namespace PCMgr
         private bool perfInited = false;
         private bool perfMainInited = false;
         private bool perfMainInitFailed = false;
-        private bool processListDetalsInited = false;
+        private bool ProcessListDetailsInited = false;
 
         public static FormMain Instance { private set; get; }
         public const string MICROSOFT = "Microsoft Corporation";
@@ -553,7 +553,7 @@ namespace PCMgr
 
             ProcessListPrepareClear();
             listProcess.Locked = true;
-            MEnumProcess(enumProcessCallBack_ptr);
+            MEnumProcess(enumProcessCallBack_ptr, IntPtr.Zero);
         }
         private void ProcessListRefesh1Finished()
         {
@@ -1493,7 +1493,7 @@ namespace PCMgr
             if (validPid.Count > 0)
             {
                 for (int i = validPid.Count - 1; i >= 0; i--)
-                    MReUpdateProcess(validPid[i], enumProcessCallBack_ptr);
+                    MUpdateProcess(validPid[i], enumProcessCallBack_ptr, IntPtr.Zero);
             }
         }
         private void ProcessListFree(PsItem it)
@@ -1565,7 +1565,7 @@ namespace PCMgr
             listProcess.Items.Clear();
         }
 
-        private void ProcessListHandle(uint pid, uint ppid, IntPtr name, IntPtr exefullpath, int tp, IntPtr hprocess, IntPtr system_process)
+        private void ProcessListHandle(uint pid, uint ppid, IntPtr name, IntPtr exefullpath, int tp, IntPtr hprocess, IntPtr system_process, IntPtr customData)
         {
             //enum proc callback
             if (tp == 1)
@@ -2217,7 +2217,7 @@ namespace PCMgr
         }
 
         //Find iten
-        private bool ProcessListDetalsIsProcessLoaded(uint pid, out ProcessDetalItem item)
+        private bool ProcessListDetailsIsProcessLoaded(uint pid, out ProcessDetalItem item)
         {
             bool rs = false;
             foreach (ProcessDetalItem f in loadedDetalProcess)
@@ -2232,7 +2232,7 @@ namespace PCMgr
             item = null;
             return rs;
         }
-        private ProcessDetalItem ProcessListDetalsFindPsItem(uint pid)
+        private ProcessDetalItem ProcessListDetailsFindPsItem(uint pid)
         {
             ProcessDetalItem rs = null;
             foreach (ProcessDetalItem i in loadedDetalProcess)
@@ -2247,9 +2247,9 @@ namespace PCMgr
         }
 
 
-        private void ProcessListDetalsInit()
+        private void ProcessListDetailsInit()
         {
-            if (!processListDetalsInited)
+            if (!ProcessListDetailsInited)
             {
                 enumProcessDetalsCallBack_ptr = Marshal.GetFunctionPointerForDelegate(enumProcessDetalsCallBack);
                 enumProcessDetalsCallBack2_ptr = Marshal.GetFunctionPointerForDelegate(enumProcessDetalsCallBack2);
@@ -2259,24 +2259,25 @@ namespace PCMgr
                 MAppWorkCall3(179, listProcessDetals.Handle, IntPtr.Zero);
                 MAppWorkCall3(182, listProcessDetals.Handle, IntPtr.Zero);
                 listProcessDetals.ListViewItemSorter = listViewItemComparerProcDetals;
+                ComCtlApi.MListViewProcListWndProc(listProcessDetals.Handle);
 
-                ProcessListDetalsLoadColumns();
-                ProcessListDetalsILoadAllItem();
+                ProcessListDetailsLoadColumns();
+                ProcessListDetailsILoadAllItem();
 
-                processListDetalsInited = true;
+                ProcessListDetailsInited = true;
             }
         }
-        private void ProcessListDetalsUnInit()
+        private void ProcessListDetailsUnInit()
         {
-            if (processListDetalsInited)
+            if (ProcessListDetailsInited)
             {
-                ProcessListDetalsSaveColumns();
+                ProcessListDetailsSaveColumns();
                 ProcessDetalsListFreeAll();
             }
         }
 
         //Add item
-        private void ProcessListDetalsLoad(uint pid, uint ppid, string exename, string exefullpath, IntPtr hprocess, IntPtr system_process)
+        private void ProcessListDetailsLoad(uint pid, uint ppid, string exename, string exefullpath, IntPtr hprocess, IntPtr system_process)
         {
             //base
             ProcessDetalItem p = new ProcessDetalItem();
@@ -2286,7 +2287,7 @@ namespace PCMgr
             loadedDetalProcess.Add(p);
 
             ProcessDetalItem parentpsItem = null;
-            if (ProcessListDetalsIsProcessLoaded(p.ppid, out parentpsItem))
+            if (ProcessListDetailsIsProcessLoaded(p.ppid, out parentpsItem))
             {
                 p.parent = parentpsItem;
                 parentpsItem.childs.Add(p);
@@ -2320,7 +2321,7 @@ namespace PCMgr
             p.exepath = stringBuilder.ToString();
 
             //icon
-            li.ImageKey = ProcessListDetalsGetIcon(p.exepath);
+            li.ImageKey = ProcessListDetailsGetIcon(p.exepath);
             li.Tag = p;
 
             //16 empty item
@@ -2366,107 +2367,107 @@ namespace PCMgr
             if (colSessionIDIndex != -1)
                 li.SubItems[colSessionIDIndex].Text = MGetProcessSessionID(system_process).ToString();
 
-            ProcessListDetalsUpdate(pid, true, li, system_process);
+            ProcessListDetailsUpdate(pid, true, li, system_process);
 
             listProcessDetals.Items.Add(li);
         }
         //Update dyamic data
-        private void ProcessListDetalsUpdate(uint pid, bool isload, ListViewItem it, IntPtr system_process, int ipdateOneDataCloum = -1, bool forceProcessHost = false)
+        private void ProcessListDetailsUpdate(uint pid, bool isload, ListViewItem it, IntPtr system_process, int ipdateOneDataCloum = -1, bool forceProcessHost = false)
         {
             ProcessDetalItem p = it.Tag as ProcessDetalItem;
             if (colCPUIndex != -1 && colCPUIndex != ipdateOneDataCloum)
-                ProcessListDetals_Perf_Update_CPU(it, p);
+                ProcessListDetails_Perf_Update_CPU(it, p);
             if (colWorkingSetPrivateIndex != -1 && colWorkingSetPrivateIndex != ipdateOneDataCloum)
-                ProcessListDetals_Perf_Update_WorkingSetPrivate(it, p);
+                ProcessListDetails_Perf_Update_WorkingSetPrivate(it, p);
             if (colWorkingSetIndex != -1 && colWorkingSetIndex != ipdateOneDataCloum)
-                ProcessListDetals_Perf_Update_WorkingSet(it, p);
+                ProcessListDetails_Perf_Update_WorkingSet(it, p);
             if (colWorkingSetShareIndex != -1 && colWorkingSetShareIndex != ipdateOneDataCloum)
-                ProcessListDetals_Perf_Update_WorkingSetShare(it, p);
+                ProcessListDetails_Perf_Update_WorkingSetShare(it, p);
             if (colPeakWorkingSetIndex != -1 && colPeakWorkingSetIndex != ipdateOneDataCloum)
-                ProcessListDetals_Perf_Update_PeakWorkingSet(it, p);
+                ProcessListDetails_Perf_Update_PeakWorkingSet(it, p);
             if (colNonPagedPoolIndex != -1 && colNonPagedPoolIndex != ipdateOneDataCloum)
-                ProcessListDetals_Perf_Update_NonPagedPool(it, p);
+                ProcessListDetails_Perf_Update_NonPagedPool(it, p);
             if (colPagedPoolIndex != -1 && colPagedPoolIndex != ipdateOneDataCloum)
-                ProcessListDetals_Perf_Update_PagedPool(it, p);
+                ProcessListDetails_Perf_Update_PagedPool(it, p);
             if (colCommitedSizeIndex != -1 && colCommitedSizeIndex != ipdateOneDataCloum)
-                ProcessListDetals_Perf_Update_CommitedSize(it, p);
+                ProcessListDetails_Perf_Update_CommitedSize(it, p);
             if (colPageErrorIndex != -1 && colPageErrorIndex != ipdateOneDataCloum)
-                ProcessListDetals_Perf_Update_PageFault(it, p);
+                ProcessListDetails_Perf_Update_PageFault(it, p);
             if (colHandleCountIndex != -1 && colHandleCountIndex != ipdateOneDataCloum)
-                ProcessListDetals_Perf_Update_HandleCount(it, p);
+                ProcessListDetails_Perf_Update_HandleCount(it, p);
             if (colThreadCountIndex != -1 && colThreadCountIndex != ipdateOneDataCloum)
-                ProcessListDetals_Perf_Update_ThreadsCount(it, p);
+                ProcessListDetails_Perf_Update_ThreadsCount(it, p);
             if (colIOReadIndex != -1 && colIOReadIndex != ipdateOneDataCloum)
-                ProcessListDetals_Perf_Update_IORead(it, p);
+                ProcessListDetails_Perf_Update_IORead(it, p);
             if (colIOWriteIndex != -1 && colIOWriteIndex != ipdateOneDataCloum)
-                ProcessListDetals_Perf_Update_IOWrite(it, p);
+                ProcessListDetails_Perf_Update_IOWrite(it, p);
             if (colIOOtherIndex != -1 && colIOOtherIndex != ipdateOneDataCloum)
-                ProcessListDetals_Perf_Update_IOOther(it, p);
+                ProcessListDetails_Perf_Update_IOOther(it, p);
             if (colIOReadBytesIndex != -1 && colIOReadBytesIndex != ipdateOneDataCloum)
-                ProcessListDetals_Perf_Update_IOReadBytes(it, p);
+                ProcessListDetails_Perf_Update_IOReadBytes(it, p);
             if (colIOWriteBytesIndex != -1 && colIOWriteBytesIndex != ipdateOneDataCloum)
-                ProcessListDetals_Perf_Update_IOWriteBytes(it, p);
+                ProcessListDetails_Perf_Update_IOWriteBytes(it, p);
             if (colIOOtherBytesIndex != -1 && colIOOtherBytesIndex != ipdateOneDataCloum)
-                ProcessListDetals_Perf_Update_IOOtherBytes(it, p);
+                ProcessListDetails_Perf_Update_IOOtherBytes(it, p);
             if (colCPUTimeIndex != -1 && colCPUTimeIndex != ipdateOneDataCloum)
-                ProcessListDetals_Perf_Update_CPUTime(it, p);
+                ProcessListDetails_Perf_Update_CPUTime(it, p);
             if (colCycleIndex != -1 && colCycleIndex != ipdateOneDataCloum)
-                ProcessListDetals_Perf_Update_Cycle(it, p);
+                ProcessListDetails_Perf_Update_Cycle(it, p);
             if (colStateIndex != -1 && colStateIndex != ipdateOneDataCloum)
-                ProcessListDetals_Update_State(it, p);
+                ProcessListDetails_Update_State(it, p);
         }
         //update a column be use to sort
-        private void ProcessListDetalsUpdateOnePerfCloum(uint pid, ListViewItem it, int ipdateOneDataCloum, bool forceProcessHost = false)
+        private void ProcessListDetailsUpdateOnePerfCloum(uint pid, ListViewItem it, int ipdateOneDataCloum, bool forceProcessHost = false)
         {
             ProcessDetalItem p = it.Tag as ProcessDetalItem;
             if (colCPUIndex != -1 && colCPUIndex == ipdateOneDataCloum)
-                ProcessListDetals_Perf_Update_CPU(it, p);
+                ProcessListDetails_Perf_Update_CPU(it, p);
             else if (colWorkingSetPrivateIndex != -1 && colWorkingSetPrivateIndex == ipdateOneDataCloum)
-                ProcessListDetals_Perf_Update_WorkingSetPrivate(it, p);
+                ProcessListDetails_Perf_Update_WorkingSetPrivate(it, p);
             else if (colWorkingSetIndex != -1 && colWorkingSetIndex == ipdateOneDataCloum)
-                ProcessListDetals_Perf_Update_WorkingSet(it, p);
+                ProcessListDetails_Perf_Update_WorkingSet(it, p);
             else if (colWorkingSetShareIndex != -1 && colWorkingSetShareIndex == ipdateOneDataCloum)
-                ProcessListDetals_Perf_Update_WorkingSetShare(it, p);
+                ProcessListDetails_Perf_Update_WorkingSetShare(it, p);
             else if (colPeakWorkingSetIndex != -1 && colPeakWorkingSetIndex == ipdateOneDataCloum)
-                ProcessListDetals_Perf_Update_PeakWorkingSet(it, p);
+                ProcessListDetails_Perf_Update_PeakWorkingSet(it, p);
             else if (colNonPagedPoolIndex != -1 && colNonPagedPoolIndex == ipdateOneDataCloum)
-                ProcessListDetals_Perf_Update_NonPagedPool(it, p);
+                ProcessListDetails_Perf_Update_NonPagedPool(it, p);
             else if (colPagedPoolIndex != -1 && colPagedPoolIndex == ipdateOneDataCloum)
-                ProcessListDetals_Perf_Update_PagedPool(it, p);
+                ProcessListDetails_Perf_Update_PagedPool(it, p);
             else if (colCommitedSizeIndex != -1 && colCommitedSizeIndex == ipdateOneDataCloum)
-                ProcessListDetals_Perf_Update_CommitedSize(it, p);
+                ProcessListDetails_Perf_Update_CommitedSize(it, p);
             else if (colPageErrorIndex != -1 && colPageErrorIndex == ipdateOneDataCloum)
-                ProcessListDetals_Perf_Update_PageFault(it, p);
+                ProcessListDetails_Perf_Update_PageFault(it, p);
             else if (colHandleCountIndex != -1 && colHandleCountIndex == ipdateOneDataCloum)
-                ProcessListDetals_Perf_Update_HandleCount(it, p);
+                ProcessListDetails_Perf_Update_HandleCount(it, p);
             else if (colThreadCountIndex != -1 && colThreadCountIndex == ipdateOneDataCloum)
-                ProcessListDetals_Perf_Update_ThreadsCount(it, p);
+                ProcessListDetails_Perf_Update_ThreadsCount(it, p);
             else if (colIOReadIndex != -1 && colIOReadIndex == ipdateOneDataCloum)
-                ProcessListDetals_Perf_Update_IORead(it, p);
+                ProcessListDetails_Perf_Update_IORead(it, p);
             else if (colIOWriteIndex != -1 && colIOWriteIndex == ipdateOneDataCloum)
-                ProcessListDetals_Perf_Update_IOWrite(it, p);
+                ProcessListDetails_Perf_Update_IOWrite(it, p);
             else if (colIOOtherIndex != -1 && colIOOtherIndex == ipdateOneDataCloum)
-                ProcessListDetals_Perf_Update_IOOther(it, p);
+                ProcessListDetails_Perf_Update_IOOther(it, p);
             else if (colIOReadBytesIndex != -1 && colIOReadBytesIndex == ipdateOneDataCloum)
-                ProcessListDetals_Perf_Update_IOReadBytes(it, p);
+                ProcessListDetails_Perf_Update_IOReadBytes(it, p);
             else if (colIOWriteBytesIndex != -1 && colIOWriteBytesIndex == ipdateOneDataCloum)
-                ProcessListDetals_Perf_Update_IOWriteBytes(it, p);
+                ProcessListDetails_Perf_Update_IOWriteBytes(it, p);
             else if (colIOOtherBytesIndex != -1 && colIOOtherBytesIndex == ipdateOneDataCloum)
-                ProcessListDetals_Perf_Update_IOOtherBytes(it, p);
+                ProcessListDetails_Perf_Update_IOOtherBytes(it, p);
             else if (colCPUTimeIndex != -1 && colCPUTimeIndex == ipdateOneDataCloum)
-                ProcessListDetals_Perf_Update_CPUTime(it, p);
+                ProcessListDetails_Perf_Update_CPUTime(it, p);
             else if (colCycleIndex != -1 && colCycleIndex == ipdateOneDataCloum)
-                ProcessListDetals_Perf_Update_Cycle(it, p);
+                ProcessListDetails_Perf_Update_Cycle(it, p);
             else if (colStateIndex != -1 && colStateIndex == ipdateOneDataCloum)
-                ProcessListDetals_Update_State(it, p);
+                ProcessListDetails_Update_State(it, p);
         }
-        private void ProcessListDetalsUpdateValues(int refeshAllDataColum)
+        private void ProcessListDetailsUpdateValues(int refeshAllDataColum)
         {
             //update process perf data
             foreach (ListViewItem it in listProcessDetals.Items)
             {
                 if (refeshAllDataColum != -1)
-                    ProcessListDetalsUpdateOnePerfCloum(((ProcessDetalItem)it.Tag).pid, it, refeshAllDataColum);
+                    ProcessListDetailsUpdateOnePerfCloum(((ProcessDetalItem)it.Tag).pid, it, refeshAllDataColum);
             }
             if (listProcessDetals.Items.Count == 0) return;
             int start = listProcessDetals.Items.IndexOf(listProcessDetals.TopItem), end = listProcessDetals.Items.Count;
@@ -2475,131 +2476,131 @@ namespace PCMgr
             {
                 liThis = listProcessDetals.Items[i];
                 if (liThis.Position.Y < listProcessDetals.Height)
-                    ProcessListDetalsUpdate(((ProcessDetalItem)liThis.Tag).pid, false, liThis, ((ProcessDetalItem)liThis.Tag).SYSTEM_PROCESSES, refeshAllDataColum);
+                    ProcessListDetailsUpdate(((ProcessDetalItem)liThis.Tag).pid, false, liThis, ((ProcessDetalItem)liThis.Tag).SYSTEM_PROCESSES, refeshAllDataColum);
                 else break;
             }
         }
 
         //All perf data
-        private void ProcessListDetals_Perf_Update_CPU(ListViewItem it, ProcessDetalItem p)
+        private void ProcessListDetails_Perf_Update_CPU(ListViewItem it, ProcessDetalItem p)
         {
             double data = MPERF_GetProcessCpuUseAge(p.SYSTEM_PROCESSES, p.perfData);
-            it.SubItems[colCPUIndex].Text = data.ToString("00.0") + "%";
+            it.SubItems[colCPUIndex].Text = data.ToString("00.0");
             it.SubItems[colCPUIndex].Tag = data;
         }
-        private void ProcessListDetals_Perf_Update_CPUTime(ListViewItem it, ProcessDetalItem p)
+        private void ProcessListDetails_Perf_Update_CPUTime(ListViewItem it, ProcessDetalItem p)
         {
             UInt64 data = MPERF_GetProcessCpuTime(p.SYSTEM_PROCESSES);
             TimeSpan time = TimeSpan.FromMilliseconds(Convert.ToDouble(data));
             it.SubItems[colCPUTimeIndex].Text = time.Hours + ":" + time.Minutes + ":" + time.Seconds;
             it.SubItems[colCPUTimeIndex].Tag = data;
         }
-        private void ProcessListDetals_Perf_Update_Cycle(ListViewItem it, ProcessDetalItem p)
+        private void ProcessListDetails_Perf_Update_Cycle(ListViewItem it, ProcessDetalItem p)
         {
             UInt64 data = MPERF_GetProcessCycle(p.SYSTEM_PROCESSES);
             it.SubItems[colCycleIndex].Text = data.ToString();
             it.SubItems[colCycleIndex].Tag = data;
         }
-        private void ProcessListDetals_Perf_Update_WorkingSetPrivate(ListViewItem it, ProcessDetalItem p)
+        private void ProcessListDetails_Perf_Update_WorkingSetPrivate(ListViewItem it, ProcessDetalItem p)
         {
             uint data = MPERF_GetProcessMemoryInfo(p.SYSTEM_PROCESSES, M_GET_PROCMEM_WORKINGSETPRIVATE);
             it.SubItems[colWorkingSetPrivateIndex].Text = FormatFileSizeMenSingal(data);
             it.SubItems[colWorkingSetPrivateIndex].Tag = data;
         }
-        private void ProcessListDetals_Perf_Update_WorkingSetShare(ListViewItem it, ProcessDetalItem p)
+        private void ProcessListDetails_Perf_Update_WorkingSetShare(ListViewItem it, ProcessDetalItem p)
         {
             uint data = MPERF_GetProcessMemoryInfo(p.SYSTEM_PROCESSES, M_GET_PROCMEM_WORKINGSETSHARE);
             it.SubItems[colWorkingSetShareIndex].Text = FormatFileSizeMenSingal(data);
             it.SubItems[colWorkingSetShareIndex].Tag = data;
         }
-        private void ProcessListDetals_Perf_Update_WorkingSet(ListViewItem it, ProcessDetalItem p)
+        private void ProcessListDetails_Perf_Update_WorkingSet(ListViewItem it, ProcessDetalItem p)
         {
             uint data = MPERF_GetProcessMemoryInfo(p.SYSTEM_PROCESSES, M_GET_PROCMEM_WORKINGSET);
             it.SubItems[colWorkingSetIndex].Text = FormatFileSizeMenSingal(data);
             it.SubItems[colWorkingSetIndex].Tag = data;
         }
-        private void ProcessListDetals_Perf_Update_PeakWorkingSet(ListViewItem it, ProcessDetalItem p)
+        private void ProcessListDetails_Perf_Update_PeakWorkingSet(ListViewItem it, ProcessDetalItem p)
         {
             uint data = MPERF_GetProcessMemoryInfo(p.SYSTEM_PROCESSES, M_GET_PROCMEM_PEAKWORKINGSET);
             it.SubItems[colPeakWorkingSetIndex].Text = FormatFileSizeMenSingal(data);
             it.SubItems[colPeakWorkingSetIndex].Tag = data;
         }
-        private void ProcessListDetals_Perf_Update_NonPagedPool(ListViewItem it, ProcessDetalItem p)
+        private void ProcessListDetails_Perf_Update_NonPagedPool(ListViewItem it, ProcessDetalItem p)
         {
             uint data = MPERF_GetProcessMemoryInfo(p.SYSTEM_PROCESSES, M_GET_PROCMEM_NONPAGEDPOOL);
             it.SubItems[colNonPagedPoolIndex].Text = FormatFileSizeMenSingal(data);
             it.SubItems[colNonPagedPoolIndex].Tag = data;
         }
-        private void ProcessListDetals_Perf_Update_PagedPool(ListViewItem it, ProcessDetalItem p)
+        private void ProcessListDetails_Perf_Update_PagedPool(ListViewItem it, ProcessDetalItem p)
         {
             uint data = MPERF_GetProcessMemoryInfo(p.SYSTEM_PROCESSES, M_GET_PROCMEM_PAGEDPOOL);
             it.SubItems[colPagedPoolIndex].Text = FormatFileSizeMenSingal(data);
             it.SubItems[colPagedPoolIndex].Tag = data;
         }
-        private void ProcessListDetals_Perf_Update_CommitedSize(ListViewItem it, ProcessDetalItem p)
+        private void ProcessListDetails_Perf_Update_CommitedSize(ListViewItem it, ProcessDetalItem p)
         {
             uint data = MPERF_GetProcessMemoryInfo(p.SYSTEM_PROCESSES, M_GET_PROCMEM_COMMITEDSIZE);
             it.SubItems[colCommitedSizeIndex].Text = FormatFileSizeMenSingal(data);
             it.SubItems[colCommitedSizeIndex].Tag = data;
         }
-        private void ProcessListDetals_Perf_Update_PageFault(ListViewItem it, ProcessDetalItem p)
+        private void ProcessListDetails_Perf_Update_PageFault(ListViewItem it, ProcessDetalItem p)
         {
             uint data = MPERF_GetProcessMemoryInfo(p.SYSTEM_PROCESSES, M_GET_PROCMEM_PAGEDFAULT);
             it.SubItems[colPageErrorIndex].Text = FormatFileSizeMenSingal(data);
             it.SubItems[colPageErrorIndex].Tag = data;
         }
 
-        private void ProcessListDetals_Perf_Update_HandleCount(ListViewItem it, ProcessDetalItem p)
+        private void ProcessListDetails_Perf_Update_HandleCount(ListViewItem it, ProcessDetalItem p)
         {
             uint data = MGetProcessHandlesCount(p.SYSTEM_PROCESSES);
             it.SubItems[colHandleCountIndex].Text = FormatFileSizeMenSingal(data);
             it.SubItems[colHandleCountIndex].Tag = data;
         }
-        private void ProcessListDetals_Perf_Update_ThreadsCount(ListViewItem it, ProcessDetalItem p)
+        private void ProcessListDetails_Perf_Update_ThreadsCount(ListViewItem it, ProcessDetalItem p)
         {
             uint data = MGetProcessThreadsCount(p.SYSTEM_PROCESSES);
             it.SubItems[colThreadCountIndex].Text = FormatFileSizeMenSingal(data);
             it.SubItems[colThreadCountIndex].Tag = data;
         }
 
-        private void ProcessListDetals_Perf_Update_IORead(ListViewItem it, ProcessDetalItem p)
+        private void ProcessListDetails_Perf_Update_IORead(ListViewItem it, ProcessDetalItem p)
         {
             UInt64 data = MPERF_GetProcessIOInfo(p.SYSTEM_PROCESSES, M_GET_PROCIO_READ);
             it.SubItems[colIOReadIndex].Text = data.ToString();
             it.SubItems[colIOReadIndex].Tag = data;
         }
-        private void ProcessListDetals_Perf_Update_IOWrite(ListViewItem it, ProcessDetalItem p)
+        private void ProcessListDetails_Perf_Update_IOWrite(ListViewItem it, ProcessDetalItem p)
         {
             UInt64 data = MPERF_GetProcessIOInfo(p.SYSTEM_PROCESSES, M_GET_PROCIO_WRITE);
             it.SubItems[colIOWriteIndex].Text = data.ToString();
             it.SubItems[colIOWriteIndex].Tag = data;
         }
-        private void ProcessListDetals_Perf_Update_IOOther(ListViewItem it, ProcessDetalItem p)
+        private void ProcessListDetails_Perf_Update_IOOther(ListViewItem it, ProcessDetalItem p)
         {
             UInt64 data = MPERF_GetProcessIOInfo(p.SYSTEM_PROCESSES, M_GET_PROCIO_OTHER);
             it.SubItems[colIOOtherIndex].Text = data.ToString();
             it.SubItems[colIOOtherIndex].Tag = data;
         }
-        private void ProcessListDetals_Perf_Update_IOReadBytes(ListViewItem it, ProcessDetalItem p)
+        private void ProcessListDetails_Perf_Update_IOReadBytes(ListViewItem it, ProcessDetalItem p)
         {
             UInt64 data = MPERF_GetProcessIOInfo(p.SYSTEM_PROCESSES, M_GET_PROCIO_READ_BYTES);
             it.SubItems[colIOReadBytesIndex].Text = data.ToString(); 
             it.SubItems[colIOReadBytesIndex].Tag = data;
         }
-        private void ProcessListDetals_Perf_Update_IOWriteBytes(ListViewItem it, ProcessDetalItem p)
+        private void ProcessListDetails_Perf_Update_IOWriteBytes(ListViewItem it, ProcessDetalItem p)
         {
             UInt64 data = MPERF_GetProcessIOInfo(p.SYSTEM_PROCESSES, M_GET_PROCIO_WRITE_BYTES);
             it.SubItems[colIOWriteBytesIndex].Text = data.ToString();
             it.SubItems[colIOWriteBytesIndex].Tag = data;
         }
-        private void ProcessListDetals_Perf_Update_IOOtherBytes(ListViewItem it, ProcessDetalItem p)
+        private void ProcessListDetails_Perf_Update_IOOtherBytes(ListViewItem it, ProcessDetalItem p)
         {
             UInt64 data = MPERF_GetProcessIOInfo(p.SYSTEM_PROCESSES, M_GET_PROCIO_OTHER_BYTES);
             it.SubItems[colIOOtherBytesIndex].Text = data.ToString();
             it.SubItems[colIOOtherBytesIndex].Tag = data;
         }
 
-        private void ProcessListDetals_Update_State(ListViewItem it, ProcessDetalItem p)
+        private void ProcessListDetails_Update_State(ListViewItem it, ProcessDetalItem p)
         {
             int i = MGetProcessState(p.SYSTEM_PROCESSES, IntPtr.Zero);
             if (i == 1)
@@ -2628,28 +2629,31 @@ namespace PCMgr
                 it.SubItems[colStateIndex].ForeColor = Color.FromArgb(22, 158, 250);
             }
         }
-
+        
 
         //Full load
-        private void ProcessListDetalsILoadAllItem()
+        private void ProcessListDetailsILoadAllItem()
         {
-            ProcessListDetalsPrepareClear();
-            MEnumProcess(enumProcessDetalsCallBack_ptr);
+            ComCtlApi.MListViewProcListLock(true);
+            ProcessListDetailsPrepareClear();
+            MEnumProcess(enumProcessDetalsCallBack_ptr, IntPtr.Zero);
         }
-        private void ProcessListDetalsILoadAllItemFinished()
+        private void ProcessListDetailsILoadAllItemFinished()
         {
-
+            ComCtlApi.MListViewProcListLock(false);
+            listProcessDetals.Invalidate();
         }
         //Refesh
-        private void ProcessListDetalsRefesh()
+        private void ProcessListDetailsRefesh()
         {
             if (colCPUIndex != -1) MPERF_CpuTimeUpdate();
 
+            ComCtlApi.MListViewProcListLock(true);
             //刷新所有数据
-            ProcessListDetalsPrepareClear();
+            ProcessListDetailsPrepareClear();
             //lock
             MEnumProcess2Refesh(enumProcessDetalsCallBack2_ptr);
-            ProcessListDetalsClear();
+            ProcessListDetailsClear();
 
             //刷新性能数据
             bool refeshAColumData = listViewItemComparerProcDetals.SortColumn == cpuindex
@@ -2657,19 +2661,21 @@ namespace PCMgr
                 || listViewItemComparerProcDetals.SortColumn == diskindex
                 || listViewItemComparerProcDetals.SortColumn == netindex
                 || listViewItemComparerProcDetals.SortColumn == stateindex;
-            ProcessListDetalsUpdateValues(refeshAColumData ? listViewItemComparerProcDetals.SortColumn : -1);
-            ProcessListDetalsRefeshPidTree();
+            ProcessListDetailsUpdateValues(refeshAColumData ? listViewItemComparerProcDetals.SortColumn : -1);
+            ProcessListDetailsRefeshPidTree();
 
             listProcessDetals.Sort();
+            ComCtlApi.MListViewProcListLock(false);
+            listProcessDetals.Invalidate();
         }
-        private void ProcessListDetalsRefeshPidTree()
+        private void ProcessListDetailsRefeshPidTree()
         {
             //Refesh Pid tree
             foreach (ProcessDetalItem p in loadedDetalProcess)
                 p.childs.Clear();
             foreach (ProcessDetalItem p in loadedDetalProcess)
             {
-                ProcessDetalItem parent = ProcessListDetalsFindPsItem(p.ppid);
+                ProcessDetalItem parent = ProcessListDetailsFindPsItem(p.ppid);
                 if (parent != null)
                     parent.childs.Add(p);
                 else if (p.parent != null)
@@ -2682,7 +2688,7 @@ namespace PCMgr
         }
 
         //Clear funs
-        private void ProcessListDetalsClear()
+        private void ProcessListDetailsClear()
         {
             //清除validPid里没有的项目
             uint pid = 0;
@@ -2690,7 +2696,7 @@ namespace PCMgr
             {
                 pid = loadedDetalProcess[i].pid;
                 if (!validPid.Contains(pid))
-                    ProcessListDetalsFree(loadedDetalProcess[i]);
+                    ProcessListDetailsFree(loadedDetalProcess[i]);
             }
             //存在的项目则从validPid里清除
             foreach (ListViewItem i in listProcessDetals.Items)
@@ -2699,16 +2705,16 @@ namespace PCMgr
             if (validPid.Count > 0)
             {
                 for (int i = validPid.Count - 1; i >= 0; i--)
-                    MReUpdateProcess(validPid[i], enumProcessDetalsCallBack_ptr);
+                    MUpdateProcess(validPid[i], enumProcessDetalsCallBack_ptr, IntPtr.Zero);
             }
         }
-        private void ProcessListDetalsPrepareClear()
+        private void ProcessListDetailsPrepareClear()
         {
             //clear valid Pids
             validPid.Clear();
             foreach (ProcessDetalItem p in loadedDetalProcess) p.SYSTEM_PROCESSES = IntPtr.Zero;
         }
-        private void ProcessListDetalsFree(ProcessDetalItem it, bool delitem = true)
+        private void ProcessListDetailsFree(ProcessDetalItem it, bool delitem = true)
         {
             //remove invalid item
             MCloseHandle(it.handle);
@@ -2726,12 +2732,12 @@ namespace PCMgr
             listProcessDetals.Items.Clear();
             //the exit clear
             for (int i = 0; i < loadedDetalProcess.Count; i++)
-                ProcessListDetalsFree(loadedDetalProcess[i], false);
+                ProcessListDetailsFree(loadedDetalProcess[i], false);
             loadedDetalProcess.Clear();
         }
 
         //Ico
-        private string ProcessListDetalsGetIcon(string exepath)
+        private string ProcessListDetailsGetIcon(string exepath)
         {
             if (!imageListProcessDetalsIcons.Images.ContainsKey(exepath))
             {
@@ -2743,27 +2749,27 @@ namespace PCMgr
         }
 
         //CallBack
-        private void ProcessListDetalsHandle(uint pid, uint ppid, IntPtr name, IntPtr exefullpath, int tp, IntPtr hprocess, IntPtr system_process)
+        private void ProcessListDetailsHandle(uint pid, uint ppid, IntPtr name, IntPtr exefullpath, int tp, IntPtr hprocess, IntPtr system_process, IntPtr customData)
         {
             //enum proc callback
             if (tp == 1)
             {
                 validPid.Add(pid);
                 ProcessDetalItem item;
-                if (ProcessListDetalsIsProcessLoaded(pid, out item))
-                    ProcessListDetalsUpdate(pid, false, item.item, system_process);//在列表里，刷新
+                if (ProcessListDetailsIsProcessLoaded(pid, out item))
+                    ProcessListDetailsUpdate(pid, false, item.item, system_process);//在列表里，刷新
                 else//没有在列表里，添加
-                    ProcessListDetalsLoad(pid, ppid, Marshal.PtrToStringAuto(name), Marshal.PtrToStringAuto(exefullpath), hprocess, system_process);
+                    ProcessListDetailsLoad(pid, ppid, Marshal.PtrToStringAuto(name), Marshal.PtrToStringAuto(exefullpath), hprocess, system_process);
             }
             else if (tp == 0)//完成
-                ProcessListDetalsILoadAllItemFinished();
+                ProcessListDetailsILoadAllItemFinished();
         }
-        private void ProcessListDetalsHandle2(uint pid, IntPtr system_process)
+        private void ProcessListDetailsHandle2(uint pid, IntPtr system_process)
         {
             //enum proc callback2 (refesh)
             validPid.Add(pid);
             //刷新已有项目的system_process属性
-            ProcessDetalItem old = ProcessListDetalsFindPsItem(pid);
+            ProcessDetalItem old = ProcessListDetailsFindPsItem(pid);
             if (old != null) old.SYSTEM_PROCESSES = system_process;//更新此属性，因为刷新性能数据有用
         }
 
@@ -2865,25 +2871,25 @@ namespace PCMgr
             "TitleIOReadBytes","TitleIOWriteBytes","TitleIOOtherBytes"
         };
 
-        public void ProcessListDetalsAddHeader(string name, int width = 100)
+        public void ProcessListDetailsAddHeader(string name, int width = 100)
         {
             ColumnHeader li = new ColumnHeader();
             li.Name = name;
             li.Text = LanuageMgr.GetStr(name);
             li.Width = width;
-            if (ProcessListDetalsIsMumberColumn(name))
+            if (ProcessListDetailsIsMumberColumn(name))
                 li.TextAlign = HorizontalAlignment.Right;
             listProcessDetals.Columns.Add(li);
         }
-        public int ProcessListDetalsGetListIndex(string name)
+        public int ProcessListDetailsGetListIndex(string name)
         {
             int rs = -1;
-            ColumnHeader c = ProcessListDetalsFindHeader(name);
+            ColumnHeader c = ProcessListDetailsFindHeader(name);
             if (c != null)
                 rs = listProcessDetals.Columns.IndexOf(c);
             return rs;
         }
-        public ColumnHeader ProcessListDetalsFindHeader(string name)
+        public ColumnHeader ProcessListDetailsFindHeader(string name)
         {
             ColumnHeader rs = null;
             foreach (ColumnHeader c in listProcessDetals.Columns)
@@ -2894,13 +2900,13 @@ namespace PCMgr
                 }
             return rs;
         }
-        public void ProcessListDetalsRemoveHeader(string name)
+        public void ProcessListDetailsRemoveHeader(string name)
         {
-            ColumnHeader li = ProcessListDetalsFindHeader(name);
+            ColumnHeader li = ProcessListDetailsFindHeader(name);
             if (li != null) listProcessDetals.Columns.Remove(li);
         }
 
-        private bool ProcessListDetalsIsMumberColumn(string name)
+        private bool ProcessListDetailsIsMumberColumn(string name)
         {
             if (name != "")
             {
@@ -2910,7 +2916,7 @@ namespace PCMgr
             }
             return false;
         }
-        public bool ProcessListDetalsIsStringColumn(int index)
+        public bool ProcessListDetailsIsStringColumn(int index)
         {
             if (index != -1)
             {
@@ -2922,51 +2928,51 @@ namespace PCMgr
             }
             return false;
         }
-        private void ProcessListDetalsGetColumnsIndex()
+        public void ProcessListDetailsGetColumnsIndex()
         {
             //加载所有列表头的序号
-            colPPIDIndex = ProcessListDetalsGetListIndex("TitleParentPID");
-            colPIDIndex = ProcessListDetalsGetListIndex("TitlePID");
-            colPackageNameIndex = ProcessListDetalsGetListIndex("TitlePackageName");
-            colStateIndex = ProcessListDetalsGetListIndex("TitleStatus");
-            colSessionIDIndex = ProcessListDetalsGetListIndex("TitleSessionID");
-            colJobIDIndex = ProcessListDetalsGetListIndex("TitleJobID");
-            colCPUIndex = ProcessListDetalsGetListIndex("TitleCPU");
-            colCPUTimeIndex = ProcessListDetalsGetListIndex("TitleCPUTime");
-            colCycleIndex = ProcessListDetalsGetListIndex("TitleCycle");
-            colPeakWorkingSetIndex = ProcessListDetalsGetListIndex("TitlePeakWorkingSet");
-            colWorkingSetIncreasementIndex = ProcessListDetalsGetListIndex("TitleWorkingSetCrease");
-            colWorkingSetIndex = ProcessListDetalsGetListIndex("TitleWorkingSet");
-            colWorkingSetPrivateIndex = ProcessListDetalsGetListIndex("TitleWorkingSetPrivate");
-            colWorkingSetShareIndex = ProcessListDetalsGetListIndex("TitleWorkingSetShare");
-            colCommitedSizeIndex = ProcessListDetalsGetListIndex("TitleCommited");
-            colPagedPoolIndex = ProcessListDetalsGetListIndex("TitlePagedPool");
-            colNonPagedPoolIndex = ProcessListDetalsGetListIndex("TitleNonPagedPool");
-            colPageErrorIndex = ProcessListDetalsGetListIndex("TitlePagedError");
-            colPageErrorIncreasementIndex = ProcessListDetalsGetListIndex("TitlePagedErrorCrease");
-            colHandleCountIndex = ProcessListDetalsGetListIndex("TitleHandleCount");
-            colThreadCountIndex = ProcessListDetalsGetListIndex("TitleThreadCount");
-            colUserObjectIndex = ProcessListDetalsGetListIndex("TitleUserObject");
-            colGDIObjectIndex = ProcessListDetalsGetListIndex("TitleGdiObject");
-            colIOReadIndex = ProcessListDetalsGetListIndex("TitleIORead");
-            colIOWriteIndex = ProcessListDetalsGetListIndex("TitleIOWrite");
-            colIOOtherIndex = ProcessListDetalsGetListIndex("TitleIOOther");
-            colIOReadBytesIndex = ProcessListDetalsGetListIndex("TitleIOReadBytes");
-            colIOWriteBytesIndex = ProcessListDetalsGetListIndex("TitleIOWriteBytes");
-            colIOOtherBytesIndex = ProcessListDetalsGetListIndex("TitleIOOtherBytes");
-            colPathIndex = ProcessListDetalsGetListIndex("TitleProcPath");
-            colCommandLineIndex = ProcessListDetalsGetListIndex("TitleCmdLine");
-            colPlatformIndex = ProcessListDetalsGetListIndex("TitlePlatform");
-            colOSContextIndex = ProcessListDetalsGetListIndex("TitleOperationSystemContext");
-            colDescriptionIndex = ProcessListDetalsGetListIndex("TitleDescription");
-            colDepIndex = ProcessListDetalsGetListIndex("TitleDEP");
-            colUACVIndex = ProcessListDetalsGetListIndex("TitleUACVirtualization");
-            colNameIndex = ProcessListDetalsGetListIndex("TitleProcName");
-            colUserNameIndex = ProcessListDetalsGetListIndex("TitleUserName");
-            colEprocessIndex = ProcessListDetalsGetListIndex("TitleEProcess");
+            colPPIDIndex = ProcessListDetailsGetListIndex("TitleParentPID");
+            colPIDIndex = ProcessListDetailsGetListIndex("TitlePID");
+            colPackageNameIndex = ProcessListDetailsGetListIndex("TitlePackageName");
+            colStateIndex = ProcessListDetailsGetListIndex("TitleStatus");
+            colSessionIDIndex = ProcessListDetailsGetListIndex("TitleSessionID");
+            colJobIDIndex = ProcessListDetailsGetListIndex("TitleJobID");
+            colCPUIndex = ProcessListDetailsGetListIndex("TitleCPU");
+            colCPUTimeIndex = ProcessListDetailsGetListIndex("TitleCPUTime");
+            colCycleIndex = ProcessListDetailsGetListIndex("TitleCycle");
+            colPeakWorkingSetIndex = ProcessListDetailsGetListIndex("TitlePeakWorkingSet");
+            colWorkingSetIncreasementIndex = ProcessListDetailsGetListIndex("TitleWorkingSetCrease");
+            colWorkingSetIndex = ProcessListDetailsGetListIndex("TitleWorkingSet");
+            colWorkingSetPrivateIndex = ProcessListDetailsGetListIndex("TitleWorkingSetPrivate");
+            colWorkingSetShareIndex = ProcessListDetailsGetListIndex("TitleWorkingSetShare");
+            colCommitedSizeIndex = ProcessListDetailsGetListIndex("TitleCommited");
+            colPagedPoolIndex = ProcessListDetailsGetListIndex("TitlePagedPool");
+            colNonPagedPoolIndex = ProcessListDetailsGetListIndex("TitleNonPagedPool");
+            colPageErrorIndex = ProcessListDetailsGetListIndex("TitlePagedError");
+            colPageErrorIncreasementIndex = ProcessListDetailsGetListIndex("TitlePagedErrorCrease");
+            colHandleCountIndex = ProcessListDetailsGetListIndex("TitleHandleCount");
+            colThreadCountIndex = ProcessListDetailsGetListIndex("TitleThreadCount");
+            colUserObjectIndex = ProcessListDetailsGetListIndex("TitleUserObject");
+            colGDIObjectIndex = ProcessListDetailsGetListIndex("TitleGdiObject");
+            colIOReadIndex = ProcessListDetailsGetListIndex("TitleIORead");
+            colIOWriteIndex = ProcessListDetailsGetListIndex("TitleIOWrite");
+            colIOOtherIndex = ProcessListDetailsGetListIndex("TitleIOOther");
+            colIOReadBytesIndex = ProcessListDetailsGetListIndex("TitleIOReadBytes");
+            colIOWriteBytesIndex = ProcessListDetailsGetListIndex("TitleIOWriteBytes");
+            colIOOtherBytesIndex = ProcessListDetailsGetListIndex("TitleIOOtherBytes");
+            colPathIndex = ProcessListDetailsGetListIndex("TitleProcPath");
+            colCommandLineIndex = ProcessListDetailsGetListIndex("TitleCmdLine");
+            colPlatformIndex = ProcessListDetailsGetListIndex("TitlePlatform");
+            colOSContextIndex = ProcessListDetailsGetListIndex("TitleOperationSystemContext");
+            colDescriptionIndex = ProcessListDetailsGetListIndex("TitleDescription");
+            colDepIndex = ProcessListDetailsGetListIndex("TitleDEP");
+            colUACVIndex = ProcessListDetailsGetListIndex("TitleUACVirtualization");
+            colNameIndex = ProcessListDetailsGetListIndex("TitleProcName");
+            colUserNameIndex = ProcessListDetailsGetListIndex("TitleUserName");
+            colEprocessIndex = ProcessListDetailsGetListIndex("TitleEProcess");
             
         }
-        private void ProcessListDetalsSaveColumns()
+        private void ProcessListDetailsSaveColumns()
         {
             if (listProcessDetals.Columns.Count > 0)
             {
@@ -2985,9 +2991,10 @@ namespace PCMgr
                         finalString = currentColumn.Name + "-" + currentColumn.Width + "#" + finalString;
                 }
                 SetConfig("DetalHeaders", "AppSetting", finalString);
+                SetConfig("DetalSort", "AppSetting", listViewItemComparerProcDetals.SortColumn + "#" + (listViewItemComparerProcDetals.Asdening ? "Asdening" : "Descending"));
             }
         }
-        private void ProcessListDetalsLoadColumns()
+        private void ProcessListDetailsLoadColumns()
         {
             hListHeader = ComCtlApi.MListViewGetHeaderControl(listProcessDetals.Handle);
             //加载列表头
@@ -2996,17 +3003,31 @@ namespace PCMgr
             if (headersStr == "") headersStr = "TitleProcName-190#TitlePID-55#TitleStatus-55#TitleUserName-70#TitleCPU-60#TitleWorkingSetPrivate-70#TitleDescription-400#";
             string[] headers = headersStr.Split(new Char[] { '#' }, StringSplitOptions.RemoveEmptyEntries);
             for (int i = 0; i < headers.Length && i < 16; i++)
-                ProcessListDetalsAddColumns(headers[i]);
+                ProcessListDetailsAddColumns(headers[i]);
 
-            ProcessListDetalsGetColumnsIndex();
+            ProcessListDetailsGetColumnsIndex();
             if (colNameIndex == -1)
             {
-                ProcessListDetalsAddColumns("TitleProcName-130");
-                colNameIndex = ProcessListDetalsGetListIndex("TitleProcName");
+                ProcessListDetailsAddColumns("TitleProcName-130");
+                colNameIndex = ProcessListDetailsGetListIndex("TitleProcName");
             }
 
+            string sortInfo = GetConfig("DetalSort", "AppSetting");
+            if (sortInfo.Contains("#"))
+            {
+                string[] sortInfo2 = sortInfo.Split('#');
+                if (sortInfo.Length >= 2)
+                {
+                    int col = 0;
+                    int.TryParse(sortInfo2[0], out col);
+                    if (col >= 0 && col < listProcessDetals.Columns.Count)
+                        listViewItemComparerProcDetals.SortColumn = col;
+                    if (sortInfo2[1] == "Asdening") listViewItemComparerProcDetals.Asdening = true;
+                    else if (sortInfo2[1] == "Descending") listViewItemComparerProcDetals.Asdening = false;
+                }
+            }
         }
-        private void ProcessListDetalsAddColumns(string s)
+        private void ProcessListDetailsAddColumns(string s)
         {
             string sname = s; int width = 70;
             if (s.Contains("-"))
@@ -3017,7 +3038,7 @@ namespace PCMgr
                     int.TryParse(ss[1], out width);
             }
             if (width > 1000 || width <= 0) width = 70;
-            if (s.Trim() != "") ProcessListDetalsAddHeader(sname, width);
+            if (s.Trim() != "") ProcessListDetailsAddHeader(sname, width);
         }
 
         private void 隐藏列ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -3026,6 +3047,7 @@ namespace PCMgr
             {
                 listProcessDetals.Columns.Remove(listProcessDetals.Columns[colLastDown]);
                 colLastDown = -1;
+                ProcessListDetailsGetColumnsIndex();
             }
         }
         private void 选择列ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -3073,7 +3095,7 @@ namespace PCMgr
                 ListViewItem x = o1 as ListViewItem, y = o2 as ListViewItem;
                 int returnVal = -1;
                 if (x.SubItems[col].Text == y.SubItems[col].Text) return -1;
-                if (formMain.ProcessListDetalsIsStringColumn(col))
+                if (formMain.ProcessListDetailsIsStringColumn(col))
                 {
                     returnVal = String.Compare(((ListViewItem)x).SubItems[col].Text, ((ListViewItem)y).SubItems[col].Text);
                 }
@@ -4280,7 +4302,7 @@ namespace PCMgr
         private void PerfUpdateGridUnit()
         {
             string unistr = "";
-            if (baseProcessRefeshTimer.Interval != 0)
+            if (baseProcessRefeshTimer.Enabled)
                 unistr = (baseProcessRefeshTimer.Interval / 1000 * 60).ToString() + str_sec;
             else unistr = str_status_paused;
             foreach (IPerformancePage p in perfPages)
@@ -5361,7 +5383,7 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
             }
             else if (tabControlMain.SelectedTab == tabPageDetals)
             {
-                ProcessListDetalsRefesh();
+                ProcessListDetailsRefesh();
             }
         }
 
@@ -5376,7 +5398,7 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                         int c = wParam.ToInt32();
                         if (c == 0)
                         {
-                            baseProcessRefeshTimer.Interval = 0;
+                            baseProcessRefeshTimer.Enabled = false;
                             baseProcessRefeshTimer.Stop();
                             baseProcessRefeshTimerLowUWP.Stop();
                             SetConfig("RefeshTime", "AppSetting", "Stop");
@@ -5386,6 +5408,7 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                         }
                         else
                         {
+                            baseProcessRefeshTimer.Enabled = true;
                             if (c == 1) { baseProcessRefeshTimer.Interval = 2000; SetConfig("RefeshTime", "AppSetting", "Slow"); }
                             else if (c == 2) { baseProcessRefeshTimer.Interval = 1000; SetConfig("RefeshTime", "AppSetting", "Fast"); }
                             baseProcessRefeshTimer.Start();
@@ -5593,6 +5616,7 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                 case M_CALLBACK_MDETALS_LIST_HEADER_RIGHTCLICK:
                     {
                         colLastDown = wParam.ToInt32();
+                        隐藏列ToolStripMenuItem.Enabled = colLastDown != colNameIndex;
                         contextMenuStripProcDetalsCol.Show(MousePosition);
                         break;
                     }
@@ -5744,8 +5768,8 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
             workerCallBack = AppWorkerCallBack;
             lanuageItems_CallBack = Native_LanuageItems_CallBack;
 
-            enumProcessDetalsCallBack = ProcessListDetalsHandle;
-            enumProcessDetalsCallBack2 = ProcessListDetalsHandle2;
+            enumProcessDetalsCallBack = ProcessListDetailsHandle;
+            enumProcessDetalsCallBack2 = ProcessListDetailsHandle2;
 
             MAppSetCallBack(Marshal.GetFunctionPointerForDelegate(exitCallBack), 1);
             MAppSetCallBack(Marshal.GetFunctionPointerForDelegate(terminateImporantWarnCallBack), 2);
@@ -5867,6 +5891,7 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                     ProcessListInitIn1Slater();
                     break;
             }
+            MAppWorkCall3(188, IntPtr.Zero, IntPtr.Zero);
         }
         private void AppLoadKernel()
         {
@@ -5909,7 +5934,7 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
             {
                 baseProcessRefeshTimer.Stop();
 
-                ProcessListDetalsUnInit();
+                ProcessListDetailsUnInit();
                 ProcessListSimpleExit();
                 AppWorkerCallBack(38, IntPtr.Zero, IntPtr.Zero);
                 DelingDialogClose();
@@ -5948,7 +5973,7 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                         return 6;
                     if (agrs[1] == "filemgr")
                         return 7;
-                    if (agrs[1] == "detals")
+                    if (agrs[1] == "details")
                         return 8;
                 }
                 else if (agrs[0] == "spy")
@@ -6430,7 +6455,7 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
             }
             else if (e.TabPage == tabPageDetals)
             {
-                ProcessListDetalsInit();
+                ProcessListDetailsInit();
             }
         }
 

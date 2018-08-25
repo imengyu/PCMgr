@@ -11,6 +11,10 @@ namespace PCMgr
 {
     class NativeMethods
     {
+        public const string 给想反编译这个程序的人 = "不用反编译了，大部分核心功能都在C++模块里，PCMgr32.dll 自己慢慢反编译去吧";
+
+        public const string Copyright = "Copyright (C) 2018 DreamFish";
+
         public static class Win32
         {
             //Win32 api
@@ -176,16 +180,13 @@ namespace PCMgr
 
         //C++ 模块api
 
-
+        //所有API说明及参数说明其参照 PCMgrCore项目 的头文件中的注释
         //dll名称
 #if _X64_
         public const string COREDLLNAME = "PCMgr64.dll";
 #else
         public const string COREDLLNAME = "PCMgr32.dll";
 #endif
-
-        [DllImport(@"E:\主数据库\编程\方案V5\DllTest\Debug\DllMon.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void DllMonStart();
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void WORKERCALLBACK(int msg, IntPtr lParam, IntPtr wParam);
@@ -307,7 +308,7 @@ namespace PCMgr
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void EnumProcessCallBack2(uint pid, IntPtr system_process);
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        public delegate void EnumProcessCallBack(uint pid, uint ppid, IntPtr name, IntPtr exefullpath, int tp, IntPtr hprocess, IntPtr system_process);
+        public delegate void EnumProcessCallBack(uint pid, uint ppid, IntPtr name, IntPtr exefullpath, int tp, IntPtr hprocess, IntPtr system_process, IntPtr customData);
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate int taskdialogcallback(IntPtr hwnd, [MarshalAs(UnmanagedType.LPWStr)]string text, [MarshalAs(UnmanagedType.LPWStr)] string title, [MarshalAs(UnmanagedType.LPWStr)]string apptl, int ico, int button);
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -377,9 +378,9 @@ namespace PCMgr
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern bool MAppVProcess(IntPtr hWnd);
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void MEnumProcess(IntPtr callback);
+        public static extern bool MEnumProcess(IntPtr callback, IntPtr customData);
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void MEnumProcess2Refesh(IntPtr callback);
+        public static extern bool MEnumProcess2Refesh(IntPtr callback);
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern void MEnumProcessFree();
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
@@ -389,7 +390,7 @@ namespace PCMgr
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern bool MCloseHandle(IntPtr handle);
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool MReUpdateProcess(uint pid, IntPtr callback);
+        public static extern bool MUpdateProcess(uint pid, IntPtr callback, IntPtr customData);
 
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern bool MRunUWPApp([MarshalAs(UnmanagedType.LPWStr)]string packageName, [MarshalAs(UnmanagedType.LPWStr)]string appname);
@@ -787,10 +788,13 @@ namespace PCMgr
         public static class ComCtlApi
         {
             [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-            public static extern IntPtr MListViewGetHeaderControl(IntPtr hList);
+            public static extern IntPtr MListViewGetHeaderControl(IntPtr hList, bool ismain = true);
             [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
             public static extern void MListViewSetColumnSortArrow(IntPtr hListHeader, int index, bool isUp, bool no);
-
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+            public static extern void MListViewProcListWndProc(IntPtr hList);
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+            public static extern void MListViewProcListLock(bool locked);
         }
 
         public static class CSCall

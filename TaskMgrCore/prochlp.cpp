@@ -59,20 +59,24 @@ NtResumeThreadFun NtResumeThread;
 NtTerminateThreadFun NtTerminateThread;
 NtTerminateProcessFun NtTerminateProcess;
 NtOpenThreadFun NtOpenThread;
-NtQueryInformationThreadFun NtQueryInformationThread;
 NtSuspendProcessFun NtSuspendProcess;
 NtResumeProcessFun NtResumeProcess;
-
 NtOpenProcessFun NtOpenProcess;
+
+NtQueryInformationThreadFun NtQueryInformationThread;
 NtQuerySystemInformationFun NtQuerySystemInformation;
-NtUnmapViewOfSectionFun NtUnmapViewOfSection;
 NtQueryInformationProcessFun NtQueryInformationProcess;
+
+NtQueryObjectFun NtQueryObject;
+NtQueryVirtualMemoryFun NtQueryVirtualMemory;
+NtReadVirtualMemoryFun NtReadVirtualMemory;
+
+NtUnmapViewOfSectionFun NtUnmapViewOfSection;
+
 LdrGetProcedureAddressFun LdrGetProcedureAddress;
 RtlInitAnsiStringFun RtlInitAnsiString;
 RtlNtStatusToDosErrorFun RtlNtStatusToDosError;
 RtlGetLastWin32ErrorFun RtlGetLastWin32Error;
-NtQueryObjectFun NtQueryObject;
-NtQueryVirtualMemoryFun NtQueryVirtualMemory;
 
 //K32 api
 _IsWow64Process dIsWow64Process;
@@ -99,6 +103,20 @@ extern fnIMAGEUNLOAD ImageUnload;
 
 //Enum apis
 EXTERN_C BOOL MAppVProcessAllWindows();
+
+BOOL CALLBACK lpEnumProcWinsFunc(HWND hWnd, LPARAM lParam)
+{
+	PEPW_ARG agrs = (PEPW_ARG)lParam;
+	DWORD processId;
+	DWORD threadId = GetWindowThreadProcessId(hWnd, &processId);
+	if (processId == agrs->pid)
+	{
+		WCHAR windowText[128];
+		GetWindowText(hWnd, windowText, 128);
+		return agrs->c(hWnd, windowText, agrs->data);
+	}
+	return TRUE;
+}
 
 void MFroceKillProcessUser()
 {
@@ -155,7 +173,7 @@ void MKillProcessTreeUser()
 		if (!thisCommandIsVeryImporant && thisCommandIsImporant && !hTerminateImporantWarnCallBack(thisCommandName, 1))return;
 		if ((!thisCommandIsVeryImporant && thisCommandIsImporant) || (!thisCommandIsImporant && MShowMessageDialog(hWndMain, str_item_killtree_content, DEFDIALOGGTITLE,
 			(LPWSTR)(str_item_kill_ask_start + L" " + thisCommandName + L" " + str_item_killtree_end).c_str(), NULL, MB_YESNO) == IDYES))
-			MAppMainCall(M_CALLBACK_KILLPROCTREE, (LPVOID)thisCommandPid, 0);
+			MAppMainCall(M_CALLBACK_KILLPROCTREE, (LPVOID)(ULONG_PTR)thisCommandPid, 0);
 	}
 }
 M_API BOOL MKillProcessUser2(DWORD pid, BOOL showErr)
@@ -241,7 +259,7 @@ M_API BOOL MGetPrivileges2()
 	CloseHandle(hToken);
 	return TRUE;
 }
-M_API void MEnumProcessCore()
+M_API BOOL MEnumProcessCore()
 {
 	if (current_system_process) {
 		free(current_system_process);
@@ -250,70 +268,156 @@ M_API void MEnumProcessCore()
 	DWORD dwSize = 0;
 	NtQuerySystemInformation(SystemProcessesAndThreadsInformation, NULL, 0, &dwSize);
 	current_system_process = (PSYSTEM_PROCESSES)malloc(dwSize);
-	NtQuerySystemInformation(SystemProcessesAndThreadsInformation, current_system_process, dwSize, 0);
+	return NT_SUCCESS(NtQuerySystemInformation(SystemProcessesAndThreadsInformation, current_system_process, dwSize, 0));
 }
-M_API void MEnumProcessFree()
+M_API VOID MEnumProcessFree()
 {
 	if (current_system_process) {
 		free(current_system_process);
 		current_system_process = NULL;
 	}
 }
-M_API void MEnumProcess(EnumProcessCallBack calBack)
+M_API BOOL MEnumProcess(EnumProcessCallBack calBack, LPVOID customData)
 {
 	if (calBack)
 	{
 		HANDLE hProcess = NULL;
 		WCHAR exeFullPath[260];
 		MAppVProcessAllWindows();
-		MEnumProcessCore();
-		bool done = false;
-		int ix = 0;
-		for (PSYSTEM_PROCESSES p = current_system_process; !done; p = PSYSTEM_PROCESSES(PCHAR(p) + p->NextEntryOffset))
-		{
-			memset(exeFullPath, 0, sizeof(exeFullPath));
-			hProcess = NULL;
-			MGetProcessFullPathEx(static_cast<DWORD>((ULONG_PTR)p->ProcessId), exeFullPath, &hProcess, p->ImageName.Buffer);
-			calBack(static_cast<DWORD>((ULONG_PTR)p->ProcessId), static_cast<DWORD>((ULONG_PTR)p->InheritedFromProcessId), p->ImageName.Buffer, exeFullPath, 1, hProcess, p);
-			ix++;
-			done = p->NextEntryOffset == 0;
+		if (MEnumProcessCore()) {
+			bool done = false;
+			int ix = 0;
+			for (PSYSTEM_PROCESSES p = current_system_process; !done; p = PSYSTEM_PROCESSES(PCHAR(p) + p->NextEntryOffset))
+			{
+				memset(exeFullPath, 0, sizeof(exeFullPath));
+				hProcess = NULL;
+				MGetProcessFullPathEx(static_cast<DWORD>((ULONG_PTR)p->ProcessId), exeFullPath, &hProcess, p->ImageName.Buffer);
+				if (!calBack(static_cast<DWORD>((ULONG_PTR)p->ProcessId), static_cast<DWORD>((ULONG_PTR)p->InheritedFromProcessId), p->ImageName.Buffer, exeFullPath, 1, hProcess, p, customData))
+					done = true;
+				else done = p->NextEntryOffset == 0;
+				ix++;
+				done = p->NextEntryOffset == 0;
+			}
+			calBack(ix, 0, NULL, NULL, 0, 0, NULL, customData);
+			return TRUE;
 		}
-		calBack(ix, 0, NULL, NULL, 0, 0, NULL);
 	}
+	return FALSE;
 }
-M_API void MEnumProcess2Refesh(EnumProcessCallBack2 callBack)
+M_API BOOL MEnumProcess2Refesh(EnumProcessCallBack2 callBack)
 {
 	if (callBack)
 	{
 		MAppVProcessAllWindows();
-		MEnumProcessCore();
-		bool done = false;
-		for (PSYSTEM_PROCESSES p = current_system_process; !done; p = PSYSTEM_PROCESSES(PCHAR(p) + p->NextEntryOffset))
-		{
-			callBack(static_cast<DWORD>((ULONG_PTR)p->ProcessId), p);
-			done = p->NextEntryOffset == 0;
+		if (MEnumProcessCore()) {
+			bool done = false;
+			for (PSYSTEM_PROCESSES p = current_system_process; !done; p = PSYSTEM_PROCESSES(PCHAR(p) + p->NextEntryOffset))
+			{
+				callBack(static_cast<DWORD>((ULONG_PTR)p->ProcessId), p);
+				done = p->NextEntryOffset == 0;
+			}
+			return TRUE;
 		}
-	}
+	}		
+	return 0;
 }
-M_API BOOL MReUpdateProcess(DWORD pid, EnumProcessCallBack calBack)
+M_API BOOL MUpdateProcess(DWORD pid, EnumProcessCallBack calBack, LPVOID customData)
 {
+	if (!calBack)return FALSE;
+	PSYSTEM_PROCESSES p = MFindProcessInLoadedProcesses(pid);
+	if (p != NULL)
+	{
+	    HANDLE hProcess = 0;
+		WCHAR exeFullPath[260];
+		memset(exeFullPath, 0, sizeof(exeFullPath));
+		MGetProcessFullPathEx(static_cast<DWORD>((ULONG_PTR)p->ProcessId), exeFullPath, &hProcess, p->ImageName.Buffer);
+		calBack(static_cast<DWORD>((ULONG_PTR)p->ProcessId), static_cast<DWORD>((ULONG_PTR)p->InheritedFromProcessId), p->ImageName.Buffer, exeFullPath, 1, hProcess, p, customData);
+		return TRUE;
+	}
+	return 0;
+}
+M_API PSYSTEM_PROCESSES MFindProcessInLoadedProcesses(DWORD pid) {
 	bool done = false;
 	for (PSYSTEM_PROCESSES p = current_system_process; !done;
 		p = PSYSTEM_PROCESSES(PCHAR(p) + p->NextEntryOffset))
 	{
 		if (static_cast<DWORD>((ULONG_PTR)p->ProcessId) == pid)
-		{
-			HANDLE hProcess = 0;
-			WCHAR exeFullPath[260];
-			memset(exeFullPath, 0, sizeof(exeFullPath));
-			MGetProcessFullPathEx(static_cast<DWORD>((ULONG_PTR)p->ProcessId), exeFullPath, &hProcess, p->ImageName.Buffer);
-			calBack(static_cast<DWORD>((ULONG_PTR)p->ProcessId), static_cast<DWORD>((ULONG_PTR)p->InheritedFromProcessId), p->ImageName.Buffer, exeFullPath, 1, hProcess, p);
-			done = true;
-			return TRUE;
-		}
+			return p;
 		done = p->NextEntryOffset == 0;
-	}			
+	}	
 	return 0;
+}
+M_API BOOL MEnumProcessThreads(PSYSTEM_PROCESSES p, EnumProcessThreadsCallBack callback, LPVOID customData)
+{
+	if (!callback)return FALSE;
+	PSYSTEM_THREADS threads = p->Threads;
+	for (ULONG i = 0; i < p->NumberOfThreads; i++)
+		if (!callback(static_cast<DWORD>((ULONG_PTR)threads[i].ClientId.UniqueThread), static_cast<DWORD>((ULONG_PTR)threads[i].ClientId.UniqueProcess),
+			threads[i].StartAddress, &threads[i], customData)) break;
+	return TRUE;
+}
+M_API BOOL MEnumProcessWindow(DWORD pid, EnumProcessWindowsCallBack callback, LPVOID customData)
+{
+	if (callback) {
+		EPW_ARG agrs = { pid, callback, customData };
+		return EnumWindows(lpEnumProcWinsFunc, (LPARAM)&agrs);
+	}
+	return FALSE;
+}
+M_API BOOL MEnumProcessModules(DWORD dwPID, EnumProcessModulesCallBack callback, LPVOID customData)
+{
+	if (callback) {
+		HANDLE hProcess;
+		NTSTATUS status = MOpenProcessNt(dwPID, &hProcess);
+		if (status == STATUS_SUCCESS && hProcess) {
+
+			BOOL bRet = FALSE;
+
+			PPEB pPeb = MGetProcessPeb(hProcess);
+			PPEB_LDR_DATA pLdr = NULL;
+			if (pPeb != 0)
+			{
+				status = NtReadVirtualMemory(hProcess, PTR_ADD_OFFSET(pPeb, FIELD_OFFSET(PEB, Ldr)), &pLdr, sizeof(PPEB_LDR_DATA), NULL);
+				if (!NT_SUCCESS(status)) return FALSE;
+
+				PLIST_ENTRY list_head = (PLIST_ENTRY)PTR_ADD_OFFSET(pLdr, FIELD_OFFSET(PEB_LDR_DATA, InMemoryOrderModuleList));
+				PLIST_ENTRY p = list_head;
+				LIST_ENTRY thisListEntry;
+				status = NtReadVirtualMemory(hProcess, list_head, &thisListEntry, sizeof(LIST_ENTRY), NULL);
+
+				int i = 0;
+				WCHAR thisName[MAX_PATH];
+				for (p = thisListEntry.Flink; p != list_head; p = thisListEntry.Flink)
+				{
+					LDR_MODULE thisModule;
+					status = NtReadVirtualMemory(hProcess, CONTAINING_RECORD(p, LDR_MODULE, InMemoryOrderModuleList), &thisModule, sizeof(LDR_MODULE), NULL);
+					status = NtReadVirtualMemory(hProcess, p, &thisListEntry, sizeof(LIST_ENTRY), NULL);
+
+					if (thisModule.BaseDllName.Buffer != NULL) 
+					{
+						WCHAR baseDllNameBuffer[MAX_PATH] = { 0 };
+						status = NtReadVirtualMemory(hProcess, thisModule.BaseDllName.Buffer, &baseDllNameBuffer, sizeof(baseDllNameBuffer), NULL);
+						wcscpy_s(thisName, baseDllNameBuffer);
+
+						WCHAR fullDllNameBuffer[MAX_PATH] = {0};
+						if (thisModule.FullDllName.Buffer != NULL) {
+							status = NtReadVirtualMemory(hProcess, thisModule.FullDllName.Buffer, &fullDllNameBuffer, sizeof(fullDllNameBuffer), NULL);
+						}
+
+						if (!callback(baseDllNameBuffer, fullDllNameBuffer, thisModule.BaseAddress, thisModule.SizeOfImage, customData))
+							break;
+						i++;
+
+						if (i > 512)//Too big
+							break;
+					}
+				}
+				CloseHandle(hProcess);
+				return TRUE;
+			}
+		}
+	}
+	return FALSE;
 }
 
 //EXE information
@@ -948,6 +1052,8 @@ M_API int MGetProcessState(PSYSTEM_PROCESSES p, HWND hWnd)
 	bool done = false;
 	if (p)
 	{
+		if(IsWindow(hWnd) && IsHungAppWindow(hWnd))
+			return 3;
 		SYSTEM_THREADS systemThread = p->Threads[0];
 		if (systemThread.ThreadState == THREAD_STATE::StateWait && systemThread.WaitReason == Suspended)
 			return 2;
@@ -955,17 +1061,12 @@ M_API int MGetProcessState(PSYSTEM_PROCESSES p, HWND hWnd)
 	}	
 	return 0;
 }
-M_API VOID* MGetProcessThreads(DWORD pid)
+M_API PSYSTEM_THREADS MGetProcessThreads(DWORD pid)
 {
-	bool done = false;
-	//遍历进程列表
-	for (PSYSTEM_PROCESSES p = current_system_process; !done;
-		p = PSYSTEM_PROCESSES(PCHAR(p) + p->NextEntryOffset))
-	{
-		if (static_cast<DWORD>((ULONG_PTR)p->ProcessId) == pid)
-			return p->Threads;
-		done = p->NextEntryOffset == 0;
-	}
+
+	PSYSTEM_PROCESSES p = MFindProcessInLoadedProcesses(pid);
+	if (p != NULL)
+		return p->Threads;
 	return 0;
 }
 M_API PSYSTEM_PROCESSES MGetProcessInfo(DWORD pid)
@@ -1125,6 +1226,62 @@ M_API ULONG MGetProcessThreadsCount(PSYSTEM_PROCESSES p)
 M_API ULONG MGetProcessHandlesCount(PSYSTEM_PROCESSES p)
 {
 	if (p) return p->HandleCount;
+	return 0;
+}
+M_API NTSTATUS MGetProcessMappedFileName(HANDLE ProcessHandle, PVOID BaseAddress, LPWSTR OutFileName, int BufferSize)
+{
+	NTSTATUS status;
+	PVOID buffer;
+	SIZE_T bufferSize;
+	SIZE_T returnLength;
+	PUNICODE_STRING unicodeString;
+
+	bufferSize = 0x100;
+	buffer = malloc(bufferSize);
+
+	status = NtQueryVirtualMemory(
+		ProcessHandle,
+		BaseAddress,
+		MemoryMappedFilenameInformation,
+		buffer,
+		bufferSize,
+		&returnLength
+	);
+
+	if (status == STATUS_BUFFER_OVERFLOW)
+	{
+		free(buffer);
+		bufferSize = returnLength;
+		buffer = malloc(bufferSize);
+
+		status = NtQueryVirtualMemory(
+			ProcessHandle,
+			BaseAddress,
+			MemoryMappedFilenameInformation,
+			buffer,
+			bufferSize,
+			&returnLength
+		);
+	}
+
+	if (!NT_SUCCESS(status))
+	{
+		free(buffer);
+		return status;
+	}
+
+	unicodeString = (PUNICODE_STRING)buffer;
+
+	wcscpy_s(OutFileName, BufferSize, unicodeString->Buffer);
+
+	free(buffer);
+	return status;
+}
+M_API PPEB MGetProcessPeb(HANDLE handle) {
+	ULONG outLength = 0;
+	PROCESS_BASIC_INFORMATION basicInfo = { 0 };
+	if (NT_SUCCESS(NtQueryInformationProcess(handle, ProcessBasicInformation, &basicInfo, sizeof(PROCESS_BASIC_INFORMATION), &outLength)))
+		return basicInfo.PebBaseAddress;
 	return 0;
 }
 
@@ -1601,8 +1758,6 @@ M_CAPI(int) MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWOR
 	return 0;
 }
 
-extern MEMORYSTATUSEX memory_statuex;
-
 extern HINSTANCE hInst;
 
 HINSTANCE hLoader;
@@ -1677,6 +1832,7 @@ BOOL LoadDll()
 		RtlNtStatusToDosError = (RtlNtStatusToDosErrorFun)GetProcAddress(hNtDll, "RtlNtStatusToDosError");
 		RtlGetLastWin32Error = (RtlGetLastWin32ErrorFun)GetProcAddress(hNtDll, "RtlGetLastWin32Error");
 		NtQueryVirtualMemory = (NtQueryVirtualMemoryFun)GetProcAddress(hNtDll, "NtQueryVirtualMemory");
+		NtReadVirtualMemory = (NtReadVirtualMemoryFun)GetProcAddress(hNtDll, "NtReadVirtualMemory");
 
 		//shell32
 		RunFileDlg = (_RunFileDlg)MGetProcedureAddress(hShell32, NULL, 61);
@@ -1765,7 +1921,7 @@ VOID MAnitInjectLow() {
 		HANDLE hThread = GetCurrentThread();
 		MEMORY_BASIC_INFORMATION mbi = { 0 };
 		ULONG_PTR dwStaAddr = 0;
-		ULONG_PTR dwReturnLength = 0;
+		ULONG dwReturnLength = 0;
 		NtQueryInformationThread(hThread, ThreadQuerySetWin32StartAddress, &dwStaAddr, sizeof(dwStaAddr), &dwReturnLength);
 		VirtualQuery((LPVOID)dwStaAddr, &mbi, sizeof(mbi));
 		if (!MIsATrustDll((HMODULE)mbi.AllocationBase)) {

@@ -33,6 +33,7 @@ typedef void(__cdecl *EnumPrivilegesCallBack)(LPWSTR name);
 //主窗口 WinProc
 LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
+LRESULT MProcListWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 //显示错误对话框
 void MPrintErrorMessage(LPWSTR str, int icon = MB_OK);
 //显示一个对话框
@@ -81,7 +82,11 @@ BOOL MAppStartTest();
 EXTERN_C M_API void MAppWorkCall2(UINT msg, WPARAM wParam, LPARAM lParam);
 EXTERN_C M_API int MAppWorkCall3(int id, HWND hWnd, void*data);
 //获取窗口的图标
+//    hWnd ：窗口句柄
 EXTERN_C M_API HICON MGetWindowIcon(HWND hWnd);
+
+M_CAPI(void) MListViewSetColumnSortArrow(HWND hListHeader, int index, BOOL isUp, BOOL no);
+M_CAPI(HWND) MListViewGetHeaderControl(HWND hList, BOOL isMain = FALSE);
 
 //字符串是否相等
 #define MStrEqual MStrEqualW

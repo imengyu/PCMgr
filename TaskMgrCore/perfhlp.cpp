@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "perfhlp.h"
-#include "ntdef.h"
 #include "sysfuns.h"
 #include "loghlp.h"
 #include "prochlp.h"
