@@ -60,7 +60,7 @@ void WindowEnumStart() {
 void WindowEnumDestroy() {
 	CloseDesktop(hDesk);
 	for (auto it = hUWPWins->begin(); it != hUWPWins->end(); it++)
-		free(*it);
+		MFree(*it);
 	hUWPWins->clear();
 	delete hUWPWins;
 	delete hUWPBrokedWins;
@@ -297,7 +297,7 @@ BOOL CALLBACK lpEnumFunc2(HWND hWnd, LPARAM lParam)
 			//This is a uwp host window
 			if ((l & WS_EX_APPWINDOW) == WS_EX_APPWINDOW || (l & WS_EX_OVERLAPPEDWINDOW) == WS_EX_OVERLAPPEDWINDOW || (ls & WS_CAPTION) == WS_CAPTION)
 			{
-				PUWPWindow uwpWindow = (PUWPWindow)malloc(sizeof(UWPWindow));
+				PUWPWindow uwpWindow = (PUWPWindow)MAlloc(sizeof(UWPWindow));
 				uwpWindow->hWndHost = hWnd;
 				uwpWindow->notFoundRealWindow = TRUE;
 				uwpWindow->hostPid = 0;
@@ -454,7 +454,7 @@ M_API BOOL MAppVProcess(HWND hWndParent)
 M_API BOOL MAppVProcessAllWindows()
 {
 	for (auto it = hUWPWins->begin(); it != hUWPWins->end(); it++)
-		free(*it);
+		MFree(*it);
 	hUWPBrokedWins->clear();
 	hUWPWins->clear();
 	hAllWins->clear();
@@ -483,13 +483,16 @@ BOOL MAppVModuls(DWORD dwPID, HWND hDlg, LPWSTR procName)
 		SetWindowText(htitle, (LPWSTR)str_item_access_denied.c_str());
 		return -1;
 	}
-	else if (status == STATUS_SUCCESS && hProcess) {
+	else if (NT_SUCCESS(status) && hProcess) {
 
 		BOOL bRet = FALSE;
-		
-		PPEB pPeb = MGetProcessPeb(hProcess);
+
 		PPEB_LDR_DATA pLdr = NULL;
-		if (pPeb != 0)
+		PPEB pPeb = 0;
+
+		status = MGetProcessPeb(hProcess,&pPeb);
+
+		if (NT_SUCCESS(status) && pPeb != 0)
 		{
 			status = NtReadVirtualMemory(hProcess, PTR_ADD_OFFSET(pPeb, FIELD_OFFSET(PEB, Ldr)), &pLdr, sizeof(PPEB_LDR_DATA), NULL);
 			if (!NT_SUCCESS(status)) return FALSE;
@@ -566,16 +569,16 @@ BOOL MAppVModuls(DWORD dwPID, HWND hDlg, LPWSTR procName)
 			return TRUE;
 		}
 		else {
-			LogWarn(L"View Modules Failed in MGetProcessPeb");
-			wstring str = FormatString(L"%s\n%s\nError Code : 0x%08x", str_item_enum_modulefailed, L"Failed to get peb", status);
+			LogWarn(L"View Modules Failed in MGetProcessPeb  : %s", MNtStatusToStr(status));
+			wstring str = FormatString(L"%s\n%s\nError Code : %s", str_item_enum_modulefailed, L"Failed to get peb", MNtStatusToStr(status));
 			SetWindowText(htitle, str.c_str());
 		}
 
 		MCloseHandle(hProcess);
 	}
 	else {
-		LogWarn(L"View Modules Failed in OpenProcess : 0x%08X", status);
-		wstring str = FormatString(L"%s\n%s\nError Code : 0x%08x", str_item_enum_modulefailed, str_item_openprocfailed, status);
+		LogWarn(L"View Modules Failed in OpenProcess : %s", MNtStatusToStr(status));
+		wstring str = FormatString(L"%s\n%s\nError Code : %s", str_item_enum_modulefailed, str_item_openprocfailed, MNtStatusToStr(status));
 		SetWindowText(htitle, str.c_str());
 		return 0;
 	}
@@ -634,8 +637,9 @@ BOOL MAppVThreads(DWORD dwPID, HWND hDlg, LPWSTR procName)
 				vitem.iSubItem++;
 
 				if (hThread && teb == 0) {
-					teb = (ULONG_PTR)MGetThreadPeb(hThread);
-					if (status == STATUS_SUCCESS) {
+					status = MGetThreadPeb(hThread, (PTEB*)&teb);
+					if (NT_SUCCESS(status))
+					{
 						TCHAR modname1[32];
 #ifdef _X64_
 						swprintf_s(modname1, L"0x%I64X", (ULONG_PTR)teb);
@@ -646,7 +650,7 @@ BOOL MAppVThreads(DWORD dwPID, HWND hDlg, LPWSTR procName)
 					}
 					else {
 						TCHAR err[18];
-						swprintf_s(err, L"ERROR:0x%08X", status);
+						swprintf_s(err, L"%s", MNtStatusToStr(status));
 						vitem.pszText = err;
 					}
 				}
@@ -671,14 +675,24 @@ BOOL MAppVThreads(DWORD dwPID, HWND hDlg, LPWSTR procName)
 
 				PVOID startaddr = 0;
 				if (hThread)
-					startaddr = MGetThreadWin32StartAddress(hThread);
-				WCHAR modname1[32];
+				{
+					status = MGetThreadWin32StartAddress(hThread, &startaddr);
+					if (NT_SUCCESS(status)) {
+						WCHAR modname1[32];
 #ifdef _X64_
-				swprintf_s(modname1, L"0x%I64X", (ULONG_PTR)(startaddr));
+						swprintf_s(modname1, L"0x%I64X", (ULONG_PTR)(startaddr));
 #else
-				swprintf_s(modname1, L"0x%08X", (ULONG_PTR)(startaddr));
+						swprintf_s(modname1, L"0x%08X", (ULONG_PTR)(startaddr));
 #endif
-				vitem.pszText = modname1;
+						vitem.pszText = modname1;
+					}
+					else {
+						TCHAR err[18];
+						swprintf_s(err, L"%s", MNtStatusToStr(status));
+						vitem.pszText = err;
+					}
+				}
+				else vitem.pszText = L"-";
 				ListView_SetItem(hListThreads, &vitem);
 				vitem.iSubItem++;
 
@@ -688,7 +702,7 @@ BOOL MAppVThreads(DWORD dwPID, HWND hDlg, LPWSTR procName)
 					{
 						WCHAR modpath[260];
 						WCHAR modname[260];
-						if (MGetProcessMappedFileName(hProcess, startaddr, modname, 260) > 0) {
+						if (MGetProcessMappedFileName(hProcess, startaddr, modname, 260) == STATUS_SUCCESS) {
 							MDosPathToNtPath(modname, modpath);
 							vitem.pszText = modpath;
 						}
@@ -743,6 +757,8 @@ BOOL MAppVThreads(DWORD dwPID, HWND hDlg, LPWSTR procName)
 		}
 		done = p->NextEntryOffset == 0;
 	}
+
+	SetWindowText(htitle, (LPWSTR)str_item_invalidproc.c_str());
 	LogWarn(L"Not found process : %d", dwPID);
 	return 0;
 
@@ -808,6 +824,10 @@ BOOL MAppVWins(DWORD dwPID, HWND hDlg, LPWSTR procName)
 		wstring str = FormatString(str_item_vwinstitle, procName, dwPID, winscount);
 		SetWindowText(htitle, str.c_str());
 		return TRUE;
+	}
+	else {
+		wstring str = FormatString(L"EnumWindows failed\nError Code : %s", GetLastError());
+		SetWindowText(htitle, str.c_str());
 	}
 	return FALSE;
 }

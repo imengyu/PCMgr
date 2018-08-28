@@ -59,13 +59,16 @@
             // performanceGridGlobal
             // 
             resources.ApplyResources(this.performanceGridGlobal, "performanceGridGlobal");
-            this.performanceGridGlobal.BgColor = System.Drawing.Color.FromArgb(((int)(((byte)(241)))), ((int)(((byte)(246)))), ((int)(((byte)(250)))));
+            this.performanceGridGlobal.BgColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(236)))), ((int)(((byte)(245)))), ((int)(((byte)(250)))));
             this.performanceGridGlobal.BottomTextHeight = 20;
             this.performanceGridGlobal.DrawColor = System.Drawing.Color.FromArgb(((int)(((byte)(17)))), ((int)(((byte)(125)))), ((int)(((byte)(187)))));
             this.performanceGridGlobal.DrawColor2 = System.Drawing.Color.FromArgb(((int)(((byte)(17)))), ((int)(((byte)(125)))), ((int)(((byte)(187)))));
             this.performanceGridGlobal.DrawData2 = false;
             this.performanceGridGlobal.DrawData2Bg = false;
             this.performanceGridGlobal.GridColor = System.Drawing.Color.FromArgb(((int)(((byte)(206)))), ((int)(((byte)(226)))), ((int)(((byte)(240)))));
+            this.performanceGridGlobal.MaxScaleText = "";
+            this.performanceGridGlobal.MaxScaleValue = 0;
+            this.performanceGridGlobal.MaxValue = 100;
             this.performanceGridGlobal.Name = "performanceGridGlobal";
             this.performanceGridGlobal.TopTextHeight = 20;
             // 

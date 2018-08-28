@@ -12,7 +12,7 @@ namespace PCMgr.Ctls
 
         public PerformanceList()
         {
-            SetStyle(ControlStyles.Selectable, true);
+            SetStyle(ControlStyles.Selectable, false);
             SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
             items = new PerformanceListItemCollection();
             items.ItemAdd += Items_ItemAdd;
@@ -149,8 +149,6 @@ namespace PCMgr.Ctls
                 ps.Add(new PointF(rect.Left, rect.Top + rect.Height));
                 ps.Add(new PointF(rect.Left + offset + 0 * single, rect.Top + rect.Height - it.Data[0] * division));
 
-
-
                 if (it.BgBrush != Brushes.White)
                 {
                     for (int i = 1; i < it.Data.Count; i++)
@@ -162,7 +160,7 @@ namespace PCMgr.Ctls
                     }
 
                     ps.Add(new PointF(rect.Left + rect.Width, rect.Top + rect.Height));
-                    g.FillClosedCurve(it.BgBrush, ps.ToArray());              
+                    g.FillClosedCurve(it.BgBrush, ps.ToArray(), System.Drawing.Drawing2D.FillMode.Alternate, 0f);              
                 }
                 else
                 {
@@ -391,6 +389,15 @@ namespace PCMgr.Ctls
                     BorderPen = new Pen(basePen.Color, 1);
             }
         }
+        public Brush BgBrush2 { get; set; }
+        public Pen BasePen2
+        {
+            get { return basePen2; }
+            set
+            {
+                basePen2 = value;
+            }
+        }
         public string Name { get; set; }
         public List<int> Data { get { return dataIem; } }
 
@@ -409,6 +416,20 @@ namespace PCMgr.Ctls
             }
             b = !b;
         }
+        public void AddData2(int d)
+        {
+            if (b2)
+            {
+                dataIem2.RemoveAt(0);
+                dataIem2.Add(d);
+            }
+            else
+            {
+                int index = dataIem2.Count - 1;
+                dataIem2[index] = (dataIem2[index] + d) / 2;
+            }
+            b2 = !b2;
+        }
 
         public int PageIndex { get; set; }
         public bool Gray { get; set; }
@@ -420,10 +441,12 @@ namespace PCMgr.Ctls
         {
             return Name;
         }
-
+        private bool b2 = false;
         private bool b = false;
         private Pen basePen = null;
+        private Pen basePen2 = null;
         private List<int> dataIem = null;
+        private List<int> dataIem2 = null;
     }
     public class PerformanceListItemCollection : System.Collections.CollectionBase
     {

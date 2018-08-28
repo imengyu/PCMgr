@@ -183,7 +183,7 @@ M_CAPI(BOOL) M_SU_KDA(DACALLBACK callback, ULONG_PTR startaddress, ULONG_PTR siz
 		agrs.StartAddress = startaddress;
 		agrs.Size = size;
 
-		PUCHAR outBuffer = (PUCHAR)malloc(size);
+		PUCHAR outBuffer = (PUCHAR)MAlloc(size);
 		memset(outBuffer, 0, size);
 
 		DWORD ReturnLength = 0;
@@ -197,7 +197,7 @@ M_CAPI(BOOL) M_SU_KDA(DACALLBACK callback, ULONG_PTR startaddress, ULONG_PTR siz
 #else
 		BOOL rs = M_KDA_Dec(outBuffer, startaddress, callback, size, TRUE);
 #endif
-		free(outBuffer);
+		MFree(outBuffer);
 		return rs;
 	}
 	return FALSE;
@@ -312,7 +312,7 @@ M_CAPI(BOOL) M_SU_GetEPROCESS(DWORD pid, ULONG_PTR* lpEprocess, ULONG_PTR* lpPeb
 	BOOL rs = FALSE;
 	if (isKernelDriverLoaded)
 	{
-		PKPROCINFO output = (PKPROCINFO)malloc(sizeof(KPROCINFO));
+		PKPROCINFO output = (PKPROCINFO)MAlloc(sizeof(KPROCINFO));
 		memset(output, 0, sizeof(KPROCINFO));
 		DWORD ReturnLength = 0;
 		if (DeviceIoControl(hKernelDevice, CTL_GET_EPROCESS, &pid, sizeof(DWORD), output, sizeof(KPROCINFO), &ReturnLength, NULL))
@@ -328,7 +328,7 @@ M_CAPI(BOOL) M_SU_GetEPROCESS(DWORD pid, ULONG_PTR* lpEprocess, ULONG_PTR* lpPeb
 			if (path) wcscpy_s(path, MAX_PATH, output->FullPath);
 			rs = TRUE;
 		} else LogErr(L"M_SU_GetEPROCESS DeviceIoControl err : %d in pid : %d", GetLastError(), pid);
-		free(output);
+		MFree(output);
 	}
 	return rs;
 }
@@ -337,7 +337,7 @@ M_CAPI(BOOL) M_SU_GetETHREAD(DWORD tid, ULONG_PTR* lpEthread, ULONG_PTR * lpTeb)
 	BOOL rs = FALSE;
 	if (isKernelDriverLoaded)
 	{
-		PKTHREADINFO output = (PKTHREADINFO)malloc(sizeof(KTHREADINFO));
+		PKTHREADINFO output = (PKTHREADINFO)MAlloc(sizeof(KTHREADINFO));
 		memset(output, 0, sizeof(KTHREADINFO));
 		DWORD ReturnLength = 0;
 		if (DeviceIoControl(hKernelDevice, CTL_GET_ETHREAD, &tid, sizeof(DWORD), output, sizeof(KTHREADINFO), &ReturnLength, NULL))
@@ -348,7 +348,7 @@ M_CAPI(BOOL) M_SU_GetETHREAD(DWORD tid, ULONG_PTR* lpEthread, ULONG_PTR * lpTeb)
 			rs = TRUE;
 		}
 		else LogErr(L"M_SU_GetETHREAD DeviceIoControl err : %d in tid : %d", GetLastError(), tid);
-		free(output);
+		MFree(output);
 	}
 	return rs;
 }
@@ -366,7 +366,7 @@ M_CAPI(BOOL) M_SU_GetProcessCommandLine(DWORD tid, LPWSTR outCmdLine)
 			rs = TRUE;
 		}
 		else LogErr(L"M_SU_GetProcessCommandLine DeviceIoControl err : %d in tid : %d", GetLastError(), tid);
-		free(output);
+		MFree(output);
 	}
 	return rs;
 }
@@ -375,7 +375,7 @@ M_CAPI(BOOL) M_SU_GetProcessCommandLine(DWORD tid, LPWSTR outCmdLine)
 
 M_CAPI(void) M_SU_EnumKernelModulsItemDestroy(KernelModulSmallInfo*km)
 {
-	if (km) free(km);
+	if (km) MFree(km);
 }
 M_CAPI(BOOL) M_SU_EnumKernelModuls(EnumKernelModulsCallBack callback, BOOL showall) {
 
@@ -398,7 +398,7 @@ M_CAPI(BOOL) M_SU_EnumKernelModuls(EnumKernelModulsCallBack callback, BOOL showa
 
 		memset(&kModule, 0, sizeof(kModule));
 
-		PKernelModulSmallInfo kmi = (PKernelModulSmallInfo)malloc(sizeof(KernelModulSmallInfo));
+		PKernelModulSmallInfo kmi = (PKernelModulSmallInfo)MAlloc(sizeof(KernelModulSmallInfo));
 		memset(kmi, 0, sizeof(KernelModulSmallInfo));
 
 		WCHAR strEntryPoint[32];
@@ -452,7 +452,7 @@ M_CAPI(BOOL) M_SU_EnumKernelModuls(EnumKernelModulsCallBack callback, BOOL showa
 			if (!pDrvscsNames[i].DriverServiceFounded) {
 				notLoadDrvCount++;
 
-				PKernelModulSmallInfo kmi = (PKernelModulSmallInfo)malloc(sizeof(KernelModulSmallInfo));
+				PKernelModulSmallInfo kmi = (PKernelModulSmallInfo)MAlloc(sizeof(KernelModulSmallInfo));
 				memset(kmi, 0, sizeof(KernelModulSmallInfo));
 
 				kmi->DriverObject = NULL;
@@ -717,7 +717,7 @@ M_CAPI(BOOL) M_SU_GetProcessHotKeys(DWORD pid, EnumProcessHotKeyCallBack callBac
 		}
 		if (outSize < 0 || outSize > 128)return FALSE;
 		DWORD bufferSize = outSize * sizeof(HOT_KEY_DATA);
-		PHOT_KEY_DATA outBuffer = (PHOT_KEY_DATA)malloc(bufferSize);
+		PHOT_KEY_DATA outBuffer = (PHOT_KEY_DATA)MAlloc(bufferSize);
 		if (!DeviceIoControl(hKernelDevice, CTL_GET_PROCESS_HOTKEYS_BUFFER, NULL, 0, &outBuffer, bufferSize, &ReturnLength, NULL))
 		{
 			LogErr(L"M_SU_GetProcessHotKeys DeviceIoControl err : %d", GetLastError());
@@ -740,9 +740,9 @@ M_CAPI(BOOL) M_SU_GetProcessHotKeys(DWORD pid, EnumProcessHotKeyCallBack callBac
 
 			LPWSTR procNamew = A2W(data->ImageFileName);
 			callBack(data, objStr, data->id, keyStr, data->ProcessId, data->ThreadId, procNamew);
-			free(procNamew);
+			MFree(procNamew);
 		}
-		free(outBuffer);
+		MFree(outBuffer);
 		rs = TRUE;
 	}
 	return rs;
@@ -763,7 +763,7 @@ M_CAPI(BOOL) M_SU_GetProcessTimers(DWORD pid, EnumProcessTimerCallBack callBack)
 		}
 		if (outSize < 0 || outSize > 128)return FALSE;
 		DWORD bufferSize = outSize * sizeof(TIMER_DATA);
-		PTIMER_DATA outBuffer = (PTIMER_DATA)malloc(bufferSize);
+		PTIMER_DATA outBuffer = (PTIMER_DATA)MAlloc(bufferSize);
 		if (!DeviceIoControl(hKernelDevice, CTL_GET_PROCESS_TIMERS_BUFFER, NULL, 0, &outBuffer, bufferSize, &ReturnLength, NULL))
 		{
 			LogErr(L"M_SU_GetProcessHotKeys DeviceIoControl err : %d", GetLastError());
@@ -797,7 +797,7 @@ M_CAPI(BOOL) M_SU_GetProcessTimers(DWORD pid, EnumProcessTimerCallBack callBack)
 			}
 		}
 
-		free(outBuffer);
+		MFree(outBuffer);
 		rs = TRUE;
 	}
 	return rs;

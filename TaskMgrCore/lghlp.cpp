@@ -111,8 +111,19 @@ LPWSTR str_item_setscstart_err;
 LPWSTR str_item_set_to;
 LPWSTR str_item_killtree_end;
 LPWSTR str_item_killtree_content;
+LPWSTR str_item_want_disconnectuser;
+LPWSTR str_item_want_logoffuser;
+LPWSTR str_item_please_enter_password;
+LPWSTR str_item_conss_failed;
+LPWSTR str_item_conect_ss;
+LPWSTR str_item_disconect_ss;
+LPWSTR str_item_disconss_failed;
+LPWSTR str_item_logoff_ss;
+LPWSTR str_item_logoff_ssfailed;
+LPWSTR str_item_set_proc_priority_failed;
+LPWSTR str_item_set_proc_affinity_failed;
 
-#define HASSTR(x) x=(LPWSTR)malloc(size*sizeof(WCHAR));wcscpy_s(x, size, msg)
+#define HASSTR(x) x=(LPWSTR)MAlloc(size*sizeof(WCHAR));wcscpy_s(x, size, msg)
 
 extern HINSTANCE hInst;
 HINSTANCE hInstRs = NULL;
@@ -217,6 +228,17 @@ void MLG_SetLanuageItems_Destroy()
 	delete str_item_set_to;
 	delete str_item_killtree_end;
 	delete str_item_killtree_content;
+	delete str_item_want_disconnectuser;
+	delete str_item_want_logoffuser;
+	delete str_item_please_enter_password;
+	delete str_item_conss_failed;
+	delete str_item_conect_ss;
+	delete str_item_disconect_ss;
+	delete str_item_disconss_failed;
+	delete str_item_logoff_ss;
+	delete str_item_logoff_ssfailed;
+	delete str_item_set_proc_priority_failed;
+	delete str_item_set_proc_affinity_failed;
 }
 void MLG_SetLanuageItems_1(int id, LPWSTR msg, int size)
 {
@@ -294,6 +316,18 @@ void MLG_SetLanuageItems_2(int id, LPWSTR msg, int size)
 	case 12: HASSTR(str_item_set_to); break;
 	case 13: HASSTR(str_item_killtree_end); break;
 	case 14: HASSTR(str_item_killtree_content); break;
+	case 15: HASSTR(str_item_want_disconnectuser); break;
+	case 16: HASSTR(str_item_want_logoffuser); break;
+	case 17: HASSTR(str_item_please_enter_password); break;
+	case 18: HASSTR(str_item_conss_failed); break;
+	case 19: HASSTR(str_item_conect_ss); break;
+	case 20: HASSTR(str_item_disconect_ss); break;
+	case 21: HASSTR(str_item_disconss_failed); break;
+	case 22: HASSTR(str_item_logoff_ss); break;
+	case 23: HASSTR(str_item_logoff_ssfailed); break;
+	case 24: HASSTR(str_item_set_proc_priority_failed); break;
+	case 25: HASSTR(str_item_set_proc_affinity_failed); break;
 	}
+
 
 }

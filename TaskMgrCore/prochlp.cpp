@@ -12,6 +12,7 @@
 #include "suact.h"
 #include "kda.h"
 #include "fmhlp.h"
+#include "handlehlp.h"
 #include "PathHelper.h"
 #include "StringHlp.h"
 #include <Psapi.h>
@@ -35,6 +36,7 @@ LPWSTR thisCommandPath = NULL;
 LPWSTR thisCommandName = NULL;
 LPWSTR thisCommandUWPName = NULL;
 DWORD thisCommandPid = 0;
+HANDLE thisCommandhProcess = 0;
 BOOL thisCommandIsImporant = FALSE;
 BOOL thisCommandIsVeryImporant = FALSE;
 HICON HIconDef;
@@ -66,6 +68,8 @@ NtOpenProcessFun NtOpenProcess;
 NtQueryInformationThreadFun NtQueryInformationThread;
 NtQuerySystemInformationFun NtQuerySystemInformation;
 NtQueryInformationProcessFun NtQueryInformationProcess;
+
+NtSetInformationProcessFun NtSetInformationProcess;
 
 NtQueryObjectFun NtQueryObject;
 NtQueryVirtualMemoryFun NtQueryVirtualMemory;
@@ -100,6 +104,13 @@ _GetExtendedTcpTable dGetExtendedTcpTable;
 //imahlp api
 extern fnIMAGELOAD ImageLoad;
 extern fnIMAGEUNLOAD ImageUnload;
+//winsta api
+_WinStationConnectW WinStationConnectW;
+_WinStationDisconnect WinStationDisconnect;
+_WinStationReset WinStationReset;
+_WinStationFreeMemory WinStationFreeMemory;
+_WinStationEnumerateW WinStationEnumerateW;
+_WinStationQueryInformationW WinStationQueryInformationW;
 
 //Enum apis
 EXTERN_C BOOL MAppVProcessAllWindows();
@@ -117,6 +128,8 @@ BOOL CALLBACK lpEnumProcWinsFunc(HWND hWnd, LPARAM lParam)
 	}
 	return TRUE;
 }
+
+std::list<PPROCHANDLE_STORAGE> processHandleStorage;
 
 void MFroceKillProcessUser()
 {
@@ -176,9 +189,9 @@ void MKillProcessTreeUser()
 			MAppMainCall(M_CALLBACK_KILLPROCTREE, (LPVOID)(ULONG_PTR)thisCommandPid, 0);
 	}
 }
-M_API BOOL MKillProcessUser2(DWORD pid, BOOL showErr)
+BOOL MKillProcessUser2(HWND hWnd, DWORD pid, BOOL showErr)
 {
-	if (pid > 4)
+	if (hWnd == hWndMain && pid > 4)
 	{
 		HANDLE hProcess;
 		NTSTATUS status = MOpenProcessNt(pid, &hProcess);
@@ -197,11 +210,74 @@ M_API BOOL MKillProcessUser2(DWORD pid, BOOL showErr)
 			MShowErrorMessage((LPWSTR)str_item_invalidproc.c_str(), (LPWSTR)str_item_kill_failed.c_str(), MB_ICONWARNING, MB_OK);
 		else if (NT_SUCCESS(status))
 			return TRUE;
-		else if(showErr)
+		else if (showErr)
 			ThrowErrorAndErrorCodeX(status, str_item_openprocfailed, (LPWSTR)str_item_kill_failed.c_str());
-	}			
+	}
 	return 0;
 }
+
+void MProcessHANDLEStorageDestroyItem(DWORD pid) {
+	PPROCHANDLE_STORAGE target = NULL;
+	for (auto it = processHandleStorage.begin(); it != processHandleStorage.end(); it++)
+	{
+		if ((*it)->pid == pid) {
+			target = *it;
+			break;
+		}
+	}
+	if (target) {
+		MCloseHandle(target->hProcess);
+		processHandleStorage.remove(target);
+		MFree(target);
+	}
+}
+void MProcessHANDLEStorageDestroy() {
+	for (auto it = processHandleStorage.begin(); it != processHandleStorage.end(); it++)
+		MFree(*it);
+	processHandleStorage.clear();
+}
+BOOL MTryGetProcessExitStatus(HANDLE hProcess) {
+	NTSTATUS exitStatus = 0;
+	NTSTATUS status = MGetProcessExitStatus(hProcess, &exitStatus);
+	if (NT_SUCCESS(status))
+		return exitStatus == 0;
+	else if (status == STATUS_INVALID_HANDLE || status == STATUS_INVALID_CID)
+		return FALSE;
+	else return TRUE;
+}
+HANDLE MTryFindOpenedProcessHANDLE(DWORD pid) {
+	if(pid<=4 )	return NULL;
+	PPROCHANDLE_STORAGE target = NULL;
+	for (auto it = processHandleStorage.begin(); it != processHandleStorage.end(); it++)
+	{
+		if ((*it)->pid == pid) {
+			target = *it;
+			break;
+		}
+	}
+	if (target)
+		return target->hProcess;
+	return NULL;
+}
+HANDLE MTryOpenProcess(DWORD pid) {
+	if (pid <= 4)	return NULL;
+	HANDLE oldHandle = MTryFindOpenedProcessHANDLE(pid);
+	if (oldHandle)
+		if (!MTryGetProcessExitStatus(oldHandle))
+			MProcessHANDLEStorageDestroyItem(pid);
+		else return oldHandle;
+	HANDLE hProcess = NULL;
+	NTSTATUS status = MOpenProcessNt(pid, &hProcess);
+	if (NT_SUCCESS(status) && hProcess) {
+		PPROCHANDLE_STORAGE item = (PPROCHANDLE_STORAGE)MAlloc(sizeof(PROCHANDLE_STORAGE));
+		item->hProcess = hProcess;
+		item->pid = pid;
+		processHandleStorage.push_back(item);
+		return hProcess;
+	}
+	return NULL;
+}
+
 M_API BOOL MGetPrivileges2()
 {
 	HANDLE hToken;
@@ -262,18 +338,18 @@ M_API BOOL MGetPrivileges2()
 M_API BOOL MEnumProcessCore()
 {
 	if (current_system_process) {
-		free(current_system_process);
+		MFree(current_system_process);
 		current_system_process = NULL;
 	}
 	DWORD dwSize = 0;
-	NtQuerySystemInformation(SystemProcessesAndThreadsInformation, NULL, 0, &dwSize);
-	current_system_process = (PSYSTEM_PROCESSES)malloc(dwSize);
-	return NT_SUCCESS(NtQuerySystemInformation(SystemProcessesAndThreadsInformation, current_system_process, dwSize, 0));
+	NtQuerySystemInformation(SystemProcessInformation, NULL, 0, &dwSize);
+	current_system_process = (PSYSTEM_PROCESSES)MAlloc(dwSize);
+	return NT_SUCCESS(NtQuerySystemInformation(SystemProcessInformation, current_system_process, dwSize, 0));
 }
 M_API VOID MEnumProcessFree()
 {
 	if (current_system_process) {
-		free(current_system_process);
+		MFree(current_system_process);
 		current_system_process = NULL;
 	}
 }
@@ -304,7 +380,7 @@ M_API BOOL MEnumProcess(EnumProcessCallBack calBack, LPVOID customData)
 	}
 	return FALSE;
 }
-M_API BOOL MEnumProcess2Refesh(EnumProcessCallBack2 callBack)
+M_API BOOL MEnumProcess2(EnumProcessCallBack2 callBack)
 {
 	if (callBack)
 	{
@@ -373,10 +449,11 @@ M_API BOOL MEnumProcessModules(DWORD dwPID, EnumProcessModulesCallBack callback,
 
 			BOOL bRet = FALSE;
 
-			PPEB pPeb = MGetProcessPeb(hProcess);
-			PPEB_LDR_DATA pLdr = NULL;
-			if (pPeb != 0)
+			PPEB pPeb = 0;
+			if (NT_SUCCESS(MGetProcessPeb(hProcess, &pPeb) && pPeb != 0))
 			{
+				PPEB_LDR_DATA pLdr = NULL;
+
 				status = NtReadVirtualMemory(hProcess, PTR_ADD_OFFSET(pPeb, FIELD_OFFSET(PEB, Ldr)), &pLdr, sizeof(PPEB_LDR_DATA), NULL);
 				if (!NT_SUCCESS(status)) return FALSE;
 
@@ -393,13 +470,13 @@ M_API BOOL MEnumProcessModules(DWORD dwPID, EnumProcessModulesCallBack callback,
 					status = NtReadVirtualMemory(hProcess, CONTAINING_RECORD(p, LDR_MODULE, InMemoryOrderModuleList), &thisModule, sizeof(LDR_MODULE), NULL);
 					status = NtReadVirtualMemory(hProcess, p, &thisListEntry, sizeof(LIST_ENTRY), NULL);
 
-					if (thisModule.BaseDllName.Buffer != NULL) 
+					if (thisModule.BaseDllName.Buffer != NULL)
 					{
 						WCHAR baseDllNameBuffer[MAX_PATH] = { 0 };
 						status = NtReadVirtualMemory(hProcess, thisModule.BaseDllName.Buffer, &baseDllNameBuffer, sizeof(baseDllNameBuffer), NULL);
 						wcscpy_s(thisName, baseDllNameBuffer);
 
-						WCHAR fullDllNameBuffer[MAX_PATH] = {0};
+						WCHAR fullDllNameBuffer[MAX_PATH] = { 0 };
 						if (thisModule.FullDllName.Buffer != NULL) {
 							status = NtReadVirtualMemory(hProcess, thisModule.FullDllName.Buffer, &fullDllNameBuffer, sizeof(fullDllNameBuffer), NULL);
 						}
@@ -418,6 +495,9 @@ M_API BOOL MEnumProcessModules(DWORD dwPID, EnumProcessModulesCallBack callback,
 		}
 	}
 	return FALSE;
+}
+M_API BOOL MEnumProcessHandles(DWORD pid, EHCALLBACK callback) {
+	return M_EH_EnumProcessHandles(pid, callback);
 }
 
 //EXE information
@@ -710,7 +790,7 @@ M_API BOOL MShowExeFileSignatureInfo(LPCWSTR pwszSourceFile)
 		NULL,
 		&dwSignerInfo);
 	if (!fResult) goto RETURN;
-	pSignerInfo = (PCMSG_SIGNER_INFO)malloc(dwSignerInfo);
+	pSignerInfo = (PCMSG_SIGNER_INFO)MAlloc(dwSignerInfo);
 	fResult = CryptMsgGetParam(hMsg,
 		CMSG_SIGNER_INFO_PARAM,
 		0,
@@ -742,7 +822,7 @@ M_API BOOL MShowExeFileSignatureInfo(LPCWSTR pwszSourceFile)
 	}
 	else LogErr(_T("CertFindCertificateInStore failed with %x\n"),	GetLastError());
 RETURN:
-	if (pSignerInfo)free(pSignerInfo);
+	if (pSignerInfo)MFree(pSignerInfo);
 	if (hStore != NULL) CertCloseStore(hStore, 0);
 	if (hMsg != NULL) CryptMsgClose(hMsg);
 	return fResult;
@@ -1030,19 +1110,14 @@ M_API BOOL MGetProcessFullPathEx(DWORD dwPID, LPWSTR outNter, PHANDLE phandle, L
 
 	TCHAR szResult[MAX_PATH];
 	TCHAR szImagePath[MAX_PATH];
-	HANDLE hProcess;
-
-
-	NTSTATUS rs = MOpenProcessNt(dwPID, &hProcess);
-	if (!hProcess || rs != STATUS_SUCCESS) return FALSE;
-	if (!K32GetProcessImageFileNameW(hProcess, szImagePath, MAX_PATH))
-	{
-		if (hProcess != INVALID_HANDLE_VALUE && hProcess != (HANDLE)0xCCCCCCCCULL)
-			CloseHandle(hProcess);
+	HANDLE hProcess = MTryOpenProcess(dwPID);
+	if (!hProcess) return FALSE;
+	if (!NT_SUCCESS(MGetProcessImageFileNameWin32(hProcess, szImagePath, MAX_PATH)))
 		return FALSE;
-	}
-	if (!MDosPathToNtPath(szImagePath, szResult)) return FALSE;
-	wcscpy_s(outNter, 260, szResult);
+	//if (!MDosPathToNtPath(szImagePath, szResult)) return FALSE;
+	//wcscpy_s(outNter, 260, szResult);
+	wcscpy_s(outNter, 260, szImagePath);
+
 	if (phandle)*phandle = hProcess;
 	else MCloseHandle(hProcess);
 	return TRUE;
@@ -1090,7 +1165,7 @@ M_API BOOL MGetProcessCommandLine(HANDLE handle, LPWSTR l, int maxcount, DWORD p
 			NTSTATUS status = MQueryProcessVariableSize(handle, ProcessCommandLineInformation, (PVOID*)&commandLine);
 			if (NT_SUCCESS(status)) {
 				wcscpy_s(l, maxcount, commandLine->Buffer);
-				free(commandLine);
+				MFree(commandLine);
 				return TRUE;
 			}
 		}
@@ -1150,15 +1225,15 @@ M_API ULONG_PTR MGetProcessWorkingSetPrivate(HANDLE hProcess, SIZE_T pageSize)
 	SIZE_T bufferSize;
 
 	bufferSize = sizeof(MEMORY_WORKING_SET_INFORMATION);
-	buffer = (PMEMORY_WORKING_SET_INFORMATION)malloc(bufferSize);
+	buffer = (PMEMORY_WORKING_SET_INFORMATION)MAlloc(bufferSize);
 	memset(buffer, 0, bufferSize);
 
 	status = NtQueryVirtualMemory(hProcess, NULL, MemoryWorkingSetInformation, buffer, bufferSize, NULL);
 	if (status == STATUS_INFO_LENGTH_MISMATCH)
 	{
 		bufferSize = sizeof(buffer->NumberOfEntries) + buffer->NumberOfEntries * sizeof(MEMORY_WORKING_SET_BLOCK);
-		free(buffer);
-		buffer = (PMEMORY_WORKING_SET_INFORMATION)malloc(bufferSize);
+		MFree(buffer);
+		buffer = (PMEMORY_WORKING_SET_INFORMATION)MAlloc(bufferSize);
 
 		status = NtQueryVirtualMemory(hProcess, NULL, MemoryWorkingSetInformation, buffer, bufferSize, NULL);
 		if (NT_SUCCESS(status))
@@ -1168,10 +1243,10 @@ M_API ULONG_PTR MGetProcessWorkingSetPrivate(HANDLE hProcess, SIZE_T pageSize)
 				if (!buffer->WorkingSetInfo[i].Shared) workSetPrivate++;
 
 			workSetPrivate *= pageSize;
-			free(buffer);
+			MFree(buffer);
 			return workSetPrivate;
 		}
-		free(buffer);
+		MFree(buffer);
 	}
 	return 0;
 }
@@ -1199,12 +1274,12 @@ M_API BOOL MGetProcessUserName(HANDLE hProcess, LPWSTR buffer, int maxcount)
 	}
 
 	pTokenUser = NULL;
-	pTokenUser = (PTOKEN_USER)malloc(dwSize);
+	pTokenUser = (PTOKEN_USER)MAlloc(dwSize);
 	if (pTokenUser == NULL)
 		result = FALSE;
 
 	if (!GetTokenInformation(hToken, TokenUser, pTokenUser, dwSize, &dwSize)) {
-		if (pTokenUser) free(pTokenUser);
+		if (pTokenUser) MFree(pTokenUser);
 		return FALSE;
 	}
 
@@ -1214,7 +1289,7 @@ M_API BOOL MGetProcessUserName(HANDLE hProcess, LPWSTR buffer, int maxcount)
 		result = TRUE;
 	}
 
-	if (pTokenUser) free(pTokenUser);
+	if (pTokenUser) MFree(pTokenUser);
 
 	return result;
 }
@@ -1228,6 +1303,12 @@ M_API ULONG MGetProcessHandlesCount(PSYSTEM_PROCESSES p)
 	if (p) return p->HandleCount;
 	return 0;
 }
+M_API DWORD MGetProcessSessionID(DWORD pid)
+{
+	DWORD sid = 0;
+	ProcessIdToSessionId(pid, &sid);
+	return sid;
+}
 M_API NTSTATUS MGetProcessMappedFileName(HANDLE ProcessHandle, PVOID BaseAddress, LPWSTR OutFileName, int BufferSize)
 {
 	NTSTATUS status;
@@ -1237,7 +1318,7 @@ M_API NTSTATUS MGetProcessMappedFileName(HANDLE ProcessHandle, PVOID BaseAddress
 	PUNICODE_STRING unicodeString;
 
 	bufferSize = 0x100;
-	buffer = malloc(bufferSize);
+	buffer = MAlloc(bufferSize);
 
 	status = NtQueryVirtualMemory(
 		ProcessHandle,
@@ -1250,9 +1331,9 @@ M_API NTSTATUS MGetProcessMappedFileName(HANDLE ProcessHandle, PVOID BaseAddress
 
 	if (status == STATUS_BUFFER_OVERFLOW)
 	{
-		free(buffer);
+		MFree(buffer);
 		bufferSize = returnLength;
-		buffer = malloc(bufferSize);
+		buffer = MAlloc(bufferSize);
 
 		status = NtQueryVirtualMemory(
 			ProcessHandle,
@@ -1266,7 +1347,7 @@ M_API NTSTATUS MGetProcessMappedFileName(HANDLE ProcessHandle, PVOID BaseAddress
 
 	if (!NT_SUCCESS(status))
 	{
-		free(buffer);
+		MFree(buffer);
 		return status;
 	}
 
@@ -1274,15 +1355,113 @@ M_API NTSTATUS MGetProcessMappedFileName(HANDLE ProcessHandle, PVOID BaseAddress
 
 	wcscpy_s(OutFileName, BufferSize, unicodeString->Buffer);
 
-	free(buffer);
+	MFree(buffer);
 	return status;
 }
-M_API PPEB MGetProcessPeb(HANDLE handle) {
+M_API NTSTATUS MGetProcessPeb(HANDLE ProcessHandle, PPEB* pPpeb) {
 	ULONG outLength = 0;
 	PROCESS_BASIC_INFORMATION basicInfo = { 0 };
-	if (NT_SUCCESS(NtQueryInformationProcess(handle, ProcessBasicInformation, &basicInfo, sizeof(PROCESS_BASIC_INFORMATION), &outLength)))
-		return basicInfo.PebBaseAddress;
-	return 0;
+	NTSTATUS status = MGetProcessBasicInformation(ProcessHandle, &basicInfo);
+	if (NT_SUCCESS(status))
+		if(pPpeb) *pPpeb = basicInfo.PebBaseAddress;
+	return status;
+}
+M_API NTSTATUS MGetProcessImageFileNameWin32(HANDLE ProcessHandle,	LPWSTR FileNameBuffer, ULONG FileNameBufferSize)
+{
+	NTSTATUS status;
+	PUNICODE_STRING fileName;
+
+	status = MQueryProcessVariableSize(ProcessHandle, ProcessImageFileNameWin32, (PVOID*)&fileName);
+
+	if (!NT_SUCCESS(status))
+		return status;
+
+	wcscpy_s(FileNameBuffer, FileNameBufferSize, fileName->Buffer);
+
+	MFree(fileName);
+
+	return status;
+}
+M_API NTSTATUS MGetProcessImageFileName(HANDLE ProcessHandle, LPWSTR FileNameBuffer, ULONG FileNameBufferSize)
+{
+	NTSTATUS status;
+	PUNICODE_STRING fileName;
+
+	status = MQueryProcessVariableSize(
+		ProcessHandle,
+		ProcessImageFileName,
+		(PVOID*)&fileName
+	);
+	if (!NT_SUCCESS(status))
+		return status;
+	wcscpy_s(FileNameBuffer, FileNameBufferSize, fileName->Buffer);
+	MFree(fileName);
+	return status;
+}
+M_API NTSTATUS MGetProcessBasicInformation(HANDLE ProcessHandle, PPROCESS_BASIC_INFORMATION BasicInformation)
+{
+	return NtQueryInformationProcess(ProcessHandle, ProcessBasicInformation, BasicInformation, sizeof(PROCESS_BASIC_INFORMATION), NULL);
+}
+M_API NTSTATUS MGetProcessExecuteFlags(HANDLE ProcessHandle, PULONG ExecuteFlags)
+{
+	return NtQueryInformationProcess(ProcessHandle, ProcessExecuteFlags, ExecuteFlags, sizeof(ULONG), NULL);
+}
+M_API NTSTATUS MGetProcessIoPriority(HANDLE ProcessHandle, IO_PRIORITY_HINT *IoPriority)
+{
+	return NtQueryInformationProcess(
+		ProcessHandle,
+		ProcessIoPriority,
+		IoPriority,
+		sizeof(IO_PRIORITY_HINT),
+		NULL
+	);
+}
+M_API NTSTATUS MGetProcessExitStatus(HANDLE ProcessHandle, NTSTATUS *ExitStatus) {
+	ULONG outLength = 0;
+	PROCESS_BASIC_INFORMATION basicInfo = { 0 };
+	NTSTATUS status = MGetProcessBasicInformation(ProcessHandle, &basicInfo);
+	if (NT_SUCCESS(status))
+		if (ExitStatus) *ExitStatus = basicInfo.ExitStatus;
+	return status;
+}
+M_API NTSTATUS MGetProcessBasePriority(HANDLE ProcessHandle, PULONG BasePriority)
+{
+	return NtQueryInformationProcess(
+		ProcessHandle,
+		ProcessBasePriority,
+		BasePriority,
+		sizeof(ULONG),
+		NULL
+	);
+}
+M_API NTSTATUS MGetProcessAffinityMask(HANDLE ProcessHandle, PULONG_PTR AffinityMask)
+{
+	NTSTATUS status;
+	PROCESS_BASIC_INFORMATION pbi;
+	status = MGetProcessBasicInformation(ProcessHandle, &pbi);
+	if (NT_SUCCESS(status))
+	{
+		if (AffinityMask)
+			*AffinityMask = pbi.AffinityMask;
+	}
+	return status;
+}
+//Set Process information 
+NTSTATUS MSetProcessPriorityClass(HANDLE ProcessHandle, UCHAR PriorityClass)
+{
+	PROCESS_PRIORITY_CLASS priorityClass;
+	priorityClass.Foreground = FALSE;
+	priorityClass.PriorityClass = PriorityClass;
+	return NtSetInformationProcess(ProcessHandle, ProcessPriorityClass, &priorityClass, sizeof(PROCESS_PRIORITY_CLASS));
+}
+NTSTATUS MSetProcessAffinityMask(HANDLE ProcessHandle,	ULONG_PTR AffinityMask)
+{
+	return NtSetInformationProcess(
+		ProcessHandle,
+		ProcessAffinityMask,
+		&AffinityMask,
+		sizeof(ULONG_PTR)
+	);
 }
 
 //User names
@@ -1291,7 +1470,7 @@ std::list<PUSERNAME> allUserNames;
 
 VOID MUserNameSIDsDeleteAll() {
 	for (auto it = allUserNames.begin(); it != allUserNames.end(); it++)
-		free(*it);
+		MFree(*it);
 	allUserNames.clear();
 }
 PUSERNAME MFindUserNameBySID(PSID sid) {
@@ -1315,12 +1494,12 @@ M_API PUSERNAME MGetUserNameBySID(PSID sid) {
 			DWORD dwDomainSize = 128;
 			SID_NAME_USE SNU;
 
-			addedItem = (PUSERNAME)malloc(sizeof(USERNAME));
+			addedItem = (PUSERNAME)MAlloc(sizeof(USERNAME));
 			addedItem->Sid = sid;
 			if (LookupAccountSid(NULL, sid, addedItem->UserName, &dwNameSize, addedItem->DomainName, &dwDomainSize, &SNU) != 0)
 				allUserNames.push_back(addedItem);
 			else {
-				free(addedItem);
+				MFree(addedItem);
 				addedItem = nullptr;
 			}
 			return addedItem;
@@ -1337,7 +1516,7 @@ M_API PUSERNAME MGetUserNameBySID(PSID sid) {
 	{
 		UINT32 bufferLength = 0;
 		LONG result = dGetPackageId(handle, &bufferLength, nullptr);
-		BYTE* buffer = (PBYTE)malloc(bufferLength);
+		BYTE* buffer = (PBYTE)MAlloc(bufferLength);
 		result = dGetPackageId(handle, &bufferLength, buffer);
 		if (result == ERROR_SUCCESS) {
 			data->packageId = reinterpret_cast<PACKAGE_ID*>(buffer);
@@ -1559,10 +1738,10 @@ M_CAPI(BOOL) MEnumProcessPrivileges(DWORD dwId, EnumPrivilegesCallBack callBack)
 		// 试探一下需要分配多少内存
 		GetTokenInformation(hToken, TokenPrivileges, NULL, dwNeededSize, &dwNeededSize);
 		// 分配所需内存大小
-		pTp = (PTOKEN_PRIVILEGES)malloc(dwNeededSize);
+		pTp = (PTOKEN_PRIVILEGES)MAlloc(dwNeededSize);
 		if (!GetTokenInformation(hToken, TokenPrivileges, pTp, dwNeededSize, &dwNeededSize))
 		{
-			free(pTp);
+			MFree(pTp);
 			LogErr(L"GetTokenInformation failed pid : %d Error : %d", dwId, GetLastError());
 			return 0;
 		}
@@ -1577,7 +1756,7 @@ M_CAPI(BOOL) MEnumProcessPrivileges(DWORD dwId, EnumPrivilegesCallBack callBack)
 				DWORD dwNameLen = 0;    // 权限名字长度
 				LookupPrivilegeName(NULL, &pTp->Privileges[i].Luid, NULL, &dwNameLen);
 				// 分配需要的内存
-				pUidName = (WCHAR *)malloc(dwNameLen*sizeof(WCHAR));
+				pUidName = (WCHAR *)MAlloc(dwNameLen*sizeof(WCHAR));
 				// 获取权限名
 				LookupPrivilegeName(NULL, &pTp->Privileges[i].Luid, pUidName, &dwNameLen);
 				// 如果该权限是启用状态就记录
@@ -1585,10 +1764,10 @@ M_CAPI(BOOL) MEnumProcessPrivileges(DWORD dwId, EnumPrivilegesCallBack callBack)
 				{
 					callBack(pUidName);
 				}
-				free(pUidName);
+				MFree(pUidName);
 			}
 		}
-		free(pTp);
+		MFree(pTp);
 		CloseHandle(hToken);
 	}
 	return FALSE;
@@ -1596,6 +1775,45 @@ M_CAPI(BOOL) MEnumProcessPrivileges(DWORD dwId, EnumPrivilegesCallBack callBack)
 
 extern HWND selectItem4;
 
+void MSetProcessPriorityClassMenuHandler(UCHAR PriorityClass) {
+	NTSTATUS status = MSetProcessPriorityClass(thisCommandhProcess, PriorityClass);
+	if (!NT_SUCCESS(status))
+		MShowErrorMessageWithNTSTATUS(str_item_set_proc_priority_failed, DEFDIALOGGTITLE, status);
+}
+void MAppProcPropertyClassHandleWmCommand(WPARAM wParam)
+{
+	switch (wParam)
+	{
+	case ID_SETPRIORTY_REALTIME: {
+		MSetProcessPriorityClassMenuHandler(PROCESS_PRIORITY_CLASS_REALTIME);
+		break;
+	}
+	case ID_SETPRIORTY_HIGH: {
+		MSetProcessPriorityClassMenuHandler(PROCESS_PRIORITY_CLASS_HIGH);
+		break;
+	}
+	case ID_SETPRIORTY_ABOVENORMAL: {
+		MSetProcessPriorityClassMenuHandler(PROCESS_PRIORITY_CLASS_ABOVE_NORMAL);
+		break;
+	}
+	case ID_SETPRIORTY_NORMAL: {
+		MSetProcessPriorityClassMenuHandler(PROCESS_PRIORITY_CLASS_NORMAL);
+		break;
+	}
+	case ID_SETPRIORTY_BELOWNORMAL: {
+		MSetProcessPriorityClassMenuHandler(PROCESS_PRIORITY_CLASS_BELOW_NORMAL);
+		break;
+	}
+	case ID_SETPRIORTY_LOW: {
+		MSetProcessPriorityClassMenuHandler(PROCESS_PRIORITY_CLASS_IDLE);
+		break;
+	}
+	default:
+		break;
+	}
+}
+
+//MENU
 M_CAPI(int) MAppWorkShowMenuProcessPrepare(LPWSTR strFilePath, LPWSTR strFileName, DWORD pid, BOOL isImporant, BOOL isVeryImporant)
 {
 	thisCommandIsVeryImporant = isVeryImporant;
@@ -1617,19 +1835,20 @@ M_CAPI(int) MAppWorkShowMenuProcessPrepare(LPWSTR strFilePath, LPWSTR strFileNam
 	}
 	return 0;
 }
-//MENU
 M_CAPI(int) MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWORD pid, HWND hDlg, HWND selectHWND, int data, int type, int x, int y)
 {
 	thisCommandPid = pid;
+
 	HMENU hroot = LoadMenu(hInstRs, MAKEINTRESOURCE(IDR_MENUTASK));
+	int addMenu = 0;
+
 	if (!hroot) return 0;
 	if (pid > 0)
 	{
 		HMENU hpop = GetSubMenu(hroot, 0);
 
 		POINT pt;
-		if (x == 0 && y == 0)
-			GetCursorPos(&pt);
+		if (x == 0 && y == 0) GetCursorPos(&pt);
 		else {
 			pt.x = x;
 			pt.y = y;
@@ -1650,6 +1869,11 @@ M_CAPI(int) MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWOR
 			EnableMenuItem(hpop, IDM_VKSTRUCTS, MF_DISABLED);
 			EnableMenuItem(hpop, IDM_VHOTKEY, MF_DISABLED);
 			EnableMenuItem(hpop, IDM_VTIMER, MF_DISABLED);
+			EnableMenuItem(hpop, IDM_DEBUG, MF_DISABLED);
+
+			EnableMenuItem(hpop, 9 + addMenu, MF_BYPOSITION | MF_DISABLED);
+			EnableMenuItem(hpop, 10 + addMenu, MF_BYPOSITION | MF_DISABLED);
+			EnableMenuItem(hpop, 11 + addMenu, MF_BYPOSITION | MF_DISABLED);
 		}
 		if (MStrEqualW(strFilePath, L"") || MStrEqualW(strFilePath, L"-")) {
 			EnableMenuItem(hpop, IDM_OPENPATH, MF_DISABLED);
@@ -1666,6 +1890,7 @@ M_CAPI(int) MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWOR
 		{
 			selectItem4 = selectHWND;
 			InsertMenu(hpop, 1, MF_BYPOSITION, IDM_SETTO, str_item_set_to);
+			addMenu++;
 		}
 
 		killUWPCmdSendBack = type == 3;
@@ -1703,7 +1928,53 @@ M_CAPI(int) MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWOR
 				EnableMenuItem(hpop, IDM_VTIMER, MF_DISABLED);
 				EnableMenuItem(hpop, IDM_VPRIVILEGE, MF_DISABLED);
 				EnableMenuItem(hpop, IDM_DEBUG, MF_DISABLED);
+
+				EnableMenuItem(hpop, 9 + addMenu, MF_BYPOSITION | MF_DISABLED);
+				EnableMenuItem(hpop, 10 + addMenu, MF_BYPOSITION | MF_DISABLED);
+				EnableMenuItem(hpop, 11 + addMenu, MF_BYPOSITION | MF_DISABLED);
 			}
+		}
+
+		thisCommandhProcess = MTryFindOpenedProcessHANDLE(pid);
+
+		if (pid > 4 && thisCommandhProcess)
+		{
+			PROCESS_PRIORITY_CLASS priorityClass = { 0 };
+			NTSTATUS status = NtQueryInformationProcess(thisCommandhProcess, ProcessPriorityClass, &priorityClass, sizeof(PROCESS_PRIORITY_CLASS), NULL);
+			if (NT_SUCCESS(status))
+			{
+				HMENU hpopAfs = GetSubMenu(hpop, 10 + addMenu);
+				switch (priorityClass.PriorityClass)
+				{
+				case PROCESS_PRIORITY_CLASS_REALTIME:
+					CheckMenuRadioItem(hpopAfs, 0, 5, 0, MF_BYPOSITION);
+					break;
+				case PROCESS_PRIORITY_CLASS_HIGH:
+					CheckMenuRadioItem(hpopAfs, 0, 5, 1, MF_BYPOSITION);
+					break;
+				case PROCESS_PRIORITY_CLASS_ABOVE_NORMAL:
+					CheckMenuRadioItem(hpopAfs, 0, 5, 2, MF_BYPOSITION);
+					break;
+				case PROCESS_PRIORITY_CLASS_NORMAL:
+					CheckMenuRadioItem(hpopAfs, 0, 5, 3, MF_BYPOSITION);
+					break;
+				case PROCESS_PRIORITY_CLASS_BELOW_NORMAL:
+					CheckMenuRadioItem(hpopAfs, 0, 5, 4, MF_BYPOSITION);
+					break;
+				case PROCESS_PRIORITY_CLASS_IDLE:
+					CheckMenuRadioItem(hpopAfs, 0, 5, 5, MF_BYPOSITION);
+					break;
+				}
+			}
+			else
+			{
+				Log(L"NtQueryInformationProcess  ProcessPriorityClass FAILED ! %s", MNtStatusToStr(status));
+				EnableMenuItem(hpop, 10 + addMenu, MF_BYPOSITION | MF_DISABLED);
+			}
+		}
+		else {
+			EnableMenuItem(hpop, 10 + addMenu, MF_BYPOSITION | MF_DISABLED);
+			EnableMenuItem(hpop, 11 + addMenu, MF_BYPOSITION | MF_DISABLED);
 		}
 
 		TrackPopupMenu(hpop,
@@ -1716,6 +1987,8 @@ M_CAPI(int) MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWOR
 	}
 	else if (pid == 0)
 	{
+		thisCommandhProcess = NULL;
+
 		HMENU hpop = GetSubMenu(hroot, 0);
 		POINT pt;
 		GetCursorPos(&pt);
@@ -1737,6 +2010,11 @@ M_CAPI(int) MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWOR
 		EnableMenuItem(hpop, IDM_VPRIVILEGE, MF_DISABLED);
 		EnableMenuItem(hpop, IDM_FILEPROP, MF_DISABLED);
 		EnableMenuItem(hpop, IDM_DEBUG, MF_DISABLED);
+
+		EnableMenuItem(hpop, ID_TASKMENU_SETAFFINITY, MF_DISABLED);
+
+		EnableMenuItem(hpop, 9, MF_BYPOSITION | MF_DISABLED);
+		EnableMenuItem(hpop, 10, MF_BYPOSITION | MF_DISABLED);
 
 		if (MStrEqualW(strFilePath, L"") || MStrEqualW(strFilePath, L"-")) {
 			EnableMenuItem(hpop, IDM_OPENPATH, MF_DISABLED);
@@ -1773,6 +2051,7 @@ HINSTANCE hPerfDisk;
 HINSTANCE hComBase;
 HINSTANCE hClr;
 HINSTANCE hGdiPlus;
+HINSTANCE hWinsta;
 
 //动态加载api
 BOOL LoadDll()
@@ -1789,6 +2068,7 @@ BOOL LoadDll()
 	hPerfDisk = LoadLibrary(L"perfdisk.dll");
 	hComBase = LoadLibrary(L"combase.dll");
 	hGdiPlus = LoadLibrary(L"GdiPlus.dll");
+	hWinsta = LoadLibrary(L"WinSta.dll");
 	thisCommandPath = new WCHAR[260];
 	thisCommandName = new WCHAR[260];
 	thisCommandUWPName = new WCHAR[260];
@@ -1833,6 +2113,7 @@ BOOL LoadDll()
 		RtlGetLastWin32Error = (RtlGetLastWin32ErrorFun)GetProcAddress(hNtDll, "RtlGetLastWin32Error");
 		NtQueryVirtualMemory = (NtQueryVirtualMemoryFun)GetProcAddress(hNtDll, "NtQueryVirtualMemory");
 		NtReadVirtualMemory = (NtReadVirtualMemoryFun)GetProcAddress(hNtDll, "NtReadVirtualMemory");
+		NtSetInformationProcess = (NtSetInformationProcessFun)GetProcAddress(hNtDll, "NtSetInformationProcess");
 
 		//shell32
 		RunFileDlg = (_RunFileDlg)MGetProcedureAddress(hShell32, NULL, 61);
@@ -1857,6 +2138,14 @@ BOOL LoadDll()
 		//
 		ImageLoad = (fnIMAGELOAD)GetProcAddress(hImghlp, "ImageLoad");
 		ImageUnload = (fnIMAGEUNLOAD)GetProcAddress(hImghlp, "ImageUnload");
+
+		WinStationConnectW = (_WinStationConnectW)GetProcAddress(hWinsta, "WinStationConnectW");
+		WinStationDisconnect = (_WinStationDisconnect)GetProcAddress(hWinsta, "WinStationDisconnect");
+		WinStationReset = (_WinStationReset)GetProcAddress(hWinsta, "WinStationReset");
+		WinStationFreeMemory = (_WinStationFreeMemory)GetProcAddress(hWinsta, "WinStationFreeMemory");
+		WinStationEnumerateW = (_WinStationEnumerateW)GetProcAddress(hWinsta, "WinStationEnumerateW");
+		WinStationQueryInformationW = (_WinStationQueryInformationW)GetProcAddress(hWinsta, "WinStationQueryInformationW");
+
 		return TRUE;
 	}
 }
@@ -1867,6 +2156,7 @@ void FreeDll()
 	FreeLibrary(hCryptui);
 	FreeLibrary(hIphlpapi);
 	FreeLibrary(hImghlp);
+	FreeLibrary(hWinsta);
 
 	delete thisCommandUWPName;
 	delete thisCommandPath;

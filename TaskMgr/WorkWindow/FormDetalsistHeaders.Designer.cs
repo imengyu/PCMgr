@@ -33,6 +33,7 @@
             this.buttonCancel = new System.Windows.Forms.Button();
             this.buttonOk = new System.Windows.Forms.Button();
             this.listItems = new System.Windows.Forms.ListView();
+            this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.SuspendLayout();
             // 
             // labelTip
@@ -58,9 +59,16 @@
             // 
             resources.ApplyResources(this.listItems, "listItems");
             this.listItems.CheckBoxes = true;
+            this.listItems.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeader1});
+            this.listItems.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
             this.listItems.Name = "listItems";
             this.listItems.UseCompatibleStateImageBehavior = false;
-            this.listItems.View = System.Windows.Forms.View.List;
+            this.listItems.View = System.Windows.Forms.View.Details;
+            // 
+            // columnHeader1
+            // 
+            resources.ApplyResources(this.columnHeader1, "columnHeader1");
             // 
             // FormDetalsistHeaders
             // 
@@ -88,5 +96,6 @@
         private System.Windows.Forms.Button buttonCancel;
         private System.Windows.Forms.Button buttonOk;
         private System.Windows.Forms.ListView listItems;
+        private System.Windows.Forms.ColumnHeader columnHeader1;
     }
 }

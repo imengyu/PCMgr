@@ -62,7 +62,6 @@ namespace PCMgr.WorkWindow
         {
             if (currentPid >= 4)
             {
-                labelEnuming.Show();
                 listView1.Items.Clear();
                 new Thread(EnumHandles).Start();
             }
@@ -77,9 +76,13 @@ namespace PCMgr.WorkWindow
 
         private void EnumHandles()
         {
+            listView1.Invoke(new Action(listView1.Hide));
+            labelEnuming.Invoke(new Action(labelEnuming.Show));
+
+            Thread.Sleep(1000);
+            MEnumProcessHandles(currentPid, CallbackPtr);
+
             Invoke(new Action(delegate {
-                listView1.Visible = false;
-                MEnumProcessHandles(currentPid, CallbackPtr);
                 Text = string.Format(LanuageMgr.GetStr("VHandleTitle"), currentName, currentPid, listView1.Items.Count);
                 labelEnuming.Hide();
                 listView1.Visible = true;
@@ -128,7 +131,6 @@ namespace PCMgr.WorkWindow
         private void FormVHandles_Shown(object sender, EventArgs e)
         {
             刷新ToolStripMenuItem_Click(sender, e);
-            labelEnuming.Hide();
         }
 
         private void listView1_KeyDown(object sender, KeyEventArgs e)

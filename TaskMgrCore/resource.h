@@ -23,20 +23,38 @@
 #define IDR_MENUSIMPPROC                119
 #define IDS_STRING_RUN2TITLE            120
 #define IDS_STRING_RUN2TEXT             121
+#define IDR_MENUUSER                    121
 #define IDS_STRING_CONRUN               122
+#define IDD_CONNECTSESS                 122
 #define IDS_STRING_CANRUN               123
 #define IDS_STRING_KILLOLD              124
+#define IDD_STATS                       124
 #define IDD_VWINS                       125
-#define IDS_STRING_KILLOLDFAILED 126
+#define IDS_STRING_KILLOLDFAILED        126
+#define IDD_PEVIEW                      127
 #define IDI_ICONACTIVEDWIN              206
 #define IDR_WINSMENU                    209
 #define IDR_MODULSMENU                  214
 #define IDD_VMODULS                     232
 #define IDR_THREADMENU                  304
+#define IDC_EDIT                        1001
 #define IDC_THREADLIST                  1002
+#define IDC_USERNAME                    1002
+#define IDC_STAT_MEM                    1004
+#define IDC_STAT_GC                     1005
+#define IDC_FORCEGC                     1006
 #define IDC_MODULLIST                   1007
+#define IDC_STAT_AC_MEM                 1007
+#define IDC_STAT_FREEMEM                1008
 #define IDC_TITLE                       1009
+#define IDC_STAT_INUSEMEM               1009
+#define IDC_STAT_ACLLMEM                1010
 #define IDC_CLOSEWINDOW                 1011
+#define IDC_BUTTON1                     1011
+#define IDC_BTN_REFESH                  1011
+#define IDC_EXPORTTABLES                1012
+#define IDC_TABLES                      1012
+#define IDC_TREEITEMS                   1013
 #define IDC_WINSLIST                    1106
 #define IDC_RESULT                      1136
 #define IDM_ABOUT                       40004
@@ -48,6 +66,7 @@
 #define ID_THREADMENU_RESUTHREAD        40010
 #define IDM_SPYWIN                      40011
 #define ID_WINSMENU_SPYWIN              40012
+#define IDM_SYSTEM_SLEEP                40017
 #define IDM_SYSTEM_SHUTDOWN             40018
 #define IDM_SYSTEM_REBOOT               40019
 #define ID_WINSMENU_SETTO               40020
@@ -88,7 +107,6 @@
 #define ID_FMMAIN_NEW                   40066
 #define ID_FMMAIN_NEWFOLDER             40067
 #define ID_WINSMENU_HIDEWINDOW          40068
-#define ID_FMMAIN_SELALL                40078
 #define ID_FMMAIN_NOSEL                 40069
 #define ID_FMMAIN_RESEL                 40070
 #define ID_FMMAIN_PROP                  40071
@@ -97,6 +115,7 @@
 #define ID_FMM_HIDDEN                   40074
 #define ID_FMM_SYSTEM                   40075
 #define ID_FMMAIN_SHIWHIDEDFILES        40077
+#define ID_FMMAIN_SELALL                40078
 #define ID_FMFOLDER_PROP                40088
 #define ID_FMFOLDER_COPYPATH            40089
 #define ID_FMFOLDER_RENAME              40090
@@ -152,6 +171,16 @@
 #define ID_SIMPPROC_ENDTASK             40184
 #define ID_SIMPPROC_SETTO               40185
 #define IDM_SETTO                       40186
+#define ID_USER_CONNECT                 40189
+#define ID_USER_DISCONNECT              40190
+#define ID_USER_LOGOOFF                 40191
+#define ID_TASKMENU_SETAFFINITY         40199
+#define ID_SETPRIORTY_REALTIME          40202
+#define ID_SETPRIORTY_HIGH              40203
+#define ID_SETPRIORTY_ABOVENORMAL       40204
+#define ID_SETPRIORTY_NORMAL            40205
+#define ID_SETPRIORTY_BELOWNORMAL       40206
+#define ID_SETPRIORTY_LOW               40207
 #define ID_THREADMENU_KILLKERNEL        41008
 #define ID_WINSMENU_SHOWWND             41009
 #define IDM_REFESH                      41012
@@ -206,9 +235,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        121
-#define _APS_NEXT_COMMAND_VALUE         40186
-#define _APS_NEXT_CONTROL_VALUE         1001
+#define _APS_NEXT_RESOURCE_VALUE        129
+#define _APS_NEXT_COMMAND_VALUE         40208
+#define _APS_NEXT_CONTROL_VALUE         1014
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

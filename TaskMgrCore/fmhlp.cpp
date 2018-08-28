@@ -467,7 +467,7 @@ M_API UINT MFM_CalcFileCount(const wchar_t* szFileDir)
 M_API BOOL MFM_DeleteDir(const wchar_t* szFileDir)
 {
 	size_t strsize = wcslen(szFileDir) + 1;
-	LPWSTR path = (LPWSTR)malloc(strsize * sizeof(wchar_t));
+	LPWSTR path = (LPWSTR)MAlloc(strsize * sizeof(wchar_t));
 	wcscpy_s(path, strsize, szFileDir);
 	HANDLE hThread = CreateThread(NULL, 0, MFM_DeleteDirThread, (LPVOID)path, 0, 0);
 	if (hThread)return TRUE;
@@ -541,7 +541,7 @@ M_API BOOL MFM_FillData(const wchar_t* szFileDir, BOOL force, UINT fileSize)
 	HANDLE hFile;
 	if (M_SU_CreateFile(szFileDir, GENERIC_WRITE | GENERIC_READ, 0, OPEN_EXISTING, &hFile))
 	{
-		LPVOID buffer = malloc(fileSize);
+		LPVOID buffer = MAlloc(fileSize);
 		memset(buffer, 0, fileSize);
 		DWORD written = 0;
 		SetFilePointer(hFile, 0, 0, FILE_BEGIN);
@@ -621,7 +621,7 @@ DWORD WINAPI MFM_DeleteDirThread(LPVOID lpThreadParameter)
 	MFM_DeleteDirInnern((LPWSTR)lpThreadParameter);
 	MAppMainCall(M_CALLBACK_UPDATE_PROGRESS_DLG_TO_DELETEING, 0, 0);
 
-	free(lpThreadParameter);
+	MFree(lpThreadParameter);
 	return 0;
 }
 BOOL MFM_DeleteDirInnern(const wchar_t* szFileDir)

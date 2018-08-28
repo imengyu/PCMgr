@@ -33,7 +33,9 @@ namespace PCMgr
             if (run && NativeMethods.MIs64BitOS())
                 run = Show64Warn();
 #endif
-            
+
+            NativeMethods.MAppWorkCall3(177, IntPtr.Zero, IntPtr.Zero);
+
             //Application.Run(new WorkWindow.FormAbout());
             if (run) Application.Run(new FormMain(agrs));
         }
@@ -118,10 +120,38 @@ namespace PCMgr
                         NativeMethods.Log("MainRunAgrs run kda ");
                         Application.Run(new WorkWindow.FormKDA());
                         return false;
+                    case "vexp":
+                        if (agrs.Length > 1)
+                        {
+                            if (NativeMethods.MFM_FileExist(agrs[1]))
+                            {
+                                IntPtr file = Marshal.StringToHGlobalUni(agrs[1]);
+                                NativeMethods.MAppWorkCall3(168, IntPtr.Zero, file);
+                                Marshal.FreeHGlobal(file);
+                                return false;
+                            }
+                            else NativeMethods.Log("Invalid args[1] : " + agrs[1] + " File not exists");
+                        }
+                        break;
+                    case "vimp":
+                        if (agrs.Length > 1)
+                        {
+                            if (NativeMethods.MFM_FileExist(agrs[1]))
+                            {
+                                IntPtr file = Marshal.StringToHGlobalUni(agrs[1]);
+                                NativeMethods.MAppWorkCall3(169, IntPtr.Zero, file);
+                                Marshal.FreeHGlobal(file);
+                                return false;
+                            }
+                            else NativeMethods.Log("Invalid args[1] : " + agrs[1] + " File not exists");
+                        }
+                        break;
                 }
             }
             return true;
         }
+
+        #region Start Warn
 
         private static bool Show64Warn()
         {
@@ -179,6 +209,8 @@ namespace PCMgr
             NativeMethods.SetConfigBool("X32Warning", "AppSetting", !e.IsChecked);
         }
 
+        #endregion
+
         private static void Application_ThreadException(object sender, System.Threading.ThreadExceptionEventArgs e)
         {
             NativeMethods.FLogErr(e.Exception.ToString());
@@ -187,7 +219,9 @@ namespace PCMgr
             if (d == DialogResult.Abort)
                 Environment.Exit(0);
         }
-    
+
+        #region Program Entry
+
         [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern int MAppMainGetArgs([MarshalAs(UnmanagedType.LPWStr)]string cmdline);
         [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
@@ -210,5 +244,7 @@ namespace PCMgr
             Main(agrs.ToArray());
             return 0;
         }
+
+        #endregion
     }
 }

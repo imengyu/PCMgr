@@ -2,6 +2,8 @@
 #include "stdafx.h"
 #include "perfhlp.h"
 #include "ntdef.h"
+#include "nthlp.h"
+#include "handlehlp.h"
 
 //枚举进程模块回调
 //返回FALSE中停止枚举
@@ -47,6 +49,12 @@ typedef void(__cdecl*EnumProcessCallBack2)(
 	PSYSTEM_PROCESSES proc//进程信息数据结构（下一次调用MEnumProcess/MEnumProcessCore之后会被释放）
 	);
 
+//枚举进程权限回调
+//    name：权限名字
+typedef void(__cdecl *EnumPrivilegesCallBack)(LPWSTR name);
+
+//private
+
 typedef struct tag_USERNAME {
 	PSID Sid;
 	WCHAR UserName[64];
@@ -65,19 +73,27 @@ typedef struct tag_PEOCESSKINFO {
 	WCHAR ImageFileName[MAX_PATH];
 	WCHAR ImageFullName[MAX_PATH];
 }PEOCESSKINFO,*PPEOCESSKINFO;
+typedef struct tag_PROCHANDLE_STORAGE {
+	DWORD pid;
+	HANDLE hProcess;
+}PROCHANDLE_STORAGE,*PPROCHANDLE_STORAGE;
 
 //Not use
+//private
 
 VOID MAnitInjectLow();
 
+//private
+
+void MProcessHANDLEStorageDestroyItem(DWORD pid);
+void MProcessHANDLEStorageDestroy();
 BOOL LoadDll();
 void FreeDll();
 void MFroceKillProcessUser();
 void MKillProcessUser(BOOL ask);
 void MKillProcessTreeUser();
-
-//Do not use
-EXTERN_C M_API BOOL MKillProcessUser2(DWORD pid, BOOL showErr);
+BOOL MKillProcessUser2(HWND hWnd, DWORD pid, BOOL showErr);
+void MAppProcPropertyClassHandleWmCommand(WPARAM wParam);
 
 //进程提权
 EXTERN_C M_API BOOL MGetPrivileges2();
@@ -90,7 +106,7 @@ EXTERN_C M_API void MEnumProcessFree();
 EXTERN_C M_API BOOL MEnumProcess(EnumProcessCallBack callBack, LPVOID customData);
 //简单枚举进程（仅仅返回 PID，通常用于刷新）
 //    callBack：简单回调
-EXTERN_C M_API BOOL MEnumProcess2Refesh(EnumProcessCallBack2 callBack);
+EXTERN_C M_API BOOL MEnumProcess2(EnumProcessCallBack2 callBack);
 //从进程列表中找指定PID并调用 calBack
 //（MEnumProcess/MEnumProcessCore之后使用）
 EXTERN_C M_API BOOL MUpdateProcess(DWORD pid, EnumProcessCallBack calBack, LPVOID customData);
@@ -104,6 +120,18 @@ EXTERN_C M_API BOOL MEnumProcessThreads(PSYSTEM_PROCESSES p, EnumProcessThreadsC
 //    dwPID：进程pid
 //    callBack：回调
 EXTERN_C M_API BOOL MEnumProcessWindow(DWORD dwPID, EnumProcessWindowsCallBack callback, LPVOID customData);
+//枚举进程所有模块
+//    dwPID：进程pid
+//    callBack：回调
+EXTERN_C M_API BOOL MEnumProcessModules(DWORD dwPID, EnumProcessModulesCallBack callback, LPVOID customData);
+//枚举进程所有句柄
+//    dwPID：进程pid
+//    callBack：回调
+EXTERN_C M_API BOOL MEnumProcessHandles(DWORD pid, EHCALLBACK callback);
+//枚举进程所有权限
+//    dwPID：进程pid
+//    callBack：回调
+M_CAPI(BOOL) MEnumProcessPrivileges(DWORD dwId, EnumPrivilegesCallBack callBack);
 
 //把带符号链接的路径转为可访问的文件路径
 //    pszNtPath：输入路径
@@ -189,8 +217,8 @@ EXTERN_C M_API NTSTATUS MSuspendProcessNt(DWORD dwPId, HANDLE handle);
 EXTERN_C M_API NTSTATUS MResumeProcessNt(DWORD dwPId, HANDLE handle);
 //普通打开进程
 //    dwPId：进程id，为 0 时使用 handle
-//    handle：进程句柄，为 NULL 时使用 dwPId
-EXTERN_C M_API NTSTATUS MOpenProcessNt(DWORD dwId, PHANDLE pLandle);
+//    [OUT] pLhandle：返回进程句柄
+EXTERN_C M_API NTSTATUS MOpenProcessNt(DWORD dwId, PHANDLE pLhandle);
 //普通结束进程
 //    dwPId：进程id，为 0 时使用 handle
 //    handle：进程句柄，为 NULL 时使用 dwPId
@@ -238,7 +266,45 @@ EXTERN_C M_API ULONG MGetProcessHandlesCount(PSYSTEM_PROCESSES p);
 EXTERN_C M_API NTSTATUS MGetProcessMappedFileName(HANDLE ProcessHandle, PVOID BaseAddress, LPWSTR OutFileName, int BufferSize);
 //获取进程PEB地址
 //    hProcess：进程句柄
-EXTERN_C M_API PPEB MGetProcessPeb(HANDLE hProcess);
+//    [OUT] pPpeb：接收PPEB变量
+EXTERN_C M_API NTSTATUS MGetProcessPeb(HANDLE handle, PPEB* pPpeb);
+//获取进程 Win32 路径
+//    ProcessHandle：进程句柄
+//    [OUT] FileNameBuffer：输出字符串缓冲区
+//    FileNameBufferSize：输出字符串缓冲区字符个数
+EXTERN_C M_API NTSTATUS MGetProcessImageFileNameWin32(HANDLE ProcessHandle, LPWSTR FileNameBuffer, ULONG FileNameBufferSize);
+//获取进程路径
+//    ProcessHandle：进程句柄
+//    [OUT] FileNameBuffer：输出字符串缓冲区
+//    FileNameBufferSize：输出字符串缓冲区字符个数
+EXTERN_C M_API NTSTATUS MGetProcessImageFileName(HANDLE ProcessHandle, LPWSTR FileNameBuffer, ULONG FileNameBufferSize);
+//获取进程PROCESS_BASIC_INFORMATION
+//    ProcessHandle：进程句柄
+//    [OUT] BasicInformation：接收PROCESS_BASIC_INFORMATION结构体变量
+EXTERN_C M_API NTSTATUS MGetProcessBasicInformation(HANDLE ProcessHandle, PPROCESS_BASIC_INFORMATION BasicInformation);
+//获取进程启动标志
+//    ProcessHandle：进程句柄
+//    [OUT] ExecuteFlags：接收ExecuteFlags信息变量
+EXTERN_C M_API NTSTATUS MGetProcessExecuteFlags(HANDLE ProcessHandle, PULONG ExecuteFlags);
+//获取进程IO优先级
+//    ProcessHandle：进程句柄
+//    [OUT] IoPriority：接收IO_PRIORITY_HINT信息结构体变量
+EXTERN_C M_API NTSTATUS MGetProcessIoPriority(HANDLE ProcessHandle, IO_PRIORITY_HINT *IoPriority);
+//获取进程 ExitStatus
+//    ProcessHandle：进程句柄
+//    [OUT] ExitStatus：接收信息变量
+EXTERN_C M_API NTSTATUS MGetProcessExitStatus(HANDLE ProcessHandle, NTSTATUS *ExitStatus);
+//获取进程 BasePriority
+//    ProcessHandle：进程句柄
+//    [OUT] BasePriority：接收信息变量
+EXTERN_C M_API NTSTATUS MGetProcessBasePriority(HANDLE ProcessHandle, PULONG BasePriority);
+//获取进程 AffinityMask
+//    ProcessHandle：进程句柄
+//    [OUT] AffinityMask：接收信息变量
+EXTERN_C M_API NTSTATUS MGetProcessAffinityMask(HANDLE ProcessHandle, PULONG_PTR AffinityMask);
+
+NTSTATUS MSetProcessPriorityClass(HANDLE ProcessHandle, UCHAR PriorityClass);
+NTSTATUS MSetProcessAffinityMask(HANDLE ProcessHandle, ULONG_PTR AffinityMask);
 
 //获取UWP应用完整包名
 //    handle：进程句柄
@@ -246,6 +312,7 @@ EXTERN_C M_API PPEB MGetProcessPeb(HANDLE hProcess);
 //    [OUT] buffer：输出字符串缓冲区
 EXTERN_C M_API BOOL MGetUWPPackageFullName(HANDLE handle, int * len, LPWSTR buffer);
 //获取进程状态
+//[返回]
 //  3：无响应/2：暂停/1：正在运行/0：未知
 //    p：枚举所给的进程信息结构
 //    hWnd：这个进程的主窗口

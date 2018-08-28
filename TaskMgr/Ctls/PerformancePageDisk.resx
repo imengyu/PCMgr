@@ -123,17 +123,14 @@
   </data>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="performanceInfos.Location" type="System.Drawing.Point, System.Drawing">
-    <value>0, 482</value>
+    <value>0, 240</value>
   </data>
   <data name="performanceInfos.Size" type="System.Drawing.Size, System.Drawing">
-    <value>768, 116</value>
+    <value>612, 84</value>
   </data>
   <assembly alias="mscorlib" name="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="performanceInfos.TabIndex" type="System.Int32, mscorlib">
     <value>3</value>
-  </data>
-  <data name="performanceInfos.Text" xml:space="preserve">
-    <value>performanceInfos1</value>
   </data>
   <data name="&gt;&gt;performanceInfos.Name" xml:space="preserve">
     <value>performanceInfos</value>
@@ -151,13 +148,13 @@
     <value>Bottom, Left, Right</value>
   </data>
   <data name="performanceGridSpeed.LeftBottomText" xml:space="preserve">
-    <value>60s</value>
+    <value>60秒</value>
   </data>
   <data name="performanceGridSpeed.LeftText" xml:space="preserve">
     <value>磁盘传输速率</value>
   </data>
   <data name="performanceGridSpeed.Location" type="System.Drawing.Point, System.Drawing">
-    <value>3, 400</value>
+    <value>3, 158</value>
   </data>
   <data name="performanceGridSpeed.RightBottomText" xml:space="preserve">
     <value>0</value>
@@ -166,7 +163,7 @@
     <value>100%</value>
   </data>
   <data name="performanceGridSpeed.Size" type="System.Drawing.Size, System.Drawing">
-    <value>765, 76</value>
+    <value>609, 76</value>
   </data>
   <data name="performanceGridSpeed.TabIndex" type="System.Int32, mscorlib">
     <value>2</value>
@@ -190,7 +187,7 @@
     <value>0, 0</value>
   </data>
   <data name="performanceTitle1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>768, 35</value>
+    <value>612, 35</value>
   </data>
   <data name="performanceTitle1.SmallTitle" xml:space="preserve">
     <value>磁盘名称</value>
@@ -232,7 +229,7 @@
     <value>100%</value>
   </data>
   <data name="performanceGridDiskTime.Size" type="System.Drawing.Size, System.Drawing">
-    <value>765, 353</value>
+    <value>609, 111</value>
   </data>
   <data name="performanceGridDiskTime.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
@@ -256,7 +253,7 @@
     <value>6, 12</value>
   </data>
   <data name="$this.Size" type="System.Drawing.Size, System.Drawing">
-    <value>768, 598</value>
+    <value>612, 324</value>
   </data>
   <data name="&gt;&gt;$this.Name" xml:space="preserve">
     <value>PerformancePageDisk</value>

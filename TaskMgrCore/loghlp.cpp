@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "loghlp.h"
+#include "cmdhlp.h"
 #include <stdarg.h>
 #include <stdio.h>
 #include "StringHlp.h"
@@ -23,47 +24,136 @@ LogLevel currentLogLevel = LogLevel::LogLevDebug;
 LogLevel currentLogLevel = LogLevel::LogLevError;
 #endif
 
+static BOOL ConsoleHandlerRoutine(_In_ DWORD dwCtrlType)
+{
+	switch (dwCtrlType)
+	{
+	case CTRL_BREAK_EVENT:
+		M_LOG_CloseConsole(FALSE);
+		return TRUE;
+	case CTRL_CLOSE_EVENT:
+		M_LOG_CloseConsole(TRUE);
+		return TRUE;
+	}
+	return FALSE;
+}
+
+void M_LOG_FocusConsoleWindow() {
+	if (showConsole) {
+		HWND hConsole = GetConsoleWindow();
+		MAppWorkCall3(213, hConsole, 0);
+	}
+}
 void M_LOG_DefConsoleTextColor() {
 	if (hOutput) SetConsoleTextAttribute(hOutput, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 }
-M_CAPI(void) M_LOG_Close()
+void M_LOG_CreateConsole()
 {
-	if (hOutput || showConsole) {
-		CloseHandle(hOutput);
-		FreeConsole();
+	if (!AllocConsole()) {
+		LogErr2(L"AllocConsole failed : %d", GetLastError());
+		return;
 	}
-	if (logFile) 
-		fclose(logFile);
+
+	hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleCtrlHandler((PHANDLER_ROUTINE)ConsoleHandlerRoutine, TRUE);
+
+	FILE *fileIn;
+	FILE *file;
+	FILE *fileErr;
+	freopen_s(&fileIn, "CONIN$", "r", stdin);
+	freopen_s(&fileErr, "CONOUT$", "w", stderr);
+	freopen_s(&file, "CONOUT$", "w", stdout);
+
+	HWND hConsole = GetConsoleWindow();
+	SendMessage(hConsole, WM_SETICON, 0, (LPARAM)LoadIcon(hInst, MAKEINTRESOURCE(IDI_ICONCONSOLE)));
+	SetConsoleTitle(L"PCMgr Debug Console");
+	HMENU menu = GetSystemMenu(GetConsoleWindow(), FALSE);
+	EnableMenuItem(menu, SC_CLOSE, MF_GRAYED | MF_DISABLED);
+
+	printf_s("You Can enter \"?\" or \"help\" to show command helps\nEnter \"exit\" to close Console window and back to Main app.\n");
+
+	M_LOG_PrintColorTextW(FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE,
+		L"\nIf you close this window directly then the whole app will exit.\n\n");
+
+	MStartRunCmdThread();
+}
+void M_LOG_CloseConsole(BOOL callFormCloseEvent, BOOL callFormConsoleApp)
+{
+
+	if (!callFormCloseEvent)
+		FreeConsole();
+
+	FILE *file;
+	freopen_s(&file, "NUL", "w", stdout);
+	freopen_s(&file, "NUL", "w", stderr);
+	freopen_s(&file, "NUL", "r", stdin);
+
+	MStopRunCmdThread();
+
+	showConsole = false;
+}
+bool M_LOG_TryPushEnterCursur()
+{
+	CHAR buf[1];
+	CONSOLE_SCREEN_BUFFER_INFO cci = { 0 };
+	COORD cord = { 0 };
+	DWORD readBytes = 0;
+
+	GetConsoleScreenBufferInfo(hOutput, &cci);
+	memcpy_s(&cord, sizeof(cord), &cci.dwCursorPosition, sizeof(cord));
+
+	if (cord.X > 0) cord.X--;
+
+	ReadConsoleOutputCharacterA(hOutput, buf, 1, cord, &readBytes);
+	if (buf[0] == '>') {
+		putchar('\b');
+		return true;
+	}
+	return false;
+}
+
+CRITICAL_SECTION cs_log;
+
+void M_LOG_Close_InConsole() {
+	if (hOutput || showConsole)
+		M_LOG_CloseConsole(FALSE, TRUE);
+	if (logFile) fclose(logFile);
 	logFile = NULL;
 }
-M_CAPI(void) M_LOG_Init_InConsole() {
+void M_LOG_Init_InConsole() {
 	hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
 	tofile = true;
 	showConsole = true;
+}
+void M_LOG_Init() {
+	InitializeCriticalSection(&cs_log);//初始化临界区
+}
+void M_LOG_Destroy() {
+	DeleteCriticalSection(&cs_log);//删除临界区
+}
+
+M_CAPI(void) M_LOG_Close()
+{
+	if (hOutput || showConsole)
+		M_LOG_CloseConsole(FALSE);
+	if (logFile) fclose(logFile);
+	logFile = NULL;
 }
 M_CAPI(void) M_LOG_Init(BOOL showConsole, BOOL enableFileLog)
 {
 	::enableFileLog = enableFileLog;
 	::showConsole = showConsole;
-	tofile = !IsDebuggerPresent();
 
 	if (enableFileLog) {
 		GetModuleFileName(0, logPath, MAX_PATH);
 		PathRenameExtension(logPath, (LPWSTR)L".log");
 		_wfopen_s(&logFile, logPath, L"w");
+		tofile = true;
 	}
 	else tofile = false;
 
-	if (showConsole && tofile)
-	{
-		AllocConsole();
-		hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
-		HWND hConsole = GetConsoleWindow();
-		FILE *file;
-		freopen_s(&file, "CONOUT$", "w", stdout);
-		SendMessage(hConsole, WM_SETICON, 0, (LPARAM)LoadIcon(hInst, MAKEINTRESOURCE(IDI_ICONCONSOLE)));
-		SetConsoleTitle(L"PCMgr Debug Outputs");
-	}
+	if (showConsole)
+		M_LOG_CreateConsole();
 }
 M_CAPI(void) M_LOG_SetLogLevel(LogLevel level)
 {
@@ -77,41 +167,78 @@ M_CAPI(void) M_LOG_DisableLog() {
 	currentLogLevel = LogLevel::LogLevDisabled;
 }
 
+M_CAPI(void) M_LOG_PrintColorTextA(WORD color, char const* const _Format, ...)
+{
+	va_list arg;
+	va_start(arg, _Format);
+	if (!showConsole)
+	{
+		std::string buf = FormatString(_Format, arg);
+		SetConsoleTextAttribute(hOutput, color);
+		WriteConsoleA(hOutput, buf.c_str(), static_cast<DWORD>(buf.size()), NULL, NULL);
+		M_LOG_DefConsoleTextColor();
+	}
+	va_end(arg);
+}
+M_CAPI(void) M_LOG_PrintColorTextW(WORD color, wchar_t const* const _Format, ...)
+{
+	va_list arg;
+	va_start(arg, _Format);
+	if (showConsole)
+	{
+		std::wstring buf = FormatString(_Format, arg);
+		SetConsoleTextAttribute(hOutput, color);
+		WriteConsoleW(hOutput, buf.c_str(), static_cast<DWORD>(buf.size()), NULL, NULL);
+		M_LOG_DefConsoleTextColor();
+	}
+	va_end(arg);
+}
+
 void M_LOG_LogXW(LPWSTR orgFormat, WORD color, wchar_t const* const _Format, va_list arg)
 {
 	if (currentLogLevel == LogLevDisabled)return;
 
+	EnterCriticalSection(&cs_log);
+
 	std::wstring format1 = FormatString(orgFormat, _Format);
 	std::wstring buf = FormatString(format1.c_str(), arg);
-	if (tofile)
-	{
-		if (!showConsole)
-			fwprintf_s(logFile, buf.c_str());
-		else {
-			SetConsoleTextAttribute(hOutput, color);
-			WriteConsoleW(hOutput, buf.c_str(), static_cast<DWORD>(buf.size()), NULL, NULL);
-			M_LOG_DefConsoleTextColor();
-		}
+
+	if (!showConsole) {
+		if (tofile)fwprintf_s(logFile, buf.c_str());
+		else  OutputDebugString((LPWSTR)buf.c_str());	
 	}
-	else OutputDebugString((LPWSTR)buf.c_str());
+	else {
+		bool needRePrintCur = M_LOG_TryPushEnterCursur();
+		SetConsoleTextAttribute(hOutput, color);
+		WriteConsole(hOutput, buf.c_str(), buf.size() + 1, NULL, 0);
+		M_LOG_DefConsoleTextColor();
+		if (needRePrintCur) printf(">");
+	}
+
+	LeaveCriticalSection(&cs_log);
 }
 void M_LOG_LogX_WithFunAndLineW(LPWSTR orgFormat, LPSTR fileName, LPSTR funName, INT lineNumber, WORD color, wchar_t const* const _Format, va_list arg)
 {
 	if (currentLogLevel == LogLevDisabled)return;
 
+	EnterCriticalSection(&cs_log);
+
 	std::wstring format1 = FormatString(orgFormat, _Format, fileName, lineNumber, funName);
 	std::wstring buf = FormatString(format1.c_str(), arg);
-	if (tofile)
-	{
-		if (!showConsole)
-			fwprintf_s(logFile, buf.c_str());
-		else {
-			SetConsoleTextAttribute(hOutput, color);
-			WriteConsoleW(hOutput, buf.c_str(), static_cast<DWORD>(buf.size()), NULL, NULL);
-			M_LOG_DefConsoleTextColor();
-		}
+
+	if (!showConsole) {
+		if (tofile)fwprintf_s(logFile, buf.c_str());
+		else  OutputDebugString((LPWSTR)buf.c_str());
 	}
-	else OutputDebugString((LPWSTR)buf.c_str());
+	else {
+		bool needRePrintCur = M_LOG_TryPushEnterCursur();
+		SetConsoleTextAttribute(hOutput, color);
+		WriteConsole(hOutput, buf.c_str(), buf.size() + 1, NULL, 0);
+		M_LOG_DefConsoleTextColor();
+		if (needRePrintCur) printf(">");
+	}
+
+	LeaveCriticalSection(&cs_log);
 }
 
 M_CAPI(void) M_LOG_LogErrW(wchar_t const* const _Format, ...)
@@ -138,26 +265,6 @@ M_CAPI(void) M_LOG_LogInfoW(wchar_t const* const _Format, ...)
 		va_list arg;
 		va_start(arg, _Format);
 		M_LOG_LogXW(L"[INFO] %s \n", FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE, _Format, arg);
-		va_end(arg);
-	}
-}
-M_CAPI(void) M_LOG_LogTextW(WORD color, wchar_t const* const _Format, ...)
-{
-	if (currentLogLevel <= LogLevFull) {
-		va_list arg;
-		va_start(arg, _Format);
-		std::wstring buf = FormatString(_Format, arg);
-		if (tofile)
-		{
-			if (!showConsole)
-				fwprintf_s(logFile, buf.c_str());
-			else {
-				SetConsoleTextAttribute(hOutput, color);
-				WriteConsoleW(hOutput, buf.c_str(), static_cast<DWORD>(buf.size()), NULL, NULL);
-				M_LOG_DefConsoleTextColor();
-			}
-		}
-		else OutputDebugString((LPWSTR)buf.c_str());
 		va_end(arg);
 	}
 }
@@ -216,37 +323,46 @@ void M_LOG_LogXA(LPCSTR orgFormat, WORD color, char const* const _Format, va_lis
 {
 	if (currentLogLevel == LogLevDisabled)return;
 
+	EnterCriticalSection(&cs_log);
+
 	std::string format1 = FormatString(orgFormat, _Format);
 	std::string buf = FormatString(format1.c_str(), arg);
-	if (tofile)
-	{
-		if (!showConsole)
-			fprintf_s(logFile, buf.c_str());
-		else {
-			SetConsoleTextAttribute(hOutput, color);
-			WriteConsoleA(hOutput, buf.c_str(), static_cast<DWORD>(buf.size()), NULL, NULL);
-			M_LOG_DefConsoleTextColor();
-		}
+
+	if (!showConsole) {
+		if (tofile)fprintf_s(logFile, buf.c_str());
+		else OutputDebugStringA((LPCSTR)buf.c_str());
 	}
-	else OutputDebugStringA((LPCSTR)buf.c_str());
+	else {
+		bool needRePrintCur = M_LOG_TryPushEnterCursur();
+		SetConsoleTextAttribute(hOutput, color);
+		WriteConsoleA(hOutput, buf.c_str(), static_cast<DWORD>(buf.size()), NULL, NULL);
+		M_LOG_DefConsoleTextColor();
+		if (needRePrintCur) printf(">");
+	}
+
+	LeaveCriticalSection(&cs_log);
 }
 void M_LOG_LogX_WithFunAndLineA(LPCSTR orgFormat, LPSTR fileName, LPSTR funName, INT lineNumber, WORD color, char const* const _Format, va_list arg)
 {
 	if (currentLogLevel == LogLevDisabled)return;
 
+	EnterCriticalSection(&cs_log);
+
 	std::string format1 = FormatString(orgFormat, _Format, fileName, lineNumber, funName);
 	std::string buf = FormatString(format1.c_str(), arg);
-	if (tofile)
-	{
-		if (!showConsole)
-			fprintf_s(logFile, buf.c_str());
-		else {
-			SetConsoleTextAttribute(hOutput, color);
-			WriteConsoleA(hOutput, buf.c_str(), static_cast<DWORD>(buf.size()), NULL, NULL);
-			M_LOG_DefConsoleTextColor();
-		}
+	if (!showConsole) {
+		if (tofile)fprintf_s(logFile, buf.c_str());
+		else OutputDebugStringA((LPCSTR)buf.c_str());
 	}
-	else OutputDebugStringA((LPCSTR)buf.c_str());
+	else {
+		bool needRePrintCur = M_LOG_TryPushEnterCursur();
+		SetConsoleTextAttribute(hOutput, color);
+		WriteConsoleA(hOutput, buf.c_str(), static_cast<DWORD>(buf.size()), NULL, NULL);
+		M_LOG_DefConsoleTextColor();
+		if (needRePrintCur) printf(">");
+	}
+
+	LeaveCriticalSection(&cs_log);
 }
 
 M_CAPI(void) M_LOG_LogErrA(char const* const _Format, ...)
@@ -273,26 +389,6 @@ M_CAPI(void) M_LOG_LogInfoA(char const* const _Format, ...)
 		va_list arg;
 		va_start(arg, _Format);
 		M_LOG_LogXA("[INFO] %s \n", FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE, _Format, arg);
-		va_end(arg);
-	}
-}
-M_CAPI(void) M_LOG_LogTextA(WORD color, char const* const _Format, ...)
-{
-	if (currentLogLevel <= LogLevFull) {
-		va_list arg;
-		va_start(arg, _Format);
-		std::string buf = FormatString(_Format, arg);
-		if (tofile)
-		{
-			if (!showConsole)
-				fprintf_s(logFile, buf.c_str());
-			else {
-				SetConsoleTextAttribute(hOutput, color);
-				WriteConsoleA(hOutput, buf.c_str(), static_cast<DWORD>(buf.size()), NULL, NULL);
-				M_LOG_DefConsoleTextColor();
-			}
-		}
-		else OutputDebugStringA((LPCSTR)buf.c_str());
 		va_end(arg);
 	}
 }

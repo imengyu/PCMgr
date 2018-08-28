@@ -11,7 +11,7 @@ namespace PCMgr.Ctls
         public PerformanceGrid()
         {
             DrawData2 = false;
-            SetStyle(ControlStyles.Selectable, true);
+            SetStyle(ControlStyles.Selectable, false);
             SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
             BgBrush = new SolidBrush(Color.FromArgb(241, 246, 250));
             DrawPen = new Pen(Color.FromArgb(17, 125, 187));
@@ -81,9 +81,9 @@ namespace PCMgr.Ctls
         public Pen GridPen { get; set; }
         public Pen MaxUnitPen { get; set; }
 
-        [Bindable(true), Localizable(true)]
+        [Localizable(true)]
         public string LeftText { get; set; }
-        [Bindable(true), Localizable(true)]
+        [Localizable(true)]
         public string RightText { get; set; }
         [Localizable(true)]
         public string LeftBottomText { get; set; }
@@ -212,7 +212,7 @@ namespace PCMgr.Ctls
                 pts[61].X = Width;
                 pts[61].Y = Height - BottomTextHeight;//右下
 
-                if (BgBrush != Brushes.White) g.FillClosedCurve(BgBrush, pts);
+                if (BgBrush != Brushes.White) g.FillClosedCurve(BgBrush, pts, FillMode.Alternate, 0f);
                 for (int i = 1; i < 61; i++) g.DrawLine(DrawPen, pts[i - 1], pts[i]);
             }
             if (DrawData2 && dataIem2.Count > 0)
@@ -235,7 +235,7 @@ namespace PCMgr.Ctls
                 pts[61].X = Width;
                 pts[61].Y = Height - BottomTextHeight;//右下
 
-                if (DrawData2Bg && BgBrush != Brushes.White) g.FillClosedCurve(BgBrush, pts);
+                if (DrawData2Bg && BgBrush != Brushes.White) g.FillClosedCurve(BgBrush, pts, FillMode.Alternate, 0f);
                 for (int i = 1; i < 61; i++) g.DrawLine(DrawPen2, pts[i - 1], pts[i]);
             }
 

@@ -1,7 +1,9 @@
 #include "stdafx.h"
 #include "nthlp.h"
+#include "msup.h"
 #include <stdlib.h>
 
+WCHAR ntStatusStrBuf[20];
 
 extern NtQueryInformationProcessFun NtQueryInformationProcess;
 
@@ -22,7 +24,7 @@ NTSTATUS MQueryProcessVariableSize(_In_ HANDLE ProcessHandle,_In_ PROCESSINFOCLA
 	if (status != STATUS_BUFFER_OVERFLOW && status != STATUS_BUFFER_TOO_SMALL && status != STATUS_INFO_LENGTH_MISMATCH)
 		return status;
 
-	buffer = malloc(returnLength);
+	buffer = MAlloc(returnLength);
 	status = NtQueryInformationProcess(
 		ProcessHandle,
 		ProcessInformationClass,
@@ -37,12 +39,12 @@ NTSTATUS MQueryProcessVariableSize(_In_ HANDLE ProcessHandle,_In_ PROCESSINFOCLA
 	}
 	else
 	{
-		free(buffer);
+		MFree(buffer);
 	}
 
 	return status;
 }
-LPWSTR MNtstatusToStr(NTSTATUS status) {
+LPWSTR MNtStatusToStr(NTSTATUS status) {
 	switch (status)
 	{
 	case STATUS_SUCCESS:
@@ -69,6 +71,9 @@ LPWSTR MNtstatusToStr(NTSTATUS status) {
 		return L"STATUS_INVALID_CID";
 	case STATUS_THREAD_IS_TERMINATING:
 		return L"STATUS_THREAD_IS_TERMINATING";
+	default:
+		swprintf_s(ntStatusStrBuf, L"0x%08X", status);
+		break;
 	}
-	return 0;
+	return ntStatusStrBuf;
 }

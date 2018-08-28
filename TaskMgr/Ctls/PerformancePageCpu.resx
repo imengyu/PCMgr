@@ -124,10 +124,10 @@
   <data name="performanceInfos.TabIndex" type="System.Int32, mscorlib">
     <value>2</value>
   </data>
-  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-  <data name="label1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>43, 17</value>
+  <data name="&gt;&gt;performanceGridGlobal.Parent" xml:space="preserve">
+    <value>$this</value>
   </data>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="$this.AutoScaleDimensions" type="System.Drawing.SizeF, System.Drawing">
     <value>7, 17</value>
   </data>
@@ -173,9 +173,6 @@
   <data name="label1.Location" type="System.Drawing.Point, System.Drawing">
     <value>464, 248</value>
   </data>
-  <data name="performanceGridGlobal.Size" type="System.Drawing.Size, System.Drawing">
-    <value>580, 188</value>
-  </data>
   <data name="performanceCpus.Location" type="System.Drawing.Point, System.Drawing">
     <value>3, 258</value>
   </data>
@@ -216,6 +213,9 @@
   <data name="performanceGridGlobal.LeftBottomText" xml:space="preserve">
     <value>60 秒</value>
   </data>
+  <data name="performanceGridGlobal.RightBottomText" xml:space="preserve">
+    <value>0</value>
+  </data>
   <data name="performanceInfos.Location" type="System.Drawing.Point, System.Drawing">
     <value>0, 294</value>
   </data>
@@ -234,11 +234,11 @@
   <data name="label1.TabIndex" type="System.Int32, mscorlib">
     <value>4</value>
   </data>
-  <data name="&gt;&gt;performanceGridGlobal.Parent" xml:space="preserve">
-    <value>$this</value>
+  <data name="label1.Size" type="System.Drawing.Size, System.Drawing">
+    <value>43, 17</value>
   </data>
-  <data name="performanceGridGlobal.RightBottomText" xml:space="preserve">
-    <value>0</value>
+  <data name="&gt;&gt;performanceInfos.Name" xml:space="preserve">
+    <value>performanceInfos</value>
   </data>
   <data name="&gt;&gt;performanceInfos.ZOrder" xml:space="preserve">
     <value>1</value>
@@ -276,8 +276,8 @@
   <data name="$this.Size" type="System.Drawing.Size, System.Drawing">
     <value>586, 438</value>
   </data>
-  <data name="&gt;&gt;performanceInfos.Name" xml:space="preserve">
-    <value>performanceInfos</value>
+  <data name="performanceGridGlobal.Size" type="System.Drawing.Size, System.Drawing">
+    <value>580, 188</value>
   </data>
   <data name="performanceGridGlobal.LeftText" xml:space="preserve">
     <value>% 利用率</value>

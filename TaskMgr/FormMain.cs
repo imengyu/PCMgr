@@ -54,7 +54,8 @@ namespace PCMgr
         private bool perfInited = false;
         private bool perfMainInited = false;
         private bool perfMainInitFailed = false;
-        private bool ProcessListDetailsInited = false;
+        private bool processListDetailsInited = false;
+        private bool usersListInited = false;
 
         public static FormMain Instance { private set; get; }
         public const string MICROSOFT = "Microsoft Corporation";
@@ -594,7 +595,7 @@ namespace PCMgr
             //刷新所有数据
             ProcessListPrepareClear();
             listProcess.Locked = true;
-            MEnumProcess2Refesh(enumProcessCallBack2_ptr);
+            MEnumProcess2(enumProcessCallBack2_ptr);
             ProcessListClear();
 
             //枚举一些UWP应用
@@ -1500,7 +1501,7 @@ namespace PCMgr
         {
             //remove invalid item
             TaskMgrListItem li = it.item;
-            MCloseHandle(it.handle);
+            MAppWorkCall3(174, IntPtr.Zero, new IntPtr(it.pid)); 
 
             uwphostitem hostitem = ProcessListFindUWPItemWithHostId(it.pid);
             if (hostitem != null) uwpHostPid.Remove(hostitem);
@@ -1769,6 +1770,7 @@ namespace PCMgr
                         listApps.Items.Add(li);
                 }
             }
+            lbNoAppsTip.Visible = listApps.Items.Count == 0;
             listApps.Locked = false;
             listApps.SyncItems(true);
             listApps_SelectItemChanged(null, null);
@@ -1823,7 +1825,11 @@ namespace PCMgr
         {
             TaskMgrListItem taskMgrListItem = listProcess.SelectedItem;
             if (taskMgrListItem != null)
-                ProcessListEndTask(0, taskMgrListItem);
+            {
+                if (taskMgrListItem.Group == listProcess.Groups[0])
+                    ProcessListEndTask(0, taskMgrListItem);
+                else MAppWorkCall3(178, Handle, IntPtr.Zero);
+            }
         }
 
         private void BaseProcessRefeshTimerLowSc_Tick(object sender, EventArgs e)
@@ -2249,7 +2255,7 @@ namespace PCMgr
 
         private void ProcessListDetailsInit()
         {
-            if (!ProcessListDetailsInited)
+            if (!processListDetailsInited)
             {
                 enumProcessDetalsCallBack_ptr = Marshal.GetFunctionPointerForDelegate(enumProcessDetalsCallBack);
                 enumProcessDetalsCallBack2_ptr = Marshal.GetFunctionPointerForDelegate(enumProcessDetalsCallBack2);
@@ -2264,12 +2270,12 @@ namespace PCMgr
                 ProcessListDetailsLoadColumns();
                 ProcessListDetailsILoadAllItem();
 
-                ProcessListDetailsInited = true;
+                processListDetailsInited = true;
             }
         }
         private void ProcessListDetailsUnInit()
         {
-            if (ProcessListDetailsInited)
+            if (processListDetailsInited)
             {
                 ProcessListDetailsSaveColumns();
                 ProcessDetalsListFreeAll();
@@ -2652,7 +2658,7 @@ namespace PCMgr
             //刷新所有数据
             ProcessListDetailsPrepareClear();
             //lock
-            MEnumProcess2Refesh(enumProcessDetalsCallBack2_ptr);
+            MEnumProcess2(enumProcessDetalsCallBack2_ptr);
             ProcessListDetailsClear();
 
             //刷新性能数据
@@ -2717,7 +2723,7 @@ namespace PCMgr
         private void ProcessListDetailsFree(ProcessDetalItem it, bool delitem = true)
         {
             //remove invalid item
-            MCloseHandle(it.handle);
+            MAppWorkCall3(174, IntPtr.Zero, new IntPtr(it.pid));
 
             MPERF_PerfDataDestroy(it.perfData);
             it.childs.Clear();
@@ -2783,20 +2789,41 @@ namespace PCMgr
                 {
                     btnEndProcess.Enabled = true;
                     MAppWorkShowMenuProcessPrepare(ps.exepath, ps.exename, ps.pid, IsImporant(ps), IsVeryImporant(ps));
-
-                    btnEndProcess.Text = str_endproc;
                     nextSecType = MENU_SELECTED_PROCESS_KILL_ACT_KILL;
                 }
                 else btnEndProcessDetals.Enabled = false;
             }
             else if (e.Button == MouseButtons.Right)
             {
+                nextSecType = MENU_SELECTED_PROCESS_KILL_ACT_KILL;
+                MAppWorkShowMenuProcessPrepare(ps.exepath, ps.exename, ps.pid, IsImporant(ps), IsVeryImporant(ps));
                 MAppWorkShowMenuProcess(ps.exepath, ps.exename, ps.pid, Handle, IntPtr.Zero, 0, nextSecType, MousePosition.X, MousePosition.Y);
             }
         }
         private void listProcessDetals_SelectedIndexChanged(object sender, EventArgs e)
         {
             btnEndProcessDetals.Enabled = listProcessDetals.SelectedItems.Count != 0;
+        }
+        private void listProcessDetals_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (listProcessDetals.SelectedItems.Count > 0)
+            {
+                if (e.KeyCode == Keys.Apps)
+                {
+                    ListViewItem item = listProcessDetals.SelectedItems[0];
+                    Point p = item.Position; p.X = 0;
+                    p = listProcessDetals.PointToScreen(p);
+                    ProcessDetalItem ps = item.Tag as ProcessDetalItem;
+                    MAppWorkShowMenuProcess(ps.exepath, ps.exename, ps.pid, Handle, IntPtr.Zero, 0, nextSecType, p.X, p.Y);
+                }
+                else if(e.KeyCode == Keys.Delete)
+                {
+                    ListViewItem item = listProcessDetals.SelectedItems[0];
+                    ProcessDetalItem ps = item.Tag as ProcessDetalItem;
+                    MAppWorkShowMenuProcessPrepare(ps.exepath, ps.exename, ps.pid, IsImporant(ps), IsVeryImporant(ps));
+                    MAppWorkCall3(178, Handle, IntPtr.Zero);
+                }
+            }
         }
 
         private void btnEndProcessDetals_Click(object sender, EventArgs e)
@@ -3053,6 +3080,11 @@ namespace PCMgr
         private void 选择列ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             new FormDetalsistHeaders().ShowDialog();
+        }
+        private void 将此列调整为合适大小ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (colLastDown != -1)
+                listProcessDetals.AutoResizeColumn(colLastDown, ColumnHeaderAutoResizeStyle.ColumnContent);
         }
 
         private void listProcessDetals_ColumnClick(object sender, ColumnClickEventArgs e)
@@ -4167,16 +4199,23 @@ namespace PCMgr
         private void PerfPagesToNull()
         {
             if (currSelectedPerformancePage != null)
+            {
                 currSelectedPerformancePage.PageHide();
+                currSelectedPerformancePage.PageIsActive = false;
+            }
             currSelectedPerformancePage = null;
         }
         private void PerfPagesTo(int index)
         {
             if (currSelectedPerformancePage != null)
+            {
                 currSelectedPerformancePage.PageHide();
+                currSelectedPerformancePage.PageIsActive = false;
+            }
             currSelectedPerformancePage = null;
             currSelectedPerformancePage = perfPages[index];
             currSelectedPerformancePage.PageShow();
+            currSelectedPerformancePage.PageIsActive = true;
         }
         private void PerfPagesAddToCtl(Control c)
         {
@@ -4192,9 +4231,19 @@ namespace PCMgr
             PerfPagesAddToCtl(performanceCpu);
             perfPages.Add(performanceCpu);
 
+            PerfItemHeader perfItemHeaderCpu = new PerfItemHeader();
+            perfItemHeaderCpu.item = perf_cpu;
+            perfItemHeaderCpu.performancePage = performanceCpu;
+            perfItems.Add(perfItemHeaderCpu);
+
             PerformancePageRam performanceRam = new PerformancePageRam();
             PerfPagesAddToCtl(performanceRam);
             perfPages.Add(performanceRam);
+
+            PerfItemHeader perfItemHeaderRam = new PerfItemHeader();
+            perfItemHeaderRam.item = perf_ram;
+            perfItemHeaderRam.performancePage = performanceRam;
+            perfItems.Add(perfItemHeaderRam);
         }
         private void PerfInit()
         {
@@ -4213,6 +4262,7 @@ namespace PCMgr
                 perf_ram.BasePen = new Pen(RamDrawColor, 2);
                 perf_ram.BgBrush = new SolidBrush(RamBgColor);
                 performanceLeftList.Items.Add(perf_ram);
+
 
                 PerfPagesInit();
 
@@ -4278,10 +4328,23 @@ namespace PCMgr
         {
             foreach (PerfItemHeader h in perfItems)
             {
-                double data = h.performancePage.PageUpdateSimple();
-                h.performancePage.PageFroceSetData((int)data);
-                h.item.SmallText = data.ToString("0.0") + "%";
-                h.item.AddData((int)data);
+                string outCustomStr = null;
+                int outdata1 = -1;
+                int outdata2 = -1;
+                if (h.performancePage.PageUpdateSimple(out outCustomStr, out outdata1, out outdata2))
+                {
+                    if (outCustomStr != null)
+                        h.item.SmallText = outCustomStr;
+                }
+                else
+                {
+                    if (outCustomStr == null)
+                        h.item.SmallText = outdata1.ToString("0.0") + "%";
+                }
+                if (outdata2 != -1 && outdata2 != -1)
+                    h.item.AddData((int)(outdata1 + outdata2) / 2);
+                else if (outdata1 != -1)
+                    h.item.AddData((int)outdata1);
             }
 
             if (currSelectedPerformancePage != null)
@@ -4416,6 +4479,12 @@ namespace PCMgr
         public static string str_SetTo = "";
         public static string str_KillTreeAskEnd = "";
         public static string str_KillTreeContent = "";
+        public static string str_Sent = "";
+        public static string str_Receive = "";
+        public static string str_MemFree = "Free";
+        public static string str_MemModifed = "Modifed";
+        public static string str_MemStandby = "Standby";
+        public static string str_MemUsingS = "Using";
 
         /*
         
@@ -4458,6 +4527,12 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
             {
                 MLG_SetLanuageItems_CanRealloc();
 
+                str_MemFree = LanuageMgr.GetStr("MemFree");
+                str_MemModifed = LanuageMgr.GetStr("MemModifed");
+                str_MemStandby = LanuageMgr.GetStr("MemStandby");
+                str_MemUsingS = LanuageMgr.GetStr("MemUsingS");
+                str_Receive = LanuageMgr.GetStr("Receive");
+                str_Sent = LanuageMgr.GetStr("Send");
                 str_KillTreeAskEnd = LanuageMgr.GetStr("KillTreeAskEnd");
                 str_KillTreeContent = LanuageMgr.GetStr("KillTreeContent");
                 str_No = LanuageMgr.GetStr("No");
@@ -4632,8 +4707,17 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                 MAppSetLanuageItems(2, 12, str_SetTo, str_SetTo.Length + 1);
                 MAppSetLanuageItems(2, 13, str_KillTreeAskEnd, str_KillTreeAskEnd.Length + 1);
                 MAppSetLanuageItems(2, 14, str_KillTreeContent, str_KillTreeContent.Length + 1);
-
-                
+                MAppSetLanuageItems(2, 15, LanuageMgr.GetStr2("WantDisconnectUser", out size), size);
+                MAppSetLanuageItems(2, 16, LanuageMgr.GetStr2("WantLogooffUser", out size), size);
+                MAppSetLanuageItems(2, 17, LanuageMgr.GetStr2("PleaseEnterPassword", out size), size);
+                MAppSetLanuageItems(2, 18, LanuageMgr.GetStr2("ConnectSessionFailed", out size), size);
+                MAppSetLanuageItems(2, 19, LanuageMgr.GetStr2("ConnectSession", out size), size);
+                MAppSetLanuageItems(2, 20, LanuageMgr.GetStr2("DisConnectSession", out size), size);
+                MAppSetLanuageItems(2, 21, LanuageMgr.GetStr2("DisConnectSessionFailed", out size), size);
+                MAppSetLanuageItems(2, 22, LanuageMgr.GetStr2("LogoffSession", out size), size);
+                MAppSetLanuageItems(2, 23, LanuageMgr.GetStr2("DisConnectSessionFailed1", out size), size);
+                MAppSetLanuageItems(2, 24, LanuageMgr.GetStr2("SetProcPriorityClassFailed", out size), size);
+                MAppSetLanuageItems(2, 25, LanuageMgr.GetStr2("SetProcAffinityFailed", out size), size);
             }
             catch (Exception e)
             {
@@ -5131,6 +5215,90 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
 
         #endregion
 
+        #region UsersWork
+
+        private void UsersListInit()
+        {
+            if(!usersListInited)
+            {
+                enumUsersCallBack = UsersListEnumUsersCallBack;
+                enumUsersCallBackCallBack_ptr = Marshal.GetFunctionPointerForDelegate(enumUsersCallBack);
+
+                listUsers.Font = new Font("微软雅黑", 9f);
+
+                UsersListLoad();
+                usersListInited = true;
+            }
+        }
+        private void UsersListUnInit()
+        {
+            if(usersListInited)
+            {
+                listUsers.Items.Clear();
+            }
+        }
+        private void UsersListLoad()
+        {
+            listUsers.Items.Clear();
+            MEnumUsers(enumUsersCallBackCallBack_ptr, IntPtr.Zero);
+        }
+
+        private void listUsers_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Apps)
+            {
+                if (listUsers.SelectedItem != null)
+                {
+                    Point p = listStartup.GetiItemPoint(listUsers.SelectedItem);
+                    p = listUsers.PointToScreen(p);
+ 
+                    MAppWorkCall3(212, new IntPtr(p.X), new IntPtr(p.Y));
+                    IntPtr str = Marshal.StringToHGlobalUni(listUsers.SelectedItem.SubItems[0].Text);
+                    MAppWorkCall3(170, Handle, str);
+                    Marshal.FreeHGlobal(str);
+                    MAppWorkCall3(175, Handle, new IntPtr((int)(uint)listUsers.SelectedItem.Tag));
+                }
+            }
+        }
+        private void listUsers_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (listUsers.SelectedItem != null)
+            {
+                if (e.Button == MouseButtons.Right)
+                {
+                    MAppWorkCall3(212, new IntPtr(MousePosition.X), new IntPtr(MousePosition.Y));
+                    IntPtr str = Marshal.StringToHGlobalUni(listUsers.SelectedItem.SubItems[0].Text);
+                    MAppWorkCall3(170, Handle, str);
+                    Marshal.FreeHGlobal(str);
+                    MAppWorkCall3(175, Handle, new IntPtr((int)(uint)listUsers.SelectedItem.Tag));
+                }
+            }
+        }
+
+        private bool UsersListEnumUsersCallBack(IntPtr userName, uint sessionId, uint userId, IntPtr domain, IntPtr customData)
+        {
+            string name = Marshal.PtrToStringUni(userName);
+            string domainStr = Marshal.PtrToStringUni(domain);
+            TaskMgrListItem li = new TaskMgrListItem(name);
+            li.SubItems.Add(new TaskMgrListItem.TaskMgrListViewSubItem());
+            li.SubItems.Add(new TaskMgrListItem.TaskMgrListViewSubItem());
+            li.SubItems.Add(new TaskMgrListItem.TaskMgrListViewSubItem());
+            li.SubItems.Add(new TaskMgrListItem.TaskMgrListViewSubItem());
+            li.SubItems[0].Text = name;
+            li.SubItems[1].Text = userId.ToString();
+            li.SubItems[2].Text = sessionId.ToString();
+            li.SubItems[3].Text = domainStr;
+            li.SubItems[0].Font = listUsers.Font;
+            li.SubItems[1].Font = listUsers.Font;
+            li.SubItems[2].Font = listUsers.Font;
+            li.SubItems[3].Font = listUsers.Font;
+            li.Tag = sessionId;
+            listUsers.Items.Add(li);
+            return true;
+        }
+
+        #endregion
+
         #region NotifyWork
 
         private FormDelFileProgress delingdialog = null;
@@ -5279,6 +5447,8 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
 
         private static LanuageItems_CallBack lanuageItems_CallBack;
 
+        private EnumUsersCallBack enumUsersCallBack;
+
         private EnumProcessCallBack enumProcessDetalsCallBack;
         private EnumProcessCallBack2 enumProcessDetalsCallBack2;
 
@@ -5287,6 +5457,7 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
         private EnumWinsCallBack enumWinsCallBack;
         private GetWinsCallBack getWinsCallBack;
 
+        private IntPtr enumUsersCallBackCallBack_ptr;
         private IntPtr enumProcessDetalsCallBack_ptr;
         private IntPtr enumProcessDetalsCallBack2_ptr;
         private IntPtr enumProcessCallBack_ptr;
@@ -5363,19 +5534,6 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
             else if (tabControlMain.SelectedTab == tabPagePerfCtl)
             {
                 MPERF_GlobalUpdatePerformanceCounters();
-
-                int cpu = (int)(MPERF_GetCupUseAge());
-                perf_cpu.SmallText = cpu + " %";
-                perf_cpu.AddData(cpu);
-
-                perfPages[0].PageFroceSetData(cpu);
-
-                int ram = (int)(MPERF_GetRamUseAge2() * 100);
-                perf_ram.SmallText = ram + " %";
-                perf_ram.AddData(ram);
-
-                if (perfPages[1] != currSelectedPerformancePage)
-                    perfPages[1].PageFroceSetData(ram);
 
                 PerfUpdate();
 
@@ -5625,9 +5783,9 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                         new FormKDA().ShowDialog(this);
                         break;
                     }
-                case 33:
+                case M_CALLBACK_SETAFFINITY:
                     {
-
+                        new FormSetAffinity((uint)wParam.ToInt32(), lParam).ShowDialog();
                         break;
                     }
                 case M_CALLBACK_UPDATE_LOAD_STATUS:
@@ -5750,8 +5908,118 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
             }
         }
 
+        #region FormEvent
+
+        private void AppLastLoadStep()
+        {
+            int id = AppRunAgrs();
+            if (id != 0 && GetConfigBool("SimpleView", "AppSetting", true)) id = 0;
+            switch (id)
+            {
+                case 1:
+                    tabControlMain.SelectedTab = tabPageKernelCtl;
+                    lbStartingStatus.Hide();
+                    tabControlMain.Show();
+                    tabControlMain_Selected(this, new TabControlEventArgs(tabPageKernelCtl, 0, TabControlAction.Selected));
+                    break;
+                case 3:
+                    tabControlMain.SelectedTab = tabPagePerfCtl;
+                    lbStartingStatus.Hide();
+                    tabControlMain.Show();
+                    tabControlMain_Selected(this, new TabControlEventArgs(tabPagePerfCtl, 0, TabControlAction.Selected));
+                    break;
+                case 4:
+                    tabControlMain.SelectedTab = tabPageUWPCtl;
+                    lbStartingStatus.Hide();
+                    tabControlMain.Show();
+                    tabControlMain_Selected(this, new TabControlEventArgs(tabPageUWPCtl, 0, TabControlAction.Selected));
+                    break;
+                case 5:
+                    tabControlMain.SelectedTab = tabPageScCtl;
+                    lbStartingStatus.Hide();
+                    tabControlMain.Show();
+                    tabControlMain_Selected(this, new TabControlEventArgs(tabPageScCtl, 0, TabControlAction.Selected));
+                    break;
+                case 6:
+                    tabControlMain.SelectedTab = tabPageStartCtl;
+                    lbStartingStatus.Hide();
+                    tabControlMain.Show();
+                    tabControlMain_Selected(this, new TabControlEventArgs(tabPageStartCtl, 0, TabControlAction.Selected));
+                    break;
+                case 7:
+                    tabControlMain.SelectedTab = tabPageFileCtl;
+                    lbStartingStatus.Hide();
+                    tabControlMain.Show();
+                    tabControlMain_Selected(this, new TabControlEventArgs(tabPageFileCtl, 0, TabControlAction.Selected));
+                    break;
+                case 8:
+                    tabControlMain.SelectedTab = tabPageDetals;
+                    lbStartingStatus.Hide();
+                    tabControlMain.Show();
+                    tabControlMain_Selected(this, new TabControlEventArgs(tabPageDetals, 0, TabControlAction.Selected));
+                    return;
+                case 9:
+                    tabControlMain.SelectedTab = tabPageUsers;
+                    lbStartingStatus.Hide();
+                    tabControlMain.Show();
+                    tabControlMain_Selected(this, new TabControlEventArgs(tabPageUsers, 0, TabControlAction.Selected));
+                    return;
+                case 0:
+                default:
+                    ProcessListInitIn1Slater();
+                    break;
+            }
+            MAppWorkCall3(188, IntPtr.Zero, IntPtr.Zero);
+        }
+        private void AppLoadKernel()
+        {
+            if (GetConfigBool("LoadKernelDriver", "Configure"))
+            {
+                Log("Loading Kernel...");
+                if (!MInitKernel(null))
+                {
+                    if (eprocessindex != -1)
+                    {
+                        listProcess.Colunms.Remove(listProcess.Colunms[eprocessindex]);
+                        eprocessindex = -1;
+                    }
+
+                    if(MIsKernelNeed64())
+                        TaskDialog.Show(LanuageMgr.GetStr("LoadDriverErrNeed64"), LanuageMgr.GetStr("ErrTitle"), LanuageMgr.GetStr("LoadDriverErrNeed64Text"), TaskDialogButton.OK, TaskDialogIcon.None);
+                    else TaskDialog.Show(LanuageMgr.GetStr("LoadDriverErr"), LanuageMgr.GetStr("ErrTitle"), "", TaskDialogButton.OK, TaskDialogIcon.None);
+                    AppLastLoadStep();
+                }
+                else
+                {
+                    if (GetConfigBool("SelfProtect", "AppSetting"))
+                        MAppWorkCall3(203, IntPtr.Zero, IntPtr.Zero);
+                }
+                canUseKernel = MCanUseKernel();
+            }
+            else
+            {
+                AppLastLoadStep();
+                if (eprocessindex != -1)
+                {
+                    listProcess.Colunms.Remove(listProcess.Colunms[eprocessindex]);
+                    eprocessindex = -1;
+                }
+            }
+        }
         //Load and exit
         private void AppLoad()
+        {
+            AppOnLoad();
+        }
+        private void AppExit()
+        {
+            //退出函数
+            Log("App exit...");
+            AppOnExit();
+            Application.Exit();
+        }
+
+        private void AppOnLoad()
         {
             //初始化函数
             DelingDialogInit();
@@ -5828,124 +6096,26 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                 AppLoadKernel();
             else AppLastLoadStep();
         }
-        private void AppExit()
-        {
-            //退出函数
-            Log("App exit...");
-            AppOnExit();
-            Application.Exit();
-        }
-
-        #region FormEvent
-
-        private void AppLastLoadStep()
-        {
-            int id = AppRunAgrs();
-            if (id != 0 && GetConfigBool("SimpleView", "AppSetting", true)) id = 0;
-            switch (id)
-            {
-                case 1:
-                    tabControlMain.SelectedTab = tabPageKernelCtl;
-                    lbStartingStatus.Hide();
-                    tabControlMain.Show();
-                    tabControlMain_Selected(this, new TabControlEventArgs(tabPageKernelCtl, 0, TabControlAction.Selected));
-                    break;
-                case 3:
-                    tabControlMain.SelectedTab = tabPagePerfCtl;
-                    lbStartingStatus.Hide();
-                    tabControlMain.Show();
-                    tabControlMain_Selected(this, new TabControlEventArgs(tabPagePerfCtl, 0, TabControlAction.Selected));
-                    break;
-                case 4:
-                    tabControlMain.SelectedTab = tabPageUWPCtl;
-                    lbStartingStatus.Hide();
-                    tabControlMain.Show();
-                    tabControlMain_Selected(this, new TabControlEventArgs(tabPageUWPCtl, 0, TabControlAction.Selected));
-                    break;
-                case 5:
-                    tabControlMain.SelectedTab = tabPageScCtl;
-                    lbStartingStatus.Hide();
-                    tabControlMain.Show();
-                    tabControlMain_Selected(this, new TabControlEventArgs(tabPageScCtl, 0, TabControlAction.Selected));
-                    break;
-                case 6:
-                    tabControlMain.SelectedTab = tabPageStartCtl;
-                    lbStartingStatus.Hide();
-                    tabControlMain.Show();
-                    tabControlMain_Selected(this, new TabControlEventArgs(tabPageStartCtl, 0, TabControlAction.Selected));
-                    break;
-                case 7:
-                    tabControlMain.SelectedTab = tabPageFileCtl;
-                    lbStartingStatus.Hide();
-                    tabControlMain.Show();
-                    tabControlMain_Selected(this, new TabControlEventArgs(tabPageFileCtl, 0, TabControlAction.Selected));
-                    break;
-                case 8:
-                    tabControlMain.SelectedTab = tabPageDetals;
-                    lbStartingStatus.Hide();
-                    tabControlMain.Show();
-                    tabControlMain_Selected(this, new TabControlEventArgs(tabPageDetals, 0, TabControlAction.Selected));
-                    return;
-                case 0:
-                default:
-                    ProcessListInitIn1Slater();
-                    break;
-            }
-            MAppWorkCall3(188, IntPtr.Zero, IntPtr.Zero);
-        }
-        private void AppLoadKernel()
-        {
-            if (GetConfigBool("LoadKernelDriver", "Configure"))
-            {
-                Log("Loading Kernel...");
-                if (!MInitKernel(null))
-                {
-                    if (eprocessindex != -1)
-                    {
-                        listProcess.Colunms.Remove(listProcess.Colunms[eprocessindex]);
-                        eprocessindex = -1;
-                    }
-
-                    if(MIsKernelNeed64())
-                        TaskDialog.Show(LanuageMgr.GetStr("LoadDriverErrNeed64"), LanuageMgr.GetStr("ErrTitle"), LanuageMgr.GetStr("LoadDriverErrNeed64Text"), TaskDialogButton.OK, TaskDialogIcon.None);
-                    else TaskDialog.Show(LanuageMgr.GetStr("LoadDriverErr"), LanuageMgr.GetStr("ErrTitle"), "", TaskDialogButton.OK, TaskDialogIcon.None);
-                    AppLastLoadStep();
-                }
-                else
-                {
-                    if (GetConfigBool("SelfProtect", "AppSetting"))
-                        MAppWorkCall3(203, IntPtr.Zero, IntPtr.Zero);
-                }
-                canUseKernel = MCanUseKernel();
-            }
-            else
-            {
-                AppLastLoadStep();
-                if (eprocessindex != -1)
-                {
-                    listProcess.Colunms.Remove(listProcess.Colunms[eprocessindex]);
-                    eprocessindex = -1;
-                }
-            }
-        }
         private void AppOnExit()
         {
             if (!exitCalled)
             {
                 baseProcessRefeshTimer.Stop();
 
+                fileSystemWatcher.EnableRaisingEvents = false;
+                SaveListColumnsWidth();
                 ProcessListDetailsUnInit();
                 ProcessListSimpleExit();
                 AppWorkerCallBack(38, IntPtr.Zero, IntPtr.Zero);
                 DelingDialogClose();
                 MPERF_NET_FreeAllProcessNetInfo();
+                UsersListUnInit();
                 PerfClear();
                 ProcessListUnInitPerfs();
                 ProcessListFreeAll();
                 MSCM_Exit();
                 MEnumProcessFree();
                 KernelListUnInit();
-                fileSystemWatcher.EnableRaisingEvents = false;
                 M_LOG_Close();
                 MAppWorkCall3(204, IntPtr.Zero, IntPtr.Zero);
                 MAppWorkCall3(207, Handle, IntPtr.Zero);
@@ -5975,6 +6145,8 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                         return 7;
                     if (agrs[1] == "details")
                         return 8;
+                    if (agrs[1] == "users")
+                        return 9;
                 }
                 else if (agrs[0] == "spy")
                     new FormSpyWindow(GetDesktopWindow()).ShowDialog();
@@ -6058,6 +6230,26 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
             li11.Width = 130;
             listUwpApps.Colunms.Add(li11);
 
+            listUsers.Header.Height = 36;
+            listUsers.ReposVscroll();
+            listUsers.DrawIcon = false;
+            TaskMgrListHeaderItem li13 = new TaskMgrListHeaderItem();
+            li13.TextSmall = LanuageMgr.GetStr("TitleName");
+            li13.Width = 450;
+            listUsers.Colunms.Add(li13);
+            TaskMgrListHeaderItem li14 = new TaskMgrListHeaderItem();
+            li14.TextSmall = "ID";
+            li14.Width = 50;
+            listUsers.Colunms.Add(li14);
+            TaskMgrListHeaderItem li15 = new TaskMgrListHeaderItem();
+            li15.TextSmall = LanuageMgr.GetStr("TitleSessionID");
+            li15.Width = 50;
+            listUsers.Colunms.Add(li15);
+            TaskMgrListHeaderItem li16 = new TaskMgrListHeaderItem();
+            li16.TextSmall = LanuageMgr.GetStr("TitleDomainName");
+            li16.Width = 60;
+            listUsers.Colunms.Add(li16);
+
             string s1 = GetConfig("MainHeaders1", "AppSetting");
             if (s1 != "") listProcessAddHeader("TitleName", int.Parse(s1));
             else listProcessAddHeader("TitleName", 200);
@@ -6124,6 +6316,8 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                 listProcess.Header.Items[netindex].IsNum = true;
                 listProcess.Header.Items[netindex].Alignment = StringAlignment.Far;
             }
+
+            LoadListColumnsWidth();
         }
         private void LoadSettings()
         {
@@ -6234,6 +6428,88 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
             }
         }
 
+        private void LoadListColumnsWidth()
+        {
+            string s = GetConfig("ListStartsWidths", "AppSetting", "");
+            if (s.Contains("#"))
+            {
+                string[] ss = s.Split(new Char[] { '#' }, StringSplitOptions.RemoveEmptyEntries);
+                for(int i = 0; i < ss.Length && i < listStartup.Colunms.Count; i++)
+                {
+                    int width = 0;
+                    if (int.TryParse(ss[i], out width) && width > 0 && width < 1000)
+                        listStartup.Colunms[i].Width = width;
+                }
+            }
+            s = GetConfig("ListUWPsWidths", "AppSetting", "");
+            if (s.Contains("#"))
+            {
+                string[] ss = s.Split(new Char[] { '#' }, StringSplitOptions.RemoveEmptyEntries);
+                for (int i = 0; i < ss.Length && i < listUwpApps.Colunms.Count; i++)
+                {
+                    int width = 0;
+                    if (int.TryParse(ss[i], out width) && width > 0 && width < 1000)
+                        listUwpApps.Colunms[i].Width = width;
+                }
+            }
+            s = GetConfig("ListUsersWidths", "AppSetting", "");
+            if (s.Contains("#"))
+            {
+                string[] ss = s.Split(new Char[] { '#' }, StringSplitOptions.RemoveEmptyEntries);
+                for (int i = 0; i < ss.Length && i < listUsers.Colunms.Count; i++)
+                {
+                    int width = 0;
+                    if (int.TryParse(ss[i], out width) && width > 0 && width < 1000)
+                        listUsers.Colunms[i].Width = width;
+                }
+            }
+            s = GetConfig("ListDriversWidths", "AppSetting", "");
+            if (s.Contains("#"))
+            {
+                string[] ss = s.Split(new Char[] { '#' }, StringSplitOptions.RemoveEmptyEntries);
+                for (int i = 0; i < ss.Length && i < listDrivers.Columns.Count; i++)
+                {
+                    int width = 0;
+                    if (int.TryParse(ss[i], out width) && width > 0 && width < 1000)
+                        listDrivers.Columns[i].Width = width;
+                }
+            }
+            s = GetConfig("ListServiceWidths", "AppSetting", "");
+            if (s.Contains("#"))
+            {
+                string[] ss = s.Split(new Char[] { '#' }, StringSplitOptions.RemoveEmptyEntries);
+                for (int i = 0; i < ss.Length && i < listService.Columns.Count; i++)
+                {
+                    int width = 0;
+                    if (int.TryParse(ss[i], out width) && width > 0 && width < 1000)
+                        listService.Columns[i].Width = width;
+                }
+            }
+        }
+        private void SaveListColumnsWidth()
+        {
+            string s = "";
+            foreach (TaskMgrListHeaderItem he in listStartup.Colunms)
+                s += "#" + he.Width;
+            SetConfig("ListStartsWidths", "AppSetting", s);
+            s = "";
+            foreach (TaskMgrListHeaderItem he in listUwpApps.Colunms)
+                s += "#" + he.Width;
+            SetConfig("ListUWPsWidths", "AppSetting", s);
+            s = "";
+            foreach (TaskMgrListHeaderItem he in listUsers.Colunms)
+                s += "#" + he.Width;
+            SetConfig("ListUsersWidths", "AppSetting", s);
+            s = "";
+            foreach (ColumnHeader he in listDrivers.Columns)
+                s += "#" + he.Width;
+            SetConfig("ListDriversWidths", "AppSetting", s);
+            s = "";
+            foreach (ColumnHeader he in listService.Columns)
+                s += "#" + he.Width;
+            SetConfig("ListServiceWidths", "AppSetting", s);
+        }
+
         private void notifyIcon_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             MAppWorkCall3(208, Handle, Handle);
@@ -6288,6 +6564,12 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                         }
                         break;
                     }
+                case 40017:
+                    {
+                        //sleep system
+                        Application.SetSuspendState(PowerState.Hibernate, true, true);
+                        break;
+                    }
                 case 41130:
                 case 41012:
                     {
@@ -6305,6 +6587,10 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                             UWPListRefesh();
                         else if (tabControlMain.SelectedTab == tabPagePerfCtl)
                             BaseProcessRefeshTimer_Tick(null, null);
+                        else if (tabControlMain.SelectedTab == tabPageDetals)
+                            BaseProcessRefeshTimer_Tick(null, null);
+                        else if (tabControlMain.SelectedTab == tabPageUsers)
+                            UsersListLoad();
                         break;
                     }
                 case 40019:
@@ -6456,6 +6742,10 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
             else if (e.TabPage == tabPageDetals)
             {
                 ProcessListDetailsInit();
+            }
+            else if (e.TabPage == tabPageUsers)
+            {
+                UsersListInit();
             }
         }
 

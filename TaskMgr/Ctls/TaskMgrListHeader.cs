@@ -126,7 +126,6 @@ namespace PCMgr.Ctls
         {
             get
             {
-
 #if DEBUG
                 bool returnFlag = false;
                 if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime)

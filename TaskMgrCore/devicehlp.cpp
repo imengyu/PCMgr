@@ -100,34 +100,34 @@ M_CAPI(BOOL) MDEVICE_GetLogicalDiskInfo()
 		{
 			HRESULT hr = pEnumerator->Next(WBEM_INFINITE, 1, &pclsObj, &uReturn);
 			VARIANT vtProp;
+			VariantInit(&vtProp);
 
-			if (0 == uReturn)
+			if (0 == uReturn) 
 				break;
 
-			MDevicePhysicalDisk *disk = (MDevicePhysicalDisk*)malloc(sizeof(MDevicePhysicalDisk));
+			MDevicePhysicalDisk *disk = (MDevicePhysicalDisk*)MAlloc(sizeof(MDevicePhysicalDisk));
 
-			hr = pclsObj->Get(L"Name", 0, &vtProp, 0, 0);
-			wcscpy_s(disk->Name, vtProp.bstrVal);
+			hr = pclsObj->Get(bstr_t(L"Name"), 0, &vtProp, 0, 0);
+			if (SUCCEEDED(hr) && (V_VT(&vtProp) == VT_BSTR)) wcscpy_s(disk->Name, vtProp.bstrVal);
 			VariantClear(&vtProp);
 
-			hr = pclsObj->Get(L"Model", 0, &vtProp, 0, 0);
-			wcscpy_s(disk->Model, vtProp.bstrVal);
+			hr = pclsObj->Get(bstr_t(L"Model"), 0, &vtProp, 0, 0);
+			if (SUCCEEDED(hr) && (V_VT(&vtProp) == VT_BSTR)) wcscpy_s(disk->Model, vtProp.bstrVal);
 			VariantClear(&vtProp);
 
-			hr = pclsObj->Get(L"Size", 0, &vtProp, 0, 0);
+			hr = pclsObj->Get(bstr_t(L"Size"), 0, &vtProp, 0, 0);
 			disk->Size = vtProp.ullVal;
-			wcscpy_s(disk->SizeStr, vtProp.bstrVal);
+			if (SUCCEEDED(hr) && (V_VT(&vtProp) == VT_BSTR)) wcscpy_s(disk->SizeStr, vtProp.bstrVal);
 			VariantClear(&vtProp);
 
-			hr = pclsObj->Get(L"Index", 0, &vtProp, 0, 0);
+			hr = pclsObj->Get(bstr_t(L"Index"), 0, &vtProp, 0, 0);
 			disk->Index = vtProp.uintVal;
 			VariantClear(&vtProp);
 
 			diskInfos.push_back(disk);
-
 			pclsObj->Release();
 		}
-
+		
 		pEnumerator->Release();
 		return TRUE;
 	}
@@ -138,7 +138,7 @@ M_CAPI(BOOL) MDEVICE_DestroyLogicalDiskInfo()
 	if (wmiInited)
 	{
 		for (auto it = diskInfos.begin(); it != diskInfos.end(); it++)
-			free(*it);
+			MFree(*it);
 		diskInfos.clear();
 		return TRUE;
 	}
@@ -238,18 +238,64 @@ M_CAPI(BOOL) MDEVICE_GetIsPageFileDisk(LPCSTR perfStr)
 }
 
 MDeviceMemory memoryInfo;
+UINT16 allMemoryDevice = 0;
+UINT16 usedMemoryDevice = 0;
 
+M_CAPI(BOOL) MDEVICE_GetMemoryArrayInfo()
+{
+	if (wmiInited)
+	{
+		IEnumWbemClassObject* pEnumerator = NULL;
+		HRESULT hres = pSvc->ExecQuery(
+			bstr_t(L"WQL"),
+			bstr_t(L"SELECT * FROM Win32_PhysicalMemoryArray"),
+			WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY,
+			NULL,
+			&pEnumerator);
+
+		if (FAILED(hres))
+		{
+			LogErr2(L"Query for (Win32_PhysicalMemoryArray)  failed. Error code : 0x%X", hres);
+			return FALSE;
+		}
+
+		IWbemClassObject *pclsObj = NULL;
+		ULONG uReturn = 0;
+		while (pEnumerator)
+		{
+			HRESULT hr = pEnumerator->Next(WBEM_INFINITE, 1, &pclsObj, &uReturn);
+			VARIANT vtProp;
+			VariantInit(&vtProp);
+
+			if (0 == uReturn)
+				break;
+
+			hr = pclsObj->Get(bstr_t(L"MemoryDevices"), 0, &vtProp, 0, 0);
+			allMemoryDevice = vtProp.uiVal;
+			VariantClear(&vtProp);
+
+			usedMemoryDevice++;
+
+			pclsObj->Release();
+
+		}
+
+		pEnumerator->Release();
+		return TRUE;
+	}
+	return FALSE;
+}
 M_CAPI(BOOL) MDEVICE_GetMemoryDeviceInfo()
 {
 	if (wmiInited)
 	{
-		if (diskInfos.size() > 0)
-			MDEVICE_DestroyLogicalDiskInfo();
+		allMemoryDevice = 0;
+		usedMemoryDevice = 0;
 
 		IEnumWbemClassObject* pEnumerator = NULL;
 		HRESULT hres = pSvc->ExecQuery(
-			bstr_t("WQL"),
-			bstr_t("SELECT * FROM Win32_PhysicalMemory"),
+			bstr_t(L"WQL"),
+			bstr_t(L"SELECT * FROM Win32_PhysicalMemory"),
 			WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY,
 			NULL,
 			&pEnumerator);
@@ -262,37 +308,185 @@ M_CAPI(BOOL) MDEVICE_GetMemoryDeviceInfo()
 
 		IWbemClassObject *pclsObj = NULL;
 		ULONG uReturn = 0;
-
 		while (pEnumerator)
 		{
 			HRESULT hr = pEnumerator->Next(WBEM_INFINITE, 1, &pclsObj, &uReturn);
 			VARIANT vtProp;
+			VariantInit(&vtProp);
 
 			if (0 == uReturn)
 				break;
 
-			hr = pclsObj->Get(L"Model", 0, &vtProp, 0, 0);
-			if(vtProp.bstrVal) wcscpy_s(memoryInfo.Name, vtProp.bstrVal);
+			hr = pclsObj->Get(bstr_t(L"FormFactor"), 0, &vtProp, 0, 0);
+			memoryInfo.FormatFactor = vtProp.uiVal;
 			VariantClear(&vtProp);
 
-			hr = pclsObj->Get(L"Speed", 0, &vtProp, 0, 0);
-			memoryInfo.Speed = vtProp.uintVal;
+			hr = pclsObj->Get(bstr_t(L"DeviceLocator"), 0, &vtProp, 0, 0);
+			if (SUCCEEDED(hr) && (V_VT(&vtProp) == VT_BSTR)) wcscpy_s(memoryInfo.DeviceLocator, vtProp.bstrVal);
+			VariantClear(&vtProp);
+
+			hr = pclsObj->Get(bstr_t(L"SMBIOSMemoryType"), 0, &vtProp, 0, 0);
+			if (SUCCEEDED(hr)) memoryInfo.SMBIOSMemoryType = vtProp.uintVal;
+			VariantClear(&vtProp);
+
+			hr = pclsObj->Get(bstr_t(L"Speed"), 0, &vtProp, 0, 0);
+			if (SUCCEEDED(hr)) memoryInfo.Speed = vtProp.uintVal;
+			VariantClear(&vtProp);
+
+			hr = pclsObj->Get(bstr_t(L"Capacity"), 0, &vtProp, 0, 0);
+			if (SUCCEEDED(hr) && (V_VT(&vtProp) == VT_BSTR)) memoryInfo.Capacity = _wtoi64(vtProp.bstrVal);
 			VariantClear(&vtProp);
 
 			pclsObj->Release();
-
-			break;
+			
 		}
-
+		
 		pEnumerator->Release();
-		return TRUE;
+
+		return MDEVICE_GetMemoryArrayInfo();
 	}
 	return FALSE;
 }
+M_CAPI(LPWSTR) MDEVICE_GetMemoryFormFactorString(UINT16 _formFactor)
+{
+	LPWSTR formFactor = NULL;
+	switch (_formFactor)
+	{
+	case 1:
+		formFactor = L"Other";
+		break;
+	case 2:
+		formFactor = L"SIP";
+		break;
+	case 3:
+		formFactor = L"DIP";
+		break;
+	case 4:
+		formFactor = L"ZIP";
+		break;
+	case 5:
+		formFactor = L"SOJ";
+		break;
+	case 6:
+		formFactor = L"Proprietary";
+		break;
+	case 7:
+		formFactor = L"SIMM";
+		break;
+	case 8:
+		formFactor = L"DIMM";
+		break;
+	case 9:
+		formFactor = L"TSOP";
+		break;
+	case 10:
+		formFactor = L"PGA";
+		break;
+	case 11:
+		formFactor = L"RIMM";
+		break;
+	case 12:
+		formFactor = L"SODIMM";
+		break;
+	case 13:
+		formFactor = L"SRIMM";
+		break;
+	case 14:
+		formFactor = L"SMD";
+		break;
+	case 15:
+		formFactor = L"SSMP";
+		break;
+	case 16:
+		formFactor = L"QFP";
+		break;
+	case 17:
+		formFactor = L"TQFP";
+		break;
+	case 18:
+		formFactor = L"SOIC";
+		break;
+	case 19:
+		formFactor = L"LCC";
+		break;
+	case 20:
+		formFactor = L"PLCC";
+		break;
+	case 21:
+		formFactor = L"BGA";
+		break;
+	case 22:
+		formFactor = L"FPBGA";
+		break;
+	case 23:
+		formFactor = L"LGA";
+		break;
+	default:
+		formFactor = L"Unknown";
+		break;
+	}
+	return  formFactor;
+}
+M_CAPI(LPWSTR) MDEVICE_GetMemoryTypeString(UINT32 sMBIOSMemoryType)
+{
+	switch (sMBIOSMemoryType)
+	{
+	case 0x01:return L" Other";
+	case 0x02:return L" Unknown";
+	case 0x03:return L" DRAM";
+	case 0x04:return L" EDRAM";
+	case 0x05:return L" VRAM";
+	case 0x06:return L" SRAM";
+	case 0x07:return L" RAM";
+	case 0x08:return L" ROM";
+	case 0x09:return L" FLASH";
+	case 0x0A:return L" EEPROM";
+	case 0x0B:return L" FEPROM";
+	case 0x0C:return L" EPROM";
+	case 0x0D:return L" CDRAM";
+	case 0x0E:return L" 3DRAM";
+	case 0x0F:return L" SDRAM";
+	case 0x10:return L" SGRAM";
+	case 0x11:return L" RDRAM";
+	case 0x12:return L" DDR";
+	case 0x13:return L" DDR2";
+	case 0x14:return L" DDR2 FB - DIMM";
+	case 0x18:return L" DDR3";
+	case 0x19:return L" FBD2";
+	case 0x1A:return L" DDR4";
+	case 0x1B:return L" LPDDR";
+	case 0x1C:return L" LPDDR2";
+	case 0x1D:return L" LPDDR3";
+	case 0x1E:return L" LPDDR4";
+	default:
+		return L"";
+		break;
+	}
+}
+M_CAPI(LPWSTR) MDEVICE_GetMemoryDeviceLocator() {
+	return memoryInfo.DeviceLocator;
+}
 M_CAPI(LPWSTR) MDEVICE_GetMemoryDeviceName() {
+	if (MStrEqual(memoryInfo.Name, L"")) {
+		UINT64 size = memoryInfo.Capacity / 8388608;
+		swprintf_s(memoryInfo.Name, L"%llu GB %s", size, MDEVICE_GetMemoryTypeString(memoryInfo.SMBIOSMemoryType));
+	}
 	return memoryInfo.Name;
 }
 M_CAPI(UINT32) MDEVICE_GetMemoryDeviceSpeed() {
 	return memoryInfo.Speed;
+}
+M_CAPI(UINT16) MDEVICE_GetMemoryDeviceFormFactor() {
+	return memoryInfo.FormatFactor;
+}
+M_CAPI(BOOL) MDEVICE_GetMemoryDeviceUsed(UINT16*outAll, UINT16*outUsed) 
+{
+	if (wmiInited && outAll && outUsed)
+	{
+		*outAll = allMemoryDevice;
+		*outUsed = usedMemoryDevice;
+		return TRUE;
+	}
+	return FALSE;
 }
 

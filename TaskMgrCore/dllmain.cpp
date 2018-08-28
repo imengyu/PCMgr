@@ -6,6 +6,7 @@
 #include "kernelhlp.h"
 #include "prochlp.h"
 #include "mainprocs.h"
+#include "loghlp.h"
 #include "settinghlp.h"
 #include "lghlp.h"
 #include "vprocx.h"
@@ -44,6 +45,7 @@ BOOL APIENTRY DllMain( HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpRese
 void DllStartup() {
 	HIconDef = (HICON)LoadImage(hInst, MAKEINTRESOURCE(IDI_ICONDEFAPP), IMAGE_ICON, 16, 16, 0);
 	LoadDll();
+	M_LOG_Init();
 	MLG_Startup();
 	hCurLoading = LoadCursor(NULL, IDC_WAIT);
 	ShowMainCoreStartUp();
@@ -54,6 +56,8 @@ void DllStartup() {
 }
 void DllDestroy() {
 	hInst = NULL;
+	M_LOG_Destroy();	
+	MProcessHANDLEStorageDestroy();
 	MUnInitKernelNTPDB();
 	MLG_SetLanuageItems_Destroy();
 	MPERF_FreeCpuInfos();

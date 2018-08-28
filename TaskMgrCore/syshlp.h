@@ -6,6 +6,8 @@
 #define PTR_ADD_OFFSET(Pointer, Offset) ((PVOID)((ULONG_PTR)(Pointer) + (ULONG_PTR)(Offset)))
 #define PTR_SUB_OFFSET(Pointer, Offset) ((PVOID)((ULONG_PTR)(Pointer) - (ULONG_PTR)(Offset)))
 
+BOOL MGetDebuggerInformation();
+
 //显示”运行“对话框（hwndOwner填自己的窗口句柄，其他全部填NULL）
 M_CAPI(BOOL) MRunFileDlg(HWND hwndOwner, HICON hIcon, LPCWSTR lpszDirectory, LPCWSTR lpszTitle, LPCWSTR lpszDescription, ULONG uFlags);
 //系统是否是64位
@@ -22,6 +24,9 @@ M_CAPI(BOOL) MIsRunasAdmin();
 M_CAPI(PVOID) MGetProcedureAddress(PVOID DllHandle, PSTR ProcedureName, ULONG ProcedureNumber);
 //等于 GetProcAddress（自及实现的）
 M_CAPI(PVOID) MGetProcAddress(PVOID DllHandle, PSTR ProcedureName);
+
+//获取系统处理器标识
+M_CAPI(BOOL) MGetSystemAffinityMask(PULONG_PTR SystemAffinityMask);
 
 //命令行转为文件路径
 //    cmdline：命令行

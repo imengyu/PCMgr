@@ -66,6 +66,8 @@ M_CAPI(ULONGLONG) MPERF_GetCommitTotal();
 M_CAPI(ULONGLONG) MPERF_GetCommitLimit();
 //获取可用内存
 M_CAPI(ULONGLONG) MPERF_GetRamAvail();
+//获取已用内存
+M_CAPI(ULONGLONG) MPERF_GetRamUsed();
 //获取可用分页内存
 M_CAPI(ULONGLONG) MPERF_GetRamAvailPageFile();
 //刷新性能信息，刷新以后上面的函数才能用

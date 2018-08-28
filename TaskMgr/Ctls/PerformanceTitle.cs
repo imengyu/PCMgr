@@ -8,6 +8,8 @@ namespace PCMgr.Ctls
     {
         public PerformanceTitle()
         {
+            SetStyle(ControlStyles.Selectable, false);
+            SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
             TitleFont = new Font("微软雅黑", 18);
             SmallTitleFont = new Font("微软雅黑", 12);
             stringFormatRight = new StringFormat();
@@ -17,9 +19,9 @@ namespace PCMgr.Ctls
 
         public Font TitleFont { get; set; }
         public Font SmallTitleFont { get; set; }
-        [Bindable(true), Localizable(true)]
+        [Localizable(true)]
         public string Title { get; set; }
-        [Bindable(true), Localizable(true)]
+        [Localizable(true)]
         public string SmallTitle { get; set; }
 
         private StringFormat stringFormatRight = null;

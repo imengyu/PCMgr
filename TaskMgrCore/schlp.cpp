@@ -43,9 +43,9 @@ M_CAPI(BOOL) MSCM_Init()
 M_CAPI(void) MSCM_Exit()
 {
 	if(hSCM) CloseServiceHandle(hSCM);
-	if (pBuf) { free(pBuf); pBuf = NULL; }
-	if (pBufDrvscs) { free(pBufDrvscs); pBufDrvscs = NULL; }
-	if (pDrvscsNames) { free(pDrvscsNames); pDrvscsNames = NULL; }
+	if (pBuf) { MFree(pBuf); pBuf = NULL; }
+	if (pBufDrvscs) { MFree(pBufDrvscs); pBufDrvscs = NULL; }
+	if (pDrvscsNames) { MFree(pDrvscsNames); pDrvscsNames = NULL; }
 }
 M_CAPI(LPWSTR) MSCM_GetScGroup(LPWSTR path)
 {
@@ -75,7 +75,7 @@ M_CAPI(LPWSTR) MSCM_GetScGroup(LPWSTR path)
 
 BOOL MSCM_EnumDriverServicesFreeAll() {
 	if (pBufDrvscs) {
-		free(pBufDrvscs); 
+		MFree(pBufDrvscs); 
 		pBufDrvscs = NULL;
 	}
 	if (pDrvscsNames)
@@ -85,7 +85,7 @@ BOOL MSCM_EnumDriverServicesFreeAll() {
 			if (pDrvscsNames[i].ServiceHandle)
 				CloseServiceHandle(pDrvscsNames[i].ServiceHandle);
 		}
-		free(pDrvscsNames);
+		MFree(pDrvscsNames);
 		pDrvscsNames = NULL;
 	}
 	return TRUE;
@@ -117,7 +117,7 @@ M_CAPI(BOOL) MSCM_EnumDriverServices() {
 			NULL, dwBufSize, &dwBufNeed, &dwNumberOfDriverService, NULL, NULL);
 
 		dwBufSize = dwBufNeed + sizeof(ENUM_SERVICE_STATUS_PROCESS);
-		pBufDrvscs = (LPENUM_SERVICE_STATUS_PROCESS)malloc(dwBufSize);
+		pBufDrvscs = (LPENUM_SERVICE_STATUS_PROCESS)MAlloc(dwBufSize);
 		if (NULL == pBufDrvscs)
 			return FALSE;
 		memset(pBufDrvscs, 0, dwBufSize);
@@ -126,14 +126,14 @@ M_CAPI(BOOL) MSCM_EnumDriverServices() {
 			(LPBYTE)pBufDrvscs, dwBufSize, &dwBufNeed, &dwNumberOfDriverService, NULL, NULL);
 		if (bRet == FALSE) {
 			LogErr(L"EnumServicesStatusEx error : %d", GetLastError());
-			free(pBufDrvscs);
+			MFree(pBufDrvscs);
 			pBufDrvscs = NULL;
 			return FALSE;
 		}
 
 		if (dwNumberOfDriverService > 0) {
 			size_t size = (dwNumberOfDriverService + 1) * sizeof(SERVICE_STORAGE);
-			pDrvscsNames = (LPSERVICE_STORAGE)malloc(size);
+			pDrvscsNames = (LPSERVICE_STORAGE)MAlloc(size);
 			memset(pDrvscsNames, 0, size);
 			if (pDrvscsNames) {
 				for (unsigned int i = 0; i < dwNumberOfDriverService; i++)
@@ -146,12 +146,12 @@ M_CAPI(BOOL) MSCM_EnumDriverServices() {
 						pDrvscsNames[i].ServiceHandle = hSc;
 						DWORD sizeneed;
 						QueryServiceConfig(hSc, NULL, 0, &sizeneed);
-						LPQUERY_SERVICE_CONFIG cfg = (LPQUERY_SERVICE_CONFIG)malloc(sizeneed);
+						LPQUERY_SERVICE_CONFIG cfg = (LPQUERY_SERVICE_CONFIG)MAlloc(sizeneed);
 						if (QueryServiceConfig(hSc, cfg, sizeneed, &sizeneed)) {
 							wcscpy_s(pDrvscsNames[i].ServiceImagePath, cfg->lpBinaryPathName);
 							pDrvscsNames[i].ServiceStartType = cfg->dwStartType;
 						}
-						free(cfg);
+						MFree(cfg);
 					}
 				}
 				return TRUE;
@@ -164,7 +164,7 @@ M_CAPI(BOOL) MEnumServices(EnumServicesCallBack callback)
 {
 	BOOL bRet = FALSE;
 	if (callback && hSCM) {
-		if (pBuf) free(pBuf);
+		if (pBuf) MFree(pBuf);
 		pBuf = NULL;		
 		// 获取需要的缓冲区大小
 		EnumServicesStatusEx(hSCM, SC_ENUM_PROCESS_INFO, SERVICE_WIN32, SERVICE_STATE_ALL,
@@ -172,7 +172,7 @@ M_CAPI(BOOL) MEnumServices(EnumServicesCallBack callback)
 
 		// 多设置存放1个服务信息的长度
 		dwBufSize = dwBufNeed + sizeof(ENUM_SERVICE_STATUS_PROCESS);
-		pBuf = (char *)malloc(dwBufSize);
+		pBuf = (char *)MAlloc(dwBufSize);
 		if (NULL == pBuf)
 			return -2;
 		memset(pBuf, 0, dwBufSize);
@@ -182,7 +182,7 @@ M_CAPI(BOOL) MEnumServices(EnumServicesCallBack callback)
 			(LPBYTE)pBuf, dwBufSize, &dwBufNeed, &dwNumberOfService, NULL, NULL);
 		if (bRet == FALSE) {
 			LogErr(L"EnumServicesStatusEx error : %d", GetLastError());
-			free(pBuf);
+			MFree(pBuf);
 			pBuf = NULL;
 			return -1;
 		}
@@ -194,17 +194,17 @@ M_CAPI(BOOL) MEnumServices(EnumServicesCallBack callback)
 			if (hSc) {
 				DWORD sizeneed;
 				QueryServiceConfig(hSc, NULL, 0, &sizeneed);
-				LPQUERY_SERVICE_CONFIG cfg = (LPQUERY_SERVICE_CONFIG)malloc(sizeneed);
+				LPQUERY_SERVICE_CONFIG cfg = (LPQUERY_SERVICE_CONFIG)MAlloc(sizeneed);
 				if (QueryServiceConfig(hSc, cfg, sizeneed, &sizeneed)) {
 					callback(pServiceInfo[i].lpDisplayName, pServiceInfo[i].lpServiceName, cfg->dwServiceType,
 						pServiceInfo[i].ServiceStatusProcess.dwCurrentState, pServiceInfo[i].ServiceStatusProcess.dwProcessId,
 						pServiceInfo[i].ServiceStatusProcess.dwServiceFlags == 1, cfg->dwStartType, cfg->lpBinaryPathName, MSCM_GetScGroup(cfg->lpBinaryPathName));
 					
-					free(cfg);
+					MFree(cfg);
 				}
 				else {
 					wsprintf(err, L"QueryServiceConfig err : %d .", GetLastError());
-					free(cfg);
+					MFree(cfg);
 					CloseServiceHandle(hSc);
 					goto DEFINFO;
 				}
@@ -255,7 +255,7 @@ M_CAPI(BOOL) MSCM_ChangeScStartType(LPWSTR scname, DWORD type, LPWSTR errText)
 		DWORD bufSize = 0;
 		LPQUERY_SERVICE_CONFIG confg = NULL;
 		QueryServiceConfig(hSc, confg, 0, &bufSize);
-		confg = (LPQUERY_SERVICE_CONFIG)malloc(bufSize);
+		confg = (LPQUERY_SERVICE_CONFIG)MAlloc(bufSize);
 		QueryServiceConfig(hSc, confg, bufSize, &bufSize);
 
 		if (confg->dwStartType != type)

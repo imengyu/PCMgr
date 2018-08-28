@@ -132,6 +132,18 @@
     <ClInclude Include="cscall.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="userhlp.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="cmdhlp.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="msup.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="pehlp.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -219,6 +231,18 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="uwphlp.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="userhlp.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="cmdhlp.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="msup.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="pehlp.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

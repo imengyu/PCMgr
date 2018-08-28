@@ -140,7 +140,7 @@
         AAEAAAD/////AQAAAAAAAAAMAgAAAFdTeXN0ZW0uV2luZG93cy5Gb3JtcywgVmVyc2lvbj00LjAuMC4w
         LCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODkFAQAAACZTeXN0
         ZW0uV2luZG93cy5Gb3Jtcy5JbWFnZUxpc3RTdHJlYW1lcgEAAAAERGF0YQcCAgAAAAkDAAAADwMAAADw
-        CAAAAk1TRnQBSQFMAgEBAwEAAXABBwFwAQcBEAEAARABAAT/ASEBAAj/AUIBTQE2BwABNgMAASgDAAFA
+        CAAAAk1TRnQBSQFMAgEBAwEAAeABBwHgAQcBEAEAARABAAT/ASEBAAj/AUIBTQE2BwABNgMAASgDAAFA
         AwABEAMAAQEBAAEgBgABELYAAlgBYgHvAlgBYgHvDAACWAFiAe8CWAFiAe+EAAGyAgAB/wwAAmIBWAHv
         AdwBjwEAAf8B6AGXAQAB/wHoAZcBAAH/AegBlwEAAf8BwwIAAf8CRwFGAYAcAAGOAeQC/wGNAeMC/wGL
         AeMC/wGKAeIC/wGIAeIC/wGHAeEC/wIAAb4B/wIAAeYB/wIAAbwB/wEAAdYB/AH/AgABuQH/AgAB3gH/
@@ -270,7 +270,7 @@
         AAEAAAD/////AQAAAAAAAAAMAgAAAFdTeXN0ZW0uV2luZG93cy5Gb3JtcywgVmVyc2lvbj00LjAuMC4w
         LCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODkFAQAAACZTeXN0
         ZW0uV2luZG93cy5Gb3Jtcy5JbWFnZUxpc3RTdHJlYW1lcgEAAAAERGF0YQcCAgAAAAkDAAAADwMAAACw
-        BAAAAk1TRnQBSQFMAwEBAAE4AQcBOAEHARABAAEQAQAE/wEhAQAI/wFCAU0BNgcAATYDAAEoAwABQAMA
+        BAAAAk1TRnQBSQFMAwEBAAGoAQcBqAEHARABAAEQAQAE/wEhAQAI/wFCAU0BNgcAATYDAAEoAwABQAMA
         ARADAAEBAQABIAYAARA8AAHNAf8MAAJQAVEBnwJQAVEBn8wAAvsB+gH/AvsB+gH/AvsB+gH/AvsB+gH/
         AvsB+gH/AvsB+gH/A/0B/wIAAdsB/wIAAdkB/wP9Af8CUAFRAZ8CAAHeAf8CUAFRAZ/MAAP7Af8B9wL2
         Af8B9wH2AfUB/wH3AfYB9QH/AfcB9gH1Af8B9wH2AfUB/wH3AfYB9QH/AvsB+gH/AgAB2wH/AgAB2QH/
@@ -442,6 +442,252 @@
   </data>
   <data name="tabControlMain.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Top, Bottom, Left, Right</value>
+  </data>
+  <data name="&gt;&gt;tabPageProcCtl.Name" xml:space="preserve">
+    <value>tabPageProcCtl</value>
+  </data>
+  <data name="&gt;&gt;tabPageProcCtl.Type" xml:space="preserve">
+    <value>System.Windows.Forms.TabPage, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;tabPageProcCtl.Parent" xml:space="preserve">
+    <value>tabControlMain</value>
+  </data>
+  <data name="&gt;&gt;tabPageProcCtl.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="&gt;&gt;tabPageKernelCtl.Name" xml:space="preserve">
+    <value>tabPageKernelCtl</value>
+  </data>
+  <data name="&gt;&gt;tabPageKernelCtl.Type" xml:space="preserve">
+    <value>System.Windows.Forms.TabPage, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;tabPageKernelCtl.Parent" xml:space="preserve">
+    <value>tabControlMain</value>
+  </data>
+  <data name="&gt;&gt;tabPageKernelCtl.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="&gt;&gt;tabPagePerfCtl.Name" xml:space="preserve">
+    <value>tabPagePerfCtl</value>
+  </data>
+  <data name="&gt;&gt;tabPagePerfCtl.Type" xml:space="preserve">
+    <value>System.Windows.Forms.TabPage, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;tabPagePerfCtl.Parent" xml:space="preserve">
+    <value>tabControlMain</value>
+  </data>
+  <data name="&gt;&gt;tabPagePerfCtl.ZOrder" xml:space="preserve">
+    <value>2</value>
+  </data>
+  <data name="&gt;&gt;tabPageUWPCtl.Name" xml:space="preserve">
+    <value>tabPageUWPCtl</value>
+  </data>
+  <data name="&gt;&gt;tabPageUWPCtl.Type" xml:space="preserve">
+    <value>System.Windows.Forms.TabPage, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;tabPageUWPCtl.Parent" xml:space="preserve">
+    <value>tabControlMain</value>
+  </data>
+  <data name="&gt;&gt;tabPageUWPCtl.ZOrder" xml:space="preserve">
+    <value>3</value>
+  </data>
+  <data name="&gt;&gt;tabPageUsers.Name" xml:space="preserve">
+    <value>tabPageUsers</value>
+  </data>
+  <data name="&gt;&gt;tabPageUsers.Type" xml:space="preserve">
+    <value>System.Windows.Forms.TabPage, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;tabPageUsers.Parent" xml:space="preserve">
+    <value>tabControlMain</value>
+  </data>
+  <data name="&gt;&gt;tabPageUsers.ZOrder" xml:space="preserve">
+    <value>4</value>
+  </data>
+  <data name="&gt;&gt;tabPageScCtl.Name" xml:space="preserve">
+    <value>tabPageScCtl</value>
+  </data>
+  <data name="&gt;&gt;tabPageScCtl.Type" xml:space="preserve">
+    <value>System.Windows.Forms.TabPage, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;tabPageScCtl.Parent" xml:space="preserve">
+    <value>tabControlMain</value>
+  </data>
+  <data name="&gt;&gt;tabPageScCtl.ZOrder" xml:space="preserve">
+    <value>5</value>
+  </data>
+  <data name="&gt;&gt;tabPageDetals.Name" xml:space="preserve">
+    <value>tabPageDetals</value>
+  </data>
+  <data name="&gt;&gt;tabPageDetals.Type" xml:space="preserve">
+    <value>System.Windows.Forms.TabPage, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;tabPageDetals.Parent" xml:space="preserve">
+    <value>tabControlMain</value>
+  </data>
+  <data name="&gt;&gt;tabPageDetals.ZOrder" xml:space="preserve">
+    <value>6</value>
+  </data>
+  <data name="&gt;&gt;tabPageStartCtl.Name" xml:space="preserve">
+    <value>tabPageStartCtl</value>
+  </data>
+  <data name="&gt;&gt;tabPageStartCtl.Type" xml:space="preserve">
+    <value>System.Windows.Forms.TabPage, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;tabPageStartCtl.Parent" xml:space="preserve">
+    <value>tabControlMain</value>
+  </data>
+  <data name="&gt;&gt;tabPageStartCtl.ZOrder" xml:space="preserve">
+    <value>7</value>
+  </data>
+  <data name="&gt;&gt;tabPageFileCtl.Name" xml:space="preserve">
+    <value>tabPageFileCtl</value>
+  </data>
+  <data name="&gt;&gt;tabPageFileCtl.Type" xml:space="preserve">
+    <value>System.Windows.Forms.TabPage, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;tabPageFileCtl.Parent" xml:space="preserve">
+    <value>tabControlMain</value>
+  </data>
+  <data name="&gt;&gt;tabPageFileCtl.ZOrder" xml:space="preserve">
+    <value>8</value>
+  </data>
+  <data name="tabControlMain.Font" type="System.Drawing.Font, System.Drawing">
+    <value>微软雅黑, 9pt</value>
+  </data>
+  <data name="tabControlMain.Location" type="System.Drawing.Point, System.Drawing">
+    <value>0, 0</value>
+  </data>
+  <data name="tabControlMain.Size" type="System.Drawing.Size, System.Drawing">
+    <value>909, 594</value>
+  </data>
+  <data name="tabControlMain.TabIndex" type="System.Int32, mscorlib">
+    <value>0</value>
+  </data>
+  <data name="tabControlMain.Visible" type="System.Boolean, mscorlib">
+    <value>False</value>
+  </data>
+  <data name="&gt;&gt;tabControlMain.Name" xml:space="preserve">
+    <value>tabControlMain</value>
+  </data>
+  <data name="&gt;&gt;tabControlMain.Type" xml:space="preserve">
+    <value>System.Windows.Forms.TabControl, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;tabControlMain.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;tabControlMain.ZOrder" xml:space="preserve">
+    <value>4</value>
+  </data>
+  <data name="&gt;&gt;sp4.Name" xml:space="preserve">
+    <value>sp4</value>
+  </data>
+  <data name="&gt;&gt;sp4.Type" xml:space="preserve">
+    <value>System.Windows.Forms.PictureBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;sp4.Parent" xml:space="preserve">
+    <value>tabPageProcCtl</value>
+  </data>
+  <data name="&gt;&gt;sp4.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="&gt;&gt;check_showAllProcess.Name" xml:space="preserve">
+    <value>check_showAllProcess</value>
+  </data>
+  <data name="&gt;&gt;check_showAllProcess.Type" xml:space="preserve">
+    <value>System.Windows.Forms.CheckBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;check_showAllProcess.Parent" xml:space="preserve">
+    <value>tabPageProcCtl</value>
+  </data>
+  <data name="&gt;&gt;check_showAllProcess.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="&gt;&gt;spl1.Name" xml:space="preserve">
+    <value>spl1</value>
+  </data>
+  <data name="&gt;&gt;spl1.Type" xml:space="preserve">
+    <value>System.Windows.Forms.PictureBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;spl1.Parent" xml:space="preserve">
+    <value>tabPageProcCtl</value>
+  </data>
+  <data name="&gt;&gt;spl1.ZOrder" xml:space="preserve">
+    <value>2</value>
+  </data>
+  <data name="&gt;&gt;btnEndProcess.Name" xml:space="preserve">
+    <value>btnEndProcess</value>
+  </data>
+  <data name="&gt;&gt;btnEndProcess.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;btnEndProcess.Parent" xml:space="preserve">
+    <value>tabPageProcCtl</value>
+  </data>
+  <data name="&gt;&gt;btnEndProcess.ZOrder" xml:space="preserve">
+    <value>3</value>
+  </data>
+  <data name="&gt;&gt;listProcess.Name" xml:space="preserve">
+    <value>listProcess</value>
+  </data>
+  <data name="&gt;&gt;listProcess.Type" xml:space="preserve">
+    <value>PCMgr.Ctls.TaskMgrList, PCMgrApp32, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+  </data>
+  <data name="&gt;&gt;listProcess.Parent" xml:space="preserve">
+    <value>tabPageProcCtl</value>
+  </data>
+  <data name="&gt;&gt;listProcess.ZOrder" xml:space="preserve">
+    <value>4</value>
+  </data>
+  <data name="&gt;&gt;lbProcessCount.Name" xml:space="preserve">
+    <value>lbProcessCount</value>
+  </data>
+  <data name="&gt;&gt;lbProcessCount.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;lbProcessCount.Parent" xml:space="preserve">
+    <value>tabPageProcCtl</value>
+  </data>
+  <data name="&gt;&gt;lbProcessCount.ZOrder" xml:space="preserve">
+    <value>5</value>
+  </data>
+  <data name="&gt;&gt;expandFewerDetals.Name" xml:space="preserve">
+    <value>expandFewerDetals</value>
+  </data>
+  <data name="&gt;&gt;expandFewerDetals.Type" xml:space="preserve">
+    <value>PCMgr.Aero.ExpandButton, PCMgrApp32, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+  </data>
+  <data name="&gt;&gt;expandFewerDetals.Parent" xml:space="preserve">
+    <value>tabPageProcCtl</value>
+  </data>
+  <data name="&gt;&gt;expandFewerDetals.ZOrder" xml:space="preserve">
+    <value>6</value>
+  </data>
+  <data name="tabPageProcCtl.Location" type="System.Drawing.Point, System.Drawing">
+    <value>4, 26</value>
+  </data>
+  <data name="tabPageProcCtl.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>3, 3, 3, 3</value>
+  </data>
+  <data name="tabPageProcCtl.Size" type="System.Drawing.Size, System.Drawing">
+    <value>901, 564</value>
+  </data>
+  <data name="tabPageProcCtl.TabIndex" type="System.Int32, mscorlib">
+    <value>0</value>
+  </data>
+  <data name="tabPageProcCtl.Text" xml:space="preserve">
+    <value>进程管理</value>
+  </data>
+  <data name="&gt;&gt;tabPageProcCtl.Name" xml:space="preserve">
+    <value>tabPageProcCtl</value>
+  </data>
+  <data name="&gt;&gt;tabPageProcCtl.Type" xml:space="preserve">
+    <value>System.Windows.Forms.TabPage, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;tabPageProcCtl.Parent" xml:space="preserve">
+    <value>tabControlMain</value>
+  </data>
+  <data name="&gt;&gt;tabPageProcCtl.ZOrder" xml:space="preserve">
+    <value>0</value>
   </data>
   <data name="sp4.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Bottom, Left</value>
@@ -686,32 +932,92 @@
   <data name="&gt;&gt;expandFewerDetals.ZOrder" xml:space="preserve">
     <value>6</value>
   </data>
-  <data name="tabPageProcCtl.Location" type="System.Drawing.Point, System.Drawing">
+  <data name="&gt;&gt;sp5.Name" xml:space="preserve">
+    <value>sp5</value>
+  </data>
+  <data name="&gt;&gt;sp5.Type" xml:space="preserve">
+    <value>System.Windows.Forms.PictureBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;sp5.Parent" xml:space="preserve">
+    <value>tabPageKernelCtl</value>
+  </data>
+  <data name="&gt;&gt;sp5.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="&gt;&gt;linkLabelShowKernelTools.Name" xml:space="preserve">
+    <value>linkLabelShowKernelTools</value>
+  </data>
+  <data name="&gt;&gt;linkLabelShowKernelTools.Type" xml:space="preserve">
+    <value>System.Windows.Forms.LinkLabel, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;linkLabelShowKernelTools.Parent" xml:space="preserve">
+    <value>tabPageKernelCtl</value>
+  </data>
+  <data name="&gt;&gt;linkLabelShowKernelTools.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="&gt;&gt;pl_driverNotLoadTip.Name" xml:space="preserve">
+    <value>pl_driverNotLoadTip</value>
+  </data>
+  <data name="&gt;&gt;pl_driverNotLoadTip.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Panel, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;pl_driverNotLoadTip.Parent" xml:space="preserve">
+    <value>tabPageKernelCtl</value>
+  </data>
+  <data name="&gt;&gt;pl_driverNotLoadTip.ZOrder" xml:space="preserve">
+    <value>2</value>
+  </data>
+  <data name="&gt;&gt;lbDriversCount.Name" xml:space="preserve">
+    <value>lbDriversCount</value>
+  </data>
+  <data name="&gt;&gt;lbDriversCount.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;lbDriversCount.Parent" xml:space="preserve">
+    <value>tabPageKernelCtl</value>
+  </data>
+  <data name="&gt;&gt;lbDriversCount.ZOrder" xml:space="preserve">
+    <value>3</value>
+  </data>
+  <data name="&gt;&gt;listDrivers.Name" xml:space="preserve">
+    <value>listDrivers</value>
+  </data>
+  <data name="&gt;&gt;listDrivers.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ListView, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;listDrivers.Parent" xml:space="preserve">
+    <value>tabPageKernelCtl</value>
+  </data>
+  <data name="&gt;&gt;listDrivers.ZOrder" xml:space="preserve">
+    <value>4</value>
+  </data>
+  <data name="tabPageKernelCtl.Location" type="System.Drawing.Point, System.Drawing">
     <value>4, 26</value>
   </data>
-  <data name="tabPageProcCtl.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
+  <data name="tabPageKernelCtl.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>3, 3, 3, 3</value>
   </data>
-  <data name="tabPageProcCtl.Size" type="System.Drawing.Size, System.Drawing">
+  <data name="tabPageKernelCtl.Size" type="System.Drawing.Size, System.Drawing">
     <value>901, 564</value>
   </data>
-  <data name="tabPageProcCtl.TabIndex" type="System.Int32, mscorlib">
-    <value>0</value>
+  <data name="tabPageKernelCtl.TabIndex" type="System.Int32, mscorlib">
+    <value>1</value>
   </data>
-  <data name="tabPageProcCtl.Text" xml:space="preserve">
-    <value>进程管理</value>
+  <data name="tabPageKernelCtl.Text" xml:space="preserve">
+    <value>内核管理</value>
   </data>
-  <data name="&gt;&gt;tabPageProcCtl.Name" xml:space="preserve">
-    <value>tabPageProcCtl</value>
+  <data name="&gt;&gt;tabPageKernelCtl.Name" xml:space="preserve">
+    <value>tabPageKernelCtl</value>
   </data>
-  <data name="&gt;&gt;tabPageProcCtl.Type" xml:space="preserve">
+  <data name="&gt;&gt;tabPageKernelCtl.Type" xml:space="preserve">
     <value>System.Windows.Forms.TabPage, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;tabPageProcCtl.Parent" xml:space="preserve">
+  <data name="&gt;&gt;tabPageKernelCtl.Parent" xml:space="preserve">
     <value>tabControlMain</value>
   </data>
-  <data name="&gt;&gt;tabPageProcCtl.ZOrder" xml:space="preserve">
-    <value>0</value>
+  <data name="&gt;&gt;tabPageKernelCtl.ZOrder" xml:space="preserve">
+    <value>1</value>
   </data>
   <data name="sp5.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Bottom, Left</value>
@@ -772,6 +1078,54 @@
   </data>
   <data name="pl_driverNotLoadTip.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>None</value>
+  </data>
+  <data name="&gt;&gt;linkRestartAsAdminDriver.Name" xml:space="preserve">
+    <value>linkRestartAsAdminDriver</value>
+  </data>
+  <data name="&gt;&gt;linkRestartAsAdminDriver.Type" xml:space="preserve">
+    <value>System.Windows.Forms.LinkLabel, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;linkRestartAsAdminDriver.Parent" xml:space="preserve">
+    <value>pl_driverNotLoadTip</value>
+  </data>
+  <data name="&gt;&gt;linkRestartAsAdminDriver.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="&gt;&gt;lbRestartAsAdminDriver.Name" xml:space="preserve">
+    <value>lbRestartAsAdminDriver</value>
+  </data>
+  <data name="&gt;&gt;lbRestartAsAdminDriver.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;lbRestartAsAdminDriver.Parent" xml:space="preserve">
+    <value>pl_driverNotLoadTip</value>
+  </data>
+  <data name="&gt;&gt;lbRestartAsAdminDriver.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="pl_driverNotLoadTip.Location" type="System.Drawing.Point, System.Drawing">
+    <value>162, 198</value>
+  </data>
+  <data name="pl_driverNotLoadTip.Size" type="System.Drawing.Size, System.Drawing">
+    <value>563, 103</value>
+  </data>
+  <data name="pl_driverNotLoadTip.TabIndex" type="System.Int32, mscorlib">
+    <value>11</value>
+  </data>
+  <data name="pl_driverNotLoadTip.Visible" type="System.Boolean, mscorlib">
+    <value>False</value>
+  </data>
+  <data name="&gt;&gt;pl_driverNotLoadTip.Name" xml:space="preserve">
+    <value>pl_driverNotLoadTip</value>
+  </data>
+  <data name="&gt;&gt;pl_driverNotLoadTip.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Panel, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;pl_driverNotLoadTip.Parent" xml:space="preserve">
+    <value>tabPageKernelCtl</value>
+  </data>
+  <data name="&gt;&gt;pl_driverNotLoadTip.ZOrder" xml:space="preserve">
+    <value>2</value>
   </data>
   <data name="linkRestartAsAdminDriver.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
@@ -851,30 +1205,6 @@
   <data name="&gt;&gt;lbRestartAsAdminDriver.ZOrder" xml:space="preserve">
     <value>1</value>
   </data>
-  <data name="pl_driverNotLoadTip.Location" type="System.Drawing.Point, System.Drawing">
-    <value>162, 198</value>
-  </data>
-  <data name="pl_driverNotLoadTip.Size" type="System.Drawing.Size, System.Drawing">
-    <value>563, 103</value>
-  </data>
-  <data name="pl_driverNotLoadTip.TabIndex" type="System.Int32, mscorlib">
-    <value>11</value>
-  </data>
-  <data name="pl_driverNotLoadTip.Visible" type="System.Boolean, mscorlib">
-    <value>False</value>
-  </data>
-  <data name="&gt;&gt;pl_driverNotLoadTip.Name" xml:space="preserve">
-    <value>pl_driverNotLoadTip</value>
-  </data>
-  <data name="&gt;&gt;pl_driverNotLoadTip.Type" xml:space="preserve">
-    <value>System.Windows.Forms.Panel, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;pl_driverNotLoadTip.Parent" xml:space="preserve">
-    <value>tabPageKernelCtl</value>
-  </data>
-  <data name="&gt;&gt;pl_driverNotLoadTip.ZOrder" xml:space="preserve">
-    <value>2</value>
-  </data>
   <data name="lbDriversCount.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Bottom, Left</value>
   </data>
@@ -910,6 +1240,27 @@
   </data>
   <data name="listDrivers.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Top, Bottom, Left, Right</value>
+  </data>
+  <data name="listDrivers.Location" type="System.Drawing.Point, System.Drawing">
+    <value>0, 0</value>
+  </data>
+  <data name="listDrivers.Size" type="System.Drawing.Size, System.Drawing">
+    <value>901, 519</value>
+  </data>
+  <data name="listDrivers.TabIndex" type="System.Int32, mscorlib">
+    <value>12</value>
+  </data>
+  <data name="&gt;&gt;listDrivers.Name" xml:space="preserve">
+    <value>listDrivers</value>
+  </data>
+  <data name="&gt;&gt;listDrivers.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ListView, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;listDrivers.Parent" xml:space="preserve">
+    <value>tabPageKernelCtl</value>
+  </data>
+  <data name="&gt;&gt;listDrivers.ZOrder" xml:space="preserve">
+    <value>4</value>
   </data>
   <data name="columnHeader15.Text" xml:space="preserve">
     <value>驱动名称</value>
@@ -959,78 +1310,6 @@
   <data name="columnHeader23.Width" type="System.Int32, mscorlib">
     <value>128</value>
   </data>
-  <data name="listDrivers.Location" type="System.Drawing.Point, System.Drawing">
-    <value>0, 0</value>
-  </data>
-  <data name="listDrivers.Size" type="System.Drawing.Size, System.Drawing">
-    <value>901, 519</value>
-  </data>
-  <data name="listDrivers.TabIndex" type="System.Int32, mscorlib">
-    <value>12</value>
-  </data>
-  <data name="&gt;&gt;listDrivers.Name" xml:space="preserve">
-    <value>listDrivers</value>
-  </data>
-  <data name="&gt;&gt;listDrivers.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ListView, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;listDrivers.Parent" xml:space="preserve">
-    <value>tabPageKernelCtl</value>
-  </data>
-  <data name="&gt;&gt;listDrivers.ZOrder" xml:space="preserve">
-    <value>4</value>
-  </data>
-  <data name="tabPageKernelCtl.Location" type="System.Drawing.Point, System.Drawing">
-    <value>4, 26</value>
-  </data>
-  <data name="tabPageKernelCtl.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>3, 3, 3, 3</value>
-  </data>
-  <data name="tabPageKernelCtl.Size" type="System.Drawing.Size, System.Drawing">
-    <value>901, 564</value>
-  </data>
-  <data name="tabPageKernelCtl.TabIndex" type="System.Int32, mscorlib">
-    <value>1</value>
-  </data>
-  <data name="tabPageKernelCtl.Text" xml:space="preserve">
-    <value>内核管理</value>
-  </data>
-  <data name="&gt;&gt;tabPageKernelCtl.Name" xml:space="preserve">
-    <value>tabPageKernelCtl</value>
-  </data>
-  <data name="&gt;&gt;tabPageKernelCtl.Type" xml:space="preserve">
-    <value>System.Windows.Forms.TabPage, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;tabPageKernelCtl.Parent" xml:space="preserve">
-    <value>tabControlMain</value>
-  </data>
-  <data name="&gt;&gt;tabPageKernelCtl.ZOrder" xml:space="preserve">
-    <value>1</value>
-  </data>
-  <data name="linkLabelOpenPerfMon.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
-    <value>Bottom, Left</value>
-  </data>
-  <data name="linkLabelOpenPerfMon.ImageAlign" type="System.Drawing.ContentAlignment, System.Drawing">
-    <value>MiddleLeft</value>
-  </data>
-  <data name="linkLabelOpenPerfMon.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
-    <value>NoControl</value>
-  </data>
-  <data name="linkLabelOpenPerfMon.Location" type="System.Drawing.Point, System.Drawing">
-    <value>13, 536</value>
-  </data>
-  <data name="linkLabelOpenPerfMon.Size" type="System.Drawing.Size, System.Drawing">
-    <value>112, 17</value>
-  </data>
-  <data name="linkLabelOpenPerfMon.TabIndex" type="System.Int32, mscorlib">
-    <value>3</value>
-  </data>
-  <data name="linkLabelOpenPerfMon.Text" xml:space="preserve">
-    <value>打开资源监视器</value>
-  </data>
-  <data name="linkLabelOpenPerfMon.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
-    <value>MiddleRight</value>
-  </data>
   <data name="&gt;&gt;linkLabelOpenPerfMon.Name" xml:space="preserve">
     <value>linkLabelOpenPerfMon</value>
   </data>
@@ -1070,53 +1349,41 @@
   <data name="&gt;&gt;tabPagePerfCtl.ZOrder" xml:space="preserve">
     <value>2</value>
   </data>
-  <data name="pl_UWPEnumFailTip.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
-    <value>None</value>
+  <data name="linkLabelOpenPerfMon.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
+    <value>Bottom, Left</value>
   </data>
-  <data name="lbUWPEnumFailText.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
-    <value>Fill</value>
+  <data name="linkLabelOpenPerfMon.ImageAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleLeft</value>
   </data>
-  <data name="lbUWPEnumFailText.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+  <data name="linkLabelOpenPerfMon.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
   </data>
-  <data name="lbUWPEnumFailText.Location" type="System.Drawing.Point, System.Drawing">
-    <value>0, 0</value>
+  <data name="linkLabelOpenPerfMon.Location" type="System.Drawing.Point, System.Drawing">
+    <value>13, 536</value>
   </data>
-  <data name="lbUWPEnumFailText.Size" type="System.Drawing.Size, System.Drawing">
-    <value>483, 228</value>
+  <data name="linkLabelOpenPerfMon.Size" type="System.Drawing.Size, System.Drawing">
+    <value>112, 17</value>
   </data>
-  <data name="lbUWPEnumFailText.TabIndex" type="System.Int32, mscorlib">
+  <data name="linkLabelOpenPerfMon.TabIndex" type="System.Int32, mscorlib">
+    <value>3</value>
+  </data>
+  <data name="linkLabelOpenPerfMon.Text" xml:space="preserve">
+    <value>打开资源监视器</value>
+  </data>
+  <data name="linkLabelOpenPerfMon.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleRight</value>
+  </data>
+  <data name="&gt;&gt;linkLabelOpenPerfMon.Name" xml:space="preserve">
+    <value>linkLabelOpenPerfMon</value>
+  </data>
+  <data name="&gt;&gt;linkLabelOpenPerfMon.Type" xml:space="preserve">
+    <value>System.Windows.Forms.LinkLabel, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;linkLabelOpenPerfMon.Parent" xml:space="preserve">
+    <value>tabPagePerfCtl</value>
+  </data>
+  <data name="&gt;&gt;linkLabelOpenPerfMon.ZOrder" xml:space="preserve">
     <value>0</value>
-  </data>
-  <data name="lbUWPEnumFailText.Text" xml:space="preserve">
-    <value>未知错误</value>
-  </data>
-  <data name="lbUWPEnumFailText.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
-    <value>MiddleCenter</value>
-  </data>
-  <data name="&gt;&gt;lbUWPEnumFailText.Name" xml:space="preserve">
-    <value>lbUWPEnumFailText</value>
-  </data>
-  <data name="&gt;&gt;lbUWPEnumFailText.Type" xml:space="preserve">
-    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;lbUWPEnumFailText.Parent" xml:space="preserve">
-    <value>pl_UWPEnumFailTip</value>
-  </data>
-  <data name="&gt;&gt;lbUWPEnumFailText.ZOrder" xml:space="preserve">
-    <value>0</value>
-  </data>
-  <data name="pl_UWPEnumFailTip.Location" type="System.Drawing.Point, System.Drawing">
-    <value>210, 160</value>
-  </data>
-  <data name="pl_UWPEnumFailTip.Size" type="System.Drawing.Size, System.Drawing">
-    <value>483, 228</value>
-  </data>
-  <data name="pl_UWPEnumFailTip.TabIndex" type="System.Int32, mscorlib">
-    <value>11</value>
-  </data>
-  <data name="pl_UWPEnumFailTip.Visible" type="System.Boolean, mscorlib">
-    <value>False</value>
   </data>
   <data name="&gt;&gt;pl_UWPEnumFailTip.Name" xml:space="preserve">
     <value>pl_UWPEnumFailTip</value>
@@ -1129,18 +1396,6 @@
   </data>
   <data name="&gt;&gt;pl_UWPEnumFailTip.ZOrder" xml:space="preserve">
     <value>0</value>
-  </data>
-  <data name="listUwpApps.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
-    <value>Top, Bottom, Left, Right</value>
-  </data>
-  <data name="listUwpApps.Location" type="System.Drawing.Point, System.Drawing">
-    <value>0, 0</value>
-  </data>
-  <data name="listUwpApps.Size" type="System.Drawing.Size, System.Drawing">
-    <value>898, 525</value>
-  </data>
-  <data name="listUwpApps.TabIndex" type="System.Int32, mscorlib">
-    <value>12</value>
   </data>
   <data name="&gt;&gt;listUwpApps.Name" xml:space="preserve">
     <value>listUwpApps</value>
@@ -1181,8 +1436,305 @@
   <data name="&gt;&gt;tabPageUWPCtl.ZOrder" xml:space="preserve">
     <value>3</value>
   </data>
+  <data name="pl_UWPEnumFailTip.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
+    <value>None</value>
+  </data>
+  <data name="&gt;&gt;lbUWPEnumFailText.Name" xml:space="preserve">
+    <value>lbUWPEnumFailText</value>
+  </data>
+  <data name="&gt;&gt;lbUWPEnumFailText.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;lbUWPEnumFailText.Parent" xml:space="preserve">
+    <value>pl_UWPEnumFailTip</value>
+  </data>
+  <data name="&gt;&gt;lbUWPEnumFailText.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="pl_UWPEnumFailTip.Location" type="System.Drawing.Point, System.Drawing">
+    <value>210, 160</value>
+  </data>
+  <data name="pl_UWPEnumFailTip.Size" type="System.Drawing.Size, System.Drawing">
+    <value>483, 228</value>
+  </data>
+  <data name="pl_UWPEnumFailTip.TabIndex" type="System.Int32, mscorlib">
+    <value>11</value>
+  </data>
+  <data name="pl_UWPEnumFailTip.Visible" type="System.Boolean, mscorlib">
+    <value>False</value>
+  </data>
+  <data name="&gt;&gt;pl_UWPEnumFailTip.Name" xml:space="preserve">
+    <value>pl_UWPEnumFailTip</value>
+  </data>
+  <data name="&gt;&gt;pl_UWPEnumFailTip.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Panel, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;pl_UWPEnumFailTip.Parent" xml:space="preserve">
+    <value>tabPageUWPCtl</value>
+  </data>
+  <data name="&gt;&gt;pl_UWPEnumFailTip.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="lbUWPEnumFailText.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
+    <value>Fill</value>
+  </data>
+  <data name="lbUWPEnumFailText.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="lbUWPEnumFailText.Location" type="System.Drawing.Point, System.Drawing">
+    <value>0, 0</value>
+  </data>
+  <data name="lbUWPEnumFailText.Size" type="System.Drawing.Size, System.Drawing">
+    <value>483, 228</value>
+  </data>
+  <data name="lbUWPEnumFailText.TabIndex" type="System.Int32, mscorlib">
+    <value>0</value>
+  </data>
+  <data name="lbUWPEnumFailText.Text" xml:space="preserve">
+    <value>未知错误</value>
+  </data>
+  <data name="lbUWPEnumFailText.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleCenter</value>
+  </data>
+  <data name="&gt;&gt;lbUWPEnumFailText.Name" xml:space="preserve">
+    <value>lbUWPEnumFailText</value>
+  </data>
+  <data name="&gt;&gt;lbUWPEnumFailText.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;lbUWPEnumFailText.Parent" xml:space="preserve">
+    <value>pl_UWPEnumFailTip</value>
+  </data>
+  <data name="&gt;&gt;lbUWPEnumFailText.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="listUwpApps.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
+    <value>Top, Bottom, Left, Right</value>
+  </data>
+  <data name="listUwpApps.Location" type="System.Drawing.Point, System.Drawing">
+    <value>0, 0</value>
+  </data>
+  <data name="listUwpApps.Size" type="System.Drawing.Size, System.Drawing">
+    <value>898, 525</value>
+  </data>
+  <data name="listUwpApps.TabIndex" type="System.Int32, mscorlib">
+    <value>12</value>
+  </data>
+  <data name="&gt;&gt;listUwpApps.Name" xml:space="preserve">
+    <value>listUwpApps</value>
+  </data>
+  <data name="&gt;&gt;listUwpApps.Type" xml:space="preserve">
+    <value>PCMgr.Ctls.TaskMgrList, PCMgrApp32, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+  </data>
+  <data name="&gt;&gt;listUwpApps.Parent" xml:space="preserve">
+    <value>tabPageUWPCtl</value>
+  </data>
+  <data name="&gt;&gt;listUwpApps.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="&gt;&gt;listUsers.Name" xml:space="preserve">
+    <value>listUsers</value>
+  </data>
+  <data name="&gt;&gt;listUsers.Type" xml:space="preserve">
+    <value>PCMgr.Ctls.TaskMgrList, PCMgrApp32, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+  </data>
+  <data name="&gt;&gt;listUsers.Parent" xml:space="preserve">
+    <value>tabPageUsers</value>
+  </data>
+  <data name="&gt;&gt;listUsers.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="tabPageUsers.Location" type="System.Drawing.Point, System.Drawing">
+    <value>4, 26</value>
+  </data>
+  <data name="tabPageUsers.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>3, 3, 3, 3</value>
+  </data>
+  <data name="tabPageUsers.Size" type="System.Drawing.Size, System.Drawing">
+    <value>901, 564</value>
+  </data>
+  <data name="tabPageUsers.TabIndex" type="System.Int32, mscorlib">
+    <value>9</value>
+  </data>
+  <data name="tabPageUsers.Text" xml:space="preserve">
+    <value>用户</value>
+  </data>
+  <data name="&gt;&gt;tabPageUsers.Name" xml:space="preserve">
+    <value>tabPageUsers</value>
+  </data>
+  <data name="&gt;&gt;tabPageUsers.Type" xml:space="preserve">
+    <value>System.Windows.Forms.TabPage, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;tabPageUsers.Parent" xml:space="preserve">
+    <value>tabControlMain</value>
+  </data>
+  <data name="&gt;&gt;tabPageUsers.ZOrder" xml:space="preserve">
+    <value>4</value>
+  </data>
+  <data name="listUsers.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
+    <value>Top, Bottom, Left, Right</value>
+  </data>
+  <data name="listUsers.Location" type="System.Drawing.Point, System.Drawing">
+    <value>-1, 0</value>
+  </data>
+  <data name="listUsers.Size" type="System.Drawing.Size, System.Drawing">
+    <value>901, 525</value>
+  </data>
+  <data name="listUsers.TabIndex" type="System.Int32, mscorlib">
+    <value>1</value>
+  </data>
+  <data name="listUsers.Text" xml:space="preserve">
+    <value>taskMgrList</value>
+  </data>
+  <data name="&gt;&gt;listUsers.Name" xml:space="preserve">
+    <value>listUsers</value>
+  </data>
+  <data name="&gt;&gt;listUsers.Type" xml:space="preserve">
+    <value>PCMgr.Ctls.TaskMgrList, PCMgrApp32, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+  </data>
+  <data name="&gt;&gt;listUsers.Parent" xml:space="preserve">
+    <value>tabPageUsers</value>
+  </data>
+  <data name="&gt;&gt;listUsers.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="&gt;&gt;pl_ScNeedAdminTip.Name" xml:space="preserve">
+    <value>pl_ScNeedAdminTip</value>
+  </data>
+  <data name="&gt;&gt;pl_ScNeedAdminTip.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Panel, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;pl_ScNeedAdminTip.Parent" xml:space="preserve">
+    <value>tabPageScCtl</value>
+  </data>
+  <data name="&gt;&gt;pl_ScNeedAdminTip.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="&gt;&gt;sp2.Name" xml:space="preserve">
+    <value>sp2</value>
+  </data>
+  <data name="&gt;&gt;sp2.Type" xml:space="preserve">
+    <value>System.Windows.Forms.PictureBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;sp2.Parent" xml:space="preserve">
+    <value>tabPageScCtl</value>
+  </data>
+  <data name="&gt;&gt;sp2.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="&gt;&gt;linkOpenScMsc.Name" xml:space="preserve">
+    <value>linkOpenScMsc</value>
+  </data>
+  <data name="&gt;&gt;linkOpenScMsc.Type" xml:space="preserve">
+    <value>System.Windows.Forms.LinkLabel, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;linkOpenScMsc.Parent" xml:space="preserve">
+    <value>tabPageScCtl</value>
+  </data>
+  <data name="&gt;&gt;linkOpenScMsc.ZOrder" xml:space="preserve">
+    <value>2</value>
+  </data>
+  <data name="&gt;&gt;listService.Name" xml:space="preserve">
+    <value>listService</value>
+  </data>
+  <data name="&gt;&gt;listService.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ListView, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;listService.Parent" xml:space="preserve">
+    <value>tabPageScCtl</value>
+  </data>
+  <data name="&gt;&gt;listService.ZOrder" xml:space="preserve">
+    <value>3</value>
+  </data>
+  <data name="&gt;&gt;lbServicesCount.Name" xml:space="preserve">
+    <value>lbServicesCount</value>
+  </data>
+  <data name="&gt;&gt;lbServicesCount.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;lbServicesCount.Parent" xml:space="preserve">
+    <value>tabPageScCtl</value>
+  </data>
+  <data name="&gt;&gt;lbServicesCount.ZOrder" xml:space="preserve">
+    <value>4</value>
+  </data>
+  <data name="tabPageScCtl.Location" type="System.Drawing.Point, System.Drawing">
+    <value>4, 26</value>
+  </data>
+  <data name="tabPageScCtl.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>3, 3, 3, 3</value>
+  </data>
+  <data name="tabPageScCtl.Size" type="System.Drawing.Size, System.Drawing">
+    <value>901, 564</value>
+  </data>
+  <data name="tabPageScCtl.TabIndex" type="System.Int32, mscorlib">
+    <value>3</value>
+  </data>
+  <data name="tabPageScCtl.Text" xml:space="preserve">
+    <value>服务管理</value>
+  </data>
+  <data name="&gt;&gt;tabPageScCtl.Name" xml:space="preserve">
+    <value>tabPageScCtl</value>
+  </data>
+  <data name="&gt;&gt;tabPageScCtl.Type" xml:space="preserve">
+    <value>System.Windows.Forms.TabPage, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;tabPageScCtl.Parent" xml:space="preserve">
+    <value>tabControlMain</value>
+  </data>
+  <data name="&gt;&gt;tabPageScCtl.ZOrder" xml:space="preserve">
+    <value>5</value>
+  </data>
   <data name="pl_ScNeedAdminTip.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>None</value>
+  </data>
+  <data name="&gt;&gt;linkRebootAsAdmin.Name" xml:space="preserve">
+    <value>linkRebootAsAdmin</value>
+  </data>
+  <data name="&gt;&gt;linkRebootAsAdmin.Type" xml:space="preserve">
+    <value>System.Windows.Forms.LinkLabel, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;linkRebootAsAdmin.Parent" xml:space="preserve">
+    <value>pl_ScNeedAdminTip</value>
+  </data>
+  <data name="&gt;&gt;linkRebootAsAdmin.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="&gt;&gt;lbScNeedAdminTip.Name" xml:space="preserve">
+    <value>lbScNeedAdminTip</value>
+  </data>
+  <data name="&gt;&gt;lbScNeedAdminTip.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;lbScNeedAdminTip.Parent" xml:space="preserve">
+    <value>pl_ScNeedAdminTip</value>
+  </data>
+  <data name="&gt;&gt;lbScNeedAdminTip.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="pl_ScNeedAdminTip.Location" type="System.Drawing.Point, System.Drawing">
+    <value>325, 228</value>
+  </data>
+  <data name="pl_ScNeedAdminTip.Size" type="System.Drawing.Size, System.Drawing">
+    <value>200, 55</value>
+  </data>
+  <data name="pl_ScNeedAdminTip.TabIndex" type="System.Int32, mscorlib">
+    <value>10</value>
+  </data>
+  <data name="pl_ScNeedAdminTip.Visible" type="System.Boolean, mscorlib">
+    <value>False</value>
+  </data>
+  <data name="&gt;&gt;pl_ScNeedAdminTip.Name" xml:space="preserve">
+    <value>pl_ScNeedAdminTip</value>
+  </data>
+  <data name="&gt;&gt;pl_ScNeedAdminTip.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Panel, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;pl_ScNeedAdminTip.Parent" xml:space="preserve">
+    <value>tabPageScCtl</value>
+  </data>
+  <data name="&gt;&gt;pl_ScNeedAdminTip.ZOrder" xml:space="preserve">
+    <value>0</value>
   </data>
   <data name="linkRebootAsAdmin.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
@@ -1261,30 +1813,6 @@
   </data>
   <data name="&gt;&gt;lbScNeedAdminTip.ZOrder" xml:space="preserve">
     <value>1</value>
-  </data>
-  <data name="pl_ScNeedAdminTip.Location" type="System.Drawing.Point, System.Drawing">
-    <value>325, 228</value>
-  </data>
-  <data name="pl_ScNeedAdminTip.Size" type="System.Drawing.Size, System.Drawing">
-    <value>200, 55</value>
-  </data>
-  <data name="pl_ScNeedAdminTip.TabIndex" type="System.Int32, mscorlib">
-    <value>10</value>
-  </data>
-  <data name="pl_ScNeedAdminTip.Visible" type="System.Boolean, mscorlib">
-    <value>False</value>
-  </data>
-  <data name="&gt;&gt;pl_ScNeedAdminTip.Name" xml:space="preserve">
-    <value>pl_ScNeedAdminTip</value>
-  </data>
-  <data name="&gt;&gt;pl_ScNeedAdminTip.Type" xml:space="preserve">
-    <value>System.Windows.Forms.Panel, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;pl_ScNeedAdminTip.Parent" xml:space="preserve">
-    <value>tabPageScCtl</value>
-  </data>
-  <data name="&gt;&gt;pl_ScNeedAdminTip.ZOrder" xml:space="preserve">
-    <value>0</value>
   </data>
   <data name="sp2.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Bottom, Left</value>
@@ -1365,6 +1893,27 @@
   <data name="listService.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Top, Bottom, Left, Right</value>
   </data>
+  <data name="listService.Location" type="System.Drawing.Point, System.Drawing">
+    <value>0, 0</value>
+  </data>
+  <data name="listService.Size" type="System.Drawing.Size, System.Drawing">
+    <value>901, 525</value>
+  </data>
+  <data name="listService.TabIndex" type="System.Int32, mscorlib">
+    <value>0</value>
+  </data>
+  <data name="&gt;&gt;listService.Name" xml:space="preserve">
+    <value>listService</value>
+  </data>
+  <data name="&gt;&gt;listService.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ListView, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;listService.Parent" xml:space="preserve">
+    <value>tabPageScCtl</value>
+  </data>
+  <data name="&gt;&gt;listService.ZOrder" xml:space="preserve">
+    <value>3</value>
+  </data>
   <data name="columnHeader7.Text" xml:space="preserve">
     <value>名称</value>
   </data>
@@ -1419,27 +1968,6 @@
   <data name="columnHeader21.Width" type="System.Int32, mscorlib">
     <value>85</value>
   </data>
-  <data name="listService.Location" type="System.Drawing.Point, System.Drawing">
-    <value>0, 0</value>
-  </data>
-  <data name="listService.Size" type="System.Drawing.Size, System.Drawing">
-    <value>901, 525</value>
-  </data>
-  <data name="listService.TabIndex" type="System.Int32, mscorlib">
-    <value>0</value>
-  </data>
-  <data name="&gt;&gt;listService.Name" xml:space="preserve">
-    <value>listService</value>
-  </data>
-  <data name="&gt;&gt;listService.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ListView, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;listService.Parent" xml:space="preserve">
-    <value>tabPageScCtl</value>
-  </data>
-  <data name="&gt;&gt;listService.ZOrder" xml:space="preserve">
-    <value>3</value>
-  </data>
   <data name="lbServicesCount.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Bottom, Left</value>
   </data>
@@ -1473,32 +2001,56 @@
   <data name="&gt;&gt;lbServicesCount.ZOrder" xml:space="preserve">
     <value>4</value>
   </data>
-  <data name="tabPageScCtl.Location" type="System.Drawing.Point, System.Drawing">
+  <data name="&gt;&gt;btnEndProcessDetals.Name" xml:space="preserve">
+    <value>btnEndProcessDetals</value>
+  </data>
+  <data name="&gt;&gt;btnEndProcessDetals.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;btnEndProcessDetals.Parent" xml:space="preserve">
+    <value>tabPageDetals</value>
+  </data>
+  <data name="&gt;&gt;btnEndProcessDetals.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="&gt;&gt;listProcessDetals.Name" xml:space="preserve">
+    <value>listProcessDetals</value>
+  </data>
+  <data name="&gt;&gt;listProcessDetals.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ListView, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;listProcessDetals.Parent" xml:space="preserve">
+    <value>tabPageDetals</value>
+  </data>
+  <data name="&gt;&gt;listProcessDetals.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="tabPageDetals.Location" type="System.Drawing.Point, System.Drawing">
     <value>4, 26</value>
   </data>
-  <data name="tabPageScCtl.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
+  <data name="tabPageDetals.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>3, 3, 3, 3</value>
   </data>
-  <data name="tabPageScCtl.Size" type="System.Drawing.Size, System.Drawing">
+  <data name="tabPageDetals.Size" type="System.Drawing.Size, System.Drawing">
     <value>901, 564</value>
   </data>
-  <data name="tabPageScCtl.TabIndex" type="System.Int32, mscorlib">
-    <value>3</value>
+  <data name="tabPageDetals.TabIndex" type="System.Int32, mscorlib">
+    <value>8</value>
   </data>
-  <data name="tabPageScCtl.Text" xml:space="preserve">
-    <value>服务管理</value>
+  <data name="tabPageDetals.Text" xml:space="preserve">
+    <value>详细信息</value>
   </data>
-  <data name="&gt;&gt;tabPageScCtl.Name" xml:space="preserve">
-    <value>tabPageScCtl</value>
+  <data name="&gt;&gt;tabPageDetals.Name" xml:space="preserve">
+    <value>tabPageDetals</value>
   </data>
-  <data name="&gt;&gt;tabPageScCtl.Type" xml:space="preserve">
+  <data name="&gt;&gt;tabPageDetals.Type" xml:space="preserve">
     <value>System.Windows.Forms.TabPage, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;tabPageScCtl.Parent" xml:space="preserve">
+  <data name="&gt;&gt;tabPageDetals.Parent" xml:space="preserve">
     <value>tabControlMain</value>
   </data>
-  <data name="&gt;&gt;tabPageScCtl.ZOrder" xml:space="preserve">
-    <value>4</value>
+  <data name="&gt;&gt;tabPageDetals.ZOrder" xml:space="preserve">
+    <value>6</value>
   </data>
   <data name="btnEndProcessDetals.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Bottom, Right</value>
@@ -1553,7 +2105,7 @@
         AAEAAAD/////AQAAAAAAAAAMAgAAAFdTeXN0ZW0uV2luZG93cy5Gb3JtcywgVmVyc2lvbj00LjAuMC4w
         LCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODkFAQAAACZTeXN0
         ZW0uV2luZG93cy5Gb3Jtcy5JbWFnZUxpc3RTdHJlYW1lcgEAAAAERGF0YQcCAgAAAAkDAAAADwMAAACw
-        BAAAAk1TRnQBSQFMAwEBAAFAAQcBQAEHARABAAEQAQAE/wEhAQAI/wFCAU0BNgcAATYDAAEoAwABQAMA
+        BAAAAk1TRnQBSQFMAwEBAAGwAQcBsAEHARABAAEQAQAE/wEhAQAI/wFCAU0BNgcAATYDAAEoAwABQAMA
         ARADAAEBAQABIAYAARA8AAHNAf8MAAJQAVEBnwJQAVEBn8wAAvsB+gH/AvsB+gH/AvsB+gH/AvsB+gH/
         AvsB+gH/AvsB+gH/A/0B/wIAAdsB/wIAAdkB/wP9Af8CUAFRAZ8CAAHeAf8CUAFRAZ/MAAP7Af8B9wL2
         Af8B9wH2AfUB/wH3AfYB9QH/AfcB9gH1Af8B9wH2AfUB/wH3AfYB9QH/AvsB+gH/AgAB2wH/AgAB2QH/
@@ -1590,48 +2142,6 @@
   </data>
   <data name="&gt;&gt;listProcessDetals.ZOrder" xml:space="preserve">
     <value>1</value>
-  </data>
-  <data name="tabPageDetals.Location" type="System.Drawing.Point, System.Drawing">
-    <value>4, 26</value>
-  </data>
-  <data name="tabPageDetals.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>3, 3, 3, 3</value>
-  </data>
-  <data name="tabPageDetals.Size" type="System.Drawing.Size, System.Drawing">
-    <value>901, 564</value>
-  </data>
-  <data name="tabPageDetals.TabIndex" type="System.Int32, mscorlib">
-    <value>8</value>
-  </data>
-  <data name="tabPageDetals.Text" xml:space="preserve">
-    <value>详细信息</value>
-  </data>
-  <data name="&gt;&gt;tabPageDetals.Name" xml:space="preserve">
-    <value>tabPageDetals</value>
-  </data>
-  <data name="&gt;&gt;tabPageDetals.Type" xml:space="preserve">
-    <value>System.Windows.Forms.TabPage, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;tabPageDetals.Parent" xml:space="preserve">
-    <value>tabControlMain</value>
-  </data>
-  <data name="&gt;&gt;tabPageDetals.ZOrder" xml:space="preserve">
-    <value>5</value>
-  </data>
-  <data name="listStartup.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
-    <value>Top, Bottom, Left, Right</value>
-  </data>
-  <data name="listStartup.Location" type="System.Drawing.Point, System.Drawing">
-    <value>0, 0</value>
-  </data>
-  <data name="listStartup.Size" type="System.Drawing.Size, System.Drawing">
-    <value>901, 525</value>
-  </data>
-  <data name="listStartup.TabIndex" type="System.Int32, mscorlib">
-    <value>0</value>
-  </data>
-  <data name="listStartup.Text" xml:space="preserve">
-    <value>taskMgrList1</value>
   </data>
   <data name="&gt;&gt;listStartup.Name" xml:space="preserve">
     <value>listStartup</value>
@@ -1670,7 +2180,97 @@
     <value>tabControlMain</value>
   </data>
   <data name="&gt;&gt;tabPageStartCtl.ZOrder" xml:space="preserve">
-    <value>6</value>
+    <value>7</value>
+  </data>
+  <data name="listStartup.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
+    <value>Top, Bottom, Left, Right</value>
+  </data>
+  <data name="listStartup.Location" type="System.Drawing.Point, System.Drawing">
+    <value>0, 0</value>
+  </data>
+  <data name="listStartup.Size" type="System.Drawing.Size, System.Drawing">
+    <value>901, 525</value>
+  </data>
+  <data name="listStartup.TabIndex" type="System.Int32, mscorlib">
+    <value>0</value>
+  </data>
+  <data name="listStartup.Text" xml:space="preserve">
+    <value>taskMgrList</value>
+  </data>
+  <data name="&gt;&gt;listStartup.Name" xml:space="preserve">
+    <value>listStartup</value>
+  </data>
+  <data name="&gt;&gt;listStartup.Type" xml:space="preserve">
+    <value>PCMgr.Ctls.TaskMgrList, PCMgrApp32, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+  </data>
+  <data name="&gt;&gt;listStartup.Parent" xml:space="preserve">
+    <value>tabPageStartCtl</value>
+  </data>
+  <data name="&gt;&gt;listStartup.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="&gt;&gt;lbFileMgrStatus.Name" xml:space="preserve">
+    <value>lbFileMgrStatus</value>
+  </data>
+  <data name="&gt;&gt;lbFileMgrStatus.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;lbFileMgrStatus.Parent" xml:space="preserve">
+    <value>tabPageFileCtl</value>
+  </data>
+  <data name="&gt;&gt;lbFileMgrStatus.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="&gt;&gt;btnFmAddGoto.Name" xml:space="preserve">
+    <value>btnFmAddGoto</value>
+  </data>
+  <data name="&gt;&gt;btnFmAddGoto.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;btnFmAddGoto.Parent" xml:space="preserve">
+    <value>tabPageFileCtl</value>
+  </data>
+  <data name="&gt;&gt;btnFmAddGoto.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="&gt;&gt;textBoxFmCurrent.Name" xml:space="preserve">
+    <value>textBoxFmCurrent</value>
+  </data>
+  <data name="&gt;&gt;textBoxFmCurrent.Type" xml:space="preserve">
+    <value>System.Windows.Forms.TextBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;textBoxFmCurrent.Parent" xml:space="preserve">
+    <value>tabPageFileCtl</value>
+  </data>
+  <data name="&gt;&gt;textBoxFmCurrent.ZOrder" xml:space="preserve">
+    <value>2</value>
+  </data>
+  <data name="tabPageFileCtl.Location" type="System.Drawing.Point, System.Drawing">
+    <value>4, 26</value>
+  </data>
+  <data name="tabPageFileCtl.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>3, 3, 3, 3</value>
+  </data>
+  <data name="tabPageFileCtl.Size" type="System.Drawing.Size, System.Drawing">
+    <value>901, 564</value>
+  </data>
+  <data name="tabPageFileCtl.TabIndex" type="System.Int32, mscorlib">
+    <value>5</value>
+  </data>
+  <data name="tabPageFileCtl.Text" xml:space="preserve">
+    <value>文件管理</value>
+  </data>
+  <data name="&gt;&gt;tabPageFileCtl.Name" xml:space="preserve">
+    <value>tabPageFileCtl</value>
+  </data>
+  <data name="&gt;&gt;tabPageFileCtl.Type" xml:space="preserve">
+    <value>System.Windows.Forms.TabPage, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;tabPageFileCtl.Parent" xml:space="preserve">
+    <value>tabControlMain</value>
+  </data>
+  <data name="&gt;&gt;tabPageFileCtl.ZOrder" xml:space="preserve">
+    <value>8</value>
   </data>
   <data name="lbFileMgrStatus.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Bottom, Left</value>
@@ -1705,6 +2305,9 @@
   <data name="&gt;&gt;lbFileMgrStatus.ZOrder" xml:space="preserve">
     <value>0</value>
   </data>
+  <metadata name="toolTip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>480, 17</value>
+  </metadata>
   <data name="btnFmAddGoto.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Top, Right</value>
   </data>
@@ -1736,9 +2339,6 @@
   <data name="btnFmAddGoto.TabIndex" type="System.Int32, mscorlib">
     <value>3</value>
   </data>
-  <metadata name="toolTip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>480, 17</value>
-  </metadata>
   <data name="btnFmAddGoto.ToolTip" xml:space="preserve">
     <value>跳转到</value>
   </data>
@@ -1778,60 +2378,6 @@
   <data name="&gt;&gt;textBoxFmCurrent.ZOrder" xml:space="preserve">
     <value>2</value>
   </data>
-  <data name="tabPageFileCtl.Location" type="System.Drawing.Point, System.Drawing">
-    <value>4, 26</value>
-  </data>
-  <data name="tabPageFileCtl.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>3, 3, 3, 3</value>
-  </data>
-  <data name="tabPageFileCtl.Size" type="System.Drawing.Size, System.Drawing">
-    <value>901, 564</value>
-  </data>
-  <data name="tabPageFileCtl.TabIndex" type="System.Int32, mscorlib">
-    <value>5</value>
-  </data>
-  <data name="tabPageFileCtl.Text" xml:space="preserve">
-    <value>文件管理</value>
-  </data>
-  <data name="&gt;&gt;tabPageFileCtl.Name" xml:space="preserve">
-    <value>tabPageFileCtl</value>
-  </data>
-  <data name="&gt;&gt;tabPageFileCtl.Type" xml:space="preserve">
-    <value>System.Windows.Forms.TabPage, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;tabPageFileCtl.Parent" xml:space="preserve">
-    <value>tabControlMain</value>
-  </data>
-  <data name="&gt;&gt;tabPageFileCtl.ZOrder" xml:space="preserve">
-    <value>7</value>
-  </data>
-  <data name="tabControlMain.Font" type="System.Drawing.Font, System.Drawing">
-    <value>微软雅黑, 9pt</value>
-  </data>
-  <data name="tabControlMain.Location" type="System.Drawing.Point, System.Drawing">
-    <value>0, 0</value>
-  </data>
-  <data name="tabControlMain.Size" type="System.Drawing.Size, System.Drawing">
-    <value>909, 594</value>
-  </data>
-  <data name="tabControlMain.TabIndex" type="System.Int32, mscorlib">
-    <value>0</value>
-  </data>
-  <data name="tabControlMain.Visible" type="System.Boolean, mscorlib">
-    <value>False</value>
-  </data>
-  <data name="&gt;&gt;tabControlMain.Name" xml:space="preserve">
-    <value>tabControlMain</value>
-  </data>
-  <data name="&gt;&gt;tabControlMain.Type" xml:space="preserve">
-    <value>System.Windows.Forms.TabControl, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;tabControlMain.Parent" xml:space="preserve">
-    <value>$this</value>
-  </data>
-  <data name="&gt;&gt;tabControlMain.ZOrder" xml:space="preserve">
-    <value>4</value>
-  </data>
   <data name="lbStartingStatus.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Left, Right</value>
   </data>
@@ -1863,7 +2409,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;lbStartingStatus.ZOrder" xml:space="preserve">
-    <value>3</value>
+    <value>2</value>
   </data>
   <data name="spBottom.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Bottom, Left, Right</value>
@@ -1890,11 +2436,23 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;spBottom.ZOrder" xml:space="preserve">
-    <value>2</value>
+    <value>3</value>
   </data>
+  <metadata name="toolTip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>480, 17</value>
+  </metadata>
   <metadata name="contextMenuStripUWP.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>735, 17</value>
   </metadata>
+  <data name="contextMenuStripUWP.Size" type="System.Drawing.Size, System.Drawing">
+    <value>167, 136</value>
+  </data>
+  <data name="&gt;&gt;contextMenuStripUWP.Name" xml:space="preserve">
+    <value>contextMenuStripUWP</value>
+  </data>
+  <data name="&gt;&gt;contextMenuStripUWP.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ContextMenuStrip, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="打开应用ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
     <value>166, 22</value>
   </data>
@@ -1931,15 +2489,6 @@
   <data name="复制发布者ToolStripMenuItem.Text" xml:space="preserve">
     <value>复制(&amp;C)</value>
   </data>
-  <data name="contextMenuStripUWP.Size" type="System.Drawing.Size, System.Drawing">
-    <value>167, 136</value>
-  </data>
-  <data name="&gt;&gt;contextMenuStripUWP.Name" xml:space="preserve">
-    <value>contextMenuStripUWP</value>
-  </data>
-  <data name="&gt;&gt;contextMenuStripUWP.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ContextMenuStrip, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="listApps.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Top, Bottom, Left, Right</value>
   </data>
@@ -1947,7 +2496,7 @@
     <value>0, 0</value>
   </data>
   <data name="listApps.Size" type="System.Drawing.Size, System.Drawing">
-    <value>907, 547</value>
+    <value>907, 544</value>
   </data>
   <data name="listApps.TabIndex" type="System.Int32, mscorlib">
     <value>11</value>
@@ -1962,7 +2511,47 @@
     <value>pl_simple</value>
   </data>
   <data name="&gt;&gt;listApps.ZOrder" xml:space="preserve">
-    <value>2</value>
+    <value>3</value>
+  </data>
+  <data name="lbNoAppsTip.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
+    <value>Left, Right</value>
+  </data>
+  <data name="lbNoAppsTip.Font" type="System.Drawing.Font, System.Drawing">
+    <value>微软雅黑, 9pt</value>
+  </data>
+  <data name="lbNoAppsTip.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="lbNoAppsTip.Location" type="System.Drawing.Point, System.Drawing">
+    <value>4, 223</value>
+  </data>
+  <data name="lbNoAppsTip.Size" type="System.Drawing.Size, System.Drawing">
+    <value>891, 84</value>
+  </data>
+  <data name="lbNoAppsTip.TabIndex" type="System.Int32, mscorlib">
+    <value>13</value>
+  </data>
+  <data name="lbNoAppsTip.Text" xml:space="preserve">
+    <value>当前没有运行应用
+您可以点击"详细信息"来查看更多后台应用的信息</value>
+  </data>
+  <data name="lbNoAppsTip.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleCenter</value>
+  </data>
+  <data name="lbNoAppsTip.Visible" type="System.Boolean, mscorlib">
+    <value>False</value>
+  </data>
+  <data name="&gt;&gt;lbNoAppsTip.Name" xml:space="preserve">
+    <value>lbNoAppsTip</value>
+  </data>
+  <data name="&gt;&gt;lbNoAppsTip.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;lbNoAppsTip.Parent" xml:space="preserve">
+    <value>pl_simple</value>
+  </data>
+  <data name="&gt;&gt;lbNoAppsTip.ZOrder" xml:space="preserve">
+    <value>0</value>
   </data>
   <data name="expandMoreDetals.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Bottom, Left</value>
@@ -1998,7 +2587,7 @@
     <value>pl_simple</value>
   </data>
   <data name="&gt;&gt;expandMoreDetals.ZOrder" xml:space="preserve">
-    <value>0</value>
+    <value>1</value>
   </data>
   <data name="btnEndTaskSimple.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Bottom, Right</value>
@@ -2034,7 +2623,7 @@
     <value>pl_simple</value>
   </data>
   <data name="&gt;&gt;btnEndTaskSimple.ZOrder" xml:space="preserve">
-    <value>1</value>
+    <value>2</value>
   </data>
   <data name="pl_simple.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
     <value>Fill</value>
@@ -2062,6 +2651,39 @@
   </data>
   <data name="&gt;&gt;pl_simple.ZOrder" xml:space="preserve">
     <value>5</value>
+  </data>
+  <metadata name="contextMenuStripProcDetalsCol.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>238, 34</value>
+  </metadata>
+  <data name="contextMenuStripProcDetalsCol.Size" type="System.Drawing.Size, System.Drawing">
+    <value>211, 76</value>
+  </data>
+  <data name="&gt;&gt;contextMenuStripProcDetalsCol.Name" xml:space="preserve">
+    <value>contextMenuStripProcDetalsCol</value>
+  </data>
+  <data name="&gt;&gt;contextMenuStripProcDetalsCol.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ContextMenuStrip, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="隐藏列ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>210, 22</value>
+  </data>
+  <data name="隐藏列ToolStripMenuItem.Text" xml:space="preserve">
+    <value>隐藏列(&amp;H)</value>
+  </data>
+  <data name="选择列ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>210, 22</value>
+  </data>
+  <data name="选择列ToolStripMenuItem.Text" xml:space="preserve">
+    <value>选择列(&amp;C)</value>
+  </data>
+  <data name="toolStripSeparator1.Size" type="System.Drawing.Size, System.Drawing">
+    <value>207, 6</value>
+  </data>
+  <data name="将此列调整为合适大小ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>210, 22</value>
+  </data>
+  <data name="将此列调整为合适大小ToolStripMenuItem.Text" xml:space="preserve">
+    <value>将此列调整为合适大小(&amp;F)</value>
   </data>
   <metadata name="fileSystemWatcher.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>573, 17</value>
@@ -2909,18 +3531,6 @@
   <data name="&gt;&gt;复制发布者ToolStripMenuItem.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;fileSystemWatcher.Name" xml:space="preserve">
-    <value>fileSystemWatcher</value>
-  </data>
-  <data name="&gt;&gt;fileSystemWatcher.Type" xml:space="preserve">
-    <value>System.IO.FileSystemWatcher, System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;notifyIcon.Name" xml:space="preserve">
-    <value>notifyIcon</value>
-  </data>
-  <data name="&gt;&gt;notifyIcon.Type" xml:space="preserve">
-    <value>System.Windows.Forms.NotifyIcon, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="&gt;&gt;隐藏列ToolStripMenuItem.Name" xml:space="preserve">
     <value>隐藏列ToolStripMenuItem</value>
   </data>
@@ -2932,6 +3542,30 @@
   </data>
   <data name="&gt;&gt;选择列ToolStripMenuItem.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;toolStripSeparator1.Name" xml:space="preserve">
+    <value>toolStripSeparator1</value>
+  </data>
+  <data name="&gt;&gt;toolStripSeparator1.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripSeparator, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;将此列调整为合适大小ToolStripMenuItem.Name" xml:space="preserve">
+    <value>将此列调整为合适大小ToolStripMenuItem</value>
+  </data>
+  <data name="&gt;&gt;将此列调整为合适大小ToolStripMenuItem.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;fileSystemWatcher.Name" xml:space="preserve">
+    <value>fileSystemWatcher</value>
+  </data>
+  <data name="&gt;&gt;fileSystemWatcher.Type" xml:space="preserve">
+    <value>System.IO.FileSystemWatcher, System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;notifyIcon.Name" xml:space="preserve">
+    <value>notifyIcon</value>
+  </data>
+  <data name="&gt;&gt;notifyIcon.Type" xml:space="preserve">
+    <value>System.Windows.Forms.NotifyIcon, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;$this.Name" xml:space="preserve">
     <value>FormMain</value>
@@ -3571,29 +4205,5 @@
   </data>
   <data name="notifyIcon.Visible" type="System.Boolean, mscorlib">
     <value>True</value>
-  </data>
-  <metadata name="contextMenuStripProcDetalsCol.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>238, 34</value>
-  </metadata>
-  <data name="隐藏列ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>112, 22</value>
-  </data>
-  <data name="隐藏列ToolStripMenuItem.Text" xml:space="preserve">
-    <value>隐藏列</value>
-  </data>
-  <data name="选择列ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>112, 22</value>
-  </data>
-  <data name="选择列ToolStripMenuItem.Text" xml:space="preserve">
-    <value>选择列</value>
-  </data>
-  <data name="contextMenuStripProcDetalsCol.Size" type="System.Drawing.Size, System.Drawing">
-    <value>113, 48</value>
-  </data>
-  <data name="&gt;&gt;contextMenuStripProcDetalsCol.Name" xml:space="preserve">
-    <value>contextMenuStripProcDetalsCol</value>
-  </data>
-  <data name="&gt;&gt;contextMenuStripProcDetalsCol.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ContextMenuStrip, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

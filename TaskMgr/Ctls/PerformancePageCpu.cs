@@ -50,7 +50,9 @@ namespace PCMgr.Ctls
         private TimeSpan times;
         private int cpuCount = 0;
         private int cpuUseage = 0;
+        private string maxSpeed = "";
 
+        public bool PageIsActive { get; set; }
         public void PageFroceSetData(int s)
         {
             cpuUseage = s;
@@ -66,8 +68,9 @@ namespace PCMgr.Ctls
         }
         public void PageUpdate()
         {
-            int cpuuse = cpuUseage;
-            item_cpuuseage.Value = cpuuse.ToString() + "%";
+            cpuUseage = (int)(MPERF_GetCupUseAge());
+            performanceGridGlobal.AddData(cpuUseage);
+            item_cpuuseage.Value = cpuUseage.ToString() + "%";
             performanceGridGlobal.Invalidate();
             if (MPERF_UpdatePerformance())
             {
@@ -88,9 +91,17 @@ namespace PCMgr.Ctls
         {
             performanceGridGlobal.LeftBottomText = s;
         }
-        public double PageUpdateSimple()
+        public bool PageUpdateSimple(out string customString, out int outdata1, out int outdata2)
         {
-            return 0;
+            cpuUseage = (int)(MPERF_GetCupUseAge() );
+            customString = cpuUseage.ToString() + "%  " + maxSpeed;
+            outdata1 = cpuUseage;
+            outdata2 = -1;
+
+            if (!PageIsActive)
+                performanceGridGlobal.AddData(outdata1);
+
+            return true;
         }
 
         PerformanceInfos.PerformanceInfoSpeicalItem item_cpuuseage = null;
@@ -113,6 +124,7 @@ namespace PCMgr.Ctls
 
             cpuCount = MPERF_GetProcessNumber();
 
+            maxSpeed = (MPERF_GetCpuFrequency() / 1024d).ToString("0.0") + " GHz";
             performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem(LanuageMgr.GetStr("MaxSpeed"), MPERF_GetCpuFrequency().ToString() + " MHz"));
             performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem(LanuageMgr.GetStr("CpuCpunt"), cpuCount.ToString()));
 

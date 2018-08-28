@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "syshlp.h"
+#include "prochlp.h"
 #include "shellapi.h"
 #include "loghlp.h"
 #include "mapphlp.h"
@@ -10,6 +11,8 @@ BOOL _IsRunasAdmin = -1;
 
 DWORD currentWindowsBulidVer = 0;
 DWORD currentWindowsMajor = 0;
+
+extern WCHAR debuggerCommand[MAX_PATH];
 
 extern _RunFileDlg RunFileDlg;
 extern LdrGetProcedureAddressFun LdrGetProcedureAddress;
@@ -227,15 +230,15 @@ M_CAPI(BOOL) MGetWindowsBulidVersion() {
 M_CAPI(BOOL) MGetNtosAndWin32kfullNameAndStartAddress(LPWSTR name, size_t buffersize, ULONG_PTR *address, ULONG_PTR *win32kfulladdress)
 {
 	ULONG outLength = 0;
-	PSYSTEMMODULELIST pSysModuleNames = (PSYSTEMMODULELIST)malloc(sizeof(SYSTEM_MODULE_INFORMATION));
+	PSYSTEMMODULELIST pSysModuleNames = (PSYSTEMMODULELIST)MAlloc(sizeof(SYSTEM_MODULE_INFORMATION));
 	if (NtQuerySystemInformation(SystemModuleInformation, pSysModuleNames, 0, &outLength) == STATUS_INFO_LENGTH_MISMATCH)
 	{
-		free(pSysModuleNames);
-		pSysModuleNames = (PSYSTEMMODULELIST)malloc(outLength);
+		MFree(pSysModuleNames);
+		pSysModuleNames = (PSYSTEMMODULELIST)MAlloc(outLength);
 	}
 	else
 	{
-		free(pSysModuleNames);
+		MFree(pSysModuleNames);
 		pSysModuleNames = NULL;
 	}
 
@@ -244,7 +247,7 @@ M_CAPI(BOOL) MGetNtosAndWin32kfullNameAndStartAddress(LPWSTR name, size_t buffer
 		NTSTATUS status = NtQuerySystemInformation(SystemModuleInformation, pSysModuleNames, outLength, &outLength);
 		if (!NT_SUCCESS(status)) {
 			LogErr(L"MGetNtosName NtQuerySystemInformation failed : 0x%08X", status);
-			free(pSysModuleNames);
+			MFree(pSysModuleNames);
 			return 0;
 		}
 
@@ -268,9 +271,44 @@ M_CAPI(BOOL) MGetNtosAndWin32kfullNameAndStartAddress(LPWSTR name, size_t buffer
 				if (win32kfulladdress)
 					*win32kfulladdress = (ULONG_PTR)SystemModuleInfoThis->Base;
 		}
-		free(pSysModuleNames);
+		MFree(pSysModuleNames);
 	}
 	return 0;
+}
+
+BOOL MGetDebuggerInformation() {
+
+	HKEY hKey;
+	if (RegOpenKey(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\AeDebug", &hKey) == ERROR_SUCCESS) {
+		TCHAR dwValue[256];
+		DWORD dwSzType = REG_SZ;
+		DWORD dwSize = sizeof(dwValue);
+		if (RegQueryValueEx(hKey, L"Debugger", 0, &dwSzType, (LPBYTE)&dwValue, &dwSize) == ERROR_SUCCESS)
+		{
+			wcscpy_s(debuggerCommand, dwValue);
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+M_CAPI(BOOL) MGetSystemAffinityMask(PULONG_PTR SystemAffinityMask)
+{
+	if (!SystemAffinityMask)return FALSE;
+
+	SYSTEM_BASIC_INFORMATION systemBasicInfo;
+
+	NTSTATUS status = NtQuerySystemInformation(
+		SystemBasicInformation,
+		&systemBasicInfo,
+		sizeof(SYSTEM_BASIC_INFORMATION),
+		NULL
+	);
+
+	if (NT_SUCCESS(status)) {
+		*SystemAffinityMask = systemBasicInfo.ActiveProcessorsAffinityMask;
+		return TRUE;
+	}
+	return FALSE;
 }
 
 M_CAPI(LPWSTR) MKeyToStr(UINT vk)

@@ -2,6 +2,10 @@
 #include "stdafx.h"
 #include "ntdef.h"
 #include "cscall.h"
+#include "msup.h"
+
+#define M_MTMSG_ 1
+#define M_MTMSG_COSCLOSE 1
 
 #define M_DRAW_HEADER_HOT 1
 #define M_DRAW_HEADER_PRESSED 2
@@ -28,7 +32,6 @@ typedef void(__cdecl *EnumWinsCallBack)(HWND hWnd, HWND hWndParent);
 typedef void(__cdecl *GetWinsCallBack)(HWND hWnd, HWND hWndParent, int i);
 typedef void(__cdecl *WorkerCallBack)(int msg, void* data1, void* data2);
 typedef BOOL(__cdecl *TerminateImporantWarnCallBack)(LPWSTR commandName, int id);
-typedef void(__cdecl *EnumPrivilegesCallBack)(LPWSTR name);
 
 //主窗口 WinProc
 LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -42,11 +45,11 @@ int MShowMessageDialog(HWND hwnd, LPWSTR text, LPWSTR title, LPWSTR instruction,
 int MShowErrorMessage(LPWSTR text, LPWSTR intr, int ico=0, int btn=0);
 //显示带有LastErr的错误对话框
 int MShowErrorMessageWithLastErr(LPWSTR text, LPWSTR intr, int ico, int btn);
+//显示 NTSTATUS 错误对话框
+void MShowErrorMessageWithNTSTATUS(LPWSTR msg, LPWSTR title, NTSTATUS status);
 
 EXTERN_C M_API BOOL MIsSystemSupport();
-EXTERN_C M_API BOOL MAppMainCanRun();
 EXTERN_C M_API void MAppRun2();
-EXTERN_C M_API void MGlobalAppInitialize();
 EXTERN_C M_API void MAppMainExit(UINT exitcode);
 EXTERN_C M_API DWORD MAppMainGetExitCode();
 EXTERN_C M_API BOOL MAppMainRun();
@@ -79,8 +82,11 @@ BOOL MAppStartEnd();
 BOOL MAppStartTryActiveLastApp(LPWSTR windowTitle);
 EXTERN_C M_API BOOL MAppKillOld(LPWSTR procName);
 BOOL MAppStartTest();
+EXTERN_C M_API LRESULT MAppWorkCall1(WPARAM wParam, LPARAM lParam);
 EXTERN_C M_API void MAppWorkCall2(UINT msg, WPARAM wParam, LPARAM lParam);
 EXTERN_C M_API int MAppWorkCall3(int id, HWND hWnd, void*data);
+EXTERN_C M_API LRESULT MAppMainThreadCall(WPARAM wParam, LPARAM lParam);
+
 //获取窗口的图标
 //    hWnd ：窗口句柄
 EXTERN_C M_API HICON MGetWindowIcon(HWND hWnd);

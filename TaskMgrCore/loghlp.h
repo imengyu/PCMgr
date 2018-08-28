@@ -43,6 +43,11 @@ M_CAPI(void) M_LOG_Warning_ForceFileW(_Printf_format_string_ const wchar_t* szFo
 M_CAPI(void) M_LOG_Info_ForceFileW(_Printf_format_string_ const wchar_t* szFormat, ...);
 M_CAPI(void) M_LOG_Str_ForceFileW(_Printf_format_string_ const wchar_t* szFormat, ...);
 
+void M_LOG_Init();
+void M_LOG_Destroy();
+void M_LOG_FocusConsoleWindow();
+void M_LOG_CloseConsole(BOOL callFormCloseEvent, BOOL callFormConsoleApp = FALSE);
+
 //设置 Log 当前记录等级
 M_CAPI(void) M_LOG_SetLogLevel(LogLevel level);
 //获取 Log 当前记录等级
@@ -50,6 +55,8 @@ M_CAPI(LogLevel) M_LOG_GetLogLevel(int l);
 //禁用 Log 模块
 M_CAPI(void) M_LOG_DisableLog();
 
+//关闭 Log 模块（适用于控制台程序）
+M_CAPI(void) M_LOG_Close_InConsole();
 //关闭 Log 模块
 M_CAPI(void) M_LOG_Close();
 //初始化 Log 模块（适用于控制台程序）
@@ -76,7 +83,6 @@ M_CAPI(void) M_LOG_Log_WithFunAndLineW(LPSTR fileName, LPSTR funName, INT lineNu
 M_CAPI(void) M_LOG_LogErrW(_In_z_ _Printf_format_string_ wchar_t const* const _Format, ...);
 M_CAPI(void) M_LOG_LogWarnW(_In_z_ _Printf_format_string_ wchar_t const* const _Format, ...);
 M_CAPI(void) M_LOG_LogInfoW(_In_z_ _Printf_format_string_ wchar_t const* const _Format, ...);
-M_CAPI(void) M_LOG_LogTextW(WORD color, _Printf_format_string_ wchar_t const* const _Format, ...);
 M_CAPI(void) M_LOG_LogW(_In_z_ _Printf_format_string_ wchar_t const* const _Format, ...);
 
 M_CAPI(void) M_LOG_LogErr_WithFunAndLineA(LPSTR fileName, LPSTR funName, INT lineNumber, _In_z_ _Printf_format_string_ char const* const _Format, ...);
@@ -87,5 +93,7 @@ M_CAPI(void) M_LOG_Log_WithFunAndLineA(LPSTR fileName, LPSTR funName, INT lineNu
 M_CAPI(void) M_LOG_LogErrA(_In_z_ _Printf_format_string_ char const* const _Format, ...);
 M_CAPI(void) M_LOG_LogWarnA(_In_z_ _Printf_format_string_ char const* const _Format, ...);
 M_CAPI(void) M_LOG_LogInfoA(_In_z_ _Printf_format_string_ char const* const _Format, ...);
-M_CAPI(void) M_LOG_LogTextA(WORD color, _Printf_format_string_ char const* const _Format, ...);
 M_CAPI(void) M_LOG_LogA(_In_z_ _Printf_format_string_ char const* const _Format, ...);
+
+M_CAPI(void) M_LOG_PrintColorTextA(WORD color, char const* const _Format, ...);
+M_CAPI(void) M_LOG_PrintColorTextW(WORD color, wchar_t const* const _Format, ...);

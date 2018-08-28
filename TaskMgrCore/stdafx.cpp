@@ -10,12 +10,15 @@
 #pragma comment(lib, "Wintrust.lib")
 #pragma comment(lib, "Shlwapi.lib")
 #pragma comment(lib, "Crypt32.lib")
-#pragma comment(lib , "DbgHelp.lib")
-#pragma comment(lib , "Imagehlp.lib")
+#pragma comment(lib ,"DbgHelp.lib")
+#pragma comment(lib ,"Imagehlp.lib")
 #pragma comment(lib, "iphlpapi.lib")
 #pragma comment(lib, "ws2_32.lib")
 #pragma comment(lib, "Pdh.lib")
 #pragma comment(lib, "wbemuuid.lib")
+#pragma comment(lib, "netapi32.lib")
+#pragma comment(lib, "capstone.lib")
+#pragma comment(lib, "winsta.lib")
 
 // TODO: 在 STDAFX.H 中引用任何所需的附加头文件，
 //而不是在此文件中引用

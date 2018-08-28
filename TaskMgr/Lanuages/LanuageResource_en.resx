@@ -1010,4 +1010,67 @@ Therefore, the kernel function is not available. If you need to use the kernel f
   <data name="TitleCycle" xml:space="preserve">
     <value>Cycle</value>
   </data>
+  <data name="TitleUserPrivilege" xml:space="preserve">
+    <value>User Privilege</value>
+  </data>
+  <data name="TitleDomainName" xml:space="preserve">
+    <value>Domain Name</value>
+  </data>
+  <data name="WantDisconnectUser" xml:space="preserve">
+    <value>Do you want to disconnect to this user?</value>
+  </data>
+  <data name="WantLogooffUser" xml:space="preserve">
+    <value>Do you want to logoff this user?</value>
+  </data>
+  <data name="PleaseEnterPassword" xml:space="preserve">
+    <value>Please enter the password of this user</value>
+  </data>
+  <data name="ConnectSession" xml:space="preserve">
+    <value>connect to the session</value>
+  </data>
+  <data name="ConnectSessionFailed" xml:space="preserve">
+    <value>Unable to connect to the session</value>
+  </data>
+  <data name="DisConnectSession" xml:space="preserve">
+    <value>Disconnect the session</value>
+  </data>
+  <data name="DisConnectSessionFailed" xml:space="preserve">
+    <value>Unable to disconnect the session</value>
+  </data>
+  <data name="DisConnectSessionFailed1" xml:space="preserve">
+    <value>Unable to logoff the session</value>
+  </data>
+  <data name="LogoffSession" xml:space="preserve">
+    <value>Logoff the session</value>
+  </data>
+  <data name="SetProcAffinityFailed" xml:space="preserve">
+    <value>Unable to set affinity of process</value>
+  </data>
+  <data name="SetProcPriorityClassFailed" xml:space="preserve">
+    <value>Unable to set priority of process</value>
+  </data>
+  <data name="AllowWhatCpusToRun" xml:space="preserve">
+    <value>Controls which CPUs are allowed to run </value>
+  </data>
+  <data name="DeviceLocator" xml:space="preserve">
+    <value>Device Locator</value>
+  </data>
+  <data name="FormFactor" xml:space="preserve">
+    <value>Form Factor</value>
+  </data>
+  <data name="Model" xml:space="preserve">
+    <value>Model</value>
+  </data>
+  <data name="MemFree" xml:space="preserve">
+    <value>Free</value>
+  </data>
+  <data name="MemModifed" xml:space="preserve">
+    <value>Modifed</value>
+  </data>
+  <data name="MemStandby" xml:space="preserve">
+    <value>Standby</value>
+  </data>
+  <data name="MemUsingS" xml:space="preserve">
+    <value>Using</value>
+  </data>
 </root>

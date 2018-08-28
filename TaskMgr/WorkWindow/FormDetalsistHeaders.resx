@@ -207,14 +207,17 @@
   <data name="listItems.Alignment" type="System.Windows.Forms.ListViewAlignment, System.Windows.Forms">
     <value>Left</value>
   </data>
+  <data name="columnHeader1.Width" type="System.Int32, mscorlib">
+    <value>328</value>
+  </data>
   <data name="listItems.Location" type="System.Drawing.Point, System.Drawing">
-    <value>14, 74</value>
+    <value>14, 65</value>
   </data>
   <data name="listItems.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>3, 4, 3, 4</value>
   </data>
   <data name="listItems.Size" type="System.Drawing.Size, System.Drawing">
-    <value>360, 253</value>
+    <value>360, 262</value>
   </data>
   <data name="listItems.TabIndex" type="System.Int32, mscorlib">
     <value>4</value>
@@ -251,6 +254,12 @@
   </data>
   <data name="$this.Text" xml:space="preserve">
     <value>选择列</value>
+  </data>
+  <data name="&gt;&gt;columnHeader1.Name" xml:space="preserve">
+    <value>columnHeader1</value>
+  </data>
+  <data name="&gt;&gt;columnHeader1.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ColumnHeader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;$this.Name" xml:space="preserve">
     <value>FormDetalsistHeaders</value>

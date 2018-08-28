@@ -101,7 +101,17 @@ extern LPWSTR str_item_setscstart_err;
 extern LPWSTR str_item_set_to;
 extern LPWSTR str_item_killtree_end;
 extern LPWSTR str_item_killtree_content;
-
+extern LPWSTR str_item_want_disconnectuser;
+extern LPWSTR str_item_want_logoffuser;
+extern LPWSTR str_item_please_enter_password;
+extern LPWSTR str_item_conss_failed;
+extern LPWSTR str_item_conect_ss;
+extern LPWSTR str_item_disconect_ss;
+extern LPWSTR str_item_disconss_failed;
+extern LPWSTR str_item_logoff_ss;
+extern LPWSTR str_item_logoff_ssfailed;
+extern LPWSTR str_item_set_proc_priority_failed;
+extern LPWSTR str_item_set_proc_affinity_failed;
 
 
 

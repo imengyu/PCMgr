@@ -1010,4 +1010,70 @@ PCMgr 需要管理员权限 才能对系统进行控制和管理。
   <data name="TitleCycle" xml:space="preserve">
     <value>周期</value>
   </data>
+  <data name="TitleUserPrivilege" xml:space="preserve">
+    <value>用户权限</value>
+  </data>
+  <data name="TitleID" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="TitleDomainName" xml:space="preserve">
+    <value>主机名</value>
+  </data>
+  <data name="WantDisconnectUser" xml:space="preserve">
+    <value>你希望与此用户断开连接吗？</value>
+  </data>
+  <data name="WantLogooffUser" xml:space="preserve">
+    <value>你希望注销此用户吗？</value>
+  </data>
+  <data name="PleaseEnterPassword" xml:space="preserve">
+    <value>请输入此用户的密码</value>
+  </data>
+  <data name="ConnectSession" xml:space="preserve">
+    <value>连接会话</value>
+  </data>
+  <data name="ConnectSessionFailed" xml:space="preserve">
+    <value>无法连接会话</value>
+  </data>
+  <data name="DisConnectSession" xml:space="preserve">
+    <value>断开连接</value>
+  </data>
+  <data name="DisConnectSessionFailed" xml:space="preserve">
+    <value>无法断开会话的连接</value>
+  </data>
+  <data name="DisConnectSessionFailed1" xml:space="preserve">
+    <value>无法注销会话</value>
+  </data>
+  <data name="LogoffSession" xml:space="preserve">
+    <value>注销会话</value>
+  </data>
+  <data name="SetProcAffinityFailed" xml:space="preserve">
+    <value>设置进程相关性错误</value>
+  </data>
+  <data name="SetProcPriorityClassFailed" xml:space="preserve">
+    <value>设置进程优先级错误</value>
+  </data>
+  <data name="AllowWhatCpusToRun" xml:space="preserve">
+    <value>允许哪些处理器运行</value>
+  </data>
+  <data name="Model" xml:space="preserve">
+    <value>型号</value>
+  </data>
+  <data name="DeviceLocator" xml:space="preserve">
+    <value>已使用的插槽</value>
+  </data>
+  <data name="FormFactor" xml:space="preserve">
+    <value>规格</value>
+  </data>
+  <data name="MemFree" xml:space="preserve">
+    <value>可用</value>
+  </data>
+  <data name="MemModifed" xml:space="preserve">
+    <value>已提交</value>
+  </data>
+  <data name="MemStandby" xml:space="preserve">
+    <value>备用</value>
+  </data>
+  <data name="MemUsingS" xml:space="preserve">
+    <value>使用中</value>
+  </data>
 </root>

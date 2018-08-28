@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "perfhlp.h"
 #include "sysfuns.h"
+#include "msup.h"
 #include "loghlp.h"
 #include "prochlp.h"
 #include "StringHlp.h"
@@ -11,7 +12,8 @@
 #include <Tcpestats.h>
 #include <vector>
 
-#define PAGE_SIZE 0x1000
+extern NtQuerySystemInformationFun NtQuerySystemInformation;
+extern NtQueryInformationProcessFun NtQueryInformationProcess;
 
 int cpu_Count = 0;
 __int64 LastTime;
@@ -29,6 +31,8 @@ DWORD processorL2CacheCount = 0;
 DWORD processorL3CacheCount = 0;
 DWORD processorPackageCount = 0;
 MEMORYSTATUSEX memory_statuex;
+SYSTEM_MEMORY_LIST_INFORMATION memoryListInfo;
+ULONG_PTR standbyPageCount = 0;
 
 void MPERF_FreeCpuInfos()
 {
@@ -85,13 +89,25 @@ M_CAPI(ULONGLONG) MPERF_GetCommitLimit()
 M_CAPI(ULONGLONG) MPERF_GetRamAvail() {
 	return memory_statuex.ullAvailPhys;
 }
+M_CAPI(ULONGLONG) MPERF_GetRamUsed() {
+	return memory_statuex.ullTotalPhys - memory_statuex.ullAvailPhys;
+}
 M_CAPI(ULONGLONG) MPERF_GetRamAvailPageFile() {
 	return performance_info.CommitLimit*performance_info.PageSize;
 }
-M_CAPI(LONGLONG) MPERF_GetRunTime()
+M_CAPI(ULONGLONG) MPERF_GetRunTime()
 {
 	return GetTickCount64();
 }
+M_CAPI(ULONGLONG) MPERF_GetStandBySize()
+{
+	return standbyPageCount * MPERF_GetPageSize();
+}
+M_CAPI(ULONGLONG) MPERF_GetModifiedSize()
+{
+	return memoryListInfo.ModifiedPageCount*MPERF_GetPageSize();
+}
+
 M_CAPI(DWORD) MPERF_GetThreadCount() {
 	return performance_info.ThreadCount;
 }
@@ -105,6 +121,24 @@ M_CAPI(BOOL) MPERF_UpdatePerformance()
 {
 	return GetPerformanceInfo(&performance_info, sizeof(performance_info));
 }
+M_CAPI(BOOL) MPERF_UpdateMemoryListInfo()
+{
+	standbyPageCount = 0;
+	memset(&memoryListInfo, 0, sizeof(memoryListInfo));
+	if (NT_SUCCESS(NtQuerySystemInformation(
+		SystemMemoryListInformation,
+		&memoryListInfo,
+		sizeof(SYSTEM_MEMORY_LIST_INFORMATION),
+		NULL
+	)))
+	{
+		for (ULONG i = 0; i < 8; i++)
+			standbyPageCount += memoryListInfo.PageCountByPriority[i];
+		return TRUE;
+	}
+	return FALSE;
+}
+
 M_CAPI(DWORD) MPERF_GetCpuL1Cache()
 {
 	return processorL1CacheCount;
@@ -131,7 +165,7 @@ M_CAPI(BOOL) MPERF_GetCpuInfos() {
 	DWORD byteOffset = 0;
 
 	GetLogicalProcessorInformation(NULL, &returnLength);
-	buffer = (PSYSTEM_LOGICAL_PROCESSOR_INFORMATION)malloc(returnLength);
+	buffer = (PSYSTEM_LOGICAL_PROCESSOR_INFORMATION)MAlloc(returnLength);
 	if (GetLogicalProcessorInformation(buffer, &returnLength))
 	{
 		ptr = buffer;
@@ -239,8 +273,8 @@ M_CAPI(LPWSTR) MPERF_EnumPerformanceCounterInstanceNames(LPWSTR counterName)
 	if (status == PDH_MORE_DATA || (status == PDH_INVALID_ARGUMENT && dwInstanceListSize > 0))
 	{
 		// Allocate the buffers and try the call again.
-		pwsCounterListBuffer = (LPWSTR)malloc(dwCounterListSize * sizeof(WCHAR));
-		pwsInstanceListBuffer = (LPWSTR)malloc(dwInstanceListSize * sizeof(WCHAR));
+		pwsCounterListBuffer = (LPWSTR)MAlloc(dwCounterListSize * sizeof(WCHAR));
+		pwsInstanceListBuffer = (LPWSTR)MAlloc(dwInstanceListSize * sizeof(WCHAR));
 
 		status = PdhEnumObjectItems(NULL, NULL, counterName, 
 			pwsCounterListBuffer,
@@ -248,12 +282,12 @@ M_CAPI(LPWSTR) MPERF_EnumPerformanceCounterInstanceNames(LPWSTR counterName)
 			pwsInstanceListBuffer,
 			&dwInstanceListSize, PERF_DETAIL_WIZARD, 0);
 
-		free(pwsCounterListBuffer);
+		MFree(pwsCounterListBuffer);
 
 		if (status == ERROR_SUCCESS)
 			return pwsInstanceListBuffer;
 		else LogErr(L"Second PdhEnumObjectItems \"Network Interface\" failed : 0x%X (Counter name : %s)", status, counterName);
-		free(pwsInstanceListBuffer);
+		MFree(pwsInstanceListBuffer);
 	}
 	else LogErr(L"First PdhEnumObjectItems \"Network Interface\" failed : 0x%X (Counter name : %s)", status, counterName);
 	return NULL;
@@ -298,7 +332,7 @@ M_CAPI(BOOL) MPERF_Init3PerformanceCounters()
 					GlobalFree(counter3network);
 					counter3network = NULL;
 				}
-				free(netInstanceNames);
+				MFree(netInstanceNames);
 			}
 
 			counter3Inited = TRUE;
@@ -426,6 +460,7 @@ M_CAPI(double) MPERF_GetProcessCpuUseAge(PSYSTEM_PROCESSES p, MPerfAndProcessDat
 		if (TimeInterval == 0) return 0;
 		__int64 i1 = (data->NowCpuTime - data->LastCpuTime) / 1000;
 		double rs = static_cast<double>((double)i1 / (double)(TimeInterval / 100000));
+		if (rs > 1) rs = 1;
 		return (rs < 0.1 && rs>0.05) ? 0.1 : rs;
 	}
 	return -1;
@@ -582,7 +617,7 @@ M_CAPI(void)MPERF_NET_FreeAllProcessNetInfo()
 {
 	if (netProcess)
 	{
-		free(netProcess);
+		MFree(netProcess);
 		netProcess = NULL;
 	}
 }
@@ -591,13 +626,13 @@ M_CAPI(BOOL)MPERF_NET_UpdateAllProcessNetInfo()
 	MPERF_NET_FreeAllProcessNetInfo();
 	
 	DWORD dwSize = sizeof(MIB_TCPTABLE_OWNER_PID);
-	netProcess = (PMIB_TCPTABLE_OWNER_PID)malloc(sizeof(MIB_TCPTABLE_OWNER_PID));
+	netProcess = (PMIB_TCPTABLE_OWNER_PID)MAlloc(sizeof(MIB_TCPTABLE_OWNER_PID));
 	memset(netProcess, 0, sizeof(dwSize));
 	if (dGetExtendedTcpTable(netProcess, &dwSize, TRUE, AF_INET, TCP_TABLE_OWNER_PID_CONNECTIONS, 0) == ERROR_INSUFFICIENT_BUFFER)
 	{
-		free(netProcess);
+		MFree(netProcess);
 		DWORD realSize = sizeof(DWORD) + dwSize * sizeof(MIB_TCPROW_OWNER_PID);
-		netProcess = (PMIB_TCPTABLE_OWNER_PID)malloc(realSize);
+		netProcess = (PMIB_TCPTABLE_OWNER_PID)MAlloc(realSize);
 		memset(netProcess, 0, sizeof(realSize));
 		if (dGetExtendedTcpTable(netProcess, &dwSize, TRUE, AF_INET, TCP_TABLE_OWNER_PID_CONNECTIONS, 0) != NO_ERROR)
 		{
@@ -638,7 +673,7 @@ M_CAPI(BOOL) MPERF_InitCpuDetalsPerformanceCounters()
 					else cpuCounters.push_back(thisCounter);
 				}
 			}
-			free(cpuInstanceNames);
+			MFree(cpuInstanceNames);
 		}
 		return TRUE;
 	}
@@ -690,11 +725,11 @@ M_CAPI(UINT) MPERF_InitDisksPerformanceCounters()
 			{
 				if (wcscmp(pTemp, L"_Total") != 0)
 				{
-					MPerfDiskData *data = (MPerfDiskData*)malloc(sizeof(MPerfDiskData));
+					MPerfDiskData *data = (MPerfDiskData*)MAlloc(sizeof(MPerfDiskData));
 					memset(data, 0, sizeof(MPerfDiskData));
 					wcscpy_s(data->performanceCounter_Name, pTemp);
 
-					std::wstring cpuCounterName = FormatString(L"\\PhysicalDisk(%s)\\Avg. Disk Queue Length", pTemp);
+					std::wstring cpuCounterName = FormatString(L"\\PhysicalDisk(%s)\\%% Disk Time", pTemp);
 					data->performanceCounter_avgQue = (PDH_HCOUNTER*)GlobalAlloc(GPTR, (sizeof(PDH_HCOUNTER)));
 					status = PdhAddCounter(hQuery, cpuCounterName.c_str(), 0, data->performanceCounter_avgQue);
 					if (status != ERROR_SUCCESS)
@@ -749,7 +784,7 @@ M_CAPI(UINT) MPERF_InitDisksPerformanceCounters()
 			}
 
 			return (UINT)diskCounters.size();
-			free(diskInstanceNames);
+			MFree(diskInstanceNames);
 		}
 	}
 	return FALSE;
@@ -787,7 +822,7 @@ M_CAPI(BOOL) MPERF_DestroyDisksPerformanceCounters()
 				GlobalFree(data->performanceCounter_writeSpeed);
 			}
 
-			free(data);
+			MFree(data);
 		}
 	}
 	return FALSE;
@@ -828,7 +863,7 @@ M_CAPI(BOOL) MPERF_GetDisksPerformanceCountersValues(MPerfDiskData*data,
 		if (out_readavgQue)
 		{
 			PdhGetFormattedCounterValue(*data->performanceCounter_avgQue, PDH_FMT_DOUBLE, &pdh_counter_value_type, &pdh_counter_value);
-			*out_readavgQue = pdh_counter_value.doubleValue / 100;
+			*out_readavgQue = pdh_counter_value.doubleValue;
 		}
 	}
 	return FALSE;
@@ -848,7 +883,7 @@ M_CAPI(double)MPERF_GetDisksPerformanceCountersSimpleValues(MPerfDiskData*data)
 		PDH_FMT_COUNTERVALUE pdh_counter_value;
 		DWORD pdh_counter_value_type;
 		PdhGetFormattedCounterValue(*data->performanceCounter_avgQue, PDH_FMT_DOUBLE, &pdh_counter_value_type, &pdh_counter_value);
-		return pdh_counter_value.doubleValue * 100;
+		return pdh_counter_value.doubleValue;
 	}
 	return 0;
 }
@@ -867,7 +902,7 @@ M_CAPI(UINT) MPERF_InitNetworksPerformanceCounters()
 		{
 			for (LPWSTR pTemp = netInstanceNames; *pTemp != 0; pTemp += wcslen(pTemp) + 1)
 			{
-				MPerfNetData *data = (MPerfNetData*)malloc(sizeof(MPerfNetData));
+				MPerfNetData *data = (MPerfNetData*)MAlloc(sizeof(MPerfNetData));
 				memset(data, 0, sizeof(MPerfNetData));
 				wcscpy_s(data->performanceCounter_Name, pTemp);
 
@@ -893,7 +928,7 @@ M_CAPI(UINT) MPERF_InitNetworksPerformanceCounters()
 
 				netCounters.push_back(data);
 			}		
-			free(netInstanceNames);
+			MFree(netInstanceNames);
 			return (UINT)diskCounters.size();
 		}
 	}
@@ -917,7 +952,7 @@ M_CAPI(BOOL) MPERF_DestroyNetworksPerformanceCounters()
 				GlobalFree(data->performanceCounter_sent);
 			}
 
-			free(data);
+			MFree(data);
 		}
 	}
 	return FALSE;

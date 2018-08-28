@@ -75,6 +75,8 @@
             this.pl_UWPEnumFailTip = new System.Windows.Forms.Panel();
             this.lbUWPEnumFailText = new System.Windows.Forms.Label();
             this.listUwpApps = new PCMgr.Ctls.TaskMgrList();
+            this.tabPageUsers = new System.Windows.Forms.TabPage();
+            this.listUsers = new PCMgr.Ctls.TaskMgrList();
             this.tabPageScCtl = new System.Windows.Forms.TabPage();
             this.pl_ScNeedAdminTip = new System.Windows.Forms.Panel();
             this.linkRebootAsAdmin = new System.Windows.Forms.LinkLabel();
@@ -114,13 +116,16 @@
             this.复制发布者ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.listApps = new PCMgr.Ctls.TaskMgrList();
             this.pl_simple = new System.Windows.Forms.Panel();
+            this.lbNoAppsTip = new System.Windows.Forms.Label();
             this.expandMoreDetals = new PCMgr.Aero.ExpandButton();
             this.btnEndTaskSimple = new System.Windows.Forms.Button();
-            this.fileSystemWatcher = new System.IO.FileSystemWatcher();
-            this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.contextMenuStripProcDetalsCol = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.隐藏列ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.选择列ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.将此列调整为合适大小ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.fileSystemWatcher = new System.IO.FileSystemWatcher();
+            this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerFm)).BeginInit();
             this.splitContainerFm.Panel1.SuspendLayout();
             this.splitContainerFm.Panel2.SuspendLayout();
@@ -138,6 +143,7 @@
             this.tabPagePerfCtl.SuspendLayout();
             this.tabPageUWPCtl.SuspendLayout();
             this.pl_UWPEnumFailTip.SuspendLayout();
+            this.tabPageUsers.SuspendLayout();
             this.tabPageScCtl.SuspendLayout();
             this.pl_ScNeedAdminTip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.sp2)).BeginInit();
@@ -147,8 +153,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.spBottom)).BeginInit();
             this.contextMenuStripUWP.SuspendLayout();
             this.pl_simple.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.fileSystemWatcher)).BeginInit();
             this.contextMenuStripProcDetalsCol.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.fileSystemWatcher)).BeginInit();
             this.SuspendLayout();
             // 
             // splitContainerFm
@@ -266,6 +272,7 @@
             this.tabControlMain.Controls.Add(this.tabPageKernelCtl);
             this.tabControlMain.Controls.Add(this.tabPagePerfCtl);
             this.tabControlMain.Controls.Add(this.tabPageUWPCtl);
+            this.tabControlMain.Controls.Add(this.tabPageUsers);
             this.tabControlMain.Controls.Add(this.tabPageScCtl);
             this.tabControlMain.Controls.Add(this.tabPageDetals);
             this.tabControlMain.Controls.Add(this.tabPageStartCtl);
@@ -511,6 +518,29 @@
             this.listUwpApps.KeyDown += new System.Windows.Forms.KeyEventHandler(this.listUwpApps_KeyDown);
             this.listUwpApps.MouseClick += new System.Windows.Forms.MouseEventHandler(this.listUwpApps_MouseClick);
             // 
+            // tabPageUsers
+            // 
+            this.tabPageUsers.Controls.Add(this.listUsers);
+            resources.ApplyResources(this.tabPageUsers, "tabPageUsers");
+            this.tabPageUsers.Name = "tabPageUsers";
+            this.tabPageUsers.UseVisualStyleBackColor = true;
+            // 
+            // listUsers
+            // 
+            resources.ApplyResources(this.listUsers, "listUsers");
+            this.listUsers.BackColor = System.Drawing.Color.White;
+            this.listUsers.DrawIcon = true;
+            this.listUsers.FocusedType = false;
+            this.listUsers.ListViewItemSorter = null;
+            this.listUsers.Name = "listUsers";
+            this.listUsers.NoHeader = false;
+            this.listUsers.SelectedItem = null;
+            this.listUsers.ShowGroup = false;
+            this.listUsers.Value = 0D;
+            this.listUsers.XOffest = 0;
+            this.listUsers.KeyDown += new System.Windows.Forms.KeyEventHandler(this.listUsers_KeyDown);
+            this.listUsers.MouseClick += new System.Windows.Forms.MouseEventHandler(this.listUsers_MouseClick);
+            // 
             // tabPageScCtl
             // 
             this.tabPageScCtl.Controls.Add(this.pl_ScNeedAdminTip);
@@ -652,6 +682,7 @@
             this.listProcessDetals.View = System.Windows.Forms.View.Details;
             this.listProcessDetals.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listProcessDetals_ColumnClick);
             this.listProcessDetals.SelectedIndexChanged += new System.EventHandler(this.listProcessDetals_SelectedIndexChanged);
+            this.listProcessDetals.KeyDown += new System.Windows.Forms.KeyEventHandler(this.listProcessDetals_KeyDown);
             this.listProcessDetals.MouseClick += new System.Windows.Forms.MouseEventHandler(this.listProcessDetals_MouseClick);
             // 
             // imageListProcessDetalsIcons
@@ -793,11 +824,19 @@
             // 
             // pl_simple
             // 
+            this.pl_simple.Controls.Add(this.lbNoAppsTip);
             this.pl_simple.Controls.Add(this.expandMoreDetals);
             this.pl_simple.Controls.Add(this.btnEndTaskSimple);
             this.pl_simple.Controls.Add(this.listApps);
             resources.ApplyResources(this.pl_simple, "pl_simple");
             this.pl_simple.Name = "pl_simple";
+            // 
+            // lbNoAppsTip
+            // 
+            resources.ApplyResources(this.lbNoAppsTip, "lbNoAppsTip");
+            this.lbNoAppsTip.AutoEllipsis = true;
+            this.lbNoAppsTip.ForeColor = System.Drawing.Color.DimGray;
+            this.lbNoAppsTip.Name = "lbNoAppsTip";
             // 
             // expandMoreDetals
             // 
@@ -815,25 +854,13 @@
             this.btnEndTaskSimple.UseVisualStyleBackColor = true;
             this.btnEndTaskSimple.Click += new System.EventHandler(this.btnEndTaskSimple_Click);
             // 
-            // fileSystemWatcher
-            // 
-            this.fileSystemWatcher.EnableRaisingEvents = true;
-            this.fileSystemWatcher.SynchronizingObject = this;
-            this.fileSystemWatcher.Changed += new System.IO.FileSystemEventHandler(this.fileSystemWatcher_Changed);
-            this.fileSystemWatcher.Created += new System.IO.FileSystemEventHandler(this.fileSystemWatcher_Created);
-            this.fileSystemWatcher.Deleted += new System.IO.FileSystemEventHandler(this.fileSystemWatcher_Deleted);
-            this.fileSystemWatcher.Renamed += new System.IO.RenamedEventHandler(this.fileSystemWatcher_Renamed);
-            // 
-            // notifyIcon
-            // 
-            resources.ApplyResources(this.notifyIcon, "notifyIcon");
-            this.notifyIcon.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon_MouseDoubleClick);
-            // 
             // contextMenuStripProcDetalsCol
             // 
             this.contextMenuStripProcDetalsCol.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.隐藏列ToolStripMenuItem,
-            this.选择列ToolStripMenuItem});
+            this.选择列ToolStripMenuItem,
+            this.toolStripSeparator1,
+            this.将此列调整为合适大小ToolStripMenuItem});
             this.contextMenuStripProcDetalsCol.Name = "contextMenuStripProcDetalsCol";
             resources.ApplyResources(this.contextMenuStripProcDetalsCol, "contextMenuStripProcDetalsCol");
             // 
@@ -849,13 +876,38 @@
             resources.ApplyResources(this.选择列ToolStripMenuItem, "选择列ToolStripMenuItem");
             this.选择列ToolStripMenuItem.Click += new System.EventHandler(this.选择列ToolStripMenuItem_Click);
             // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            resources.ApplyResources(this.toolStripSeparator1, "toolStripSeparator1");
+            // 
+            // 将此列调整为合适大小ToolStripMenuItem
+            // 
+            this.将此列调整为合适大小ToolStripMenuItem.Name = "将此列调整为合适大小ToolStripMenuItem";
+            resources.ApplyResources(this.将此列调整为合适大小ToolStripMenuItem, "将此列调整为合适大小ToolStripMenuItem");
+            this.将此列调整为合适大小ToolStripMenuItem.Click += new System.EventHandler(this.将此列调整为合适大小ToolStripMenuItem_Click);
+            // 
+            // fileSystemWatcher
+            // 
+            this.fileSystemWatcher.EnableRaisingEvents = true;
+            this.fileSystemWatcher.SynchronizingObject = this;
+            this.fileSystemWatcher.Changed += new System.IO.FileSystemEventHandler(this.fileSystemWatcher_Changed);
+            this.fileSystemWatcher.Created += new System.IO.FileSystemEventHandler(this.fileSystemWatcher_Created);
+            this.fileSystemWatcher.Deleted += new System.IO.FileSystemEventHandler(this.fileSystemWatcher_Deleted);
+            this.fileSystemWatcher.Renamed += new System.IO.RenamedEventHandler(this.fileSystemWatcher_Renamed);
+            // 
+            // notifyIcon
+            // 
+            resources.ApplyResources(this.notifyIcon, "notifyIcon");
+            this.notifyIcon.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon_MouseDoubleClick);
+            // 
             // FormMain
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
-            this.Controls.Add(this.spBottom);
             this.Controls.Add(this.lbStartingStatus);
+            this.Controls.Add(this.spBottom);
             this.Controls.Add(this.tabControlMain);
             this.Controls.Add(this.pl_simple);
             this.Cursor = System.Windows.Forms.Cursors.AppStarting;
@@ -885,6 +937,7 @@
             this.tabPagePerfCtl.ResumeLayout(false);
             this.tabPageUWPCtl.ResumeLayout(false);
             this.pl_UWPEnumFailTip.ResumeLayout(false);
+            this.tabPageUsers.ResumeLayout(false);
             this.tabPageScCtl.ResumeLayout(false);
             this.tabPageScCtl.PerformLayout();
             this.pl_ScNeedAdminTip.ResumeLayout(false);
@@ -897,8 +950,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.spBottom)).EndInit();
             this.contextMenuStripUWP.ResumeLayout(false);
             this.pl_simple.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.fileSystemWatcher)).EndInit();
             this.contextMenuStripProcDetalsCol.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.fileSystemWatcher)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -996,6 +1049,11 @@
         private System.Windows.Forms.ContextMenuStrip contextMenuStripProcDetalsCol;
         private System.Windows.Forms.ToolStripMenuItem 隐藏列ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 选择列ToolStripMenuItem;
+        private System.Windows.Forms.TabPage tabPageUsers;
+        private Ctls.TaskMgrList listUsers;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripMenuItem 将此列调整为合适大小ToolStripMenuItem;
+        private System.Windows.Forms.Label lbNoAppsTip;
     }
 }
 

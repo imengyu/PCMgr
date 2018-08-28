@@ -35,7 +35,10 @@
             this.labelOsVer = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
+            this.pb_plat = new System.Windows.Forms.PictureBox();
             this.label5 = new System.Windows.Forms.Label();
+            this.linkLabelDiag = new System.Windows.Forms.LinkLabel();
+            ((System.ComponentModel.ISupportInitialize)(this.pb_plat)).BeginInit();
             this.SuspendLayout();
             // 
             // button1
@@ -69,19 +72,37 @@
             // label4
             // 
             resources.ApplyResources(this.label4, "label4");
+            this.label4.ForeColor = System.Drawing.Color.DimGray;
             this.label4.Name = "label4";
+            // 
+            // pb_plat
+            // 
+            resources.ApplyResources(this.pb_plat, "pb_plat");
+            this.pb_plat.Image = global::PCMgr.Properties.Resources.img_x32;
+            this.pb_plat.Name = "pb_plat";
+            this.pb_plat.TabStop = false;
             // 
             // label5
             // 
             resources.ApplyResources(this.label5, "label5");
+            this.label5.ForeColor = System.Drawing.Color.Black;
             this.label5.Name = "label5";
+            // 
+            // linkLabelDiag
+            // 
+            resources.ApplyResources(this.linkLabelDiag, "linkLabelDiag");
+            this.linkLabelDiag.Name = "linkLabelDiag";
+            this.linkLabelDiag.TabStop = true;
+            this.linkLabelDiag.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabelDiag_LinkClicked);
             // 
             // FormAbout
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
+            this.Controls.Add(this.linkLabelDiag);
             this.Controls.Add(this.label5);
+            this.Controls.Add(this.pb_plat);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.labelOsVer);
@@ -92,6 +113,7 @@
             this.MinimizeBox = false;
             this.Name = "FormAbout";
             this.Load += new System.EventHandler(this.FormAbout_Load);
+            ((System.ComponentModel.ISupportInitialize)(this.pb_plat)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -105,6 +127,8 @@
         private System.Windows.Forms.Label labelOsVer;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.PictureBox pb_plat;
         private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.LinkLabel linkLabelDiag;
     }
 }

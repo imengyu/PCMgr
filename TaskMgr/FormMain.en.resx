@@ -121,46 +121,46 @@
     <value>
         AAEAAAD/////AQAAAAAAAAAMAgAAAFdTeXN0ZW0uV2luZG93cy5Gb3JtcywgVmVyc2lvbj00LjAuMC4w
         LCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODkFAQAAACZTeXN0
-        ZW0uV2luZG93cy5Gb3Jtcy5JbWFnZUxpc3RTdHJlYW1lcgEAAAAERGF0YQcCAgAAAAkDAAAADwMAAAD+
-        CAAAAk1TRnQBSQFMAgEBAwEAAdQBAwHUAQMBEAEAARABAAT/ASEBAAj/AUIBTQE2BwABNgMAASgDAAFA
+        ZW0uV2luZG93cy5Gb3Jtcy5JbWFnZUxpc3RTdHJlYW1lcgEAAAAERGF0YQcCAgAAAAkDAAAADwMAAAD4
+        CAAAAk1TRnQBSQFMAgEBAwEAAeQBAwHkAQMBEAEAARABAAT/ASEBAAj/AUIBTQE2BwABNgMAASgDAAFA
         AwABEAMAAQEBAAEgBgABELYAAlgBYgHvAlgBYgHvDAACWAFiAe8CWAFiAe+EAAGyAgAB/wwAAmIBWAHv
-        AdwBjwEAAf8B6AGXAQAB/wHoAZcBAAH/AegBlwEAAf8BwwECAQAB/wJHAUYBgBwAAY4B5AL/AY0B4wL/
-        AYsB4wL/AYoB4gL/AYgB4gL/AYcB4QL/AgABvgH/AgAB5gH/AgABvAH/AQAB1gH8Af8CAAG5Af8CAAHe
-        Af8CWAFiAe9IACz/AzoBYAwAAccBhQEAAf8BzwGJAQAB/wI6ATkBYAHcAZABAAH/AegBmAEAAf8B6AGY
-        AQAB/wHoAZgBAAH/AegBmAEAAf8B6AGYAQAB/wHoAZgBAAH/AegBmAEAAf8BsgIAAf8YAAGQAeQC/wG1
-        Ae0C/wGNAeMC/wGLAeMC/wGKAeIC/wGIAeIC/wGHAeEC/wIAAb4B/wIAAeYB/wIAAcEB/wIAAeIB/wJY
-        AWIB70gAAwwBEDD/DAABxwGFAQAB/wHoAZkBAAH/AegBmQEAAf8B6AGZAQAB/wHkAZYBAAH/AlwBVwHf
-        AyoBQAMqAUACTAFLAY8BwwEDAQAB/wHoAZkBAAH/AegBmQEAAf8BsgIAAf8UAAGRAeUC/wG3Ae0C/wGO
-        AeQC/wGNAeMC/wGLAeMC/wGKAeIC/wGIAeIC/wGHAeEC/wIAAcQB/wIAAeYB/wIAAcEB/0wAA1wB3wMy
-        AVAs/wMMARAIAAHHAYUBAAH/AegBmgEAAf8B6AGaAQAB/wHkAZcBAAH/AyEBMBQAAmIBWAHvAegBmgEA
-        Af8B6AGaAQAB/wJHAUYBgBAAAZMB5QL/AbcB7gL/AZAB5AL/AY4B5AL/AY0B4wL/AYsB4wL/AYoB4gL/
-        AgABwAH/AgAB6gH/AgABxAH/AgAB5gH/AlgBYgHvSAAE/wQALP8DXAHfCAABxwGGAQAB/wHoAZoBAAH/
-        AegBmgEAAf8B6AGaAQAB/wHPAYkBAAH/GAABxwEFAQAB/wHoAZoBAAH/AcMBAQEAAf8QAAGUAeYC/wG5
-        Ae4C/wGRAeUC/wGQAeQC/wGOAeQC/wGNAeMC/wIAAcMB/wIAAe4B/wIAAcAB/wEAAdIB9wH/AgABvgH/
-        AgAB5gH/AlgBYgHvRAAE/wNMAY8DUQGfLP8IAAG3AQIBAAH/AccBhQEAAf8BxwGFAQAB/wHHAYQBAAH/
-        AccBhAEAAf8BsgIAAf8UAAJMAUsBjwHHAQUBAAH/AccBBQEAAf8QAAGWAeYC/wG5Ae8C/wGTAeUC/wGR
-        AeUC/wGQAeQC/wGOAeQC/wIAAbwB/wIAAcMB/wGMAeMC/wGMAd4B+AH/AVkCXAHPAlgBYgHvAlgBYgHv
-        RAAI/wQALP8DTAGPTAABlwHnAv8BuwHvAv8BlAHmAv8BkwHlAv8BkQHlAv8BkAHkAv8BjgHkAv8BjQHj
-        Av8BiwHjAv8BswHsAv9QAAj/AyoBQANcAc8s/0wAAZcB5wL/AbsB7wL/AZYB5gL/AZQB5gL/AZMB5QL/
-        AZEB5QL/AZAB5AL/AY4B5AL/AY0B4wL/AbMB7QL/UAAM/wMMARAwAAJRAVABnwHoAZcBAAH/AeQBlAEA
-        Af8YAAHPAYUBAAH/AegBlwEAAf8B6AGXAQAB/wHoAZcBAAH/AegBlwEAAf8DKgFADAABlwHnAv8BuwHv
-        Av8BlwHnAv8BlgHmAv8BlAHmAv8BkwHlAv8BkQHlAv8BkAHkAv8BjgHkAv8BtQHtAv9MAAMMARA0/xAA
-        AeQBlgEAAf8B6AGYAQAB/wJiAVgB7xgAAc8BhQEAAf8B6AGYAQAB/wHoAZgBAAH/AegBmAEAAf8DKgFA
-        DAABlwHnAv8BuwHvAv8BlwHnAv8BlwHnAv8BlgHmAv8BlAHmAv8BkwHlAv8BkQHlAv8BkAHkAv8BtQHt
-        Av9QADT/EAACXAFXAd8B6AGZAQAB/wHoAZkBAAH/AmIBWAHvEAADQAFwAdwBjwEAAf8B6AGZAQAB/wHo
-        AZkBAAH/AegBmQEAAf8DKgFADAABlwHnAv8BuwHvAv8BlwHnAv8BlwHnAv8BlwHnAv8BlgHmAv8BlAHm
-        Av8BkwHlAv8BkQHlAv8BtwHtAv9kAAMMARAY/xgAAbICAAH/AegBmgEAAf8B6AGaAQAB/wHkAZcBAAH/
-        AccBggEAAf8BxwGCAQAB/wHTAYoBAAH/AegBmgEAAf8B6AGaAQAB/wHkAZYBAAH/Ac8BhQEAAf8B6AGa
-        AQAB/wMqAUAMAAGXAecC/wG7Ae8C/wGXAecC/wGXAecC/wGXAecC/wGXAecC/wGWAeYC/wGUAeYC/wGT
-        AeUC/wG3Ae4C/2wAEP8gAAJcAVcB3wHkAZcBAAH/AegBmgEAAf8B6AGaAQAB/wHoAZoBAAH/AegBmgEA
-        Af8B6AGaAQAB/wHHAYABAAH/AyEBMAQAAc8BhQEAAf8DKgFADAABlwHnAv8BuwHvAv8BlwHnAv8BlwHn
-        Av8BlwHnAv8BlwHnAv8BlwHnAv8BlgHmAv8BlAHmAv8BuQHuAv+kAAJRAVABnwGyAgAB/wG3AgAB/wJc
-        AVkBzwMyAVAQAAMqAUANAAHQAfIB/wEAAdAB8QH/AQABzwHxAf8BAAHOAfAB/wEAAc4B8AH/AQABzQHv
-        Af8BAAHMAe8B/wEAAcwB7gH/AQABywHuAf8BAAHKAe0B//8ATQABQgFNAT4HAAE+AwABKAMAAUADAAEQ
-        AwABAQEAAQEFAAGAFwAD/wEABf8BnAIAAv8BuAEPAeADAAHAAQMBgAEHAeABAQIAAYABAwGAAQMB4AED
-        AgABgAEBAYMB4QHgAQECAAGgAQEBgwHxAeADAAGAAQEBgQHxAeADAAGQAQAC/wHgAQcCAAGAAQAC/wHg
-        AQcCAAGHAf8BjwHAAeABBwMAAQMBxwLgAQcCAAGAAQMBwwHAAeABBwIAAfwBBwHgAQAB4AEHAgAB/wEP
-        AfABBAHgAQcCAAL/AfwBHgHgAQcCAAb/AgAL
+        AdwBjwEAAf8B6AGXAQAB/wHoAZcBAAH/AegBlwEAAf8BwwIAAf8CRwFGAYAcAAGOAeQC/wGNAeMC/wGL
+        AeMC/wGKAeIC/wGIAeIC/wGHAeEC/wIAAb4B/wIAAeYB/wIAAbwB/wEAAdYB/AH/AgABuQH/AgAB3gH/
+        AlgBYgHvSAAs/wM6AWAMAAHHAYUBAAH/Ac8BiQEAAf8COgE5AWAB3AGQAQAB/wHoAZgBAAH/AegBmAEA
+        Af8B6AGYAQAB/wHoAZgBAAH/AegBmAEAAf8B6AGYAQAB/wHoAZgBAAH/AbICAAH/GAABkAHkAv8BtQHt
+        Av8BjQHjAv8BiwHjAv8BigHiAv8BiAHiAv8BhwHhAv8CAAG+Af8CAAHmAf8CAAHBAf8CAAHiAf8CWAFi
+        Ae9IAAMMARAw/wwAAccBhQEAAf8B6AGZAQAB/wHoAZkBAAH/AegBmQEAAf8B5AGWAQAB/wJcAVcB3wMq
+        AUADKgFAAkwBSwGPAcMBAQEAAf8B6AGZAQAB/wHoAZkBAAH/AbICAAH/FAABkQHlAv8BtwHtAv8BjgHk
+        Av8BjQHjAv8BiwHjAv8BigHiAv8BiAHiAv8BhwHhAv8CAAHEAf8CAAHmAf8CAAHBAf9MAANcAd8DMgFQ
+        LP8DDAEQCAABxwGFAQAB/wHoAZoBAAH/AegBmgEAAf8B5AGXAQAB/wMhATAUAAJiAVgB7wHoAZoBAAH/
+        AegBmgEAAf8CRwFGAYAQAAGTAeUC/wG3Ae4C/wGQAeQC/wGOAeQC/wGNAeMC/wGLAeMC/wGKAeIC/wIA
+        AcAB/wIAAeoB/wIAAcQB/wIAAeYB/wJYAWIB70gABP8EACz/A1wB3wgAAccBhgEAAf8B6AGaAQAB/wHo
+        AZoBAAH/AegBmgEAAf8BzwGJAQAB/xgAAccBAwEAAf8B6AGaAQAB/wHDAgAB/xAAAZQB5gL/AbkB7gL/
+        AZEB5QL/AZAB5AL/AY4B5AL/AY0B4wL/AgABwwH/AgAB7gH/AgABwAH/AQAB0gH3Af8CAAG+Af8CAAHm
+        Af8CWAFiAe9EAAT/A0wBjwNRAZ8s/wgAAbcCAAH/AccBhQEAAf8BxwGFAQAB/wHHAYQBAAH/AccBhAEA
+        Af8BsgIAAf8UAAJMAUsBjwHHAQMBAAH/AccBAwEAAf8QAAGWAeYC/wG5Ae8C/wGTAeUC/wGRAeUC/wGQ
+        AeQC/wGOAeQC/wIAAbwB/wIAAcMB/wGMAeMC/wGMAd4B+AH/AVkCXAHPAlgBYgHvAlgBYgHvRAAI/wQA
+        LP8DTAGPTAABlwHnAv8BuwHvAv8BlAHmAv8BkwHlAv8BkQHlAv8BkAHkAv8BjgHkAv8BjQHjAv8BiwHj
+        Av8BswHsAv9QAAj/AyoBQANcAc8s/0wAAZcB5wL/AbsB7wL/AZYB5gL/AZQB5gL/AZMB5QL/AZEB5QL/
+        AZAB5AL/AY4B5AL/AY0B4wL/AbMB7QL/UAAM/wMMARAwAAJRAVABnwHoAZcBAAH/AeQBlAEAAf8YAAHP
+        AYUBAAH/AegBlwEAAf8B6AGXAQAB/wHoAZcBAAH/AegBlwEAAf8DKgFADAABlwHnAv8BuwHvAv8BlwHn
+        Av8BlgHmAv8BlAHmAv8BkwHlAv8BkQHlAv8BkAHkAv8BjgHkAv8BtQHtAv9MAAMMARA0/xAAAeQBlgEA
+        Af8B6AGYAQAB/wJiAVgB7xgAAc8BhQEAAf8B6AGYAQAB/wHoAZgBAAH/AegBmAEAAf8DKgFADAABlwHn
+        Av8BuwHvAv8BlwHnAv8BlwHnAv8BlgHmAv8BlAHmAv8BkwHlAv8BkQHlAv8BkAHkAv8BtQHtAv9QADT/
+        EAACXAFXAd8B6AGZAQAB/wHoAZkBAAH/AmIBWAHvEAADQAFwAdwBjwEAAf8B6AGZAQAB/wHoAZkBAAH/
+        AegBmQEAAf8DKgFADAABlwHnAv8BuwHvAv8BlwHnAv8BlwHnAv8BlwHnAv8BlgHmAv8BlAHmAv8BkwHl
+        Av8BkQHlAv8BtwHtAv9kAAMMARAY/xgAAbICAAH/AegBmgEAAf8B6AGaAQAB/wHkAZcBAAH/AccBggEA
+        Af8BxwGCAQAB/wHTAYoBAAH/AegBmgEAAf8B6AGaAQAB/wHkAZYBAAH/Ac8BhQEAAf8B6AGaAQAB/wMq
+        AUAMAAGXAecC/wG7Ae8C/wGXAecC/wGXAecC/wGXAecC/wGXAecC/wGWAeYC/wGUAeYC/wGTAeUC/wG3
+        Ae4C/2wAEP8gAAJcAVcB3wHkAZcBAAH/AegBmgEAAf8B6AGaAQAB/wHoAZoBAAH/AegBmgEAAf8B6AGa
+        AQAB/wHHAYABAAH/AyEBMAQAAc8BhQEAAf8DKgFADAABlwHnAv8BuwHvAv8BlwHnAv8BlwHnAv8BlwHn
+        Av8BlwHnAv8BlwHnAv8BlgHmAv8BlAHmAv8BuQHuAv+kAAJRAVABnwGyAgAB/wG3AgAB/wJcAVkBzwMy
+        AVAQAAMqAUANAAHQAfIB/wEAAdAB8QH/AQABzwHxAf8BAAHOAfAB/wEAAc4B8AH/AQABzQHvAf8BAAHM
+        Ae8B/wEAAcwB7gH/AQABywHuAf8BAAHKAe0B//8ATQABQgFNAT4HAAE+AwABKAMAAUADAAEQAwABAQEA
+        AQEFAAGAFwAD/wEABf8BnAIAAv8BuAEPAeADAAHAAQMBgAEHAeABAQIAAYABAwGAAQMB4AEDAgABgAEB
+        AYMB4QHgAQECAAGgAQEBgwHxAeADAAGAAQEBgQHxAeADAAGQAQAC/wHgAQcCAAGAAQAC/wHgAQcCAAGH
+        Af8BjwHAAeABBwMAAQMBxwLgAQcCAAGAAQMBwwHAAeABBwIAAfwBBwHgAQAB4AEHAgAB/wEPAfABBAHg
+        AQcCAAL/AfwBHgHgAQcCAAb/AgAL
 </value>
   </data>
   <data name="columnHeader1.Text" xml:space="preserve">
@@ -186,7 +186,7 @@
         AAEAAAD/////AQAAAAAAAAAMAgAAAFdTeXN0ZW0uV2luZG93cy5Gb3JtcywgVmVyc2lvbj00LjAuMC4w
         LCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODkFAQAAACZTeXN0
         ZW0uV2luZG93cy5Gb3Jtcy5JbWFnZUxpc3RTdHJlYW1lcgEAAAAERGF0YQcCAgAAAAkDAAAADwMAAACw
-        BAAAAk1TRnQBSQFMAwEBAAGcAQMBnAEDARABAAEQAQAE/wEhAQAI/wFCAU0BNgcAATYDAAEoAwABQAMA
+        BAAAAk1TRnQBSQFMAwEBAAGsAQMBrAEDARABAAEQAQAE/wEhAQAI/wFCAU0BNgcAATYDAAEoAwABQAMA
         ARADAAEBAQABIAYAARA8AAHNAf8MAAJQAVEBnwJQAVEBn8wAAvsB+gH/AvsB+gH/AvsB+gH/AvsB+gH/
         AvsB+gH/AvsB+gH/A/0B/wIAAdsB/wIAAdkB/wP9Af8CUAFRAZ8CAAHeAf8CUAFRAZ/MAAP7Af8B9wL2
         Af8B9wH2AfUB/wH3AfYB9QH/AfcB9gH1Af8B9wH2AfUB/wH3AfYB9QH/AvsB+gH/AgAB2wH/AgAB2QH/
@@ -370,6 +370,9 @@
   <data name="lbUWPEnumFailText.Text" xml:space="preserve">
     <value>Unkow error</value>
   </data>
+  <data name="tabPageUsers.Text" xml:space="preserve">
+    <value>Users</value>
+  </data>
   <data name="tabPageScCtl.Text" xml:space="preserve">
     <value>Services</value>
   </data>
@@ -482,6 +485,40 @@
   <data name="lbServicesCount.Text" xml:space="preserve">
     <value>Service Count：--</value>
   </data>
+  <data name="tabPageDetals.Text" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="btnEndProcessDetals.Text" xml:space="preserve">
+    <value>&amp;End Task</value>
+  </data>
+  <data name="imageListProcessDetalsIcons.ImageStream" mimetype="application/x-microsoft.net.object.binary.base64">
+    <value>
+        AAEAAAD/////AQAAAAAAAAAMAgAAAFdTeXN0ZW0uV2luZG93cy5Gb3JtcywgVmVyc2lvbj00LjAuMC4w
+        LCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODkFAQAAACZTeXN0
+        ZW0uV2luZG93cy5Gb3Jtcy5JbWFnZUxpc3RTdHJlYW1lcgEAAAAERGF0YQcCAgAAAAkDAAAADwMAAACw
+        BAAAAk1TRnQBSQFMAwEBAAFwAQcBcAEHARABAAEQAQAE/wEhAQAI/wFCAU0BNgcAATYDAAEoAwABQAMA
+        ARADAAEBAQABIAYAARA8AAHNAf8MAAJQAVEBnwJQAVEBn8wAAvsB+gH/AvsB+gH/AvsB+gH/AvsB+gH/
+        AvsB+gH/AvsB+gH/A/0B/wIAAdsB/wIAAdkB/wP9Af8CUAFRAZ8CAAHeAf8CUAFRAZ/MAAP7Af8B9wL2
+        Af8B9wH2AfUB/wH3AfYB9QH/AfcB9gH1Af8B9wH2AfUB/wH3AfYB9QH/AvsB+gH/AgAB2wH/AgAB2QH/
+        AgAB4gH/AlABUQGf0AAB/AL7Af8B+AH3AfYB/wH4AfcB9gH/AfgB9wH2Af8B+AH3AfYB/wH3AfYB9QH/
+        AfcB9gH1Af8B+AH3AfYB/wIAAcoB/wIAAecB/wIAAdkB/9QAAfwC+wH/AfgC9wH/AfgC9wH/AfgB9wH2
+        Af8B+AH3AfYB/wH4AfcB9gH/AvgB9wH/AgABzAH/AgAB6wH/AgABzAH/AgAB2wH/AgAB2QH/0AAC/AH7
+        Af8B+QH4AfcB/wH5AfgB9wH/AfkB+AH3Af8B+AL3Af8B+AH3AfYB/wGjAZ0B3QH/AgAB8AH/AgABzAH/
+        A/sB/wYAAdsB/wIAAc0B/8wAA/wB/wH5AvgB/wH5AvgB/wH5AfgB9wH/AfkB+AH3Af8C+AH3Af8B+QH4
+        AfcB/wGjAZ0B3QH/AfkB+AH3Af8C+wH6Af/YAAH9AvwB/wH6AfkB+AH/AvkB+AH/AvkB+AH/AfkC+AH/
+        AfkB+AH3Af8B+QH4AfcB/wH4AfcB9gH/AfgB9wH2Af8D+wH/2AAB/QL8Af8B+gH5AfgB/wH5AvgB/wH6
+        AfkB+AH/AvkB+AH/AfkC+AH/AfkB+AH3Af8C+AH3Af8B+AH3AfYB/wH8AvsB/9gAAf0C/AH/AfoC+QH/
+        AvoB+QH/AfoB+QH4Af8B+gH5AfgB/wL5AfgB/wH5AvgB/wH5AfgB9wH/AfgC9wH/AfwC+wH/2AAC/QH8
+        Af8C+gH5Af8B+wH6AfkB/wH6AvkB/wH6AfkB+AH/AfoB+QH4Af8B+QL4Af8B+QH4AfcB/wL4AfcB/wH8
+        AvsB/9gAA/0B/wH7AvoB/wL6AfkB/wH7AfoB+QH/AvoB+QH/AfkC+AH/AvkB+AH/AukB6AH/AekB6AHn
+        Af8B7ALrAf/YAAP9Af8C+wH6Af8B+wL6Af8C+gH5Af8B+gL5Af8B+gH5AfgB/wL5AfgB/wOmAf8D6QH/
+        A9MB/9gAA/0B/wL7AfoB/wH7AvoB/wL6AfkB/wH6AvkB/wH6AfkB+AH/AvkB+AH/A6YB/wHeAt0B/wMh
+        ATDYAAOlAf8DowH/AaICoQH/A6AB/wOeAf8CnQGcAf8CmwGaAf8BmgKZAf8DIQEw/wDRAAFCAU0BPgcA
+        AT4DAAEoAwABQAMAARADAAEBAQABAQUAAYAXAAP/AQAB/wHcBgAB4AcAAeABAQYAAeABAwYAAeABAQYA
+        AeABBAYAAeABBwYAAeABBwYAAeABBwYAAeABBwYAAeABBwYAAeABBwYAAeABBwYAAeABBwYAAeABDwYA
+        Av8GAAs=
+</value>
+  </data>
   <data name="tabPageStartCtl.Text" xml:space="preserve">
     <value>Start apps</value>
   </data>
@@ -514,7 +551,7 @@
     <value>Initializing...</value>
   </data>
   <data name="contextMenuStripUWP.Size" type="System.Drawing.Size, System.Drawing">
-    <value>204, 114</value>
+    <value>204, 136</value>
   </data>
   <data name="打开应用ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
     <value>203, 22</value>
@@ -545,6 +582,43 @@
   </data>
   <data name="复制完整名称ToolStripMenuItem.Text" xml:space="preserve">
     <value>Copy full name</value>
+  </data>
+  <data name="复制发布者ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>203, 22</value>
+  </data>
+  <data name="lbNoAppsTip.Text" xml:space="preserve">
+    <value>No application currently running.
+You can click "More details" to view more background application information.</value>
+  </data>
+  <data name="expandMoreDetals.Text" xml:space="preserve">
+    <value>More &amp;Detals</value>
+  </data>
+  <data name="btnEndTaskSimple.Text" xml:space="preserve">
+    <value>&amp;End Task</value>
+  </data>
+  <data name="contextMenuStripProcDetalsCol.Size" type="System.Drawing.Size, System.Drawing">
+    <value>183, 76</value>
+  </data>
+  <data name="隐藏列ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>182, 22</value>
+  </data>
+  <data name="隐藏列ToolStripMenuItem.Text" xml:space="preserve">
+    <value>&amp;Hide column</value>
+  </data>
+  <data name="选择列ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>182, 22</value>
+  </data>
+  <data name="选择列ToolStripMenuItem.Text" xml:space="preserve">
+    <value>&amp;Choose columns</value>
+  </data>
+  <data name="toolStripSeparator1.Size" type="System.Drawing.Size, System.Drawing">
+    <value>179, 6</value>
+  </data>
+  <data name="将此列调整为合适大小ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>182, 22</value>
+  </data>
+  <data name="将此列调整为合适大小ToolStripMenuItem.Text" xml:space="preserve">
+    <value>Size column to &amp;Fit </value>
   </data>
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
@@ -2503,11 +2577,5 @@
   </data>
   <data name="notifyIcon.Text" xml:space="preserve">
     <value>PCMgr</value>
-  </data>
-  <data name="expandMoreDetals.Text" xml:space="preserve">
-    <value>More &amp;Detals</value>
-  </data>
-  <data name="btnEndTaskSimple.Text" xml:space="preserve">
-    <value>&amp;End Task</value>
   </data>
 </root>

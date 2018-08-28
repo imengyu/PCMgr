@@ -26,3 +26,108 @@ typedef PLOADED_IMAGE(WINAPI *fnIMAGELOAD)(__in PSTR DllName,	__in  PSTR DllPath
 
 typedef HMODULE(WINAPI *fnLoadLibraryA)(LPCSTR lpLibFileName);
 typedef HMODULE(WINAPI *fnLoadLibraryW)(LPCWSTR lpLibFileName);
+
+#pragma region WinSta
+
+#define WINSTATIONNAME_LENGTH 32
+
+typedef WCHAR WINSTATIONNAME[WINSTATIONNAME_LENGTH + 1];
+
+// Variable length data descriptor (not needed)
+typedef struct _VARDATA_WIRE
+{
+	USHORT Size;
+	USHORT Offset;
+} VARDATA_WIRE, *PVARDATA_WIRE;
+
+typedef enum _WINSTATIONSTATECLASS
+{
+	State_Active = 0,
+	State_Connected = 1,
+	State_ConnectQuery = 2,
+	State_Shadow = 3,
+	State_Disconnected = 4,
+	State_Idle = 5,
+	State_Listen = 6,
+	State_Reset = 7,
+	State_Down = 8,
+	State_Init = 9
+} WINSTATIONSTATECLASS;
+
+typedef struct _SESSIONIDW
+{
+	union
+	{
+		ULONG SessionId;
+		ULONG LogonId;
+	};
+	WINSTATIONNAME WinStationName;
+	WINSTATIONSTATECLASS State;
+} SESSIONIDW, *PSESSIONIDW;
+
+typedef enum _WINSTATIONINFOCLASS
+{
+	WinStationCreateData,
+	WinStationConfiguration,
+	WinStationPdParams,
+	WinStationWd,
+	WinStationPd,
+	WinStationPrinter,
+	WinStationClient,
+	WinStationModules,
+	WinStationInformation,
+	WinStationTrace,
+	WinStationBeep,
+	WinStationEncryptionOff,
+	WinStationEncryptionPerm,
+	WinStationNtSecurity,
+	WinStationUserToken,
+	WinStationUnused1,
+	WinStationVideoData,
+	WinStationInitialProgram,
+	WinStationCd,
+	WinStationSystemTrace,
+	WinStationVirtualData,
+	WinStationClientData,
+	WinStationSecureDesktopEnter,
+	WinStationSecureDesktopExit,
+	WinStationLoadBalanceSessionTarget,
+	WinStationLoadIndicator,
+	WinStationShadowInfo,
+	WinStationDigProductId,
+	WinStationLockedState,
+	WinStationRemoteAddress,
+	WinStationIdleTime,
+	WinStationLastReconnectType,
+	WinStationDisallowAutoReconnect,
+	WinStationMprNotifyInfo,
+	WinStationExecSrvSystemPipe,
+	WinStationSmartCardAutoLogon,
+	WinStationIsAdminLoggedOn,
+	WinStationReconnectedFromId,
+	WinStationEffectsPolicy,
+	WinStationType,
+	WinStationInformationEx,
+	WinStationValidationInfo
+} WINSTATIONINFOCLASS;
+
+typedef BOOLEAN(WINAPI*_WinStationSendMessageW)(
+	_In_opt_ HANDLE hServer,
+	_In_ ULONG SessionId,
+	_In_ PWSTR Title,
+	_In_ ULONG TitleLength,
+	_In_ PWSTR Message,
+	_In_ ULONG MessageLength,
+	_In_ ULONG Style,
+	_In_ ULONG Timeout,
+	_Out_ PULONG Response,
+	_In_ BOOLEAN DoNotWait
+);
+typedef BOOLEAN(WINAPI*_WinStationConnectW)(_In_opt_ HANDLE hServer,	_In_ ULONG SessionId,	_In_ ULONG TargetSessionId,	_In_opt_ PWSTR pPassword,	_In_ BOOLEAN bWait);
+typedef BOOLEAN(WINAPI*_WinStationDisconnect)(_In_opt_ HANDLE hServer,	_In_ ULONG SessionId,	_In_ BOOLEAN bWait);
+typedef BOOLEAN(WINAPI*_WinStationReset)(_In_opt_ HANDLE hServer,_In_ ULONG SessionId,_In_ BOOLEAN bWait);
+typedef BOOLEAN(WINAPI*_WinStationFreeMemory)(	_In_ PVOID Buffer);
+typedef BOOLEAN(WINAPI*_WinStationEnumerateW)(	_In_opt_ HANDLE hServer,	_Out_ PSESSIONIDW *SessionIds,	_Out_ PULONG Count);
+typedef BOOLEAN(WINAPI*_WinStationQueryInformationW)(_In_opt_ HANDLE hServer, _In_ ULONG SessionId, _In_ WINSTATIONINFOCLASS WinStationInformationClass, _Out_writes_bytes_(WinStationInformationLength) PVOID pWinStationInformation, _In_ ULONG WinStationInformationLength, _Out_ PULONG pReturnLength);
+
+#pragma endregion

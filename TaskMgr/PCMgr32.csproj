@@ -254,6 +254,12 @@
     <Compile Include="WorkWindow\FormKernel.Designer.cs">
       <DependentUpon>FormKernel.cs</DependentUpon>
     </Compile>
+    <Compile Include="WorkWindow\FormSetAffinity.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WorkWindow\FormSetAffinity.Designer.cs">
+      <DependentUpon>FormSetAffinity.cs</DependentUpon>
+    </Compile>
     <Compile Include="WorkWindow\FormVHotKeys.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -374,6 +380,9 @@
     <EmbeddedResource Include="Ctls\PerformancePageRam.resx">
       <DependentUpon>PerformancePageRam.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\FormAbout.en.resx">
+      <DependentUpon>FormAbout.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FormMain.en.resx">
       <DependentUpon>FormMain.cs</DependentUpon>
     </EmbeddedResource>
@@ -398,6 +407,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="WorkWindow\FormKernel.resx">
       <DependentUpon>FormKernel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormSetAffinity.en.resx">
+      <DependentUpon>FormSetAffinity.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormSetAffinity.resx">
+      <DependentUpon>FormSetAffinity.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="WorkWindow\FormVHotKeys.en.resx">
       <DependentUpon>FormVHotKeys.cs</DependentUpon>
@@ -527,6 +542,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\img_x64.png" />
+    <None Include="Resources\img_x32inx64.png" />
+    <None Include="Resources\img_x32.png" />
     <None Include="Resources\WizardHat.ico" />
     <Content Include="icoPcmgr.ico" />
     <None Include="Resources\iconContextMenu.png" />

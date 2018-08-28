@@ -51,7 +51,7 @@
             // performanceGridSpeed
             // 
             resources.ApplyResources(this.performanceGridSpeed, "performanceGridSpeed");
-            this.performanceGridSpeed.BgColor = System.Drawing.Color.FromArgb(((int)(((byte)(239)))), ((int)(((byte)(247)))), ((int)(((byte)(223)))));
+            this.performanceGridSpeed.BgColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(239)))), ((int)(((byte)(247)))), ((int)(((byte)(223)))));
             this.performanceGridSpeed.BottomTextHeight = 20;
             this.performanceGridSpeed.DrawColor = System.Drawing.Color.FromArgb(((int)(((byte)(77)))), ((int)(((byte)(166)))), ((int)(((byte)(12)))));
             this.performanceGridSpeed.DrawColor2 = System.Drawing.Color.FromArgb(((int)(((byte)(90)))), ((int)(((byte)(180)))), ((int)(((byte)(90)))));

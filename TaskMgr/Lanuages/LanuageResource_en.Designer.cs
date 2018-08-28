@@ -88,6 +88,15 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 Controls which CPUs are allowed to run  的本地化字符串。
+        /// </summary>
+        internal static string AllowWhatCpusToRun {
+            get {
+                return ResourceManager.GetString("AllowWhatCpusToRun", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 PCMgr 的本地化字符串。
         /// </summary>
         internal static string AppTitle {
@@ -273,6 +282,24 @@ namespace PCMgr.Lanuages {
         internal static string CollectingFiles {
             get {
                 return ResourceManager.GetString("CollectingFiles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 connect to the session 的本地化字符串。
+        /// </summary>
+        internal static string ConnectSession {
+            get {
+                return ResourceManager.GetString("ConnectSession", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Unable to connect to the session 的本地化字符串。
+        /// </summary>
+        internal static string ConnectSessionFailed {
+            get {
+                return ResourceManager.GetString("ConnectSessionFailed", resourceCulture);
             }
         }
         
@@ -466,11 +493,47 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 Device Locator 的本地化字符串。
+        /// </summary>
+        internal static string DeviceLocator {
+            get {
+                return ResourceManager.GetString("DeviceLocator", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Disabled 的本地化字符串。
         /// </summary>
         internal static string Disabled {
             get {
                 return ResourceManager.GetString("Disabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Disconnect the session 的本地化字符串。
+        /// </summary>
+        internal static string DisConnectSession {
+            get {
+                return ResourceManager.GetString("DisConnectSession", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Unable to disconnect the session 的本地化字符串。
+        /// </summary>
+        internal static string DisConnectSessionFailed {
+            get {
+                return ResourceManager.GetString("DisConnectSessionFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Unable to logoff the session 的本地化字符串。
+        /// </summary>
+        internal static string DisConnectSessionFailed1 {
+            get {
+                return ResourceManager.GetString("DisConnectSessionFailed1", resourceCulture);
             }
         }
         
@@ -741,6 +804,15 @@ namespace PCMgr.Lanuages {
         internal static string Formatted {
             get {
                 return ResourceManager.GetString("Formatted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Form Factor 的本地化字符串。
+        /// </summary>
+        internal static string FormFactor {
+            get {
+                return ResourceManager.GetString("FormFactor", resourceCulture);
             }
         }
         
@@ -1108,6 +1180,15 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 Logoff the session 的本地化字符串。
+        /// </summary>
+        internal static string LogoffSession {
+            get {
+                return ResourceManager.GetString("LogoffSession", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 You can choose only 16 items at most. 的本地化字符串。
         /// </summary>
         internal static string MaxShow16Item {
@@ -1126,11 +1207,47 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 Free 的本地化字符串。
+        /// </summary>
+        internal static string MemFree {
+            get {
+                return ResourceManager.GetString("MemFree", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Modifed 的本地化字符串。
+        /// </summary>
+        internal static string MemModifed {
+            get {
+                return ResourceManager.GetString("MemModifed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Standby 的本地化字符串。
+        /// </summary>
+        internal static string MemStandby {
+            get {
+                return ResourceManager.GetString("MemStandby", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 In use 的本地化字符串。
         /// </summary>
         internal static string MemUsing {
             get {
                 return ResourceManager.GetString("MemUsing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Using 的本地化字符串。
+        /// </summary>
+        internal static string MemUsingS {
+            get {
+                return ResourceManager.GetString("MemUsingS", resourceCulture);
             }
         }
         
@@ -1149,6 +1266,15 @@ namespace PCMgr.Lanuages {
         internal static string MenuRebootAsAdmin {
             get {
                 return ResourceManager.GetString("MenuRebootAsAdmin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Model 的本地化字符串。
+        /// </summary>
+        internal static string Model {
+            get {
+                return ResourceManager.GetString("Model", resourceCulture);
             }
         }
         
@@ -1425,6 +1551,15 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 Please enter the password of this user 的本地化字符串。
+        /// </summary>
+        internal static string PleaseEnterPassword {
+            get {
+                return ResourceManager.GetString("PleaseEnterPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Please enter the path to go! 的本地化字符串。
         /// </summary>
         internal static string PleaseEnterPath {
@@ -1668,6 +1803,24 @@ namespace PCMgr.Lanuages {
         internal static string ServiceHost {
             get {
                 return ResourceManager.GetString("ServiceHost", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Unable to set affinity of process 的本地化字符串。
+        /// </summary>
+        internal static string SetProcAffinityFailed {
+            get {
+                return ResourceManager.GetString("SetProcAffinityFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Unable to set priority of process 的本地化字符串。
+        /// </summary>
+        internal static string SetProcPriorityClassFailed {
+            get {
+                return ResourceManager.GetString("SetProcPriorityClassFailed", resourceCulture);
             }
         }
         
@@ -1966,6 +2119,15 @@ namespace PCMgr.Lanuages {
         internal static string TitleDisk {
             get {
                 return ResourceManager.GetString("TitleDisk", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Domain Name 的本地化字符串。
+        /// </summary>
+        internal static string TitleDomainName {
+            get {
+                return ResourceManager.GetString("TitleDomainName", resourceCulture);
             }
         }
         
@@ -2465,6 +2627,15 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 User Privilege 的本地化字符串。
+        /// </summary>
+        internal static string TitleUserPrivilege {
+            get {
+                return ResourceManager.GetString("TitleUserPrivilege", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 An important warning 的本地化字符串。
         /// </summary>
         internal static string TitleVeryWarn {
@@ -2632,6 +2803,24 @@ namespace PCMgr.Lanuages {
         internal static string VWinTitle {
             get {
                 return ResourceManager.GetString("VWinTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Do you want to disconnect to this user? 的本地化字符串。
+        /// </summary>
+        internal static string WantDisconnectUser {
+            get {
+                return ResourceManager.GetString("WantDisconnectUser", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Do you want to logoff this user? 的本地化字符串。
+        /// </summary>
+        internal static string WantLogooffUser {
+            get {
+                return ResourceManager.GetString("WantLogooffUser", resourceCulture);
             }
         }
         

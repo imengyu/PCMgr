@@ -23,6 +23,7 @@ namespace PCMgr.Ctls
         private int lastDiskTime = 0;
         private int lastMaxSpeed = 100;
 
+        public bool PageIsActive { get; set; }
         public void PageDelete()
         {
 
@@ -106,9 +107,16 @@ namespace PCMgr.Ctls
             performanceGridSpeed.Invalidate();
             performanceInfos.UpdateSpeicalItems();
         }
-        public double PageUpdateSimple()
+        public bool PageUpdateSimple(out string customString, out int outdata1, out int outdata2)
         {
-            return NativeMethods.MPERF_GetDisksPerformanceCountersSimpleValues(currDisk);
+            customString = null;
+            int all = (int)(NativeMethods.MPERF_GetDisksPerformanceCountersSimpleValues(currDisk));
+            if (all > 100) all = 100;
+            lastDiskTime = all;
+            performanceGridDiskTime.AddData(lastDiskTime);
+            outdata1 = all;
+            outdata2 = -1;
+            return false;
         }
 
         private PerformanceInfos.PerformanceInfoSpeicalItem item_diskTime = null;

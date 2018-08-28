@@ -51,7 +51,7 @@
             // performanceGridGlobal
             // 
             resources.ApplyResources(this.performanceGridGlobal, "performanceGridGlobal");
-            this.performanceGridGlobal.BgColor = System.Drawing.Color.FromArgb(((int)(((byte)(244)))), ((int)(((byte)(242)))), ((int)(((byte)(244)))));
+            this.performanceGridGlobal.BgColor = System.Drawing.Color.FromArgb(((int)(((byte)(180)))), ((int)(((byte)(244)))), ((int)(((byte)(242)))), ((int)(((byte)(244)))));
             this.performanceGridGlobal.BottomTextHeight = 20;
             this.performanceGridGlobal.DrawColor = System.Drawing.Color.FromArgb(((int)(((byte)(139)))), ((int)(((byte)(18)))), ((int)(((byte)(174)))));
             this.performanceGridGlobal.DrawColor2 = System.Drawing.Color.FromArgb(((int)(((byte)(17)))), ((int)(((byte)(125)))), ((int)(((byte)(187)))));
@@ -78,9 +78,15 @@
             this.performanceRamPoolGrid.DrawColor = System.Drawing.Color.FromArgb(((int)(((byte)(139)))), ((int)(((byte)(18)))), ((int)(((byte)(174)))));
             this.performanceRamPoolGrid.GridColor = System.Drawing.Color.FromArgb(((int)(((byte)(206)))), ((int)(((byte)(176)))), ((int)(((byte)(215)))));
             this.performanceRamPoolGrid.Name = "performanceRamPoolGrid";
+            this.performanceRamPoolGrid.StrVauleFree = null;
+            this.performanceRamPoolGrid.StrVauleModified = null;
+            this.performanceRamPoolGrid.StrVauleStandby = null;
+            this.performanceRamPoolGrid.StrVauleUsing = null;
             this.performanceRamPoolGrid.TextColor = System.Drawing.Color.Gray;
             this.performanceRamPoolGrid.TopTextHeight = 20;
-            this.performanceRamPoolGrid.VauleCompressed = 0D;
+            this.performanceRamPoolGrid.VauleFree = 0D;
+            this.performanceRamPoolGrid.VauleModified = 0D;
+            this.performanceRamPoolGrid.VauleStandby = 0D;
             this.performanceRamPoolGrid.VauleUsing = 0D;
             // 
             // PerformancePageRam

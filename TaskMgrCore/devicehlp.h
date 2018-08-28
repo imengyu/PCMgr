@@ -15,8 +15,12 @@ struct MDevicePhysicalDisk
 struct MDeviceMemory
 {
 	WCHAR Name[64];
+	UINT16 FormatFactor;
+	WCHAR DeviceLocator[32];
 	UINT64 Size;
 	UINT32 Speed;
+	UINT32 SMBIOSMemoryType;
+	UINT64 Capacity;
 };
 
 //≥ı ºªØ

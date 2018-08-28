@@ -17,6 +17,8 @@
 #include "StringHlp.h"
 #include "loghlp.h"
 #include "nthlp.h"
+#include "userhlp.h"
+#include "pehlp.h"
 #include <Windowsx.h>
 #include <shellapi.h>
 #include <Vsstyle.h>
@@ -32,6 +34,7 @@
 #pragma comment(linker,"\"/manifestdependency:type='win32' \
 name = 'Microsoft.Windows.Common-Controls' version = '6.0.0.0' \
 processorArchitecture = '*' publicKeyToken = '6595b64144ccf1df' language = '*'\"")
+#pragma comment(linker,"/export:MAppWorkCall1=PCMGR32.MAppMainThreadCall")
 
 #ifdef _AMD64_
 #define GWL_WNDPROC         (-4)
@@ -39,6 +42,7 @@ processorArchitecture = '*' publicKeyToken = '6595b64144ccf1df' language = '*'\"
 #define WM_S_APPBAR 900
 #define WM_S_MESSAGE_EXIT 901
 #define WM_S_MESSAGE_ACTIVE 902
+#define WM_S_MAINTHREAD_ACT 903
 
 extern HINSTANCE hInst;
 extern HINSTANCE hInstRs;
@@ -51,7 +55,7 @@ extern LPWSTR fmCurrectSelectFilePath0;
 extern bool fmMutilSelect;
 extern int fmMutilSelectCount;
 extern void* clrcreateinstance;
-
+extern bool showConsole;
 BOOL appLoadSucessfuly = FALSE;
 
 typedef HRESULT(WINAPI*CLRCreateInstanceFun)(REFCLSID clsid, REFIID riid, LPVOID *ppInterface);
@@ -67,6 +71,7 @@ WorkerCallBack hWorkerCallBack;
 TerminateImporantWarnCallBack hTerminateImporantWarnCallBack;
 HANDLE hMutex;
 
+WCHAR debuggerCommand[MAX_PATH];
 WCHAR thisGuid[MAX_PATH];
 WCHAR appDir[MAX_PATH];
 WCHAR appName[MAX_PATH];
@@ -232,12 +237,75 @@ BOOL MAppStartShowRun2Warn()
 }
 M_API void MAppWorkCall2(UINT msg, WPARAM wParam, LPARAM lParam)
 {
+	if (!executeByLoader) {
+		msg = 0;
+		wParam = NULL;
+	}
 	SendMessage(hWndMain, msg, wParam, lParam);
 }
 M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 {
+	if (!executeByLoader) {
+		id = 0; 
+		data = NULL;
+	}
 	switch (id)
 	{
+	case 168: {
+		MAppVPEExp((LPWSTR)data, hWnd);
+		break;
+	}
+	case 169: {
+		MAppVPEImp((LPWSTR)data, hWnd);
+		break;
+	}
+	case 170: {
+		MUsersSetCurrentSelectUserName((LPWSTR)data);
+		break;
+	}
+	case 171: {
+		NTSTATUS status = MSetProcessAffinityMask((HANDLE)hWnd, (ULONG_PTR)data);
+		if (!NT_SUCCESS(status))
+			MShowErrorMessageWithNTSTATUS(str_item_set_proc_affinity_failed, DEFDIALOGGTITLE, status);
+		break;
+	}
+	case 172: {
+		MShowProgramStats();
+		break;
+	}
+	case 173: {
+		return MKillProcessUser2(hWndMain, (DWORD)hWnd, (BOOL)data);
+	}
+	case 174: {
+		MProcessHANDLEStorageDestroyItem((DWORD)data);
+		break;
+	}
+	case 175: {
+		if (hWnd) {
+			MUsersSetCurrentSelect((DWORD)data);
+			HMENU hroot = LoadMenu(hInstRs, MAKEINTRESOURCE(IDR_MENUUSER));
+			if (hroot) {
+				HMENU hpop = GetSubMenu(hroot, 0);
+				POINT pt;
+				if (menu_last_x == 0 && menu_last_y == 0)
+					GetCursorPos(&pt);
+				else {
+					pt.x = menu_last_x;
+					pt.y = menu_last_y;
+				}
+
+				TrackPopupMenu(hpop,
+					TPM_LEFTALIGN | TPM_TOPALIGN | TPM_RIGHTBUTTON,
+					pt.x,
+					pt.y,
+					0,
+					hWnd,
+					NULL);
+				DestroyMenu(hroot);
+			}
+		}
+		break;
+	}
 	case 176: {
 		MessageBox(0, L"Welcome to my Github https://github.com/717021 . This software is open source. You can download the full source code there.", L"YouCanFindProjectOnGithub", MB_OK);
 		break;
@@ -261,9 +329,10 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 		SetUnhandledExceptionFilter(MUnhandledExceptionFilter);
 		return 1;
 	}
-	case 182:
+	case 182: {
 		MSetAsExplorerTheme(hWnd);
 		return 1;
+	}
 	case 183: {
 		hMenuMain = LoadMenu(hInstRs, MAKEINTRESOURCE(IDR_MENUMAIN));
 		hMenuMainFile = GetSubMenu(hMenuMain, 0);
@@ -279,9 +348,7 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 		if (!M_CFG_GetConfigBOOL(L"SimpleView", L"AppSetting", TRUE))
 			SetMenu(hWnd, hMenuMain);
 
-		if (MFM_FileExist(L"C:\\Windows\\System32\\vsjitdebugger.exe"))
-			can_debug = true;
-
+		can_debug = MGetDebuggerInformation();
 		return 1;
 	}
 	case 184: {
@@ -309,21 +376,16 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 		}
 		break;
 	}
-	case 185:
-		ExitWindowsEx(EWX_REBOOT, 0);
-		break;
-	case 186:
-		ExitWindowsEx(EWX_LOGOFF, 0);
-		break;
-	case 187:
-		ExitWindowsEx(EWX_SHUTDOWN, 0);
-		break;
-	case 188:
+	case 185: ExitWindowsEx(EWX_REBOOT, 0); break;
+	case 186: ExitWindowsEx(EWX_LOGOFF, 0); break;
+	case 187: ExitWindowsEx(EWX_SHUTDOWN, 0); break;
+	case 188: {
 		INITCOMMONCONTROLSEX InitCtrls;
 		InitCtrls.dwSize = sizeof(InitCtrls);
 		InitCtrls.dwICC = ICC_WIN95_CLASSES;
 		InitCommonControlsEx(&InitCtrls);
 		break;
+	}
 	case 189: {
 		selectItem4 = (HWND)data;
 		HMENU hroot = LoadMenu(hInstRs, MAKEINTRESOURCE(IDR_MENUWINMAIN));
@@ -352,18 +414,21 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 		}
 		break;
 	}
-	case 190:
+	case 190: {
 		SendMessage(hWnd, WM_COMMAND, IDM_KILL, 0);
 		break;
-	case 191:
+	}
+	case 191: {
 		MAppRebot();
 		break;
-	case 192:
+	}
+	case 192: {
 		if (SendMessageTimeout((HWND)data, WM_SYSCOMMAND, SC_CLOSE, 0, SMTO_BLOCK, 500, 0) == 0)
 			return 1;
 		if (IsWindow((HWND)data))
 			return 1;
 		return 0;
+	}
 	case 193: {
 		int c = static_cast<int>((ULONG_PTR)data);
 		switch (c)
@@ -387,64 +452,45 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 		hWorkerCallBack(M_CALLBACK_SWITCH_REFESHRATE_SET, (LPVOID)static_cast<ULONG_PTR>(c), 0);
 		break;
 	}
-	case 194:
+	case 194: {
 		top_most = static_cast<int>((ULONG_PTR)data);
 		CheckMenuItem(hMenuMainSet, IDM_TOPMOST, top_most ? MF_CHECKED : MF_UNCHECKED);
 		hWorkerCallBack(M_CALLBACK_SWITCH_TOPMOST_SET, (LPVOID)static_cast<ULONG_PTR>(top_most), 0);
 		break;
-	case 195:
+	}
+	case 195: {
 		close_hide = static_cast<int>((ULONG_PTR)data);
 		CheckMenuItem(hMenuMainSet, IDM_CLOSETOHIDE, close_hide ? MF_CHECKED : MF_UNCHECKED);
 		hWorkerCallBack(M_CALLBACK_SWITCH_CLOSEHIDE_SET, (LPVOID)static_cast<ULONG_PTR>(close_hide), 0);
 		break;
-	case 196:
+	}
+	case 196: {
 		min_hide = static_cast<int>((ULONG_PTR)data);
 		CheckMenuItem(hMenuMainSet, IDM_MINHIDE, min_hide ? MF_CHECKED : MF_UNCHECKED);
 		hWorkerCallBack(M_CALLBACK_SWITCH_MINHIDE_SET, (LPVOID)static_cast<ULONG_PTR>(min_hide), 0);
 		break;
-	case 197:
-		if (data)
-			MSCM_SetCurrSelSc((LPWSTR)data);
-		break;
-	case 198:
-		selectItem4 = (HWND)data;
-		break;
-	case 200:
-		ShowWindow(hWnd, SW_HIDE);
-		break;
-	case 201:
-		if (MCanUseKernel())
-			M_SU_ForceShutdown();
-		break;
-	case 202:
-		if (MCanUseKernel())
-			M_SU_ForceReboot();
-		break;
-	case 203:
-		M_SU_ProtectMySelf();
-		break;
-	case 204:
-		M_SU_UnProtectMySelf();
-		break;
-	case 205:
-		ShowWindow(hWnd, SW_SHOW);
-		break;
-	case 206:
-		use_apc = (BOOL)(ULONG_PTR)data;
-		break;
-	case 207:
-		UnregisterHotKey(hWnd, HotKeyId);
-		break;
-	case 208:
+	}
+	case 197: if (data) MSCM_SetCurrSelSc((LPWSTR)data); break;
+	case 198: selectItem4 = (HWND)data; break;
+	case 200: ShowWindow(hWnd, SW_HIDE); break;
+	case 201: if (MCanUseKernel()) M_SU_ForceShutdown(); break;
+	case 202: if (MCanUseKernel()) M_SU_ForceReboot(); break;
+	case 203: M_SU_ProtectMySelf(); break;
+	case 204: M_SU_UnProtectMySelf(); break;
+	case 205: ShowWindow(hWnd, SW_SHOW); break;
+	case 206: use_apc = (BOOL)(ULONG_PTR)data; break;
+	case 207: UnregisterHotKey(hWnd, HotKeyId); break;
+	case 208: {		
 		if (!IsWindowVisible(hWnd))
-			ShowWindow(hWnd, SW_SHOW);
+		ShowWindow(hWnd, SW_SHOW);
 		if (IsIconic(hWnd))
 			ShowWindow(hWnd, SW_RESTORE);
 		if (has_fullscreen_window)
 			SendMessage(hWnd, WM_COMMAND, IDM_TOPMOST, 0);
 		SetForegroundWindow(hWnd);
 		break;
-	case 209:
+	}
+	case 209: {
 		APPBARDATA abd;
 		memset(&abd, 0, sizeof(abd));
 		abd.cbSize = sizeof(APPBARDATA);
@@ -452,16 +498,14 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 		abd.uCallbackMessage = WM_S_APPBAR;
 		SHAppBarMessage(ABM_NEW, &abd);
 		break;
-	case 210:
-		EnableWindow(hWnd, FALSE);
-		break;
-	case 211:
-		EnableWindow(hWnd, TRUE);
-		break;
-	case 212:
+	}
+	case 210: EnableWindow(hWnd, FALSE); break;
+	case 211: EnableWindow(hWnd, TRUE); break;
+	case 212: {
 		menu_last_x = (int)(ULONG_PTR)hWnd;
 		menu_last_y = (int)(ULONG_PTR)data;
 		break;
+	}
 	case 213: {
 		if (IsIconic(hWnd))
 			ShowWindow(hWnd, SW_RESTORE);
@@ -495,7 +539,6 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 
 	default:
 		return 0;
-		break;
 	}
 	return 0;
 }
@@ -604,6 +647,12 @@ M_API void MAppTest(int id, void*v) {
 		break;
 	}
 }
+M_API LRESULT MAppMainThreadCall(WPARAM wParam, LPARAM lParam)
+{
+	if (!executeByLoader)
+		return 0;
+	return SendMessage(hWndMain, WM_S_MAINTHREAD_ACT, wParam, lParam);
+}
 
 //...
 M_API HICON MGetWindowIcon(HWND hWnd)
@@ -623,6 +672,9 @@ M_API BOOL MIsSystemSupport()
 }
 
 LPWSTR*argsStrs = NULL;
+BOOL isRunningMainApp = FALSE;
+BOOL clrInited = FALSE;
+ICLRGCManager *pGcManager = nullptr;
 
 M_API void MAppMainExit(UINT exitcode)
 {
@@ -641,6 +693,7 @@ M_API BOOL MAppMainRun()
 		MessageBox(0, L"Only pcmgr can use this function.", L"illegal use", 0);
 	}
 
+	isRunningMainApp = TRUE;
 
 	GetModuleFileName(NULL, appDir, MAX_PATH);
 	std::wstring *w = Path::GetFileName(appDir);
@@ -709,11 +762,18 @@ M_API BOOL MAppMainRun()
 			goto cleanup;
 		}
 
+		clrInited = TRUE;
+
+		ICLRControl *manager = nullptr;
+		pRuntimeHost->GetCLRControl(&manager);
+		if (SUCCEEDED(hr)) {
+			hr = manager->GetCLRManager(IID_ICLRGCManager, (LPVOID*)&pGcManager);
+			if (FAILED(hr)) LogWarn2(L"ICLRControl->QueryInterface faild : 0x%X08", hr);
+		}
+		else LogWarn2(L"GetCLRControl faild HRESULT : 0x%X08", hr);
+
 		hr = pRuntimeHost->Start();
 		if (FAILED(hr)) { LogErr(L"Start RuntimeHost failed HRESULT : 0x%08X", hr); goto cleanup; }
-
-		ICLRErrorReportingManager *manager = nullptr;
-		pRuntimeHost->GetCLRControl((ICLRControl**)&manager);
 
 		LogInfo(L"Load main app : %s", mainDllPath);
 		hr = pRuntimeHost->ExecuteInDefaultAppDomain(mainDllPath, L"PCMgr.Program", L"ProgramEntry", GetCommandLine(), &dwMainAppRet);
@@ -729,6 +789,7 @@ M_API BOOL MAppMainRun()
 		else rs = TRUE;
 		hr = pRuntimeHost->Stop();
 
+		clrInited = FALSE;
 	cleanup:
 		if (pRuntimeInfo != nullptr) {
 			pRuntimeInfo->Release();
@@ -804,6 +865,8 @@ M_API void MAppRebot() {
 	GetModuleFileName(NULL, exeFullPath, MAX_PATH);
 	ShellExecute(NULL, L"open", exeFullPath, NULL, NULL, 5);
 
+	MAppStartEnd();
+
 	if (hMainExitCallBack)
 		hMainExitCallBack();
 }
@@ -812,6 +875,7 @@ M_API void MAppRebotAdmin() {
 	TCHAR exeFullPath[MAX_PATH];
 	GetModuleFileName(NULL, exeFullPath, MAX_PATH);
 	if (static_cast<int>((ULONG_PTR)ShellExecute(NULL, L"runas", exeFullPath, NULL, NULL, 5)) > 32) {
+		MAppStartEnd();
 		if (hMainExitCallBack) 
 			hMainExitCallBack();
 	}
@@ -826,7 +890,10 @@ M_API void MAppRebotAdmin2(LPWSTR agrs) {
 
 	TCHAR exeFullPath[MAX_PATH];
 	GetModuleFileName(NULL, exeFullPath, MAX_PATH);
-	if (static_cast<int>((ULONG_PTR)ShellExecute(NULL, L"runas", exeFullPath, agrs, NULL, 5)) > 32) {
+
+	if (static_cast<int>((ULONG_PTR)ShellExecute(NULL, L"runas", exeFullPath, agrs, NULL, 5)) > 32)
+	{
+		MAppStartEnd();
 		if (hMainExitCallBack)
 			hMainExitCallBack();
 	}
@@ -1008,7 +1075,7 @@ void ThrowErrorAndErrorCodeX(NTSTATUS code, LPWSTR msg, LPWSTR title, BOOL ntsta
 	if (ntstatus && STATUS_SUCCESS == code)return;	
 	wchar_t errcode[260];
 	if (ntstatus) {
-		LPWSTR ntstatusstr = MNtstatusToStr(code);
+		LPWSTR ntstatusstr = MNtStatusToStr(code);
 		if (ntstatusstr==0)
 		wsprintf(errcode, L"\nCode : %d\nNTSTATUS : 0x%lX", code, code);
 		else wsprintf(errcode, L"\nCode : %d\n%s (0x%lX)", code, ntstatusstr, code);
@@ -1023,7 +1090,9 @@ extern LPWSTR thisCommandName;
 extern LPWSTR thisCommandUWPName;
 extern BOOL thisCommandIsImporant;
 extern BOOL thisCommandIsVeryImporant;
+extern HANDLE thisCommandhProcess;
 
+M_CAPI(LPWSTR) MAppGetCurSelectName() { return thisCommandName; }
 
 //Ö÷´°¿Ú WinProc
 LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -1037,6 +1106,18 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			return TRUE;
 		}
 		else MAppExit();
+		break;
+	}
+	case WM_S_MAINTHREAD_ACT: {
+		switch (wParam)
+		{
+		case M_MTMSG_COSCLOSE: {
+			M_LOG_CloseConsole(FALSE);
+			break;
+		}
+		default:
+			break;
+		}
 		break;
 	}
 	case WM_S_MESSAGE_EXIT: {
@@ -1218,8 +1299,8 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		case IDM_DEBUG: {
 			if (thisCommandPid > 4)
 			{
-				std::wstring cmd = FormatString(L"-p %u", thisCommandPid);
-				ShellExecute(hWndMain, L"open", L"C:\\Windows\\System32\\vsjitdebugger.exe", (LPWSTR)cmd.c_str(), NULL, 5);
+				std::wstring cmd = FormatString(debuggerCommand, thisCommandPid, thisCommandPid);
+				ShellExecute(hWndMain, L"open", (LPWSTR)cmd.c_str(), NULL, NULL, 5);
 			}
 			break;
 		}
@@ -1237,13 +1318,14 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		case IDC_PCMGR_CMD: {
-#ifdef _AMD64_
-			if (MFM_FileExist(L"PCMgrCmd64.exe"))
-				MFM_OpenFile(L"PCMgrCmd64.exe", hWnd);
-#else
-			if (MFM_FileExist(L"PCMgrCmd32.exe"))
-				MFM_OpenFile(L"PCMgrCmd32.exe", hWnd);
-#endif
+			if (!M_CFG_GetConfigBOOL(L"ShowDebugWindow", L"Configure", FALSE)) {
+				M_CFG_SetConfigBOOL(L"ShowDebugWindow", L"Configure", TRUE);
+				M_LOG_Close();
+				M_LOG_Init(1, 0);
+			}
+			else if(showConsole)
+				M_LOG_FocusConsoleWindow();
+			else M_LOG_Init(1, 0);
 			break;
 		}
 		case IDC_SOFTACT_SHOW_KDA: {
@@ -1319,6 +1401,19 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		case ID_MAINWINMENU_BRINGFORNT: {
 			if (IsWindow(selectItem4))
 				SetForegroundWindow(selectItem4);
+			break;
+		}
+		case ID_SETPRIORTY_REALTIME:
+		case ID_SETPRIORTY_HIGH: 
+		case ID_SETPRIORTY_ABOVENORMAL: 		
+		case ID_SETPRIORTY_NORMAL: 		
+		case ID_SETPRIORTY_BELOWNORMAL: 
+		case ID_SETPRIORTY_LOW: {
+			MAppProcPropertyClassHandleWmCommand(wParam);
+			break;
+		}
+		case ID_TASKMENU_SETAFFINITY: {
+			MAppMainCall(M_CALLBACK_SETAFFINITY, (LPVOID)thisCommandPid, thisCommandhProcess);
 			break;
 		}
 		case ID_FMMAIN_REFESH: {
@@ -1552,6 +1647,11 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			MAppMainCall(M_CALLBACK_SIMPLEVIEW_ACT, 0, 0);
 			break;
 		}
+		case ID_USER_CONNECT:
+		case ID_USER_DISCONNECT:
+		case ID_USER_LOGOOFF: {
+			return MUsersHandleWmCommand(wParam);
+		}
 		default:
 			break;
 		}
@@ -1690,6 +1790,11 @@ int MShowErrorMessageWithLastErr(LPWSTR text, LPWSTR intr, int ico, int btn)
 	std::wstring w = text;
 	w += FormatString(L"\nLastError : %d", GetLastError());
 	return MShowMessageDialog(hWndMain, (LPWSTR)w.c_str(), DEFDIALOGGTITLE, intr, ico, btn);
+}
+void MShowErrorMessageWithNTSTATUS(LPWSTR msg, LPWSTR title, NTSTATUS status)
+{
+	ThrowErrorAndErrorCodeX(status, msg, title);
+
 }
 
 //TaskDialog

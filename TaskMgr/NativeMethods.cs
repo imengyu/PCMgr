@@ -11,9 +11,15 @@ namespace PCMgr
 {
     class NativeMethods
     {
+        public static class 想反编译这个程序吗
+        {
+            public const string Copyright = "Copyright (C) 2018 DreamFish";
+            public const string 版权所有 = "版权所有 Copyright (C) 2018 DreamFish";
+            public const string 不用反编译了 = "大部分核心功能都在C++模块里，PCMgr32.dll 自己慢慢反编译去吧";
+        }
         public const string 给想反编译这个程序的人 = "不用反编译了，大部分核心功能都在C++模块里，PCMgr32.dll 自己慢慢反编译去吧";
-
         public const string Copyright = "Copyright (C) 2018 DreamFish";
+        public const string Key = "The key is TryCallThis api";
 
         public static class Win32
         {
@@ -188,6 +194,8 @@ namespace PCMgr
         public const string COREDLLNAME = "PCMgr32.dll";
 #endif
 
+        #region Main Api
+
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void WORKERCALLBACK(int msg, IntPtr lParam, IntPtr wParam);
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -218,21 +226,21 @@ namespace PCMgr
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern void M_LOG_Close();
 
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "M_LOG_Error_ForceFile")]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "M_LOG_Error_ForceFileW")]
         public static extern void FLogErr([MarshalAs(UnmanagedType.LPWStr)]string format);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "M_LOG_Warning_ForceFile")]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "M_LOG_Warning_ForceFileW")]
         public static extern void FLogWarn([MarshalAs(UnmanagedType.LPWStr)]string format);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "M_LOG_Info_ForceFile")]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "M_LOG_Info_ForceFileW")]
         public static extern void FLogInfo([MarshalAs(UnmanagedType.LPWStr)]string format);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "M_LOG_Str_ForceFile")]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "M_LOG_Str_ForceFileW")]
         public static extern void FLog([MarshalAs(UnmanagedType.LPWStr)]string format);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "M_LOG_LogErr")]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "M_LOG_LogErrW")]
         public static extern void LogErr([MarshalAs(UnmanagedType.LPWStr)]string format);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "M_LOG_LogWarn")]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "M_LOG_LogWarnW")]
         public static extern void LogWarn([MarshalAs(UnmanagedType.LPWStr)]string format);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "M_LOG_LogInfo")]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "M_LOG_LogInfoW")]
         public static extern void LogInfo([MarshalAs(UnmanagedType.LPWStr)]string format);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "M_LOG_Log")]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "M_LOG_LogW")]
         public static extern void Log([MarshalAs(UnmanagedType.LPWStr)]string format);
 
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
@@ -270,18 +278,22 @@ namespace PCMgr
 
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern int MAppRegShowHotKey(IntPtr hWnd, uint vkkey, uint key);
-
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern bool MFM_FileExist([MarshalAs(UnmanagedType.LPWStr)]string path);
-
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern void MAppTest(int id, IntPtr ptr);
-
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern void MLG_SetLanuageItems_CallBack(IntPtr callback);
         [return: MarshalAs(UnmanagedType.LPWStr)]
         [UnmanagedFunctionPointer(CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public delegate string LanuageItems_CallBack([MarshalAs(UnmanagedType.LPWStr)]string s);
+
+        [return: MarshalAs(UnmanagedType.LPWStr)]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern string MAppGetCurSelectName();
+        [return: MarshalAs(UnmanagedType.LPWStr)]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern string MNtStatusToStr(int ntstatus);
 
         public static bool SetConfigBool(string configkey, string configSection, bool configData)
         {
@@ -302,6 +314,8 @@ namespace PCMgr
             Win32.GetPrivateProfileString(configSection, configkey, configDefData, temp, 1024, FormMain.cfgFilePath);
             return temp.ToString();
         }
+
+        #endregion
 
         #region PROC API
 
@@ -363,8 +377,10 @@ namespace PCMgr
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern int MAppWorkShowMenuProcessPrepare([MarshalAs(UnmanagedType.LPWStr)]string strFilePath, [MarshalAs(UnmanagedType.LPWStr)]string strFileName, uint pid, bool isimporant, bool isveryimporant);
 
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern bool MKillProcessUser2(uint pid, bool showErr);
+        public static bool MKillProcessUser2(uint pid, bool showErr)
+        {
+            return MAppWorkCall3(173, new IntPtr(pid), showErr ? new IntPtr(1) : IntPtr.Zero) == 1;
+        }
 
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern bool MAppVProcessModuls(uint dwPID, IntPtr hDlg, [MarshalAs(UnmanagedType.LPWStr)]string procName);
@@ -380,7 +396,7 @@ namespace PCMgr
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern bool MEnumProcess(IntPtr callback, IntPtr customData);
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool MEnumProcess2Refesh(IntPtr callback);
+        public static extern bool MEnumProcess2(IntPtr callback);
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern void MEnumProcessFree();
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
@@ -427,6 +443,12 @@ namespace PCMgr
         public static extern bool MUninitKernel();
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern bool MInitKernel(string currDir);
+
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool MGetSystemAffinityMask(ref UInt32 SystemAffinityMask);
+
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int MGetProcessAffinityMask(IntPtr handle, ref UInt32 AffinityMask);
 
         #endregion
 
@@ -604,6 +626,43 @@ namespace PCMgr
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern void MFM_SetShowHiddenFiles(bool b);
 
+        public static String GetBestFilesizeUnit(Int64 fileSize, out Int64 divisor)
+        {
+            if (fileSize >= 1073741824)
+            {
+                divisor = 1073741824;
+                return "GB";
+            }
+            else if (fileSize >= 1048576)
+            {
+                divisor = 1048576;
+                return "MB";
+            }
+            else
+            {
+                divisor = 1024;
+                return "KB";
+            }
+        }
+        public static String GetBestFilesizeUnit(UInt64 fileSize, out UInt64 divisor)
+        {
+            if (fileSize >= 1073741824)
+            {
+                divisor = 1073741824;
+                return "GB";
+            }
+            else if (fileSize >= 1048576)
+            {
+                divisor = 1048576;
+                return "MB";
+            }
+            else
+            {
+                divisor = 1024;
+                return "KB";
+            }
+        }
+
         public static String FormatFileSizeKBUnit(Int64 fileSize)
         {
             fileSize = fileSize * 1024;
@@ -703,6 +762,19 @@ namespace PCMgr
                 throw new ArgumentOutOfRangeException("fileSize");
             return (fileSize / 1024).ToString("0") + " K";
         }
+        public static String FormatNetSpeed(Int64 speedBytes)
+        {
+            if (speedBytes < 0)
+                throw new ArgumentOutOfRangeException("fileSize");
+            speedBytes *= 8;
+            if (speedBytes >= 1073741824)
+                return string.Format("{0:########0.00} Gbps", ((Double)speedBytes) / (1024 * 1024 * 1024));
+            else if (speedBytes >= 1048576)
+                return string.Format("{0:####0.00} Mbps", ((Double)speedBytes) / (1024 * 1024));           
+            else
+                return string.Format("{0:####0.00} Kbps", ((Double)speedBytes) / 1024);         
+        }
+
 
         #endregion
 
@@ -754,6 +826,17 @@ namespace PCMgr
 
         #endregion
 
+        #region USER API
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public delegate bool EnumUsersCallBack(IntPtr userName, uint sessionId, uint userId, IntPtr domain, IntPtr customData);
+
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool MEnumUsers(IntPtr callback, IntPtr customData);
+
+        #endregion
+
+
         public static class DeviceApi
         {
             [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
@@ -777,13 +860,101 @@ namespace PCMgr
             [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
             public static extern bool MDEVICE_GetIsPageFileDisk([MarshalAs(UnmanagedType.LPStr)]string perfstr);
 
+            public static string MDEVICE_MemoryFormFactorToString(UInt16 _formFactor)
+            {
+                string formFactor = string.Empty;
 
+                switch (_formFactor)
+                {
+                    case 1:
+                        formFactor = "Other";
+                        break;
+                    case 2:
+                        formFactor = "SIP";
+                        break;
+                    case 3:
+                        formFactor = "DIP";
+                        break;
+                    case 4:
+                        formFactor = "ZIP";
+                        break;
+                    case 5:
+                        formFactor = "SOJ";
+                        break;
+                    case 6:
+                        formFactor = "Proprietary";
+                        break;
+                    case 7:
+                        formFactor = "SIMM";
+                        break;
+                    case 8:
+                        formFactor = "DIMM";
+                        break;
+                    case 9:
+                        formFactor = "TSOP";
+                        break;
+                    case 10:
+                        formFactor = "PGA";
+                        break;
+                    case 11:
+                        formFactor = "RIMM";
+                        break;
+                    case 12:
+                        formFactor = "SODIMM";
+                        break;
+                    case 13:
+                        formFactor = "SRIMM";
+                        break;
+                    case 14:
+                        formFactor = "SMD";
+                        break;
+                    case 15:
+                        formFactor = "SSMP";
+                        break;
+                    case 16:
+                        formFactor = "QFP";
+                        break;
+                    case 17:
+                        formFactor = "TQFP";
+                        break;
+                    case 18:
+                        formFactor = "SOIC";
+                        break;
+                    case 19:
+                        formFactor = "LCC";
+                        break;
+                    case 20:
+                        formFactor = "PLCC";
+                        break;
+                    case 21:
+                        formFactor = "BGA";
+                        break;
+                    case 22:
+                        formFactor = "FPBGA";
+                        break;
+                    case 23:
+                        formFactor = "LGA";
+                        break;
+                    default:
+                        formFactor = "Unknown";
+                        break;
+                }
+
+                return formFactor;
+            }
+
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+            public static extern bool MDEVICE_GetMemoryDeviceUsed(ref UInt16 outAll, ref UInt16 outUsed);
             [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
             public static extern bool MDEVICE_GetMemoryDeviceInfo();
             [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
             public static extern IntPtr MDEVICE_GetMemoryDeviceName();
             [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
             public static extern UInt32 MDEVICE_GetMemoryDeviceSpeed();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+            public static extern IntPtr MDEVICE_GetMemoryDeviceLocator();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+            public static extern UInt16 MDEVICE_GetMemoryDeviceFormFactor();
         }
         public static class ComCtlApi
         {
@@ -826,8 +997,8 @@ namespace PCMgr
             public const int M_CALLBACK_VIEW_HOTKEY = 29;
             public const int M_CALLBACK_SHOW_TRUSTED_DLG = 30;
             public const int M_CALLBACK_MDETALS_LIST_HEADER_RIGHTCLICK = 31;
-            public const int M_CALLBACK_KDA = 32; 
-
+            public const int M_CALLBACK_KDA = 32;
+            public const int M_CALLBACK_SETAFFINITY = 33;
             public const int M_CALLBACK_UPDATE_LOAD_STATUS = 34;
             public const int M_CALLBACK_SHOW_NOPDB_WARN = 35;
             public const int M_CALLBACK_INVOKE_LASTLOAD_STEP = 36;

@@ -111,7 +111,7 @@
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)$(TargetName)Core.pdb</ProgramDatabaseFile>
       <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
-      <AdditionalDependencies>capstone.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
     </Link>
@@ -134,7 +134,7 @@
       <ProgramDatabaseFile>$(OutDir)$(TargetName)Core.pdb</ProgramDatabaseFile>
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
-      <AdditionalDependencies>capstone.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -155,7 +155,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <ProgramDatabaseFile>$(OutDir)$(TargetName)Core.pdb</ProgramDatabaseFile>
-      <AdditionalDependencies>capstone.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
@@ -178,7 +178,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <ProgramDatabaseFile>$(OutDir)$(TargetName)Core.pdb</ProgramDatabaseFile>
-      <AdditionalDependencies>capstone.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
@@ -188,6 +188,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="cmdhlp.h" />
     <ClInclude Include="comdlghlp.h" />
     <ClInclude Include="cscall.h" />
     <ClInclude Include="devicehlp.h" />
@@ -201,10 +202,12 @@
     <ClInclude Include="loghlp.h" />
     <ClInclude Include="mainprocs.h" />
     <ClInclude Include="mapphlp.h" />
+    <ClInclude Include="msup.h" />
     <ClInclude Include="ntdef.h" />
     <ClInclude Include="nthlp.h" />
     <ClInclude Include="ntsymbol.h" />
     <ClInclude Include="PathHelper.h" />
+    <ClInclude Include="pehlp.h" />
     <ClInclude Include="perfhlp.h" />
     <ClInclude Include="prochlp.h" />
     <ClInclude Include="reghlp.h" />
@@ -221,11 +224,13 @@
     <ClInclude Include="sysstructs.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="thdhlp.h" />
+    <ClInclude Include="userhlp.h" />
     <ClInclude Include="uwphlp.h" />
     <ClInclude Include="VersionHelpers.h" />
     <ClInclude Include="vprocx.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="cmdhlp.cpp" />
     <ClCompile Include="comdlghlp.cpp" />
     <ClCompile Include="devicehlp.cpp" />
     <ClCompile Include="DirectoryHelper.cpp" />
@@ -251,9 +256,11 @@
     <ClCompile Include="loghlp.cpp" />
     <ClCompile Include="mainprocs.cpp" />
     <ClCompile Include="mapphlp.cpp" />
+    <ClCompile Include="msup.cpp" />
     <ClCompile Include="nthlp.cpp" />
     <ClCompile Include="ntsymbol.cpp" />
     <ClCompile Include="PathHelper.cpp" />
+    <ClCompile Include="pehlp.cpp" />
     <ClCompile Include="perfhlp.cpp" />
     <ClCompile Include="prochlp.cpp" />
     <ClCompile Include="reghlp.cpp" />
@@ -271,6 +278,7 @@
     <ClCompile Include="suact.cpp" />
     <ClCompile Include="syshlp.cpp" />
     <ClCompile Include="thdhlp.cpp" />
+    <ClCompile Include="userhlp.cpp" />
     <ClCompile Include="uwphlp.cpp" />
     <ClCompile Include="vprocx.cpp" />
   </ItemGroup>

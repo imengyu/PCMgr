@@ -43,17 +43,29 @@ M_API NTSTATUS MOpenThreadNt(DWORD dwId, PHANDLE pLandle, DWORD dwPId)
 		return 0;
 	}
 }
-M_API PTEB MGetThreadPeb(HANDLE hThread) {
-	THREAD_BASIC_INFORMATION tbi;
-	if (NtQueryInformationThread(hThread, ThreadBasicInformation, &tbi, sizeof(tbi), NULL) == STATUS_SUCCESS)
-		return tbi.TebBaseAddress;
-	return NULL;
+M_API NTSTATUS MGetThreadBasicInformation(HANDLE ThreadHandle, PTHREAD_BASIC_INFORMATION BasicInformation)
+{
+	return NtQueryInformationThread(
+		ThreadHandle,
+		ThreadBasicInformation,
+		BasicInformation,
+		sizeof(THREAD_BASIC_INFORMATION),
+		NULL
+	);
 }
-M_API PVOID MGetThreadWin32StartAddress(HANDLE hThread) {
+M_API NTSTATUS MGetThreadPeb(HANDLE hThread, PTEB*pPTeb) {
+	THREAD_BASIC_INFORMATION tbi;
+	NTSTATUS status = MGetThreadBasicInformation(hThread, &tbi);
+	if (NT_SUCCESS(status))
+		if (pPTeb)*pPTeb = tbi.TebBaseAddress;
+	return status;
+}
+M_API NTSTATUS MGetThreadWin32StartAddress(HANDLE hThread, PVOID * outStartAddress) {
 	PVOID startaddr = 0;
-	if (NtQueryInformationThread(hThread, ThreadQuerySetWin32StartAddress, &startaddr, sizeof(startaddr), NULL) == STATUS_SUCCESS)
-		return startaddr;
-	return NULL;
+	NTSTATUS status = NtQueryInformationThread(hThread, ThreadQuerySetWin32StartAddress, &startaddr, sizeof(startaddr), NULL);
+	if (NT_SUCCESS(status))
+		if (outStartAddress)*outStartAddress = startaddr;
+	return status;
 }
 
 M_API NTSTATUS MTerminateThreadNt(HANDLE handle)
