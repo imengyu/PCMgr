@@ -490,3 +490,173 @@ M_CAPI(BOOL) MDEVICE_GetMemoryDeviceUsed(UINT16*outAll, UINT16*outUsed)
 	return FALSE;
 }
 
+std::vector<MDeviceNetworkAdapter*> netAdapters;
+
+MDeviceNetworkAdapter* MDEVICE_FindNetworkAdaptersInfo(LPWSTR name) {
+	for (auto it = netAdapters.begin(); it != netAdapters.end(); it++)
+	{
+		if (MStrEqual((*it)->Description, name))
+			return *it;
+	}
+	return NULL;
+}
+BOOL MDEVICE_GetNetworkAdaptersIPInfo()
+{
+	if (wmiInited)
+	{
+		IEnumWbemClassObject* pEnumerator = NULL;
+		HRESULT hres = pSvc->ExecQuery(
+			bstr_t("WQL"),
+			bstr_t("SELECT * FROM Win32_NetworkAdapterConfiguration "),
+			WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY,
+			NULL,
+			&pEnumerator);
+
+		if (FAILED(hres))
+		{
+			LogErr2(L"Query for Win32_NetworkAdapterConfiguration  failed. Error code : 0x%X", hres);
+			return FALSE;
+		}
+
+		IWbemClassObject *pclsObj = NULL;
+		ULONG uReturn = 0;
+
+		while (pEnumerator)
+		{
+			HRESULT hr = pEnumerator->Next(WBEM_INFINITE, 1, &pclsObj, &uReturn);
+			VARIANT vtProp;
+			VariantInit(&vtProp);
+
+			if (0 == uReturn)
+				break;
+
+			WCHAR name[128];
+			hr = pclsObj->Get(bstr_t(L"Description"), 0, &vtProp, 0, 0);
+			if (SUCCEEDED(hr) && (V_VT(&vtProp) == VT_BSTR)) wcscpy_s(name, vtProp.bstrVal);
+			VariantClear(&vtProp);
+
+			MDeviceNetworkAdapter *adapter = MDEVICE_FindNetworkAdaptersInfo(name);
+			if (adapter) 
+			{
+				hr = pclsObj->Get(bstr_t(L"IPAddress"), 0, &vtProp, 0, 0);
+				if (SUCCEEDED(hr) && (vtProp.vt == (VT_ARRAY | VT_BSTR))) {
+					BSTR bstrValue = NULL;
+					LONG index = 0;
+					SafeArrayGetElement(vtProp.parray, &index, &bstrValue);
+					wcscpy_s(adapter->IPAddressV4, (BSTR)bstrValue);
+					index = 1;
+					SafeArrayGetElement(vtProp.parray, &index, &bstrValue);
+					wcscpy_s(adapter->IPAddressV6, (BSTR)bstrValue);
+				}
+				VariantClear(&vtProp);
+			}
+			pclsObj->Release();
+		}
+
+		pEnumerator->Release();
+		return TRUE;
+	}
+	return FALSE;
+}
+M_CAPI(BOOL) MDEVICE_DestroyNetworkAdaptersInfo()
+{
+	if (wmiInited)
+	{
+		for (auto it = netAdapters.begin(); it != netAdapters.end(); it++)
+			MFree(*it);
+		netAdapters.clear();
+		return 1;
+	}
+	return 0;
+}
+M_CAPI(UINT) MDEVICE_GetNetworkAdaptersInfo()
+{
+	if (wmiInited)
+	{
+		if (netAdapters.size() > 0)
+			MDEVICE_DestroyNetworkAdaptersInfo();
+
+		IEnumWbemClassObject* pEnumerator = NULL;
+		HRESULT hres = pSvc->ExecQuery(
+			bstr_t("WQL"),
+			bstr_t("SELECT * FROM Win32_NetworkAdapter"),
+			WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY,
+			NULL,
+			&pEnumerator);
+
+		if (FAILED(hres))
+		{
+			LogErr2(L"Query for Win32_NetworkAdapter failed. Error code : 0x%X", hres);
+			return FALSE;
+		}
+
+		IWbemClassObject *pclsObj = NULL;
+		ULONG uReturn = 0;
+
+		while (pEnumerator)
+		{
+			HRESULT hr = pEnumerator->Next(WBEM_INFINITE, 1, &pclsObj, &uReturn);
+			VARIANT vtProp;
+			VariantInit(&vtProp);
+
+			if (0 == uReturn)
+				break;
+
+			MDeviceNetworkAdapter *adapter = (MDeviceNetworkAdapter*)MAlloc(sizeof(MDeviceNetworkAdapter));
+			memset(adapter, 0, sizeof(MDeviceNetworkAdapter));
+
+			hr = pclsObj->Get(bstr_t(L"Description"), 0, &vtProp, 0, 0);
+			if (SUCCEEDED(hr) && (V_VT(&vtProp) == VT_BSTR)) wcscpy_s(adapter->Description, vtProp.bstrVal);
+			VariantClear(&vtProp);
+
+			hr = pclsObj->Get(bstr_t(L"NetEnabled"), 0, &vtProp, 0, 0);
+			if (SUCCEEDED(hr)) adapter->Enabled = -vtProp.boolVal;
+			VariantClear(&vtProp);
+
+			hr = pclsObj->Get(bstr_t(L"PhysicalAdapter"), 0, &vtProp, 0, 0);
+			if (SUCCEEDED(hr)) adapter->PhysicalAdapter = -vtProp.boolVal;
+			VariantClear(&vtProp);
+
+			hr = pclsObj->Get(bstr_t(L"StatusInfo"), 0, &vtProp, 0, 0);
+			if (SUCCEEDED(hr)) adapter->StatusInfo = vtProp.uiVal;
+			VariantClear(&vtProp);
+
+			netAdapters.push_back(adapter);
+			pclsObj->Release();
+		}
+
+		pEnumerator->Release();
+		MDEVICE_GetNetworkAdaptersIPInfo();
+
+		return netAdapters.size();
+	}
+	return FALSE;
+}
+M_CAPI(BOOL) MDEVICE_GetNetworkAdapterInfoItem(int index, LPWSTR name, int nameV4Size) {
+	if (index >= 0 && (UINT)index < netAdapters.size()) {
+		MDeviceNetworkAdapter *adapter = netAdapters[index];
+		if (adapter->PhysicalAdapter)
+		{
+			adapter->StatusInfo;
+			wcscpy_s(name, nameV4Size, adapter->Description);
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+M_CAPI(BOOL) MDEVICE_GetNetworkAdapterInfoFormName(LPWSTR name, LPWSTR ipAddressV4, int ipAddressV4Size, LPWSTR ipAddressV6, int ipAddressV6Size)
+{
+	if (wmiInited)
+	{
+		MDeviceNetworkAdapter*adapter = MDEVICE_FindNetworkAdaptersInfo(name);
+		if (adapter != NULL)
+		{
+			if (ipAddressV4) wcscpy_s(ipAddressV4, ipAddressV4Size, adapter->IPAddressV4);
+			if (ipAddressV6) wcscpy_s(ipAddressV6, ipAddressV6Size, adapter->IPAddressV6);
+			return adapter->Enabled;
+		}
+	}
+	return 0;
+}
+
+

@@ -392,7 +392,7 @@ void MRunCmd_VExp(vector<string>* cmds, int size)
 		}
 	}
 	printf("\n");
-UNMAP_AND_EXIT:
+//UNMAP_AND_EXIT:
 	{
 		if (hModule != hInst && hModule != hLoader)
 			FreeLibrary(hModule);

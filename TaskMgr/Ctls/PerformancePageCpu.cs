@@ -224,7 +224,25 @@ namespace PCMgr.Ctls
             }
             g.DrawRectangle(performanceGridGlobal.DrawPen, 0, 0, performanceCpus.Width - 1, performanceCpus.Height - 1);
         }
+        private void performanceCpus_MouseMove(object sender, MouseEventArgs e)
+        {
+            ShowTooltip(e.Location);
+        }
+        private void performanceCpus_MouseLeave(object sender, EventArgs e)
+        {
+            lastShowTooltip = 0;
+            toolTip1.Hide(this);
+        }
 
-
+        private int lastShowTooltip = 0;
+        private void ShowTooltip(Point p)
+        {
+            int curri = (p.X / (performanceCpus.Width / cpuCount));
+            if (curri != lastShowTooltip)
+            {
+                lastShowTooltip = 1;
+                toolTip1.Show("CPU " +curri, performanceCpus, 0, Height + 2, 5000);
+            }
+        }
     }
 }

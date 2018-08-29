@@ -1068,12 +1068,147 @@ PCMgr 需要管理员权限 才能对系统进行控制和管理。
     <value>可用</value>
   </data>
   <data name="MemModifed" xml:space="preserve">
-    <value>已提交</value>
+    <value>已修改</value>
   </data>
   <data name="MemStandby" xml:space="preserve">
     <value>备用</value>
   </data>
   <data name="MemUsingS" xml:space="preserve">
     <value>使用中</value>
+  </data>
+  <data name="MemTipFree" xml:space="preserve">
+    <value>可用 ({0})
+当前未使用但会在进程、驱动程序或操作系统
+需要更多内存时首先重新使用的内存</value>
+  </data>
+  <data name="MemTipModifed" xml:space="preserve">
+    <value>已修改 ({0})
+内容必须先写入磁盘才能用于其他用途的内存</value>
+  </data>
+  <data name="MemTipStandby" xml:space="preserve">
+    <value>备用 ({0})
+包含未频繁使用的缓存数据和代码的内存</value>
+  </data>
+  <data name="MemTipUsing" xml:space="preserve">
+    <value>使用中 ({0})
+由进程、驱动程序或操作系统使用的内存
+
+使用中，已压缩({1})
+压缩内存存储了估计 {2} 的数据，为系统节省了 {3} 的内存</value>
+  </data>
+  <data name="IPV4" xml:space="preserve">
+    <value>IPv4 地址</value>
+  </data>
+  <data name="IPV6" xml:space="preserve">
+    <value>IPv6 地址</value>
+  </data>
+  <data name="AdapterName" xml:space="preserve">
+    <value>适配器名称</value>
+  </data>
+  <data name="ConnectType" xml:space="preserve">
+    <value>连接类型</value>
+  </data>
+  <data name="Ethernet" xml:space="preserve">
+    <value>以太网</value>
+  </data>
+  <data name="TipCPU" xml:space="preserve">
+    <value>所有内核的总处理器利用率</value>
+  </data>
+  <data name="TipDisk" xml:space="preserve">
+    <value>所有物理驱动器的总利用率</value>
+  </data>
+  <data name="TipGPU" xml:space="preserve">
+    <value>所有 GPU 引擎的最高利用率</value>
+  </data>
+  <data name="TipNet" xml:space="preserve">
+    <value>当前主要网络上的网络利用率</value>
+  </data>
+  <data name="TipRam" xml:space="preserve">
+    <value>单个进程保留的物理内存总量</value>
+  </data>
+  <data name="TitleType" xml:space="preserve">
+    <value>类型</value>
+  </data>
+  <data name="TipCmdLine" xml:space="preserve">
+    <value>指定用于创建进程的完整命令行</value>
+  </data>
+  <data name="TipCommitedSize" xml:space="preserve">
+    <value>操作系统为进程保留的虚拟内存量</value>
+  </data>
+  <data name="TipCPUTime" xml:space="preserve">
+    <value>进程启动后所用的处理器总时间(秒)</value>
+  </data>
+  <data name="TipCycle" xml:space="preserve">
+    <value>进程所消耗的 CPU 周期时间的当前百分比</value>
+  </data>
+  <data name="TipGDIObject" xml:space="preserve">
+    <value>进程使用的 GDI 对象数</value>
+  </data>
+  <data name="TipHandleCount" xml:space="preserve">
+    <value>由进程打开的当前句柄数</value>
+  </data>
+  <data name="TipIOOther" xml:space="preserve">
+    <value>进程自启动以来生成的非
+读取/写入 I/O 操作(例如控制功能)数</value>
+  </data>
+  <data name="TipIOOtherBytes" xml:space="preserve">
+    <value>进程在 I/O 操作(非读取/写入操作，例如控制功能)期间
+期间读取的总字节数数</value>
+  </data>
+  <data name="TipIORead" xml:space="preserve">
+    <value>进程自启动以来生成的读取 I/O 操作数</value>
+  </data>
+  <data name="TipIOReadBytes" xml:space="preserve">
+    <value>进程在 I/O 操作期间读取的总字节数</value>
+  </data>
+  <data name="TipIOWrite" xml:space="preserve">
+    <value>进程自启动以来生成的写入 I/O 操作数</value>
+  </data>
+  <data name="TipIOWriteBytes" xml:space="preserve">
+    <value>进程在 I/O 操作期间写入的总字节数</value>
+  </data>
+  <data name="TipJobID" xml:space="preserve">
+    <value>正在其中运行进程的作业对象</value>
+  </data>
+  <data name="TipNonPagedSize" xml:space="preserve">
+    <value>由内核或驱动程序代表进程
+所分配的不可分页内核内存量</value>
+  </data>
+  <data name="TipPagedSize" xml:space="preserve">
+    <value>由内核或驱动程序代表进程
+所分配的可分页内核内存量</value>
+  </data>
+  <data name="TipPageErr" xml:space="preserve">
+    <value>进程自启动以后生成的页面错误数</value>
+  </data>
+  <data name="TipPID" xml:space="preserve">
+    <value>进程 ID</value>
+  </data>
+  <data name="TipPlatform" xml:space="preserve">
+    <value>进程运行的平台(32位 或 64位)</value>
+  </data>
+  <data name="TipPrivateWorkingSet" xml:space="preserve">
+    <value>由该进程使用而其他进程
+无法使用的物理内存量</value>
+  </data>
+  <data name="TipShareWorkingSet" xml:space="preserve">
+    <value>由该进程所使用并且
+可与其他进程共享的物理内存量</value>
+  </data>
+  <data name="TipStatus" xml:space="preserve">
+    <value>进程执行状态</value>
+  </data>
+  <data name="TipThredCount" xml:space="preserve">
+    <value>活动线程数</value>
+  </data>
+  <data name="TipUserObject" xml:space="preserve">
+    <value>由进程使用的窗口管理器对象
+(窗口、菜单、光标、键盘布局、监视器)数</value>
+  </data>
+  <data name="TipWorkingSet" xml:space="preserve">
+    <value>进程当前正在使用的物理内存量</value>
+  </data>
+  <data name="IdleProcessDsb" xml:space="preserve">
+    <value>处理器空闲时间百分比</value>
   </data>
 </root>

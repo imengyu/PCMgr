@@ -79,6 +79,15 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 适配器名称 的本地化字符串。
+        /// </summary>
+        internal static string AdapterName {
+            get {
+                return ResourceManager.GetString("AdapterName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 地址 的本地化字符串。
         /// </summary>
         internal static string Address {
@@ -309,6 +318,15 @@ namespace PCMgr.Lanuages {
         internal static string ConnectSessionFailed {
             get {
                 return ResourceManager.GetString("ConnectSessionFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 连接类型 的本地化字符串。
+        /// </summary>
+        internal static string ConnectType {
+            get {
+                return ResourceManager.GetString("ConnectType", resourceCulture);
             }
         }
         
@@ -664,6 +682,15 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 以太网 的本地化字符串。
+        /// </summary>
+        internal static string Ethernet {
+            get {
+                return ResourceManager.GetString("Ethernet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 提权失败！ 的本地化字符串。
         /// </summary>
         internal static string FailedGetPrivileges {
@@ -898,6 +925,15 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 处理器空闲时间百分比 的本地化字符串。
+        /// </summary>
+        internal static string IdleProcessDsb {
+            get {
+                return ResourceManager.GetString("IdleProcessDsb", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 文件名无效。 的本地化字符串。
         /// </summary>
         internal static string InvalidFileName {
@@ -930,6 +966,24 @@ namespace PCMgr.Lanuages {
         internal static string InvThread {
             get {
                 return ResourceManager.GetString("InvThread", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 IPv4 地址 的本地化字符串。
+        /// </summary>
+        internal static string IPV4 {
+            get {
+                return ResourceManager.GetString("IPV4", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 IPv6 地址 的本地化字符串。
+        /// </summary>
+        internal static string IPV6 {
+            get {
+                return ResourceManager.GetString("IPV6", resourceCulture);
             }
         }
         
@@ -1223,7 +1277,7 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
-        ///   查找类似 已提交 的本地化字符串。
+        ///   查找类似 已修改 的本地化字符串。
         /// </summary>
         internal static string MemModifed {
             get {
@@ -1237,6 +1291,50 @@ namespace PCMgr.Lanuages {
         internal static string MemStandby {
             get {
                 return ResourceManager.GetString("MemStandby", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 可用 ({0})
+        ///当前未使用但会在进程、驱动程序或操作系统
+        ///需要更多内存时首先重新使用的内存 的本地化字符串。
+        /// </summary>
+        internal static string MemTipFree {
+            get {
+                return ResourceManager.GetString("MemTipFree", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 已修改 ({0})
+        ///内容必须先写入磁盘才能用于其他用途的内存 的本地化字符串。
+        /// </summary>
+        internal static string MemTipModifed {
+            get {
+                return ResourceManager.GetString("MemTipModifed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 备用 ({0})
+        ///包含未频繁使用的缓存数据和代码的内存 的本地化字符串。
+        /// </summary>
+        internal static string MemTipStandby {
+            get {
+                return ResourceManager.GetString("MemTipStandby", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 使用中 ({0})
+        ///由进程、驱动程序或操作系统使用的内存
+        ///
+        ///使用中，已压缩({1})
+        ///压缩内存存储了估计 {2} 的数据，为系统节省了 {3} 的内存 的本地化字符串。
+        /// </summary>
+        internal static string MemTipUsing {
+            get {
+                return ResourceManager.GetString("MemTipUsing", resourceCulture);
             }
         }
         
@@ -2012,11 +2110,279 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 指定用于创建进程的完整命令行 的本地化字符串。
+        /// </summary>
+        internal static string TipCmdLine {
+            get {
+                return ResourceManager.GetString("TipCmdLine", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 操作系统为进程保留的虚拟内存量 的本地化字符串。
+        /// </summary>
+        internal static string TipCommitedSize {
+            get {
+                return ResourceManager.GetString("TipCommitedSize", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 所有内核的总处理器利用率 的本地化字符串。
+        /// </summary>
+        internal static string TipCPU {
+            get {
+                return ResourceManager.GetString("TipCPU", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 进程启动后所用的处理器总时间(秒) 的本地化字符串。
+        /// </summary>
+        internal static string TipCPUTime {
+            get {
+                return ResourceManager.GetString("TipCPUTime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 进程所消耗的 CPU 周期时间的当前百分比 的本地化字符串。
+        /// </summary>
+        internal static string TipCycle {
+            get {
+                return ResourceManager.GetString("TipCycle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 所有物理驱动器的总利用率 的本地化字符串。
+        /// </summary>
+        internal static string TipDisk {
+            get {
+                return ResourceManager.GetString("TipDisk", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 进程使用的 GDI 对象数 的本地化字符串。
+        /// </summary>
+        internal static string TipGDIObject {
+            get {
+                return ResourceManager.GetString("TipGDIObject", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 所有 GPU 引擎的最高利用率 的本地化字符串。
+        /// </summary>
+        internal static string TipGPU {
+            get {
+                return ResourceManager.GetString("TipGPU", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 由进程打开的当前句柄数 的本地化字符串。
+        /// </summary>
+        internal static string TipHandleCount {
+            get {
+                return ResourceManager.GetString("TipHandleCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 进程自启动以来生成的非
+        ///读取/写入 I/O 操作(例如控制功能)数 的本地化字符串。
+        /// </summary>
+        internal static string TipIOOther {
+            get {
+                return ResourceManager.GetString("TipIOOther", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 进程在 I/O 操作(非读取/写入操作，例如控制功能)期间
+        ///期间读取的总字节数数 的本地化字符串。
+        /// </summary>
+        internal static string TipIOOtherBytes {
+            get {
+                return ResourceManager.GetString("TipIOOtherBytes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 进程自启动以来生成的读取 I/O 操作数 的本地化字符串。
+        /// </summary>
+        internal static string TipIORead {
+            get {
+                return ResourceManager.GetString("TipIORead", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 进程在 I/O 操作期间读取的总字节数 的本地化字符串。
+        /// </summary>
+        internal static string TipIOReadBytes {
+            get {
+                return ResourceManager.GetString("TipIOReadBytes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 进程自启动以来生成的写入 I/O 操作数 的本地化字符串。
+        /// </summary>
+        internal static string TipIOWrite {
+            get {
+                return ResourceManager.GetString("TipIOWrite", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 进程在 I/O 操作期间写入的总字节数 的本地化字符串。
+        /// </summary>
+        internal static string TipIOWriteBytes {
+            get {
+                return ResourceManager.GetString("TipIOWriteBytes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 正在其中运行进程的作业对象 的本地化字符串。
+        /// </summary>
+        internal static string TipJobID {
+            get {
+                return ResourceManager.GetString("TipJobID", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 当前主要网络上的网络利用率 的本地化字符串。
+        /// </summary>
+        internal static string TipNet {
+            get {
+                return ResourceManager.GetString("TipNet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 由内核或驱动程序代表进程
+        ///所分配的不可分页内核内存量 的本地化字符串。
+        /// </summary>
+        internal static string TipNonPagedSize {
+            get {
+                return ResourceManager.GetString("TipNonPagedSize", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 由内核或驱动程序代表进程
+        ///所分配的可分页内核内存量 的本地化字符串。
+        /// </summary>
+        internal static string TipPagedSize {
+            get {
+                return ResourceManager.GetString("TipPagedSize", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 进程自启动以后生成的页面错误数 的本地化字符串。
+        /// </summary>
+        internal static string TipPageErr {
+            get {
+                return ResourceManager.GetString("TipPageErr", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 进程 ID 的本地化字符串。
+        /// </summary>
+        internal static string TipPID {
+            get {
+                return ResourceManager.GetString("TipPID", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 进程运行的平台(32位 或 64位) 的本地化字符串。
+        /// </summary>
+        internal static string TipPlatform {
+            get {
+                return ResourceManager.GetString("TipPlatform", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 由该进程使用而其他进程
+        ///无法使用的物理内存量 的本地化字符串。
+        /// </summary>
+        internal static string TipPrivateWorkingSet {
+            get {
+                return ResourceManager.GetString("TipPrivateWorkingSet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 单个进程保留的物理内存总量 的本地化字符串。
+        /// </summary>
+        internal static string TipRam {
+            get {
+                return ResourceManager.GetString("TipRam", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 由该进程所使用并且
+        ///可与其他进程共享的物理内存量 的本地化字符串。
+        /// </summary>
+        internal static string TipShareWorkingSet {
+            get {
+                return ResourceManager.GetString("TipShareWorkingSet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 进程执行状态 的本地化字符串。
+        /// </summary>
+        internal static string TipStatus {
+            get {
+                return ResourceManager.GetString("TipStatus", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 活动线程数 的本地化字符串。
+        /// </summary>
+        internal static string TipThredCount {
+            get {
+                return ResourceManager.GetString("TipThredCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 提示 的本地化字符串。
         /// </summary>
         internal static string TipTitle {
             get {
                 return ResourceManager.GetString("TipTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 由进程使用的窗口管理器对象
+        ///(窗口、菜单、光标、键盘布局、监视器)数 的本地化字符串。
+        /// </summary>
+        internal static string TipUserObject {
+            get {
+                return ResourceManager.GetString("TipUserObject", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 进程当前正在使用的物理内存量 的本地化字符串。
+        /// </summary>
+        internal static string TipWorkingSet {
+            get {
+                return ResourceManager.GetString("TipWorkingSet", resourceCulture);
             }
         }
         
@@ -2611,6 +2977,15 @@ namespace PCMgr.Lanuages {
         internal static string TitleThreadCount {
             get {
                 return ResourceManager.GetString("TitleThreadCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 类型 的本地化字符串。
+        /// </summary>
+        internal static string TitleType {
+            get {
+                return ResourceManager.GetString("TitleType", resourceCulture);
             }
         }
         

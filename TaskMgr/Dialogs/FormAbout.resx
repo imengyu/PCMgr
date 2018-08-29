@@ -217,10 +217,10 @@
     <value>NoControl</value>
   </data>
   <data name="labelOsVer.Location" type="System.Drawing.Point, System.Drawing">
-    <value>202, 110</value>
+    <value>8, 110</value>
   </data>
   <data name="labelOsVer.Size" type="System.Drawing.Size, System.Drawing">
-    <value>143, 16</value>
+    <value>541, 16</value>
   </data>
   <data name="labelOsVer.TabIndex" type="System.Int32, mscorlib">
     <value>3</value>

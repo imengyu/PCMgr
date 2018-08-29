@@ -429,6 +429,7 @@ namespace PCMgr.Ctls
                                 items[i].MouseEntered = true;
                                 enteredItem = items[i];
                                 Invalidate();
+                                ShowToolTip();
                                 break;
                             }
                         }
@@ -440,27 +441,16 @@ namespace PCMgr.Ctls
         protected override void OnMouseHover(EventArgs e)
         {
             base.OnMouseHover(e);
-            if (enteredItem != null && lastTooltipItem == null)
-            {
-                if (!string.IsNullOrEmpty(enteredItem.ToolTip))
-                {
-                    tipToolTip.Show(enteredItem.ToolTip, this, MousePosition);
-                    lastTooltipItem = enteredItem;
-                }
-            }
-            else if (enteredItem == null)
-            {
-                if(lastTooltipItem != null)
-                {
-                    tipToolTip.Hide(this);
-                    lastTooltipItem = null;
-                }
-            }
         }
         protected override void OnMouseLeave(EventArgs e)
         {
             if (enteredItem != null)
             {
+                if (lastTooltipItem != null)
+                {
+                    tipToolTip.Hide(this);
+                    lastTooltipItem = null;
+                }
                 enteredItem.MouseEntered = false;
                 enteredItem = null;
                 Invalidate();
@@ -528,6 +518,36 @@ namespace PCMgr.Ctls
                 g.DrawLine(new Pen(Color.FromArgb(160, 160, 160)), new Point(0, Height - 1), new Point(Width, Height - 1));
             }
 
+        }
+
+        private void ShowToolTip()
+        {
+            if (enteredItem != null && lastTooltipItem == null)
+            {
+                if (!string.IsNullOrEmpty(enteredItem.ToolTip))
+                {
+                    tipToolTip.Show(enteredItem.ToolTip, this, enteredItem.X - xOffiest, Height + 5);
+                    lastTooltipItem = enteredItem;
+                }
+            }
+            else if (enteredItem != lastTooltipItem)
+            {
+                if (enteredItem!=null && !string.IsNullOrEmpty(enteredItem.ToolTip))
+                {
+                    tipToolTip.Show(enteredItem.ToolTip, this, enteredItem.X - xOffiest, Height + 5);
+                    lastTooltipItem = enteredItem;
+                }
+                else
+                {
+                    tipToolTip.Hide(this);
+                    lastTooltipItem = null;
+                }
+            }
+            else
+            {
+                tipToolTip.Hide(this);
+                lastTooltipItem = null;
+            }
         }
 
         public bool Vsitem(bool b = false)

@@ -91,6 +91,7 @@ namespace PCMgr.WorkWindow
         {
 
             Add("TitleProcName", 170);
+            Add("TitleType", 100);
             Add("TitlePublisher", 100);
             Add("TitleStatus", 70);
             Add("TitlePID", 50);

@@ -106,6 +106,7 @@ bool can_debug = false;
 bool use_apc = false;
 int IDC_MAINLIST_HEADER = 0;
 WNDPROC procListWndProc = NULL;
+WNDPROC procListHeaderWndProc = NULL;
 BOOL procListLock = FALSE;
 HWND hListHeaderMainProcList;
 
@@ -1037,9 +1038,10 @@ M_CAPI(void) MListViewSetColumnSortArrow(HWND hListHeader, int index, BOOL isUp,
 }
 M_CAPI(HWND) MListViewGetHeaderControl(HWND hList, BOOL isMain) {
 	HWND hListHeader = FindWindowEx(hList, NULL, L"SysHeader32", NULL);
-	if (isMain) {
-		if (hListHeader)
-			IDC_MAINLIST_HEADER = GetDlgCtrlID(hListHeader);
+	if (isMain && hListHeader) {
+		IDC_MAINLIST_HEADER = GetDlgCtrlID(hListHeader);
+		procListHeaderWndProc = (WNDPROC)GetWindowLongPtr(hListHeader, GWL_WNDPROC);
+		SetWindowLongPtr(hListHeader, GWL_WNDPROC, (LONG_PTR)MProcListHeaderWinProc);
 		hListHeaderMainProcList = hListHeader;
 	}
 	return hListHeader;
@@ -1095,7 +1097,7 @@ extern HANDLE thisCommandhProcess;
 M_CAPI(LPWSTR) MAppGetCurSelectName() { return thisCommandName; }
 
 //Ö÷´°¿Ú WinProc
-LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg)
 	{
@@ -1263,7 +1265,7 @@ LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 					SendMessage(hWndMain, WM_COMMAND, 41012, 0);
 				}
 				else if (status == STATUS_ACCESS_DENIED)
-					MShowErrorMessage((LPWSTR)str_item_access_denied.c_str(), (LPWSTR)str_item_kill_failed.c_str(), MB_ICONERROR, MB_OK);
+					MShowErrorMessage((LPWSTR)str_item_access_denied.c_str(), (LPWSTR)str_item_op_failed.c_str(), MB_ICONERROR, MB_OK);
 				else if (status != STATUS_SUCCESS) ThrowErrorAndErrorCodeX(status, str_item_susprocfailed, (LPWSTR)str_item_op_failed.c_str());
 			}
 			break;
@@ -1705,7 +1707,7 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	}
 	return (INT_PTR)FALSE;
 }
-LRESULT MProcListWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK MProcListWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg)
 	{
@@ -1746,7 +1748,32 @@ LRESULT MProcListWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	}
 	return procListWndProc(hWnd, msg, wParam, lParam);
 }
-
+LRESULT CALLBACK MProcListHeaderWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch (msg)
+	{
+	case WM_MOUSEMOVE: {
+		int index = -1;
+		LONG xPos = GET_X_LPARAM(lParam);
+		LONG yPos = GET_Y_LPARAM(lParam);
+		RECT rcCol = { 0 };
+		for (int i = 0; Header_GetItemRect(hListHeaderMainProcList, i, &rcCol); i++)
+		{
+			if (rcCol.left<xPos && rcCol.right>xPos
+				&& rcCol.top<yPos && rcCol.bottom>yPos)
+			{
+				index = i;
+				break;
+			}
+		}
+		if (index >= 0) MAppMainCall(M_CALLBACK_MDETALS_LIST_HEADER_MOUSEMOVE, 
+			(LPVOID)(ULONG_PTR)index, 
+			(LPVOID)MAKELPARAM(rcCol.left, rcCol.bottom));
+		break;
+	}
+	}
+	return procListHeaderWndProc(hWnd, msg, wParam, lParam);
+}
 
 
 //Dialog boxs

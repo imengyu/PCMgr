@@ -1108,7 +1108,7 @@ M_API BOOL MGetProcessFullPathEx(DWORD dwPID, LPWSTR outNter, PHANDLE phandle, L
 		return 1;
 	}
 
-	TCHAR szResult[MAX_PATH];
+	//TCHAR szResult[MAX_PATH];
 	TCHAR szImagePath[MAX_PATH];
 	HANDLE hProcess = MTryOpenProcess(dwPID);
 	if (!hProcess) return FALSE;

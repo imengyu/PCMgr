@@ -44,6 +44,10 @@ namespace PCMgr.Ctls
         [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern ulong MPERF_GetRamUsed();
 
+        private string fTipVauleFree;
+        private string fTipVauleModified;
+        private string fTipVauleStandby;
+        private string fTipVauleUsing;
         private ulong all_ram = 0;
 
         public bool PageIsActive { get; set; }
@@ -90,6 +94,8 @@ namespace PCMgr.Ctls
                 ulong availableSize = MPERF_GetRamAvail();
                 ulong usedSize = all_ram - availableSize;
                 ulong compressedSize = 0;
+                ulong compressedEstimateSize = 0;
+                ulong compressedSavedSize = 0;
                 ulong modifedSize= MPERF_GetModifiedSize();
                 ulong standbySize = MPERF_GetStandBySize();
                 ulong freeSize = availableSize - modifedSize - standbySize;
@@ -103,6 +109,11 @@ namespace PCMgr.Ctls
                 performanceRamPoolGrid.StrVauleModified = NativeMethods.FormatFileSize(modifedSize);
                 performanceRamPoolGrid.StrVauleStandby = NativeMethods.FormatFileSize(standbySize);
                 performanceRamPoolGrid.StrVauleFree = NativeMethods.FormatFileSize(freeSize);
+                performanceRamPoolGrid.TipVauleFree = string.Format(fTipVauleFree, performanceRamPoolGrid.StrVauleFree);
+                performanceRamPoolGrid.TipVauleModified = string.Format(fTipVauleModified, performanceRamPoolGrid.StrVauleModified);
+                performanceRamPoolGrid.TipVauleStandby = string.Format(fTipVauleStandby, performanceRamPoolGrid.StrVauleStandby);
+                performanceRamPoolGrid.TipVauleUsing = string.Format(fTipVauleUsing, performanceRamPoolGrid.StrVauleUsing, NativeMethods.FormatFileSize(compressedSize), NativeMethods.FormatFileSize(compressedEstimateSize), NativeMethods.FormatFileSize(compressedSavedSize));
+
                 performanceRamPoolGrid.Invalidate();
 
                 item_ramuseage.Value = NativeMethods.FormatFileSize(usedSize) + " (" + NativeMethods.FormatFileSize(compressedSize) + ")";
@@ -152,17 +163,19 @@ namespace PCMgr.Ctls
             performanceGridGlobal.RightText = NativeMethods.FormatFileSize(all_ram);
 
             NativeMethods.DeviceApi.MDEVICE_GetMemoryDeviceInfo();
-
             performanceTitle.SmallTitle = Marshal.PtrToStringUni(NativeMethods.DeviceApi.MDEVICE_GetMemoryDeviceName());
-
             performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem(LanuageMgr.GetStr("Speed"), NativeMethods.DeviceApi.MDEVICE_GetMemoryDeviceSpeed().ToString() + " MHz"));
             performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem(LanuageMgr.GetStr("FormFactor"),
               NativeMethods.DeviceApi.MDEVICE_MemoryFormFactorToString(NativeMethods.DeviceApi.MDEVICE_GetMemoryDeviceFormFactor())
                 ));
-
             UInt16 used = 0, all = 0;
             if (NativeMethods.DeviceApi.MDEVICE_GetMemoryDeviceUsed(ref all, ref used))
                 performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem(LanuageMgr.GetStr("DeviceLocator"), used + "/" + all));
+
+            fTipVauleFree = LanuageMgr.GetStr("MemTipFree");
+            fTipVauleModified = LanuageMgr.GetStr("MemTipModifed");
+            fTipVauleStandby = LanuageMgr.GetStr("MemTipStandby");
+            fTipVauleUsing = LanuageMgr.GetStr("MemTipUsing");
         }
 
         public void PageFroceSetData(int s)

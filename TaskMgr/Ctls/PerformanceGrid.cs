@@ -111,6 +111,7 @@ namespace PCMgr.Ctls
         private int lastDataAverage2 = 0;
         private int lastDataAverage1_zeroCount = 0;
         private int lastDataAverage2_zeroCount = 0;
+        private int xLineOffist = 0;
 
         /// <summary>
         /// .数据12平均值
@@ -148,6 +149,11 @@ namespace PCMgr.Ctls
         /// </summary>
         public void AddData(int d)
         {
+            float single = 1.0F * Width / (60 - 1);
+            if (xLineOffist < (single * 4))
+                xLineOffist += (int)(single);
+            else xLineOffist = 0;
+
             dataIem.RemoveAt(0);
             dataIem.Add(d);
         }
@@ -172,17 +178,22 @@ namespace PCMgr.Ctls
 
             float single = 1.0F * Width / (60 - 1);
             float division = 1.0F * (Height - TopTextHeight - BottomTextHeight) / MaxValue;
-            float divisionGrid = 1.0F * (Height - TopTextHeight - BottomTextHeight) / 100;
             float offset = 1.0F * (60 - dataIem.Count) * single;
+            float divisionGrid = divisionGrid = 1.0F * (Height - TopTextHeight - BottomTextHeight) / 100;
 
-            for (int i = 1; i < 10; i++)
+            if (Height - TopTextHeight - BottomTextHeight > 30)
             {
-                int y = (int)(i * 10 * divisionGrid) + TopTextHeight;
-                g.DrawLine(GridPen, 1, y, Width - 2, y);
+                for (int i = 1; i < 10; i++)
+                {
+                    int y = (int)(i * 10 * divisionGrid) + TopTextHeight;
+                    g.DrawLine(GridPen, 1, y, Width - 2, y);
+                }
             }
-            for (int i = 1; i <= 6; i++)
+            for (int i = 1; i <= 20; i++)
             {
-                int x = (int)((i * 10) * single);
+                int x = (int)(i * (single * 3)) - xLineOffist;
+                if (x > Width)
+                    break;
                 g.DrawLine(GridPen, x, TopTextHeight, x, Height - 2 - BottomTextHeight);
             }
 

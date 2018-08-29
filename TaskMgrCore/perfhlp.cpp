@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "perfhlp.h"
+#include "mapphlp.h"
 #include "sysfuns.h"
 #include "msup.h"
 #include "loghlp.h"
@@ -460,7 +461,7 @@ M_CAPI(double) MPERF_GetProcessCpuUseAge(PSYSTEM_PROCESSES p, MPerfAndProcessDat
 		if (TimeInterval == 0) return 0;
 		__int64 i1 = (data->NowCpuTime - data->LastCpuTime) / 1000;
 		double rs = static_cast<double>((double)i1 / (double)(TimeInterval / 100000));
-		if (rs > 1) rs = 1;
+		if (rs > 100) rs = 100;
 		return (rs < 0.1 && rs>0.05) ? 0.1 : rs;
 	}
 	return -1;
@@ -479,10 +480,8 @@ M_CAPI(ULONGLONG) MPERF_GetProcessCycle(PSYSTEM_PROCESSES p)
 }
 M_CAPI(SIZE_T) MPERF_GetProcessRam(PSYSTEM_PROCESSES p, HANDLE hProcess)
 {
-	if (p) {	
+	if (p) 
 		return (SIZE_T)p->WorkingSetPrivateSize.QuadPart;
-		//return p->VmCounters.WorkingSetSize;
-	}
 	return 0;
 }
 M_CAPI(SIZE_T) MPERF_GetProcessMemoryInfo(PSYSTEM_PROCESSES p, int col)
@@ -498,7 +497,7 @@ M_CAPI(SIZE_T) MPERF_GetProcessMemoryInfo(PSYSTEM_PROCESSES p, int col)
 		case M_GET_PROCMEM_PEAKWORKINGSET:
 			return (SIZE_T)p->VmCounters.PeakWorkingSetSize;
 		case M_GET_PROCMEM_COMMITEDSIZE:
-			return (SIZE_T)0;
+			return (SIZE_T)p->VmCounters.VirtualSize;
 		case M_GET_PROCMEM_NONPAGEDPOOL:
 			return (SIZE_T)p->VmCounters.QuotaNonPagedPoolUsage;
 		case M_GET_PROCMEM_PAGEDPOOL:
@@ -897,7 +896,7 @@ M_CAPI(UINT) MPERF_InitNetworksPerformanceCounters()
 	{
 		PDH_STATUS status;
 		DWORD netsInstanceNamesSize = 0;
-		LPWSTR netInstanceNames = MPERF_EnumPerformanceCounterInstanceNames(L"Network Interface");
+		LPWSTR netInstanceNames = MPERF_EnumPerformanceCounterInstanceNames(L"Network Adapter");
 		if (netInstanceNames)
 		{
 			for (LPWSTR pTemp = netInstanceNames; *pTemp != 0; pTemp += wcslen(pTemp) + 1)
@@ -929,7 +928,7 @@ M_CAPI(UINT) MPERF_InitNetworksPerformanceCounters()
 				netCounters.push_back(data);
 			}		
 			MFree(netInstanceNames);
-			return (UINT)diskCounters.size();
+			return (UINT)netCounters.size();
 		}
 	}
 	return FALSE;
@@ -962,6 +961,48 @@ M_CAPI(MPerfNetData*) MPERF_GetNetworksPerformanceCounters(int index)
 	if (index >= 0 && (UINT)index < netCounters.size())
 		return netCounters[index];
 	return 0;
+}
+M_CAPI(MPerfNetData*) MPERF_GetNetworksPerformanceCounterWithName(LPWSTR name) {
+	if (hQuery)
+	{
+		for (auto it = netCounters.begin(); it != netCounters.end(); it++)
+		{
+			MPerfNetData *data1 = (*it);
+			if (MStrEqual(data1->performanceCounter_Name, name))
+			{
+				return data1;
+			}
+		}
+
+		MPerfNetData *data = NULL;
+		data = (MPerfNetData*)MAlloc(sizeof(MPerfNetData));
+		memset(data, 0, sizeof(MPerfNetData));
+		wcscpy_s(data->performanceCounter_Name, name);
+
+		std::wstring cpuCounterName = FormatString(L"\\Network Interface(%s)\\Bytes Sent/sec", name);
+		data->performanceCounter_sent = (PDH_HCOUNTER*)GlobalAlloc(GPTR, (sizeof(PDH_HCOUNTER)));
+		PDH_STATUS status = PdhAddCounter(hQuery, cpuCounterName.c_str(), 0, data->performanceCounter_sent);
+		if (status != ERROR_SUCCESS)
+		{
+			GlobalFree(data->performanceCounter_sent);
+			data->performanceCounter_sent = 0;
+			LogErr(L"Add Performance Counter \"%s\" failed : 0x%X", cpuCounterName.c_str(), status);
+		}
+
+		cpuCounterName = FormatString(L"\\Network Interface(%s)\\Bytes Received/sec", name);
+		data->performanceCounter_receive = (PDH_HCOUNTER*)GlobalAlloc(GPTR, (sizeof(PDH_HCOUNTER)));
+		status = PdhAddCounter(hQuery, cpuCounterName.c_str(), 0, data->performanceCounter_receive);
+		if (status != ERROR_SUCCESS)
+		{
+			GlobalFree(data->performanceCounter_receive);
+			data->performanceCounter_receive = 0;
+			LogErr(L"Add Performance Counter \"%s\" failed : 0x%X", cpuCounterName.c_str(), status);
+		}
+
+		netCounters.push_back(data);
+		return data;
+	}
+	return FALSE;
 }
 M_CAPI(BOOL) MPERF_GetNetworksPerformanceCountersValues(MPerfNetData*data, double*out_sent, double*out_receive)
 {
@@ -1001,4 +1042,6 @@ M_CAPI(double)MPERF_GetNetworksPerformanceCountersSimpleValues(MPerfNetData*data
 	}
 	return 0;
 }
+
+
 

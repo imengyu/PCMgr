@@ -22,6 +22,16 @@ struct MDeviceMemory
 	UINT32 SMBIOSMemoryType;
 	UINT64 Capacity;
 };
+//网卡信息
+struct MDeviceNetworkAdapter
+{
+	WCHAR Description[64];
+	WCHAR IPAddressV4[32];
+	WCHAR IPAddressV6[64];
+	UINT16 StatusInfo;
+	BOOL PhysicalAdapter;
+	BOOL Enabled;
+};
 
 //初始化
 M_CAPI(BOOL) MDEVICE_Init();

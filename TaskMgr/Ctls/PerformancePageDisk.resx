@@ -168,6 +168,12 @@
   <data name="performanceGridSpeed.TabIndex" type="System.Int32, mscorlib">
     <value>2</value>
   </data>
+  <metadata name="toolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>17, 17</value>
+  </metadata>
+  <data name="performanceGridSpeed.ToolTip" xml:space="preserve">
+    <value>此磁盘上的读取和写入活动</value>
+  </data>
   <data name="&gt;&gt;performanceGridSpeed.Name" xml:space="preserve">
     <value>performanceGridSpeed</value>
   </data>
@@ -234,6 +240,9 @@
   <data name="performanceGridDiskTime.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
   </data>
+  <data name="performanceGridDiskTime.ToolTip" xml:space="preserve">
+    <value>磁盘处理读取或写入请求的事件百分比</value>
+  </data>
   <data name="&gt;&gt;performanceGridDiskTime.Name" xml:space="preserve">
     <value>performanceGridDiskTime</value>
   </data>
@@ -254,6 +263,12 @@
   </data>
   <data name="$this.Size" type="System.Drawing.Size, System.Drawing">
     <value>612, 324</value>
+  </data>
+  <data name="&gt;&gt;toolTip1.Name" xml:space="preserve">
+    <value>toolTip1</value>
+  </data>
+  <data name="&gt;&gt;toolTip1.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolTip, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;$this.Name" xml:space="preserve">
     <value>PerformancePageDisk</value>

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -26,10 +27,11 @@ namespace PCMgr.Ctls
 
         private Brush brushModified = new SolidBrush(Color.FromArgb(206, 180, 215));
         private Brush brushBackuped = new SolidBrush(Color.FromArgb(231, 207, 238));
+        private ToolTip toolTip = new ToolTip();
 
         private Rectangle rectInUse = default(Rectangle);
         private Rectangle rectModified = default(Rectangle);
-        private Rectangle rectBackuped = default(Rectangle);
+        private Rectangle rectStandby = default(Rectangle);
         private Rectangle rectFree = default(Rectangle);
 
         public Color BgColor
@@ -84,7 +86,47 @@ namespace PCMgr.Ctls
 
         public int TopTextHeight { get; set; }
 
+        protected override void OnMouseMove(MouseEventArgs e)
+        {
+            ShowTooltip(e.Location);
+            base.OnMouseMove(e);
+        }
+        protected override void OnMouseLeave(EventArgs e)
+        {
+            lastShowTooltip = 0;
+            toolTip.Hide(this);
+            base.OnMouseLeave(e);
+        }
 
+        private int lastShowTooltip = 0;
+        private void ShowTooltip(Point p)
+        {
+            if (rectInUse.Contains(p) && lastShowTooltip != 1)
+            {
+                lastShowTooltip = 1;
+                toolTip.Show(TipVauleUsing, this, 0, Height + 2, 5000);
+            }
+            else if (rectModified.Contains(p) && lastShowTooltip != 2)
+            {
+                lastShowTooltip = 2;
+                toolTip.Show(TipVauleModified, this, rectModified.X, Height + 2, 3000);
+            }
+            else if (rectStandby.Contains(p) && lastShowTooltip != 3)
+            {
+                lastShowTooltip = 3;
+                toolTip.Show(TipVauleStandby, this, rectStandby.X, Height + 2, 4000);
+            }
+            else if (rectFree.Contains(p) && lastShowTooltip != 4)
+            {
+                lastShowTooltip = 4;
+                toolTip.Show(TipVauleFree, this, rectFree.X, Height + 2, 3000);
+            }
+        }
+
+        public string TipVauleUsing { get; set; }
+        public string TipVauleModified { get; set; }
+        public string TipVauleStandby { get; set; }
+        public string TipVauleFree { get; set; }
         public string StrVauleUsing { get; set; }
         public string StrVauleModified { get; set; }
         public string StrVauleStandby { get; set; }
@@ -144,25 +186,25 @@ namespace PCMgr.Ctls
                 w += (int)(VauleStandby * Width);
                 if (w - oldw > 1)
                 {
-                    rectBackuped = new Rectangle(oldw, r.Top, w - oldw, r.Height);
-                    g.FillRectangle(brushBackuped, rectBackuped);
+                    rectStandby = new Rectangle(oldw, r.Top, w - oldw, r.Height);
+                    g.FillRectangle(brushBackuped, rectStandby);
                     g.DrawLine(DrawPen, w, r.Top, w, r.Bottom);
 
                     if (w - oldw > 50)           
                         g.DrawString(FormMain.str_MemStandby, Font, TextBrush, oldw, Height - TopTextHeight + BottomTextOffestY);
                     if (w - oldw > 50)
-                        g.DrawString(StrVauleStandby, Font, TextBrush, rectBackuped, stringFormatCenter);
+                        g.DrawString(StrVauleStandby, Font, TextBrush, rectStandby, stringFormatCenter);
                  
                 }
-                else rectBackuped = default(Rectangle);
+                else rectStandby = default(Rectangle);
             }
             if (VauleFree > 0 && VauleFree < 1)
             {
                 int oldw = w;
                 w += (int)(VauleFree * Width);
                 rectFree = new Rectangle(oldw, r.Top, w - oldw, r.Height);
-                if (rectBackuped.Width > 50)//右
-                    g.DrawString(FormMain.str_MemFree, Font, TextBrush, new Rectangle(rectBackuped.X, Height - TopTextHeight + BottomTextOffestY, rectBackuped.Width + rectFree.Width, TopTextHeight), stringFormatRight);
+                if (rectStandby.Width > 50)//右
+                    g.DrawString(FormMain.str_MemFree, Font, TextBrush, new Rectangle(rectStandby.X, Height - TopTextHeight + BottomTextOffestY, rectStandby.Width + rectFree.Width, TopTextHeight), stringFormatRight);
                 if (w - oldw > 50)
                     g.DrawString(StrVauleFree, Font, TextBrush, rectFree, stringFormatCenter);
                 

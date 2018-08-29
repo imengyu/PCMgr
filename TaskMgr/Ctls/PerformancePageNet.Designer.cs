@@ -28,23 +28,26 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PerformancePageNet));
             this.performanceInfos = new PCMgr.Ctls.PerformanceInfos();
             this.performanceTitle = new PCMgr.Ctls.PerformanceTitle();
             this.performanceGrid = new PCMgr.Ctls.PerformanceGrid();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.SuspendLayout();
             // 
             // performanceInfos
             // 
+            resources.ApplyResources(this.performanceInfos, "performanceInfos");
             this.performanceInfos.ColorText = System.Drawing.Color.Black;
             this.performanceInfos.ColorTitle = System.Drawing.Color.Gray;
-            resources.ApplyResources(this.performanceInfos, "performanceInfos");
-            this.performanceInfos.FontText = new System.Drawing.Font("微软雅黑", 10.5F);
+            this.performanceInfos.FontText = new System.Drawing.Font("微软雅黑", 9F);
             this.performanceInfos.FontTextSpeical = new System.Drawing.Font("微软雅黑", 15F);
             this.performanceInfos.FontTitle = new System.Drawing.Font("微软雅黑", 10.5F);
             this.performanceInfos.ItemMargan = 10;
             this.performanceInfos.LineOffest = 5;
-            this.performanceInfos.MaxSpeicalItemsWidth = 350;
+            this.performanceInfos.MaxSpeicalItemsWidth = 170;
+            this.performanceInfos.MaxSpeicalItemsWidthLimit = 250;
             this.performanceInfos.Name = "performanceInfos";
             // 
             // performanceTitle
@@ -57,7 +60,7 @@
             // performanceGrid
             // 
             resources.ApplyResources(this.performanceGrid, "performanceGrid");
-            this.performanceGrid.BgColor = System.Drawing.Color.FromArgb(((int)(((byte)(252)))), ((int)(((byte)(243)))), ((int)(((byte)(235)))));
+            this.performanceGrid.BgColor = System.Drawing.Color.FromArgb(((int)(((byte)(80)))), ((int)(((byte)(255)))), ((int)(((byte)(157)))), ((int)(((byte)(89)))));
             this.performanceGrid.BottomTextHeight = 20;
             this.performanceGrid.DrawColor = System.Drawing.Color.FromArgb(((int)(((byte)(167)))), ((int)(((byte)(79)))), ((int)(((byte)(1)))));
             this.performanceGrid.DrawColor2 = System.Drawing.Color.FromArgb(((int)(((byte)(167)))), ((int)(((byte)(79)))), ((int)(((byte)(1)))));
@@ -68,6 +71,7 @@
             this.performanceGrid.MaxScaleValue = 0;
             this.performanceGrid.MaxValue = 100;
             this.performanceGrid.Name = "performanceGrid";
+            this.toolTip1.SetToolTip(this.performanceGrid, resources.GetString("performanceGrid.ToolTip"));
             this.performanceGrid.TopTextHeight = 20;
             // 
             // PerformancePageNet
@@ -89,5 +93,6 @@
         private PerformanceGrid performanceGrid;
         private PerformanceTitle performanceTitle;
         private PerformanceInfos performanceInfos;
+        private System.Windows.Forms.ToolTip toolTip1;
     }
 }

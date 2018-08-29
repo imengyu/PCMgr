@@ -819,7 +819,9 @@ You can also try to use WinDbg to download  {1} symbol files, and then copy them
 Therefore, the kernel function is not available. If you need to use the kernel function, switch to the 64 bit PC Manager program.</value>
   </data>
   <data name="KillAskContentImporant" xml:space="preserve">
-    <value>Ending this process causes Windows to become unstable or shut down, resulting in the loss of all unsaved data. Are you sure you want to continue?</value>
+    <value>Ending this process causes Windows to become
+ unstable or shut down, resulting in the loss of all unsaved data.
+Are you sure you want to continue?</value>
   </data>
   <data name="KillAskImporantGiveup" xml:space="preserve">
     <value>Give up the unsaved data and shutdown.</value>
@@ -1072,5 +1074,142 @@ Therefore, the kernel function is not available. If you need to use the kernel f
   </data>
   <data name="MemUsingS" xml:space="preserve">
     <value>Using</value>
+  </data>
+  <data name="MemTipFree" xml:space="preserve">
+    <value>Free ({0})
+Memory that is not currently in use but will be repurposed
+first process, driver, or operating system need more memory</value>
+  </data>
+  <data name="MemTipModifed" xml:space="preserve">
+    <value>Modifed ({0})
+The contents must be written to disk before being used for other purposes.</value>
+  </data>
+  <data name="MemTipStandby" xml:space="preserve">
+    <value>Standby ({0})
+Contains memory that is not frequently used for caching data and code.</value>
+  </data>
+  <data name="MemTipUsing" xml:space="preserve">
+    <value>In use ({0})
+Memory used by processes, drivers, or operating systems
+
+In use, compressed ({1}).
+
+
+Compressed memory stores data that estimates {2} and saves {3} memory for the system.</value>
+  </data>
+  <data name="AdapterName" xml:space="preserve">
+    <value>Adapter Name</value>
+  </data>
+  <data name="ConnectType" xml:space="preserve">
+    <value>Connection Type</value>
+  </data>
+  <data name="IPV4" xml:space="preserve">
+    <value>IPv4 Address</value>
+  </data>
+  <data name="IPV6" xml:space="preserve">
+    <value>IPv6 Address</value>
+  </data>
+  <data name="Ethernet" xml:space="preserve">
+    <value>Ethernet</value>
+  </data>
+  <data name="TipCmdLine" xml:space="preserve">
+    <value>指定用于创建进程的完整命令行</value>
+  </data>
+  <data name="TipCommitedSize" xml:space="preserve">
+    <value>操作系统为进程保留的虚拟内存量</value>
+  </data>
+  <data name="TipCPU" xml:space="preserve">
+    <value>Total processor utilization of all cores</value>
+  </data>
+  <data name="TipCPUTime" xml:space="preserve">
+    <value>进程启动后所用的处理器总时间(秒)</value>
+  </data>
+  <data name="TipCycle" xml:space="preserve">
+    <value>进程所消耗的 CPU 周期时间的当前百分比</value>
+  </data>
+  <data name="TipDisk" xml:space="preserve">
+    <value>Total utilization of all physical drives</value>
+  </data>
+  <data name="TipGDIObject" xml:space="preserve">
+    <value>进程使用的 GDI 对象数</value>
+  </data>
+  <data name="TipGPU" xml:space="preserve">
+    <value>Maximum utilization of all GPU engines</value>
+  </data>
+  <data name="TipHandleCount" xml:space="preserve">
+    <value>由进程打开的当前句柄数</value>
+  </data>
+  <data name="TipIOOther" xml:space="preserve">
+    <value>进程自启动以来生成的非
+读取/写入 I/O 操作(例如控制功能)数</value>
+  </data>
+  <data name="TipIOOtherBytes" xml:space="preserve">
+    <value>进程在 I/O 操作(非读取/写入操作，例如控制功能)期间
+期间读取的总字节数数</value>
+  </data>
+  <data name="TipIORead" xml:space="preserve">
+    <value>进程自启动以来生成的读取 I/O 操作数</value>
+  </data>
+  <data name="TipIOReadBytes" xml:space="preserve">
+    <value>进程在 I/O 操作期间读取的总字节数</value>
+  </data>
+  <data name="TipIOWrite" xml:space="preserve">
+    <value>进程自启动以来生成的写入 I/O 操作数</value>
+  </data>
+  <data name="TipIOWriteBytes" xml:space="preserve">
+    <value>进程在 I/O 操作期间写入的总字节数</value>
+  </data>
+  <data name="TipJobID" xml:space="preserve">
+    <value>正在其中运行进程的作业对象</value>
+  </data>
+  <data name="TipNet" xml:space="preserve">
+    <value>Current network utilization on major networks</value>
+  </data>
+  <data name="TipNonPagedSize" xml:space="preserve">
+    <value>由内核或驱动程序代表进程
+所分配的不可分页内核内存量</value>
+  </data>
+  <data name="TipPagedSize" xml:space="preserve">
+    <value>由内核或驱动程序代表进程
+所分配的可分页内核内存量</value>
+  </data>
+  <data name="TipPageErr" xml:space="preserve">
+    <value>进程自启动以后生成的页面错误数</value>
+  </data>
+  <data name="TipPID" xml:space="preserve">
+    <value>The process id</value>
+  </data>
+  <data name="TipPlatform" xml:space="preserve">
+    <value>进程运行的平台(32位 或 64位)</value>
+  </data>
+  <data name="TipPrivateWorkingSet" xml:space="preserve">
+    <value>由该进程使用而其他进程
+无法使用的物理内存量</value>
+  </data>
+  <data name="TipRam" xml:space="preserve">
+    <value>Total physical memory retained by a single process</value>
+  </data>
+  <data name="TipShareWorkingSet" xml:space="preserve">
+    <value>由该进程所使用并且
+可与其他进程共享的物理内存量</value>
+  </data>
+  <data name="TipStatus" xml:space="preserve">
+    <value>进程执行状态</value>
+  </data>
+  <data name="TipThredCount" xml:space="preserve">
+    <value>活动线程数</value>
+  </data>
+  <data name="TipUserObject" xml:space="preserve">
+    <value>由进程使用的窗口管理器对象
+(窗口、菜单、光标、键盘布局、监视器)数</value>
+  </data>
+  <data name="TipWorkingSet" xml:space="preserve">
+    <value>进程当前正在使用的物理内存量</value>
+  </data>
+  <data name="TitleType" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="IdleProcessDsb" xml:space="preserve">
+    <value>Percentage of processor idle time</value>
   </data>
 </root>

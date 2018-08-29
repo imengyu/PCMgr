@@ -17,7 +17,6 @@ namespace PCMgr
             public const string 版权所有 = "版权所有 Copyright (C) 2018 DreamFish";
             public const string 不用反编译了 = "大部分核心功能都在C++模块里，PCMgr32.dll 自己慢慢反编译去吧";
         }
-        public const string 给想反编译这个程序的人 = "不用反编译了，大部分核心功能都在C++模块里，PCMgr32.dll 自己慢慢反编译去吧";
         public const string Copyright = "Copyright (C) 2018 DreamFish";
         public const string Key = "The key is TryCallThis api";
 
@@ -38,6 +37,14 @@ namespace PCMgr
                 return Marshal.GetDelegateForFunctionPointer(functionAddress, typeof(T));
             }
 
+            public static ushort LOWORD(IntPtr value)
+            {
+                return LOWORD((uint)value.ToInt32());
+            }
+            public static ushort HIWORD(IntPtr value)
+            {
+                return HIWORD((uint)value.ToInt32());
+            }
             public static ushort LOWORD(uint value)
             {
                 return (ushort)(value & 0xFFFF);
@@ -198,7 +205,7 @@ namespace PCMgr
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void WORKERCALLBACK(int msg, IntPtr lParam, IntPtr wParam);
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate long WNDPROC(IntPtr hWnd, uint msg, IntPtr lParam, IntPtr wParam);
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void EXITCALLBACK();
@@ -563,6 +570,8 @@ namespace PCMgr
         public static extern bool MPERF_GetNetworksPerformanceCountersInstanceName(IntPtr data, StringBuilder buf, int size);
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern double MPERF_GetNetworksPerformanceCountersSimpleValues(IntPtr data);
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern IntPtr MPERF_GetNetworksPerformanceCounterWithName([MarshalAs(UnmanagedType.LPWStr)]string name);
 
         #endregion
 
@@ -770,11 +779,22 @@ namespace PCMgr
             if (speedBytes >= 1073741824)
                 return string.Format("{0:########0.00} Gbps", ((Double)speedBytes) / (1024 * 1024 * 1024));
             else if (speedBytes >= 1048576)
-                return string.Format("{0:####0.00} Mbps", ((Double)speedBytes) / (1024 * 1024));           
+                return string.Format("{0:####0.00} Mbps", ((Double)speedBytes) / (1024 * 1024));
             else
-                return string.Format("{0:####0.00} Kbps", ((Double)speedBytes) / 1024);         
+                return string.Format("{0:####0.00} Kbps", ((Double)speedBytes) / 1024);
         }
-
+        public static String FormatNetSpeedUnit(Int64 speedBytes)
+        {
+            if (speedBytes < 0)
+                throw new ArgumentOutOfRangeException("fileSize");
+            speedBytes *= 8;
+            if (speedBytes >= 1073741824)
+                return string.Format("{0:########0} Gbps", ((Double)speedBytes) / (1024 * 1024 * 1024));
+            else if (speedBytes >= 1048576)
+                return string.Format("{0:####0} Mbps", ((Double)speedBytes) / (1024 * 1024));
+            else
+                return string.Format("{0:####0} Kbps", ((Double)speedBytes) / 1024);
+        }
 
         #endregion
 
@@ -782,7 +802,7 @@ namespace PCMgr
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void EnumServicesCallBack(IntPtr dspName, IntPtr scName, uint scType, uint currentState, uint dwProcessId, bool syssc,
-            uint dwStartType, IntPtr lpBinaryPathName, IntPtr lpLoadOrderGroup);
+                uint dwStartType, IntPtr lpBinaryPathName, IntPtr lpLoadOrderGroup);
 
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern bool MSCM_Init();
@@ -859,6 +879,26 @@ namespace PCMgr
             public static extern bool MDEVICE_GetIsSystemDisk([MarshalAs(UnmanagedType.LPStr)]string perfstr);
             [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
             public static extern bool MDEVICE_GetIsPageFileDisk([MarshalAs(UnmanagedType.LPStr)]string perfstr);
+
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+            public static extern uint MDEVICE_GetNetworkAdaptersInfo();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+            public static extern bool MDEVICE_DestroyNetworkAdaptersInfo();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+            public static extern bool MDEVICE_GetNetworkAdapterInfoFormName(
+                [MarshalAs(UnmanagedType.LPWStr)]string name, StringBuilder sbV4, int bufferSizeV4,
+                StringBuilder sbV6, int bufferSizeV6);
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+            public static extern bool MDEVICE_GetNetworkAdapterInfoItem(int index, StringBuilder name, int bufferSize);
+
+
+
+            public static bool MDEVICE_GetNetworkAdapterIsWIFI(string name)
+            {
+                if (name != null && (name.ToLower().Contains("wifi") || name.ToLower().Contains("wireless lan") || name.Contains("wi-fi")))
+                    return true;
+                return false;
+            }
 
             public static string MDEVICE_MemoryFormFactorToString(UInt16 _formFactor)
             {
@@ -1008,11 +1048,12 @@ namespace PCMgr
             public const int M_CALLBACK_DBGPRINT_EMEPTY = 40;
             public const int M_CALLBACK_SHOW_LOAD_STATUS = 41;
             public const int M_CALLBACK_HLDE_LOAD_STATUS = 42;
+            public const int M_CALLBACK_MDETALS_LIST_HEADER_MOUSEMOVE = 43;
 
             public const int M_CALLBACK_KERNEL_VIELL_PRGV = 51;
             public const int M_CALLBACK_KERNEL_TOOL = 52;
             public const int M_CALLBACK_HOOKS = 53;
-            public const int M_CALLBACK_NETMON = 54;           
+            public const int M_CALLBACK_NETMON = 54;
             public const int M_CALLBACK_REGEDIT = 55;
             public const int M_CALLBACK_FILEMGR = 56;
 

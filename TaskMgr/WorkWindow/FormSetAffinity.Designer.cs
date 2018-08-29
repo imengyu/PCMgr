@@ -97,7 +97,6 @@
             this.ShowInTaskbar = false;
             this.Load += new System.EventHandler(this.FormSetAffinity_Load);
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 

@@ -37,7 +37,7 @@ namespace PCMgr.Ctls
         private void Scrol_ValueChanged(object sender, EventArgs e)
         {
             yOffest = ((VScrollBar)sender).Value - ((VScrollBar)sender).Minimum;
-            SyncItems(true);
+            Invalidate();
         }
         private void T_Tick(object sender, EventArgs e)
         {
@@ -185,9 +185,18 @@ namespace PCMgr.Ctls
                 {
                     PerformanceListItem last_selectedItem = selectedItem;
                     int index = items.IndexOf(last_selectedItem);
+
+                    CON:
                     if (index >= 1)
                     {
-                        selectedItem = items[index - 1];
+                        if (!items[index - 1].Gray)
+                            selectedItem = items[index - 1];
+                        else
+                        {
+                            index--;
+                            goto CON;
+                        }
+
                         InvalidAItem(selectedItem);
                         InvalidAItem(last_selectedItem);
                         OnSelectedtndexChanged(EventArgs.Empty);
@@ -210,9 +219,18 @@ namespace PCMgr.Ctls
                 {
                     PerformanceListItem last_selectedItem = selectedItem;
                     int index = items.IndexOf(last_selectedItem);
+
+                    CON:
                     if (index < items.Count - 1)
                     {
-                        selectedItem = items[index + 1];
+                        if (!items[index + 1].Gray) 
+                            selectedItem = items[index + 1];
+                        else
+                        {
+                            index++;
+                            goto CON;
+                        }
+                        
                         InvalidAItem(selectedItem);
                         InvalidAItem(last_selectedItem);
                         OnSelectedtndexChanged(EventArgs.Empty);
@@ -273,16 +291,20 @@ namespace PCMgr.Ctls
                 {
                     for (int i = 0; i < items.Count; i++)
                     {
-                        int y = items[i].ItemY - yOffest;
-                        if (e.Y > y && e.Y < y + items[i].ItemHeight)
+                        if (!items[i].Gray)
                         {
-                            if (mouseEnterItem != null)
+                            int y = items[i].ItemY - yOffest;
+                            if (e.Y > y && e.Y < y + items[i].ItemHeight)
+                            {
+                                if (mouseEnterItem != null)
+                                    InvalidAItem(mouseEnterItem);
+                                mouseEnterItem = items[i];
                                 InvalidAItem(mouseEnterItem);
-                            mouseEnterItem = items[i];
-                            InvalidAItem(mouseEnterItem);
-                            break;
+                                break;
+                            }
+                            else if (y + items[i].ItemHeight > e.Y) break;
                         }
-                        else if (y + items[i].ItemHeight > e.Y) break;
+                        else mouseEnterItem = null;
                     }
                 }
             }
@@ -295,17 +317,24 @@ namespace PCMgr.Ctls
                 if (e.Delta < 0)
                 {
                     if (yOffest <= outHeight + 16 - scrol.SmallChange)
-                        yOffest += scrol.SmallChange;
+                    {
+                        scrol.Value += scrol.SmallChange;
+                    }
                     else
-                        yOffest = outHeight + 16;
-                    SyncItems(true);
+                    {
+                        scrol.Value = outHeight + 16;
+                    }
                 }
                 else
                 {
                     if (yOffest > scrol.SmallChange)
-                        yOffest -= scrol.SmallChange;
-                    else yOffest = 0;
-                    SyncItems(true);
+                    {
+                        scrol.Value -= scrol.SmallChange;
+                    }
+                    else
+                    {
+                        scrol.Value = 0;
+                    }
                 }
             }
         }
@@ -330,11 +359,11 @@ namespace PCMgr.Ctls
 
             Graphics g = e.Graphics;
             Rectangle refrect = e.ClipRectangle;
-            int drawedHeight = 0;
+            int drawedHeight = -yOffest;
             for (int i = 0; i < items.Count; i++)
             {
                 PerformanceListItem it = items[i];
-                if (drawedHeight >= refrect.Top)
+                if (drawedHeight >= refrect.Top - it.ItemHeight)
                     DrawItem(g, it, it.ItemY - yOffest);
                 drawedHeight += it.ItemHeight;
                 if (drawedHeight > refrect.Bottom) break;

@@ -57,10 +57,12 @@ namespace PCMgr.Ctls
                 FontTitleHeight = _FontTitle.Height;
             }
         }
+        public int MaxSpeicalItemsWidthLimit { get; set; }
         public int MaxSpeicalItemsWidth { get; set; }
         public int ItemMargan { get; set; }
         public int LineOffest { get; set; }
 
+        private bool NeedRefeshStaticItems = false;
         private int FontTitleHeight = 0;
         private int FontTextSpeicalHeight = 0;
         private int FontTextHeight = 0;
@@ -110,7 +112,11 @@ namespace PCMgr.Ctls
 
         public void UpdateSpeicalItems()
         {
-            Invalidate(new Rectangle(0, 0, MaxSpeicalItemsWidth, Height));
+            if (NeedRefeshStaticItems) {
+                Invalidate();
+                NeedRefeshStaticItems = false;
+            }
+            else Invalidate(new Rectangle(0, 0, MaxSpeicalItemsWidth, Height));
         }
 
         protected override void OnPaint(PaintEventArgs e)
@@ -128,6 +134,7 @@ namespace PCMgr.Ctls
                 int w1 = (int)(g.MeasureString(it.Name, FontTitle).Width);
                 int w2 = (int)(g.MeasureString(it.Value, FontTextSpeical).Width);
                 int w = w1 > w2 ? w1 : w2;
+                REDRAW:
                 if (drawedX + w < MaxSpeicalItemsWidth)
                 {
                     if (SpeicalItems[i].LineSp)
@@ -150,6 +157,18 @@ namespace PCMgr.Ctls
                 }
                 else
                 {
+                    if (SpeicalItems[i].LineSp)
+                    {
+                        drawedX = ItemMargan;
+                        goto REDRAW;
+                    }
+                    if (drawedX + w < MaxSpeicalItemsWidthLimit)
+                    {
+                        MaxSpeicalItemsWidth = drawedX + w + 20;
+                        NeedRefeshStaticItems = true;
+                        goto REDRAW;
+                    }
+
                     curY += (FontTitleHeight + FontTextSpeicalHeight + 10);
                     if (curY < Height)
                     {

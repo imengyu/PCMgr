@@ -34,9 +34,11 @@ typedef void(__cdecl *WorkerCallBack)(int msg, void* data1, void* data2);
 typedef BOOL(__cdecl *TerminateImporantWarnCallBack)(LPWSTR commandName, int id);
 
 //主窗口 WinProc
-LRESULT MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
-LRESULT MProcListWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK MProcListWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK MProcListHeaderWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
 //显示错误对话框
 void MPrintErrorMessage(LPWSTR str, int icon = MB_OK);
 //显示一个对话框

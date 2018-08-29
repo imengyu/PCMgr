@@ -12,11 +12,16 @@ namespace PCMgr.Ctls
         {
             InitializeComponent();
         }
-        public PerformancePageNet(IntPtr netadapter)
+        public PerformancePageNet(IntPtr netadapter, bool isWifi, string name)
         {
-            InitializeComponent(); currNet = netadapter;
+            InitializeComponent();
+            currNet = netadapter;
+            currNetName = name;
+            currNetIsWifi = isWifi;
         }
-
+        private bool currNetIsWifi = false;
+        public string v4 = "", v6 = "";
+        private string currNetName = "";
         private IntPtr currNet = IntPtr.Zero;
         private int lastMaxSpeed = 100;
 
@@ -59,7 +64,7 @@ namespace PCMgr.Ctls
             if (lastMaxSpeed > performanceGrid.MaxValue)
             {
                 performanceGrid.MaxValue = GetSpeedMaxUnit();
-                performanceGrid.RightText = NativeMethods.FormatNetSpeed(performanceGrid.MaxValue * 1024 / 8);
+                performanceGrid.RightText = NativeMethods.FormatNetSpeedUnit(performanceGrid.MaxValue * 1024 / 8);
             }
             else if (lastMaxSpeed < performanceGrid.MaxValue)
             {
@@ -67,7 +72,7 @@ namespace PCMgr.Ctls
                 if (performanceGrid.MaxValue > maxValue)
                 {
                     performanceGrid.MaxValue = maxValue;
-                    performanceGrid.RightText = NativeMethods.FormatNetSpeed(maxValue * 1024 / 8);
+                    performanceGrid.RightText = NativeMethods.FormatNetSpeedUnit(maxValue * 1024 / 8);
                 }
             }
             //刷新最大速度标尺
@@ -76,7 +81,7 @@ namespace PCMgr.Ctls
                 && lastMaxSpeed <= performanceGrid.MaxValue * 0.95)
             {
                 performanceGrid.MaxScaleValue = lastMaxSpeed;
-                performanceGrid.MaxScaleText = NativeMethods.FormatNetSpeed(lastMaxSpeed * 1024 / 8);
+                performanceGrid.MaxScaleText = NativeMethods.FormatNetSpeedUnit(lastMaxSpeed * 1024 / 8);
             }
             else performanceGrid.MaxScaleValue = 0;
 
@@ -135,9 +140,8 @@ namespace PCMgr.Ctls
 
         private void PerformancePageNet_Load(object sender, EventArgs e)
         {
-            StringBuilder sb = new StringBuilder(64);
-            NativeMethods.MPERF_GetNetworksPerformanceCountersInstanceName(currNet, sb, 64);
-            performanceTitle.SmallTitle = sb.ToString();
+            performanceTitle.Title = currNetIsWifi ? "Wi-Fi" : LanuageMgr.GetStr("Ethernet");
+            performanceTitle.SmallTitle = currNetName;
 
             item_readSpeed = new PerformanceInfos.PerformanceInfoSpeicalItem();
             item_writeSpeed = new PerformanceInfos.PerformanceInfoSpeicalItem();
@@ -157,6 +161,20 @@ namespace PCMgr.Ctls
             performanceInfos.FontTitle = new Font("微软雅黑", 9);
             performanceInfos.SpeicalItems.Add(item_readSpeed);
             performanceInfos.SpeicalItems.Add(item_writeSpeed);
+
+            if (currNetIsWifi)
+            {
+                performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem(LanuageMgr.GetStr("AdapterName"), "WALN"));
+
+            }
+            else
+            {
+                performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem(LanuageMgr.GetStr("AdapterName"), currNetName));
+                performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem(LanuageMgr.GetStr("ConnectType"), performanceTitle.Title));
+            }
+
+            performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem(LanuageMgr.GetStr("IPV4"), v4));
+            performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem(LanuageMgr.GetStr("IPV6"), v6));
         }
 
 
