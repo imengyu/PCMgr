@@ -16,6 +16,7 @@ namespace PCMgr
             public const string Copyright = "Copyright (C) 2018 DreamFish";
             public const string 版权所有 = "版权所有 Copyright (C) 2018 DreamFish";
             public const string 不用反编译了 = "大部分核心功能都在C++模块里，PCMgr32.dll 自己慢慢反编译去吧";
+            public const string QQ = "1501076885";
         }
         public const string Copyright = "Copyright (C) 2018 DreamFish";
         public const string Key = "The key is TryCallThis api";
@@ -456,6 +457,11 @@ namespace PCMgr
 
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern int MGetProcessAffinityMask(IntPtr handle, ref UInt32 AffinityMask);
+
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern uint MGetProcessUserHandleCount(IntPtr handle);
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern uint MGetProcessGdiHandleCount(IntPtr handle);
 
         #endregion
 

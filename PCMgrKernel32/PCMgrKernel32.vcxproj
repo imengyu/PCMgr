@@ -192,7 +192,7 @@
       <BasicRuntimeChecks />
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <StructMemberAlignment />
-      <BufferSecurityCheck />
+      <BufferSecurityCheck>false</BufferSecurityCheck>
       <CallingConvention>StdCall</CallingConvention>
     </ClCompile>
     <Link>
@@ -202,6 +202,7 @@
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
       <Driver>Driver</Driver>
       <EntryPointSymbol>DriverEntry</EntryPointSymbol>
+      <SubSystem>Native</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

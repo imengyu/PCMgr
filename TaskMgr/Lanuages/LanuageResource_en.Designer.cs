@@ -1173,6 +1173,26 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 The kernel management function is only partially completed, and the function has not been developed yet. There may be BUG. If you load the driver, it is likely to cause a blue screen problem because of incompatibility.
+        ///
+        ///Therefore, we do not recommend that you use this option. 的本地化字符串。
+        /// </summary>
+        internal static string LoadDriverWarn {
+            get {
+                return ResourceManager.GetString("LoadDriverWarn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Do you really want to load the driver? This function is debugging! 的本地化字符串。
+        /// </summary>
+        internal static string LoadDriverWarnTitle {
+            get {
+                return ResourceManager.GetString("LoadDriverWarnTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Loading 的本地化字符串。
         /// </summary>
         internal static string Loading {
@@ -3200,6 +3220,15 @@ namespace PCMgr.Lanuages {
         internal static string WantLogooffUser {
             get {
                 return ResourceManager.GetString("WantLogooffUser", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Warning 的本地化字符串。
+        /// </summary>
+        internal static string WarnTitle {
+            get {
+                return ResourceManager.GetString("WarnTitle", resourceCulture);
             }
         }
         

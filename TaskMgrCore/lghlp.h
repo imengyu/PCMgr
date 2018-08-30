@@ -112,7 +112,9 @@ extern LPWSTR str_item_logoff_ss;
 extern LPWSTR str_item_logoff_ssfailed;
 extern LPWSTR str_item_set_proc_priority_failed;
 extern LPWSTR str_item_set_proc_affinity_failed;
-
+extern LPWSTR str_item_warn_title;
+extern LPWSTR str_item_loaddriver_warn;
+extern LPWSTR str_item_loaddriver_warn_title;
 
 
 

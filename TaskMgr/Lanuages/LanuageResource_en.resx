@@ -1212,4 +1212,15 @@ Compressed memory stores data that estimates {2} and saves {3} memory for the sy
   <data name="IdleProcessDsb" xml:space="preserve">
     <value>Percentage of processor idle time</value>
   </data>
+  <data name="LoadDriverWarn" xml:space="preserve">
+    <value>The kernel management function is only partially completed, and the function has not been developed yet. There may be BUG. If you load the driver, it is likely to cause a blue screen problem because of incompatibility.
+
+Therefore, we do not recommend that you use this option.</value>
+  </data>
+  <data name="LoadDriverWarnTitle" xml:space="preserve">
+    <value>Do you really want to load the driver? This function is debugging!</value>
+  </data>
+  <data name="WarnTitle" xml:space="preserve">
+    <value>Warning</value>
+  </data>
 </root>

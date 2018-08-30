@@ -149,8 +149,10 @@ namespace PCMgr.Ctls
             item_nopagepool = new PerformanceInfos.PerformanceInfoSpeicalItem();
             item_ramuseage.Name = LanuageMgr.GetStr("MemUsing");
             item_ramcanuse.Name = LanuageMgr.GetStr("MenCanUse");
+            item_sended.LineSp = true;
             item_sended.Name = LanuageMgr.GetStr("Submited");
             item_cached.Name = LanuageMgr.GetStr("Cached");
+            item_pagepool.LineSp = true;
             item_pagepool.Name = LanuageMgr.GetStr("PagedPool");
             item_nopagepool.Name = LanuageMgr.GetStr("NonPagedPool");
             performanceInfos.SpeicalItems.Add(item_ramuseage);

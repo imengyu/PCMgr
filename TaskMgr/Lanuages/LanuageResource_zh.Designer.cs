@@ -1178,6 +1178,25 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 内核管理功能目前只完成部分，功能还未开发完成，可能存在BUG。如果您加载驱动，很可能造成因为不兼容而蓝屏的问题。
+        ///所以，我们不建议您使用此选项。 的本地化字符串。
+        /// </summary>
+        internal static string LoadDriverWarn {
+            get {
+                return ResourceManager.GetString("LoadDriverWarn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 你真的要加载驱动吗？此功能目前仅仅在测试中！ 的本地化字符串。
+        /// </summary>
+        internal static string LoadDriverWarnTitle {
+            get {
+                return ResourceManager.GetString("LoadDriverWarnTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 正在加载 的本地化字符串。
         /// </summary>
         internal static string Loading {
@@ -1339,7 +1358,7 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
-        ///   查找类似 使用中 (已缓存) 的本地化字符串。
+        ///   查找类似 使用中 (已压缩) 的本地化字符串。
         /// </summary>
         internal static string MemUsing {
             get {
@@ -3211,6 +3230,15 @@ namespace PCMgr.Lanuages {
         internal static string WantLogooffUser {
             get {
                 return ResourceManager.GetString("WantLogooffUser", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 警告 的本地化字符串。
+        /// </summary>
+        internal static string WarnTitle {
+            get {
+                return ResourceManager.GetString("WarnTitle", resourceCulture);
             }
         }
         

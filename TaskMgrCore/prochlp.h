@@ -240,6 +240,10 @@ EXTERN_C M_API BOOL MGetProcessCommandLine(HANDLE handle, LPWSTR buffer, int max
 EXTERN_C M_API BOOL MGetProcessIsUWP(HANDLE handle);
 //获取进程是否是32位
 EXTERN_C M_API BOOL MGetProcessIs32Bit(HANDLE handle);
+//获取进程的GDI对象个数
+M_API DWORD MGetProcessGdiHandleCount(HANDLE handle);
+//获取进程的用户对象个数
+M_API DWORD MGetProcessUserHandleCount(HANDLE handle);
 //获取进程内核EPROCESS信息
 //    pid：进程id
 //  对 M_SU_GetEPROCESS 的封装

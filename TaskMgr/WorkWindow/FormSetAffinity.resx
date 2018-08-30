@@ -235,10 +235,10 @@
     <value>Top, Left, Right</value>
   </data>
   <data name="lbTip.Location" type="System.Drawing.Point, System.Drawing">
-    <value>12, 25</value>
+    <value>12, 21</value>
   </data>
   <data name="lbTip.Size" type="System.Drawing.Size, System.Drawing">
-    <value>345, 36</value>
+    <value>345, 40</value>
   </data>
   <data name="lbTip.TabIndex" type="System.Int32, mscorlib">
     <value>8</value>

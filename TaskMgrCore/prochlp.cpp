@@ -76,6 +76,8 @@ NtQueryVirtualMemoryFun NtQueryVirtualMemory;
 NtReadVirtualMemoryFun NtReadVirtualMemory;
 
 NtUnmapViewOfSectionFun NtUnmapViewOfSection;
+NtDuplicateObjectFun NtDuplicateObject;
+NtCloseFun NtClose;
 
 LdrGetProcedureAddressFun LdrGetProcedureAddress;
 RtlInitAnsiStringFun RtlInitAnsiString;
@@ -1187,6 +1189,12 @@ M_API BOOL MGetProcessIs32Bit(HANDLE handle) {
 	IsWow64Process(handle, &rs);
 	return rs;
 }
+M_API DWORD MGetProcessGdiHandleCount(HANDLE handle) {
+	return GetGuiResources(handle, GR_GDIOBJECTS);
+}
+M_API DWORD MGetProcessUserHandleCount(HANDLE handle) {
+	return GetGuiResources(handle, GR_USEROBJECTS);
+}
 M_API BOOL MGetProcessEprocess(DWORD pid, PPEOCESSKINFO info)
 {
 	ULONG_PTR outEprocess = 0;
@@ -1551,7 +1559,7 @@ M_API BOOL MUnInstallUWPApp(LPWSTR name)
 //..
 M_API BOOL MCloseHandle(HANDLE handle)
 {
-	return CloseHandle(handle);
+	return NT_SUCCESS(NtClose(handle));
 }
 //Process Control
 M_API NTSTATUS MSuspendProcessNt(DWORD dwPId, HANDLE handle)
@@ -2114,6 +2122,8 @@ BOOL LoadDll()
 		NtQueryVirtualMemory = (NtQueryVirtualMemoryFun)GetProcAddress(hNtDll, "NtQueryVirtualMemory");
 		NtReadVirtualMemory = (NtReadVirtualMemoryFun)GetProcAddress(hNtDll, "NtReadVirtualMemory");
 		NtSetInformationProcess = (NtSetInformationProcessFun)GetProcAddress(hNtDll, "NtSetInformationProcess");
+		NtDuplicateObject = (NtDuplicateObjectFun)GetProcAddress(hNtDll, "NtDuplicateObject");
+		NtClose = (NtCloseFun)GetProcAddress(hNtDll, "NtClose");
 
 		//shell32
 		RunFileDlg = (_RunFileDlg)MGetProcedureAddress(hShell32, NULL, 61);

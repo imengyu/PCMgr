@@ -69,7 +69,7 @@
             this.performanceInfos.ItemMargan = 0;
             this.performanceInfos.LineOffest = 0;
             this.performanceInfos.MaxSpeicalItemsWidth = 300;
-            this.performanceInfos.MaxSpeicalItemsWidthLimit = 300;
+            this.performanceInfos.MaxSpeicalItemsWidthLimit = 500;
             this.performanceInfos.Name = "performanceInfos";
             // 
             // performanceGridGlobal

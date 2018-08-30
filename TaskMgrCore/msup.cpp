@@ -51,7 +51,20 @@ VOID MGetMemStatitics(HWND hDlg)
 	PROCESS_MEMORY_COUNTERS meminfo = { 0 };
 	meminfo.cb = sizeof(PROCESS_MEMORY_COUNTERS);
 	GetProcessMemoryInfo(GetCurrentProcess(), &meminfo, meminfo.cb);
-
+#ifdef _AMD64_
+	swprintf_s(memstr,
+		L"PageFaultCount : %u\nPagefileUsage : %llu\nPeakPagefileUsage : %llu\nPeakWorkingSetSize : %llu\
+        \nQuotaNonPagedPoolUsage : %llu\nQuotaPagedPoolUsage : %llu\nQuotaPeakNonPagedPoolUsage : %llu\
+		\nQuotaPeakPagedPoolUsage : %llu\nWorkingSetSize : %llu\n",
+		meminfo.PageFaultCount,
+		meminfo.PagefileUsage,
+		meminfo.PeakPagefileUsage, meminfo.PeakWorkingSetSize,
+		meminfo.QuotaNonPagedPoolUsage,
+		meminfo.QuotaPagedPoolUsage,
+		meminfo.QuotaPeakNonPagedPoolUsage,
+		meminfo.QuotaPeakPagedPoolUsage,
+		meminfo.WorkingSetSize);
+#else
 	swprintf_s(memstr,
 		L"PageFaultCount : %u\nPagefileUsage : %u\nPeakPagefileUsage : %u\nPeakWorkingSetSize : %u\
         \nQuotaNonPagedPoolUsage : %u\nQuotaPagedPoolUsage : %u\nQuotaPeakNonPagedPoolUsage : %u\
@@ -64,6 +77,7 @@ VOID MGetMemStatitics(HWND hDlg)
 		meminfo.QuotaPeakNonPagedPoolUsage,
 		meminfo.QuotaPeakPagedPoolUsage,
 		meminfo.WorkingSetSize);
+#endif
 
 	SetDlgItemText(hDlg, IDC_STAT_MEM, memstr);
 
@@ -84,9 +98,10 @@ VOID MGetGCStatitics(HWND hDlg)
 		if (SUCCEEDED(pGcManager->GetStats(&GCStats)))
 		{
 			WCHAR memstr[512];
-			swprintf_s(memstr, L"Gen0HeapSizeKBytes : %u K\nGen1HeapSizeKBytes : %u K\nGen2HeapSizeKBytes : %u K\n\
-KBytesPromotedFromGen0 : %u K\nKBytesPromotedFromGen1 : %u K\nLargeObjectHeapSizeKBytes : %u K\n\
-CommittedKBytes : %u K\nReservedKBytes : %u K",
+#ifdef _AMD64_
+			swprintf_s(memstr, L"Gen0HeapSizeKBytes : %llu K\nGen1HeapSizeKBytes : %llu K\nGen2HeapSizeKBytes : %llu K\n\
+KBytesPromotedFromGen0 : %llu K\nKBytesPromotedFromGen1 : %llu K\nLargeObjectHeapSizeKBytes : %llu K\n\
+CommittedKBytes : %llu K\nReservedKBytes : %llu K",
 				GCStats.Gen0HeapSizeKBytes,
 				GCStats.Gen1HeapSizeKBytes,
 				GCStats.Gen2HeapSizeKBytes,
@@ -95,6 +110,19 @@ CommittedKBytes : %u K\nReservedKBytes : %u K",
 				GCStats.LargeObjectHeapSizeKBytes,
 				GCStats.CommittedKBytes,
 				GCStats.ReservedKBytes);
+#else
+			swprintf_s(memstr, L"Gen0HeapSizeKBytes : %u K\nGen1HeapSizeKBytes : %u K\nGen2HeapSizeKBytes : %u K\n\
+KBytesPromotedFromGen0 : %u K\nKBytesPromotedFromGen1 : %u K\nLargeObjectHeapSizeKBytes : %u K\n\
+CommittedKBytes : %u K\nReservedKBytes : %u K",
+GCStats.Gen0HeapSizeKBytes,
+GCStats.Gen1HeapSizeKBytes,
+GCStats.Gen2HeapSizeKBytes,
+GCStats.KBytesPromotedFromGen0,
+GCStats.KBytesPromotedFromGen1,
+GCStats.LargeObjectHeapSizeKBytes,
+GCStats.CommittedKBytes,
+GCStats.ReservedKBytes);
+#endif
 			SetDlgItemText(hDlg, IDC_STAT_GC, memstr);
 		}
 	}

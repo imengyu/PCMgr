@@ -630,7 +630,7 @@ PCMgr 需要管理员权限 才能对系统进行控制和管理。
     <value>最大速度：</value>
   </data>
   <data name="MemUsing" xml:space="preserve">
-    <value>使用中 (已缓存)</value>
+    <value>使用中 (已压缩)</value>
   </data>
   <data name="MenCanUse" xml:space="preserve">
     <value>可用内存</value>
@@ -1210,5 +1210,15 @@ PCMgr 需要管理员权限 才能对系统进行控制和管理。
   </data>
   <data name="IdleProcessDsb" xml:space="preserve">
     <value>处理器空闲时间百分比</value>
+  </data>
+  <data name="LoadDriverWarn" xml:space="preserve">
+    <value>内核管理功能目前只完成部分，功能还未开发完成，可能存在BUG。如果您加载驱动，很可能造成因为不兼容而蓝屏的问题。
+所以，我们不建议您使用此选项。</value>
+  </data>
+  <data name="LoadDriverWarnTitle" xml:space="preserve">
+    <value>你真的要加载驱动吗？此功能目前仅仅在测试中！</value>
+  </data>
+  <data name="WarnTitle" xml:space="preserve">
+    <value>警告</value>
   </data>
 </root>

@@ -808,10 +808,10 @@ typedef struct _SYSTEM_MEMORY_LIST_INFORMATION
 } SYSTEM_MEMORY_LIST_INFORMATION, *PSYSTEM_MEMORY_LIST_INFORMATION;
 
 typedef LONG(NTAPI * RtlNtStatusToDosErrorFun)(ULONG status);
-typedef NTSTATUS(NTAPI * RtlGetLastWin32ErrorFun)();
-typedef NTSTATUS(NTAPI * NtOpenThreadFun)(PHANDLE ThreadHandle, ACCESS_MASK DesiredAccess, POBJECT_ATTRIBUTES ObjectAttributes, PCLIENT_ID ClientId);
-typedef NTSTATUS(NTAPI * NtTerminateThreadFun)(HANDLE ThreadHandle, DWORD ExitCode);
-typedef NTSTATUS(NTAPI * NtSuspendThreadFun)(HANDLE ThreadHandle, PULONG PreviousSuspendCount OPTIONAL);
+typedef NTSTATUS(NTAPI *RtlGetLastWin32ErrorFun)();
+typedef NTSTATUS(NTAPI *NtOpenThreadFun)(PHANDLE ThreadHandle, ACCESS_MASK DesiredAccess, POBJECT_ATTRIBUTES ObjectAttributes, PCLIENT_ID ClientId);
+typedef NTSTATUS(NTAPI *NtTerminateThreadFun)(HANDLE ThreadHandle, DWORD ExitCode);
+typedef NTSTATUS(NTAPI *NtSuspendThreadFun)(HANDLE ThreadHandle, PULONG PreviousSuspendCount OPTIONAL);
 typedef NTSTATUS(NTAPI *NtResumeThreadFun)(HANDLE ThreadHandle, PULONG SuspendCount OPTIONAL);
 
 
@@ -826,13 +826,21 @@ typedef NTSTATUS(NTAPI *NtResumeProcessFun)(HANDLE);
 typedef NTSTATUS(NTAPI *NtTerminateProcessFun)(HANDLE, DWORD);
 typedef NTSTATUS(NTAPI *NtOpenProcessFun)(PHANDLE ProcessHandle, ACCESS_MASK DesiredAccess, POBJECT_ATTRIBUTES ObjectAttributes, PCLIENT_ID ClientId);
 typedef NTSTATUS(NTAPI *NtUnmapViewOfSectionFun)(IN HANDLE ProcessHandle, IN PVOID BaseAddress);
-typedef NTSTATUS(NTAPI* NtQueryObjectFun)(HANDLE Handle, OBJECT_INFORMATION_CLASS Info, PVOID Buffer, ULONG BufferSize, PULONG ReturnLength);
-typedef NTSTATUS(NTAPI*NtReadVirtualMemoryFun)(_In_ HANDLE ProcessHandle, _In_opt_ PVOID BaseAddress, _Out_writes_bytes_(BufferSize) PVOID Buffer, _In_ SIZE_T BufferSize, _Out_opt_ PSIZE_T NumberOfBytesRead);
+typedef NTSTATUS(NTAPI *NtQueryObjectFun)(HANDLE Handle, OBJECT_INFORMATION_CLASS Info, PVOID Buffer, ULONG BufferSize, PULONG ReturnLength);
+typedef NTSTATUS(NTAPI *NtReadVirtualMemoryFun)(_In_ HANDLE ProcessHandle, _In_opt_ PVOID BaseAddress, _Out_writes_bytes_(BufferSize) PVOID Buffer, _In_ SIZE_T BufferSize, _Out_opt_ PSIZE_T NumberOfBytesRead);
+typedef NTSTATUS(NTAPI *NtDuplicateObjectFun)(_In_ HANDLE SourceProcessHandle, _In_ HANDLE SourceHandle, _In_opt_ HANDLE TargetProcessHandle, _Out_opt_ PHANDLE TargetHandle, _In_ ACCESS_MASK DesiredAccess, _In_ ULONG HandleAttributes, _In_ ULONG Options);
+typedef NTSTATUS(NTAPI *NtCloseFun)(_In_ HANDLE Handle);
 
 typedef NTSTATUS(NTAPI *LdrGetProcedureAddressFun)(_In_ PVOID DllHandle, _In_opt_ PANSI_STRING ProcedureName, _In_opt_ ULONG ProcedureNumber, _Out_ PVOID* ProcedureAddress);
 typedef VOID(NTAPI *RtlInitAnsiStringFun)(_Out_ PANSI_STRING DestinationString, _In_opt_ PSTR SourceString);
 
-
+#define NtCurrentProcess() ((HANDLE)(LONG_PTR)-1)
+#define ZwCurrentProcess() NtCurrentProcess()
+#define NtCurrentThread() ((HANDLE)(LONG_PTR)-2)
+#define ZwCurrentThread() NtCurrentThread()
+#define NtCurrentSession() ((HANDLE)(LONG_PTR)-3)
+#define ZwCurrentSession() NtCurrentSession()
+#define NtCurrentPeb() (NtCurrentTeb()->ProcessEnvironmentBlock)
 
 /*typedef BOOL(*KsGetStateFun)();
 typedef BOOL(*KsOpenProcessHandleFun)(DWORD dwPID, PHANDLE pHandle);

@@ -230,18 +230,18 @@ namespace PCMgr.Ctls
         }
         private void performanceCpus_MouseLeave(object sender, EventArgs e)
         {
-            lastShowTooltip = 0;
+            lastShowTooltip = -1;
             toolTip1.Hide(this);
         }
 
-        private int lastShowTooltip = 0;
+        private int lastShowTooltip = -1;
         private void ShowTooltip(Point p)
         {
             int curri = (p.X / (performanceCpus.Width / cpuCount));
             if (curri != lastShowTooltip)
             {
-                lastShowTooltip = 1;
-                toolTip1.Show("CPU " +curri, performanceCpus, 0, Height + 2, 5000);
+                lastShowTooltip = curri;
+                toolTip1.Show("CPU " + curri, performanceCpus, curri * (performanceCpus.Width / cpuCount), performanceCpus.Height + 3, 5000);
             }
         }
     }

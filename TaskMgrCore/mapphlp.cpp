@@ -113,6 +113,11 @@ HWND hListHeaderMainProcList;
 bool MLoadAppBackUp();
 LONG WINAPI MUnhandledExceptionFilter(struct _EXCEPTION_POINTERS *lpExceptionInfo);
 
+BOOL MAppShowLoadDrvWarn() {
+	if (MShowMessageDialog(hWndMain, str_item_loaddriver_warn, str_item_warn_title, str_item_loaddriver_warn_title, MB_ICONEXCLAMATION, MB_YESNO) == IDNO)
+		return FALSE;
+	return TRUE;
+}
 //Worker Calls
 BOOL MAppStartLoadSomeZZ()
 {
@@ -275,15 +280,15 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 		break;
 	}
 	case 173: {
-		return MKillProcessUser2(hWndMain, (DWORD)hWnd, (BOOL)data);
+		return MKillProcessUser2(hWndMain, (DWORD)(ULONG_PTR)hWnd, (BOOL)(ULONG_PTR)data);
 	}
 	case 174: {
-		MProcessHANDLEStorageDestroyItem((DWORD)data);
+		MProcessHANDLEStorageDestroyItem((DWORD)(ULONG_PTR)data);
 		break;
 	}
 	case 175: {
 		if (hWnd) {
-			MUsersSetCurrentSelect((DWORD)data);
+			MUsersSetCurrentSelect((DWORD)(ULONG_PTR)data);
 			HMENU hroot = LoadMenu(hInstRs, MAKEINTRESOURCE(IDR_MENUUSER));
 			if (hroot) {
 				HMENU hpop = GetSubMenu(hroot, 0);
@@ -308,7 +313,7 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 		break;
 	}
 	case 176: {
-		MessageBox(0, L"Welcome to my Github https://github.com/717021 . This software is open source. You can download the full source code there.", L"YouCanFindProjectOnGithub", MB_OK);
+		MessageBoxA(0, "Welcome to my Github https://github.com/717021 . This software is open source. You can download the full source code there.\nAnd if you want talk to me, you can add my QQ : 1501076885", "YouCanFindProjectOnGithub", MB_OK);
 		break;
 	}
 	case 177: {
@@ -1147,7 +1152,8 @@ LRESULT CALLBACK MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		switch (wParam)
 		{
 		case IDM_LOAD_DRIVER: {
-			MAppMainCall(M_CALLBACK_KERNEL_INIT, 0, 0);
+			if (MAppShowLoadDrvWarn())
+				MAppMainCall(M_CALLBACK_KERNEL_INIT, 0, 0);
 			break;
 		}
 		case IDM_UNLOAD_DRIVER: {
@@ -1367,6 +1373,7 @@ LRESULT CALLBACK MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				MLoadKernelNTPDB(&kNtosValue, M_CFG_GetConfigBOOL(L"UseKrnlPDB", L"Configure", true));
 				MAppMainCall(M_CALLBACK_HLDE_LOAD_STATUS, 0, 0);
 			}
+			else MShowErrorMessage(L"", L"Kernel not load.");
 			break;
 		}
 		case IDM_SETTO:
@@ -1415,7 +1422,7 @@ LRESULT CALLBACK MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		case ID_TASKMENU_SETAFFINITY: {
-			MAppMainCall(M_CALLBACK_SETAFFINITY, (LPVOID)thisCommandPid, thisCommandhProcess);
+			MAppMainCall(M_CALLBACK_SETAFFINITY, (LPVOID)(ULONG_PTR)thisCommandPid, thisCommandhProcess);
 			break;
 		}
 		case ID_FMMAIN_REFESH: {

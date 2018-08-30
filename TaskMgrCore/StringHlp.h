@@ -5,6 +5,24 @@
 #include <string>  
 #include <vector>
 
+//×Ö·û´®ÊÇ·ñÏàµÈ
+#define MStrEqual MStrEqualW
+//Õ­×Ö·û×ªÎª¿í×Ö·û
+#define A2W MConvertLPCSTRToLPWSTR
+//¿í×Ö·û×ªÎªÕ­×Ö·û
+#define W2A MConvertLPWSTRToLPCSTR
+
+EXTERN_C M_API void MConvertStrDel(void * str);
+
+//Õ­×Ö·û×ªÎª¿í×Ö·û
+EXTERN_C M_API LPWSTR MConvertLPCSTRToLPWSTR(const char * szString);
+//¿í×Ö·û×ªÎªÕ­×Ö·û
+EXTERN_C M_API LPCSTR MConvertLPWSTRToLPCSTR(const WCHAR * szString);
+//×Ö·û´®ÊÇ·ñÏàµÈ
+EXTERN_C M_API BOOL MStrEqualA(const LPCSTR str1, const LPCSTR str2);
+//×Ö·û´®ÊÇ·ñÏàµÈ
+EXTERN_C M_API BOOL MStrEqualW(const wchar_t* str1, const wchar_t* str2);
+
 std::string & FormatString(std::string & _str, const char * _Format, ...);
 
 std::wstring & FormatString(std::wstring & _str, const wchar_t * _Format, ...);

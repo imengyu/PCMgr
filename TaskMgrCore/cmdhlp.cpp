@@ -11,6 +11,7 @@
 #include "suact.h"
 #include "nthlp.h"
 #include "fmhlp.h"
+#include "msup.h"
 #include "StringHlp.h"
 #include "StringSplit.h"
 
@@ -32,10 +33,11 @@ DWORD WINAPI MConsoleThread(LPVOID lpParameter)
 	return MAppCmdRunner(TRUE);
 }
 
+#define CMD_CASE_NOARG(cmd, go) else if ((*cmds)[0] == cmd) go()
 #define CMD_CASE(cmd, go) else if ((*cmds)[0] == cmd) go(cmds, size)
 #define CMD_CASE_CAN_EXIT(cmd, go) else if ((*cmds)[0] == cmd) {if(go(cmds, size))return true;}
 
-bool MRunCmd(vector<string> * cmds);
+bool MRunCmd(vector<string> * cmds, LPCSTR oldCmd);
 
 vector<string> *MAppConsoleInitCommandLine() 
 {
@@ -68,8 +70,11 @@ M_CAPI(int) MAppConsoleInit()
 	MGetWindowsBulidVersion();
 	printf_s("\n");
 
+	string orgCmd;
 	vector<string> * cmds = MAppConsoleInitCommandLine();
-	if (cmds) MRunCmd(cmds);
+	for each (string var in (*cmds))
+		orgCmd += var;
+	if (cmds) MRunCmd(cmds, orgCmd.c_str());
 	delete(cmds);
 
 	int rs = MAppCmdRunner(FALSE);
@@ -488,15 +493,19 @@ UNMAP_AND_EXIT:
 	CloseHandle(hFileMapping);
 	CloseHandle(hFile);
 }
+void MRunCmd_FGc() {
+	MForceGC();
+	MPrintSuccess();
+}
 
 
 bool MRunCmdWithString(char*maxbuf) {
 	string cmd(maxbuf);
 	vector<string> cmds;
 	SplitString(cmd, cmds, " ");
-	return MRunCmd(&cmds);
+	return MRunCmd(&cmds, maxbuf);
 }
-bool MRunCmd(vector<string> * cmds)
+bool MRunCmd(vector<string> * cmds, LPCSTR oldCmd)
 {
 	int size = static_cast<int>(cmds->size());
 	if (size >= 1)
@@ -511,7 +520,9 @@ bool MRunCmd(vector<string> * cmds)
 		CMD_CASE("taskresume", MRunCmd_TaskResume);
 		CMD_CASE("vexp", MRunCmd_VExp);
 		CMD_CASE("vimp", MRunCmd_VImp);
-		else MRunCmd_RunAsProgram(cmds, size);
+		CMD_CASE_NOARG("vstat", MShowProgramStats);
+		CMD_CASE_NOARG("gc", MRunCmd_FGc);
+		else system(oldCmd);
 	}
 	return false;
 }

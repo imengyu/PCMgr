@@ -21,6 +21,17 @@ namespace PCMgr
 {
     public partial class FormMain : Form
     {
+        #region ToZz
+        public static class 想反编译这个程序吗
+        {
+            public const string Copyright = "Copyright (C) 2018 DreamFish";
+            public const string 版权所有 = "版权所有 Copyright (C) 2018 DreamFish";
+            public const string 不用反编译了 = "为什么没有混淆？因为大部分核心功能都在C++模块里（PCMgr32.dll），" +
+                "C++的程序多难反编译啊！";
+            public const string QQ = "1501076885";
+        }
+        #endregion
+
         public FormMain(string[] agrs)
         {
             Instance = this;
@@ -37,7 +48,6 @@ namespace PCMgr
             baseProcessRefeshTimerLowUWP.Tick += BaseProcessRefeshTimerLowUWP_Tick;
             this.agrs = agrs;
         }
-
 
         public static string cfgFilePath = "";
         private string[] agrs = null;
@@ -2486,6 +2496,10 @@ namespace PCMgr
                 ProcessListDetails_Perf_Update_Cycle(it, p);
             if (colStateIndex != -1 && colStateIndex != ipdateOneDataCloum)
                 ProcessListDetails_Update_State(it, p);
+            if (colGDIObjectIndex != -1 && colGDIObjectIndex != ipdateOneDataCloum)
+                ProcessListDetails_Perf_Update_GdiHandleCount(it, p);
+            if (colUserObjectIndex != -1 && colUserObjectIndex != ipdateOneDataCloum)
+                ProcessListDetails_Perf_Update_UserHandleCount(it, p);
         }
         //update a column be use to sort
         private void ProcessListDetailsUpdateOnePerfCloum(uint pid, ListViewItem it, int ipdateOneDataCloum, bool forceProcessHost = false)
@@ -2531,6 +2545,10 @@ namespace PCMgr
                 ProcessListDetails_Perf_Update_Cycle(it, p);
             else if (colStateIndex != -1 && colStateIndex == ipdateOneDataCloum)
                 ProcessListDetails_Update_State(it, p);
+            else if(colGDIObjectIndex != -1 && colGDIObjectIndex == ipdateOneDataCloum)
+                ProcessListDetails_Perf_Update_GdiHandleCount(it, p);
+            else if(colUserObjectIndex != -1 && colUserObjectIndex == ipdateOneDataCloum)
+                ProcessListDetails_Perf_Update_UserHandleCount(it, p);
         }
         private void ProcessListDetailsUpdateValues(int refeshAllDataColum)
         {
@@ -2632,6 +2650,18 @@ namespace PCMgr
             uint data = MGetProcessThreadsCount(p.SYSTEM_PROCESSES);
             it.SubItems[colThreadCountIndex].Text = FormatFileSizeMenSingal(data);
             it.SubItems[colThreadCountIndex].Tag = data;
+        }
+        private void ProcessListDetails_Perf_Update_GdiHandleCount(ListViewItem it, ProcessDetalItem p)
+        {
+            uint data = MGetProcessGdiHandleCount(p.handle);
+            it.SubItems[colGDIObjectIndex].Text = FormatFileSizeMenSingal(data);
+            it.SubItems[colGDIObjectIndex].Tag = data;
+        }
+        private void ProcessListDetails_Perf_Update_UserHandleCount(ListViewItem it, ProcessDetalItem p)
+        {
+            uint data = MGetProcessUserHandleCount(p.handle);
+            it.SubItems[colUserObjectIndex].Text = FormatFileSizeMenSingal(data);
+            it.SubItems[colUserObjectIndex].Tag = data;
         }
 
         private void ProcessListDetails_Perf_Update_IORead(ListViewItem it, ProcessDetalItem p)
@@ -4683,7 +4713,7 @@ namespace PCMgr
         public static string str_MemStandby = "Standby";
         public static string str_MemUsingS = "Using";
         public static string str_IdleProcessDsb = "IdleProcessDsb";
-        
+        public static string str_WarnTitle = "";
 
         /*
         
@@ -4726,6 +4756,7 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
             {
                 MLG_SetLanuageItems_CanRealloc();
 
+                str_WarnTitle = LanuageMgr.GetStr("WarnTitle");
                 str_IdleProcessDsb = LanuageMgr.GetStr("IdleProcessDsb");
                 str_MemFree = LanuageMgr.GetStr("MemFree");
                 str_MemModifed = LanuageMgr.GetStr("MemModifed");
@@ -4918,6 +4949,9 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                 MAppSetLanuageItems(2, 23, LanuageMgr.GetStr2("DisConnectSessionFailed1", out size), size);
                 MAppSetLanuageItems(2, 24, LanuageMgr.GetStr2("SetProcPriorityClassFailed", out size), size);
                 MAppSetLanuageItems(2, 25, LanuageMgr.GetStr2("SetProcAffinityFailed", out size), size);
+                MAppSetLanuageItems(2, 26, str_WarnTitle, str_WarnTitle.Length + 1);
+                MAppSetLanuageItems(2, 27, LanuageMgr.GetStr2("LoadDriverWarn", out size), size);
+                MAppSetLanuageItems(2, 28, LanuageMgr.GetStr2("LoadDriverWarnTitle", out size), size);
             }
             catch (Exception e)
             {
@@ -6151,6 +6185,8 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
         }
 
         #region FormEvent
+
+        public const string QQ = "1501076885";
 
         private void AppLastLoadStep()
         {

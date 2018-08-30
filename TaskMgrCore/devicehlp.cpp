@@ -628,7 +628,7 @@ M_CAPI(UINT) MDEVICE_GetNetworkAdaptersInfo()
 		pEnumerator->Release();
 		MDEVICE_GetNetworkAdaptersIPInfo();
 
-		return netAdapters.size();
+		return static_cast<UINT>(netAdapters.size());
 	}
 	return FALSE;
 }

@@ -56,18 +56,18 @@ VOID AddAStringItem(HWND hList, LPWSTR str)
 	li.iItem = 0;
 	li.iSubItem = 1;
 	li.pszText = str;
-	li.cchTextMax = wcslen(str) + 1;
+	li.cchTextMax = static_cast<int>(wcslen(str) + 1);
 	ListView_SetItem(hList, &li);
 }
 VOID Add2StringItem(HWND hList, LPWSTR str, LPWSTR str2) {
 	LVITEM li = { 0 };
 	li.mask = LVIF_TEXT;
 	li.pszText = str;
-	li.cchTextMax = wcslen(str) + 1;
+	li.cchTextMax = static_cast<int>(wcslen(str) + 1);
 	ListView_InsertItem(hList, &li);
 	li.iSubItem = 1;
 	li.pszText = str2;
-	li.cchTextMax = wcslen(str2) + 1;
+	li.cchTextMax = static_cast<int>(wcslen(str2) + 1);
 	ListView_SetItem(hList, &li);
 }
 

@@ -210,7 +210,7 @@ void M_LOG_LogXW(LPWSTR orgFormat, WORD color, wchar_t const* const _Format, va_
 	else {
 		bool needRePrintCur = M_LOG_TryPushEnterCursur();
 		SetConsoleTextAttribute(hOutput, color);
-		WriteConsole(hOutput, buf.c_str(), buf.size() + 1, NULL, 0);
+		WriteConsole(hOutput, buf.c_str(), static_cast<DWORD>(buf.size() + 1), NULL, 0);
 		M_LOG_DefConsoleTextColor();
 		if (needRePrintCur) printf(">");
 	}
@@ -233,7 +233,7 @@ void M_LOG_LogX_WithFunAndLineW(LPWSTR orgFormat, LPSTR fileName, LPSTR funName,
 	else {
 		bool needRePrintCur = M_LOG_TryPushEnterCursur();
 		SetConsoleTextAttribute(hOutput, color);
-		WriteConsole(hOutput, buf.c_str(), buf.size() + 1, NULL, 0);
+		WriteConsole(hOutput, buf.c_str(), static_cast<DWORD>(buf.size() + 1), NULL, 0);
 		M_LOG_DefConsoleTextColor();
 		if (needRePrintCur) printf(">");
 	}
