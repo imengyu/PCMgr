@@ -115,7 +115,9 @@ extern LPWSTR str_item_set_proc_affinity_failed;
 extern LPWSTR str_item_warn_title;
 extern LPWSTR str_item_loaddriver_warn;
 extern LPWSTR str_item_loaddriver_warn_title;
-
+extern LPWSTR str_item_deatch_debugger_title;
+extern LPWSTR str_item_deatch_debugger_err;
+extern LPWSTR str_item_deatch_debugger_notdebug;
 
 
 

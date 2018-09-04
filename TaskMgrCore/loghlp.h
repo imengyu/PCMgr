@@ -49,6 +49,13 @@ void M_LOG_FocusConsoleWindow();
 void M_LOG_CloseConsole(BOOL callFormCloseEvent, BOOL callFormConsoleApp = FALSE);
 
 //设置 Log 当前记录等级
+//   	LogLevFull,        全部记录
+//   	LogLevDebug,   仅调试输出及以上
+//   	LogLevWarn,     仅警告及错误
+//   	LogLevError,     仅错误
+//   	LogLevDisabled 禁用输出
+M_CAPI(void) M_LOG_SetLogLevelStr(LPCWSTR level);
+//设置 Log 当前记录等级
 M_CAPI(void) M_LOG_SetLogLevel(LogLevel level);
 //获取 Log 当前记录等级
 M_CAPI(LogLevel) M_LOG_GetLogLevel(int l);

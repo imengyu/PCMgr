@@ -125,6 +125,9 @@ LPWSTR str_item_set_proc_affinity_failed;
 LPWSTR str_item_warn_title;
 LPWSTR str_item_loaddriver_warn;
 LPWSTR str_item_loaddriver_warn_title;
+LPWSTR str_item_deatch_debugger_title;
+LPWSTR str_item_deatch_debugger_err;
+LPWSTR str_item_deatch_debugger_notdebug;
 
 #define HASSTR(x) x=(LPWSTR)MAlloc(size*sizeof(WCHAR));wcscpy_s(x, size, msg)
 
@@ -245,6 +248,9 @@ void MLG_SetLanuageItems_Destroy()
 	delete str_item_warn_title;
 	delete str_item_loaddriver_warn;
 	delete str_item_loaddriver_warn_title;
+	delete str_item_deatch_debugger_title;
+	delete str_item_deatch_debugger_err;
+	delete str_item_deatch_debugger_notdebug;
 }
 void MLG_SetLanuageItems_1(int id, LPWSTR msg, int size)
 {
@@ -336,6 +342,9 @@ void MLG_SetLanuageItems_2(int id, LPWSTR msg, int size)
 	case 26: HASSTR(str_item_warn_title); break;
 	case 27: HASSTR(str_item_loaddriver_warn); break;
 	case 28: HASSTR(str_item_loaddriver_warn_title); break;
+	case 29: HASSTR(str_item_deatch_debugger_title); break;
+	case 30: HASSTR(str_item_deatch_debugger_err); break;
+	case 31: HASSTR(str_item_deatch_debugger_notdebug); break;
 	}
 
 

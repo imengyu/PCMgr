@@ -33,7 +33,7 @@ namespace PCMgr.WorkWindow
         private EHCALLBACK Callback;
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate void EHCALLBACK(IntPtr handle, IntPtr type, IntPtr name, IntPtr address, IntPtr objaddr, int refcount, int typeindex);
+        private delegate void EHCALLBACK(IntPtr handle, IntPtr type, IntPtr name, IntPtr address, IntPtr objaddr, UInt32 refcount, int typeindex);
 
         private void FormVHandles_Load(object sender, EventArgs e)
         {
@@ -43,7 +43,7 @@ namespace PCMgr.WorkWindow
             Callback = _EHCALLBACK;
             CallbackPtr = Marshal.GetFunctionPointerForDelegate(Callback);
         }
-        private void _EHCALLBACK(IntPtr handle, IntPtr type, IntPtr name, IntPtr address, IntPtr objaddr, int refcount, int typeindex)
+        private void _EHCALLBACK(IntPtr handle, IntPtr type, IntPtr name, IntPtr address, IntPtr objaddr, UInt32 refcount, int typeindex)
         {
             ListViewItem li = new ListViewItem(Marshal.PtrToStringUni(type));
             li.Tag = handle;

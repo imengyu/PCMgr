@@ -32,6 +32,7 @@ namespace PCMgr.Ctls
                 vs.ValueChanged += Vs_ValueChanged;
                 vs.TabIndex = 3;
                 vs.TabStop = true;
+                vs.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
                 par.Controls.Add(vs);
             }
             lineBrush = new LinearGradientBrush(new Point(0, 0), new Point(0, 60), Color.Transparent, Color.FromArgb(187, 187, 187));
@@ -474,8 +475,6 @@ namespace PCMgr.Ctls
                 {
                     int x = items[i].X - XOffest;
 
-                    g.DrawLine(p, new Point(x, 0), new Point(x, h));
-
                     if (items[i] == enteredItem)
                     {
                         if (items[i].IsHot)
@@ -514,6 +513,7 @@ namespace PCMgr.Ctls
                             arrdrawed = true;
                         }
                     thisWidth += items[i].Width;
+                    g.DrawLine(p, new Point(x + items[i].Width, 0), new Point(x + items[i].Width, h));
                 }
                 g.DrawLine(new Pen(Color.FromArgb(160, 160, 160)), new Point(0, Height - 1), new Point(Width, Height - 1));
             }

@@ -66,6 +66,7 @@ namespace PCMgr.WorkWindow
                 AddItem(FormMain.str_DblCklShow_KPROCESS, "", "_KPROCES");
                 AddItem(FormMain.str_DblCklShow_RTL_USER_PROCESS_PARAMETERS, "", "_RTL_USER_PROCESS_PARAMETERS");
             }
+            else AddItem("", FormMain.str_DriverNotLoad);
         }
 
         private void AddItem(string name, string value, object tag = null)

@@ -17,7 +17,7 @@
 #pragma comment(lib, "Pdh.lib")
 #pragma comment(lib, "wbemuuid.lib")
 #pragma comment(lib, "netapi32.lib")
-#pragma comment(lib, "capstone.lib")
+#pragma comment(lib, "capstone_dll.lib")
 #pragma comment(lib, "winsta.lib")
 
 // TODO: 在 STDAFX.H 中引用任何所需的附加头文件，

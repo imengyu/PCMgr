@@ -25,6 +25,11 @@ namespace PCMgr.Ctls
         private IntPtr currNet = IntPtr.Zero;
         private int lastMaxSpeed = 100;
 
+        private double lastReceive = 0;
+        private double lastSent = 0;
+
+        public Panel GridPanel => panelGrid;
+        public bool PageIsGraphicMode { get; set; }
         public bool PageIsActive { get; set; }
         public void PageDelete()
         {
@@ -47,10 +52,10 @@ namespace PCMgr.Ctls
         }
         public void PageUpdate()
         {
-            double sent = 0;
-            double receive = 0;
+            NativeMethods.MPERF_GetNetworksPerformanceCountersValues(currNet, ref lastSent, ref lastReceive);
 
-            NativeMethods.MPERF_GetNetworksPerformanceCountersValues(currNet, ref sent, ref receive);
+            double sent = lastSent;
+            double receive = lastReceive;
 
             item_readSpeed.Value = NativeMethods.FormatNetSpeed(Convert.ToInt64(sent));
             item_writeSpeed.Value = NativeMethods.FormatNetSpeed(Convert.ToInt64(receive));
@@ -90,25 +95,19 @@ namespace PCMgr.Ctls
             performanceInfos.UpdateSpeicalItems();
         }
         public bool PageUpdateSimple(out string customString, out int outdata1, out int outdata2)
-        {
-            double sent = 0;
-            double receive = 0;
-
-            NativeMethods.MPERF_GetNetworksPerformanceCountersValues(currNet, ref sent, ref receive);
-
-            int data1 = (int)(sent * 0.0001);
-            int data2 = (int)(receive * 0.0001);
-
+        {        
             if (!PageIsActive)
             {
-                performanceGrid.AddData2(data1);
-                performanceGrid.AddData(data2);
+                NativeMethods.MPERF_GetNetworksPerformanceCountersValues(currNet, ref lastSent, ref lastReceive);
+
+                performanceGrid.AddData2((int)(lastSent / 1024 * 8));
+                performanceGrid.AddData((int)(lastReceive / 1024 * 8));
             }
 
-            customString = FormMain.str_Sent + " : " + (sent / 1024 * 8).ToString("0.0") + " " 
-                + FormMain.str_Receive + " : " + (receive / 1024 * 8).ToString("0.0") + " Kbps";
-            outdata1 = data1;
-            outdata2 = data2;
+            customString = FormMain.str_Sent + " : " + (lastSent / 1024 * 8).ToString("0.0") + " "
+                + FormMain.str_Receive + " : " + (lastReceive / 1024 * 8).ToString("0.0") + " Kbps";
+            outdata1 = (int)((double)(lastSent / 1024 * 8) / performanceGrid.MaxValue) * 100;
+            outdata2 = (int)((double)(lastReceive / 1024 * 8) / performanceGrid.MaxValue) * 100;
             return true;
         }
 
@@ -175,6 +174,45 @@ namespace PCMgr.Ctls
 
             performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem(LanuageMgr.GetStr("IPV4"), v4));
             performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem(LanuageMgr.GetStr("IPV6"), v6));
+        }
+
+        public event OpeningPageMenuEventHandler OpeningPageMenu;
+        public event SwithGraphicViewEventHandler SwithGraphicView;
+
+        private void PerformancePageNet_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+                contextMenuStrip.Show(MousePosition);
+        }
+        private void 复制ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string s = performanceTitle.Title + "\n    " + performanceTitle.SmallTitle;
+            s += performanceInfos.GetCopyString();
+            Clipboard.SetText(s);
+        }
+
+        private void PerformancePageNet_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+                SwithGraphicView?.Invoke(this);
+        }
+        private void PerformancePageNet_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (PageIsGraphicMode)
+                if (e.Button == MouseButtons.Left && e.Clicks == 1)
+                    NativeMethods.MAppWorkCall3(165, IntPtr.Zero, IntPtr.Zero);
+        }
+
+        private void 图形摘要视图ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SwithGraphicView?.Invoke(this);
+        }
+
+        private void contextMenuStrip_Opening(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            图形摘要视图ToolStripMenuItem.Checked = PageIsGraphicMode;
+            OpeningPageMenu?.Invoke(this, 查看ToolStripMenuItem);
+
         }
 
 

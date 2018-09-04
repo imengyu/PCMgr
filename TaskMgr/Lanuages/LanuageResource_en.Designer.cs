@@ -511,6 +511,33 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 Detach debugger failed 的本地化字符串。
+        /// </summary>
+        internal static string DetachDebuggerError {
+            get {
+                return ResourceManager.GetString("DetachDebuggerError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 The process is not being debugged. 的本地化字符串。
+        /// </summary>
+        internal static string DetachDebuggerNotDebugger {
+            get {
+                return ResourceManager.GetString("DetachDebuggerNotDebugger", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Detach debugger 的本地化字符串。
+        /// </summary>
+        internal static string DetachDebuggerTitle {
+            get {
+                return ResourceManager.GetString("DetachDebuggerTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Device Locator 的本地化字符串。
         /// </summary>
         internal static string DeviceLocator {
@@ -606,6 +633,15 @@ namespace PCMgr.Lanuages {
         internal static string DriverLoadSuccessFull {
             get {
                 return ResourceManager.GetString("DriverLoadSuccessFull", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Driver not load ! 的本地化字符串。
+        /// </summary>
+        internal static string DriverNotLoad {
+            get {
+                return ResourceManager.GetString("DriverNotLoad", resourceCulture);
             }
         }
         
@@ -912,6 +948,15 @@ namespace PCMgr.Lanuages {
         internal static string HandleCount {
             get {
                 return ResourceManager.GetString("HandleCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Hide main window 的本地化字符串。
+        /// </summary>
+        internal static string HideMain {
+            get {
+                return ResourceManager.GetString("HideMain", resourceCulture);
             }
         }
         
@@ -1356,6 +1401,16 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 In use ({0})
+        ///Memory used by processes, drivers, or operating systems 的本地化字符串。
+        /// </summary>
+        internal static string MemTipUsingS {
+            get {
+                return ResourceManager.GetString("MemTipUsingS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 In use 的本地化字符串。
         /// </summary>
         internal static string MemUsing {
@@ -1543,6 +1598,15 @@ namespace PCMgr.Lanuages {
         internal static string NoPDBWarnText {
             get {
                 return ResourceManager.GetString("NoPDBWarnText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Not Connect 的本地化字符串。
+        /// </summary>
+        internal static string NotConnect {
+            get {
+                return ResourceManager.GetString("NotConnect", resourceCulture);
             }
         }
         
@@ -1956,6 +2020,15 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 Show main window 的本地化字符串。
+        /// </summary>
+        internal static string ShowMain {
+            get {
+                return ResourceManager.GetString("ShowMain", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Size 的本地化字符串。
         /// </summary>
         internal static string Size {
@@ -2037,6 +2110,15 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 Let the program hang up. 的本地化字符串。
+        /// </summary>
+        internal static string SuspendCheckText {
+            get {
+                return ResourceManager.GetString("SuspendCheckText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 ? 的本地化字符串。
         /// </summary>
         internal static string SuspendEnd {
@@ -2051,6 +2133,24 @@ namespace PCMgr.Lanuages {
         internal static string SuspendStart {
             get {
                 return ResourceManager.GetString("SuspendStart", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Suspending the program will cause the program hung and unable to continue to run. Do you want to continue? 的本地化字符串。
+        /// </summary>
+        internal static string SuspendThisText {
+            get {
+                return ResourceManager.GetString("SuspendThisText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Do you want to suspend this program? 的本地化字符串。
+        /// </summary>
+        internal static string SuspendThisTitle {
+            get {
+                return ResourceManager.GetString("SuspendThisTitle", resourceCulture);
             }
         }
         

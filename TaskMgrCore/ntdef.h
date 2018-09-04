@@ -16,6 +16,7 @@ typedef LONG KPRIORITY;
 #define STATUS_BUFFER_TOO_SMALL          ((NTSTATUS)0xC0000023L)
 #define STATUS_PROCESS_IS_TERMINATING  ((NTSTATUS)0xC000010AL)
 #define STATUS_THREAD_IS_TERMINATING   ((NTSTATUS)0xC000004BL)
+#define STATUS_PORT_NOT_SET                ((NTSTATUS)0xC0000353L)
 
 #define NT_SUCCESS(status) ((NTSTATUS)(status)>=0)
 
@@ -303,7 +304,7 @@ typedef enum _SYSTEM_INFORMATION_CLASS {
 	SystemVirtualAddressInformation, // q: SYSTEM_VA_LIST_INFORMATION[]; s: SYSTEM_VA_LIST_INFORMATION[] (requires SeIncreaseQuotaPrivilege) // MmQuerySystemVaInformation
 	SystemLogicalProcessorAndGroupInformation, // q: SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX // since WIN7 // KeQueryLogicalProcessorRelationship
 	SystemProcessorCycleTimeInformation, // q: SYSTEM_PROCESSOR_CYCLE_TIME_INFORMATION[]
-	SystemStoreInformation, // q; s // SmQueryStoreInformation
+	SystemStoreInformation, // q; s // SmQueryStoreInformation SYSTEM_COMPRESSION_INFO
 	SystemRegistryAppendString, // s: SYSTEM_REGISTRY_APPEND_STRING_PARAMETERS // 110
 	SystemAitSamplingValue, // s: ULONG (requires SeProfileSingleProcessPrivilege)
 	SystemVhdBootInformation, // q: SYSTEM_VHD_BOOT_INFORMATION
@@ -351,7 +352,7 @@ typedef enum _SYSTEM_INFORMATION_CLASS {
 	SystemProcessorFeaturesInformation, // q: SYSTEM_PROCESSOR_FEATURES_INFORMATION
 	SystemRegistryReconciliationInformation,
 	SystemEdidInformation,
-	SystemManufacturingInformation, // q: SYSTEM_MANUFACTURING_INFORMATION // since THRESHOLD
+	SystemManufacturingInformation, // q: SYSTEM_MANUFACTURING_INFORMATION // since THRESHOLD 10.0 and higher
 	SystemEnergyEstimationConfigInformation, // q: SYSTEM_ENERGY_ESTIMATION_CONFIG_INFORMATION
 	SystemHypervisorDetailInformation, // q: SYSTEM_HYPERVISOR_DETAIL_INFORMATION
 	SystemProcessorCycleStatsInformation, // q: SYSTEM_PROCESSOR_CYCLE_STATS_INFORMATION // 160
@@ -373,7 +374,24 @@ typedef enum _SYSTEM_INFORMATION_CLASS {
 	SystemCpuSetTagInformation, // q: SYSTEM_CPU_SET_TAG_INFORMATION
 	SystemWin32WerStartCallout,
 	SystemSecureKernelProfileInformation,
-	MaxSystemInfoClass
+	SystemCodeIntegrityPlatformManifestInformation,//1511 and higher
+	SystemInterruptSteeringInformation,
+	SystemSuppportedProcessorArchitectures,
+	SystemMemoryUsageInformation,//1607 and higher
+	SystemCodeIntegrityCertificateInformation,
+	SystemPhysicalMemoryInformation,
+	SystemControlFlowTransition,
+	SystemKernelDebuggingAllowed,
+	SystemActivityModerationExeState,
+	SystemActivityModerationUserSettings,
+	SystemCodeIntegrityPoliciesFullInformation,
+	SystemCodeIntegrityUnlockInformation,
+	SystemIntegrityQuotaInformation,
+	SystemFlushInformation,
+	SystemProcessorIdleMaskInformation,
+	SystemSecureDumpEncryptionInformation,
+	SystemWriteConstraintInformation,
+	MaxSystemInfoClass,
 } SYSTEM_INFORMATION_CLASS;
 typedef enum _OBJECT_INFORMATION_CLASS {
 	ObjectBasicInformation = 0,
@@ -480,6 +498,16 @@ typedef enum _THREADINFOCLASS {
 	ThreadBreakOnTermination,
 	MaxThreadInfoClass
 }   THREADINFOCLASS;
+typedef enum _STORE_INFORMATION_CLASS
+{
+	ProcessCompressionInfoRequest = 0x16,
+	StoreInformationMax
+}STORE_INFORMATION_CLASS;
+typedef enum _DEBUGOBJECTINFOCLASS
+{
+	DebugObjectFlags = 1,
+	MaxDebugObjectInfoClass
+} DEBUGOBJECTINFOCLASS, *PDEBUGOBJECTINFOCLASS;
 
 typedef enum _IO_PRIORITY_HINT
 {
@@ -539,6 +567,14 @@ typedef struct _PROCESS_HANDLE_INFORMATION
 	ULONG HandleCount;
 	ULONG HandleCountHighWatermark;
 } PROCESS_HANDLE_INFORMATION, *PPROCESS_HANDLE_INFORMATION;
+typedef struct _PROCESS_COMPRESSION_INFO {
+	ULONG Version;
+	ULONG CompressionPid;
+	ULONGLONG CompressionWorkingSetSize;
+	ULONGLONG CompressSize;
+	ULONGLONG CompressedSize;
+	ULONGLONG NonCompressedSize;
+}PROCESS_COMPRESSION_INFO,*PPROCESS_COMPRESSION_INFO;
 
 typedef struct _THREAD_BASIC_INFORMATION { // Information Class 0
 	NTSTATUS ExitStatus;
@@ -574,6 +610,7 @@ typedef struct _SYSTEM_BASIC_INFORMATION
 	ULONG_PTR ActiveProcessorsAffinityMask;
 	CCHAR NumberOfProcessors;
 } SYSTEM_BASIC_INFORMATION, *PSYSTEM_BASIC_INFORMATION;
+
 
 typedef struct _OBJECT_NAME_INFORMATION
 {
@@ -701,6 +738,12 @@ typedef struct _SYSTEM_PROCESSES { // Information Class 5 (Latest win10)(Before 
 	SYSTEM_THREADS Threads[1];
 } SYSTEM_PROCESSES, *PSYSTEM_PROCESSES;
 
+typedef struct _SYSTEM_STORE_INFORMATION {
+	ULONG Version;
+	_STORE_INFORMATION_CLASS InfoClass;
+	PVOID Data;
+	ULONG Length;
+}SYSTEM_STORE_INFORMATION,*PSYSTEM_STORE_INFORMATION;
 typedef struct _SYSTEM_HANDLE_TABLE_ENTRY_INFO {
 	USHORT UniqueProcessId;
 	USHORT CreatorBackTraceIndex;
@@ -816,6 +859,9 @@ typedef NTSTATUS(NTAPI *NtResumeThreadFun)(HANDLE ThreadHandle, PULONG SuspendCo
 
 
 typedef NTSTATUS(NTAPI*NtSetInformationProcessFun)(_In_ HANDLE ProcessHandle, _In_ PROCESSINFOCLASS ProcessInformationClass, _In_reads_bytes_(ProcessInformationLength) PVOID ProcessInformation, _In_ ULONG ProcessInformationLength);
+typedef NTSTATUS(NTAPI*NtSetInformationDebugObjectFun)(_In_ HANDLE DebugObjectHandle,	_In_ DEBUGOBJECTINFOCLASS DebugObjectInformationClass,	_In_ PVOID DebugInformation,	_In_ ULONG DebugInformationLength,	_Out_opt_ PULONG ReturnLength);
+
+typedef NTSTATUS(NTAPI*NtRemoveProcessDebugFun)(_In_ HANDLE ProcessHandle, _In_ HANDLE DebugObjectHandle);
 
 typedef NTSTATUS(NTAPI *NtQueryVirtualMemoryFun)(_In_ HANDLE ProcessHandle, _In_ PVOID BaseAddress, _In_ MEMORY_INFORMATION_CLASS MemoryInformationClass, _Out_writes_bytes_(MemoryInformationLength) PVOID MemoryInformation, _In_ SIZE_T MemoryInformationLength, _Out_opt_ PSIZE_T ReturnLength);
 typedef NTSTATUS(NTAPI *NtQueryInformationProcessFun)(HANDLE ProcessHandle, DWORD ProcessInformationClass, PVOID ProcessInformation, ULONG ProcessInformationLength, PULONG ReturnLength);

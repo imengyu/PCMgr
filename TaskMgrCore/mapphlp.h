@@ -87,6 +87,8 @@ BOOL MAppStartTest();
 EXTERN_C M_API LRESULT MAppWorkCall1(WPARAM wParam, LPARAM lParam);
 EXTERN_C M_API void MAppWorkCall2(UINT msg, WPARAM wParam, LPARAM lParam);
 EXTERN_C M_API int MAppWorkCall3(int id, HWND hWnd, void*data);
+EXTERN_C M_API void* MAppWorkCall4(int id, void* hWnd, void*data);
+EXTERN_C M_API void* MAppWorkCall5(int id, void* hWnd, void*data1, void*data2, void*data3);
 EXTERN_C M_API LRESULT MAppMainThreadCall(WPARAM wParam, LPARAM lParam);
 
 //获取窗口的图标

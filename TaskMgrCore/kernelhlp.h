@@ -6,16 +6,17 @@ DWORD WINAPI MDbgViewReceiveThread(LPVOID lpParameter);
 DWORD WINAPI MLoadingThread(LPVOID lpParameter);
 
 //MyDbgView关闭
-BOOL MUnInitMyDbgView();
+M_CAPI(BOOL) MUnInitMyDbgView();
 //启动 MyDbgView
-BOOL MInitMyDbgView();
+M_CAPI(BOOL) MInitMyDbgView();
+M_CAPI(BOOL) MMyDbgViewStarted();
 
 //强制不启用 MyDbgView
 M_CAPI(VOID) MDoNotStartMyDbgView();
 //加载内核的pdb
-BOOL MInitKernelNTPDB(BOOL usingNtosPDB, PKNTOSVALUE kNtosValue);
+M_CAPI(BOOL) MInitKernelNTPDB(BOOL usingNtosPDB, PKNTOSVALUE kNtosValue);
 //加载内核的pdb释放资源
-BOOL MUnInitKernelNTPDB();
+M_CAPI(BOOL) MUnInitKernelNTPDB();
 
 VOID MLoadKernelNTPDB(PKNTOSVALUE kNtosValue, BOOL usingNtosPDB);
 
@@ -24,8 +25,7 @@ M_CAPI(BOOL) MIsKernelNeed64();
 //获取PCMgr内核驱动是否可用
 M_CAPI(BOOL) MCanUseKernel();
 //加载PCMgr内核驱动
-//   currentPath：当前程序目录可以为 NULL
-M_CAPI(BOOL) MInitKernel(LPWSTR currentPath);
+M_CAPI(BOOL) MInitKernel();
 //卸载PCMgr内核驱动
 M_CAPI(BOOL) MUninitKernel();
 BOOL MShowMyDbgView();
@@ -41,3 +41,6 @@ M_CAPI(BOOL) MUnLoadKernelDriver(LPWSTR szSvrName);
 
 //获取ntoskrn.exe基地址（内核加载以后有效）
 M_CAPI(ULONG_PTR) MGetNTBaseAddress();
+
+M_CAPI(void) MInitKernelSwitchMenuState(BOOL loaded);
+M_CAPI(BOOL) MInitKernelDriverHandleEndStep(HANDLE hHandle);

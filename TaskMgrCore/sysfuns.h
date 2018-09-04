@@ -4,6 +4,7 @@
 #include <cryptuiapi.h>
 #include <iphlpapi.h>
 #include <DbgHelp.h>
+#include "netdef.h"
 
 typedef FARPROC (*_MGetProcAddressCore)(_In_ HMODULE hModule,_In_ LPCSTR lpProcName);
 typedef BOOL(WINAPI *_RunFileDlg)(_In_ HWND hwndOwner, _In_opt_ HICON hIcon, _In_opt_ LPCWSTR lpszDirectory, _In_opt_ LPCWSTR lpszTitle, _In_opt_ LPCWSTR lpszDescription, _In_ ULONG uFlags);
@@ -17,8 +18,10 @@ typedef BOOL(WINAPI *_IsWow64Process)(HANDLE, PBOOL);
 typedef DWORD(WINAPI*_GetModuleFileNameW)(_In_opt_ HMODULE hModule, LPWSTR lpFilename, DWORD nSize);
 typedef BOOL(WINAPI*_CryptUIDlgViewCertificateW)(_In_  PCCRYPTUI_VIEWCERTIFICATE_STRUCTW pCertViewInfo, _Out_ BOOL *pfPropertiesChanged);
 typedef BOOL(WINAPI*_CryptUIDlgViewContext)(DWORD dwContextType, const void *pvContext, HWND hwnd, LPCWSTR pwszTitle, DWORD dwFlags, void *pvReserved);
-typedef ULONG(WINAPI* _GetPerTcpConnectionEStats)(PMIB_TCPROW Row, TCP_ESTATS_TYPE EstatsType, PUCHAR Rw, ULONG RwVersion, ULONG RwSize, PUCHAR Ros, ULONG RosVersion, ULONG RosSize, PUCHAR Rod, ULONG RodVersion, ULONG RodSize);
-typedef DWORD(WINAPI*_GetExtendedTcpTable)(PVOID pTcpTable, PDWORD          pdwSize, BOOL bOrder, ULONG ulAf, TCP_TABLE_CLASS TableClass, ULONG Reserved);
+typedef ULONG(WINAPI* _GetPerTcpConnectionEStats)(_In_ PMIB_TCPROW Row, _In_ TCP_ESTATS_TYPE EstatsType, _Out_writes_bytes_opt_(RwSize) PUCHAR Rw, _In_ ULONG RwVersion, _In_ ULONG RwSize, _Out_writes_bytes_opt_(RosSize) PUCHAR Ros, _In_ ULONG RosVersion, _In_ ULONG RosSize, _Out_writes_bytes_opt_(RodSize) PUCHAR Rod, _In_ ULONG RodVersion, _In_ ULONG RodSize);
+typedef ULONG(WINAPI*_GetPerTcp6ConnectionEStats)(_In_ PMIB_TCP6ROW Row, _In_ TCP_ESTATS_TYPE EstatsType, _Out_writes_bytes_opt_(RwSize) PUCHAR Rw, _In_  ULONG RwVersion, _In_  ULONG RwSize, _Out_writes_bytes_opt_(RosSize) PUCHAR Ros, _In_  ULONG RosVersion, _In_  ULONG RosSize, _Out_writes_bytes_opt_(RodSize) PUCHAR Rod, _In_  ULONG RodVersion, _In_  ULONG RodSize);
+typedef ULONG(WINAPI*_SetPerTcpConnectionEStats)(_In_ PMIB_TCPROW Row, _In_ TCP_ESTATS_TYPE EstatsType, _In_reads_bytes_(RwSize) PUCHAR Rw, _In_ ULONG RwVersion, _In_ ULONG RwSize, _In_ ULONG Offset);
+typedef DWORD(WINAPI*_GetExtendedTcpTable)(PVOID pTcpTable, PDWORD pdwSize, BOOL bOrder, ULONG ulAf, TCP_TABLE_CLASS TableClass, ULONG Reserved);
 typedef BOOL(WINAPI*_CancelShutdown)();
 
 typedef BOOL(WINAPI *fnIMAGEUNLOAD)(__in PLOADED_IMAGE LoadedImage);

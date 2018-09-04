@@ -1,9 +1,5 @@
 #pragma once
-#ifdef TASKMGRCORE_EXPORTS
 #include "ntdef.h"
-#else
-#include <ntdef.h>
-#endif
 
 typedef struct tag_NTOS_EPROCESS_OFF_DATA {
 	ULONG_PTR EPROCESS_RundownProtectOffest;

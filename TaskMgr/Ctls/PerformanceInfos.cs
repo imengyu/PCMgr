@@ -110,6 +110,15 @@ namespace PCMgr.Ctls
         public List<PerformanceInfoStaticItem> StaticItems { get { return listStaticItems; } }
         public List<PerformanceInfoSpeicalItem> SpeicalItems { get { return listSpeicalItems; } }
 
+        public string GetCopyString()
+        {
+            string rs = "";
+            foreach (PerformanceInfoStaticItem s in listStaticItems)
+                rs += "\n    " + s.Name + " : " + s.Value;
+            foreach (PerformanceInfoSpeicalItem s in listSpeicalItems)
+                rs += "\n    " + s.Name + " : " + s.Value;
+            return rs;
+        }
         public void UpdateSpeicalItems()
         {
             if (NeedRefeshStaticItems) {

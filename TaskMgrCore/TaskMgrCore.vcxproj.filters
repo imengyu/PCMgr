@@ -144,6 +144,9 @@
     <ClInclude Include="pehlp.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="netdef.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

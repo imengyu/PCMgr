@@ -242,18 +242,6 @@
     <Compile Include="WorkWindow\FormFirst.Designer.cs">
       <DependentUpon>FormFirst.cs</DependentUpon>
     </Compile>
-    <Compile Include="WorkWindow\FormHooks.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="WorkWindow\FormHooks.Designer.cs">
-      <DependentUpon>FormHooks.cs</DependentUpon>
-    </Compile>
-    <Compile Include="WorkWindow\FormKernel.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="WorkWindow\FormKernel.Designer.cs">
-      <DependentUpon>FormKernel.cs</DependentUpon>
-    </Compile>
     <Compile Include="WorkWindow\FormSetAffinity.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -401,12 +389,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="WorkWindow\FormFirst.resx">
       <DependentUpon>FormFirst.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="WorkWindow\FormHooks.resx">
-      <DependentUpon>FormHooks.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="WorkWindow\FormKernel.resx">
-      <DependentUpon>FormKernel.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="WorkWindow\FormSetAffinity.en.resx">
       <DependentUpon>FormSetAffinity.cs</DependentUpon>
@@ -604,7 +586,9 @@
       <Name>PCMgrUWP</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="WorkWindow\KMgr\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

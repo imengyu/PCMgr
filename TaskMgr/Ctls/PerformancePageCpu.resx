@@ -117,95 +117,104 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="performanceCpus.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
+    <value>Bottom, Left, Right</value>
+  </data>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="performanceCpus.Location" type="System.Drawing.Point, System.Drawing">
+    <value>3, 186</value>
+  </data>
+  <data name="performanceCpus.Size" type="System.Drawing.Size, System.Drawing">
+    <value>468, 22</value>
+  </data>
   <assembly alias="mscorlib" name="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="performanceCpus.TabIndex" type="System.Int32, mscorlib">
     <value>3</value>
   </data>
-  <data name="performanceInfos.TabIndex" type="System.Int32, mscorlib">
-    <value>2</value>
-  </data>
-  <data name="&gt;&gt;toolTip1.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolTip, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;performanceGridGlobal.Parent" xml:space="preserve">
-    <value>$this</value>
-  </data>
-  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-  <data name="$this.AutoScaleDimensions" type="System.Drawing.SizeF, System.Drawing">
-    <value>7, 17</value>
-  </data>
-  <data name="&gt;&gt;performanceInfos.Parent" xml:space="preserve">
-    <value>$this</value>
-  </data>
-  <data name="&gt;&gt;performanceTitle.Name" xml:space="preserve">
-    <value>performanceTitle</value>
+  <data name="&gt;&gt;performanceCpus.Name" xml:space="preserve">
+    <value>performanceCpus</value>
   </data>
   <data name="&gt;&gt;performanceCpus.Type" xml:space="preserve">
     <value>System.Windows.Forms.PictureBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;performanceTitle.Parent" xml:space="preserve">
-    <value>$this</value>
+  <data name="&gt;&gt;performanceCpus.Parent" xml:space="preserve">
+    <value>panelGrid</value>
   </data>
-  <data name="&gt;&gt;performanceGridGlobal.ZOrder" xml:space="preserve">
+  <data name="&gt;&gt;performanceCpus.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="performanceInfos.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
+    <value>Bottom</value>
+  </data>
+  <data name="performanceInfos.Location" type="System.Drawing.Point, System.Drawing">
+    <value>0, 214</value>
+  </data>
+  <data name="performanceInfos.Size" type="System.Drawing.Size, System.Drawing">
+    <value>474, 101</value>
+  </data>
+  <data name="performanceInfos.TabIndex" type="System.Int32, mscorlib">
     <value>2</value>
   </data>
-  <data name="performanceCpus.Size" type="System.Drawing.Size, System.Drawing">
-    <value>580, 22</value>
+  <data name="&gt;&gt;performanceInfos.Name" xml:space="preserve">
+    <value>performanceInfos</value>
+  </data>
+  <data name="&gt;&gt;performanceInfos.Type" xml:space="preserve">
+    <value>PCMgr.Ctls.PerformanceInfos, PCMgrApp32, Version=1.2.0.1, Culture=neutral, PublicKeyToken=null</value>
+  </data>
+  <data name="&gt;&gt;performanceInfos.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;performanceInfos.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="performanceGridGlobal.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
+    <value>Top, Bottom, Left, Right</value>
+  </data>
+  <data name="performanceGridGlobal.LeftBottomText" xml:space="preserve">
+    <value>60 秒</value>
+  </data>
+  <data name="performanceGridGlobal.LeftText" xml:space="preserve">
+    <value>% 利用率</value>
+  </data>
+  <data name="performanceGridGlobal.Location" type="System.Drawing.Point, System.Drawing">
+    <value>3, 45</value>
+  </data>
+  <data name="performanceGridGlobal.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>3, 4, 3, 4</value>
+  </data>
+  <data name="performanceGridGlobal.MinimumSize" type="System.Drawing.Size, System.Drawing">
+    <value>380, 87</value>
+  </data>
+  <data name="performanceGridGlobal.RightBottomText" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="performanceGridGlobal.RightText" xml:space="preserve">
+    <value>100 %</value>
+  </data>
+  <data name="performanceGridGlobal.Size" type="System.Drawing.Size, System.Drawing">
+    <value>468, 131</value>
+  </data>
+  <data name="performanceGridGlobal.TabIndex" type="System.Int32, mscorlib">
+    <value>0</value>
+  </data>
+  <metadata name="toolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>17, 17</value>
+  </metadata>
+  <data name="performanceGridGlobal.ToolTip" xml:space="preserve">
+    <value>CPU 活动</value>
   </data>
   <data name="&gt;&gt;performanceGridGlobal.Name" xml:space="preserve">
     <value>performanceGridGlobal</value>
   </data>
-  <data name="&gt;&gt;$this.Type" xml:space="preserve">
-    <value>System.Windows.Forms.UserControl, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="&gt;&gt;performanceGridGlobal.Type" xml:space="preserve">
+    <value>PCMgr.Ctls.PerformanceGrid, PCMgrApp32, Version=1.2.0.1, Culture=neutral, PublicKeyToken=null</value>
   </data>
-  <data name="label1.Text" xml:space="preserve">
-    <value>label1</value>
+  <data name="&gt;&gt;performanceGridGlobal.Parent" xml:space="preserve">
+    <value>panelGrid</value>
   </data>
-  <data name="performanceGridGlobal.Location" type="System.Drawing.Point, System.Drawing">
-    <value>3, 57</value>
-  </data>
-  <data name="&gt;&gt;$this.Name" xml:space="preserve">
-    <value>PerformancePageCpu</value>
-  </data>
-  <data name="&gt;&gt;performanceCpus.ZOrder" xml:space="preserve">
-    <value>0</value>
-  </data>
-  <data name="performanceInfos.Size" type="System.Drawing.Size, System.Drawing">
-    <value>586, 144</value>
-  </data>
-  <data name="label1.Location" type="System.Drawing.Point, System.Drawing">
-    <value>464, 248</value>
-  </data>
-  <data name="&gt;&gt;toolTip1.Name" xml:space="preserve">
-    <value>toolTip1</value>
-  </data>
-  <data name="performanceCpus.Location" type="System.Drawing.Point, System.Drawing">
-    <value>3, 258</value>
-  </data>
-  <data name="&gt;&gt;performanceTitle.Type" xml:space="preserve">
-    <value>PCMgr.Ctls.PerformanceTitle, PCMgrApp32, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</value>
-  </data>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="performanceInfos.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
-    <value>Bottom</value>
-  </data>
-  <data name="performanceTitle.ToolTip" xml:space="preserve">
-    <value />
-  </data>
-  <data name="performanceInfos.ToolTip" xml:space="preserve">
-    <value />
-  </data>
-  <data name="&gt;&gt;label1.ZOrder" xml:space="preserve">
-    <value>0</value>
-  </data>
-  <data name="performanceTitle.SmallTitle" xml:space="preserve">
-    <value>cpu id and name</value>
-  </data>
-  <data name="performanceGridGlobal.ToolTip" xml:space="preserve">
-    <value>CPU 活动</value>
-  </data>
-  <data name="performanceCpus.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
-    <value>Bottom, Left, Right</value>
+  <data name="&gt;&gt;performanceGridGlobal.ZOrder" xml:space="preserve">
+    <value>2</value>
   </data>
   <data name="performanceTitle.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
     <value>Top</value>
@@ -213,103 +222,175 @@
   <data name="performanceTitle.Location" type="System.Drawing.Point, System.Drawing">
     <value>0, 0</value>
   </data>
-  <data name="&gt;&gt;performanceCpus.Parent" xml:space="preserve">
-    <value>$this</value>
+  <data name="performanceTitle.Size" type="System.Drawing.Size, System.Drawing">
+    <value>474, 38</value>
+  </data>
+  <data name="performanceTitle.SmallTitle" xml:space="preserve">
+    <value>cpu id and name</value>
   </data>
   <data name="performanceTitle.TabIndex" type="System.Int32, mscorlib">
     <value>1</value>
   </data>
-  <data name="performanceCpus.ToolTip" xml:space="preserve">
-    <value />
-  </data>
-  <data name="performanceGridGlobal.TabIndex" type="System.Int32, mscorlib">
-    <value>0</value>
-  </data>
-  <data name="performanceGridGlobal.LeftBottomText" xml:space="preserve">
-    <value>60 秒</value>
-  </data>
-  <data name="label1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>43, 17</value>
-  </data>
-  <data name="performanceInfos.Location" type="System.Drawing.Point, System.Drawing">
-    <value>0, 294</value>
-  </data>
-  <data name="label1.AutoSize" type="System.Boolean, mscorlib">
-    <value>True</value>
-  </data>
-  <data name="&gt;&gt;performanceGridGlobal.Type" xml:space="preserve">
-    <value>PCMgr.Ctls.PerformanceGrid, PCMgrApp32, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</value>
-  </data>
-  <data name="performanceGridGlobal.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
-    <value>Top, Bottom, Left, Right</value>
-  </data>
-  <data name="&gt;&gt;performanceTitle.ZOrder" xml:space="preserve">
-    <value>3</value>
-  </data>
-  <data name="label1.TabIndex" type="System.Int32, mscorlib">
-    <value>4</value>
-  </data>
-  <data name="&gt;&gt;label1.Name" xml:space="preserve">
-    <value>label1</value>
-  </data>
-  <data name="performanceGridGlobal.RightBottomText" xml:space="preserve">
-    <value>0</value>
-  </data>
-  <data name="&gt;&gt;performanceInfos.ZOrder" xml:space="preserve">
-    <value>1</value>
-  </data>
-  <data name="$this.ToolTip" xml:space="preserve">
-    <value />
-  </data>
-  <data name="$this.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>20, 20, 20, 20</value>
-  </data>
-  <data name="&gt;&gt;label1.Type" xml:space="preserve">
-    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="performanceTitle.Title" xml:space="preserve">
     <value>CPU</value>
   </data>
-  <data name="&gt;&gt;label1.Parent" xml:space="preserve">
+  <data name="&gt;&gt;performanceTitle.Name" xml:space="preserve">
+    <value>performanceTitle</value>
+  </data>
+  <data name="&gt;&gt;performanceTitle.Type" xml:space="preserve">
+    <value>PCMgr.Ctls.PerformanceTitle, PCMgrApp32, Version=1.2.0.1, Culture=neutral, PublicKeyToken=null</value>
+  </data>
+  <data name="&gt;&gt;performanceTitle.Parent" xml:space="preserve">
+    <value>panelGrid</value>
+  </data>
+  <data name="&gt;&gt;performanceTitle.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="performanceCpusAll.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
+    <value>Top, Bottom, Left, Right</value>
+  </data>
+  <data name="performanceCpusAll.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="performanceCpusAll.Location" type="System.Drawing.Point, System.Drawing">
+    <value>3, 45</value>
+  </data>
+  <data name="performanceCpusAll.Size" type="System.Drawing.Size, System.Drawing">
+    <value>468, 166</value>
+  </data>
+  <data name="performanceCpusAll.TabIndex" type="System.Int32, mscorlib">
+    <value>4</value>
+  </data>
+  <data name="performanceCpusAll.Visible" type="System.Boolean, mscorlib">
+    <value>False</value>
+  </data>
+  <data name="&gt;&gt;performanceCpusAll.Name" xml:space="preserve">
+    <value>performanceCpusAll</value>
+  </data>
+  <data name="&gt;&gt;performanceCpusAll.Type" xml:space="preserve">
+    <value>System.Windows.Forms.PictureBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;performanceCpusAll.Parent" xml:space="preserve">
+    <value>panelGrid</value>
+  </data>
+  <data name="&gt;&gt;performanceCpusAll.ZOrder" xml:space="preserve">
+    <value>3</value>
+  </data>
+  <metadata name="contextMenuStrip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>118, 17</value>
+  </metadata>
+  <data name="显示内核时间ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>148, 22</value>
+  </data>
+  <data name="显示内核时间ToolStripMenuItem.Text" xml:space="preserve">
+    <value>显示内核时间</value>
+  </data>
+  <data name="图形摘要视图ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>148, 22</value>
+  </data>
+  <data name="图形摘要视图ToolStripMenuItem.Text" xml:space="preserve">
+    <value>图形摘要视图</value>
+  </data>
+  <data name="查看ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>148, 22</value>
+  </data>
+  <data name="查看ToolStripMenuItem.Text" xml:space="preserve">
+    <value>查看</value>
+  </data>
+  <data name="复制ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>148, 22</value>
+  </data>
+  <data name="复制ToolStripMenuItem.Text" xml:space="preserve">
+    <value>复制</value>
+  </data>
+  <data name="contextMenuStrip.Size" type="System.Drawing.Size, System.Drawing">
+    <value>149, 92</value>
+  </data>
+  <data name="&gt;&gt;contextMenuStrip.Name" xml:space="preserve">
+    <value>contextMenuStrip</value>
+  </data>
+  <data name="&gt;&gt;contextMenuStrip.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ContextMenuStrip, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="panelGrid.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
+    <value>Top, Bottom, Left, Right</value>
+  </data>
+  <data name="panelGrid.Location" type="System.Drawing.Point, System.Drawing">
+    <value>0, 0</value>
+  </data>
+  <data name="panelGrid.MinimumSize" type="System.Drawing.Size, System.Drawing">
+    <value>380, 211</value>
+  </data>
+  <data name="panelGrid.Size" type="System.Drawing.Size, System.Drawing">
+    <value>474, 211</value>
+  </data>
+  <data name="panelGrid.TabIndex" type="System.Int32, mscorlib">
+    <value>5</value>
+  </data>
+  <data name="&gt;&gt;panelGrid.Name" xml:space="preserve">
+    <value>panelGrid</value>
+  </data>
+  <data name="&gt;&gt;panelGrid.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Panel, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;panelGrid.Parent" xml:space="preserve">
     <value>$this</value>
   </data>
-  <data name="performanceGridGlobal.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>3, 4, 3, 4</value>
-  </data>
-  <data name="performanceTitle.Size" type="System.Drawing.Size, System.Drawing">
-    <value>586, 38</value>
-  </data>
-  <data name="performanceGridGlobal.Size" type="System.Drawing.Size, System.Drawing">
-    <value>580, 188</value>
-  </data>
-  <data name="performanceGridGlobal.RightText" xml:space="preserve">
-    <value>100 %</value>
-  </data>
-  <data name="&gt;&gt;performanceCpus.Name" xml:space="preserve">
-    <value>performanceCpus</value>
-  </data>
-  <data name="&gt;&gt;performanceInfos.Type" xml:space="preserve">
-    <value>PCMgr.Ctls.PerformanceInfos, PCMgrApp32, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</value>
-  </data>
-  <data name="$this.Font" type="System.Drawing.Font, System.Drawing">
-    <value>微软雅黑, 9pt</value>
-  </data>
-  <data name="$this.Size" type="System.Drawing.Size, System.Drawing">
-    <value>586, 438</value>
-  </data>
-  <data name="&gt;&gt;performanceInfos.Name" xml:space="preserve">
-    <value>performanceInfos</value>
-  </data>
-  <data name="performanceGridGlobal.LeftText" xml:space="preserve">
-    <value>% 利用率</value>
+  <data name="&gt;&gt;panelGrid.ZOrder" xml:space="preserve">
+    <value>2</value>
   </data>
   <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
-  <metadata name="toolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>17, 17</value>
-  </metadata>
-  <metadata name="$this.Language" type="System.Globalization.CultureInfo, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-    <value>en</value>
-  </metadata>
+  <data name="$this.AutoScaleDimensions" type="System.Drawing.SizeF, System.Drawing">
+    <value>7, 17</value>
+  </data>
+  <data name="$this.AutoScroll" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="$this.Font" type="System.Drawing.Font, System.Drawing">
+    <value>微软雅黑, 9pt</value>
+  </data>
+  <data name="$this.MinimumSize" type="System.Drawing.Size, System.Drawing">
+    <value>400, 315</value>
+  </data>
+  <data name="$this.Size" type="System.Drawing.Size, System.Drawing">
+    <value>474, 315</value>
+  </data>
+  <data name="&gt;&gt;toolTip1.Name" xml:space="preserve">
+    <value>toolTip1</value>
+  </data>
+  <data name="&gt;&gt;toolTip1.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolTip, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;显示内核时间ToolStripMenuItem.Name" xml:space="preserve">
+    <value>显示内核时间ToolStripMenuItem</value>
+  </data>
+  <data name="&gt;&gt;显示内核时间ToolStripMenuItem.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;图形摘要视图ToolStripMenuItem.Name" xml:space="preserve">
+    <value>图形摘要视图ToolStripMenuItem</value>
+  </data>
+  <data name="&gt;&gt;图形摘要视图ToolStripMenuItem.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;查看ToolStripMenuItem.Name" xml:space="preserve">
+    <value>查看ToolStripMenuItem</value>
+  </data>
+  <data name="&gt;&gt;查看ToolStripMenuItem.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;复制ToolStripMenuItem.Name" xml:space="preserve">
+    <value>复制ToolStripMenuItem</value>
+  </data>
+  <data name="&gt;&gt;复制ToolStripMenuItem.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;$this.Name" xml:space="preserve">
+    <value>PerformancePageCpu</value>
+  </data>
+  <data name="&gt;&gt;$this.Type" xml:space="preserve">
+    <value>System.Windows.Forms.UserControl, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
 </root>

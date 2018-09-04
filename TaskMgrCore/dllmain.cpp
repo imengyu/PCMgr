@@ -10,12 +10,16 @@
 #include "settinghlp.h"
 #include "lghlp.h"
 #include "vprocx.h"
+#include "cmdhlp.h"
+
+#include "..\PCMgrCmdRunner\PCMgrCmdRunnerEntry.h"
 
 HINSTANCE hInst;
 
 extern HICON HIconDef;
 extern HCURSOR hCurLoading;
 extern MEMORYSTATUSEX memory_statuex;
+extern MCmdRunner *staticCmdRunner;
 
 //Dll Õ∑≈
 void DllDestroy();
@@ -53,6 +57,8 @@ void DllStartup() {
 	MPERF_GetProcessNumber();
 	WindowEnumStart();
 	memory_statuex.dwLength = sizeof(memory_statuex);
+	staticCmdRunner = new MCmdRunner();
+	MInitAllCmd();
 }
 void DllDestroy() {
 	hInst = NULL;
@@ -64,5 +70,6 @@ void DllDestroy() {
 	MPERF_GlobalDestroy();
 	WindowEnumDestroy();
 	MUnInitMyDbgView();
+	delete(staticCmdRunner);
 	FreeDll();
 }

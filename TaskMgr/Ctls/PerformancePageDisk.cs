@@ -23,6 +23,8 @@ namespace PCMgr.Ctls
         private int lastDiskTime = 0;
         private int lastMaxSpeed = 100;
 
+        public Panel GridPanel => panelGrid;
+        public bool PageIsGraphicMode { get; set; }
         public bool PageIsActive { get; set; }
         public void PageDelete()
         {
@@ -210,6 +212,41 @@ namespace PCMgr.Ctls
             InitStaticValues();
         }
 
+        public event SwithGraphicViewEventHandler SwithGraphicView;
+        public event OpeningPageMenuEventHandler OpeningPageMenu;
 
+        private void 复制ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string s = performanceTitle1.Title + "\n    " + performanceTitle1.SmallTitle;
+            s += performanceInfos.GetCopyString();
+            Clipboard.SetText(s);
+        }
+        private void contextMenuStrip_Opening(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            图形摘要视图ToolStripMenuItem.Checked = PageIsGraphicMode;
+            OpeningPageMenu?.Invoke(this, 查看ToolStripMenuItem);
+        }
+
+        private void PerformancePageDisk_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+                contextMenuStrip.Show(MousePosition);
+        }
+        private void PerformancePageDisk_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+                SwithGraphicView?.Invoke(this);
+        }
+        private void PerformancePageDisk_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (PageIsGraphicMode)
+                if (e.Button == MouseButtons.Left && e.Clicks == 1)
+                    NativeMethods.MAppWorkCall3(165, IntPtr.Zero, IntPtr.Zero);
+        }
+
+        private void 图形摘要视图ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SwithGraphicView?.Invoke(this);
+        }
     }
 }

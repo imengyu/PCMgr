@@ -118,15 +118,21 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="performanceInfos.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
-    <value>Bottom</value>
+  <data name="performanceInfos.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
+    <value>Bottom, Left, Right</value>
   </data>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="performanceInfos.Location" type="System.Drawing.Point, System.Drawing">
-    <value>0, 240</value>
+    <value>0, 279</value>
+  </data>
+  <data name="performanceInfos.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>3, 4, 3, 4</value>
+  </data>
+  <data name="performanceInfos.MinimumSize" type="System.Drawing.Size, System.Drawing">
+    <value>428, 110</value>
   </data>
   <data name="performanceInfos.Size" type="System.Drawing.Size, System.Drawing">
-    <value>612, 84</value>
+    <value>428, 110</value>
   </data>
   <assembly alias="mscorlib" name="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="performanceInfos.TabIndex" type="System.Int32, mscorlib">
@@ -136,13 +142,13 @@
     <value>performanceInfos</value>
   </data>
   <data name="&gt;&gt;performanceInfos.Type" xml:space="preserve">
-    <value>PCMgr.Ctls.PerformanceInfos, PCMgrApp32, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>PCMgr.Ctls.PerformanceInfos, PCMgrApp32, Version=1.2.0.1, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;performanceInfos.Parent" xml:space="preserve">
     <value>$this</value>
   </data>
   <data name="&gt;&gt;performanceInfos.ZOrder" xml:space="preserve">
-    <value>0</value>
+    <value>1</value>
   </data>
   <data name="performanceGridSpeed.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Bottom, Left, Right</value>
@@ -154,7 +160,13 @@
     <value>磁盘传输速率</value>
   </data>
   <data name="performanceGridSpeed.Location" type="System.Drawing.Point, System.Drawing">
-    <value>3, 158</value>
+    <value>3, 163</value>
+  </data>
+  <data name="performanceGridSpeed.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>3, 4, 3, 4</value>
+  </data>
+  <data name="performanceGridSpeed.MinimumSize" type="System.Drawing.Size, System.Drawing">
+    <value>400, 80</value>
   </data>
   <data name="performanceGridSpeed.RightBottomText" xml:space="preserve">
     <value>0</value>
@@ -163,7 +175,7 @@
     <value>100%</value>
   </data>
   <data name="performanceGridSpeed.Size" type="System.Drawing.Size, System.Drawing">
-    <value>609, 76</value>
+    <value>414, 108</value>
   </data>
   <data name="performanceGridSpeed.TabIndex" type="System.Int32, mscorlib">
     <value>2</value>
@@ -178,22 +190,25 @@
     <value>performanceGridSpeed</value>
   </data>
   <data name="&gt;&gt;performanceGridSpeed.Type" xml:space="preserve">
-    <value>PCMgr.Ctls.PerformanceGrid, PCMgrApp32, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>PCMgr.Ctls.PerformanceGrid, PCMgrApp32, Version=1.2.0.1, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;performanceGridSpeed.Parent" xml:space="preserve">
-    <value>$this</value>
+    <value>panelGrid</value>
   </data>
   <data name="&gt;&gt;performanceGridSpeed.ZOrder" xml:space="preserve">
-    <value>1</value>
+    <value>2</value>
   </data>
-  <data name="performanceTitle1.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
-    <value>Top</value>
+  <data name="performanceTitle1.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
+    <value>Top, Left, Right</value>
   </data>
   <data name="performanceTitle1.Location" type="System.Drawing.Point, System.Drawing">
     <value>0, 0</value>
   </data>
+  <data name="performanceTitle1.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>3, 4, 3, 4</value>
+  </data>
   <data name="performanceTitle1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>612, 35</value>
+    <value>420, 34</value>
   </data>
   <data name="performanceTitle1.SmallTitle" xml:space="preserve">
     <value>磁盘名称</value>
@@ -208,13 +223,13 @@
     <value>performanceTitle1</value>
   </data>
   <data name="&gt;&gt;performanceTitle1.Type" xml:space="preserve">
-    <value>PCMgr.Ctls.PerformanceTitle, PCMgrApp32, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>PCMgr.Ctls.PerformanceTitle, PCMgrApp32, Version=1.2.0.1, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;performanceTitle1.Parent" xml:space="preserve">
-    <value>$this</value>
+    <value>panelGrid</value>
   </data>
   <data name="&gt;&gt;performanceTitle1.ZOrder" xml:space="preserve">
-    <value>2</value>
+    <value>0</value>
   </data>
   <data name="performanceGridDiskTime.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Top, Bottom, Left, Right</value>
@@ -226,7 +241,13 @@
     <value>活动时间</value>
   </data>
   <data name="performanceGridDiskTime.Location" type="System.Drawing.Point, System.Drawing">
-    <value>3, 41</value>
+    <value>3, 42</value>
+  </data>
+  <data name="performanceGridDiskTime.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>3, 4, 3, 4</value>
+  </data>
+  <data name="performanceGridDiskTime.MinimumSize" type="System.Drawing.Size, System.Drawing">
+    <value>400, 80</value>
   </data>
   <data name="performanceGridDiskTime.RightBottomText" xml:space="preserve">
     <value>0</value>
@@ -235,7 +256,7 @@
     <value>100%</value>
   </data>
   <data name="performanceGridDiskTime.Size" type="System.Drawing.Size, System.Drawing">
-    <value>609, 111</value>
+    <value>414, 113</value>
   </data>
   <data name="performanceGridDiskTime.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
@@ -247,28 +268,115 @@
     <value>performanceGridDiskTime</value>
   </data>
   <data name="&gt;&gt;performanceGridDiskTime.Type" xml:space="preserve">
-    <value>PCMgr.Ctls.PerformanceGrid, PCMgrApp32, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>PCMgr.Ctls.PerformanceGrid, PCMgrApp32, Version=1.2.0.1, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;performanceGridDiskTime.Parent" xml:space="preserve">
-    <value>$this</value>
+    <value>panelGrid</value>
   </data>
   <data name="&gt;&gt;performanceGridDiskTime.ZOrder" xml:space="preserve">
-    <value>3</value>
+    <value>1</value>
+  </data>
+  <metadata name="contextMenuStrip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>276, 17</value>
+  </metadata>
+  <data name="图形摘要视图ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>148, 22</value>
+  </data>
+  <data name="图形摘要视图ToolStripMenuItem.Text" xml:space="preserve">
+    <value>图形摘要视图</value>
+  </data>
+  <data name="查看ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>148, 22</value>
+  </data>
+  <data name="查看ToolStripMenuItem.Text" xml:space="preserve">
+    <value>查看</value>
+  </data>
+  <data name="复制ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>148, 22</value>
+  </data>
+  <data name="复制ToolStripMenuItem.Text" xml:space="preserve">
+    <value>复制</value>
+  </data>
+  <data name="contextMenuStrip.Size" type="System.Drawing.Size, System.Drawing">
+    <value>149, 70</value>
+  </data>
+  <data name="&gt;&gt;contextMenuStrip.Name" xml:space="preserve">
+    <value>contextMenuStrip</value>
+  </data>
+  <data name="&gt;&gt;contextMenuStrip.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ContextMenuStrip, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="panelGrid.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
+    <value>Top, Bottom, Left, Right</value>
+  </data>
+  <data name="panelGrid.Location" type="System.Drawing.Point, System.Drawing">
+    <value>0, 0</value>
+  </data>
+  <data name="panelGrid.MinimumSize" type="System.Drawing.Size, System.Drawing">
+    <value>400, 272</value>
+  </data>
+  <data name="panelGrid.Size" type="System.Drawing.Size, System.Drawing">
+    <value>420, 272</value>
+  </data>
+  <data name="panelGrid.TabIndex" type="System.Int32, mscorlib">
+    <value>4</value>
+  </data>
+  <data name="&gt;&gt;panelGrid.Name" xml:space="preserve">
+    <value>panelGrid</value>
+  </data>
+  <data name="&gt;&gt;panelGrid.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Panel, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;panelGrid.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;panelGrid.ZOrder" xml:space="preserve">
+    <value>2</value>
   </data>
   <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
   <data name="$this.AutoScaleDimensions" type="System.Drawing.SizeF, System.Drawing">
-    <value>6, 12</value>
+    <value>7, 17</value>
+  </data>
+  <data name="$this.AutoScroll" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="$this.Font" type="System.Drawing.Font, System.Drawing">
+    <value>微软雅黑, 9pt</value>
+  </data>
+  <data name="$this.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>3, 4, 3, 4</value>
+  </data>
+  <data name="$this.MinimumSize" type="System.Drawing.Size, System.Drawing">
+    <value>420, 390</value>
   </data>
   <data name="$this.Size" type="System.Drawing.Size, System.Drawing">
-    <value>612, 324</value>
+    <value>420, 390</value>
   </data>
   <data name="&gt;&gt;toolTip1.Name" xml:space="preserve">
     <value>toolTip1</value>
   </data>
   <data name="&gt;&gt;toolTip1.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolTip, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;图形摘要视图ToolStripMenuItem.Name" xml:space="preserve">
+    <value>图形摘要视图ToolStripMenuItem</value>
+  </data>
+  <data name="&gt;&gt;图形摘要视图ToolStripMenuItem.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;查看ToolStripMenuItem.Name" xml:space="preserve">
+    <value>查看ToolStripMenuItem</value>
+  </data>
+  <data name="&gt;&gt;查看ToolStripMenuItem.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;复制ToolStripMenuItem.Name" xml:space="preserve">
+    <value>复制ToolStripMenuItem</value>
+  </data>
+  <data name="&gt;&gt;复制ToolStripMenuItem.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;$this.Name" xml:space="preserve">
     <value>PerformancePageDisk</value>

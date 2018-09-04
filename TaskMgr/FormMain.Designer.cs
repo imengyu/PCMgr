@@ -30,6 +30,9 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMain));
+            this.splitContainerPerfCtls = new System.Windows.Forms.SplitContainer();
+            this.sp3 = new System.Windows.Forms.Panel();
+            this.performanceLeftList = new PCMgr.Ctls.PerformanceList();
             this.splitContainerFm = new System.Windows.Forms.SplitContainer();
             this.treeFmLeft = new System.Windows.Forms.TreeView();
             this.imageListFileMgrLeft = new System.Windows.Forms.ImageList(this.components);
@@ -41,9 +44,6 @@
             this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.imageListFileTypeList = new System.Windows.Forms.ImageList(this.components);
-            this.splitContainerPerfCtls = new System.Windows.Forms.SplitContainer();
-            this.sp3 = new System.Windows.Forms.Panel();
-            this.performanceLeftList = new PCMgr.Ctls.PerformanceList();
             this.tabControlMain = new System.Windows.Forms.TabControl();
             this.tabPageProcCtl = new System.Windows.Forms.TabPage();
             this.sp4 = new System.Windows.Forms.PictureBox();
@@ -124,15 +124,19 @@
             this.选择列ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.将此列调整为合适大小ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.contextMenuStripTray = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.显示隐藏主界面ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.退出程序ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.fileSystemWatcher = new System.IO.FileSystemWatcher();
             this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
+            this.pl_perfGridHost = new System.Windows.Forms.Panel();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainerPerfCtls)).BeginInit();
+            this.splitContainerPerfCtls.Panel1.SuspendLayout();
+            this.splitContainerPerfCtls.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerFm)).BeginInit();
             this.splitContainerFm.Panel1.SuspendLayout();
             this.splitContainerFm.Panel2.SuspendLayout();
             this.splitContainerFm.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainerPerfCtls)).BeginInit();
-            this.splitContainerPerfCtls.Panel1.SuspendLayout();
-            this.splitContainerPerfCtls.SuspendLayout();
             this.tabControlMain.SuspendLayout();
             this.tabPageProcCtl.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.sp4)).BeginInit();
@@ -154,8 +158,39 @@
             this.contextMenuStripUWP.SuspendLayout();
             this.pl_simple.SuspendLayout();
             this.contextMenuStripProcDetalsCol.SuspendLayout();
+            this.contextMenuStripTray.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.fileSystemWatcher)).BeginInit();
             this.SuspendLayout();
+            // 
+            // splitContainerPerfCtls
+            // 
+            resources.ApplyResources(this.splitContainerPerfCtls, "splitContainerPerfCtls");
+            this.splitContainerPerfCtls.Name = "splitContainerPerfCtls";
+            // 
+            // splitContainerPerfCtls.Panel1
+            // 
+            this.splitContainerPerfCtls.Panel1.Controls.Add(this.sp3);
+            this.splitContainerPerfCtls.Panel1.Controls.Add(this.performanceLeftList);
+            // 
+            // splitContainerPerfCtls.Panel2
+            // 
+            resources.ApplyResources(this.splitContainerPerfCtls.Panel2, "splitContainerPerfCtls.Panel2");
+            this.splitContainerPerfCtls.Panel2.SizeChanged += new System.EventHandler(this.splitContainerPerfCtls_Panel2_SizeChanged);
+            // 
+            // sp3
+            // 
+            this.sp3.BackColor = System.Drawing.Color.Silver;
+            this.sp3.Cursor = System.Windows.Forms.Cursors.SizeWE;
+            resources.ApplyResources(this.sp3, "sp3");
+            this.sp3.Name = "sp3";
+            // 
+            // performanceLeftList
+            // 
+            this.performanceLeftList.BackColor = System.Drawing.Color.White;
+            resources.ApplyResources(this.performanceLeftList, "performanceLeftList");
+            this.performanceLeftList.Name = "performanceLeftList";
+            this.performanceLeftList.Selectedtem = null;
+            this.performanceLeftList.SelectedtndexChanged += new System.EventHandler(this.performanceLeftList_SelectedtndexChanged);
             // 
             // splitContainerFm
             // 
@@ -240,30 +275,6 @@
             this.imageListFileTypeList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageListFileTypeList.ImageStream")));
             this.imageListFileTypeList.TransparentColor = System.Drawing.Color.Transparent;
             this.imageListFileTypeList.Images.SetKeyName(0, "err");
-            // 
-            // splitContainerPerfCtls
-            // 
-            resources.ApplyResources(this.splitContainerPerfCtls, "splitContainerPerfCtls");
-            this.splitContainerPerfCtls.Name = "splitContainerPerfCtls";
-            // 
-            // splitContainerPerfCtls.Panel1
-            // 
-            this.splitContainerPerfCtls.Panel1.Controls.Add(this.sp3);
-            this.splitContainerPerfCtls.Panel1.Controls.Add(this.performanceLeftList);
-            // 
-            // sp3
-            // 
-            this.sp3.BackColor = System.Drawing.Color.Silver;
-            resources.ApplyResources(this.sp3, "sp3");
-            this.sp3.Name = "sp3";
-            // 
-            // performanceLeftList
-            // 
-            this.performanceLeftList.BackColor = System.Drawing.Color.White;
-            resources.ApplyResources(this.performanceLeftList, "performanceLeftList");
-            this.performanceLeftList.Name = "performanceLeftList";
-            this.performanceLeftList.Selectedtem = null;
-            this.performanceLeftList.SelectedtndexChanged += new System.EventHandler(this.performanceLeftList_SelectedtndexChanged);
             // 
             // tabControlMain
             // 
@@ -887,6 +898,27 @@
             resources.ApplyResources(this.将此列调整为合适大小ToolStripMenuItem, "将此列调整为合适大小ToolStripMenuItem");
             this.将此列调整为合适大小ToolStripMenuItem.Click += new System.EventHandler(this.将此列调整为合适大小ToolStripMenuItem_Click);
             // 
+            // contextMenuStripTray
+            // 
+            this.contextMenuStripTray.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.显示隐藏主界面ToolStripMenuItem,
+            this.退出程序ToolStripMenuItem});
+            this.contextMenuStripTray.Name = "contextMenuStripTray";
+            resources.ApplyResources(this.contextMenuStripTray, "contextMenuStripTray");
+            this.contextMenuStripTray.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStripTray_Opening);
+            // 
+            // 显示隐藏主界面ToolStripMenuItem
+            // 
+            this.显示隐藏主界面ToolStripMenuItem.Name = "显示隐藏主界面ToolStripMenuItem";
+            resources.ApplyResources(this.显示隐藏主界面ToolStripMenuItem, "显示隐藏主界面ToolStripMenuItem");
+            this.显示隐藏主界面ToolStripMenuItem.Click += new System.EventHandler(this.显示隐藏主界面ToolStripMenuItem_Click);
+            // 
+            // 退出程序ToolStripMenuItem
+            // 
+            this.退出程序ToolStripMenuItem.Name = "退出程序ToolStripMenuItem";
+            resources.ApplyResources(this.退出程序ToolStripMenuItem, "退出程序ToolStripMenuItem");
+            this.退出程序ToolStripMenuItem.Click += new System.EventHandler(this.退出程序ToolStripMenuItem_Click);
+            // 
             // fileSystemWatcher
             // 
             this.fileSystemWatcher.EnableRaisingEvents = true;
@@ -898,8 +930,16 @@
             // 
             // notifyIcon
             // 
+            this.notifyIcon.ContextMenuStrip = this.contextMenuStripTray;
             resources.ApplyResources(this.notifyIcon, "notifyIcon");
             this.notifyIcon.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon_MouseDoubleClick);
+            this.notifyIcon.MouseMove += new System.Windows.Forms.MouseEventHandler(this.notifyIcon_MouseMove);
+            // 
+            // pl_perfGridHost
+            // 
+            resources.ApplyResources(this.pl_perfGridHost, "pl_perfGridHost");
+            this.pl_perfGridHost.Cursor = System.Windows.Forms.Cursors.Arrow;
+            this.pl_perfGridHost.Name = "pl_perfGridHost";
             // 
             // FormMain
             // 
@@ -910,6 +950,7 @@
             this.Controls.Add(this.spBottom);
             this.Controls.Add(this.tabControlMain);
             this.Controls.Add(this.pl_simple);
+            this.Controls.Add(this.pl_perfGridHost);
             this.Cursor = System.Windows.Forms.Cursors.AppStarting;
             this.Name = "FormMain";
             this.Activated += new System.EventHandler(this.FormMain_Activated);
@@ -918,13 +959,13 @@
             this.Load += new System.EventHandler(this.FormMain_Load);
             this.Shown += new System.EventHandler(this.FormMain_Shown);
             this.VisibleChanged += new System.EventHandler(this.FormMain_VisibleChanged);
+            this.splitContainerPerfCtls.Panel1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainerPerfCtls)).EndInit();
+            this.splitContainerPerfCtls.ResumeLayout(false);
             this.splitContainerFm.Panel1.ResumeLayout(false);
             this.splitContainerFm.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerFm)).EndInit();
             this.splitContainerFm.ResumeLayout(false);
-            this.splitContainerPerfCtls.Panel1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainerPerfCtls)).EndInit();
-            this.splitContainerPerfCtls.ResumeLayout(false);
             this.tabControlMain.ResumeLayout(false);
             this.tabPageProcCtl.ResumeLayout(false);
             this.tabPageProcCtl.PerformLayout();
@@ -951,6 +992,7 @@
             this.contextMenuStripUWP.ResumeLayout(false);
             this.pl_simple.ResumeLayout(false);
             this.contextMenuStripProcDetalsCol.ResumeLayout(false);
+            this.contextMenuStripTray.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.fileSystemWatcher)).EndInit();
             this.ResumeLayout(false);
 
@@ -1054,6 +1096,10 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem 将此列调整为合适大小ToolStripMenuItem;
         private System.Windows.Forms.Label lbNoAppsTip;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStripTray;
+        private System.Windows.Forms.ToolStripMenuItem 显示隐藏主界面ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 退出程序ToolStripMenuItem;
+        private System.Windows.Forms.Panel pl_perfGridHost;
     }
 }
 

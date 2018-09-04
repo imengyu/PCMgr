@@ -74,7 +74,8 @@
     <TargetName>PCMgrApp32.resource2</TargetName>
     <OutDir>$(SolutionDir)$(Configuration)\en\</OutDir>
     <GenerateManifest>false</GenerateManifest>
-    <LinkIncremental>false</LinkIncremental>
+    <LinkIncremental>
+    </LinkIncremental>
     <EmbedManifest>false</EmbedManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -82,7 +83,8 @@
     <TargetName>PCMgrApp32.resource2</TargetName>
     <OutDir>$(SolutionDir)$(Configuration)\en\</OutDir>
     <GenerateManifest>false</GenerateManifest>
-    <LinkIncremental>false</LinkIncremental>
+    <LinkIncremental>
+    </LinkIncremental>
     <EmbedManifest>false</EmbedManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -90,7 +92,8 @@
     <OutDir>$(SolutionDir)$(Configuration)_64\en\</OutDir>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);E:\主数据库\编程\方案8\PCMgr\TaskMgrCore;</IncludePath>
     <GenerateManifest>false</GenerateManifest>
-    <LinkIncremental>false</LinkIncremental>
+    <LinkIncremental>
+    </LinkIncremental>
     <EmbedManifest>false</EmbedManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -98,7 +101,8 @@
     <OutDir>$(SolutionDir)$(Configuration)_64\en\</OutDir>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);E:\主数据库\编程\方案8\PCMgr\TaskMgrCore;</IncludePath>
     <GenerateManifest>false</GenerateManifest>
-    <LinkIncremental>false</LinkIncremental>
+    <LinkIncremental>
+    </LinkIncremental>
     <EmbedManifest>false</EmbedManifest>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

@@ -92,8 +92,9 @@ void FreeDll();
 void MFroceKillProcessUser();
 void MKillProcessUser(BOOL ask);
 void MKillProcessTreeUser();
-BOOL MKillProcessUser2(HWND hWnd, DWORD pid, BOOL showErr);
+BOOL MKillProcessUser2(HWND hWnd, DWORD pid, BOOL showErr, BOOL ignoreTerminateing);
 void MAppProcPropertyClassHandleWmCommand(WPARAM wParam);
+BOOL MDetachFromDebuggerProcess(DWORD pid);
 
 //进程提权
 EXTERN_C M_API BOOL MGetPrivileges2();
@@ -306,6 +307,8 @@ EXTERN_C M_API NTSTATUS MGetProcessBasePriority(HANDLE ProcessHandle, PULONG Bas
 //    ProcessHandle：进程句柄
 //    [OUT] AffinityMask：接收信息变量
 EXTERN_C M_API NTSTATUS MGetProcessAffinityMask(HANDLE ProcessHandle, PULONG_PTR AffinityMask);
+
+EXTERN_C M_API NTSTATUS MGetProcessDebugObject(HANDLE ProcessHandle, PHANDLE DebugObjectHandle);
 
 NTSTATUS MSetProcessPriorityClass(HANDLE ProcessHandle, UCHAR PriorityClass);
 NTSTATUS MSetProcessAffinityMask(HANDLE ProcessHandle, ULONG_PTR AffinityMask);

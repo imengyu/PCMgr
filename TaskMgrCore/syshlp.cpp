@@ -20,9 +20,17 @@ extern RtlInitAnsiStringFun RtlInitAnsiString;
 extern NtQuerySystemInformationFun NtQuerySystemInformation;
 _MGetProcAddressCore MGetProcAddressCore;
 
+M_CAPI(BOOL) MRunExeWithAgrs(LPWSTR pathargs, BOOL runAsadmin, HWND hWnd)
+{
+	WCHAR filePath[MAX_PATH];
+	WCHAR agrs[256];
+	if (MCommandLineSplitPath(pathargs, filePath, MAX_PATH, agrs, 256))
+		return MRunExe(filePath, agrs, runAsadmin, hWnd);
+	return FALSE;
+}
 M_CAPI(BOOL) MRunExe(LPWSTR path, LPWSTR args, BOOL runAsadmin, HWND hWnd)
 {
-	return ShellExecute(hWnd, runAsadmin ? L"runas" : L"run", path, args, NULL, SW_SHOW) > (HINSTANCE)32;
+	return (DWORD)(ULONG_PTR)ShellExecute(hWnd, runAsadmin ? L"runas" : L"open", path, args, NULL, SW_SHOW) > 32;
 }
 M_CAPI(BOOL) MRunFileDlg(_In_ HWND hwndOwner, _In_opt_ HICON hIcon, _In_opt_ LPCWSTR lpszDirectory, _In_opt_ LPCWSTR lpszTitle, _In_opt_ LPCWSTR lpszDescription, _In_ ULONG uFlags)
 {
@@ -130,7 +138,6 @@ M_CAPI(BOOL) MIsRunasAdmin()
 	return _IsRunasAdmin;
 }
 
-
 M_CAPI(PVOID) MGetProcedureAddress(_In_ PVOID DllHandle, _In_opt_ PSTR ProcedureName, _In_opt_ ULONG ProcedureNumber)
 {
 	NTSTATUS status;
@@ -180,6 +187,31 @@ M_CAPI(BOOL) MCommandLineToFilePath(LPWSTR cmdline, LPWSTR buffer, int size)
 		if (szArglist)
 		{
 			wcscpy_s(buffer, size, szArglist[0]);
+			LocalFree(szArglist);
+			return  TRUE;
+		}
+	}
+	return  FALSE;
+}
+M_CAPI(BOOL) MCommandLineSplitPath(LPWSTR cmdline, LPWSTR buffer, int size, LPWSTR argbuffer, int argbuffersize)
+{
+	if (cmdline && buffer)
+	{
+		int argc = 0;
+		LPWSTR *szArglist = CommandLineToArgvW(cmdline, &argc);
+		if (szArglist)
+		{
+			wcscpy_s(buffer, size, szArglist[0]);
+
+			std::wstring s;
+			for (int i = 1; i < argc; i++)
+			{
+				if (i != 1) s += L" ";
+				s += szArglist[i];
+			}
+
+			wcscpy_s(argbuffer, argbuffersize, s.c_str());
+
 			LocalFree(szArglist);
 			return  TRUE;
 		}

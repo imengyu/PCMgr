@@ -10,6 +10,7 @@ namespace PCMgr.Ctls
         {
             SetStyle(ControlStyles.Selectable, false);
             SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
+            SetStyle(ControlStyles.ResizeRedraw, true);
             TitleFont = new Font("微软雅黑", 18);
             SmallTitleFont = new Font("微软雅黑", 12);
             stringFormatRight = new StringFormat();

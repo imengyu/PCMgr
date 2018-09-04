@@ -12,12 +12,25 @@ namespace PCMgr.Ctls
             InitializeComponent();
         }
 
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+        public struct SYSTEM_COMPRESSION_INFO
+        {
+            public UInt32 Version;
+            public UInt32 CompressionPid;
+            public UInt64 CompressionWorkingSetSize;
+            public UInt64 CompressSize;
+            public UInt64 CompressedSize;
+            public UInt64 NonCompressedSize;
+        }
+
         [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern double MPERF_GetRamUseAge2();
         [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern bool MPERF_UpdatePerformance();
         [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern bool MPERF_UpdateMemoryListInfo();
+        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        private static extern bool MPERF_GetMemoryCompressionInfo(ref SYSTEM_COMPRESSION_INFO _compression_info);
 
         [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern ulong MPERF_GetStandBySize();
@@ -49,7 +62,10 @@ namespace PCMgr.Ctls
         private string fTipVauleStandby;
         private string fTipVauleUsing;
         private ulong all_ram = 0;
+        private bool compressInfoFailed = false;
 
+        public Panel GridPanel => panelGrid;
+        public bool PageIsGraphicMode { get; set; }
         public bool PageIsActive { get; set; }
         public bool PageUpdateSimple(out string customString, out int outdata1, out int outdata2)
         {
@@ -101,6 +117,23 @@ namespace PCMgr.Ctls
                 ulong freeSize = availableSize - modifedSize - standbySize;
                 ulong divier = all_ram / 1048576;
 
+                if(!compressInfoFailed)
+                {
+                    SYSTEM_COMPRESSION_INFO compressionInfo = new SYSTEM_COMPRESSION_INFO();
+                    if (MPERF_GetMemoryCompressionInfo(ref compressionInfo))
+                    {
+                        compressedSize = compressionInfo.CompressionWorkingSetSize;
+                        compressedEstimateSize = compressionInfo.CompressedSize;
+                        if (compressedEstimateSize > compressedSize)
+                            compressedSavedSize = compressedEstimateSize - compressedSize;
+                    }
+                    else
+                    {
+                        fTipVauleUsing = LanuageMgr.GetStr("MemTipUsingS");
+                        compressInfoFailed = true;
+                    }
+                }
+
                 performanceRamPoolGrid.VauleUsing = (usedSize / 1048576) / (double)(divier);
                 performanceRamPoolGrid.VauleModified = (modifedSize / 1048576) / (double)(divier);
                 performanceRamPoolGrid.VauleStandby = (standbySize / 1048576) / (double)(divier);
@@ -112,11 +145,15 @@ namespace PCMgr.Ctls
                 performanceRamPoolGrid.TipVauleFree = string.Format(fTipVauleFree, performanceRamPoolGrid.StrVauleFree);
                 performanceRamPoolGrid.TipVauleModified = string.Format(fTipVauleModified, performanceRamPoolGrid.StrVauleModified);
                 performanceRamPoolGrid.TipVauleStandby = string.Format(fTipVauleStandby, performanceRamPoolGrid.StrVauleStandby);
-                performanceRamPoolGrid.TipVauleUsing = string.Format(fTipVauleUsing, performanceRamPoolGrid.StrVauleUsing, NativeMethods.FormatFileSize(compressedSize), NativeMethods.FormatFileSize(compressedEstimateSize), NativeMethods.FormatFileSize(compressedSavedSize));
+
+                if (compressInfoFailed) performanceRamPoolGrid.TipVauleUsing = string.Format(fTipVauleUsing, performanceRamPoolGrid.StrVauleUsing);
+                else performanceRamPoolGrid.TipVauleUsing = string.Format(fTipVauleUsing, performanceRamPoolGrid.StrVauleUsing, NativeMethods.FormatFileSize(compressedSize), NativeMethods.FormatFileSize(compressedEstimateSize), NativeMethods.FormatFileSize(compressedSavedSize));
 
                 performanceRamPoolGrid.Invalidate();
 
-                item_ramuseage.Value = NativeMethods.FormatFileSize(usedSize) + " (" + NativeMethods.FormatFileSize(compressedSize) + ")";
+                if (compressInfoFailed) item_ramuseage.Value = NativeMethods.FormatFileSize(usedSize);
+                else item_ramuseage.Value = NativeMethods.FormatFileSize(usedSize) + " (" + NativeMethods.FormatFileSize(compressedSize) + ")";
+
                 item_ramcanuse.Value = NativeMethods.FormatFileSize(availableSize);
 
                 item_sended.Value = NativeMethods.FormatFileSize(pagesize * MPERF_GetCommitTotal()) + "/" + NativeMethods.FormatFileSize(pagesize * MPERF_GetCommitLimit());
@@ -184,5 +221,43 @@ namespace PCMgr.Ctls
         {
             performanceGridGlobal.AddData(s);
         }
+
+        public event SwithGraphicViewEventHandler SwithGraphicView;
+        public event OpeningPageMenuEventHandler OpeningPageMenu;
+
+        private void 复制ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string s = performanceTitle.Title + "\n    " + performanceTitle.SmallTitle;
+            s += performanceInfos.GetCopyString();
+            Clipboard.SetText(s);
+        }
+        private void contextMenuStrip_Opening(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            图形摘要视图ToolStripMenuItem.Checked = PageIsGraphicMode;
+            OpeningPageMenu?.Invoke(this, 查看ToolStripMenuItem);
+        }
+        private void 图形摘要视图ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SwithGraphicView?.Invoke(this);
+        }
+
+        private void PerformancePageRam_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+                contextMenuStrip.Show(MousePosition);
+        }
+        private void PerformancePageRam_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+                SwithGraphicView?.Invoke(this);
+        }
+        private void PerformancePageRam_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (PageIsGraphicMode)
+                if (e.Button == MouseButtons.Left && e.Clicks == 1)
+                    NativeMethods.MAppWorkCall3(165, IntPtr.Zero, IntPtr.Zero);
+        }
+
+
     }
 }

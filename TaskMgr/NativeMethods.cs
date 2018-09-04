@@ -62,6 +62,11 @@ namespace PCMgr
             {
                 return (byte)(value >> 8);
             }
+            public static uint MAKELPARAM(ushort a, ushort b)
+            {
+                return (uint)((uint)a & 0xffff) | ((uint)(b & 0xffff) << 16);
+            }
+
 
             public const int MB_OK = 0x00000000;
             public const int MB_OKCANCEL = 0x00000001;
@@ -266,6 +271,11 @@ namespace PCMgr
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern int MAppWorkCall3(int id, IntPtr hWnd, IntPtr data);
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr MAppWorkCall4(int id, IntPtr hWnd, IntPtr data);
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr MAppWorkCall5(int id, IntPtr hWnd, IntPtr data1, IntPtr data2, IntPtr data3);  
+
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern void MAppExit();
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern void MAppRebot();
@@ -385,9 +395,9 @@ namespace PCMgr
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern int MAppWorkShowMenuProcessPrepare([MarshalAs(UnmanagedType.LPWStr)]string strFilePath, [MarshalAs(UnmanagedType.LPWStr)]string strFileName, uint pid, bool isimporant, bool isveryimporant);
 
-        public static bool MKillProcessUser2(uint pid, bool showErr)
+        public static bool MKillProcessUser2(uint pid, bool showErr, bool ignoreTerminateing)
         {
-            return MAppWorkCall3(173, new IntPtr(pid), showErr ? new IntPtr(1) : IntPtr.Zero) == 1;
+            return MAppWorkCall5(50, IntPtr.Zero, new IntPtr(pid), new IntPtr(showErr ? 1 : 0), new IntPtr(ignoreTerminateing ? 1 : 0)).ToInt32() == 1;
         }
 
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
@@ -497,11 +507,18 @@ namespace PCMgr
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern double MPERF_GetCupUseAge();
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern double MPERF_GetCupUseAgeUserTime();
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern double MPERF_GetRamUseAge2();
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern double MPERF_GetDiskUseage();
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern double MPERF_GetNetWorkUseage();
+
+        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern ulong MPERF_GetAllRam();
+        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern ulong MPERF_GetRamUsed();
 
         //3
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
@@ -567,11 +584,13 @@ namespace PCMgr
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern uint MPERF_InitNetworksPerformanceCounters();
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern uint MPERF_InitNetworksPerformanceCounters2();
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern bool MPERF_DestroyNetworksPerformanceCounters();
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr MPERF_GetNetworksPerformanceCounters(int index);
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern double MPERF_GetNetworksPerformanceCountersValues(IntPtr data, ref double out_sent, ref double out_receive);
+        public static extern bool MPERF_GetNetworksPerformanceCountersValues(IntPtr data, ref double out_sent, ref double out_receive);
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern bool MPERF_GetNetworksPerformanceCountersInstanceName(IntPtr data, StringBuilder buf, int size);
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]

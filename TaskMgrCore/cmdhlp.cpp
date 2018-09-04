@@ -17,127 +17,130 @@
 
 #include <shellapi.h>
 #include <locale>
+#include <list>
 
-using namespace std;
+#include "..\PCMgrCmdRunner\PCMgrCmdRunnerEntry.h"
+
 
 extern HINSTANCE hInst;
 extern HINSTANCE hLoader;
 
-BOOL cmdThreadCanRun = FALSE;
-BOOL cmdThreadRunning = FALSE;
-HANDLE hCmdThread = NULL;
+typedef struct tag_COMMAND {
+	string cmd;
+	MCMD_HANDLER handler;
+	MCMD_HANDLER_NO_PARARM handler_no_pararm;
+	MCMD_HANDLER_NO_RETURN handler_no_return;
+	bool hasPararm;
+	bool hasReturn;
+}COMMAND,*PCOMMAND;
 
-DWORD WINAPI MConsoleThread(LPVOID lpParameter)
+list<PCOMMAND> *allCommands;
+MCmdRunner *staticCmdRunner;
+
+M_CAPI(MCmdRunner*) MGetStaticCmdRunner() {
+	return staticCmdRunner;
+}
+
+MCmdRunner::MCmdRunner()
 {
-	Sleep(1000);
-	return MAppCmdRunner(TRUE);
+	allCommands = new list<PCOMMAND>();
+}
+MCmdRunner::~MCmdRunner()
+{
+	for each (PCOMMAND var in *allCommands)
+		free(var);
+	allCommands->clear();
+	delete allCommands;
+}
+
+bool IsCommandRegistered(const char * cmd, PCOMMAND * outCmd)
+{
+	for each (PCOMMAND var in (*allCommands))
+	{
+		if (var->cmd == cmd) {
+			if (outCmd)*outCmd = var;
+			return true;
+		}
+	}
+	return NULL;
+}
+bool CallCommand(PCOMMAND cmd, vector<string>* cmds, int size)
+{
+	if (cmd->hasPararm) {
+		if (cmd->hasReturn)
+			return cmd->handler(cmds, size);
+		else {
+			cmd->handler_no_return(cmds, size);
+			return  false;
+		}
+	}
+	else return cmd->handler_no_pararm();
+}
+
+bool MCmdRunner::RegisterCommand(const char * cmd, MCMD_HANDLER handler)
+{
+	if (IsCommandRegistered(cmd) == NULL) {
+		PCOMMAND cmdItem = new COMMAND();
+		cmdItem->hasPararm = true;
+		cmdItem->hasReturn = true;
+		cmdItem->handler_no_pararm = NULL;
+		cmdItem->handler_no_return = NULL;
+		cmdItem->handler = handler;
+		cmdItem->cmd = cmd;
+		allCommands->push_back(cmdItem);
+	}
+	return false;
+}
+bool MCmdRunner::RegisterCommandNoParam(const char * cmd, MCMD_HANDLER_NO_PARARM handler)
+{
+	if (IsCommandRegistered(cmd) == NULL) {
+		PCOMMAND cmdItem = new COMMAND();
+		cmdItem->hasPararm = false;
+		cmdItem->hasReturn = true;
+		cmdItem->handler_no_pararm = handler;
+		cmdItem->handler_no_return = NULL;
+		cmdItem->handler = NULL;
+		cmdItem->cmd = cmd;
+		allCommands->push_back(cmdItem);
+	}
+	return false;
+}
+bool MCmdRunner::RegisterCommandNoReturn(const char * cmd, MCMD_HANDLER_NO_RETURN handler)
+{
+	if (IsCommandRegistered(cmd) == NULL) {
+		PCOMMAND cmdItem = new COMMAND();
+		cmdItem->hasPararm = true;
+		cmdItem->hasReturn = false;
+		cmdItem->handler_no_pararm = NULL;
+		cmdItem->handler = NULL;
+		cmdItem->handler_no_return = handler;
+		cmdItem->cmd = cmd;
+		allCommands->push_back(cmdItem);
+	}
+	return false;
+}
+bool MCmdRunner::UnRegisterCommand(const char * cmd)
+{
+	PCOMMAND cmdItem = 0;
+	if (::IsCommandRegistered(cmd, &cmdItem) != NULL) {
+		free(cmdItem);
+		allCommands->remove(cmdItem);
+	}
+	return false;
+}
+bool MCmdRunner::IsCommandRegistered(const char * cmd)
+{
+	PCOMMAND cmdItem = 0;
+	return ::IsCommandRegistered(cmd, &cmdItem);
 }
 
 #define CMD_CASE_NOARG(cmd, go) else if ((*cmds)[0] == cmd) go()
 #define CMD_CASE(cmd, go) else if ((*cmds)[0] == cmd) go(cmds, size)
 #define CMD_CASE_CAN_EXIT(cmd, go) else if ((*cmds)[0] == cmd) {if(go(cmds, size))return true;}
 
-bool MRunCmd(vector<string> * cmds, LPCSTR oldCmd);
-
-vector<string> *MAppConsoleInitCommandLine() 
-{
-	int argc = 0;
-	LPWSTR*argsStrs = CommandLineToArgvW(GetCommandLineW(), &argc);
-	if (argsStrs) {
-		if (argc > 1) {
-			vector<string> *cmdArray = new vector<string>();
-			for (int i = 1; i < argc; i++)
-			{
-				LPCSTR str = W2A(argsStrs[i]);
-				cmdArray->push_back(string(str));
-				delete str;
-			}
-			return cmdArray;
-		}
-		LocalFree(argsStrs);
-		return nullptr;
-	}
-	return nullptr;
-}
 M_CAPI(int) MAppConsoleInit()
 {
-	setlocale(LC_ALL, "chs");
-	cmdThreadCanRun = TRUE;
-	M_LOG_Init_InConsole();
-
-	printf_s("PCMgr Command Line Tool\n");
-	printf_s("Version : 1.0.0.1\n\n");
-	MGetWindowsBulidVersion();
-	printf_s("\n");
-
-	string orgCmd;
-	vector<string> * cmds = MAppConsoleInitCommandLine();
-	for each (string var in (*cmds))
-		orgCmd += var;
-	if (cmds) MRunCmd(cmds, orgCmd.c_str());
-	delete(cmds);
-
-	int rs = MAppCmdRunner(FALSE);
-	M_LOG_Close_InConsole();
-	ExitProcess(rs);
-	return rs;
-}
-
-int MAppCmdRunner(BOOL isMain) 
-{
-REENTER:
-	printf_s("\n>");
-
-	char maxbuf[260];
-	gets_s(maxbuf);
-
-	char *buf = maxbuf;
-	if (maxbuf[0] == '>')
-		buf = maxbuf + 1;
-
-	if (MRunCmdWithString(maxbuf))
-	{
-		if(isMain) MAppMainThreadCall(M_MTMSG_COSCLOSE, 0);
-		return 0;
-	}
-
-	if (cmdThreadCanRun)
-		goto REENTER;
-
-	return 0;
-}
-
-BOOL MStartRunCmdThread()
-{
-	if (!cmdThreadRunning)
-	{
-		cmdThreadCanRun = TRUE;
-		hCmdThread = CreateThread(NULL, NULL, MConsoleThread, NULL, NULL, NULL);
-		cmdThreadRunning = TRUE;
-		return cmdThreadRunning;
-	}
-	return FALSE;
-}
-BOOL MStopRunCmdThread()
-{
-	if (cmdThreadRunning)
-	{
-		cmdThreadCanRun = FALSE;
-		if (hCmdThread)
-		{
-			DWORD dw = WaitForSingleObject(hCmdThread, 100);
-			if (dw == WAIT_TIMEOUT) {
-				if (NT_SUCCESS(MTerminateThreadNt(hCmdThread)))
-					LogInfo(L"RunCmdThread Terminated.");
-				else LogWarn(L"RunCmdThread Terminate failed!");
-			}
-			if (hCmdThread) { CloseHandle(hCmdThread); hCmdThread = 0; }
-			cmdThreadRunning = FALSE;
-			return 1;
-		}
-		cmdThreadRunning = FALSE;
-	}
-	return FALSE;
+	return MAppCmdStart();
 }
 
 int MPrintMumberWithLen(DWORD n, size_t len)
@@ -195,166 +198,6 @@ void MPrintSuccess() {
 	printf("Success.\n");
 }
 
-void __cdecl MEnumProcessCallBack(DWORD pid, DWORD parentid, LPWSTR exename, LPWSTR exefullpath, int tp, HANDLE hProcess)
-{
-	if (tp) 
-	{
-		MPrintMumberWithLen(pid, 5);
-		printf(" ");
-		MPrintMumberWithLen(parentid, 5);
-		printf("        ");//6
-		MPrintStrWithLenW(exename, 32);
-		wprintf_s(L"   %s\n", exefullpath);
-	}
-}
-
-void MRunCmd_RunAsProgram(vector<string>* cmds, int size) {
-	BOOL fileexists = TRUE;
-	LPWSTR wagrs = NULL;
-	string parms;
-	for (int i = 1; i < size; i++) {
-		if (i != 1)parms += " ";
-		parms += (*cmds)[i];
-	}
-	if (parms != "") wagrs = MConvertLPCSTRToLPWSTR((LPCSTR)parms.c_str());
-
-	WCHAR targetPath[MAX_PATH];
-	LPWSTR wmaxpath = MConvertLPCSTRToLPWSTR((LPCSTR)("%SystemRoot%\\system32\\" + (*cmds)[0]).c_str());
-	if (ExpandEnvironmentStrings(wmaxpath, targetPath, MAX_PATH))
-	{
-		if (PathIsExe(targetPath))
-			MFM_RunExe(wmaxpath, wagrs, GetConsoleWindow());
-		else
-		{
-			LPWSTR wmaxpath2 = MConvertLPCSTRToLPWSTR((LPCSTR)("%SystemRoot%\\system32\\" + (*cmds)[0] + ".exe").c_str());
-			if (ExpandEnvironmentStrings(wmaxpath2, targetPath, MAX_PATH))
-			{
-				if (MFM_FileExist(targetPath))
-					MFM_RunExe(targetPath, wagrs, GetConsoleWindow());
-				else  fileexists = FALSE;		
-			}
-			MConvertStrDel(wmaxpath2);
-
-			if (!fileexists) {
-				LPWSTR wmaxpath3 = MConvertLPCSTRToLPWSTR((LPCSTR)("%Path%\\" + (*cmds)[0]).c_str());
-				if (ExpandEnvironmentStrings(wmaxpath3, targetPath, MAX_PATH))
-				{
-					if (MFM_FileExist(targetPath))
-						MFM_RunExe(targetPath, wagrs, GetConsoleWindow());
-					else  fileexists = FALSE;
-				}
-				MConvertStrDel(wmaxpath3);
-			}
-
-			if (!fileexists) {
-				LPWSTR wmaxpath4 = MConvertLPCSTRToLPWSTR((LPCSTR)("%Path%\\" + (*cmds)[0] + ".exe").c_str());
-				if (ExpandEnvironmentStrings(wmaxpath4, targetPath, MAX_PATH))
-				{
-					if (MFM_FileExist(targetPath))
-						MFM_RunExe(targetPath, wagrs, GetConsoleWindow());
-					else fileexists = FALSE;
-				}
-				MConvertStrDel(wmaxpath4);
-			}
-		}
-	}
-	else fileexists = FALSE;
-	MConvertStrDel(wmaxpath);
-	if (wagrs) MConvertStrDel(wagrs);
-
-	if (!fileexists) printf("Unknow cmd : %s\n", (*cmds)[0].c_str());
-}
-void MRunCmd_TaskList(vector<string>* cmds, int size)
-{
-	wprintf_s(L"PID     ParentPID ProcessName                          FullPath\n");
-	MEnumProcess((EnumProcessCallBack)MEnumProcessCallBack, NULL);
-}
-void MRunCmd_Help(vector<string>* cmds, int size) {
-	printf("Help : \n");
-	printf("    tasklist : list all running process\n");
-	printf("    taskkill pid [force] [useApc] : kill a running process use process id\n            force : Want to use kernel force kill process\n            useApc : When force kill , should use APC to terminate threads\n");
-	printf("    tasksuspend pid [force] : suspend process use process id\n            force : Want to use kernel force suspend process\n");
-	printf("    taskresume pid [force] : resume process use process id\n            force : Want to use kernel force resume process\n");
-	printf("    toadmin : run pcmgr as adminstrator\n");
-
-}
-void MRunCmd_TaskKill(vector<string>* cmds, int size)
-{
-	if (size < 2) { printf("Please enter pid.\n"); return; }
-	DWORD pid = static_cast<DWORD>(atoll((*cmds)[1].c_str()));
-	if (pid > 4) {
-		if (size > 2 && (*cmds)[2] == "force")
-		{
-			BOOL useApc = FALSE;
-			if (size > 3 && (*cmds)[3] == "apc")useApc = TRUE;
-			NTSTATUS status = 0;
-			if (M_SU_TerminateProcessPID(pid, 0, &status, useApc) && NT_SUCCESS(status))
-				MPrintSuccess();
-			else wprintf(L"TerminateProcess Failed %s\n", MNtStatusToStr(status));
-		}
-		else
-		{
-			HANDLE hProcess;
-			NTSTATUS status = MOpenProcessNt(pid, &hProcess);
-			if (status == STATUS_SUCCESS)
-			{
-				status = MTerminateProcessNt(0, hProcess);
-				if (NT_SUCCESS(status)) printf("Success.\n");
-				else wprintf(L"TerminateProcess Failed %s\n", MNtStatusToStr(status));
-			}
-			else wprintf(L"TerminateProcess Failed %s\n", MNtStatusToStr(status));
-		}
-	}
-	else printf("Invalid pid.\n");
-}
-void MRunCmd_ThreadKill(vector<string>* cmds, int size)
-{
-	if (size < 2) { printf("Please enter tid.\n"); return; }
-	DWORD tid = static_cast<DWORD>(atoll((*cmds)[1].c_str()));
-	NTSTATUS status = 0;
-	if (size > 2 && (*cmds)[2] == "force")
-	{
-		BOOL useApc = FALSE;
-		if (size > 3 && (*cmds)[3] == "apc")useApc = TRUE;
-		if (!(M_SU_TerminateThreadTID(tid, 0, &status, useApc) && NT_SUCCESS(status)))
-			wprintf(L"TerminateThread Failed %s\n", MNtStatusToStr(status));
-	}
-	else {
-		HANDLE hThread;
-		DWORD NtStatus = MOpenThreadNt(tid, &hThread, tid);
-		if (NT_SUCCESS(status)) {
-			NtStatus = MTerminateThreadNt(hThread);
-			if (NtStatus == STATUS_SUCCESS)
-				printf("Success.\n");
-			else wprintf(L"TerminateThread Failed %s\n", MNtStatusToStr(status));
-		}
-		else wprintf(L"Failed : OpenThread : %s\n", MNtStatusToStr(status));
-	}
-}
-void MRunCmd_TaskSuspend(vector<string>* cmds, int size)
-{
-	if (size < 2) { printf("Please enter pid.\n"); return; }
-	DWORD pid = static_cast<DWORD>(atoll((*cmds)[1].c_str()));
-	if (pid > 4) {
-		NTSTATUS status = MSuspendProcessNt(pid, 0);
-		if (status == STATUS_SUCCESS)
-			MPrintSuccess();
-		else wprintf(L"Failed : SuspendProcess : %s\n", MNtStatusToStr(status));
-	}
-	else printf("Invalid pid.\n");
-}
-void MRunCmd_TaskResume(vector<string>* cmds, int size)
-{
-	if (size < 2) { printf("Please enter pid.\n"); return; }
-	DWORD pid = static_cast<DWORD>(atoll((*cmds)[1].c_str()));
-	if (pid > 4) {
-		NTSTATUS status = MResumeProcessNt(pid, 0);
-		if (status == STATUS_SUCCESS)
-			MPrintSuccess();
-		else wprintf(L"Failed : SuspendProcess :%s\n", MNtStatusToStr(status));
-	}
-	else printf("Invalid pid.\n");
-}
 void MRunCmd_VExp(vector<string>* cmds, int size)
 {
 	WCHAR fileName[MAX_PATH];
@@ -366,7 +209,7 @@ void MRunCmd_VExp(vector<string>* cmds, int size)
 	}
 	if (size < 2 && !MChooseFileSingal(GetConsoleWindow(), NULL, L"Choose a PE File", L"PE文件\0*.exe;*.dll\0所有文件\0*.*\0", NULL, L".exe", fileName, MAX_PATH))
 	{
-		printf("Please enter file name.\n"); 
+		printf("Please enter file name.\n");
 		return;
 	}
 
@@ -397,7 +240,7 @@ void MRunCmd_VExp(vector<string>* cmds, int size)
 		}
 	}
 	printf("\n");
-//UNMAP_AND_EXIT:
+	//UNMAP_AND_EXIT:
 	{
 		if (hModule != hInst && hModule != hLoader)
 			FreeLibrary(hModule);
@@ -416,7 +259,7 @@ void MRunCmd_VImp(vector<string>* cmds, int size)
 	{
 		printf("Please enter file name.\n"); return;
 	}
-	
+
 	wprintf(fileName);
 	printf("\n");
 
@@ -453,7 +296,7 @@ void MRunCmd_VImp(vector<string>* cmds, int size)
 		wprintf(L"No import table!");
 		goto UNMAP_AND_EXIT;
 	}
-	
+
 	PIMAGE_IMPORT_DESCRIPTOR pImportTable = (PIMAGE_IMPORT_DESCRIPTOR)ImageRvaToVa(pNtHeaders, lpBaseAddress, Rva_import_table, NULL);
 	IMAGE_IMPORT_DESCRIPTOR null_iid;
 	IMAGE_THUNK_DATA null_thunk;
@@ -498,30 +341,27 @@ void MRunCmd_FGc() {
 	MPrintSuccess();
 }
 
-
-bool MRunCmdWithString(char*maxbuf) {
+bool MCmdRunner::MRunCmdWithString(char*maxbuf) {
 	string cmd(maxbuf);
 	vector<string> cmds;
 	SplitString(cmd, cmds, " ");
 	return MRunCmd(&cmds, maxbuf);
 }
-bool MRunCmd(vector<string> * cmds, LPCSTR oldCmd)
+bool MCmdRunner::MRunCmd(vector<string> * cmds, LPCSTR oldCmd)
 {
+	PCOMMAND registeredCmd = NULL;
+	//PCMgrCmd32
 	int size = static_cast<int>(cmds->size());
 	if (size >= 1)
 	{
 		if ((*cmds)[0] == "exit") return true;
 		else if ((*cmds)[0] == "cls") system("cls");
-		CMD_CASE("help", MRunCmd_Help);
-		CMD_CASE("?", MRunCmd_Help);
-		CMD_CASE("tasklist", MRunCmd_TaskList);
-		CMD_CASE("taskkill", MRunCmd_TaskKill);
-		CMD_CASE("tasksuspend", MRunCmd_TaskSuspend);
-		CMD_CASE("taskresume", MRunCmd_TaskResume);
 		CMD_CASE("vexp", MRunCmd_VExp);
 		CMD_CASE("vimp", MRunCmd_VImp);
 		CMD_CASE_NOARG("vstat", MShowProgramStats);
 		CMD_CASE_NOARG("gc", MRunCmd_FGc);
+		else if (::IsCommandRegistered((*cmds)[0].c_str(), &registeredCmd))
+			return CallCommand(registeredCmd, cmds, size);
 		else system(oldCmd);
 	}
 	return false;

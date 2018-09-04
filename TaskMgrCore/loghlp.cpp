@@ -8,6 +8,8 @@
 #include "mapphlp.h"
 #include <Shlwapi.h>
 
+#include "..\PCMgrCmdRunner\PCMgrCmdRunnerEntry.h"
+
 bool tofile = false;
 bool showConsole = false;
 bool enableFileLog = false;
@@ -158,6 +160,19 @@ M_CAPI(void) M_LOG_Init(BOOL showConsole, BOOL enableFileLog)
 M_CAPI(void) M_LOG_SetLogLevel(LogLevel level)
 {
 	currentLogLevel = level;
+}
+M_CAPI(void) M_LOG_SetLogLevelStr(LPCWSTR level)
+{
+	if (MStrEqual(level, L"LogLevError"))
+		currentLogLevel = LogLevel::LogLevError;
+	else if (MStrEqual(level, L"LogLevDisabled")) 
+		currentLogLevel = LogLevel::LogLevDisabled;
+	else if (MStrEqual(level, L"LogLevDebug"))
+		currentLogLevel = LogLevel::LogLevDebug;
+	else if (MStrEqual(level, L"LogLevWarn"))
+		currentLogLevel = LogLevel::LogLevWarn;
+	else if (MStrEqual(level, L"LogLevFull"))
+		currentLogLevel = LogLevel::LogLevFull;
 }
 M_CAPI(LogLevel) M_LOG_GetLogLevel(int l)
 {

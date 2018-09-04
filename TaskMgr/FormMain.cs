@@ -63,6 +63,7 @@ namespace PCMgr
         private bool uwpListInited = false;
         private bool perfInited = false;
         private bool perfMainInited = false;
+        private bool perfTrayInited = false;
         private bool perfMainInitFailed = false;
         private bool processListDetailsInited = false;
         private bool usersListInited = false;
@@ -72,8 +73,8 @@ namespace PCMgr
 
         #region ProcessListWork
 
-        private const double PERF_LIMIT_MIN_DATA_DISK = 0.01;
-        private const double PERF_LIMIT_MIN_DATA_NETWORK = PERF_LIMIT_MIN_DATA_DISK;
+        private const double PERF_LIMIT_MIN_DATA_DISK = 0.005;
+        private const double PERF_LIMIT_MIN_DATA_NETWORK = 0.001;
 
         private bool refeshLowLock = false;
         private Size lastSimpleSize = new Size();
@@ -480,6 +481,7 @@ namespace PCMgr
             //初始化
             if (!processListInited)
             {
+
                 currentProcessPid = (uint)MAppWorkCall3(180, IntPtr.Zero, IntPtr.Zero);
 
                 enumProcessCallBack = ProcessListHandle;
@@ -1044,7 +1046,8 @@ namespace PCMgr
                     foreach (TaskMgrListItem ix in it.Childs)
                         if (ix.Type == TaskMgrListItemType.ItemProcess)
                             d += ix.SubItems[diskindex].CustomData;
-                    if (d < 0.1 && d >= PERF_LIMIT_MIN_DATA_DISK) d = 0.1; else d = 0;
+                    if (d < 0.1 && d >= PERF_LIMIT_MIN_DATA_DISK) d = 0.1;
+                    else if (d < PERF_LIMIT_MIN_DATA_DISK) d = 0;
                     if (d != 0)
                     {
                         it.SubItems[diskindex].Text = d.ToString("0.0") + " MB/" + str_sec;
@@ -1063,13 +1066,13 @@ namespace PCMgr
                     double d = 0;
                     foreach (TaskMgrListItem ix in it.Childs)
                         if (ix.Type == TaskMgrListItemType.ItemProcess)
-                            d += ix.SubItems[diskindex].CustomData;
-                    if (d < 0.1 && d >= PERF_LIMIT_MIN_DATA_NETWORK) d = 0.1; else d = 0;
+                            d += ix.SubItems[netindex].CustomData;
+                    if (d < 0.1 && d >= PERF_LIMIT_MIN_DATA_NETWORK) d = 0.1; else if (d < PERF_LIMIT_MIN_DATA_NETWORK) d = 0;
                     if (d != 0)
                     {
                         it.SubItems[netindex].Text = d.ToString("0.0") + " Mbps";
                         it.SubItems[netindex].CustomData = d;
-                        it.SubItems[netindex].BackColor = dataGridZeroColor;
+                        it.SubItems[netindex].BackColor = ProcessListGetColorFormValue(d, 16); 
                     }
                     else
                     {
@@ -1158,7 +1161,8 @@ namespace PCMgr
                     }
                     else if (diskindex != -1 && ipdateOneDataCloum == diskindex)
                     {
-                        if (d < 0.1 && d >= PERF_LIMIT_MIN_DATA_DISK) d = 0.1; else d = 0;
+                        if (d < 0.1 && d >= PERF_LIMIT_MIN_DATA_DISK) d = 0.1;
+                        else if (d < PERF_LIMIT_MIN_DATA_DISK) d = 0;
                         if (d != 0)
                         {
                             it.SubItems[diskindex].Text = d.ToString("0.0") + " MB/" + str_sec;
@@ -1172,12 +1176,12 @@ namespace PCMgr
                     }
                     else if (netindex != -1 && ipdateOneDataCloum == netindex)
                     {
-                        if (d < 0.1 && d >= PERF_LIMIT_MIN_DATA_NETWORK) d = 0.1; else d = 0;
+                        if (d < 0.1 && d >= PERF_LIMIT_MIN_DATA_NETWORK) d = 0.1; else if (d < PERF_LIMIT_MIN_DATA_NETWORK) d = 0;
                         if (d != 0)
                         {
                             it.SubItems[netindex].Text = d.ToString("0.0") + " Mbps";
                             it.SubItems[netindex].CustomData = d;
-                            it.SubItems[netindex].BackColor = dataGridZeroColor;
+                            it.SubItems[netindex].BackColor = ProcessListGetColorFormValue(d, 16); 
                             return;
                         }
                         it.SubItems[netindex].Text = "0 Mbps";
@@ -1457,12 +1461,13 @@ namespace PCMgr
             {
                 ulong disk = MPERF_GetProcessDiskRate(p.SYSTEM_PROCESSES, p.perfData);
                 double val = (disk / 1024d);
-                if (val < 0.1 && val >= PERF_LIMIT_MIN_DATA_DISK) val = 0.1; else val = 0;
+                if (val < 0.1 && val >= PERF_LIMIT_MIN_DATA_DISK) val = 0.1;
+                else if (val < PERF_LIMIT_MIN_DATA_DISK) val = 0;
                 if (val != 0)
                 {
                     it.SubItems[diskindex].Text = val.ToString("0.0") + " MB/" + str_sec;
-                    it.SubItems[diskindex].BackColor = ProcessListGetColorFormValue(disk, 1048576);
-                    it.SubItems[diskindex].CustomData = (disk / 1024d);
+                    it.SubItems[diskindex].BackColor = ProcessListGetColorFormValue(val, 128);
+                    it.SubItems[diskindex].CustomData = val;
                     return;
                 }
             }
@@ -1473,16 +1478,19 @@ namespace PCMgr
         }
         private void ProcessListUpdatePerf_Net(uint pid, TaskMgrListItem it, PsItem p)
         {
-            if (p.updateLock) { p.updateLock = false; return; }
+            //if (p.updateLock) { p.updateLock = false; return; }
             if (pid > 4 && MPERF_NET_IsProcessInNet(pid))
             {
                 double allMBytesPerSec = MPERF_GetProcessNetWorkRate(pid, p.perfData) / 1048576d;
-                if (allMBytesPerSec < 0.1 && allMBytesPerSec >= PERF_LIMIT_MIN_DATA_NETWORK) allMBytesPerSec = 0.1; else allMBytesPerSec = 0;
+
+                if (allMBytesPerSec < 0.1 && allMBytesPerSec >= PERF_LIMIT_MIN_DATA_NETWORK) allMBytesPerSec = 0.1;
+                else if (allMBytesPerSec < PERF_LIMIT_MIN_DATA_NETWORK) allMBytesPerSec = 0;
+
                 if (allMBytesPerSec != 0)
                 {
                     it.SubItems[netindex].Text = allMBytesPerSec.ToString("0.0") + " Mbps";
                     it.SubItems[netindex].CustomData = allMBytesPerSec;
-                    it.SubItems[netindex].BackColor = dataGridZeroColor;
+                    it.SubItems[netindex].BackColor = ProcessListGetColorFormValue(allMBytesPerSec, 16); 
                     return;
                 }
             }
@@ -1685,10 +1693,10 @@ namespace PCMgr
                         foreach (TaskMgrListItem lichild in taskMgrListItem.Childs)
                         {
                             if (lichild.Type == TaskMgrListItemType.ItemProcess)
-                                if (!MKillProcessUser2(lichild.PID, false))
+                                if (!MKillProcessUser2(lichild.PID, false, true))
                                     break;
                         }
-                        MKillProcessUser2(taskMgrListItem.PID, true);
+                        MKillProcessUser2(taskMgrListItem.PID, true, true);
                     }
                 }
                 else if (taskMgrListItem.Type == TaskMgrListItemType.ItemUWPHost)
@@ -1696,7 +1704,7 @@ namespace PCMgr
                     foreach (TaskMgrListItem lichild in taskMgrListItem.Childs)
                     {
                         if (lichild.Type == TaskMgrListItemType.ItemProcess)
-                            MKillProcessUser2(lichild.PID, true);
+                            MKillProcessUser2(lichild.PID, true, true);
                     }
                 }
                 else if (taskMgrListItem.Type == TaskMgrListItemType.ItemProcess)
@@ -1719,7 +1727,7 @@ namespace PCMgr
                         }
                         else ananyrs = true;
                     }
-                    if (ananyrs) MKillProcessUser2(taskMgrListItem.PID, true);
+                    if (ananyrs) MKillProcessUser2(taskMgrListItem.PID, true, false);
                 }
             }
         }
@@ -1747,7 +1755,7 @@ namespace PCMgr
                 PsItem child = ProcessListFindPsItem(p.childs[i].pid);
                 if (child.childs.Count > 0)
                     ProcessListKillProcTree(child, false);
-                MKillProcessUser2(child.pid, showerr);
+                MKillProcessUser2(child.pid, showerr, true);
             }
         }
         private void ProcessListKillLastEndItem()
@@ -1759,10 +1767,10 @@ namespace PCMgr
                     foreach (TaskMgrListItem lichild in nextKillItem.Childs)
                     {
                         if (lichild.Type == TaskMgrListItemType.ItemProcess)
-                            if (!MKillProcessUser2(lichild.PID, false))
+                            if (!MKillProcessUser2(lichild.PID, false, true))
                                 break;
                     }
-                    MKillProcessUser2(nextKillItem.PID, true);
+                    MKillProcessUser2(nextKillItem.PID, true, true);
                 }
                 nextKillItem = null;
             }
@@ -1955,100 +1963,106 @@ namespace PCMgr
         }
         private void listProcess_ShowMenuSelectItem(Point pos = default(Point))
         {
-            TaskMgrListItem selectedItem = listProcess.SelectedItem.OldSelectedItem == null ?
+            if (listProcess.SelectedItem != null)
+            {
+                TaskMgrListItem selectedItem = listProcess.SelectedItem.OldSelectedItem == null ?
                  listProcess.SelectedItem : listProcess.SelectedItem.OldSelectedItem;
-            if (selectedItem.Type == TaskMgrListItemType.ItemProcess
-                || selectedItem.Type == TaskMgrListItemType.ItemUWPProcess
-                || selectedItem.Type == TaskMgrListItemType.ItemProcessHost)
-            {
-                PsItem t = (PsItem)selectedItem.Tag;
-                int rs = MAppWorkShowMenuProcess(t.exepath, selectedItem.Text, t.pid, Handle, t.firstHwnd != Handle ? t.firstHwnd : IntPtr.Zero, isSelectExplorer ? 1 : 0, nextSecType, pos.X, pos.Y);
-            }
-            else if (selectedItem.Type == TaskMgrListItemType.ItemUWPHost)
-            {
-                uwpitem t = (uwpitem)selectedItem.Tag;
-                MAppWorkShowMenuProcess(t.uwpInstallDir, t.uwpFullName, 1, Handle, t.firstHwnd, 0, nextSecType, pos.X, pos.Y);
-            }
-            else if (selectedItem.Type == TaskMgrListItemType.ItemWindow)
-            {
-                MAppWorkCall3(212, new IntPtr(pos.X), new IntPtr(pos.Y));
-                MAppWorkCall3(189, Handle, (IntPtr)selectedItem.Tag);
-            }
-            else if (selectedItem.Type == TaskMgrListItemType.ItemService)
-            {
-                IntPtr scname = Marshal.StringToHGlobalUni((string)selectedItem.Tag);
-                MAppWorkCall3(212, new IntPtr(pos.X), new IntPtr(pos.Y));
-                MAppWorkCall3(184, Handle, scname);
-                Marshal.FreeHGlobal(scname);
+                if (selectedItem.Type == TaskMgrListItemType.ItemProcess
+                    || selectedItem.Type == TaskMgrListItemType.ItemUWPProcess
+                    || selectedItem.Type == TaskMgrListItemType.ItemProcessHost)
+                {
+                    PsItem t = (PsItem)selectedItem.Tag;
+                    int rs = MAppWorkShowMenuProcess(t.exepath, selectedItem.Text, t.pid, Handle, t.firstHwnd != Handle ? t.firstHwnd : IntPtr.Zero, isSelectExplorer ? 1 : 0, nextSecType, pos.X, pos.Y);
+                }
+                else if (selectedItem.Type == TaskMgrListItemType.ItemUWPHost)
+                {
+                    uwpitem t = (uwpitem)selectedItem.Tag;
+                    MAppWorkShowMenuProcess(t.uwpInstallDir, t.uwpFullName, 1, Handle, t.firstHwnd, 0, nextSecType, pos.X, pos.Y);
+                }
+                else if (selectedItem.Type == TaskMgrListItemType.ItemWindow)
+                {
+                    MAppWorkCall3(212, new IntPtr(pos.X), new IntPtr(pos.Y));
+                    MAppWorkCall3(189, Handle, (IntPtr)selectedItem.Tag);
+                }
+                else if (selectedItem.Type == TaskMgrListItemType.ItemService)
+                {
+                    IntPtr scname = Marshal.StringToHGlobalUni((string)selectedItem.Tag);
+                    MAppWorkCall3(212, new IntPtr(pos.X), new IntPtr(pos.Y));
+                    MAppWorkCall3(184, Handle, scname);
+                    Marshal.FreeHGlobal(scname);
+                }
             }
         }
         private void listProcess_PrepareShowMenuSelectItem()
         {
-            TaskMgrListItem selectedItem = listProcess.SelectedItem.OldSelectedItem == null ?
-                listProcess.SelectedItem : listProcess.SelectedItem.OldSelectedItem;
-            if (selectedItem.Type == TaskMgrListItemType.ItemProcess
-                || selectedItem.Type == TaskMgrListItemType.ItemUWPProcess
-                || selectedItem.Type == TaskMgrListItemType.ItemProcessHost)
+            if (listProcess.SelectedItem != null)
             {
-                PsItem t = (PsItem)selectedItem.Tag;
-                if (t.pid > 4)
+                TaskMgrListItem selectedItem = listProcess.SelectedItem.OldSelectedItem == null ?
+                    listProcess.SelectedItem : listProcess.SelectedItem.OldSelectedItem;
+                if (selectedItem.Type == TaskMgrListItemType.ItemProcess
+                    || selectedItem.Type == TaskMgrListItemType.ItemUWPProcess
+                    || selectedItem.Type == TaskMgrListItemType.ItemProcessHost)
                 {
-                    btnEndProcess.Enabled = true;
-                    MAppWorkShowMenuProcessPrepare(t.exepath, t.exename, t.pid, IsImporant(t), IsVeryImporant(t));
+                    PsItem t = (PsItem)selectedItem.Tag;
+                    if (t.pid > 4)
+                    {
+                        btnEndProcess.Enabled = true;
+                        MAppWorkShowMenuProcessPrepare(t.exepath, t.exename, t.pid, IsImporant(t), IsVeryImporant(t));
 
-                    if (IsExplorer(t))
-                    {
-                        nextSecType = MENU_SELECTED_PROCESS_KILL_ACT_REBOOT;
-                        btnEndProcess.Text = str_resrat;
-                        isSelectExplorer = true;
-                    }
-                    else
-                    {
-                        if (t.isWindowShow)
+                        if (IsExplorer(t))
                         {
-                            if (stateindex != -1)
-                            {
-                                string s = listProcess.SelectedItem.SubItems[stateindex].Text;
-                                if (s == str_status_paused || s == str_status_hung)
-                                {
-                                    btnEndProcess.Text = str_endproc;
-                                    nextSecType = MENU_SELECTED_PROCESS_KILL_ACT_KILL;
-                                    goto OUT;
-                                }
-                            }
-
-                            btnEndProcess.Text = str_endtask;
-                            nextSecType = MENU_SELECTED_PROCESS_KILL_ACT_RESENT_BACK;
-
+                            nextSecType = MENU_SELECTED_PROCESS_KILL_ACT_REBOOT;
+                            btnEndProcess.Text = str_resrat;
+                            isSelectExplorer = true;
                         }
                         else
                         {
-                            btnEndProcess.Text = str_endproc;
-                            nextSecType = MENU_SELECTED_PROCESS_KILL_ACT_KILL;
+                            if (t.isWindowShow)
+                            {
+                                if (stateindex != -1)
+                                {
+                                    string s = listProcess.SelectedItem.SubItems[stateindex].Text;
+                                    if (s == str_status_paused || s == str_status_hung)
+                                    {
+                                        btnEndProcess.Text = str_endproc;
+                                        nextSecType = MENU_SELECTED_PROCESS_KILL_ACT_KILL;
+                                        goto OUT;
+                                    }
+                                }
+
+                                btnEndProcess.Text = str_endtask;
+                                nextSecType = MENU_SELECTED_PROCESS_KILL_ACT_RESENT_BACK;
+
+                            }
+                            else
+                            {
+                                btnEndProcess.Text = str_endproc;
+                                nextSecType = MENU_SELECTED_PROCESS_KILL_ACT_KILL;
+                            }
+                            OUT:
+                            isSelectExplorer = false;
                         }
-                        OUT:
-                        isSelectExplorer = false;
                     }
+                    else btnEndProcess.Enabled = false;
                 }
-                else btnEndProcess.Enabled = false;
-            }
-            else if (selectedItem.Type == TaskMgrListItemType.ItemUWPHost)
-            {
-                nextSecType = MENU_SELECTED_PROCESS_KILL_ACT_UWP_RESENT_BACK;
-                string exepath = selectedItem.Tag.ToString();
-                MAppWorkShowMenuProcessPrepare(exepath, null, 0, false, false);
-                btnEndProcess.Text = str_endtask;
-                btnEndProcess.Enabled = true;
-            }
-            else if (selectedItem.Type == TaskMgrListItemType.ItemWindow)
-            {
-                MAppWorkCall3(198, IntPtr.Zero, (IntPtr)selectedItem.Tag);
-            }
-            else if (selectedItem.Type == TaskMgrListItemType.ItemService)
-            {
-                IntPtr scname = Marshal.StringToHGlobalUni((string)selectedItem.Tag);
-                MAppWorkCall3(197, IntPtr.Zero, scname);
-                Marshal.FreeHGlobal(scname);
+                else if (selectedItem.Type == TaskMgrListItemType.ItemUWPHost)
+                {
+                    nextSecType = MENU_SELECTED_PROCESS_KILL_ACT_UWP_RESENT_BACK;
+                    string exepath = selectedItem.Tag.ToString();
+                    MAppWorkShowMenuProcessPrepare(exepath, null, 0, false, false);
+                    btnEndProcess.Text = str_endtask;
+                    btnEndProcess.Enabled = true;
+                }
+                else if (selectedItem.Type == TaskMgrListItemType.ItemWindow)
+                {
+                    MAppWorkCall3(198, IntPtr.Zero, (IntPtr)selectedItem.Tag);
+                }
+                else if (selectedItem.Type == TaskMgrListItemType.ItemService)
+                {
+                    IntPtr scname = Marshal.StringToHGlobalUni((string)selectedItem.Tag);
+                    MAppWorkCall3(197, IntPtr.Zero, scname);
+                    Marshal.FreeHGlobal(scname);
+                }
             }
         }
         private void listProcess_MouseClick(object sender, MouseEventArgs e)
@@ -4371,6 +4385,19 @@ namespace PCMgr
         public static Color NetDrawColor = Color.FromArgb(167, 79, 1);
         public static Color NetBgColor = Color.FromArgb(252, 243, 235);
 
+        public static Color CpuDrawColor2 = Color.FromArgb(100, 17, 125, 187);
+        public static Color RamDrawColor2 = Color.FromArgb(100, 139, 18, 174);
+        public static Color DiskDrawColor2 = Color.FromArgb(100, 77, 166, 12);
+        public static Color NetDrawColor2 = Color.FromArgb(100, 167, 79, 1);
+
+        public static Color CpuBgColor2 = Color.FromArgb(100, 85, 193, 255);
+        public static Color RamBgColor2 = Color.FromArgb(180, 220, 98, 244);
+        public static Color DiskBgColor2 = Color.FromArgb(100, 239, 247, 223);
+        public static Color NetBgColor2 = Color.FromArgb(100, 255, 157, 89);
+
+        PerfItemHeader perfItemHeaderCpu;
+        PerfItemHeader perfItemHeaderRam;
+
         PerformanceListItem perf_cpu = new PerformanceListItem();
         PerformanceListItem perf_ram = new PerformanceListItem();
 
@@ -4393,6 +4420,20 @@ namespace PCMgr
 
         private IPerformancePage currSelectedPerformancePage = null;
 
+        private FormSpeedBall.SpeedItem itemCpu;
+        private FormSpeedBall.SpeedItem itemRam;
+        private FormSpeedBall.SpeedItem itemDisk;
+        private FormSpeedBall.SpeedItem itemNet;
+        private IntPtr netCounterMain = IntPtr.Zero;
+
+        private Size lastGraphicSize = new Size();
+        private Control lastGridParent = null;
+        private Size lastGridSize = new Size();
+
+        private void splitContainerPerfCtls_Panel2_SizeChanged(object sender, EventArgs e)
+        {
+            PerfPagesResize(new Size(splitContainerPerfCtls.Panel2.Width - 30, splitContainerPerfCtls.Panel2.Height - 30));
+        }
         private void performanceLeftList_SelectedtndexChanged(object sender, EventArgs e)
         {
             if (performanceLeftList.Selectedtem == perf_cpu)
@@ -4401,9 +4442,96 @@ namespace PCMgr
                 PerfPagesTo(1);
             else if (performanceLeftList.Selectedtem.PageIndex != 0)
                 PerfPagesTo(performanceLeftList.Selectedtem.PageIndex);
-            else
-                PerfPagesToNull();
+            else PerfPagesToNull();
         }
+        private void OpeningPageMenuEventHandler(IPerformancePage sender, ToolStripMenuItem menuItemView)
+        {
+            if (menuItemView.DropDownItems.Count == 0)
+            {
+                /*ToolStripItem tcpu = menuItemView.DropDownItems.Add("CPU");
+                tcpu.Tag = perfItemHeaderCpu.performancePage;
+                tcpu.Click += Tcpu_Click;
+                ToolStripItem tram = menuItemView.DropDownItems.Add(perfItemHeaderRam.item.Name);
+                tram.Tag = perfItemHeaderRam.performancePage;
+                tram.Click += Tram_Click;*/
+                foreach (PerfItemHeader h in perfItems)
+                {
+                    ToolStripItem tx = menuItemView.DropDownItems.Add(h.item.Name);
+                    tx.Tag = h.performancePage;
+                    tx.Click += Tx_Click;
+                }
+            }
+
+            foreach(ToolStripMenuItem i in menuItemView.DropDownItems)
+            {
+                if (i.Tag != null && (IPerformancePage)i.Tag == sender)
+                    i.Checked = true;
+                else if (i.Checked) i.Checked = false;
+            }
+        }
+
+        private void Tx_Click(object sender, EventArgs e)
+        {
+            ToolStripItem item = sender as ToolStripItem;
+            if (item.Tag != null)
+                PerfPagesTo((IPerformancePage)item.Tag);
+        }
+        private void Tcpu_Click(object sender, EventArgs e)
+        {
+            PerfPagesTo(0);
+        }
+        private void Tram_Click(object sender, EventArgs e)
+        {
+            PerfPagesTo(1);
+        }
+
+        private void SwithGraphicViewEventHandler(IPerformancePage sender)
+        {
+            Panel gridPanel = sender.GridPanel;
+            if (!sender.PageIsGraphicMode)
+            {
+                spBottom.Visible = false;
+                tabControlMain.Visible = false;
+                lastSize = Size;
+
+                lastGridSize = gridPanel.Size;
+
+                lastGridParent = gridPanel.Parent;
+                lastGridParent.Controls.Remove(gridPanel);
+                pl_perfGridHost.Controls.Add(gridPanel);
+
+                gridPanel.Size = new Size(pl_perfGridHost.Width - 30, pl_perfGridHost.Height - 30);
+                gridPanel.Location = new Point(15, 15);
+
+                sender.PageIsGraphicMode = true;
+
+                pl_perfGridHost.BringToFront();
+
+                MAppWorkCall3(167, Handle, IntPtr.Zero);
+
+                Size = lastGraphicSize;
+            }
+            else
+            {
+                pl_perfGridHost.SendToBack();
+
+                pl_perfGridHost.Controls.Remove(gridPanel);
+                lastGridParent.Controls.Add(gridPanel);
+
+                MAppWorkCall3(173, Handle, IntPtr.Zero);
+
+                gridPanel.Size = lastGridSize;
+                gridPanel.Location = Point.Empty;
+
+                sender.PageIsGraphicMode = false;
+
+                spBottom.Visible = true;
+                tabControlMain.Visible = true;
+                lastGraphicSize = Size;
+                Size = lastSize;
+            }
+        }
+
         private void PerfPagesToNull()
         {
             if (currSelectedPerformancePage != null)
@@ -4415,40 +4543,89 @@ namespace PCMgr
         }
         private void PerfPagesTo(int index)
         {
+            PerfPagesTo(perfPages[index]);
+        }
+        private void PerfPagesTo(IPerformancePage page)
+        {
+            bool isGrMode = false;
+
             if (currSelectedPerformancePage != null)
             {
+                if (currSelectedPerformancePage.PageIsGraphicMode)
+                {
+                    isGrMode = true;
+
+                    pl_perfGridHost.SendToBack();
+
+                    pl_perfGridHost.Controls.Remove(currSelectedPerformancePage.GridPanel);
+                    lastGridParent.Controls.Add(currSelectedPerformancePage.GridPanel);
+
+                    currSelectedPerformancePage.GridPanel.Size = lastGridSize;
+                    currSelectedPerformancePage.GridPanel.Location = Point.Empty;
+
+                    currSelectedPerformancePage.PageIsGraphicMode = false;
+                }
+
                 currSelectedPerformancePage.PageHide();
                 currSelectedPerformancePage.PageIsActive = false;
             }
+
             currSelectedPerformancePage = null;
-            currSelectedPerformancePage = perfPages[index];
+            currSelectedPerformancePage = page;
             currSelectedPerformancePage.PageShow();
             currSelectedPerformancePage.PageIsActive = true;
+
+            if (isGrMode)
+            {
+                lastGridSize = currSelectedPerformancePage.GridPanel.Size;
+
+                lastGridParent = currSelectedPerformancePage.GridPanel.Parent;
+                lastGridParent.Controls.Remove(currSelectedPerformancePage.GridPanel);
+                pl_perfGridHost.Controls.Add(currSelectedPerformancePage.GridPanel);
+
+                currSelectedPerformancePage.GridPanel.Size = new Size(pl_perfGridHost.Width - 30, pl_perfGridHost.Height - 30);
+                currSelectedPerformancePage.GridPanel.Location = new Point(15, 15);
+
+                currSelectedPerformancePage.PageIsGraphicMode = true;
+
+                pl_perfGridHost.BringToFront();
+            }
         }
         private void PerfPagesAddToCtl(Control c)
         {
-            c.Visible = false;
             splitContainerPerfCtls.Panel2.Controls.Add(c);
-            c.Size = new Size(splitContainerPerfCtls.Panel2.Width - 30, splitContainerPerfCtls.Panel2.Height - 30);
+
+            c.Visible = false;
+            c.Anchor = AnchorStyles.Left | AnchorStyles.Top;//| AnchorStyles.Right | AnchorStyles.Bottom;
+            //c.Size = new Size(splitContainerPerfCtls.Panel2.Width - 30, splitContainerPerfCtls.Panel2.Height - 30);
             c.Location = new Point(15, 15);
-            c.Anchor = AnchorStyles.Left | AnchorStyles.Bottom | AnchorStyles.Right | AnchorStyles.Top;
+        }
+        private void PerfPagesResize(Size targetSize)
+        {
+            foreach (PerfItemHeader h in perfItems)
+                if (!h.performancePage.PageIsGraphicMode)
+                    h.performancePage.Size = targetSize;
         }
         private void PerfPagesInit()
         {
             PerformancePageCpu performanceCpu = new PerformancePageCpu();
+            performanceCpu.OpeningPageMenu += OpeningPageMenuEventHandler;
+            performanceCpu.SwithGraphicView += SwithGraphicViewEventHandler;
             PerfPagesAddToCtl(performanceCpu);
             perfPages.Add(performanceCpu);
 
-            PerfItemHeader perfItemHeaderCpu = new PerfItemHeader();
+            perfItemHeaderCpu = new PerfItemHeader();
             perfItemHeaderCpu.item = perf_cpu;
             perfItemHeaderCpu.performancePage = performanceCpu;
             perfItems.Add(perfItemHeaderCpu);
 
             PerformancePageRam performanceRam = new PerformancePageRam();
+            performanceRam.OpeningPageMenu += OpeningPageMenuEventHandler;
+            performanceRam.SwithGraphicView += SwithGraphicViewEventHandler;
             PerfPagesAddToCtl(performanceRam);
             perfPages.Add(performanceRam);
 
-            PerfItemHeader perfItemHeaderRam = new PerfItemHeader();
+            perfItemHeaderRam = new PerfItemHeader();
             perfItemHeaderRam.item = perf_ram;
             perfItemHeaderRam.performancePage = performanceRam;
             perfItems.Add(perfItemHeaderRam);
@@ -4460,13 +4637,13 @@ namespace PCMgr
                 MDEVICE_Init();
 
                 perf_cpu.Name = "CPU";
-                perf_cpu.SmallText = "0 %";
+                perf_cpu.SmallText = "-- %";
                 perf_cpu.BasePen = new Pen(CpuDrawColor, 2);
                 perf_cpu.BgBrush = new SolidBrush(CpuBgColor);
                 performanceLeftList.Items.Add(perf_cpu);
 
                 perf_ram.Name = LanuageMgr.GetStr("TitleRam");
-                perf_ram.SmallText = "0 %";
+                perf_ram.SmallText = "-- %";
                 perf_ram.BasePen = new Pen(RamDrawColor, 2);
                 perf_ram.BgBrush = new SolidBrush(RamBgColor);
                 performanceLeftList.Items.Add(perf_ram);
@@ -4492,6 +4669,8 @@ namespace PCMgr
                     perfItems.Add(perfItemHeader);
 
                     PerformancePageDisk performancedisk = new PerformancePageDisk(perfItemHeader.performanceCounterNative, diskIndex);
+                    performancedisk.OpeningPageMenu += OpeningPageMenuEventHandler;
+                    performancedisk.SwithGraphicView += SwithGraphicViewEventHandler;
                     PerfPagesAddToCtl(performancedisk);
                     perfPages.Add(performancedisk);
 
@@ -4523,8 +4702,12 @@ namespace PCMgr
                         bool enabled = MDEVICE_GetNetworkAdapterInfoFormName(sbName.ToString(),
                             sbIPV4, 32, sbIPV6, 64);
                         perfItemHeader.item.Gray = !enabled;
+                        if (!enabled)
+                            perfItemHeader.item.SmallText = LanuageMgr.GetStr("NotConnect");
 
                         PerformancePageNet performancenet = new PerformancePageNet(perfItemHeader.performanceCounterNative, isWifi, sbName.ToString());
+                        performancenet.OpeningPageMenu += OpeningPageMenuEventHandler;
+                        performancenet.SwithGraphicView += SwithGraphicViewEventHandler;
                         performancenet.v4 = sbIPV4.ToString();
                         performancenet.v6 = sbIPV6.ToString();
 
@@ -4538,13 +4721,54 @@ namespace PCMgr
                     }
                 }
 
-
                 performanceLeftList.UpdateAll();
                 performanceLeftList.Invalidate();
 
                 PerfPagesTo(0);
+                PerfPagesResize(new Size(splitContainerPerfCtls.Panel2.Width - 30, splitContainerPerfCtls.Panel2.Height - 30));
 
                 perfInited = true;
+            }
+        }
+        private void PerfInitTray()
+        {
+            if (!perfTrayInited)
+            {
+                if (MPERF_InitNetworksPerformanceCounters2() > 0)
+                    netCounterMain = MPERF_GetNetworksPerformanceCounters(0);
+
+                formSpeedBall = new FormSpeedBall();
+                formSpeedBall.Show();
+                ShowWindow(formSpeedBall.Handle, 0);
+
+                Font itemHugeFont = new Font("Microsoft YaHei UI", 10.5f);
+                Font itemValueFont = new Font("Microsoft YaHei UI", 10.5f);
+
+                itemCpu = new FormSpeedBall.SpeedItem("CPU", CpuBgColor2, CpuDrawColor);
+                itemRam = new FormSpeedBall.SpeedItem(LanuageMgr.GetStr("TitleRam"), RamBgColor2, RamDrawColor2);
+                itemDisk = new FormSpeedBall.SpeedItem(LanuageMgr.GetStr("TitleDisk"), DiskBgColor2, DiskDrawColor2);
+                itemNet = new FormSpeedBall.SpeedItem(LanuageMgr.GetStr("TitleNet"), NetBgColor2, NetDrawColor2);
+
+                itemCpu.TextFont = itemHugeFont;
+                itemCpu.ValueFont = itemValueFont;
+                itemRam.TextFont = itemHugeFont;
+                itemRam.ValueFont = itemValueFont;
+                itemDisk.TextFont = itemHugeFont;
+                itemDisk.ValueFont = itemValueFont;
+                itemNet.TextFont = itemHugeFont;
+                itemNet.ValueFont = itemValueFont;
+
+                itemCpu.GridType = FormSpeedBall.SpeedItemGridType.OneGrid;
+                itemRam.GridType = FormSpeedBall.SpeedItemGridType.NoGrid;
+                itemNet.GridType = FormSpeedBall.SpeedItemGridType.NoValue;
+                itemDisk.GridType = FormSpeedBall.SpeedItemGridType.OneGrid;
+
+                formSpeedBall.Items.Add(itemCpu);
+                formSpeedBall.Items.Add(itemRam);
+                formSpeedBall.Items.Add(itemDisk);
+                formSpeedBall.Items.Add(itemNet);
+
+                perfTrayInited = true;
             }
         }
         private void PerfUpdate()
@@ -4566,10 +4790,11 @@ namespace PCMgr
                     if (outCustomStr == null)
                         h.item.SmallText = outdata1.ToString("0.0") + "%";
                 }
+
                 if (outdata2 != -1 && outdata2 != -1)
-                    h.item.AddData((int)(outdata1 + outdata2) / 2);
+                    h.item.AddData((outdata1 + outdata2) / 2);
                 else if (outdata1 != -1)
-                    h.item.AddData((int)outdata1);
+                    h.item.AddData(outdata1);
             }
 
             if (currSelectedPerformancePage != null)
@@ -4588,6 +4813,10 @@ namespace PCMgr
             MDEVICE_DestroyLogicalDiskInfo();
             MDEVICE_DestroyNetworkAdaptersInfo();
             MDEVICE_UnInit();
+
+            SetConfig("OldSizeGraphic", "AppSetting", lastGraphicSize.Width + "-" + lastGraphicSize.Height);
+
+            formSpeedBall.Close();
         }
         private void PerfUpdateGridUnit()
         {
@@ -4598,6 +4827,32 @@ namespace PCMgr
             foreach (IPerformancePage p in perfPages)
                 p.PageSetGridUnit(unistr);
         }
+        private void PerfSetTrayPos()
+        {
+            Point p = MousePosition;
+            p.X -= 15; p.Y -= 15;
+            Point t = new Point();
+            if (p.Y < 50)
+                t.Y = 45;
+            else if (p.Y > Screen.PrimaryScreen.Bounds.Height - 50)
+                t.Y = Screen.PrimaryScreen.Bounds.Height - formSpeedBall.Height - 45;
+            else t.Y = p.Y - formSpeedBall.Height;
+
+            if (p.X < 50)
+                t.X = 45;
+            else if (p.X > Screen.PrimaryScreen.Bounds.Width - 50)
+                t.X = Screen.PrimaryScreen.Bounds.Width - formSpeedBall.Width - 45;
+            else t.X = p.X - formSpeedBall.Width;
+
+            if (t.X < 0) t.X = 2;
+            if (t.X > Screen.PrimaryScreen.Bounds.Width - formSpeedBall.Width) t.X = Screen.PrimaryScreen.Bounds.Width - formSpeedBall.Width - 2;
+            if (t.Y < 0) t.Y = 2;
+            if (t.Y > Screen.PrimaryScreen.Bounds.Height - formSpeedBall.Height) t.X = Screen.PrimaryScreen.Bounds.Height - formSpeedBall.Height - 2;
+
+            formSpeedBall.Location = t;
+        }
+
+        private FormSpeedBall formSpeedBall = null;
 
         private void linkLabelOpenPerfMon_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
@@ -4714,6 +4969,12 @@ namespace PCMgr
         public static string str_MemUsingS = "Using";
         public static string str_IdleProcessDsb = "IdleProcessDsb";
         public static string str_WarnTitle = "";
+        public static string str_DriverNotLoad = "";
+        public static string str_SuspendThisTitle = "";
+        public static string str_SuspendThisText = "";
+        public static string str_SuspendCheckText = "";
+        public static string str_ShowMain = "";
+        public static string str_HideMain = "";
 
         /*
         
@@ -4756,6 +5017,8 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
             {
                 MLG_SetLanuageItems_CanRealloc();
 
+                str_ShowMain = LanuageMgr.GetStr("ShowMain");
+                str_HideMain = LanuageMgr.GetStr("HideMain");
                 str_WarnTitle = LanuageMgr.GetStr("WarnTitle");
                 str_IdleProcessDsb = LanuageMgr.GetStr("IdleProcessDsb");
                 str_MemFree = LanuageMgr.GetStr("MemFree");
@@ -4858,6 +5121,10 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                 str_DblCklShow_RTL_USER_PROCESS_PARAMETERS = LanuageMgr.GetStr("DblCklShow_RTL_USER_PROCESS_PARAMETERS");
                 str_CantFind = LanuageMgr.GetStr("CantFind");
                 str_SetTo = LanuageMgr.GetStr("SetTo");
+                str_DriverNotLoad = LanuageMgr.GetStr("DriverNotLoad");
+                str_SuspendThisTitle = LanuageMgr.GetStr("SuspendThisTitle");
+                str_SuspendThisText = LanuageMgr.GetStr("SuspendThisText");
+                str_SuspendCheckText = LanuageMgr.GetStr("SuspendCheckText");
 
                 MAppSetLanuageItems(0, 0, str_KillAskStart, 0);
                 MAppSetLanuageItems(0, 1, str_KillAskEnd, 0);
@@ -4952,6 +5219,10 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                 MAppSetLanuageItems(2, 26, str_WarnTitle, str_WarnTitle.Length + 1);
                 MAppSetLanuageItems(2, 27, LanuageMgr.GetStr2("LoadDriverWarn", out size), size);
                 MAppSetLanuageItems(2, 28, LanuageMgr.GetStr2("LoadDriverWarnTitle", out size), size);
+                MAppSetLanuageItems(2, 29, LanuageMgr.GetStr2("DetachDebuggerTitle", out size), size);
+                MAppSetLanuageItems(2, 30, LanuageMgr.GetStr2("DetachDebuggerError", out size), size);
+                MAppSetLanuageItems(2, 31, LanuageMgr.GetStr2("DetachDebuggerNotDebugger", out size), size);
+
             }
             catch (Exception e)
             {
@@ -5283,8 +5554,6 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
             }
         }
 
-        private FormKernel formKernel = null;
-        private FormHooks formHooks = null;
         private IntPtr hListHeaderDrv = IntPtr.Zero;
 
         private ListViewItemComparerKr listViewItemComparerKr = new ListViewItemComparerKr();
@@ -5424,24 +5693,8 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
         }
         private void linkLabelShowKernelTools_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (formKernel == null)
-            {
-                formKernel = new FormKernel();
-                formKernel.FormClosed += FormKernel_FormClosed;
-            }
-            formKernel.Show();
-            MAppWorkCall3(213, formKernel.Handle, IntPtr.Zero);
+            MessageBox.Show("The function aren't complete. ");
         }
-
-        private void FormKernel_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            formKernel = null;
-        }
-        private void FormHooks_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            formHooks = null;
-        }
-
 
         private void listDrivers_MouseUp(object sender, MouseEventArgs e)
         {
@@ -5474,13 +5727,7 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
 
         public void ShowFormHooks()
         {
-            if (formHooks == null)
-            {
-                formHooks = new FormHooks();
-                formHooks.FormClosed += FormHooks_FormClosed;
-            }
-            formHooks.Show();
-            MAppWorkCall3(213, formHooks.Handle, IntPtr.Zero);
+            MessageBox.Show("The function aren't complete. ");
         }
 
         #endregion
@@ -5701,6 +5948,18 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                 };
                 taskDialog.EnableButton(1, false);
             }
+            if (id == 5)//暂停当前进程警告
+            {
+                taskDialog = new TaskDialog(str_SuspendThisTitle, str_AppTitle, str_SuspendThisText);
+                taskDialog.VerificationText = str_SuspendCheckText;
+                taskDialog.VerificationClick += TermintateImporantProcess_TaskDialog_VerificationClick;
+                taskDialog.CustomButtons = new CustomButton[]
+                {
+                new CustomButton(1, str_Yes),
+                new CustomButton(2, str_No),
+                };
+                taskDialog.EnableButton(1, false);
+            }
 
             Results rs = taskDialog.Show(this);
             return rs.ButtonID == 1;
@@ -5753,6 +6012,52 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
         {
             //整体刷新定时器
             if (!perfMainInited) ProcessListInitLater();
+
+            double cpu = 0;
+            double ram = 0;
+            double disk = 0;
+            double net = 0;
+
+            bool perfsimpleGeted = false;
+
+            if (perfMainInited && IsWindowVisible(formSpeedBall.Handle))
+            {
+                MPERF_GlobalUpdatePerformanceCounters();
+
+                cpu = MPERF_GetCupUseAge();
+                ram = MPERF_GetRamUseAge2() * 100;
+                disk = MPERF_GetDiskUseage() * 100;
+                net = MPERF_GetNetWorkUseage() * 100;
+
+                perfsimpleGeted = true;
+
+                itemCpu.Value = cpu.ToString("0.0") + " %";
+                itemCpu.NumValue = cpu / 100;
+                itemCpu.AddData1((int)cpu);
+
+                ulong all = MPERF_GetAllRam();
+                ulong used = MPERF_GetRamUsed();
+
+                ulong divor = 0;
+                string unit = GetBestFilesizeUnit(all, out divor);
+
+                itemRam.Value = (used / (double)divor).ToString("0.0") + " " + unit + "/" + (all / (double)divor).ToString("0.0") + " " + unit + "  (" + ram.ToString("0.0") + "%)";
+                itemRam.NumValue = ram / 100;
+
+                itemDisk.Value = disk.ToString("0.0") + " %";
+                itemDisk.NumValue = disk / 100;
+                itemDisk.AddData1((int)disk);
+
+                double netsent = 0, netreceive = 0;
+                if (MPERF_GetNetworksPerformanceCountersValues(netCounterMain, ref netsent, ref netreceive))
+                    itemNet.Value = str_Sent + " : " + (netsent / 1024 * 8).ToString("0.0") + " Kbps  "
+                        + str_Receive + " : " + (netreceive / 1024 * 8).ToString("0.0") + " Kbps";
+                else itemNet.Value = net.ToString("0.0") + " %";
+
+
+                formSpeedBall.Invalidate();
+            }
+
             if (!Visible) return;
             //base RefeshTimer
             if (tabControlMain.SelectedTab == tabPageProcCtl)
@@ -5761,36 +6066,36 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                 {
                     //Refesh perfs
                     listProcess.Locked = true;
-                    if (cpuindex != -1 || ramindex != -1 || diskindex != -1 || netindex != -1)
+                    if (!perfsimpleGeted && (cpuindex != -1 || ramindex != -1 || diskindex != -1 || netindex != -1))
                         MPERF_GlobalUpdatePerformanceCounters();
                     if (cpuindex != -1)
                     {
-                        int cpu = (int)(MPERF_GetCupUseAge());
-                        listProcess.Colunms[cpuindex].TextBig = cpu + "%";
+                        if(!perfsimpleGeted) cpu = MPERF_GetCupUseAge();
+                        listProcess.Colunms[cpuindex].TextBig = (int)cpu + "%";
                         if (cpu >= 95)
                             listProcess.Colunms[cpuindex].IsHot = true;
                         else listProcess.Colunms[cpuindex].IsHot = false;
                     }
                     if (ramindex != -1)
                     {
-                        int ram = (int)(MPERF_GetRamUseAge2() * 100);
-                        listProcess.Colunms[ramindex].TextBig = ram + "%";
+                        if (!perfsimpleGeted) ram = MPERF_GetRamUseAge2() * 100;
+                        listProcess.Colunms[ramindex].TextBig = (int)ram + "%";
                         if (ram >= 95)
                             listProcess.Colunms[ramindex].IsHot = true;
                         else listProcess.Colunms[ramindex].IsHot = false;
                     }
                     if (diskindex != -1)
                     {
-                        int disk = (int)(MPERF_GetDiskUseage() * 100);
-                        listProcess.Colunms[diskindex].TextBig = disk + "%";
+                        if (!perfsimpleGeted) disk = MPERF_GetDiskUseage() * 100;
+                        listProcess.Colunms[diskindex].TextBig = (int)disk + "%";
                         if (disk >= 95)
                             listProcess.Colunms[diskindex].IsHot = true;
                         else listProcess.Colunms[diskindex].IsHot = false;
                     }
                     if (netindex != -1)
                     {
-                        int net = (int)(MPERF_GetNetWorkUseage() * 100);
-                        listProcess.Colunms[netindex].TextBig = net + "%";
+                        if (!perfsimpleGeted) net = MPERF_GetNetWorkUseage() * 100;
+                        listProcess.Colunms[netindex].TextBig = (int)net + "%";
                         if (net >= 95)
                             listProcess.Colunms[netindex].IsHot = true;
                         else listProcess.Colunms[netindex].IsHot = false;
@@ -5803,7 +6108,7 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
             }
             else if (tabControlMain.SelectedTab == tabPagePerfCtl)
             {
-                MPERF_GlobalUpdatePerformanceCounters();
+                if(!perfsimpleGeted) MPERF_GlobalUpdatePerformanceCounters();
 
                 PerfUpdate();
 
@@ -6022,13 +6327,17 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                 case M_CALLBACK_VIEW_TIMER:
                     {
                         //timer
-                        new FormVTimers(Convert.ToUInt32(wParam.ToInt32()));
+                        if (MCanUseKernel())
+                            new FormVTimers(Convert.ToUInt32(wParam.ToInt32())).ShowDialog();
+                        else MessageBox.Show(str_DriverNotLoad);
                         break;
                     }
                 case M_CALLBACK_VIEW_HOTKEY:
                     {
                         //hotkey
-                        new FormVHotKeys(Convert.ToUInt32(wParam.ToInt32()));
+                        if (MCanUseKernel())
+                            new FormVHotKeys(Convert.ToUInt32(wParam.ToInt32())).ShowDialog();
+                        else MessageBox.Show(str_DriverNotLoad);
                         break;
                     }
                 case M_CALLBACK_SHOW_TRUSTED_DLG:
@@ -6340,11 +6649,8 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
             #region GetSettings
 
 
-            string sortamxx = GetConfig("ListSortDk", "AppSetting");
-            if (sortamxx != "")
-                if (sortamxx == "TRUE")
-                    sorta = true;
-            string sortitemxx = GetConfig("ListSortIndex", "AppSetting");
+            sorta = GetConfigBool("ListSortDk", "AppSetting", true);
+            string sortitemxx = GetConfig("ListSortIndex", "AppSetting", "0");
             if (sortitemxx != "" && sortitemxx != "-1")
             {
                 try
@@ -6353,7 +6659,7 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                 }
                 catch { }
             }
-            showHiddenFiles = GetConfig("ShowHiddenFiles", "AppSetting") == "TRUE";
+            showHiddenFiles = GetConfigBool("ShowHiddenFiles", "AppSetting");
             MFM_SetShowHiddenFiles(showHiddenFiles);
             #endregion
 
@@ -6628,6 +6934,24 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                     catch { }
                 }
 
+                string sg = GetConfig("OldSizeGraphic", "AppSetting", "640-320");
+                if (sg.Contains("-"))
+                {
+                    string[] ss = sg.Split('-');
+                    try
+                    {
+                        int w = int.Parse(ss[0]); if (w + Left > Screen.PrimaryScreen.WorkingArea.Width) w = Screen.PrimaryScreen.WorkingArea.Width - Left;
+                        int h = int.Parse(ss[1]); if (h + Top > Screen.PrimaryScreen.WorkingArea.Height) h = Screen.PrimaryScreen.WorkingArea.Height - Top;
+                        lastGraphicSize = new Size(w, h);
+
+                        if (s_isSimpleView)
+                        {
+                            Width = w;
+                            Height = h;
+                        }
+                    }
+                    catch { }
+                }
                 string sl = GetConfig("OldSizeSimple", "AppSetting", "380-334");
                 if (sl.Contains("-"))
                 {
@@ -6789,10 +7113,51 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
             SetConfig("ListServiceWidths", "AppSetting", s);
         }
 
+        //notifyIcon
+        private bool notifyIcon_mouseEntered = false;
+
+        private void notifyIcon_MouseEnter(object sender, EventArgs e)
+        {
+            PerfSetTrayPos();
+            ShowWindow(formSpeedBall.Handle, 5);
+        }
+        public void notifyIcon_MouseLeave(object sender, EventArgs e)
+        {
+            notifyIcon_mouseEntered = false;
+        }
         private void notifyIcon_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             MAppWorkCall3(208, Handle, Handle);
         }
+        private void notifyIcon_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (!notifyIcon_mouseEntered)
+            {
+                notifyIcon_mouseEntered = true;
+                notifyIcon_MouseEnter(sender, e);
+            }
+        }
+
+        //notifyIcon menu
+        private void 退出程序ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            AppExit();
+        }
+        private void 显示隐藏主界面ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (IsWindowVisible(Handle))
+                ShowWindow(Handle, 0);
+            else
+                ShowWindow(Handle, 5);
+        }
+        private void contextMenuStripTray_Opening(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if(IsWindowVisible(Handle))
+                显示隐藏主界面ToolStripMenuItem.Text = str_HideMain;
+           else
+                显示隐藏主界面ToolStripMenuItem.Text = str_ShowMain;
+        }
+
         private void FormMain_Shown(object sender, EventArgs e)
         {
             AppLoad();
@@ -6806,6 +7171,8 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
 
             LoadHotKey();
             LoadLastPos();
+
+            PerfInitTray();
         }
         private void FormMain_Activated(object sender, EventArgs e)
         {
@@ -6845,7 +7212,13 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                     }
                 case 40017:
                     {
-                        //sleep system
+                        //Sleep system
+                        Application.SetSuspendState(PowerState.Suspend, true, true);
+                        break;
+                    }
+                case 41174:
+                    {
+                        //Hibernate system
                         Application.SetSuspendState(PowerState.Hibernate, true, true);
                         break;
                     }
@@ -6909,7 +7282,7 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                     }
                 case 41153:
                     {
-                        MAppTest(0, IntPtr.Zero);
+                       
                         break;
                     }
 
@@ -6941,6 +7314,8 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                 SetConfig("MainHeaders", "AppSetting", headers);
             }
             SetConfig("MainHeaders1", "AppSetting", listProcess.Colunms[0].Width.ToString());
+
+            notifyIcon.Visible = false;
 
             AppOnExit();
         }

@@ -1221,4 +1221,38 @@ PCMgr 需要管理员权限 才能对系统进行控制和管理。
   <data name="WarnTitle" xml:space="preserve">
     <value>警告</value>
   </data>
+  <data name="NotConnect" xml:space="preserve">
+    <value>未连接</value>
+  </data>
+  <data name="DriverNotLoad" xml:space="preserve">
+    <value>驱动没有加载！</value>
+  </data>
+  <data name="SuspendCheckText" xml:space="preserve">
+    <value>就让程序卡死</value>
+  </data>
+  <data name="SuspendThisText" xml:space="preserve">
+    <value>暂停本程序运行会导致程序卡死，无法继续运行，是否继续？</value>
+  </data>
+  <data name="SuspendThisTitle" xml:space="preserve">
+    <value>你希望暂停本程序的运行吗？</value>
+  </data>
+  <data name="HideMain" xml:space="preserve">
+    <value>隐藏主界面</value>
+  </data>
+  <data name="ShowMain" xml:space="preserve">
+    <value>显示主界面</value>
+  </data>
+  <data name="MemTipUsingS" xml:space="preserve">
+    <value>使用中 ({0})
+由进程、驱动程序或操作系统使用的内存</value>
+  </data>
+  <data name="DetachDebuggerError" xml:space="preserve">
+    <value>无法分离调试器</value>
+  </data>
+  <data name="DetachDebuggerNotDebugger" xml:space="preserve">
+    <value>此进程没有被调试</value>
+  </data>
+  <data name="DetachDebuggerTitle" xml:space="preserve">
+    <value>分离调试器</value>
+  </data>
 </root>

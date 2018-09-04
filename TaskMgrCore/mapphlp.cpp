@@ -78,6 +78,8 @@ WCHAR appName[MAX_PATH];
 DWORD dwMainAppRet = 0;
 extern WCHAR iniPath[MAX_PATH];
 
+
+
 int menu_last_x = 0,
 menu_last_y = 0;
 HMENU hMenuMainFile;
@@ -257,35 +259,36 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 	}
 	switch (id)
 	{
-	case 168: {
-		MAppVPEExp((LPWSTR)data, hWnd);
+	case 165: {
+		ReleaseCapture();
+		SendMessage(hWndMain, WM_NCLBUTTONDOWN, HTCAPTION, 0);
 		break;
 	}
-	case 169: {
-		MAppVPEImp((LPWSTR)data, hWnd);
+	case 167: {
+		MAppWorkCall3(215, hWnd, NULL);
+		LONG stytle = GetWindowLong(hWnd, GWL_STYLE);
+		stytle ^= WS_CAPTION;
+		SetWindowLong(hWnd, GWL_STYLE, stytle);
 		break;
 	}
-	case 170: {
-		MUsersSetCurrentSelectUserName((LPWSTR)data);
-		break;
-	}
+	case 168: MAppVPEExp((LPWSTR)data, hWnd); break;
+	case 169: MAppVPEImp((LPWSTR)data, hWnd); break;	
+	case 170: MUsersSetCurrentSelectUserName((LPWSTR)data);
 	case 171: {
 		NTSTATUS status = MSetProcessAffinityMask((HANDLE)hWnd, (ULONG_PTR)data);
 		if (!NT_SUCCESS(status))
 			MShowErrorMessageWithNTSTATUS(str_item_set_proc_affinity_failed, DEFDIALOGGTITLE, status);
 		break;
 	}
-	case 172: {
-		MShowProgramStats();
-		break;
-	}
+	case 172: MShowProgramStats(); break;
 	case 173: {
-		return MKillProcessUser2(hWndMain, (DWORD)(ULONG_PTR)hWnd, (BOOL)(ULONG_PTR)data);
-	}
-	case 174: {
-		MProcessHANDLEStorageDestroyItem((DWORD)(ULONG_PTR)data);
+		MAppWorkCall3(216, hWnd, NULL);
+		LONG stytle = GetWindowLong(hWnd, GWL_STYLE);
+		stytle |= WS_CAPTION;
+		SetWindowLong(hWnd, GWL_STYLE, stytle);
 		break;
 	}
+	case 174: MProcessHANDLEStorageDestroyItem((DWORD)(ULONG_PTR)data); break;
 	case 175: {
 		if (hWnd) {
 			MUsersSetCurrentSelect((DWORD)(ULONG_PTR)data);
@@ -316,14 +319,8 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 		MessageBoxA(0, "Welcome to my Github https://github.com/717021 . This software is open source. You can download the full source code there.\nAnd if you want talk to me, you can add my QQ : 1501076885", "YouCanFindProjectOnGithub", MB_OK);
 		break;
 	}
-	case 177: {
-		appLoadSucessfuly = TRUE;
-		break;
-	}
-	case 178: {
-		SendMessage(hWnd, WM_COMMAND, IDM_KILL, 0);
-		break;
-	}
+	case 177: appLoadSucessfuly = TRUE;	break;
+	case 178: SendMessage(hWnd, WM_COMMAND, IDM_KILL, 0); break;
 	case 179: {
 		ListView_SetExtendedListViewStyleEx(hWnd, 0, LVS_EX_FULLROWSELECT | LVS_EX_TWOCLICKACTIVATE);
 		SendMessage(hWnd, LVM_SETEXTENDEDLISTVIEWSTYLE, LVS_EX_DOUBLEBUFFER, LVS_EX_DOUBLEBUFFER);
@@ -335,10 +332,7 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 		SetUnhandledExceptionFilter(MUnhandledExceptionFilter);
 		return 1;
 	}
-	case 182: {
-		MSetAsExplorerTheme(hWnd);
-		return 1;
-	}
+	case 182: MSetAsExplorerTheme(hWnd); return 1;
 	case 183: {
 		hMenuMain = LoadMenu(hInstRs, MAKEINTRESOURCE(IDR_MENUMAIN));
 		hMenuMainFile = GetSubMenu(hMenuMain, 0);
@@ -547,6 +541,29 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 		return 0;
 	}
 	return 0;
+}	
+
+M_API void* MAppWorkCall4(int id, void* hWnd, void*data)
+{
+	switch (id)
+	{
+	case 99: return SetParent((HWND)hWnd, (HWND)data);
+	case 100: { 
+
+		break;
+	}
+	}
+	return 0;
+}
+M_API void* MAppWorkCall5(int id, void* hWnd, void*data1, void*data2, void*data3)
+{
+	switch (id)
+	{
+	case 50: return (LPVOID)(ULONG_PTR)MKillProcessUser2(hWndMain, (DWORD)(ULONG_PTR)data1, (BOOL)(ULONG_PTR)data2, (BOOL)(ULONG_PTR)data3);
+	case 51: MoveWindow((HWND)hWnd, 15, 15, (int)(ULONG_PTR)data1, (int)(ULONG_PTR)data2, TRUE); break;
+	case 52: MoveWindow((HWND)hWnd, (int)(ULONG_PTR)LOWORD(data1), (int)(ULONG_PTR)HIWORD(data1), (int)(ULONG_PTR)LOWORD(data2), (int)(ULONG_PTR)HIWORD(data2), TRUE); break;
+	}
+	return 0;
 }
 M_API void MAppHideCos()
 {
@@ -715,7 +732,9 @@ M_API BOOL MAppMainRun()
 
 	WCHAR lastLg[16];
 	GetPrivateProfileString(L"AppSetting", L"Lanuage", L"", lastLg, 16, iniPath);
-	
+	WCHAR logLev[16];
+	GetPrivateProfileString(L"AppSetting", L"LogLevel", L"", logLev, 16, iniPath);
+
 	MLG_SetLanuageItems_NoRealloc();
 	MLG_SetLanuageRes(appDir, lastLg);
 
@@ -729,6 +748,7 @@ M_API BOOL MAppMainRun()
 
 	M_LOG_Init(M_CFG_GetConfigBOOL(L"ShowDebugWindow", L"Configure", FALSE), 
 		M_CFG_GetConfigBOOL(L"LogToFile", L"Configure", FALSE));
+	M_LOG_SetLogLevelStr(logLev);
 
 	WCHAR mainDllPath[MAX_PATH];
 	wcscpy_s(mainDllPath, appDir);
@@ -1263,6 +1283,7 @@ LRESULT CALLBACK MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		case IDM_SUPROC: {
 			if (thisCommandPid > 4)
 			{
+				if (thisCommandPid == GetCurrentProcessId() && !hTerminateImporantWarnCallBack(0, 5)) break;
 				if (thisCommandIsVeryImporant && !hTerminateImporantWarnCallBack(thisCommandName, 4)) break;
 				if (!thisCommandIsVeryImporant && thisCommandIsImporant && !hTerminateImporantWarnCallBack(thisCommandName, 2)) break;
 				NTSTATUS status = MSuspendProcessNt(thisCommandPid, NULL);
@@ -1308,8 +1329,14 @@ LRESULT CALLBACK MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			if (thisCommandPid > 4)
 			{
 				std::wstring cmd = FormatString(debuggerCommand, thisCommandPid, thisCommandPid);
-				ShellExecute(hWndMain, L"open", (LPWSTR)cmd.c_str(), NULL, NULL, 5);
+				if (!MRunExeWithAgrs((LPWSTR)cmd.c_str(), FALSE, hWndMain))
+					MShowErrorMessage((LPWSTR)str_item_op_failed.c_str(), L"", MB_ICONERROR);
 			}
+			break;
+		}
+		case IDM_DEATCH_DEBUGGER: {
+			if (thisCommandPid > 4)
+				MDetachFromDebuggerProcess(thisCommandPid);
 			break;
 		}
 		case IDM_SGINED: {
@@ -1353,7 +1380,10 @@ LRESULT CALLBACK MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		case IDC_PCMGR_REGEDIT: {
-			MAppMainCall(55, 0, 0);
+			WCHAR pat[MAX_PATH];
+			wcscpy_s(pat, appDir);
+			wcscat_s(pat, L"\\PCMgrRegedit.exe");
+			MRunExe(pat, NULL, FALSE, hWndMain);
 			break;
 		}
 		case IDC_PCMGR_FILEMGR: {

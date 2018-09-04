@@ -117,13 +117,16 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="performanceRamPoolGrid.LeftText" xml:space="preserve">
+    <value>Memory combination</value>
+  </data>
+  <data name="performanceGridGlobal.LeftBottomText" xml:space="preserve">
+    <value>60 s</value>
+  </data>
   <data name="performanceGridGlobal.LeftText" xml:space="preserve">
     <value>Memory usage</value>
   </data>
   <data name="performanceTitle.Title" xml:space="preserve">
     <value>Memory</value>
-  </data>
-  <data name="performanceRamPoolGrid.LeftText" xml:space="preserve">
-    <value>Memory combination</value>
   </data>
 </root>

@@ -15,10 +15,11 @@
 
 extern NtQuerySystemInformationFun NtQuerySystemInformation;
 extern NtQueryInformationProcessFun NtQueryInformationProcess;
+extern RtlNtStatusToDosErrorFun RtlNtStatusToDosError;
 
 int cpu_Count = 0;
-__int64 LastTime;
-__int64 TimeInterval;
+__int64 LastTime = 0;
+__int64 TimeInterval = 0;
 FILETIME CreateTime;
 FILETIME ExitTime;
 
@@ -139,6 +140,32 @@ M_CAPI(BOOL) MPERF_UpdateMemoryListInfo()
 	}
 	return FALSE;
 }
+M_CAPI(BOOL) MPERF_GetMemoryCompressionInfo(PPROCESS_COMPRESSION_INFO outInfo)
+{
+	SYSTEM_STORE_INFORMATION storeInfo;
+	PROCESS_COMPRESSION_INFO compressInfo;
+
+	storeInfo.Version = 1;
+	storeInfo.InfoClass = ProcessCompressionInfoRequest;
+	storeInfo.Data = &compressInfo;
+	storeInfo.Length = sizeof(compressInfo);
+
+	ZeroMemory(&compressInfo, sizeof(compressInfo));
+	compressInfo.Version = 3;
+
+	NTSTATUS status = NtQuerySystemInformation(SystemStoreInformation, &storeInfo, sizeof(storeInfo), NULL);
+	if (NT_SUCCESS(status))
+	{
+		memcpy_s(outInfo, sizeof(PROCESS_COMPRESSION_INFO), &compressInfo, sizeof(compressInfo));
+		return TRUE;
+	}
+	else 
+	{
+		LogErr(L"MPERF_GetMemoryCompressionInfo failed : 0x%08X", status);
+		SetLastError(RtlNtStatusToDosError(status));
+		return FALSE;
+	}
+}
 
 M_CAPI(DWORD) MPERF_GetCpuL1Cache()
 {
@@ -232,10 +259,13 @@ M_CAPI(int) MPERF_GetCpuFrequency()	//获取CPU主频
 }
 M_CAPI(int) MPERF_GetProcessNumber()
 {
-	SYSTEM_INFO info;
-	GetSystemInfo(&info);
-	cpu_Count = static_cast<int>(info.dwNumberOfProcessors);
-	return (int)info.dwNumberOfProcessors;
+	if (cpu_Count == 0) 
+	{
+		SYSTEM_INFO info;
+		GetSystemInfo(&info);
+		cpu_Count = static_cast<int>(info.dwNumberOfProcessors);
+	}
+	return (int)cpu_Count;
 }
 __int64 FileTimeToInt64(const FILETIME& time)
 {
@@ -254,6 +284,7 @@ __int64 CompareFileTime(FILETIME time1, FILETIME time2)
 FILETIME LastIdleTime, LastKernelTime, LastUserTime;
 FILETIME IdleTime, KernelTime, UserTime;
 
+PDH_HCOUNTER *counter3cpuuser = NULL;//CPU性能计数器User
 PDH_HCOUNTER *counter3cpu = NULL;//CPU性能计数器
 PDH_HCOUNTER *counter3disk = NULL;//磁盘性能计数器
 PDH_HCOUNTER *counter3network = NULL;//网络性能计数器
@@ -305,6 +336,7 @@ M_CAPI(BOOL) MPERF_Init3PerformanceCounters()
 			counter3cpu = (PDH_HCOUNTER*)GlobalAlloc(GPTR, (sizeof(PDH_HCOUNTER)));
 			counter3disk = (PDH_HCOUNTER*)GlobalAlloc(GPTR, (sizeof(PDH_HCOUNTER)));
 			counter3network = (PDH_HCOUNTER*)GlobalAlloc(GPTR, (sizeof(PDH_HCOUNTER)));
+			counter3cpuuser = (PDH_HCOUNTER*)GlobalAlloc(GPTR, (sizeof(PDH_HCOUNTER)));
 
 			//添加性能计数器
 			PDH_STATUS status = ERROR_SUCCESS;
@@ -314,6 +346,14 @@ M_CAPI(BOOL) MPERF_Init3PerformanceCounters()
 				counter3cpu = NULL;
 				LogErr(L"Add Performance Counter \"Processor Information(_Total)\\% Processor Time\" failed : 0x%X", status);
 			}
+
+			status = PdhAddCounter(hQuery, L"\\Processor Information(_Total)\\% User Time", 0, counter3cpuuser);
+			if (status != ERROR_SUCCESS) {
+				GlobalFree(counter3cpuuser);
+				counter3cpuuser = NULL;
+				LogErr(L"Add Performance Counter \"Processor Information(_Total)\\% User Time\" failed : 0x%X", status);
+			}
+
 			status = PdhAddCounter(hQuery, L"\\PhysicalDisk(_Total)\\% Disk Time", 0, counter3disk);
 			if (status != ERROR_SUCCESS) {
 				GlobalFree(counter3disk);
@@ -358,6 +398,10 @@ M_CAPI(BOOL) MPERF_Destroy3PerformanceCounters()
 			PdhRemoveCounter(*counter3network);
 			GlobalFree(counter3network);
 		}
+		if (counter3cpuuser) {
+			PdhRemoveCounter(*counter3cpuuser);
+			GlobalFree(counter3cpuuser);
+		}
 
 		counter3Inited = FALSE;
 
@@ -392,6 +436,16 @@ M_CAPI(double)MPERF_GetCupUseAge_Pdh()
 	return 0;
 }
 
+M_CAPI(double)MPERF_GetCupUseAgeUserTime() {
+	if (counter3cpuuser)
+	{
+		PDH_FMT_COUNTERVALUE pdh_counter_value;
+		DWORD pdh_counter_value_type;
+		PdhGetFormattedCounterValue(*counter3cpuuser, PDH_FMT_DOUBLE, &pdh_counter_value_type, &pdh_counter_value);
+		return pdh_counter_value.doubleValue;
+	}
+	return 0;
+}
 M_CAPI(double)MPERF_GetCupUseAge() {
 	if (counter3cpu)
 		return MPERF_GetCupUseAge_Pdh();
@@ -448,8 +502,8 @@ M_CAPI(void) MPERF_CpuTimeUpdate()
 {
 	FILETIME now;
 	GetSystemTimeAsFileTime(&now);
-	__int64 nowu = FileTimeToInt64(now);;
-	TimeInterval = nowu - LastTime;
+	__int64 nowu = FileTimeToInt64(now);
+	if (LastTime != 0) TimeInterval = nowu - LastTime;
 	LastTime = nowu;
 }
 M_CAPI(double) MPERF_GetProcessCpuUseAge(PSYSTEM_PROCESSES p, MPerfAndProcessData*data)
@@ -556,34 +610,88 @@ M_CAPI(DWORD) MPERF_GetProcessDiskRate(PSYSTEM_PROCESSES p, MPerfAndProcessData*
 //Process Net Work Performance
 
 PMIB_TCPTABLE_OWNER_PID netProcess = NULL;
+PMIB_TCP6TABLE_OWNER_PID net6Process = NULL;
 
+extern _GetPerTcp6ConnectionEStats dGetPerTcp6ConnectionEStats;
 extern _GetPerTcpConnectionEStats dGetPerTcpConnectionEStats;
 extern _GetExtendedTcpTable dGetExtendedTcpTable;
+extern _SetPerTcpConnectionEStats dSetPerTcpConnectionEStats;
 
 M_CAPI(BOOL) MPERF_GetConnectNetWorkAllBuffer(DWORD dwLocalAddr, DWORD dwLocalPort, DWORD dwRemoteAddr, DWORD dwRemotePort, DWORD dwState, MPerfAndProcessData*data)
 {
-	MIB_TCPROW row = { 0 };
+	bool setConnectioned = false;
+
+	MIB_TCPROW row;
 	row.dwLocalAddr = dwLocalAddr;
 	row.dwLocalPort = dwLocalPort;
 	row.dwRemoteAddr = dwRemoteAddr;
 	row.dwRemotePort = dwRemotePort;
 	row.dwState = dwState;
 
-	TCP_ESTATS_BANDWIDTH_ROD_v0 rod= { 0 };
-	if (dGetPerTcpConnectionEStats(&row, TcpConnectionEstatsData, NULL, 0, 0, NULL, 0, 0, (LPBYTE)&rod, 0, sizeof(rod)) == NO_ERROR)
+	TCP_ESTATS_BANDWIDTH_RW_v0 rw;
+	TCP_ESTATS_BANDWIDTH_ROD_v0 rod;
+	memset(&rod, 0, sizeof(rod));
+	memset(&rw, 0, sizeof(rw));
+
+REGET:
+	ULONG ret = dGetPerTcpConnectionEStats(&row, TcpConnectionEstatsBandwidth, (PUCHAR)&rw, 0, sizeof(rw), 0, 0, 0, (PUCHAR)&rod, 0, sizeof(rod));
+	if (ret == NO_ERROR)
 	{
-		data->NetWorkInBandWidth += rod.InboundBandwidth;
-		data->NetWorkOutBandWidth += rod.OutboundBandwidth;
+		if ((!rw.EnableCollectionInbound || !rw.EnableCollectionOutbound) && !setConnectioned)
+		{
+			rw.EnableCollectionInbound = TcpBoolOptEnabled;
+			rw.EnableCollectionOutbound = TcpBoolOptEnabled;
+
+			dSetPerTcpConnectionEStats(&row, TcpConnectionEstatsBandwidth, (PUCHAR)&row, 0, sizeof(row), 0);
+			setConnectioned = true;
+			goto REGET;
+		}
+
+		data->InBandwidth = rod.InboundBandwidth;
+		data->OutBandwidth = rod.OutboundBandwidth;
+
+		data->ConnectCount++;
+
 		return TRUE;
 	}
 	return 0;
 }
+M_CAPI(BOOL) MPERF_GetConnectNetWorkAllBuffer6(IN6_ADDR LocalAddr, DWORD dwLocalPort, IN6_ADDR RemoteAddr, DWORD dwRemotePort, MIB_TCP_STATE State, MPerfAndProcessData*data)
+{
+	MIB_TCP6ROW row;
+	memset(&row, 0, sizeof(row));
+
+	row.LocalAddr = LocalAddr;
+	row.dwLocalPort = dwLocalPort;
+	row.RemoteAddr = RemoteAddr;
+	row.dwRemotePort = dwRemotePort;
+	row.State = State;
+
+	PTCP_ESTATS_BANDWIDTH_ROD_v0 rod = (PTCP_ESTATS_BANDWIDTH_ROD_v0)malloc(sizeof(TCP_ESTATS_BANDWIDTH_ROD_v0));
+	ULONG ret = dGetPerTcp6ConnectionEStats(&row, TcpConnectionEstatsBandwidth, NULL, 0, 0, NULL, 0, 0, (LPBYTE)rod, 0, sizeof(TCP_ESTATS_BANDWIDTH_ROD_v0));
+	if (ret == NO_ERROR)
+	{
+		data->InBandwidth6 = rod->InboundBandwidth;
+		data->OutBandwidth6 = rod->OutboundBandwidth;
+
+		data->ConnectCount++;
+
+		free(rod);
+		return TRUE;
+	}
+	else free(rod);
+	return 0;
+}
+
 M_CAPI(ULONG64) MPERF_GetProcessNetWorkRate(DWORD pid, MPerfAndProcessData*data)
 {
-	if (data && netProcess)
+	if (!data)	return 0;
+
+	data->ConnectCount = 0;
+
+	ULONG64 data1 = 0;
+	if (netProcess)
 	{
-		data->NetWorkInBandWidth = 0;
-		data->NetWorkOutBandWidth = 0;
 		for (UINT i = 0; i < netProcess->dwNumEntries; i++)
 		{
 			if (netProcess->table[i].dwOwningPid == pid)
@@ -592,9 +700,44 @@ M_CAPI(ULONG64) MPERF_GetProcessNetWorkRate(DWORD pid, MPerfAndProcessData*data)
 					netProcess->table[i].dwRemoteAddr, netProcess->table[i].dwRemotePort, netProcess->table[i].dwState, data);
 			}
 		}
-		return (data->NetWorkInBandWidth + data->NetWorkOutBandWidth);
+		data1 = ((data->InBandwidth) * 8 + (data->OutBandwidth) * 8);
 	}
-	return 0;
+	ULONG64 data2 = 0;
+	/*
+	if (net6Process)
+	{
+		data->NetWorkInBandWidth = 0;
+		data->NetWorkOutBandWidth = 0;
+		for (UINT i = 0; i < net6Process->dwNumEntries; i++)
+		{
+			if (net6Process->table[i].dwOwningPid == pid)
+			{
+				IN6_ADDR remoteaddr = { 0 };
+				IN6_ADDR localaddr = { 0 };
+				memcpy_s(localaddr.u.Byte, 16, net6Process->table[i].ucLocalAddr, 16);
+				memcpy_s(remoteaddr.u.Byte, 16, net6Process->table[i].ucRemoteAddr, 16);
+
+				MPERF_GetConnectNetWorkAllBuffer6(localaddr, net6Process->table[i].dwLocalPort,
+					remoteaddr, net6Process->table[i].dwRemotePort, (MIB_TCP_STATE)net6Process->table[i].dwState, data);
+			}
+		}
+		data2 = ((data->InBandwidth6) * 8 + (data->OutBandwidth6) * 8);
+	}
+	*/
+
+	if (data->ConnectCount == 0) {
+		data->LastBandwidth = 0;
+		return 0;
+	}
+
+	ULONG64 datalast = data->LastBandwidth;
+	ULONG64 datathis = (data1 + data2) / data->ConnectCount;
+
+	data->LastBandwidth = datathis;
+
+	if (datalast > datathis)
+		return datalast - datathis;
+	else return 0;
 }
 
 M_CAPI(BOOL)MPERF_NET_IsProcessInNet(DWORD pid) {
@@ -616,8 +759,13 @@ M_CAPI(void)MPERF_NET_FreeAllProcessNetInfo()
 {
 	if (netProcess)
 	{
-		MFree(netProcess);
+		free(netProcess);
 		netProcess = NULL;
+	}	
+	if (net6Process)
+	{
+		free(net6Process);
+		net6Process = NULL;
 	}
 }
 M_CAPI(BOOL)MPERF_NET_UpdateAllProcessNetInfo()
@@ -625,20 +773,41 @@ M_CAPI(BOOL)MPERF_NET_UpdateAllProcessNetInfo()
 	MPERF_NET_FreeAllProcessNetInfo();
 	
 	DWORD dwSize = sizeof(MIB_TCPTABLE_OWNER_PID);
-	netProcess = (PMIB_TCPTABLE_OWNER_PID)MAlloc(sizeof(MIB_TCPTABLE_OWNER_PID));
+	netProcess = (PMIB_TCPTABLE_OWNER_PID)malloc(sizeof(MIB_TCPTABLE_OWNER_PID));
 	memset(netProcess, 0, sizeof(dwSize));
 	if (dGetExtendedTcpTable(netProcess, &dwSize, TRUE, AF_INET, TCP_TABLE_OWNER_PID_CONNECTIONS, 0) == ERROR_INSUFFICIENT_BUFFER)
 	{
-		MFree(netProcess);
-		DWORD realSize = sizeof(DWORD) + dwSize * sizeof(MIB_TCPROW_OWNER_PID);
-		netProcess = (PMIB_TCPTABLE_OWNER_PID)MAlloc(realSize);
-		memset(netProcess, 0, sizeof(realSize));
+		free(netProcess);
+
+		netProcess = (PMIB_TCPTABLE_OWNER_PID)malloc(dwSize);
+		memset(netProcess, 0, sizeof(dwSize));
+
 		if (dGetExtendedTcpTable(netProcess, &dwSize, TRUE, AF_INET, TCP_TABLE_OWNER_PID_CONNECTIONS, 0) != NO_ERROR)
 		{
 			MPERF_NET_FreeAllProcessNetInfo();
 			return FALSE;
 		}
 	}
+
+	/*
+	dwSize = sizeof(MIB_TCP6TABLE_OWNER_PID);
+	net6Process = (PMIB_TCP6TABLE_OWNER_PID)malloc(sizeof(MIB_TCP6TABLE_OWNER_PID));
+	memset(net6Process, 0, sizeof(dwSize));
+	if (dGetExtendedTcpTable(net6Process, &dwSize, TRUE, AF_INET6, TCP_TABLE_OWNER_PID_CONNECTIONS, 0) == ERROR_INSUFFICIENT_BUFFER)
+	{
+		free(net6Process);
+		DWORD realSize = sizeof(DWORD) + dwSize * sizeof(MIB_TCP6ROW_OWNER_PID);
+		net6Process = (PMIB_TCP6TABLE_OWNER_PID)malloc(realSize);
+		memset(net6Process, 0, sizeof(realSize));
+
+		if (dGetExtendedTcpTable(net6Process, &dwSize, TRUE, AF_INET6, TCP_TABLE_OWNER_PID_CONNECTIONS, 0) != NO_ERROR)
+		{
+			MPERF_NET_FreeAllProcessNetInfo();
+			return FALSE;
+		}
+	}
+	*/
+
 	return TRUE;
 }
 M_CAPI(void)MPERF_GetNetInfo()
@@ -889,6 +1058,7 @@ M_CAPI(double)MPERF_GetDisksPerformanceCountersSimpleValues(MPerfDiskData*data)
 
 //Network Performance
 std::vector<MPerfNetData*> netCounters;
+std::vector<MPerfNetData*> netCounters2;
 
 M_CAPI(UINT) MPERF_InitNetworksPerformanceCounters()
 {
@@ -933,6 +1103,48 @@ M_CAPI(UINT) MPERF_InitNetworksPerformanceCounters()
 	}
 	return FALSE;
 }
+M_CAPI(UINT) MPERF_InitNetworksPerformanceCounters2() {
+	if (hQuery)
+	{
+		PDH_STATUS status;
+		DWORD netsInstanceNamesSize = 0;
+		LPWSTR netInstanceNames = MPERF_EnumPerformanceCounterInstanceNames(L"Network Interface");
+		if (netInstanceNames)
+		{
+			for (LPWSTR pTemp = netInstanceNames; *pTemp != 0; pTemp += wcslen(pTemp) + 1)
+			{
+				MPerfNetData *data = (MPerfNetData*)MAlloc(sizeof(MPerfNetData));
+				memset(data, 0, sizeof(MPerfNetData));
+				wcscpy_s(data->performanceCounter_Name, pTemp);
+
+				std::wstring cpuCounterName = FormatString(L"\\Network Interface(%s)\\Bytes Sent/sec", pTemp);
+				data->performanceCounter_sent = (PDH_HCOUNTER*)GlobalAlloc(GPTR, (sizeof(PDH_HCOUNTER)));
+				status = PdhAddCounter(hQuery, cpuCounterName.c_str(), 0, data->performanceCounter_sent);
+				if (status != ERROR_SUCCESS)
+				{
+					GlobalFree(data->performanceCounter_sent);
+					data->performanceCounter_sent = 0;
+					LogErr(L"Add Performance Counter \"%s\" failed : 0x%X", cpuCounterName.c_str(), status);
+				}
+
+				cpuCounterName = FormatString(L"\\Network Interface(%s)\\Bytes Received/sec", pTemp);
+				data->performanceCounter_receive = (PDH_HCOUNTER*)GlobalAlloc(GPTR, (sizeof(PDH_HCOUNTER)));
+				status = PdhAddCounter(hQuery, cpuCounterName.c_str(), 0, data->performanceCounter_receive);
+				if (status != ERROR_SUCCESS)
+				{
+					GlobalFree(data->performanceCounter_receive);
+					data->performanceCounter_receive = 0;
+					LogErr(L"Add Performance Counter \"%s\" failed : 0x%X", cpuCounterName.c_str(), status);
+				}
+
+				netCounters2.push_back(data);
+			}
+			MFree(netInstanceNames);
+			return (UINT)netCounters2.size();
+		}
+	}
+	return FALSE;
+}
 M_CAPI(BOOL) MPERF_DestroyNetworksPerformanceCounters()
 {
 	if (hQuery)
@@ -953,16 +1165,33 @@ M_CAPI(BOOL) MPERF_DestroyNetworksPerformanceCounters()
 
 			MFree(data);
 		}
+		for (auto it = netCounters2.begin(); it != netCounters2.end(); it++)
+		{
+			MPerfNetData *data = (*it);
+			if (data->performanceCounter_receive)
+			{
+				PdhRemoveCounter(*data->performanceCounter_receive);
+				GlobalFree(data->performanceCounter_receive);
+			}
+			if (data->performanceCounter_sent)
+			{
+				PdhRemoveCounter(*data->performanceCounter_sent);
+				GlobalFree(data->performanceCounter_sent);
+			}
+
+			MFree(data);
+		}
 	}
 	return FALSE;
 }
 M_CAPI(MPerfNetData*) MPERF_GetNetworksPerformanceCounters(int index)
 {
-	if (index >= 0 && (UINT)index < netCounters.size())
-		return netCounters[index];
+	if (index >= 0 && (UINT)index < netCounters2.size())
+		return netCounters2[index];
 	return 0;
 }
-M_CAPI(MPerfNetData*) MPERF_GetNetworksPerformanceCounterWithName(LPWSTR name) {
+M_CAPI(MPerfNetData*) MPERF_GetNetworksPerformanceCounterWithName(LPWSTR name) 
+{
 	if (hQuery)
 	{
 		for (auto it = netCounters.begin(); it != netCounters.end(); it++)
@@ -1020,6 +1249,7 @@ M_CAPI(BOOL) MPERF_GetNetworksPerformanceCountersValues(MPerfNetData*data, doubl
 			PdhGetFormattedCounterValue(*data->performanceCounter_receive, PDH_FMT_DOUBLE, &pdh_counter_value_type, &pdh_counter_value);
 			*out_receive = pdh_counter_value.doubleValue;
 		}
+		return TRUE;
 	}
 	return FALSE;
 }

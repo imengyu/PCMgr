@@ -121,7 +121,13 @@
   <data name="performanceCpus.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
   </data>
+  <data name="performanceGridGlobal.LeftBottomText" xml:space="preserve">
+    <value>60 s</value>
+  </data>
   <data name="performanceGridGlobal.LeftText" xml:space="preserve">
     <value>% Usage</value>
+  </data>
+  <data name="performanceGridGlobal.ToolTip" xml:space="preserve">
+    <value>CPU Time</value>
   </data>
 </root>

@@ -34,13 +34,18 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(160, 55);
+            this.BackColor = System.Drawing.Color.White;
+            this.ClientSize = new System.Drawing.Size(268, 205);
+            this.DoubleBuffered = true;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "FormSpeedBall";
+            this.Opacity = 0.9D;
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "FormSpeedBall";
             this.TopMost = true;
+            this.Paint += new System.Windows.Forms.PaintEventHandler(this.FormSpeedBall_Paint);
+            this.MouseLeave += new System.EventHandler(this.FormSpeedBall_MouseLeave);
             this.ResumeLayout(false);
 
         }

@@ -33,6 +33,13 @@ M_CAPI(BOOL) MGetSystemAffinityMask(PULONG_PTR SystemAffinityMask);
 //    [OUT] buffer：输出文件路径缓冲区
 //    size：输出文件路径缓冲区字符个数
 M_CAPI(BOOL) MCommandLineToFilePath(LPWSTR cmdline, LPWSTR buffer, int size);
+//命令行转为文件路径和参数
+//    cmdline：命令行
+//    [OUT] buffer：输出文件路径缓冲区
+//    size：输出文件路径缓冲区字符个数
+//    [OUT] argbuffer：输出参数缓冲区
+//    argbuffersize：输出参数缓冲区字符个数
+M_CAPI(BOOL) MCommandLineSplitPath(LPWSTR cmdline, LPWSTR buffer, int size, LPWSTR argbuffer, int argbuffersize);
 
 //获取系统 Bulid 版本（调用 MGetWindowsBulidVersion 以后有效）
 M_CAPI(DWORD) MGetWindowsBulidVersionValue();
@@ -48,6 +55,11 @@ M_CAPI(BOOL) MGetWindowsBulidVersion();
 //    runAsadmin：是否以管理员身份运行
 //    hWnd：调用者窗口
 M_CAPI(BOOL) MRunExe(LPWSTR path, LPWSTR args, BOOL runAsadmin, HWND hWnd);
+//运行一个EXE
+//    pathargs：路径（可带参数）
+//    runAsadmin：是否以管理员身份运行
+//    hWnd：调用者窗口
+M_CAPI(BOOL) MRunExeWithAgrs(LPWSTR pathargs, BOOL runAsadmin, HWND hWnd);
 
 //获取 Ntos And Win32 的基地址
 M_CAPI(BOOL) MGetNtosAndWin32kfullNameAndStartAddress(LPWSTR name, size_t buffersize, ULONG_PTR *address, ULONG_PTR *win32kfulladdress);

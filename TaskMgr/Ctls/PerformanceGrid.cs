@@ -13,7 +13,9 @@ namespace PCMgr.Ctls
             DrawData2 = false;
             SetStyle(ControlStyles.Selectable, false);
             SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
+            SetStyle(ControlStyles.ResizeRedraw, true);
             BgBrush = new SolidBrush(Color.FromArgb(241, 246, 250));
+            BgBrush2 = new SolidBrush(Color.FromArgb(241, 246, 250));
             DrawPen = new Pen(Color.FromArgb(17, 125, 187));
             DrawPen2 = new Pen(Color.FromArgb(17, 125, 187));
             DrawPen2.DashStyle = DashStyle.Dash;
@@ -47,6 +49,15 @@ namespace PCMgr.Ctls
                     (BgBrush as SolidBrush).Color = value;
             }
         }
+        public Color BgColor2
+        {
+            get { return (BgBrush2 as SolidBrush).Color; }
+            set
+            {
+                if (BgBrush2 != null)
+                    (BgBrush2 as SolidBrush).Color = value;
+            }
+        }
         public Color DrawColor
         {
             get { return DrawPen.Color; }
@@ -76,6 +87,7 @@ namespace PCMgr.Ctls
         }
         public Brush TextBrush { get; set; }
         public Brush BgBrush { get; set; }
+        public Brush BgBrush2 { get; set; }
         public Pen DrawPen { get; set; }
         public Pen DrawPen2 { get; set; }
         public Pen GridPen { get; set; }
@@ -246,7 +258,7 @@ namespace PCMgr.Ctls
                 pts[61].X = Width;
                 pts[61].Y = Height - BottomTextHeight;//右下
 
-                if (DrawData2Bg && BgBrush != Brushes.White) g.FillClosedCurve(BgBrush, pts, FillMode.Alternate, 0f);
+                if (DrawData2Bg && BgBrush2 != Brushes.White) g.FillClosedCurve(BgBrush2, pts, FillMode.Alternate, 0f);
                 for (int i = 1; i < 61; i++) g.DrawLine(DrawPen2, pts[i - 1], pts[i]);
             }
 
@@ -264,5 +276,6 @@ namespace PCMgr.Ctls
 
             g.DrawRectangle(DrawPen, new Rectangle(0, TopTextHeight, Width - 1, Height - 1 - TopTextHeight - BottomTextHeight));
         }
+
     }
 }

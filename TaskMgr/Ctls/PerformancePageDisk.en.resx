@@ -117,10 +117,22 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="performanceGridDiskTime.LeftText" xml:space="preserve">
-    <value>Active time</value>
+  <data name="performanceGridSpeed.LeftBottomText" xml:space="preserve">
+    <value>60 s</value>
   </data>
   <data name="performanceGridSpeed.LeftText" xml:space="preserve">
     <value>Disk</value>
+  </data>
+  <data name="performanceGridSpeed.ToolTip" xml:space="preserve">
+    <value>Read and write activities on this disk</value>
+  </data>
+  <data name="performanceGridDiskTime.LeftBottomText" xml:space="preserve">
+    <value>60 s</value>
+  </data>
+  <data name="performanceGridDiskTime.LeftText" xml:space="preserve">
+    <value>Active time</value>
+  </data>
+  <data name="performanceGridDiskTime.ToolTip" xml:space="preserve">
+    <value>Percentage of events for disk processing to read or write requests</value>
   </data>
 </root>

@@ -18,6 +18,8 @@ namespace PCMgr
             FormMain.cfgFilePath = Marshal.PtrToStringUni(NativeMethods.M_CFG_GetCfgFilePath());
             FormMain.InitLanuage();
 
+            NativeMethods.MGetPrivileges2();
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.ThreadException += Application_ThreadException;

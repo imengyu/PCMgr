@@ -15,8 +15,8 @@
 #include "StringHlp.h"
 #include <io.h>
 
-BOOL isKernelNeed64 = FALSE;
-BOOL isKernelDriverLoaded = FALSE;
+#include "..\PCMgrKrnlMgr\MKrnlMgr.h"
+
 BOOL isKernelPDBLoaded = FALSE;
 HANDLE hKernelDevice = NULL;
 extern HWND hWndMain;
@@ -192,19 +192,8 @@ void MInitKernelSwitchMenuState(BOOL loaded)
 	}
 }
 //´ò¿ªÇý¶¯¾ä±ú
-BOOL MInitKernelDriverHandle() {
-	hKernelDevice = CreateFile(L"\\\\.\\PCMGRK",
-		GENERIC_READ | GENERIC_WRITE,
-		FILE_SHARE_READ | FILE_SHARE_WRITE,
-		NULL,
-		OPEN_EXISTING,
-		FILE_ATTRIBUTE_NORMAL,
-		NULL);
-	if (hKernelDevice == INVALID_HANDLE_VALUE)
-	{
-		LogErr(L"Get Kernel driver handle (CreateFile) failed : %d . ", GetLastError());
-		return FALSE;
-	}
+BOOL MInitKernelDriverHandleEndStep(HANDLE hHandle) {
+	hKernelDevice = hHandle;
 
 	if (!executeByLoader) {
 		CloseHandle(hKernelDevice);
@@ -213,12 +202,9 @@ BOOL MInitKernelDriverHandle() {
 	}
 
 	Log(L"Kernel Driver HANDLE Created.");
-
 	MInitMyDbgView();
-
 	CreateThread(NULL, 0, MLoadingThread, NULL, 0, NULL);
-
-	MInitKernelSwitchMenuState(isKernelDriverLoaded);
+	MInitKernelSwitchMenuState(MKrnlMgr::KernelInited());
 	return TRUE;
 }
 
@@ -296,108 +282,19 @@ VOID MLoadKernelNTPDB(PKNTOSVALUE kNtosValue, BOOL usingNtosPDB) {
 
 M_CAPI(BOOL) MIsKernelNeed64()
 {
-	return isKernelNeed64;
+	return MKrnlMgr::KernelNeed64();
 }
-
 M_CAPI(BOOL) MCanUseKernel()
 {
-	return isKernelDriverLoaded && hKernelDevice != NULL;
+	return MKrnlMgr::KernelCanUse();
 }
-M_CAPI(BOOL) MInitKernel(LPWSTR currentPath)
+M_CAPI(BOOL) MInitKernel()
 {
-	WCHAR currentDir[MAX_PATH];
-	if (currentPath == 0 || MStrEqual(currentPath, L""))
-		wcscpy_s(currentDir, appDir);
-	else wcscpy_s(currentDir, currentPath);
-	Log(L"MInitKernel (%s)...", currentDir);
-	MAppSetStartingProgessText(L"Loading kernel driver...");
-	if (!isKernelDriverLoaded)
-	{
-		wchar_t path[MAX_PATH];
-		if (MIs64BitOS()) {
-#ifdef _AMD64_
-			wsprintf(path, L"%s\\PCMgrKernel64.sys", currentDir);
-#else
-			isKernelNeed64 = TRUE;
-			LogErr(L"You need to use 64 bit version PCMgr application to load driver.");
-			return FALSE;
-#endif
-		}
-		else wsprintf(path, L"%s\\PCMgrKernel32.sys", currentDir);
-
-		if (MFM_FileExist(path))
-		{
-			Log(L"LoadKernelDrive (%s)...", path);
-			
-			if (MLoadKernelDriver(L"PCMgrKernel", path, L"PCMgr kernel driver")) {
-				Log(L"Kernel Driver Loaded.");
-				isKernelDriverLoaded = TRUE;
-				return MInitKernelDriverHandle();
-			}
-			else
-			{
-				if (MInitKernelDriverHandle()) {
-					isKernelDriverLoaded = TRUE;
-					MInitKernelSwitchMenuState(isKernelDriverLoaded);
-				}
-				else {
-					isKernelDriverLoaded = FALSE;
-					LogErr(L"Load Kernel driver error");
-				}
-			}
-		}
-		else if (MInitKernelDriverHandle()) {
-			Log(L"Kernel driver file missing.");
-			isKernelDriverLoaded = TRUE;
-			MInitKernelSwitchMenuState(isKernelDriverLoaded);
-		}
-		else {
-
-			LogErr(L"Load Kernel driver error because kernel driver file missing.");
-			LogInfo(L"Try find kernel driver file : %s.", path);
-
-			isKernelDriverLoaded = FALSE;
-			MInitKernelSwitchMenuState(isKernelDriverLoaded);
-		}
-	}
-	else Log(L"Kernel alreday loaded");
-	return isKernelDriverLoaded;
+	return MKrnlMgr::InitKernel(appDir);
 }
 M_CAPI(BOOL) MUninitKernel()
 {
-	Log(L"MUninitKernel...");
-	if (isKernelDriverLoaded)
-	{
-		if (isMyDbgViewLoaded)
-			MUnInitMyDbgView();
-		if (hKernelDevice != NULL)
-			CloseHandle(hKernelDevice);
-
-		if (MUnLoadKernelDriver(L"PCMgrKernel")) {
-			isKernelDriverLoaded = FALSE;
-			EnableMenuItem(hMenuMainFile, IDM_UNLOAD_DRIVER, MF_DISABLED);
-			EnableMenuItem(hMenuMainFile, IDM_LOAD_DRIVER, MF_ENABLED);
-			
-			Log(L"Kernel unloaded");
-			return TRUE;
-		}
-		else Log(L"Kernel unload failed");
-		return !isKernelDriverLoaded;
-	}
-	else {
-		LogWarn(L"Kernel not load , try force delete service");
-
-		if (MUnLoadKernelDriver(L"PCMgrKernel")) {
-			isKernelDriverLoaded = FALSE;
-			EnableMenuItem(hMenuMainFile, IDM_UNLOAD_DRIVER, MF_DISABLED);
-			EnableMenuItem(hMenuMainFile, IDM_LOAD_DRIVER, MF_ENABLED);
-
-			Log(L"Kernel unloaded");
-			return TRUE;
-		}
-		else LogErr(L"Kernel unload failed");
-	}
-	return FALSE;
+	return MKrnlMgr::UnInitKernel();
 }
 
 BOOL froceNotUseMyDbgView = FALSE;
@@ -415,6 +312,10 @@ M_CAPI(VOID) MOnCloseMyDbgView() {
 		MUnInitMyDbgView();
 }
 
+BOOL MMyDbgViewStarted()
+{
+	return isMyDbgViewLoaded;
+}
 BOOL MUnInitMyDbgView() {
 	if (isMyDbgViewLoaded)
 	{
@@ -459,7 +360,7 @@ BOOL MInitMyDbgView()
 	}
 	return FALSE;
 }
-M_CAPI(VOID) MDoNotStartMyDbgView()
+VOID MDoNotStartMyDbgView()
 {
 	froceNotUseMyDbgView = TRUE;
 }

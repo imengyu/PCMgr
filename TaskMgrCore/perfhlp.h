@@ -78,10 +78,17 @@ struct MPerfAndProcessData
 {
 	__int64 NowCpuTime;
 	__int64 LastCpuTime;
+
 	ULONGLONG LastRead;
 	ULONGLONG LastWrite;
-	ULONG64 NetWorkInBandWidth;
-	ULONG64 NetWorkOutBandWidth;
+
+	ULONG64 InBandwidth;
+	ULONG64 OutBandwidth;
+	ULONG64 InBandwidth6;
+	ULONG64 OutBandwidth6;
+	ULONG64 ConnectCount;
+
+	ULONG64 LastBandwidth;
 
 	PACKAGE_ID* packageId=NULL;
 };

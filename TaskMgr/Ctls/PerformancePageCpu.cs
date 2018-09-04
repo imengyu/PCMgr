@@ -15,6 +15,8 @@ namespace PCMgr.Ctls
         public PerformancePageCpu()
         {
             InitializeComponent();
+
+            _showKernelTime = GetConfigBool("CpuShowKernelTime", "AppSetting");
         }
 
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
@@ -51,8 +53,25 @@ namespace PCMgr.Ctls
         private int cpuCount = 0;
         private int cpuUseage = 0;
         private string maxSpeed = "";
+        private bool notDrawGrid = false;
+        private bool _showKernelTime = false;
+        private bool showKernelTime {
+            get { return _showKernelTime; }
+            set
+            {
+                if (value != _showKernelTime)
+                {
+                    _showKernelTime = value;
+                    SetConfigBool("CpuShowKernelTime", "AppSetting", value);
+                    performanceGridGlobal.DrawData2 = _showKernelTime;
+                }
+            }
+        }
 
+        public bool PageIsGraphicMode { get; set; }
         public bool PageIsActive { get; set; }
+
+        public Panel GridPanel => panelGrid;
         public void PageFroceSetData(int s)
         {
             cpuUseage = s;
@@ -69,9 +88,19 @@ namespace PCMgr.Ctls
         public void PageUpdate()
         {
             cpuUseage = (int)(MPERF_GetCupUseAge());
-            performanceGridGlobal.AddData(cpuUseage);
+
+            if (!notDrawGrid)
+            {
+                if (showKernelTime)
+                {
+                    int cpuKernelTime = cpuUseage - (int)MPERF_GetCupUseAgeUserTime();
+                    performanceGridGlobal.AddData2(cpuKernelTime);
+                }
+                performanceGridGlobal.AddData(cpuUseage);
+                performanceGridGlobal.Invalidate();
+            }
+
             item_cpuuseage.Value = cpuUseage.ToString() + "%";
-            performanceGridGlobal.Invalidate();
             if (MPERF_UpdatePerformance())
             {
                 item_process_count.Value = MPERF_GetProcessCount().ToString();
@@ -79,7 +108,11 @@ namespace PCMgr.Ctls
                 item_handle_count.Value = MPERF_GetHandleCount().ToString();
                 times = TimeSpan.FromMilliseconds(Convert.ToDouble(MPERF_GetRunTime()));
                 item_run_time.Value = times.Days + ":" + times.Hours.ToString("00") + ":" + times.Minutes.ToString("00") + ":" + times.Seconds.ToString("00");
-                if (cpuCount > 1) performanceCpus.Invalidate();
+                if (cpuCount > 1)
+                {
+                    if(notDrawGrid) performanceCpusAll.Invalidate();
+                    else performanceCpus.Invalidate();
+                }
                 performanceInfos.UpdateSpeicalItems();
             }
         }
@@ -115,6 +148,8 @@ namespace PCMgr.Ctls
         private Font performanceCpusTextFont = null;
         private Brush performanceCpusTextBrush = null;
 
+        private int lineCount = 1;
+
         private void GetStaticInfos()
         {
             StringBuilder stringBuilder = new StringBuilder(64);
@@ -122,9 +157,25 @@ namespace PCMgr.Ctls
                 performanceTitle.SmallTitle = stringBuilder.ToString();
             else performanceTitle.SmallTitle = "";
 
+            maxSpeed = (MPERF_GetCpuFrequency() / 1024d).ToString("0.0") + " GHz";
+
             cpuCount = MPERF_GetProcessNumber();
 
-            maxSpeed = (MPERF_GetCpuFrequency() / 1024d).ToString("0.0") + " GHz";
+            if (cpuCount >= 16)
+            {
+                if (cpuCount % 10 == 0) lineCount = cpuCount / 10;
+                else if (cpuCount % 8 == 0) lineCount = cpuCount / 8;
+                else if (cpuCount % 4 == 0) lineCount = cpuCount / 4;
+                else if (cpuCount % 2 == 0) lineCount = cpuCount / 2;
+
+                performanceCpus.Hide();
+                performanceGridGlobal.Hide();
+
+                performanceCpusAll.Show();
+
+                notDrawGrid = true;
+            }
+
             performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem(LanuageMgr.GetStr("MaxSpeed"), MPERF_GetCpuFrequency().ToString() + " MHz"));
             performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem(LanuageMgr.GetStr("CpuCpunt"), cpuCount.ToString()));
 
@@ -165,6 +216,8 @@ namespace PCMgr.Ctls
             performanceCpusText = new StringFormat();
             performanceCpusText.Alignment = StringAlignment.Center;
             performanceCpusText.LineAlignment = StringAlignment.Center;
+
+            performanceGridGlobal.DrawData2 = _showKernelTime;
 
             MPERF_InitCpuDetalsPerformanceCounters();
         }
@@ -224,6 +277,39 @@ namespace PCMgr.Ctls
             }
             g.DrawRectangle(performanceGridGlobal.DrawPen, 0, 0, performanceCpus.Width - 1, performanceCpus.Height - 1);
         }
+        private void performanceCpusAll_Paint(object sender, PaintEventArgs e)
+        {
+            Graphics g = e.Graphics;
+            if (cpuCount > 1)
+            {
+                int height = performanceCpusAll.Height / lineCount;
+                int width = performanceCpusAll.Width / (cpuCount / lineCount);
+
+                int x = 0, y = 0;
+
+                int performanceCounterCpusListCount = MPERF_GetCpuDetalsPerformanceCountersCount();
+                for (int i = 0; i < performanceCounterCpusListCount; i++)
+                {
+                    double useage = MPERF_GetCpuDetalsCpuUsage(i);
+
+                    using (SolidBrush s = new SolidBrush(performanceCpus_GetColorFormValue((int)(useage))))
+                    {
+                        Rectangle r = new Rectangle(x, y + 1, width, height - 2);
+                        g.FillRectangle(s, r);
+                        g.DrawString(useage.ToString("0.0") + "%", performanceCpusTextFont, performanceCpusTextBrush, r, performanceCpusText);
+                    }
+
+                    x += width;
+
+                    if (x + width >= performanceCpusAll.Width)
+                    {
+                        x = 0;
+                        y += height;
+                    }
+                }
+            }
+            g.DrawRectangle(performanceGridGlobal.DrawPen, 0, 0, performanceCpusAll.Width - 1, performanceCpusAll.Height - 1);
+        }
         private void performanceCpus_MouseMove(object sender, MouseEventArgs e)
         {
             ShowTooltip(e.Location);
@@ -244,5 +330,49 @@ namespace PCMgr.Ctls
                 toolTip1.Show("CPU " + curri, performanceCpus, curri * (performanceCpus.Width / cpuCount), performanceCpus.Height + 3, 5000);
             }
         }
+
+        public event SwithGraphicViewEventHandler SwithGraphicView;
+        public event OpeningPageMenuEventHandler OpeningPageMenu;
+
+        private void 显示内核时间ToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
+        {
+            showKernelTime = 显示内核时间ToolStripMenuItem.Checked;
+        }
+        private void 复制ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string s = performanceTitle.Title + "\n    " + performanceTitle.SmallTitle;
+            s += performanceInfos.GetCopyString();
+            Clipboard.SetText(s);
+        }
+        private void contextMenuStrip_Opening(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (显示内核时间ToolStripMenuItem.Checked != showKernelTime)
+                显示内核时间ToolStripMenuItem.Checked = showKernelTime;
+            图形摘要视图ToolStripMenuItem.Checked = PageIsGraphicMode;
+            OpeningPageMenu?.Invoke(this, 查看ToolStripMenuItem);
+        }
+        private void 图形摘要视图ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SwithGraphicView?.Invoke(this);
+        }
+
+        private void PerformancePageCpu_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+                contextMenuStrip.Show(MousePosition);
+        }
+        private void PerformancePageCpu_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+                SwithGraphicView?.Invoke(this);
+        }
+        private void PerformancePageCpu_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (PageIsGraphicMode)
+                if (e.Button == MouseButtons.Left && e.Clicks == 1)
+                    MAppWorkCall3(165, IntPtr.Zero, IntPtr.Zero);
+        }
+
+ 
     }
 }

@@ -231,18 +231,25 @@ M_CAPI(BOOL) M_EH_EnumProcessHandles(DWORD pid, EHCALLBACK callback)
 				WCHAR handlePath[MAX_PATH];
 				WCHAR handleTypeName[64];
 				HANDLE hDup = 0;
+				ULONG refCount = 0;
 
 				memset(handlePath, 0, sizeof(handlePath));
 				memset(handleTypeName, 0, sizeof(handleTypeName));
 
-				//if (hProcess == NtCurrentProcess()) {
-				//	hDup = (HANDLE)info.HandleValue; 
-				//	status = STATUS_SUCCESS;
-				//}
-				//else 
+				if (hProcess == NtCurrentProcess()) {
+					hDup = (HANDLE)info.HandleValue; 
+					status = STATUS_SUCCESS;
+				}
+				else 
 					status = M_EH_DuplicateHandleFromProcess(hProcess, &hDup, (HANDLE)info.HandleValue, 1);
 				if (NT_SUCCESS(status))
 				{
+					ULONG bufferSize;
+					OBJECT_BASIC_INFORMATION objectBasicInfo = { 0 };
+					status = NtQueryObject(hDup, ObjectBasicInformation, &objectBasicInfo, sizeof(objectBasicInfo), &bufferSize);
+					if (NT_SUCCESS(status))
+						refCount = objectBasicInfo.ReferenceCount;
+
 					M_EH_GetHandleTypeName(hDup, handleTypeName, 64);
 
 					if (MStrEqual(handleTypeName, L"File"))
@@ -262,7 +269,7 @@ M_CAPI(BOOL) M_EH_EnumProcessHandles(DWORD pid, EHCALLBACK callback)
 #else
 				swprintf_s(handleObjAddress, L"0x%I64X", (ULONG_PTR)info.Object);
 #endif
-				callback((LPVOID)info.HandleValue, handleTypeName, handlePath, handleAddress, handleObjAddress, 0, info.ObjectTypeIndex);
+				callback((LPVOID)info.HandleValue, handleTypeName, handlePath, handleAddress, handleObjAddress, refCount, info.ObjectTypeIndex);
 			}
 
 			MFree(pSystemHandleInfos);

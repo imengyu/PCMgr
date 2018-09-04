@@ -76,6 +76,7 @@
     <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86;C:\Program Files (x86)\Windows Kits\10\Lib\win7\km\x86</LibraryPath>
     <GenerateManifest>false</GenerateManifest>
     <TargetName>$(ProjectName)32</TargetName>
+    <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <TargetExt>.sys</TargetExt>

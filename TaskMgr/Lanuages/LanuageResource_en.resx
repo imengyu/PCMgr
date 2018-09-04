@@ -1223,4 +1223,38 @@ Therefore, we do not recommend that you use this option.</value>
   <data name="WarnTitle" xml:space="preserve">
     <value>Warning</value>
   </data>
+  <data name="NotConnect" xml:space="preserve">
+    <value>Not Connect</value>
+  </data>
+  <data name="DriverNotLoad" xml:space="preserve">
+    <value>Driver not load !</value>
+  </data>
+  <data name="SuspendCheckText" xml:space="preserve">
+    <value>Let the program hang up.</value>
+  </data>
+  <data name="SuspendThisText" xml:space="preserve">
+    <value>Suspending the program will cause the program hung and unable to continue to run. Do you want to continue?</value>
+  </data>
+  <data name="SuspendThisTitle" xml:space="preserve">
+    <value>Do you want to suspend this program?</value>
+  </data>
+  <data name="HideMain" xml:space="preserve">
+    <value>Hide main window</value>
+  </data>
+  <data name="ShowMain" xml:space="preserve">
+    <value>Show main window</value>
+  </data>
+  <data name="MemTipUsingS" xml:space="preserve">
+    <value>In use ({0})
+Memory used by processes, drivers, or operating systems</value>
+  </data>
+  <data name="DetachDebuggerError" xml:space="preserve">
+    <value>Detach debugger failed</value>
+  </data>
+  <data name="DetachDebuggerNotDebugger" xml:space="preserve">
+    <value>The process is not being debugged.</value>
+  </data>
+  <data name="DetachDebuggerTitle" xml:space="preserve">
+    <value>Detach debugger</value>
+  </data>
 </root>

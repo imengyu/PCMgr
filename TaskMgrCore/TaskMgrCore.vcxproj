@@ -73,35 +73,35 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <TargetName>PCMgr32</TargetName>
-    <IncludePath>$(VC_IncludePath);E:\主数据库\编程\范例\mono-master\msvc\include;$(WindowsSDK_IncludePath);E:\主数据库\编程\范例\capstone-master\include;C:\Program Files (x86)\Windows Kits\NETFXSDK\4.6.1\Include\um</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)ThirdPart\capstone\include;C:\Program Files (x86)\Windows Kits\NETFXSDK\4.6.1\Include\um</IncludePath>
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
-    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);E:\主数据库\编程\范例\mono-master\msvc\build\sgen\Win32\lib\Debug;$(NETFXKitsDir)Lib\um\x86;E:\主数据库\编程\范例\capstone-master\msvc\Debug</LibraryPath>
+    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86;$(SolutionDir)ThirdPart\capstone\lib\x86</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <TargetName>PCMgr64</TargetName>
     <OutDir>$(SolutionDir)$(Configuration)_64\</OutDir>
-    <IncludePath>$(VC_IncludePath);E:\主数据库\编程\范例\mono-master\msvc\include;C:\Program Files (x86)\Windows Kits\NETFXSDK\4.6.1\Include\um;$(WindowsSDK_IncludePath);E:\主数据库\编程\范例\capstone-master\include;</IncludePath>
-    <LibraryPath>$(VC_LibraryPath_x64);E:\主数据库\编程\范例\capstone-master\msvc\x64\Debug;$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64;E:\主数据库\编程\范例\mono-master\msvc\build\sgen\x64\lib\Debug;</LibraryPath>
+    <IncludePath>$(VC_IncludePath);C:\Program Files (x86)\Windows Kits\NETFXSDK\4.6.1\Include\um;$(WindowsSDK_IncludePath);$(SolutionDir)ThirdPart\capstone\include</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64;$(SolutionDir)ThirdPart\capstone\lib\x64</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(VC_IncludePath);E:\主数据库\编程\范例\mono-master\msvc\include;$(WindowsSDK_IncludePath);E:\主数据库\编程\范例\capstone-master\include;C:\Program Files (x86)\Windows Kits\NETFXSDK\4.6.1\Include\um;</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)ThirdPart\capstone\include;C:\Program Files (x86)\Windows Kits\NETFXSDK\4.6.1\Include\um;</IncludePath>
     <TargetName>PCMgr32</TargetName>
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
-    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);E:\主数据库\编程\范例\mono-master\msvc\build\sgen\Win32\lib\Release;E:\主数据库\编程\范例\capstone-master\msvc\Release;$(NETFXKitsDir)Lib\um\x86</LibraryPath>
+    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86;$(SolutionDir)ThirdPart\capstone\lib\x86</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <TargetName>PCMgr64</TargetName>
     <OutDir>$(SolutionDir)$(Configuration)_64\</OutDir>
-    <IncludePath>$(VC_IncludePath);E:\主数据库\编程\范例\mono-master\msvc\include;C:\Program Files (x86)\Windows Kits\NETFXSDK\4.6.1\Include\um;$(WindowsSDK_IncludePath);E:\主数据库\编程\范例\capstone-master\include;</IncludePath>
-    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);E:\主数据库\编程\范例\capstone-master\msvc\x64\Release;$(NETFXKitsDir)Lib\um\x64;E:\主数据库\编程\范例\mono-master\msvc\build\sgen\x64\lib\Release</LibraryPath>
+    <IncludePath>$(VC_IncludePath);C:\Program Files (x86)\Windows Kits\NETFXSDK\4.6.1\Include\um;$(WindowsSDK_IncludePath);$(SolutionDir)ThirdPart\capstone\include</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64;$(SolutionDir)ThirdPart\capstone\lib\x64</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;TASKMGRCORE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;TASKMGRCORE_EXPORTS;%(PreprocessorDefinitions);</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <ProgramDataBaseFileName>$(IntDir)vc$(PlatformToolsetVersion)_PCMgrCore.pdb</ProgramDataBaseFileName>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -111,9 +111,10 @@
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)$(TargetName)Core.pdb</ProgramDatabaseFile>
       <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>PCMgrKernel32.lib;PCMgrCmd32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
+      <AdditionalLibraryDirectories>$(SolutionDir)$(Configuration)\</AdditionalLibraryDirectories>
     </Link>
     <ResourceCompile>
       <AdditionalIncludeDirectories>$(VC_IncludePath);$(WindowsSDK_IncludePath);</AdditionalIncludeDirectories>
@@ -124,7 +125,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_AMD64_;_X64_;_DEBUG;_WINDOWS;_USRDLL;TASKMGRCORE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_AMD64_;_X64_;_DEBUG;_WINDOWS;_USRDLL;TASKMGRCORE_EXPORTS;%(PreprocessorDefinitions);</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
@@ -134,7 +135,8 @@
       <ProgramDatabaseFile>$(OutDir)$(TargetName)Core.pdb</ProgramDatabaseFile>
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>PCMgrKernel64.lib;PCMgrCmd64.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)$(Configuration)_64\</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -144,7 +146,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;TASKMGRCORE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;TASKMGRCORE_EXPORTS;%(PreprocessorDefinitions);</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <ProgramDataBaseFileName>$(IntDir)vc$(PlatformToolsetVersion)_PCMgrCore.pdb</ProgramDataBaseFileName>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -155,10 +157,11 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <ProgramDatabaseFile>$(OutDir)$(TargetName)Core.pdb</ProgramDatabaseFile>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>PCMgrKernel32.lib;PCMgrCmd32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+      <AdditionalLibraryDirectories>$(SolutionDir)$(Configuration)\</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -168,7 +171,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>_AMD64_;_X64_;NDEBUG;_WINDOWS;_USRDLL;TASKMGRCORE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_AMD64_;_X64_;NDEBUG;_WINDOWS;_USRDLL;TASKMGRCORE_EXPORTS;%(PreprocessorDefinitions);</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
@@ -178,10 +181,11 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <ProgramDatabaseFile>$(OutDir)$(TargetName)Core.pdb</ProgramDatabaseFile>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>PCMgrKernel64.lib;PCMgrCmd64.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+      <AdditionalLibraryDirectories>$(SolutionDir)$(Configuration)_64\</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -203,6 +207,7 @@
     <ClInclude Include="mainprocs.h" />
     <ClInclude Include="mapphlp.h" />
     <ClInclude Include="msup.h" />
+    <ClInclude Include="netdef.h" />
     <ClInclude Include="ntdef.h" />
     <ClInclude Include="nthlp.h" />
     <ClInclude Include="ntsymbol.h" />

@@ -12,7 +12,7 @@ namespace PCMgr.Ctls
 
         public PerformanceList()
         {
-            SetStyle(ControlStyles.Selectable, false);
+            SetStyle(ControlStyles.Selectable, true);
             SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
             items = new PerformanceListItemCollection();
             items.ItemAdd += Items_ItemAdd;

@@ -70,6 +70,9 @@ NtQuerySystemInformationFun NtQuerySystemInformation;
 NtQueryInformationProcessFun NtQueryInformationProcess;
 
 NtSetInformationProcessFun NtSetInformationProcess;
+NtSetInformationDebugObjectFun NtSetInformationDebugObject;
+NtRemoveProcessDebugFun NtRemoveProcessDebug;
+
 
 NtQueryObjectFun NtQueryObject;
 NtQueryVirtualMemoryFun NtQueryVirtualMemory;
@@ -102,7 +105,9 @@ _CryptUIDlgViewContext dCryptUIDlgViewContext;
 _CancelShutdown dCancelShutdown;
 //
 _GetPerTcpConnectionEStats dGetPerTcpConnectionEStats;
+_GetPerTcp6ConnectionEStats dGetPerTcp6ConnectionEStats;
 _GetExtendedTcpTable dGetExtendedTcpTable;
+_SetPerTcpConnectionEStats dSetPerTcpConnectionEStats;
 //imahlp api
 extern fnIMAGELOAD ImageLoad;
 extern fnIMAGEUNLOAD ImageUnload;
@@ -191,7 +196,7 @@ void MKillProcessTreeUser()
 			MAppMainCall(M_CALLBACK_KILLPROCTREE, (LPVOID)(ULONG_PTR)thisCommandPid, 0);
 	}
 }
-BOOL MKillProcessUser2(HWND hWnd, DWORD pid, BOOL showErr)
+BOOL MKillProcessUser2(HWND hWnd, DWORD pid, BOOL showErr, BOOL ignoreTerminateing)
 {
 	if (hWnd == hWndMain && pid > 4)
 	{
@@ -202,10 +207,14 @@ BOOL MKillProcessUser2(HWND hWnd, DWORD pid, BOOL showErr)
 			status = MTerminateProcessNt(pid, hProcess);
 			if (status == STATUS_ACCESS_DENIED && showErr)
 				MShowErrorMessage((LPWSTR)str_item_access_denied.c_str(), (LPWSTR)str_item_kill_failed.c_str(), MB_ICONERROR, MB_OK);
+			else if (status == STATUS_PROCESS_IS_TERMINATING && ignoreTerminateing)
+				return TRUE;
 			else if (!NT_SUCCESS(status) && showErr)
 				ThrowErrorAndErrorCodeX(status, str_item_endprocfailed, (LPWSTR)str_item_kill_failed.c_str());
 			else return TRUE;
 		}
+		else if (status == STATUS_PROCESS_IS_TERMINATING && ignoreTerminateing)
+			return TRUE;
 		else if (status == STATUS_ACCESS_DENIED && showErr)
 			MShowErrorMessage((LPWSTR)str_item_access_denied.c_str(), (LPWSTR)str_item_kill_failed.c_str(), MB_ICONERROR, MB_OK);
 		else if ((status == STATUS_INVALID_CID || status == STATUS_INVALID_HANDLE) && showErr)
@@ -216,6 +225,50 @@ BOOL MKillProcessUser2(HWND hWnd, DWORD pid, BOOL showErr)
 			ThrowErrorAndErrorCodeX(status, str_item_openprocfailed, (LPWSTR)str_item_kill_failed.c_str());
 	}
 	return 0;
+}
+BOOL MDetachFromDebuggerProcess(DWORD pid)
+{
+	NTSTATUS status;
+	HANDLE processHandle;
+	HANDLE debugObjectHandle;
+	
+	if (NT_SUCCESS(status = MOpenProcessNt(	pid, &processHandle)))
+	{
+		if (NT_SUCCESS(status = MGetProcessDebugObject(processHandle, &debugObjectHandle)))
+		{
+			ULONG flags;
+
+			// Disable kill-on-close.
+			flags = 0;
+			NtSetInformationDebugObject(
+				debugObjectHandle,
+				DebugObjectFlags,
+				&flags,
+				sizeof(ULONG),
+				NULL
+			);
+
+			status = NtRemoveProcessDebug(processHandle, debugObjectHandle);
+
+			NtClose(debugObjectHandle);
+		}
+
+		NtClose(processHandle);
+	}
+
+	if (status == STATUS_PORT_NOT_SET)
+	{
+		MShowMessageDialog(hWndMain, str_item_deatch_debugger_notdebug, str_item_deatch_debugger_title, L"");
+		return FALSE;
+	}
+
+	if (!NT_SUCCESS(status))
+	{
+		MShowErrorMessageWithNTSTATUS(str_item_deatch_debugger_err, str_item_deatch_debugger_title, status);
+		return FALSE;
+	}
+
+	return TRUE;
 }
 
 void MProcessHANDLEStorageDestroyItem(DWORD pid) {
@@ -295,6 +348,7 @@ M_API BOOL MGetPrivileges2()
 		if (GetLastError() == ERROR_CALL_NOT_IMPLEMENTED) return TRUE;
 		else return FALSE;
 	}
+	
 	if (!LookupPrivilegeValue(NULL, SE_SHUTDOWN_NAME, &luid))
 	{
 		CloseHandle(hToken);
@@ -334,19 +388,37 @@ M_API BOOL MGetPrivileges2()
 		return FALSE;
 	}
 
+	if (!LookupPrivilegeValue(NULL, SE_PROF_SINGLE_PROCESS_NAME, &luid))
+	{
+		CloseHandle(hToken);
+		return FALSE;
+	}
+	tp.PrivilegeCount = 1;
+	tp.Privileges[0].Luid = luid;
+	tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+	if (!AdjustTokenPrivileges(hToken, FALSE, &tp, sizeof(TOKEN_PRIVILEGES), &oldtp, &dwSize)) {
+		CloseHandle(hToken);
+		return FALSE;
+	}
+
 	CloseHandle(hToken);
 	return TRUE;
 }
 M_API BOOL MEnumProcessCore()
 {
-	if (current_system_process) {
-		MFree(current_system_process);
-		current_system_process = NULL;
-	}
+	if (current_system_process) MEnumProcessFree();
+
 	DWORD dwSize = 0;
-	NtQuerySystemInformation(SystemProcessInformation, NULL, 0, &dwSize);
-	current_system_process = (PSYSTEM_PROCESSES)MAlloc(dwSize);
-	return NT_SUCCESS(NtQuerySystemInformation(SystemProcessInformation, current_system_process, dwSize, 0));
+	NTSTATUS status = NtQuerySystemInformation(SystemProcessInformation, NULL, 0, &dwSize);
+	if (status == STATUS_INFO_LENGTH_MISMATCH && dwSize > 0)
+	{
+		current_system_process = (PSYSTEM_PROCESSES)MAlloc(dwSize);
+		status = NtQuerySystemInformation(SystemProcessInformation, current_system_process, dwSize, 0);
+		if (!NT_SUCCESS(status))
+			SetLastError(RtlNtStatusToDosError(status));
+		else return TRUE;
+	}
+	return FALSE;
 }
 M_API VOID MEnumProcessFree()
 {
@@ -1454,6 +1526,16 @@ M_API NTSTATUS MGetProcessAffinityMask(HANDLE ProcessHandle, PULONG_PTR Affinity
 	}
 	return status;
 }
+M_API NTSTATUS MGetProcessDebugObject(HANDLE ProcessHandle, PHANDLE DebugObjectHandle)
+{
+	return NtQueryInformationProcess(
+		ProcessHandle,
+		ProcessDebugObjectHandle,
+		DebugObjectHandle,
+		sizeof(HANDLE),
+		NULL
+	);
+}
 //Set Process information 
 NTSTATUS MSetProcessPriorityClass(HANDLE ProcessHandle, UCHAR PriorityClass)
 {
@@ -2124,6 +2206,9 @@ BOOL LoadDll()
 		NtSetInformationProcess = (NtSetInformationProcessFun)GetProcAddress(hNtDll, "NtSetInformationProcess");
 		NtDuplicateObject = (NtDuplicateObjectFun)GetProcAddress(hNtDll, "NtDuplicateObject");
 		NtClose = (NtCloseFun)GetProcAddress(hNtDll, "NtClose");
+		NtSetInformationDebugObject = (NtSetInformationDebugObjectFun)GetProcAddress(hNtDll, "NtSetInformationDebugObject");
+		NtRemoveProcessDebug = (NtRemoveProcessDebugFun)GetProcAddress(hNtDll, "NtRemoveProcessDebug");
+
 
 		//shell32
 		RunFileDlg = (_RunFileDlg)MGetProcedureAddress(hShell32, NULL, 61);
@@ -2145,6 +2230,8 @@ BOOL LoadDll()
 		//
 		dGetPerTcpConnectionEStats = (_GetPerTcpConnectionEStats)GetProcAddress(hIphlpapi, "GetPerTcpConnectionEStats");
 		dGetExtendedTcpTable = (_GetExtendedTcpTable)GetProcAddress(hIphlpapi, "GetExtendedTcpTable");
+		dGetPerTcp6ConnectionEStats = (_GetPerTcp6ConnectionEStats)GetProcAddress(hIphlpapi, "GetPerTcp6ConnectionEStats");
+		dSetPerTcpConnectionEStats = (_SetPerTcpConnectionEStats)GetProcAddress(hIphlpapi, "SetPerTcpConnectionEStats");
 		//
 		ImageLoad = (fnIMAGELOAD)GetProcAddress(hImghlp, "ImageLoad");
 		ImageUnload = (fnIMAGEUNLOAD)GetProcAddress(hImghlp, "ImageUnload");

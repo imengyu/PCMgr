@@ -148,7 +148,7 @@ M_API HICON MFM_GetMyComputerIcon()
 		LPITEMIDLIST pidl=0;
 		SHGetSpecialFolderLocation(0, CSIDL_DRIVES, &pidl);
 		if (SHGetFileInfoA((LPCSTR)pidl, FILE_ATTRIBUTE_NORMAL, &info,
-			sizeof(info), SHGFI_PIDL | SHGFI_ICON | SHGFI_USEFILEATTRIBUTES)) 
+			sizeof(info), SHGFI_PIDL | SHGFI_ICON | SHGFI_USEFILEATTRIBUTES))
 			hiconMyComputer = info.hIcon;
 		IMalloc*im = 0;
 		SHGetMalloc(&im);

@@ -57,6 +57,7 @@
 #define IDC_TREEITEMS                   1013
 #define IDC_WINSLIST                    1106
 #define IDC_RESULT                      1136
+#define IDM_DEATCH_DEBUGGER  40003
 #define IDM_ABOUT                       40004
 #define IDM_SETTINGS                    40005
 #define IDM_TEXIT                       40006
@@ -230,6 +231,7 @@
 #define IDC_PCMGR_REGEDIT               41171
 #define IDC_PCMGR_FILEMGR               41172
 #define IDM_RELOADPDB                   41173
+#define IDM_SYSTEM_HIBERNATE  41174
 
 // Next default values for new objects
 // 

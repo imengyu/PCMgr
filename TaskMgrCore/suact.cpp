@@ -20,7 +20,6 @@
 extern NtTerminateThreadFun NtTerminateThread;
 extern NtTerminateProcessFun NtTerminateProcess;
 
-extern BOOL isKernelDriverLoaded;
 extern HANDLE hKernelDevice;
 extern HWND hWndMain;
 extern HINSTANCE hInstRs;
@@ -310,7 +309,7 @@ M_CAPI(BOOL) M_SU_Init(BOOL requestNtosValue, PKNTOSVALUE outValue) {
 M_CAPI(BOOL) M_SU_GetEPROCESS(DWORD pid, ULONG_PTR* lpEprocess, ULONG_PTR* lpPeb, ULONG_PTR* lpJob, LPWSTR imagename, LPWSTR path)
 {
 	BOOL rs = FALSE;
-	if (isKernelDriverLoaded)
+	if (MCanUseKernel())
 	{
 		PKPROCINFO output = (PKPROCINFO)MAlloc(sizeof(KPROCINFO));
 		memset(output, 0, sizeof(KPROCINFO));
@@ -335,7 +334,7 @@ M_CAPI(BOOL) M_SU_GetEPROCESS(DWORD pid, ULONG_PTR* lpEprocess, ULONG_PTR* lpPeb
 M_CAPI(BOOL) M_SU_GetETHREAD(DWORD tid, ULONG_PTR* lpEthread, ULONG_PTR * lpTeb)
 {
 	BOOL rs = FALSE;
-	if (isKernelDriverLoaded)
+	if (MCanUseKernel())
 	{
 		PKTHREADINFO output = (PKTHREADINFO)MAlloc(sizeof(KTHREADINFO));
 		memset(output, 0, sizeof(KTHREADINFO));
@@ -355,7 +354,7 @@ M_CAPI(BOOL) M_SU_GetETHREAD(DWORD tid, ULONG_PTR* lpEthread, ULONG_PTR * lpTeb)
 M_CAPI(BOOL) M_SU_GetProcessCommandLine(DWORD tid, LPWSTR outCmdLine)
 {
 	BOOL rs = FALSE;
-	if (isKernelDriverLoaded)
+	if (MCanUseKernel())
 	{
 		WCHAR output[1024];
 		memset(&output, 0, sizeof(output));
