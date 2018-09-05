@@ -430,6 +430,7 @@ namespace PCMgr.Ctls
         public string Name { get; set; }
         public List<int> Data { get { return dataIem; } }
 
+        public object Tag { get; set; }
 
         public void AddData(int d)
         {

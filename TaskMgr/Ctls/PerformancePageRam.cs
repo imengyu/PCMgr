@@ -167,16 +167,7 @@ namespace PCMgr.Ctls
         {
             performanceGridGlobal.LeftBottomText = s;
         }
-
-
-        PerformanceInfos.PerformanceInfoSpeicalItem item_ramuseage = null;
-        PerformanceInfos.PerformanceInfoSpeicalItem item_ramcanuse = null;
-        PerformanceInfos.PerformanceInfoSpeicalItem item_sended = null;
-        PerformanceInfos.PerformanceInfoSpeicalItem item_cached = null;
-        PerformanceInfos.PerformanceInfoSpeicalItem item_pagepool = null;
-        PerformanceInfos.PerformanceInfoSpeicalItem item_nopagepool = null;
-
-        private void PerformanceRam_Load(object sender, EventArgs e)
+        public void PageInit()
         {
             item_ramuseage = new PerformanceInfos.PerformanceInfoSpeicalItem();
             item_ramcanuse = new PerformanceInfos.PerformanceInfoSpeicalItem();
@@ -216,6 +207,14 @@ namespace PCMgr.Ctls
             fTipVauleStandby = LanuageMgr.GetStr("MemTipStandby");
             fTipVauleUsing = LanuageMgr.GetStr("MemTipUsing");
         }
+
+        PerformanceInfos.PerformanceInfoSpeicalItem item_ramuseage = null;
+        PerformanceInfos.PerformanceInfoSpeicalItem item_ramcanuse = null;
+        PerformanceInfos.PerformanceInfoSpeicalItem item_sended = null;
+        PerformanceInfos.PerformanceInfoSpeicalItem item_cached = null;
+        PerformanceInfos.PerformanceInfoSpeicalItem item_pagepool = null;
+        PerformanceInfos.PerformanceInfoSpeicalItem item_nopagepool = null;
+
 
         public void PageFroceSetData(int s)
         {

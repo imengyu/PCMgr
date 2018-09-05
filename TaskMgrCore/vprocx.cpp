@@ -637,7 +637,7 @@ BOOL MAppVThreads(DWORD dwPID, HWND hDlg, LPWSTR procName)
 				vitem.iSubItem++;
 
 				if (hThread && teb == 0) {
-					status = MGetThreadPeb(hThread, (PTEB*)&teb);
+					status = MGetThreadTeb(hThread, (PTEB*)&teb);
 					if (NT_SUCCESS(status))
 					{
 						TCHAR modname1[32];

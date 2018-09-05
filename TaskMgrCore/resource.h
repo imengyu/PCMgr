@@ -57,6 +57,9 @@
 #define IDC_TREEITEMS                   1013
 #define IDC_WINSLIST                    1106
 #define IDC_RESULT                      1136
+#define IDM_EXPAND 40000
+#define IDM_COLLAPSE 40001
+#define IDM_GROUP 40002
 #define IDM_DEATCH_DEBUGGER  40003
 #define IDM_ABOUT                       40004
 #define IDM_SETTINGS                    40005

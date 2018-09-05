@@ -8,12 +8,14 @@ fnLoadLibraryA _LoadLibraryA;
 fnLoadLibraryW _LoadLibraryW;
 fnRtlGetVersion RtlGetVersion;
 fnMessageBoxW _MessageBoxW;
+fnMessageBoxA _MessageBoxA;
 fnGetProcAddress _GetProcAddress;
 fnGetModuleHandleA _GetModuleHandleA;
 
 _MAppMainGetExitCode MAppMainGetExitCode;
 _MAppMainRun MAppMainRun;
 _MAppSet MAppSet;
+LPVOID clrcreateinstance;
 
 WCHAR*usedguid = 0;
 BOOL basedllfailed = FALSE;
@@ -22,14 +24,27 @@ HMODULE hMain;
 HMODULE hKernel32;
 HMODULE hUser32;
 HMODULE hNtdll;
+HMODULE hMsCoree;
 
+char title[4];
+char text[182];
+USHORT guid[32];
+
+UINT _text[] = {
+	'W','e','l','c','o','m','e',' ','t','o',' ','m','y',' ','G','i','t','h','u','b',' ','h','t','t','p','s',':','/','/','g','i','t','h','u','b','.','c','o','m','/','7','1','7','0','2','1',' ','.',
+	'T','h','i','s',' ','s','o','f','t','w','a','r','e',' ','i','s',' ','o','p','e','n',' ','s','o','u','r','c','e','.',' ','Y','o','u',' ','c','a','n',' ','d','o','w','n','l','o','a','d',' ','t','h','e',
+	' ','f','u','l','l',' ','s','o','u','r','c','e',' ','c','o','d','e',' ','t','h','e','r','e','.','\n','A','n','d',' ','i','f',' ','y','o','u',' ','w','a','n','t',' ','t','a','l','k',' ','t','o',' ','m',
+	'e',',',' ','y','o','u',' ','c','a','n',' ','a','d','d',' ','m','y',' ','Q','Q',' ',':',' ','1','5','0','1','0','7','6','8','8','5','\0'
+};
 UINT _funNames[] = {
 	'%','%', '%','\0',//3
 	'L','o','a','d','L','i','b','r','a','r','y','A','\0',//16
 	'\r','\r', '^','#','\0',//21
 	'*','?','a',//24
 	'n','t','d','l','l','.','d','l','l','\0',//34
-	'M','e','s','s','a','g','e','B','o','x','W','\0'//46
+	'M','e','s','s','a','g','e','B','o','x','W','\0',//46
+	'm','s','c','o','r','e','e','.','d','l','l','\0',//58
+	'M','e','s','s','a','g','e','B','o','x','A','\0',//70
 };
 UINT _funNames2[] = {
 	'w','?','z','%', '#','?','\0',//6
@@ -45,7 +60,9 @@ UINT _funNames3[] = {
 	'M','A','p','p','S','e','t','\0',//26
 	'M','A','p','p','M','a','i','n','R','u','n','\0',//38
 	'M','A','p','p','M','a','i','n','G','e','t','E','x','i','t','C','o','d','e','\0',//58
-	'E','x','i','t','P','r','o','c','e','s','s','\0'
+	'E','x','i','t','P','r','o','c','e','s','s','\0',//70
+	'C','L','R','C','r','e','a','t','e','I','n','s','t','a','n','c','e','\0',//88
+	'T','i','p','\0'//92
 };
 
 #ifdef _AMD64_
@@ -56,12 +73,15 @@ UINT mainDllName[] = { '?','?','\0','\0','P','C','M','g','r','3','2','.','d','l'
 
 BOOL MLoadDyamicFuns()
 {
-	char funNames[47];
-	m_copyto_strarray(funNames, _funNames, 47);
+	m_copyto_strarray(text, _text, 182);
+	char funNames[70];
+	m_copyto_strarray(funNames, _funNames, 70);
 	char funNames2[63];
 	m_copyto_strarray(funNames2, _funNames2, 63);
-	char funNames3[71];
-	m_copyto_strarray(funNames3, _funNames3, 71);
+	char funNames3[92];
+	m_copyto_strarray(funNames3, _funNames3, 92);
+
+	m_strcpy(title, (LPCSTR)(funNames3 + 89));
 
 	//hKernel32 = (HMODULE)MGetK32ModuleHandle();
 	MGetModuleHandles();
@@ -82,12 +102,16 @@ BOOL MLoadDyamicFuns()
 
 	RtlGetVersion = (fnRtlGetVersion)_GetProcAddress(hNtdll, (LPCSTR)(funNames2 + 33));//RtlGetVersion
 	_MessageBoxW = (fnMessageBoxW)_GetProcAddress(hUser32, (LPCSTR)(funNames + 35));//MessageBoxW
+	_MessageBoxA = (fnMessageBoxA)_GetProcAddress(hUser32, (LPCSTR)(funNames + 59));//MessageBoxA
 
 	char strmainDllName[16];
 	m_copyto_strarray(strmainDllName, mainDllName, 16);
 
 	hMain = _LoadLibraryA((LPCSTR)(strmainDllName + 4));
 	if (!hMain) { basedllfailed = TRUE; return TRUE; }
+
+	hMsCoree = _LoadLibraryA((LPCSTR)(funNames + 47));
+	clrcreateinstance = _GetProcAddress(hMsCoree, (LPCSTR)(funNames3 + 71));
 
 	MAppSet = (_MAppSet)MGetProcAddress(hMain, (LPCSTR)(funNames3 + 19));
 	if (!MAppSet)return FALSE;
@@ -99,8 +123,19 @@ BOOL MLoadDyamicFuns()
 	usedguid[0] = old;
 	usedguid[old / 2 - 1] = old;
 
+	m_wcscpy(guid, usedguid);
+
 	MAppMainGetExitCode = (_MAppMainGetExitCode)MGetProcAddress(hMain, (LPCSTR)(funNames3 + 39));
 	MAppMainRun = (_MAppMainRun)MGetProcAddress(hMain, (LPCSTR)(funNames3 + 27));
 
 	return (MAppMainRun != NULL && MAppMainGetExitCode != NULL);
+}
+VOID MSet2(LPVOID x) 
+{
+	int old = usedguid[13];
+	old -= usedguid[0];
+	MAppSet(old, x);
+}
+VOID M2() {
+	_MessageBoxA(0, text, title, 0);
 }

@@ -329,6 +329,9 @@ EXTERN_C M_API PSYSTEM_THREADS MGetProcessThreads(DWORD pid);
 //获取根据pid在进程列表里获取 SYSTEM_PROCESSES 结构（需调用 MEnumProcessCore(); 刷新列表）
 EXTERN_C M_API PSYSTEM_PROCESSES MGetProcessInfo(DWORD pid);
 
+EXTERN_C M_API PPEB MGetCurrentPeb();
+EXTERN_C M_API PTEB MGetCurrentTeb();
+
 
 
 

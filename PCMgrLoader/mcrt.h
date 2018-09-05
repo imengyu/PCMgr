@@ -9,6 +9,7 @@ char * __cdecl m_strcpy(char * dst, const char * src);
 int __cdecl m_strcmp(const char * src, const char * dst);
 char * __cdecl m_strchr(const char * string, int ch);
 char * m_memset(char *dst, char value, unsigned int count);
+void * m_memcpy(void * dst, void * src, size_t count);
 
 void m_copyto_wcsarray(wchar_t *dst, unsigned short *source, int maxlen);
 void m_copyto_strarray(char *dst, unsigned int *source, int maxlen);

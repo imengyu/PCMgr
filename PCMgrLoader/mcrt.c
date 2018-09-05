@@ -85,7 +85,14 @@ char * m_memset(char *dst, char value, unsigned int count)
 		*dst++ = value;
 	return(start);
 }
+void * m_memcpy(void * dst, void * src, size_t count)
+{
+	void * ret = dst;
+	while (count--)
+		*((LPBYTE)dst)++ = *((LPBYTE)src)++;
 
+	return(ret);
+}
 void m_copyto_wcsarray(wchar_t *dst, unsigned short *source, int maxlen)
 {
 	for (int i = 0; i < maxlen; i++)

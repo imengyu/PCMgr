@@ -30,66 +30,19 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PerformancePageDisk));
-            this.performanceInfos = new PCMgr.Ctls.PerformanceInfos();
-            this.performanceGridSpeed = new PCMgr.Ctls.PerformanceGrid();
-            this.performanceTitle1 = new PCMgr.Ctls.PerformanceTitle();
-            this.performanceGridDiskTime = new PCMgr.Ctls.PerformanceGrid();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.performanceGridDiskTime = new PCMgr.Ctls.PerformanceGrid();
+            this.performanceGridSpeed = new PCMgr.Ctls.PerformanceGrid();
             this.contextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.图形摘要视图ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.查看ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.复制ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panelGrid = new System.Windows.Forms.Panel();
+            this.performanceTitle1 = new PCMgr.Ctls.PerformanceTitle();
+            this.performanceInfos = new PCMgr.Ctls.PerformanceInfos();
             this.contextMenuStrip.SuspendLayout();
             this.panelGrid.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // performanceInfos
-            // 
-            resources.ApplyResources(this.performanceInfos, "performanceInfos");
-            this.performanceInfos.ColorText = System.Drawing.Color.Black;
-            this.performanceInfos.ColorTitle = System.Drawing.Color.Gray;
-            this.performanceInfos.FontText = new System.Drawing.Font("微软雅黑", 9F);
-            this.performanceInfos.FontTextSpeical = new System.Drawing.Font("微软雅黑", 15F);
-            this.performanceInfos.FontTitle = new System.Drawing.Font("微软雅黑", 10.5F);
-            this.performanceInfos.ItemMargan = 10;
-            this.performanceInfos.LineOffest = 6;
-            this.performanceInfos.MaxSpeicalItemsWidth = 300;
-            this.performanceInfos.MaxSpeicalItemsWidthLimit = 300;
-            this.performanceInfos.Name = "performanceInfos";
-            this.performanceInfos.MouseClick += new System.Windows.Forms.MouseEventHandler(this.PerformancePageDisk_MouseClick);
-            this.performanceInfos.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.PerformancePageDisk_MouseDoubleClick);
-            // 
-            // performanceGridSpeed
-            // 
-            resources.ApplyResources(this.performanceGridSpeed, "performanceGridSpeed");
-            this.performanceGridSpeed.BgColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(239)))), ((int)(((byte)(247)))), ((int)(((byte)(223)))));
-            this.performanceGridSpeed.BgColor2 = System.Drawing.Color.FromArgb(((int)(((byte)(241)))), ((int)(((byte)(246)))), ((int)(((byte)(250)))));
-            this.performanceGridSpeed.BottomTextHeight = 20;
-            this.performanceGridSpeed.DrawColor = System.Drawing.Color.FromArgb(((int)(((byte)(77)))), ((int)(((byte)(166)))), ((int)(((byte)(12)))));
-            this.performanceGridSpeed.DrawColor2 = System.Drawing.Color.FromArgb(((int)(((byte)(90)))), ((int)(((byte)(180)))), ((int)(((byte)(90)))));
-            this.performanceGridSpeed.DrawData2 = false;
-            this.performanceGridSpeed.DrawData2Bg = false;
-            this.performanceGridSpeed.GridColor = System.Drawing.Color.FromArgb(((int)(((byte)(219)))), ((int)(((byte)(237)))), ((int)(((byte)(206)))));
-            this.performanceGridSpeed.MaxScaleText = "";
-            this.performanceGridSpeed.MaxScaleValue = 0;
-            this.performanceGridSpeed.MaxValue = 100;
-            this.performanceGridSpeed.Name = "performanceGridSpeed";
-            this.toolTip1.SetToolTip(this.performanceGridSpeed, resources.GetString("performanceGridSpeed.ToolTip"));
-            this.performanceGridSpeed.TopTextHeight = 20;
-            this.performanceGridSpeed.MouseClick += new System.Windows.Forms.MouseEventHandler(this.PerformancePageDisk_MouseClick);
-            this.performanceGridSpeed.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.PerformancePageDisk_MouseDoubleClick);
-            this.performanceGridSpeed.MouseDown += new System.Windows.Forms.MouseEventHandler(this.PerformancePageDisk_MouseDown);
-            // 
-            // performanceTitle1
-            // 
-            resources.ApplyResources(this.performanceTitle1, "performanceTitle1");
-            this.performanceTitle1.Name = "performanceTitle1";
-            this.performanceTitle1.SmallTitleFont = new System.Drawing.Font("微软雅黑", 12F);
-            this.performanceTitle1.TitleFont = new System.Drawing.Font("微软雅黑", 18F);
-            this.performanceTitle1.MouseClick += new System.Windows.Forms.MouseEventHandler(this.PerformancePageDisk_MouseClick);
-            this.performanceTitle1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.PerformancePageDisk_MouseDoubleClick);
-            this.performanceTitle1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.PerformancePageDisk_MouseDown);
             // 
             // performanceGridDiskTime
             // 
@@ -111,6 +64,27 @@
             this.performanceGridDiskTime.MouseClick += new System.Windows.Forms.MouseEventHandler(this.PerformancePageDisk_MouseClick);
             this.performanceGridDiskTime.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.PerformancePageDisk_MouseDoubleClick);
             this.performanceGridDiskTime.MouseDown += new System.Windows.Forms.MouseEventHandler(this.PerformancePageDisk_MouseDown);
+            // 
+            // performanceGridSpeed
+            // 
+            resources.ApplyResources(this.performanceGridSpeed, "performanceGridSpeed");
+            this.performanceGridSpeed.BgColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(239)))), ((int)(((byte)(247)))), ((int)(((byte)(223)))));
+            this.performanceGridSpeed.BgColor2 = System.Drawing.Color.FromArgb(((int)(((byte)(241)))), ((int)(((byte)(246)))), ((int)(((byte)(250)))));
+            this.performanceGridSpeed.BottomTextHeight = 20;
+            this.performanceGridSpeed.DrawColor = System.Drawing.Color.FromArgb(((int)(((byte)(77)))), ((int)(((byte)(166)))), ((int)(((byte)(12)))));
+            this.performanceGridSpeed.DrawColor2 = System.Drawing.Color.FromArgb(((int)(((byte)(90)))), ((int)(((byte)(180)))), ((int)(((byte)(90)))));
+            this.performanceGridSpeed.DrawData2 = false;
+            this.performanceGridSpeed.DrawData2Bg = false;
+            this.performanceGridSpeed.GridColor = System.Drawing.Color.FromArgb(((int)(((byte)(219)))), ((int)(((byte)(237)))), ((int)(((byte)(206)))));
+            this.performanceGridSpeed.MaxScaleText = "";
+            this.performanceGridSpeed.MaxScaleValue = 0;
+            this.performanceGridSpeed.MaxValue = 100;
+            this.performanceGridSpeed.Name = "performanceGridSpeed";
+            this.toolTip1.SetToolTip(this.performanceGridSpeed, resources.GetString("performanceGridSpeed.ToolTip"));
+            this.performanceGridSpeed.TopTextHeight = 20;
+            this.performanceGridSpeed.MouseClick += new System.Windows.Forms.MouseEventHandler(this.PerformancePageDisk_MouseClick);
+            this.performanceGridSpeed.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.PerformancePageDisk_MouseDoubleClick);
+            this.performanceGridSpeed.MouseDown += new System.Windows.Forms.MouseEventHandler(this.PerformancePageDisk_MouseDown);
             // 
             // contextMenuStrip
             // 
@@ -147,6 +121,32 @@
             this.panelGrid.Controls.Add(this.performanceGridDiskTime);
             this.panelGrid.Controls.Add(this.performanceGridSpeed);
             this.panelGrid.Name = "panelGrid";
+            // 
+            // performanceTitle1
+            // 
+            resources.ApplyResources(this.performanceTitle1, "performanceTitle1");
+            this.performanceTitle1.Name = "performanceTitle1";
+            this.performanceTitle1.SmallTitleFont = new System.Drawing.Font("微软雅黑", 12F);
+            this.performanceTitle1.TitleFont = new System.Drawing.Font("微软雅黑", 18F);
+            this.performanceTitle1.MouseClick += new System.Windows.Forms.MouseEventHandler(this.PerformancePageDisk_MouseClick);
+            this.performanceTitle1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.PerformancePageDisk_MouseDoubleClick);
+            this.performanceTitle1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.PerformancePageDisk_MouseDown);
+            // 
+            // performanceInfos
+            // 
+            this.performanceInfos.ColorText = System.Drawing.Color.Black;
+            this.performanceInfos.ColorTitle = System.Drawing.Color.Gray;
+            resources.ApplyResources(this.performanceInfos, "performanceInfos");
+            this.performanceInfos.FontText = new System.Drawing.Font("微软雅黑", 9F);
+            this.performanceInfos.FontTextSpeical = new System.Drawing.Font("微软雅黑", 15F);
+            this.performanceInfos.FontTitle = new System.Drawing.Font("微软雅黑", 10.5F);
+            this.performanceInfos.ItemMargan = 10;
+            this.performanceInfos.LineOffest = 6;
+            this.performanceInfos.MaxSpeicalItemsWidth = 300;
+            this.performanceInfos.MaxSpeicalItemsWidthLimit = 300;
+            this.performanceInfos.Name = "performanceInfos";
+            this.performanceInfos.MouseClick += new System.Windows.Forms.MouseEventHandler(this.PerformancePageDisk_MouseClick);
+            this.performanceInfos.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.PerformancePageDisk_MouseDoubleClick);
             // 
             // PerformancePageDisk
             // 

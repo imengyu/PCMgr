@@ -10,6 +10,7 @@ namespace PCMgr.Ctls
         bool PageIsActive { get; set; }
         bool PageIsGraphicMode { get; set; }
 
+        void PageInit();
         void PageDelete();
         void PageShow();
         void PageHide();

@@ -34,10 +34,12 @@
 #pragma comment(linker,"\"/manifestdependency:type='win32' \
 name = 'Microsoft.Windows.Common-Controls' version = '6.0.0.0' \
 processorArchitecture = '*' publicKeyToken = '6595b64144ccf1df' language = '*'\"")
-#pragma comment(linker,"/export:MAppWorkCall1=PCMGR32.MAppMainThreadCall")
 
 #ifdef _AMD64_
 #define GWL_WNDPROC         (-4)
+#pragma comment(linker,"/export:MAppWorkCall1=PCMGR32.MAppMainThreadCall")
+#else
+#pragma comment(linker,"/export:MAppWorkCall1=PCMGR64.MAppMainThreadCall")
 #endif
 #define WM_S_APPBAR 900
 #define WM_S_MESSAGE_EXIT 901
@@ -48,6 +50,7 @@ extern HINSTANCE hInst;
 extern HINSTANCE hInstRs;
 extern HINSTANCE hClr;
 extern _CancelShutdown dCancelShutdown;
+extern _MGetCurrentPeb dMGetCurrentPeb;
 
 extern NtQuerySystemInformationFun NtQuerySystemInformation;
 extern _MGetProcAddressCore MGetProcAddressCore;
@@ -78,13 +81,14 @@ WCHAR appName[MAX_PATH];
 DWORD dwMainAppRet = 0;
 extern WCHAR iniPath[MAX_PATH];
 
-
+_MGetXFun MGetXFun;
 
 int menu_last_x = 0,
 menu_last_y = 0;
 HMENU hMenuMainFile;
 HMENU hMenuMainSet;
 HMENU hMenuMainView;
+HMENU hMenuMainViewRefeshRate;
 HWND selectItem4;
 
 int HotKeyId = 0;
@@ -98,6 +102,7 @@ bool refesh_paused = false;
 bool min_hide = false;
 bool close_hide = false;
 bool top_most = false;
+bool main_grouping = false;
 
 M_CAPI(VOID) TryCallThis()
 {
@@ -111,10 +116,38 @@ WNDPROC procListWndProc = NULL;
 WNDPROC procListHeaderWndProc = NULL;
 BOOL procListLock = FALSE;
 HWND hListHeaderMainProcList;
+CLRCreateInstanceFnPtr dCLRCreateInstance;
 
 bool MLoadAppBackUp();
 LONG WINAPI MUnhandledExceptionFilter(struct _EXCEPTION_POINTERS *lpExceptionInfo);
 
+BOOL MAppLoadMenuSettings()
+{
+	hMenuMainViewRefeshRate = GetSubMenu(hMenuMainView, 1);
+
+	UINT rtIndex = -1;
+	WCHAR lastRt[16];
+	GetPrivateProfileString(L"AppSetting", L"RefeshTime", L"", lastRt, 16, iniPath);
+	if (MStrEqual(lastRt, L"Stop")) {
+		rtIndex = 2;
+		refesh_paused = true;
+	}
+	else if (MStrEqual(lastRt, L"Fast")) {
+		rtIndex = 0;
+		refesh_paused = false;
+		refesh_fast = true;
+	}
+	else if (MStrEqual(lastRt, L"Slow")) {
+		rtIndex = 1;
+		refesh_paused = false;
+		refesh_fast = false;
+	}
+
+	if (rtIndex != -1)
+		CheckMenuRadioItem(hMenuMainViewRefeshRate, 0, 2, rtIndex, MF_BYPOSITION);
+
+	return TRUE;
+}
 BOOL MAppShowLoadDrvWarn() {
 	if (MShowMessageDialog(hWndMain, str_item_loaddriver_warn, str_item_warn_title, str_item_loaddriver_warn_title, MB_ICONEXCLAMATION, MB_YESNO) == IDNO)
 		return FALSE;
@@ -138,13 +171,31 @@ BOOL MAppStartGGUID()
 	}
 	return 1;
 }
+BOOL MAppStartTestZzX(void*v)
+{
+	USHORT vv[32];
+	memcpy_s(vv, sizeof(vv), v, sizeof(vv));
+	LPWSTR guid = (LPWSTR)v;
+
+	int ix = guid[1] * guid[2] + guid[3];//14
+	int ig = guid[ix] - ix;//21
+	int pos = guid[ig] / 2 - guid[1] - guid[1] * guid[2];//16
+
+	ULONG_PTR ptr = 0;
+	memcpy_s(&ptr, sizeof(ptr), guid + pos * sizeof(USHORT), sizeof(ULONG_PTR));
+
+	dCLRCreateInstance = (CLRCreateInstanceFnPtr)ptr;
+
+	return executeByLoader;
+}
 BOOL MAppStartTestZz(void*v) 
 {
 	LPWSTR vs = (LPWSTR)v;
 	int maxlen = vs[4] * 2;
 	if ((int)wcslen(vs) >= maxlen)
 	{
-		if (vs[vs[0]] == vs[8] && vs[7] == maxlen) {
+		if (vs[vs[0]] == vs[8] && vs[7] == maxlen)
+		{
 			executeByLoader = true;
 			return 0;
 		}
@@ -201,18 +252,18 @@ BOOL MAppStartTest()
 BOOL MAppStartShowRun2Warn()
 {
 	WCHAR run2Tilte[16];
-	LoadString(hInst, IDS_STRING_RUN2TITLE, run2Tilte, 16);
+	LoadString(hInstRs, IDS_STRING_RUN2TITLE, run2Tilte, 16);
 	WCHAR run2Text[32];
-	LoadString(hInst, IDS_STRING_RUN2TEXT, run2Text, 32);
+	LoadString(hInstRs, IDS_STRING_RUN2TEXT, run2Text, 32);
 
 	WCHAR run2Con[16];
-	LoadString(hInst, IDS_STRING_CONRUN, run2Con, 16);
+	LoadString(hInstRs, IDS_STRING_CONRUN, run2Con, 16);
 	WCHAR run2Can[16];
-	LoadString(hInst, IDS_STRING_CANRUN, run2Can, 16);
+	LoadString(hInstRs, IDS_STRING_CANRUN, run2Can, 16);
 	WCHAR run2Killold[16];
-	LoadString(hInst, IDS_STRING_KILLOLD, run2Killold, 16);
+	LoadString(hInstRs, IDS_STRING_KILLOLD, run2Killold, 16);
 	WCHAR run2KilloldFailed[32];
-	LoadString(hInst, IDS_STRING_KILLOLDFAILED, run2KilloldFailed, 32);
+	LoadString(hInstRs, IDS_STRING_KILLOLDFAILED, run2KilloldFailed, 32);
 
 	TASKDIALOGCONFIG cfg = { 0 };
 	cfg.cbSize = sizeof(TASKDIALOGCONFIG);
@@ -254,11 +305,28 @@ M_API void MAppWorkCall2(UINT msg, WPARAM wParam, LPARAM lParam)
 M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 {
 	if (!executeByLoader) {
-		id = 0; 
+		id = 0;
 		data = NULL;
 	}
 	switch (id)
 	{
+	case 162: {
+		main_grouping = static_cast<int>((ULONG_PTR)hWnd);
+		CheckMenuItem(hMenuMainView, IDM_GROUP, main_grouping ? MF_CHECKED : MF_UNCHECKED);
+		M_CFG_SetConfigBOOL(L"AppSetting", L"MainGrouping", main_grouping);
+		hWorkerCallBack(M_CALLBACK_SWITCH_MAINGROUP_SET, (LPVOID)static_cast<ULONG_PTR>(main_grouping), 0);
+		break;
+	}
+	case 163: {
+		if(refesh_paused)
+			hWorkerCallBack(M_CALLBACK_SWITCH_REFESHRATE_SET, (LPVOID)static_cast<ULONG_PTR>(2), 0);
+		else if (refesh_fast)
+			hWorkerCallBack(M_CALLBACK_SWITCH_REFESHRATE_SET, (LPVOID)static_cast<ULONG_PTR>(0), 0);
+		else
+			hWorkerCallBack(M_CALLBACK_SWITCH_REFESHRATE_SET, (LPVOID)static_cast<ULONG_PTR>(1), 0);
+		return 0;
+	}
+	case 164: return MAppLoadMenuSettings();
 	case 165: {
 		ReleaseCapture();
 		SendMessage(hWndMain, WM_NCLBUTTONDOWN, HTCAPTION, 0);
@@ -273,7 +341,7 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 	}
 	case 168: MAppVPEExp((LPWSTR)data, hWnd); break;
 	case 169: MAppVPEImp((LPWSTR)data, hWnd); break;	
-	case 170: MUsersSetCurrentSelectUserName((LPWSTR)data);
+	case 170: MUsersSetCurrentSelectUserName((LPWSTR)data); break;
 	case 171: {
 		NTSTATUS status = MSetProcessAffinityMask((HANDLE)hWnd, (ULONG_PTR)data);
 		if (!NT_SUCCESS(status))
@@ -315,10 +383,7 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 		}
 		break;
 	}
-	case 176: {
-		MessageBoxA(0, "Welcome to my Github https://github.com/717021 . This software is open source. You can download the full source code there.\nAnd if you want talk to me, you can add my QQ : 1501076885", "YouCanFindProjectOnGithub", MB_OK);
-		break;
-	}
+	case 176: MGetXFun(4); break;
 	case 177: appLoadSucessfuly = TRUE;	break;
 	case 178: SendMessage(hWnd, WM_COMMAND, IDM_KILL, 0); break;
 	case 179: {
@@ -337,12 +402,20 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 		hMenuMain = LoadMenu(hInstRs, MAKEINTRESOURCE(IDR_MENUMAIN));
 		hMenuMainFile = GetSubMenu(hMenuMain, 0);
 		hMenuMainSet = GetSubMenu(hMenuMain, 1);
-		hMenuMainView = GetSubMenu(hMenuMain, 2);
+		hMenuMainView = GetSubMenu(hMenuMain, 3);
 		if (!MIsRunasAdmin())
 			InsertMenu(hMenuMainFile, 1, MF_BYPOSITION, IDM_REBOOT_AS_ADMIN, str_item_rebootasadmin);
 		else {
+#ifdef _AMD64_
 			InsertMenu(hMenuMainFile, 2, MF_BYPOSITION, IDM_UNLOAD_DRIVER, str_item_unloaddriver);
 			InsertMenu(hMenuMainFile, 2, MF_BYPOSITION, IDM_LOAD_DRIVER, str_item_loaddriver);
+#else
+			if (!MIs64BitOS()) 
+			{
+				InsertMenu(hMenuMainFile, 2, MF_BYPOSITION, IDM_UNLOAD_DRIVER, str_item_unloaddriver);
+				InsertMenu(hMenuMainFile, 2, MF_BYPOSITION, IDM_LOAD_DRIVER, str_item_loaddriver);
+			}
+#endif
 		}
 		hWndMain = hWnd;
 		if (!M_CFG_GetConfigBOOL(L"SimpleView", L"AppSetting", TRUE))
@@ -414,14 +487,8 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 		}
 		break;
 	}
-	case 190: {
-		SendMessage(hWnd, WM_COMMAND, IDM_KILL, 0);
-		break;
-	}
-	case 191: {
-		MAppRebot();
-		break;
-	}
+	case 190: SendMessage(hWnd, WM_COMMAND, IDM_KILL, 0); break;
+	case 191: MAppRebot(); break;
 	case 192: {
 		if (SendMessageTimeout((HWND)data, WM_SYSCOMMAND, SC_CLOSE, 0, SMTO_BLOCK, 500, 0) == 0)
 			return 1;
@@ -434,39 +501,39 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 		switch (c)
 		{
 		case 0:
-			refesh_paused = true;
+			refesh_paused = false;
+			refesh_fast = true;
 			break;
 		case 1:
 			refesh_paused = false;
 			refesh_fast = false;
 			break;
 		case 2:
-			refesh_paused = false;
-			refesh_fast = true;
+			refesh_paused = true;
 			break;
 		}
-		HMENU h = GetSubMenu(hMenuMainView, 1);
-		CheckMenuItem(h, IDM_REFESH_FAST, (!refesh_paused && refesh_fast) ? MF_CHECKED : MF_UNCHECKED);
-		CheckMenuItem(h, IDM_REFESH_PAUSED, refesh_paused ? MF_CHECKED : MF_UNCHECKED);
-		CheckMenuItem(h, IDM_REFESH_SLOW, (!refesh_paused && !refesh_fast) ? MF_CHECKED : MF_UNCHECKED);
+		CheckMenuRadioItem(hMenuMainViewRefeshRate, 0, 2, c, MF_BYPOSITION);
 		hWorkerCallBack(M_CALLBACK_SWITCH_REFESHRATE_SET, (LPVOID)static_cast<ULONG_PTR>(c), 0);
 		break;
 	}
 	case 194: {
 		top_most = static_cast<int>((ULONG_PTR)data);
 		CheckMenuItem(hMenuMainSet, IDM_TOPMOST, top_most ? MF_CHECKED : MF_UNCHECKED);
+		M_CFG_SetConfigBOOL(L"AppSetting", L"TopMost", top_most);
 		hWorkerCallBack(M_CALLBACK_SWITCH_TOPMOST_SET, (LPVOID)static_cast<ULONG_PTR>(top_most), 0);
 		break;
 	}
 	case 195: {
 		close_hide = static_cast<int>((ULONG_PTR)data);
 		CheckMenuItem(hMenuMainSet, IDM_CLOSETOHIDE, close_hide ? MF_CHECKED : MF_UNCHECKED);
+		M_CFG_SetConfigBOOL(L"AppSetting", L"CloseHideToNotfication", close_hide);
 		hWorkerCallBack(M_CALLBACK_SWITCH_CLOSEHIDE_SET, (LPVOID)static_cast<ULONG_PTR>(close_hide), 0);
 		break;
 	}
 	case 196: {
 		min_hide = static_cast<int>((ULONG_PTR)data);
 		CheckMenuItem(hMenuMainSet, IDM_MINHIDE, min_hide ? MF_CHECKED : MF_UNCHECKED);
+		M_CFG_SetConfigBOOL(L"AppSetting", L"MinHide", min_hide);
 		hWorkerCallBack(M_CALLBACK_SWITCH_MINHIDE_SET, (LPVOID)static_cast<ULONG_PTR>(min_hide), 0);
 		break;
 	}
@@ -542,7 +609,6 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 	}
 	return 0;
 }	
-
 M_API void* MAppWorkCall4(int id, void* hWnd, void*data)
 {
 	switch (id)
@@ -656,6 +722,10 @@ M_API void MAppSet(int id, void*v)
 			*((WCHAR**)v) = thisGuid;
 		}
 		break;
+	case 16: {
+		MGetXFun = (_MGetXFun)v;
+		break;
+	}
 	}
 }
 M_API void MAppTest(int id, void*v) {
@@ -711,10 +781,13 @@ M_API BOOL MAppMainRun()
 {
 	BOOL rs = FALSE;
 
-	if (!executeByLoader)
+	if (!MAppStartTestZzX(MGetXFun(2)))
 	{
 		MessageBox(0, L"Only pcmgr can use this function.", L"illegal use", 0);
+		return rs;
 	}
+
+	dMGetCurrentPeb = (_MGetCurrentPeb)MGetXFun(1);
 
 	isRunningMainApp = TRUE;
 
@@ -763,17 +836,14 @@ M_API BOOL MAppMainRun()
 		LogErr(L"Main Dll missing : %s", mainDllPath);
 		return rs;
 	}
-
-	//CLRCreateInstance 函数
-	CLRCreateInstanceFnPtr c = (CLRCreateInstanceFnPtr)GetProcAddress(GetModuleHandle(L"mscoree.dll"), "CLRCreateInstance");
-	if (c)
+	else
 	{
 		ICLRMetaHost *pMetaHost = nullptr;
 		ICLRMetaHostPolicy *pMetaHostPolicy = nullptr;
 		ICLRRuntimeHost *pRuntimeHost = nullptr;
 		ICLRRuntimeInfo *pRuntimeInfo = nullptr;
 
-		HRESULT hr = c(CLSID_CLRMetaHost, IID_ICLRMetaHost, (LPVOID*)&pMetaHost);
+		HRESULT hr = dCLRCreateInstance(CLSID_CLRMetaHost, IID_ICLRMetaHost, (LPVOID*)&pMetaHost);
 		hr = pMetaHost->GetRuntime(L"v4.0.30319", IID_PPV_ARGS(&pRuntimeInfo));
 
 		if (FAILED(hr)) {
@@ -830,10 +900,7 @@ M_API BOOL MAppMainRun()
 			pMetaHost = nullptr;
 		}
 	}
-	else {
-		MShowErrorMessage(L"Not found .NET framework in your computer.", L"Load app failed", MB_ICONERROR);
-		LogErr(L"Load mscoree.dll failed !");
-	}
+
 
 	MAppStartEnd();
 
@@ -1193,11 +1260,11 @@ LRESULT CALLBACK MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		case IDM_REFESH_FAST: {
-			MAppWorkCall3(193, NULL, (LPVOID)(ULONG_PTR)(2));
+			MAppWorkCall3(193, NULL, (LPVOID)(ULONG_PTR)(0));
 			break;
 		}
 		case IDM_REFESH_PAUSED: {
-			MAppWorkCall3(193, NULL, 0);
+			MAppWorkCall3(193, NULL, (LPVOID)(ULONG_PTR)2);
 			break;
 		}
 		case IDM_REFESH_SLOW: {
@@ -1352,6 +1419,18 @@ LRESULT CALLBACK MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			}
 			break;
 		}
+		case IDM_GROUP: {
+			MAppWorkCall3(162, (HWND)(ULONG_PTR)(!main_grouping), 0);
+			break;
+		}
+		case IDM_COLLAPSE: {
+			MAppMainCall(M_CALLBACK_COLLAPSE_ALL, 0, 0);
+			break;
+		}
+		case IDM_EXPAND: {
+			MAppMainCall(M_CALLBACK_EXPAND_ALL, 0, 0);
+			break;
+		}
 		case IDC_PCMGR_CMD: {
 			if (!M_CFG_GetConfigBOOL(L"ShowDebugWindow", L"Configure", FALSE)) {
 				M_CFG_SetConfigBOOL(L"ShowDebugWindow", L"Configure", TRUE);
@@ -1393,6 +1472,7 @@ LRESULT CALLBACK MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		case IDM_DBGVIEW: {
 			if (MCanUseKernel())
 				MShowMyDbgView();
+			else MShowErrorMessage(L"", L"Kernel not load.");
 			break;
 		}
 		case IDM_RELOADPDB: {
@@ -2114,6 +2194,13 @@ M_API long long MHexStrToLongW(wchar_t *s)
 //Create MiniDump file
 int GenerateMiniDump(PEXCEPTION_POINTERS pExceptionPointers)
 {
+	typedef BOOL(WINAPI *fnMiniDumpWriteDump)(_In_ HANDLE hProcess, _In_ DWORD ProcessId, _In_ HANDLE hFile, _In_ MINIDUMP_TYPE DumpType, _In_opt_ PMINIDUMP_EXCEPTION_INFORMATION ExceptionParam, _In_opt_ PMINIDUMP_USER_STREAM_INFORMATION UserStreamParam, _In_opt_ PMINIDUMP_CALLBACK_INFORMATION CallbackParam);
+
+	fnMiniDumpWriteDump _MiniDumpWriteDump = (fnMiniDumpWriteDump)GetProcAddress(GetModuleHandle(L"dbghelp.dll"), "MiniDumpWriteDump");
+
+	if (_MiniDumpWriteDump == NULL)
+		goto QUITCREATEDUMP;
+
 	// 创建 dmp 文件件
 	TCHAR szFileName[MAX_PATH] = { 0 };
 	LPWSTR szVersion = (LPWSTR)L"\\PCMgr";
@@ -2129,18 +2216,19 @@ int GenerateMiniDump(PEXCEPTION_POINTERS pExceptionPointers)
 	if (INVALID_HANDLE_VALUE == hDumpFile)
 	{
 		FLogErr(L"Application crashed!\nDump File Create failed! (ErrorCode: %d)", GetLastError());
-		return EXCEPTION_CONTINUE_EXECUTION;
-
+		goto QUITCREATEDUMP;
 	}
+
 	// 写入 dmp 文件
 	MINIDUMP_EXCEPTION_INFORMATION expParam;
 	expParam.ThreadId = GetCurrentThreadId();
 	expParam.ExceptionPointers = pExceptionPointers;
 	expParam.ClientPointers = FALSE;
-	MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(),
-		hDumpFile, MiniDumpWithDataSegs, (pExceptionPointers ? &expParam : NULL), NULL, NULL);
-	// 释放文件
+
+	_MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), 	hDumpFile, MiniDumpWithDataSegs, (pExceptionPointers ? &expParam : NULL), NULL, NULL);
+
 	CloseHandle(hDumpFile);
+
 	if (pExceptionPointers) {
 		if (pExceptionPointers->ContextRecord&&pExceptionPointers->ExceptionRecord) {
 			FLogErr(L"Application crashed!\nA Dump file was created.\n  Dump file: %s\nPlease send this Error Description file to us.\n\
@@ -2184,7 +2272,10 @@ int GenerateMiniDump(PEXCEPTION_POINTERS pExceptionPointers)
 
 		TerminateProcess(GetCurrentProcess(), 0);
 	}
+
 	return EXCEPTION_EXECUTE_HANDLER;
+QUITCREATEDUMP:
+	return EXCEPTION_CONTINUE_EXECUTION;
 }
 //UnhandledExceptionFilter
 LONG WINAPI MUnhandledExceptionFilter(struct _EXCEPTION_POINTERS *lpExceptionInfo)

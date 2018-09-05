@@ -16,7 +16,10 @@ namespace PCMgr.Ctls
             stringFormatRight = new StringFormat();
             stringFormatRight.Alignment = StringAlignment.Far;
             stringFormatRight.LineAlignment = StringAlignment.Far;
+            stringFormatRight.Trimming = StringTrimming.EllipsisCharacter;
+            stringFormatRight.FormatFlags = StringFormatFlags.LineLimit;
         }
+
 
         public Font TitleFont { get; set; }
         public Font SmallTitleFont { get; set; }
@@ -34,7 +37,8 @@ namespace PCMgr.Ctls
             using (SolidBrush s = new SolidBrush(ForeColor))
             {
                 if (Title != "") g.DrawString(Title, TitleFont, s, 0, 0);
-                if (SmallTitle != "") g.DrawString(SmallTitle, SmallTitleFont, s, new Rectangle(0, 0, Width, Height), stringFormatRight);
+                int w = (int)g.MeasureString(Title, TitleFont).Width;
+                if (SmallTitle != "") g.DrawString(SmallTitle, SmallTitleFont, s, new Rectangle(w + 2, 0, Width - w - 2, Height), stringFormatRight);
             }
         }
     }

@@ -106,38 +106,11 @@ namespace PCMgr.Ctls
 
             customString = FormMain.str_Sent + " : " + (lastSent / 1024 * 8).ToString("0.0") + " "
                 + FormMain.str_Receive + " : " + (lastReceive / 1024 * 8).ToString("0.0") + " Kbps";
-            outdata1 = (int)((double)(lastSent / 1024 * 8) / performanceGrid.MaxValue) * 100;
-            outdata2 = (int)((double)(lastReceive / 1024 * 8) / performanceGrid.MaxValue) * 100;
+            outdata1 = (int)(lastSent * 0.0001);
+            outdata2 = (int)(lastReceive * 0.0001);
             return true;
         }
-
-        private int GetSpeedMaxUnit()
-        {
-            if (lastMaxSpeed > 100)
-            {
-                if (lastMaxSpeed < 600)
-                    return 500;//500k
-                if (lastMaxSpeed < 1030)
-                    return 1024;//1m
-                if (lastMaxSpeed < 2050)
-                    return 2048;//2m
-                if (lastMaxSpeed < 5130)
-                    return 5120;//5m
-                if (lastMaxSpeed < 10300)
-                    return 10240;//10m
-                if (lastMaxSpeed < 103000)
-                    return 102400;//100m
-                if (lastMaxSpeed < 513000)
-                    return 512000;//500m
-                else return 1048576;//1g
-            }
-            return 100;
-        }
-
-        private PerformanceInfos.PerformanceInfoSpeicalItem item_readSpeed = null;
-        private PerformanceInfos.PerformanceInfoSpeicalItem item_writeSpeed = null;
-
-        private void PerformancePageNet_Load(object sender, EventArgs e)
+        public void PageInit()
         {
             performanceTitle.Title = currNetIsWifi ? "Wi-Fi" : LanuageMgr.GetStr("Ethernet");
             performanceTitle.SmallTitle = currNetName;
@@ -174,6 +147,37 @@ namespace PCMgr.Ctls
 
             performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem(LanuageMgr.GetStr("IPV4"), v4));
             performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem(LanuageMgr.GetStr("IPV6"), v6));
+        }
+
+        private int GetSpeedMaxUnit()
+        {
+            if (lastMaxSpeed > 100)
+            {
+                if (lastMaxSpeed < 600)
+                    return 500;//500k
+                if (lastMaxSpeed < 1030)
+                    return 1024;//1m
+                if (lastMaxSpeed < 2050)
+                    return 2048;//2m
+                if (lastMaxSpeed < 5130)
+                    return 5120;//5m
+                if (lastMaxSpeed < 10300)
+                    return 10240;//10m
+                if (lastMaxSpeed < 103000)
+                    return 102400;//100m
+                if (lastMaxSpeed < 513000)
+                    return 512000;//500m
+                else return 1048576;//1g
+            }
+            return 100;
+        }
+
+        private PerformanceInfos.PerformanceInfoSpeicalItem item_readSpeed = null;
+        private PerformanceInfos.PerformanceInfoSpeicalItem item_writeSpeed = null;
+
+        private void PerformancePageNet_Load(object sender, EventArgs e)
+        {
+            
         }
 
         public event OpeningPageMenuEventHandler OpeningPageMenu;

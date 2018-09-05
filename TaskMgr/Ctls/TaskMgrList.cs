@@ -25,6 +25,7 @@ namespace PCMgr.Ctls
             header.Height = 58;
             header.TabStop = true;
             header.TabIndex = 1;
+            header.Text = "列表头";
             Controls.Add(header);
             header.XOffestChanged += Header_XOffestChanged;
             header.CloumWidthChanged += Header_HearderWidthChanged;
@@ -43,6 +44,7 @@ namespace PCMgr.Ctls
             scrol.ValueChanged += Scrol_ValueChanged;
             scrol.TabStop = true;
             scrol.TabIndex = 2;
+            scrol.Text = "列表垂直滚动条";
             ChildStringFormat = new StringFormat();
             ChildStringFormat.LineAlignment = StringAlignment.Center;
             ChildStringFormat.Trimming = StringTrimming.EllipsisCharacter;

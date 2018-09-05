@@ -10,6 +10,7 @@ typedef HMODULE(WINAPI*fnGetModuleHandleA)(__in_opt LPCSTR lpModuleName);
 typedef long(NTAPI* fnRtlGetVersion)(PRTL_OSVERSIONINFOW lpVersionInformation);
 
 typedef int (WINAPI *fnMessageBoxW)(__in_opt HWND hWnd, __in_opt LPCWSTR lpText, __in_opt LPCWSTR lpCaption, __in UINT uType);
+typedef int (WINAPI *fnMessageBoxA)(__in_opt HWND hWnd, __in_opt LPCSTR lpText, __in_opt LPCSTR lpCaption, __in UINT uType);
 
 typedef DWORD(*_MAppMainGetExitCode)();
 typedef void(*_MAppMainRun)();
@@ -17,6 +18,7 @@ typedef void(*_MAppSet)(int id, void*v);
 
 
 extern fnMessageBoxW _MessageBoxW;
+extern fnMessageBoxA _MessageBoxA;
 extern fnExitProcess _ExitProcess;
 extern fnLoadLibraryA _LoadLibraryA;
 extern fnLoadLibraryW _LoadLibraryW;
@@ -25,5 +27,8 @@ extern fnRtlGetVersion RtlGetVersion;
 extern _MAppSet MAppSet;
 extern _MAppMainGetExitCode MAppMainGetExitCode;
 extern _MAppMainRun MAppMainRun;
+extern LPVOID clrcreateinstance;
 
+VOID M2();
+VOID MSet2(LPVOID x);
 BOOL MLoadDyamicFuns();

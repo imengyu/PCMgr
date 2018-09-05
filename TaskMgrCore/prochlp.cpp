@@ -10,6 +10,7 @@
 #include "resource.h"
 #include "kernelhlp.h"
 #include "suact.h"
+#include "thdhlp.h"
 #include "kda.h"
 #include "fmhlp.h"
 #include "handlehlp.h"
@@ -118,6 +119,7 @@ _WinStationReset WinStationReset;
 _WinStationFreeMemory WinStationFreeMemory;
 _WinStationEnumerateW WinStationEnumerateW;
 _WinStationQueryInformationW WinStationQueryInformationW;
+_MGetCurrentPeb dMGetCurrentPeb;
 
 //Enum apis
 EXTERN_C BOOL MAppVProcessAllWindows();
@@ -1598,6 +1600,24 @@ M_API PUSERNAME MGetUserNameBySID(PSID sid) {
 	return NULL;
 }
 
+M_API PPEB MGetCurrentPeb()
+{
+	if (dMGetCurrentPeb)
+		return (PPEB)dMGetCurrentPeb();
+	else {
+		PPEB pPeb = NULL;
+		HANDLE hProcess = GetCurrentProcess();
+		MGetProcessPeb(hProcess, &pPeb);
+		return pPeb;
+	}
+}
+M_API PTEB MGetCurrentTeb()
+{
+	PTEB pTeb = NULL;
+	HANDLE hThread = GetCurrentThread();
+	MGetThreadTeb(hThread, &pTeb);
+	return pTeb;
+}
 
 //UWP
 /*M_API BOOL MGetUWPPackageId(HANDLE handle, MPerfAndProcessData*data)
@@ -2022,6 +2042,7 @@ M_CAPI(int) MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWOR
 				EnableMenuItem(hpop, 9 + addMenu, MF_BYPOSITION | MF_DISABLED);
 				EnableMenuItem(hpop, 10 + addMenu, MF_BYPOSITION | MF_DISABLED);
 				EnableMenuItem(hpop, 11 + addMenu, MF_BYPOSITION | MF_DISABLED);
+				EnableMenuItem(hpop, 12 + addMenu, MF_BYPOSITION | MF_DISABLED);
 			}
 		}
 
@@ -2065,6 +2086,7 @@ M_CAPI(int) MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWOR
 		else {
 			EnableMenuItem(hpop, 10 + addMenu, MF_BYPOSITION | MF_DISABLED);
 			EnableMenuItem(hpop, 11 + addMenu, MF_BYPOSITION | MF_DISABLED);
+			EnableMenuItem(hpop, 12 + addMenu, MF_BYPOSITION | MF_DISABLED);
 		}
 
 		TrackPopupMenu(hpop,
@@ -2099,12 +2121,12 @@ M_CAPI(int) MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWOR
 		EnableMenuItem(hpop, IDM_VTIMER, MF_DISABLED);
 		EnableMenuItem(hpop, IDM_VPRIVILEGE, MF_DISABLED);
 		EnableMenuItem(hpop, IDM_FILEPROP, MF_DISABLED);
-		EnableMenuItem(hpop, IDM_DEBUG, MF_DISABLED);
 
 		EnableMenuItem(hpop, ID_TASKMENU_SETAFFINITY, MF_DISABLED);
 
 		EnableMenuItem(hpop, 9, MF_BYPOSITION | MF_DISABLED);
 		EnableMenuItem(hpop, 10, MF_BYPOSITION | MF_DISABLED);
+		EnableMenuItem(hpop, 12, MF_BYPOSITION | MF_DISABLED);
 
 		if (MStrEqualW(strFilePath, L"") || MStrEqualW(strFilePath, L"-")) {
 			EnableMenuItem(hpop, IDM_OPENPATH, MF_DISABLED);

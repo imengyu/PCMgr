@@ -6,6 +6,9 @@
 #include <DbgHelp.h>
 #include "netdef.h"
 
+typedef void*(*_MGetCurrentTeb)();
+typedef void*(*_MGetCurrentPeb)();
+typedef FARPROC(*_MGetXFun)(int x);
 typedef FARPROC (*_MGetProcAddressCore)(_In_ HMODULE hModule,_In_ LPCSTR lpProcName);
 typedef BOOL(WINAPI *_RunFileDlg)(_In_ HWND hwndOwner, _In_opt_ HICON hIcon, _In_opt_ LPCWSTR lpszDirectory, _In_opt_ LPCWSTR lpszTitle, _In_opt_ LPCWSTR lpszDescription, _In_ ULONG uFlags);
 typedef BOOL(WINAPI *_IsImmersiveProcess)(_In_ HANDLE hProcess);

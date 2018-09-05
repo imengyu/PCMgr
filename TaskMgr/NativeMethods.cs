@@ -1035,6 +1035,7 @@ namespace PCMgr
 
         public static class CSCall
         {
+            public const int M_CALLBACK_SWITCH_MAINGROUP_SET = 4;
             public const int M_CALLBACK_SWITCH_REFESHRATE_SET = 5;
             public const int M_CALLBACK_SWITCH_TOPMOST_SET = 6;
             public const int M_CALLBACK_SWITCH_CLOSEHIDE_SET = 7;
@@ -1081,9 +1082,10 @@ namespace PCMgr
             public const int M_CALLBACK_NETMON = 54;
             public const int M_CALLBACK_REGEDIT = 55;
             public const int M_CALLBACK_FILEMGR = 56;
-
+            public const int M_CALLBACK_COLLAPSE_ALL = 57;
             public const int M_CALLBACK_SIMPLEVIEW_ACT = 58;
             public const int M_CALLBACK_UWPKILL = 59;
+            public const int M_CALLBACK_EXPAND_ALL = 60;
         }
     }
 

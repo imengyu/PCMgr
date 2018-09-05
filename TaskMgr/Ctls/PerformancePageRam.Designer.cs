@@ -71,9 +71,9 @@
             // 
             // performanceInfos
             // 
-            resources.ApplyResources(this.performanceInfos, "performanceInfos");
             this.performanceInfos.ColorText = System.Drawing.Color.Black;
             this.performanceInfos.ColorTitle = System.Drawing.Color.Gray;
+            resources.ApplyResources(this.performanceInfos, "performanceInfos");
             this.performanceInfos.FontText = new System.Drawing.Font("微软雅黑", 9F);
             this.performanceInfos.FontTextSpeical = new System.Drawing.Font("微软雅黑", 15F);
             this.performanceInfos.FontTitle = new System.Drawing.Font("微软雅黑", 9F);
@@ -159,7 +159,6 @@
             this.Controls.Add(this.performanceInfos);
             this.Controls.Add(this.panelGrid);
             this.Name = "PerformancePageRam";
-            this.Load += new System.EventHandler(this.PerformanceRam_Load);
             this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.PerformancePageRam_MouseClick);
             this.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.PerformancePageRam_MouseDoubleClick);
             this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.PerformancePageRam_MouseDown);

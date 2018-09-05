@@ -101,7 +101,7 @@ namespace PCMgr.Ctls
                 && lastMaxSpeed <= performanceGridSpeed.MaxValue * 0.95)
             {
                 performanceGridSpeed.MaxScaleValue = lastMaxSpeed;
-                performanceGridSpeed.MaxScaleText = NativeMethods.FormatFileSize(lastMaxSpeed * 1024) + "/" + FormMain.str_sec;
+                performanceGridSpeed.MaxScaleText = NativeMethods.FormatFileSizeKBUnit(lastMaxSpeed) + "/" + FormMain.str_sec;
             }
             else performanceGridSpeed.MaxScaleValue = 0;
 
@@ -119,6 +119,11 @@ namespace PCMgr.Ctls
             outdata1 = all;
             outdata2 = -1;
             return false;
+        }
+        public void PageInit()
+        {
+            InitValues();
+            InitStaticValues();
         }
 
         private PerformanceInfos.PerformanceInfoSpeicalItem item_diskTime = null;
@@ -208,8 +213,7 @@ namespace PCMgr.Ctls
 
         private void PerformancePageDisk_Load(object sender, EventArgs e)
         {
-            InitValues();
-            InitStaticValues();
+
         }
 
         public event SwithGraphicViewEventHandler SwithGraphicView;

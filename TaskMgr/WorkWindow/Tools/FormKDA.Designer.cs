@@ -31,6 +31,7 @@
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormKDA));
             this.splitContainer = new System.Windows.Forms.SplitContainer();
+            this.labelErrStatus = new System.Windows.Forms.Label();
             this.listViewDA = new System.Windows.Forms.ListView();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -48,7 +49,6 @@
             this.复制二进制码ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.复制OpCodeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.复制汇编代码ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.labelErrStatus = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).BeginInit();
             this.splitContainer.Panel1.SuspendLayout();
             this.splitContainer.Panel2.SuspendLayout();
@@ -69,6 +69,13 @@
             // splitContainer.Panel2
             // 
             this.splitContainer.Panel2.Controls.Add(this.textBoxBariny);
+            // 
+            // labelErrStatus
+            // 
+            resources.ApplyResources(this.labelErrStatus, "labelErrStatus");
+            this.labelErrStatus.AutoEllipsis = true;
+            this.labelErrStatus.BackColor = System.Drawing.SystemColors.Control;
+            this.labelErrStatus.Name = "labelErrStatus";
             // 
             // listViewDA
             // 
@@ -175,14 +182,7 @@
             resources.ApplyResources(this.复制汇编代码ToolStripMenuItem, "复制汇编代码ToolStripMenuItem");
             this.复制汇编代码ToolStripMenuItem.Click += new System.EventHandler(this.复制汇编代码ToolStripMenuItem_Click);
             // 
-            // labelErrStatus
-            // 
-            resources.ApplyResources(this.labelErrStatus, "labelErrStatus");
-            this.labelErrStatus.AutoEllipsis = true;
-            this.labelErrStatus.BackColor = System.Drawing.Color.White;
-            this.labelErrStatus.Name = "labelErrStatus";
-            // 
-            // FormDA
+            // FormKDA
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -193,7 +193,7 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.textBoxTargetAddress);
             this.Controls.Add(this.splitContainer);
-            this.Name = "FormDA";
+            this.Name = "FormKDA";
             this.Load += new System.EventHandler(this.FormDA_Load);
             this.splitContainer.Panel1.ResumeLayout(false);
             this.splitContainer.Panel2.ResumeLayout(false);

@@ -53,7 +53,7 @@ M_API NTSTATUS MGetThreadBasicInformation(HANDLE ThreadHandle, PTHREAD_BASIC_INF
 		NULL
 	);
 }
-M_API NTSTATUS MGetThreadPeb(HANDLE hThread, PTEB*pPTeb) {
+M_API NTSTATUS MGetThreadTeb(HANDLE hThread, PTEB*pPTeb) {
 	THREAD_BASIC_INFORMATION tbi;
 	NTSTATUS status = MGetThreadBasicInformation(hThread, &tbi);
 	if (NT_SUCCESS(status))

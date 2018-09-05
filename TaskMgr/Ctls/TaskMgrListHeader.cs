@@ -33,6 +33,7 @@ namespace PCMgr.Ctls
                 vs.TabIndex = 3;
                 vs.TabStop = true;
                 vs.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+                vs.Text = "列表水平滚动条";
                 par.Controls.Add(vs);
             }
             lineBrush = new LinearGradientBrush(new Point(0, 0), new Point(0, 60), Color.Transparent, Color.FromArgb(187, 187, 187));

@@ -136,6 +136,14 @@ namespace PCMgr.Ctls
 
             return true;
         }
+        public void PageInit()
+        {
+
+
+            GetStaticInfos();
+            InitRuntimeInfo();
+            InitCpusInfo();
+        }
 
         PerformanceInfos.PerformanceInfoSpeicalItem item_cpuuseage = null;
         PerformanceInfos.PerformanceInfoSpeicalItem item_cpuuseage_freq = null;
@@ -224,9 +232,8 @@ namespace PCMgr.Ctls
 
         private void PerformanceCpu_Load(object sender, EventArgs e)
         {
-            GetStaticInfos();
-            InitRuntimeInfo();
-            InitCpusInfo();
+            performanceCpus.Text = "逻辑处理器利用率视图";
+            performanceCpusAll.Text = "所有逻辑处理器利用率视图";
         }
 
         private Color performanceCpus_GetColorFormValue(int i)
@@ -372,7 +379,5 @@ namespace PCMgr.Ctls
                 if (e.Button == MouseButtons.Left && e.Clicks == 1)
                     MAppWorkCall3(165, IntPtr.Zero, IntPtr.Zero);
         }
-
- 
     }
 }

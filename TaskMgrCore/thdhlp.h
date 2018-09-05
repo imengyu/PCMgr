@@ -23,7 +23,7 @@ EXTERN_C M_API NTSTATUS MSuspendThreadNt(HANDLE hThread);
 //获取线程 TEB 地址
 //    hThread：线程句柄
 //    [OUT] pPTeb：接收PTEB信息变量
-EXTERN_C M_API NTSTATUS MGetThreadPeb(HANDLE hThread, PTEB*pPTeb);
+EXTERN_C M_API NTSTATUS MGetThreadTeb(HANDLE hThread, PTEB*pPTeb);
 //获取线程起始地址
 //    hThread：线程句柄
 //    [OUT] outStartAddress：接收变量

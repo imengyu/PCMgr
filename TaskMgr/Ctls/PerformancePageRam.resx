@@ -126,26 +126,26 @@
   </data>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="performanceRamPoolGrid.Location" type="System.Drawing.Point, System.Drawing">
-    <value>0, 164</value>
+    <value>3, 149</value>
   </data>
   <data name="performanceRamPoolGrid.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>3, 4, 3, 4</value>
   </data>
   <data name="performanceRamPoolGrid.MinimumSize" type="System.Drawing.Size, System.Drawing">
-    <value>311, 65</value>
+    <value>0, 60</value>
   </data>
   <data name="performanceRamPoolGrid.RightText" type="System.Resources.ResXNullRef, System.Windows.Forms">
     <value />
   </data>
   <data name="performanceRamPoolGrid.Size" type="System.Drawing.Size, System.Drawing">
-    <value>476, 68</value>
+    <value>374, 60</value>
   </data>
   <assembly alias="mscorlib" name="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="performanceRamPoolGrid.TabIndex" type="System.Int32, mscorlib">
     <value>6</value>
   </data>
   <data name="performanceRamPoolGrid.Text" xml:space="preserve">
-    <value>performanceRamPoolGrid1</value>
+    <value>内存组合视图</value>
   </data>
   <data name="&gt;&gt;performanceRamPoolGrid.Name" xml:space="preserve">
     <value>performanceRamPoolGrid</value>
@@ -159,23 +159,26 @@
   <data name="&gt;&gt;performanceRamPoolGrid.ZOrder" xml:space="preserve">
     <value>1</value>
   </data>
-  <data name="performanceInfos.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
-    <value>Bottom, Left, Right</value>
+  <data name="performanceInfos.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
+    <value>Bottom</value>
   </data>
   <data name="performanceInfos.Location" type="System.Drawing.Point, System.Drawing">
-    <value>0, 239</value>
+    <value>0, 215</value>
   </data>
   <data name="performanceInfos.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>3, 4, 3, 4</value>
   </data>
   <data name="performanceInfos.MinimumSize" type="System.Drawing.Size, System.Drawing">
-    <value>584, 175</value>
+    <value>0, 175</value>
   </data>
   <data name="performanceInfos.Size" type="System.Drawing.Size, System.Drawing">
-    <value>584, 176</value>
+    <value>380, 200</value>
   </data>
   <data name="performanceInfos.TabIndex" type="System.Int32, mscorlib">
     <value>5</value>
+  </data>
+  <data name="performanceInfos.Text" xml:space="preserve">
+    <value>子信息视图</value>
   </data>
   <data name="&gt;&gt;performanceInfos.Name" xml:space="preserve">
     <value>performanceInfos</value>
@@ -199,13 +202,13 @@
     <value>内存使用率</value>
   </data>
   <data name="performanceGridGlobal.Location" type="System.Drawing.Point, System.Drawing">
-    <value>0, 45</value>
+    <value>3, 45</value>
   </data>
   <data name="performanceGridGlobal.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>3, 6, 3, 6</value>
   </data>
   <data name="performanceGridGlobal.MinimumSize" type="System.Drawing.Size, System.Drawing">
-    <value>380, 118</value>
+    <value>0, 100</value>
   </data>
   <data name="performanceGridGlobal.RightBottomText" xml:space="preserve">
     <value>0</value>
@@ -214,10 +217,13 @@
     <value>MAXRAMSIZE</value>
   </data>
   <data name="performanceGridGlobal.Size" type="System.Drawing.Size, System.Drawing">
-    <value>476, 118</value>
+    <value>374, 100</value>
   </data>
   <data name="performanceGridGlobal.TabIndex" type="System.Int32, mscorlib">
     <value>3</value>
+  </data>
+  <data name="performanceGridGlobal.Text" xml:space="preserve">
+    <value>内存使用率图表</value>
   </data>
   <data name="&gt;&gt;performanceGridGlobal.Name" xml:space="preserve">
     <value>performanceGridGlobal</value>
@@ -241,13 +247,16 @@
     <value>3, 4, 3, 4</value>
   </data>
   <data name="performanceTitle.Size" type="System.Drawing.Size, System.Drawing">
-    <value>476, 42</value>
+    <value>380, 42</value>
   </data>
   <data name="performanceTitle.SmallTitle" xml:space="preserve">
     <value />
   </data>
   <data name="performanceTitle.TabIndex" type="System.Int32, mscorlib">
     <value>4</value>
+  </data>
+  <data name="performanceTitle.Text" xml:space="preserve">
+    <value>资源页标题</value>
   </data>
   <data name="performanceTitle.Title" xml:space="preserve">
     <value>内存</value>
@@ -301,10 +310,10 @@
     <value>0, 0</value>
   </data>
   <data name="panelGrid.MinimumSize" type="System.Drawing.Size, System.Drawing">
-    <value>400, 200</value>
+    <value>0, 200</value>
   </data>
   <data name="panelGrid.Size" type="System.Drawing.Size, System.Drawing">
-    <value>476, 232</value>
+    <value>380, 213</value>
   </data>
   <data name="panelGrid.TabIndex" type="System.Int32, mscorlib">
     <value>7</value>
@@ -337,10 +346,10 @@
     <value>3, 4, 3, 4</value>
   </data>
   <data name="$this.MinimumSize" type="System.Drawing.Size, System.Drawing">
-    <value>400, 415</value>
+    <value>380, 415</value>
   </data>
   <data name="$this.Size" type="System.Drawing.Size, System.Drawing">
-    <value>476, 415</value>
+    <value>380, 415</value>
   </data>
   <data name="&gt;&gt;图形摘要视图ToolStripMenuItem.Name" xml:space="preserve">
     <value>图形摘要视图ToolStripMenuItem</value>
