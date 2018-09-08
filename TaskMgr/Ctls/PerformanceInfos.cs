@@ -10,9 +10,9 @@ namespace PCMgr.Ctls
         {
             brushText = new SolidBrush(Color.Black);
             brushTitle = new SolidBrush(Color.Gray);
-            FontTextSpeical = new Font("微软雅黑", 15);
-            FontText = new Font("微软雅黑", 10.5f);
-            FontTitle = new Font("微软雅黑", 10.5f);
+            FontTextSpeical = new Font("Microsoft YaHei UI", 15);
+            FontText = new Font("Microsoft YaHei UI", 10.5f);
+            FontTitle = new Font("Microsoft YaHei UI", 10.5f);
             MaxSpeicalItemsWidth = 200;
 
             SetStyle(ControlStyles.Selectable, true);

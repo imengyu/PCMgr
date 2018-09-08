@@ -250,6 +250,24 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 Do you want to change the priority of &quot;%s&quot;? 的本地化字符串。
+        /// </summary>
+        internal static string ChangePriorityAsk {
+            get {
+                return ResourceManager.GetString("ChangePriorityAsk", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Changing the priority of some process may lead to instability of the system. 的本地化字符串。
+        /// </summary>
+        internal static string ChangePriorityContent {
+            get {
+                return ResourceManager.GetString("ChangePriorityContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Can not change service start type. 的本地化字符串。
         /// </summary>
         internal static string ChangeScStartTypeFailed {
@@ -966,6 +984,15 @@ namespace PCMgr.Lanuages {
         internal static string IdleProcessDsb {
             get {
                 return ResourceManager.GetString("IdleProcessDsb", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Delay procedure call and interrupt service routine 的本地化字符串。
+        /// </summary>
+        internal static string InterruptsProcessDsb {
+            get {
+                return ResourceManager.GetString("InterruptsProcessDsb", resourceCulture);
             }
         }
         
@@ -2206,6 +2233,15 @@ namespace PCMgr.Lanuages {
         internal static string SystemIdleProcess {
             get {
                 return ResourceManager.GetString("SystemIdleProcess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 System interrupts 的本地化字符串。
+        /// </summary>
+        internal static string SystemInterrupts {
+            get {
+                return ResourceManager.GetString("SystemInterrupts", resourceCulture);
             }
         }
         

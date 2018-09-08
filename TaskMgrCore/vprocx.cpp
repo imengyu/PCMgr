@@ -108,7 +108,7 @@ BOOL FreeLibraryEx()
 	else if (hProcess) {
 		TCHAR address[128];
 		ListView_GetItemText(hListModuls, selectItem2, 2, address, 128);
-		long long moduleBaseAddr = MHexStrToLongW(address);
+		long long moduleBaseAddr = StringHlp::HexStrToLongW(address);
 		DWORD rs2 = NtUnmapViewOfSection(hProcess, (PVOID)moduleBaseAddr);
 		if (rs2 == 0)
 			return TRUE;
@@ -285,17 +285,19 @@ BOOL CALLBACK lpEnumFunc2(HWND hWnd, LPARAM lParam)
 	{
 		wchar_t txtn[50];
 		GetWindowText(hWnd, txtn, 50);
-		if (MStrEqual(txtn, L""))
+		if (StrEqual(txtn, L""))
 			return TRUE;
 
 		long l = GetWindowLong(hWnd, GWL_EXSTYLE);
 		long ls = GetWindowLong(hWnd, GWL_STYLE);
 		wchar_t clsn[50];
 		GetClassName(hWnd, clsn, 50);
-		if (MStrEqualW(clsn, L"ApplicationFrameWindow"))
+		if (StrEqual(clsn, L"ApplicationFrameWindow"))
 		{
 			//This is a uwp host window
-			if ((l & WS_EX_APPWINDOW) == WS_EX_APPWINDOW || (l & WS_EX_OVERLAPPEDWINDOW) == WS_EX_OVERLAPPEDWINDOW || (ls & WS_CAPTION) == WS_CAPTION)
+			if (((l & WS_EX_APPWINDOW) == WS_EX_APPWINDOW 
+				|| (l & WS_EX_OVERLAPPEDWINDOW) == WS_EX_OVERLAPPEDWINDOW
+				|| (ls & WS_CAPTION) == WS_CAPTION) && (l & WS_EX_NOACTIVATE) != WS_EX_NOACTIVATE)
 			{
 				PUWPWindow uwpWindow = (PUWPWindow)MAlloc(sizeof(UWPWindow));
 				uwpWindow->hWndHost = hWnd;
@@ -305,7 +307,7 @@ BOOL CALLBACK lpEnumFunc2(HWND hWnd, LPARAM lParam)
 				hUWPWins->push_back(uwpWindow);
 			}
 		}
-		else if (MStrEqualW(clsn, L"Windows.UI.Core.CoreWindow"))
+		else if (StrEqual(clsn, L"Windows.UI.Core.CoreWindow"))
 		{
 			//This is a broaked uwp window
 			if ((ls & WS_VISIBLE) == WS_VISIBLE)
@@ -332,7 +334,7 @@ BOOL CALLBACK lpEnumFunc3(HWND hWnd, LPARAM lParam)
 	{
 		WCHAR className[32];
 		GetClassName(hWnd, className, 32);
-		if (MStrEqual(className, L"Windows.UI.Core.CoreWindow"))
+		if (StrEqual(className, L"Windows.UI.Core.CoreWindow"))
 		{
 			PUWPWindow window = (PUWPWindow)lParam;
 			window->hWndCoreWindow = hWnd;
@@ -344,7 +346,7 @@ BOOL CALLBACK lpEnumFunc3(HWND hWnd, LPARAM lParam)
 	return TRUE;
 }
 
-M_API void MAppVProcessAllWindowsUWP()
+void MAppVProcessAllWindowsUWP()
 {
 	if (hGetWinsWinsCallBack) {
 		list<UWPWindow*>::iterator it;
@@ -360,7 +362,7 @@ M_API void MAppVProcessAllWindowsUWP()
 				for (iter = hUWPBrokedWins->begin(); iter != hUWPBrokedWins->end(); iter++)
 				{
 					GetWindowText((*iter), windowNameFind, 64);
-					if (MStrEqual(windowNameThis, windowNameFind))
+					if (StrEqual(windowNameThis, windowNameFind))
 					{
 						window->hWndCoreWindow = (*iter);
 						GetWindowThreadProcessId(window->hWndCoreWindow, &window->hostPid);
@@ -372,7 +374,7 @@ M_API void MAppVProcessAllWindowsUWP()
 		}
 	}
 }
-M_API BOOL MAppVProcessAllWindowsGetProcessWindow(DWORD pid)
+BOOL MAppVProcessAllWindowsGetProcessWindow(DWORD pid)
 {
 	if (hGetWinsWinsCallBack) 
 	{
@@ -392,7 +394,7 @@ M_API BOOL MAppVProcessAllWindowsGetProcessWindow(DWORD pid)
 	}
 	return FALSE;
 }
-M_API BOOL MAppVProcessAllWindowsGetProcessWindow2(DWORD pid)
+BOOL MAppVProcessAllWindowsGetProcessWindow2(DWORD pid)
 {
 	list<HWND>::iterator it;
 	for (it = hAllWins->begin(); it != hAllWins->end(); it++)
@@ -410,48 +412,25 @@ M_API BOOL MAppVProcessAllWindowsGetProcessWindow2(DWORD pid)
 	return TRUE;
 }
 
-M_API BOOL MAppVProcessMsg(DWORD dwPID, HWND hDlg, int type, LPWSTR procName)
-{
-	currentPid = static_cast<DWORD>(dwPID);	curretProcName = procName;
-	if (type == 1)
-		DialogBoxW(hInstRs, MAKEINTRESOURCE(IDD_VTHEADS), hDlg, VThreadsDlgProc);
-	else if (type == 2)
-		DialogBoxW(hInstRs, MAKEINTRESOURCE(IDD_VMODULS), hDlg, VModulsDlgProc);
-	else if (type == 3)
-		DialogBoxW(hInstRs, MAKEINTRESOURCE(IDD_VWINS), hDlg, VWinsDlgProc);
-	else return FALSE;
-
-	/*MSG msg;
-	while (GetMessage(&msg, hWnd, 0, 0))
-	{
-	TranslateMessage(&msg);
-	DispatchMessage(&msg);
-	}*/
-	return TRUE;
-}
-M_API BOOL MAppVProcessModuls(DWORD dwPID, HWND hDlg, LPWSTR procName)
+BOOL MAppVProcessModuls(DWORD dwPID, HWND hDlg, LPWSTR procName)
 {
 	currentPid = static_cast<DWORD>(dwPID);	curretProcName = procName;
 	DialogBoxW(hInstRs, MAKEINTRESOURCE(IDD_VMODULS), hDlg, VModulsDlgProc);
 	return TRUE;
 }
-M_API BOOL MAppVProcessThreads(DWORD dwPID, HWND hDlg, LPWSTR procName)
+BOOL MAppVProcessThreads(DWORD dwPID, HWND hDlg, LPWSTR procName)
 {
 	currentPid = static_cast<DWORD>(dwPID);	curretProcName = procName;
 	DialogBoxW(hInstRs, MAKEINTRESOURCE(IDD_VTHEADS), hDlg, VThreadsDlgProc);
 	return TRUE;
 }
-M_API BOOL MAppVProcessWindows(DWORD dwPID, HWND hDlg, LPWSTR procName)
+BOOL MAppVProcessWindows(DWORD dwPID, HWND hDlg, LPWSTR procName)
 {
 	currentPid = static_cast<DWORD>(dwPID);	curretProcName = procName;
 	DialogBoxW(hInstRs, MAKEINTRESOURCE(IDD_VWINS), hDlg, VWinsDlgProc);
 	return TRUE;
 }
-M_API BOOL MAppVProcess(HWND hWndParent)
-{
-	return ShowMainCore(hWndParent);
-}
-M_API BOOL MAppVProcessAllWindows()
+BOOL MAppVProcessAllWindows()
 {
 	for (auto it = hUWPWins->begin(); it != hUWPWins->end(); it++)
 		MFree(*it);
@@ -1081,7 +1060,7 @@ INT_PTR CALLBACK VWinsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 				{
 					WCHAR hwnd[32];
 					ListView_GetItemText(hListWins, ListView_GetSelectionMark(hListWins), 1, hwnd, 32);
-					selectItem3 = (HWND)LongToHandle(MHexStrToIntW(hwnd));
+					selectItem3 = (HWND)LongToHandle(StringHlp::HexStrToIntW(hwnd));
 					HMENU hroot = LoadMenu(hInstRs, MAKEINTRESOURCE(IDR_WINSMENU));
 					if (hroot) {
 						HMENU hpop = GetSubMenu(hroot, 0);
@@ -1128,13 +1107,13 @@ INT_PTR CALLBACK VWinsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 			case NM_CLICK: {
 				WCHAR hwnd[32];
 				ListView_GetItemText(hListWins, ListView_GetSelectionMark(hListWins), 1, hwnd, 32);
-				selectItem3 = (HWND)LongToHandle(MHexStrToIntW(hwnd));
+				selectItem3 = (HWND)LongToHandle(StringHlp::HexStrToIntW(hwnd));
 				break;
 			}
 			case NM_RCLICK:{
 				WCHAR hwnd[32];
 				ListView_GetItemText(hListWins, ListView_GetSelectionMark(hListWins), 1, hwnd, 32);
-				selectItem3 = (HWND)LongToHandle(MHexStrToIntW(hwnd));
+				selectItem3 = (HWND)LongToHandle(StringHlp::HexStrToIntW(hwnd));
 				HMENU hroot = LoadMenu(hInstRs, MAKEINTRESOURCE(IDR_WINSMENU));
 				if (hroot) {
 					HMENU hpop = GetSubMenu(hroot, 0);
@@ -1247,7 +1226,7 @@ INT_PTR CALLBACK VModulsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 			SetCursor(hCurLoading);
 			TCHAR path[MAX_PATH];
 			ListView_GetItemText(hListModuls, selectItem2, 1, path, MAX_PATH);
-			if (!MStrEqualW(path, L""))
+			if (!StrEqual(path, L""))
 			{
 				std::wstring buf = FormatString(L"/select,%s", path);
 				ShellExecuteW(NULL, NULL, L"explorer.exe", buf.c_str(), NULL, SW_SHOWDEFAULT);
@@ -1437,7 +1416,7 @@ INT_PTR CALLBACK VThreadsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPar
 		case ID_THREADMENU_OPENPATH:
 			TCHAR path[MAX_PATH];
 			ListView_GetItemText(hListThreads, ListView_GetSelectionMark(hListThreads), 5, path, MAX_PATH);
-			if (!MStrEqualW(path, L""))
+			if (!StrEqual(path, L""))
 			{
 				std::wstring buf = FormatString(L"/select,%s", path);
 				ShellExecuteW(NULL, NULL, L"explorer.exe", buf.c_str(), NULL, SW_SHOWDEFAULT);

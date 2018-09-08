@@ -12,6 +12,9 @@
 #include "vprocx.h"
 #include "cmdhlp.h"
 
+#include "MCpuInfoMonitor.h"
+#include "MSystemPerformanctMonitor.h"
+
 #include "..\PCMgrCmdRunner\PCMgrCmdRunnerEntry.h"
 
 HINSTANCE hInst;
@@ -54,7 +57,8 @@ void DllStartup() {
 	hCurLoading = LoadCursor(NULL, IDC_WAIT);
 	ShowMainCoreStartUp();
 	MPERF_GlobalInit();
-	MPERF_GetProcessNumber();
+	MSystemPerformanctMonitor::InitGlobal();
+
 	WindowEnumStart();
 	memory_statuex.dwLength = sizeof(memory_statuex);
 	staticCmdRunner = new MCmdRunner();
@@ -66,7 +70,10 @@ void DllDestroy() {
 	MProcessHANDLEStorageDestroy();
 	MUnInitKernelNTPDB();
 	MLG_SetLanuageItems_Destroy();
-	MPERF_FreeCpuInfos();
+
+	MSystemPerformanctMonitor::DestroyGlobal();
+	MCpuInfoMonitor::FreeCpuInfos();
+
 	MPERF_GlobalDestroy();
 	WindowEnumDestroy();
 	MUnInitMyDbgView();

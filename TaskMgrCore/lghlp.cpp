@@ -129,6 +129,9 @@ LPWSTR str_item_deatch_debugger_title;
 LPWSTR str_item_deatch_debugger_err;
 LPWSTR str_item_deatch_debugger_notdebug;
 
+LPWSTR str_item_ChangePriorityAsk;
+LPWSTR str_item_ChangePriorityContent;
+
 #define HASSTR(x) x=(LPWSTR)MAlloc(size*sizeof(WCHAR));wcscpy_s(x, size, msg)
 
 extern HINSTANCE hInst;
@@ -143,7 +146,7 @@ M_CAPI(void) MLG_SetLanuageItems_NoRealloc() {
 }
 M_CAPI(void) MLG_SetLanuageRes(LPWSTR appstarppath, LPWSTR name)
 {
-	if (!MStrEqualW(name, L"zh") && !MStrEqualW(name, L"zh-CN"))
+	if (!StrEqual(name, L"zh") && !StrEqual(name, L"zh-CN"))
 	{
 #if _X64_
 		std::wstring  s = FormatString(L"%s\\%s\\PCMgrApp64.resource2.dll", appDir, name);
@@ -251,6 +254,8 @@ void MLG_SetLanuageItems_Destroy()
 	delete str_item_deatch_debugger_title;
 	delete str_item_deatch_debugger_err;
 	delete str_item_deatch_debugger_notdebug;
+	delete str_item_ChangePriorityAsk;
+	delete str_item_ChangePriorityContent;
 }
 void MLG_SetLanuageItems_1(int id, LPWSTR msg, int size)
 {
@@ -345,6 +350,8 @@ void MLG_SetLanuageItems_2(int id, LPWSTR msg, int size)
 	case 29: HASSTR(str_item_deatch_debugger_title); break;
 	case 30: HASSTR(str_item_deatch_debugger_err); break;
 	case 31: HASSTR(str_item_deatch_debugger_notdebug); break;
+	case 32: HASSTR(str_item_ChangePriorityAsk); break;
+	case 33: HASSTR(str_item_ChangePriorityContent); break;
 	}
 
 

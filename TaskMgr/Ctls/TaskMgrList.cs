@@ -80,14 +80,12 @@ namespace PCMgr.Ctls
         {
             if (!b1)
             {
+                yOffest = ((VScrollBar)sender).Value - ((VScrollBar)sender).Minimum;
                 if (!m)
                 {
                     m = true;
                     t.Start();
-                    {
-                        yOffest = ((VScrollBar)sender).Value - ((VScrollBar)sender).Minimum;
-                        SyncItems(true);
-                    }
+                    SyncItems(true);                   
                 }
             }
         }
@@ -108,6 +106,10 @@ namespace PCMgr.Ctls
             {
                 selectedItem = null;
                 SelectItemChanged?.Invoke(this, EventArgs.Empty);
+            }
+            if(showedItems.Contains(obj))
+            {
+                showedItems.Remove(obj);
             }
         }
         private void Items_ItemAdd(TaskMgrListItem obj)
@@ -137,10 +139,10 @@ namespace PCMgr.Ctls
         private int yOffest = 0;
         private ImageList imageList;
         private int allItemHeight = 0;
-        private Font fnormalText = new Font("微软雅黑", 13f);
-        private Font fgroupText = new Font("微软雅黑", 13f);
-        private Font fnormalText2 = new Font("微软雅黑", 9f);
-        private Font fsmallText2 = new Font("微软雅黑", 8.5f);
+        private Font fnormalText = new Font("Microsoft YaHei UI", 13f);
+        private Font fgroupText = new Font("Microsoft YaHei UI", 13f);
+        private Font fnormalText2 = new Font("Microsoft YaHei UI", 9f);
+        private Font fsmallText2 = new Font("Microsoft YaHei UI", 8.5f);
         private SolidBrush bsmallText2 = new SolidBrush(Color.FromArgb(0xFF, 0x7F, 0x24));
         private TaskMgrListItem selectedItem = null;
         private TaskMgrListItem mouseenteredItem_ = null;
@@ -478,13 +480,13 @@ namespace PCMgr.Ctls
                 }
 
                 int currItemHeight = isChildItem ? smallItemHeight : itemHeight;
-                for (int i2 = 0; i2 < item.SubItems.Count && i2 < header.Items.Count; i2++)
+                for (int i2 = 0; i2 < item.SubItems.Count && i2 < header.SortedItems.Count; i2++)
                 {
-                    int x = header.Items[i2].X - xOffest;
-                    if (x <= rect.Right && x + header.Items[i2].Width > rect.Left)
+                    int x = header.SortedItems[i2].X - xOffest;
+                    if (x <= rect.Right && x + header.SortedItems[i2].Width > rect.Left)
                     {
                         Color bgcolor = item.SubItems[i2].BackColor;
-                        StringFormat f = header.Items[i2].AlignmentStringFormat;
+                        StringFormat f = header.SortedItems[i2].AlignmentStringFormat;
                         if (bgcolor.A != 0 && !(bgcolor.R == 255 && bgcolor.G == 255 && bgcolor.B == 255))
                         {
                             using (SolidBrush s = (selectedItem == item || mouseenteredItem == item) ?
@@ -492,19 +494,19 @@ namespace PCMgr.Ctls
                                 g.FillRectangle(s, x + 1, item.YPos - yOffest, header.Items[i2].Width - 1, currItemHeight);
                         }
 
-                        if (i2 > 0 && item.SubItems[i2].Text != "") g.DrawString(item.SubItems[i2].Text, item.SubItems[i2].Font, drawAsPausedGray ? Brushes.Gray : item.SubItems[i2].ForeColorSolidBrush, new Rectangle(x + 6, item.YPos - yOffest, header.Items[i2].Width - 10, currItemHeight), f);
+                        if (i2 > 0 && item.SubItems[i2].Text != "") g.DrawString(item.SubItems[i2].Text, item.SubItems[i2].Font, drawAsPausedGray ? Brushes.Gray : item.SubItems[i2].ForeColorSolidBrush, new Rectangle(x + 6, item.YPos - yOffest, header.SortedItems[i2].Width - 10, currItemHeight), f);
                         else if (i2 == 0)
                         {
                             if (item.DisplayChildCount)
                             {
-                                if (item.DisplayChildValue == 0) g.DrawString(item.Text + " (" + item.Childs.Count + ")", fnormalText2, item.SubItems[0].ForeColorSolidBrush, new Rectangle(x + (DrawIcon ? 63 : 25) + (isChildItem ? 5 : 0), item.YPos - yOffest, header.Items[0].Width - (DrawIcon ? 60 : 25) - (isChildItem ? 5 : 0), currItemHeight), f);
-                                else g.DrawString(item.Text + " (" + item.DisplayChildValue + ")", fnormalText2, item.SubItems[0].ForeColorSolidBrush, new Rectangle(x + (DrawIcon ? 63 : 25) + (isChildItem ? 5 : 0), item.YPos - yOffest, header.Items[0].Width - (DrawIcon ? 60 : 25) - (isChildItem ? 5 : 0), currItemHeight), f);
+                                if (item.DisplayChildValue == 0) g.DrawString(item.Text + " (" + item.Childs.Count + ")", fnormalText2, item.SubItems[0].ForeColorSolidBrush, new Rectangle(x + (DrawIcon ? 63 : 25) + (isChildItem ? 5 : 0), item.YPos - yOffest, header.SortedItems[0].Width - (DrawIcon ? 60 : 25) - (isChildItem ? 5 : 0), currItemHeight), f);
+                                else g.DrawString(item.Text + " (" + item.DisplayChildValue + ")", fnormalText2, item.SubItems[0].ForeColorSolidBrush, new Rectangle(x + (DrawIcon ? 63 : 25) + (isChildItem ? 5 : 0), item.YPos - yOffest, header.SortedItems[0].Width - (DrawIcon ? 60 : 25) - (isChildItem ? 5 : 0), currItemHeight), f);
                             }
-                            else g.DrawString(item.Text, fnormalText2, item.SubItems[0].ForeColorSolidBrush, new Rectangle(x + (DrawIcon ? 63 : 25) + (isChildItem ? 5 : 0), item.YPos - yOffest, header.Items[0].Width - (DrawIcon ? 60 : 25) - (isChildItem ? 5 : 0), currItemHeight), f);
+                            else g.DrawString(item.Text, fnormalText2, item.SubItems[0].ForeColorSolidBrush, new Rectangle(x + (DrawIcon ? 63 : 25) + (isChildItem ? 5 : 0), item.YPos - yOffest, header.SortedItems[0].Width - (DrawIcon ? 60 : 25) - (isChildItem ? 5 : 0), currItemHeight), f);
                         }
 
                         if (drawAsPausedIcon && i2 == item.DrawUWPPausedIconIndex)
-                            g.DrawImage(PauseUwpIco, new Rectangle(x + header.Items[i2].Width - PauseUwpIco.Width - 2, item.YPos - yOffest + (isChildItem ? -2 : 2), PauseUwpIco.Width, PauseUwpIco.Height));
+                            g.DrawImage(PauseUwpIco, new Rectangle(x + header.SortedItems[i2].Width - PauseUwpIco.Width - 2, item.YPos - yOffest + (isChildItem ? -2 : 2), PauseUwpIco.Width, PauseUwpIco.Height));
                     }
                     else if (x > rect.Right) break;
                 }
@@ -584,27 +586,27 @@ namespace PCMgr.Ctls
             {
                 //draw lines
                 bool isFirstLine = true;
-                for (int i = 0; i < header.Items.Count; i++)
+                for (int i = 0; i < header.SortedItems.Count; i++)
                 {
-                    int x = header.Items[i].X - xOffest;
-                    int xw = x + header.Items[i].Width;
+                    int x = header.SortedItems[i].X - xOffest;
+                    int xw = x + header.SortedItems[i].Width;
                     if (x < r.Right && xw > 0)
                     {
-                        if (header.Items[i].IsNum)
+                        if (header.SortedItems[i].IsNum)
                         {
                             if (isFirstLine)
                             {
-                                if (header.Items[i].IsHot) g.DrawLine(hotLineColorPen, x, r.Top, x, r.Bottom);
+                                if (header.SortedItems[i].IsHot) g.DrawLine(hotLineColorPen, x, r.Top, x, r.Bottom);
                                 else g.DrawLine(defLineColorPen, x, r.Top, x, r.Bottom);
                                 isFirstLine = false;
                             }
-                            if (header.Items[i].IsHot)
+                            if (header.SortedItems[i].IsHot)
                             {
                                 g.DrawLine(hotLineColorPen, x, r.Top, x, r.Bottom);
                                 g.DrawLine(hotLineColorPen, xw, r.Top, xw, r.Bottom);
                             }
                             else g.DrawLine(defLineColorPen, xw, r.Top, xw, r.Bottom);
-                            g.FillRectangle(defBgSolidBrush, x + 2, r.Top, header.Items[i].Width - 2, r.Height);
+                            g.FillRectangle(defBgSolidBrush, x + 2, r.Top, header.SortedItems[i].Width - 2, r.Height);
                         }
                     }
                     else if (x >= r.Right) break;

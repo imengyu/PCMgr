@@ -55,8 +55,8 @@ namespace PCMgr.Ctls
         private IntPtr hThemeListView = IntPtr.Zero;
         private bool m = false;
         private Timer t;
-        private Font hugeTextFont = new Font("微软雅黑", 10.5f);
-        private Font smallTextFont = new Font("微软雅黑", 9f);
+        private Font hugeTextFont = new Font("Microsoft YaHei UI", 10.5f);
+        private Font smallTextFont = new Font("Microsoft YaHei UI", 9f);
         private PerformanceListItemCollection items = null;
         private int yOffest = 0;
         private int allItemHeight = 0;

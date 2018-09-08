@@ -5,6 +5,7 @@
 #include "loghlp.h"
 #include "mapphlp.h"
 #include "PathHelper.h"
+#include "StringHlp.h"
 
 BOOL _Is64BitOS = -1;
 BOOL _IsRunasAdmin = -1;
@@ -288,7 +289,7 @@ M_CAPI(BOOL) MGetNtosAndWin32kfullNameAndStartAddress(LPWSTR name, size_t buffer
 		//System Modules
 		PSYSTEM_MODULE_INFORMATION SystemModuleInfo = (PSYSTEM_MODULE_INFORMATION)((PULONG)&pSysModuleNames->smi[0]);
 			//Find ntoskrnl
-		LPWSTR strw = MConvertLPCSTRToLPWSTR(SystemModuleInfo->ImageName);
+		LPWSTR strw = A2W(SystemModuleInfo->ImageName);
 		std::wstring *s = Path::GetFileName(strw);
 		if (name)wcscpy_s(name, buffersize, s->c_str());
 		if (address)*address = (ULONG_PTR)SystemModuleInfo->Base;
@@ -299,7 +300,7 @@ M_CAPI(BOOL) MGetNtosAndWin32kfullNameAndStartAddress(LPWSTR name, size_t buffer
 		//And then , find win32k.sys
 		for (int i = 2; i < allModulesCount; i++) {
 			SystemModuleInfoThis = (PSYSTEM_MODULE_INFORMATION)((PULONG)&pSysModuleNames->smi[i]);
-			if (MStrEqualA(SystemModuleInfoThis->ImageName, "\\SystemRoot\\System32\\win32k.sys"))
+			if (StringHlp::StrEqualA(SystemModuleInfoThis->ImageName, "\\SystemRoot\\System32\\win32k.sys"))
 				if (win32kfulladdress)
 					*win32kfulladdress = (ULONG_PTR)SystemModuleInfoThis->Base;
 		}

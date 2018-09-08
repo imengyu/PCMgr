@@ -21,6 +21,20 @@ namespace PCMgr
         public const string Copyright = "Copyright (C) 2018 DreamFish";
         public const string Key = "The key is TryCallThis api";
 
+        public static IntPtr Nullptr = new IntPtr(0);
+
+        public static IntPtr True = new IntPtr(1);
+        public static IntPtr False = Nullptr;
+
+        public static IntPtr BoolToIntPtr(bool b)
+        {
+            return b ? True : False;
+        }
+        public static bool IntPtrToBool(IntPtr ptr)
+        {
+            return ptr != Nullptr;
+        }
+
         public static class Win32
         {
             //Win32 api
@@ -209,6 +223,62 @@ namespace PCMgr
 
         #region Main Api
 
+        public static class CSCall
+        {
+            public const int M_CALLBACK_SWITCH_MAINGROUP_SET = 4;
+            public const int M_CALLBACK_SWITCH_REFESHRATE_SET = 5;
+            public const int M_CALLBACK_SWITCH_TOPMOST_SET = 6;
+            public const int M_CALLBACK_SWITCH_CLOSEHIDE_SET = 7;
+            public const int M_CALLBACK_SWITCH_MINHIDE_SET = 8;
+            public const int M_CALLBACK_GOTO_SERVICE = 9;
+            public const int M_CALLBACK_REFESH_SCLIST = 10;
+            public const int M_CALLBACK_KILLPROCTREE = 11;
+            public const int M_CALLBACK_SPY_TOOL = 12;
+            public const int M_CALLBACK_FILE_TOOL = 13;
+            public const int M_CALLBACK_ABOUT = 14;
+            public const int M_CALLBACK_ENDTASK = 15;
+            public const int M_CALLBACK_LOADDRIVER_TOOL = 16;
+            public const int M_CALLBACK_SCITEM_REMOVED = 17;
+            public const int M_CALLBACK_SHOW_PROGRESS_DLG = 18;
+            public const int M_CALLBACK_UPDATE_PROGRESS_DLG_TO_DELETEING = 19;
+            public const int M_CALLBACK_UPDATE_PROGRESS_DLG_ALL = 20;
+            public const int M_CALLBACK_UPDATE_PROGRESS_DLG_TO_COLLECTING = 21;
+            public const int M_CALLBACK_KERNEL_INIT = 22;
+            public const int M_CALLBACK_VIEW_HANDLES = 23;
+            public const int M_CALLBACK_KERNEL_INIT_LIST = 24;
+            public const int M_CALLBACK_KERNEL_SWITCH_SHOWALLDRV = 25;
+            public const int M_CALLBACK_START_ITEM_REMVED = 26;
+            public const int M_CALLBACK_VIEW_KSTRUCTS = 27;
+            public const int M_CALLBACK_VIEW_TIMER = 28;
+            public const int M_CALLBACK_VIEW_HOTKEY = 29;
+            public const int M_CALLBACK_SHOW_TRUSTED_DLG = 30;
+            public const int M_CALLBACK_MDETALS_LIST_HEADER_RIGHTCLICK = 31;
+            public const int M_CALLBACK_KDA = 32;
+            public const int M_CALLBACK_SETAFFINITY = 33;
+            public const int M_CALLBACK_UPDATE_LOAD_STATUS = 34;
+            public const int M_CALLBACK_SHOW_NOPDB_WARN = 35;
+            public const int M_CALLBACK_INVOKE_LASTLOAD_STEP = 36;
+            public const int M_CALLBACK_DBGPRINT_SHOW = 37;
+            public const int M_CALLBACK_DBGPRINT_CLOSE = 38;
+            public const int M_CALLBACK_DBGPRINT_DATA = 39;
+            public const int M_CALLBACK_DBGPRINT_EMEPTY = 40;
+            public const int M_CALLBACK_SHOW_LOAD_STATUS = 41;
+            public const int M_CALLBACK_HLDE_LOAD_STATUS = 42;
+            public const int M_CALLBACK_MDETALS_LIST_HEADER_MOUSEMOVE = 43;
+
+            public const int M_CALLBACK_KERNEL_VIELL_PRGV = 51;
+            public const int M_CALLBACK_KERNEL_TOOL = 52;
+            public const int M_CALLBACK_HOOKS = 53;
+            public const int M_CALLBACK_NETMON = 54;
+            public const int M_CALLBACK_REGEDIT = 55;
+            public const int M_CALLBACK_FILEMGR = 56;
+            public const int M_CALLBACK_COLLAPSE_ALL = 57;
+            public const int M_CALLBACK_SIMPLEVIEW_ACT = 58;
+            public const int M_CALLBACK_UWPKILL = 59;
+            public const int M_CALLBACK_EXPAND_ALL = 60;
+        }
+
+
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void WORKERCALLBACK(int msg, IntPtr lParam, IntPtr wParam);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
@@ -263,17 +333,23 @@ namespace PCMgr
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern bool MGetPrivileges2();
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool MAppKillOld([MarshalAs(UnmanagedType.LPWStr)]string procname);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr MAppSetCallBack(IntPtr ptr, int id);
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern void MAppWorkCall2(uint msg, IntPtr wParam, IntPtr lParam);
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern int MAppWorkCall3(int id, IntPtr hWnd, IntPtr data);
+        public static int MAppWorkCall3(int id)
+        {
+            return MAppWorkCall3(id, Nullptr, Nullptr);
+        }
+        public static int MAppWorkCall3(int id, IntPtr hWnd)
+        {
+            return MAppWorkCall3(id, hWnd, Nullptr);
+        }
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr MAppWorkCall4(int id, IntPtr hWnd, IntPtr data);
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr MAppWorkCall5(int id, IntPtr hWnd, IntPtr data1, IntPtr data2, IntPtr data3);  
+        public static extern IntPtr MAppWorkCall5(int id, IntPtr hWnd, IntPtr data1, IntPtr data2, IntPtr data3);
 
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern void MAppExit();
@@ -294,8 +370,11 @@ namespace PCMgr
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern void MLG_SetLanuageItems_CanRealloc();
 
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern int MAppRegShowHotKey(IntPtr hWnd, uint vkkey, uint key);
+        public static int MAppRegShowHotKey(IntPtr hWnd, uint vkkey, uint key)
+        {
+            return MAppWorkCall5(55, hWnd, new IntPtr(vkkey), new IntPtr(key), Nullptr).ToInt32();
+        }
+
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern bool MFM_FileExist([MarshalAs(UnmanagedType.LPWStr)]string path);
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
@@ -306,9 +385,12 @@ namespace PCMgr
         [UnmanagedFunctionPointer(CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public delegate string LanuageItems_CallBack([MarshalAs(UnmanagedType.LPWStr)]string s);
 
-        [return: MarshalAs(UnmanagedType.LPWStr)]
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern string MAppGetCurSelectName();
+        public static string MAppGetCurSelectName()
+        {
+            IntPtr strptr = MAppWorkCall4(101, IntPtr.Zero, IntPtr.Zero);
+            return Marshal.PtrToStringUni(strptr);
+        }
+
         [return: MarshalAs(UnmanagedType.LPWStr)]
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern string MNtStatusToStr(int ntstatus);
@@ -378,7 +460,7 @@ namespace PCMgr
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern bool MCommandLineToFilePath(string pszFullPath, StringBuilder b, int maxcount);
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int MGetProcessState(IntPtr system_process, IntPtr hwnd);
+        public static extern int MGetProcessState(IntPtr processItem, IntPtr hwnd);
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern bool MGetProcessEprocess(uint pid, ref PEOCESSKINFO infoStruct);
 
@@ -390,14 +472,74 @@ namespace PCMgr
         public static extern bool MGetExeCompany(string pszFullPath, StringBuilder b, int maxcount);
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern IntPtr MGetExeIcon(string pszFullPath);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int MAppWorkShowMenuProcess([MarshalAs(UnmanagedType.LPWStr)]string strFilePath, [MarshalAs(UnmanagedType.LPWStr)]string strFileName, uint pid, IntPtr hWnd, IntPtr selectedhWnd, int data, int type, int x, int y);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int MAppWorkShowMenuProcessPrepare([MarshalAs(UnmanagedType.LPWStr)]string strFilePath, [MarshalAs(UnmanagedType.LPWStr)]string strFileName, uint pid, bool isimporant, bool isveryimporant);
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+        public struct SHOWMENUPROC
+        {
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
+            public string FilePath;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
+            public string FileName;
+            public uint Pid;
+            public IntPtr hWnd;
+            public IntPtr selectedhWnd;
+            public int data;
+            public int type;
+            public int x;
+            public int y;
+        }
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+        public struct SHOWMENUPROCPPER
+        {
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
+            public string FilePath;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
+            public string FileName;
+            public uint Pid;
+            public bool IsImporant;
+            public bool IsVeryImporant;
+        }
+
+        public static int MAppWorkShowMenuProcess(string strFilePath, string strFileName, uint pid, IntPtr hWnd, IntPtr selectedhWnd, int data, int type, int x, int y)
+        {
+            SHOWMENUPROC sHOWMENUPROC = new SHOWMENUPROC();
+            sHOWMENUPROC.FilePath = strFilePath;
+            sHOWMENUPROC.FileName = strFileName;
+            sHOWMENUPROC.Pid = pid;
+            sHOWMENUPROC.hWnd = hWnd;
+            sHOWMENUPROC.selectedhWnd = selectedhWnd;
+            sHOWMENUPROC.type = type;
+            sHOWMENUPROC.data = data;
+            sHOWMENUPROC.x = x;
+            sHOWMENUPROC.y = y;
+
+            IntPtr structBuffer = Marshal.AllocHGlobal(Marshal.SizeOf(sHOWMENUPROC));
+            Marshal.StructureToPtr(sHOWMENUPROC, structBuffer, false);
+            int rs = MAppWorkCall3(221, structBuffer);
+            Marshal.FreeHGlobal(structBuffer);
+
+            return rs;
+        }
+        public static int MAppWorkShowMenuProcessPrepare(string strFilePath, string strFileName, uint pid, bool isimporant, bool isveryimporant)
+        {
+            SHOWMENUPROCPPER sHOWMENUPROCPPER = new SHOWMENUPROCPPER();
+            sHOWMENUPROCPPER.FileName = strFileName;
+            sHOWMENUPROCPPER.FilePath = strFilePath;
+            sHOWMENUPROCPPER.Pid = pid;
+            sHOWMENUPROCPPER.IsImporant = isimporant;
+            sHOWMENUPROCPPER.IsVeryImporant = isveryimporant;
+
+            IntPtr structBuffer = Marshal.AllocHGlobal(Marshal.SizeOf(sHOWMENUPROCPPER));
+            Marshal.StructureToPtr(sHOWMENUPROCPPER, structBuffer, false);
+            int rs = MAppWorkCall3(220, structBuffer);
+            Marshal.FreeHGlobal(structBuffer);
+
+            return rs;
+        }
 
         public static bool MKillProcessUser2(uint pid, bool showErr, bool ignoreTerminateing)
         {
-            return MAppWorkCall5(50, IntPtr.Zero, new IntPtr(pid), new IntPtr(showErr ? 1 : 0), new IntPtr(ignoreTerminateing ? 1 : 0)).ToInt32() == 1;
+            return IntPtrToBool(MAppWorkCall5(50, Nullptr, new IntPtr(pid), BoolToIntPtr(showErr), BoolToIntPtr(ignoreTerminateing)));
         }
 
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
@@ -417,10 +559,16 @@ namespace PCMgr
         public static extern bool MEnumProcess2(IntPtr callback);
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern void MEnumProcessFree();
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool MAppVProcessAllWindowsGetProcessWindow(uint pid);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool MAppVProcessAllWindowsGetProcessWindow2(uint pid);
+
+        public static bool MAppVProcessAllWindowsGetProcessWindow(uint pid)
+        {
+            return MAppWorkCall3(218, new IntPtr(pid)) == 1;
+        }
+        public static bool MAppVProcessAllWindowsGetProcessWindow2(uint pid)
+        {
+            return MAppWorkCall3(219, new IntPtr(pid)) == 1;
+        }
+
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern bool MCloseHandle(IntPtr handle);
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
@@ -444,8 +592,11 @@ namespace PCMgr
         public static extern bool MGetUWPPackageId(IntPtr handle, IntPtr data);
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern bool MGetUWPPackageFullName(IntPtr handle, ref int len, StringBuilder buf);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void MAppVProcessAllWindowsUWP();
+
+        public static void MAppVProcessAllWindowsUWP()
+        {
+            MAppWorkCall3(217);
+        }
 
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern uint MGetProcessSessionID(IntPtr handle);
@@ -477,37 +628,17 @@ namespace PCMgr
 
         #region PERF API
 
-        public static int M_GET_PROCMEM_WORKINGSET = 0;
-        public static int M_GET_PROCMEM_WORKINGSETPRIVATE = 1;
-        public static int M_GET_PROCMEM_WORKINGSETSHARE = 2;
-        public static int M_GET_PROCMEM_PEAKWORKINGSET = 3;
-        public static int M_GET_PROCMEM_COMMITEDSIZE = 4;
-        public static int M_GET_PROCMEM_NONPAGEDPOOL = 5;
-        public static int M_GET_PROCMEM_PAGEDPOOL = 6;
-        public static int M_GET_PROCMEM_PAGEDFAULT = 7;
-
-        public static int M_GET_PROCIO_READ = 0;
-        public static int M_GET_PROCIO_WRITE = 1;
-        public static int M_GET_PROCIO_OTHER = 2;
-        public static int M_GET_PROCIO_READ_BYTES = 3;
-        public static int M_GET_PROCIO_WRITE_BYTES = 4;
-        public static int M_GET_PROCIO_OTHER_BYTES = 5;
-
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern UInt32 MPERF_GetProcessMemoryInfo(IntPtr p, int col);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern UInt64 MPERF_GetProcessIOInfo(IntPtr p, int col);
-
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern UInt64 MPERF_GetProcessCpuTime(IntPtr p);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern UInt64 MPERF_GetProcessCycle(IntPtr p);
-
         //3 get value
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern double MPERF_GetCupUseAge();
+        public static extern double MPERF_GetCpuUseAge();
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern double MPERF_GetCupUseAgeUserTime();
+        public static extern double MPERF_GetCpuUseAge2();
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern double MPERF_GetCpuUseAgeKernel();
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern double MPERF_GetCpuUseAgeUser();
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern double MPERF_GetCpuUseAgeUser2();
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern double MPERF_GetRamUseAge2();
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
@@ -515,9 +646,9 @@ namespace PCMgr
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern double MPERF_GetNetWorkUseage();
 
-        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern ulong MPERF_GetAllRam();
-        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern ulong MPERF_GetRamUsed();
 
         //3
@@ -530,23 +661,8 @@ namespace PCMgr
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern bool MPERF_GlobalUpdatePerformanceCounters();
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void MPERF_CpuTimeUpdate();
-
-        //perfdata
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr MPERF_PerfDataCreate();
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void MPERF_PerfDataDestroy(IntPtr data);
-
-        //process performance
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern uint MPERF_GetProcessRam(IntPtr handle, IntPtr hProcess);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern double MPERF_GetProcessCpuUseAge(IntPtr handle, IntPtr perfdata);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern ulong MPERF_GetProcessDiskRate(IntPtr handle, IntPtr perfdata);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern ulong MPERF_GetProcessNetWorkRate(uint pid, IntPtr perfdata);
+        public static extern bool MPERF_GlobalUpdateCpu();
+        
 
         //Network     
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
@@ -597,6 +713,8 @@ namespace PCMgr
         public static extern double MPERF_GetNetworksPerformanceCountersSimpleValues(IntPtr data);
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern IntPtr MPERF_GetNetworksPerformanceCounterWithName([MarshalAs(UnmanagedType.LPWStr)]string name);
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern UInt64 MPERF_GetProcessNetworkSpeed(IntPtr processItem);
 
         #endregion
 
@@ -645,10 +763,22 @@ namespace PCMgr
         public static extern IntPtr MFM_GetMyComputerName();
         [DllImport(COREDLLNAME, EntryPoint = "MFM_OpenFile", CallingConvention = CallingConvention.Cdecl)]
         public static extern bool MFM_OpenFile([MarshalAs(UnmanagedType.LPWStr)] string filePath, IntPtr hWnd);
-        [DllImport(COREDLLNAME, EntryPoint = "MAppWorkShowMenuFM", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int MAppWorkShowMenuFM([MarshalAs(UnmanagedType.LPWStr)] string filePath, bool mutilSelect, int selectCount);
-        [DllImport(COREDLLNAME, EntryPoint = "MAppWorkShowMenuFMF", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int MAppWorkShowMenuFMF([MarshalAs(UnmanagedType.LPWStr)] string filePath);
+
+        public static int MAppWorkShowMenuFM([MarshalAs(UnmanagedType.LPWStr)] string filePath, bool mutilSelect, int selectCount)
+        {
+            IntPtr strPtrfilePath = Marshal.StringToHGlobalUni(filePath);
+            int rs = MAppWorkCall5(53, Nullptr, strPtrfilePath, BoolToIntPtr(mutilSelect), new IntPtr(selectCount)).ToInt32();
+            Marshal.FreeHGlobal(strPtrfilePath);
+            return rs;
+        }
+        public static int MAppWorkShowMenuFMF([MarshalAs(UnmanagedType.LPWStr)] string filePath)
+        {
+            IntPtr strPtrfilePath = Marshal.StringToHGlobalUni(filePath);
+            int rs = MAppWorkCall5(54, Nullptr, strPtrfilePath, Nullptr, Nullptr).ToInt32();
+            Marshal.FreeHGlobal(strPtrfilePath);
+            return rs;
+        }
+
         [DllImport(COREDLLNAME, EntryPoint = "MFM_IsValidateFolderFileName", CallingConvention = CallingConvention.Cdecl)]
         public static extern bool MFM_IsValidateFolderFileName([MarshalAs(UnmanagedType.LPWStr)] string name);
         [DllImport(COREDLLNAME, EntryPoint = "MFM_CreateDir", CallingConvention = CallingConvention.Cdecl)]
@@ -916,15 +1046,12 @@ namespace PCMgr
             [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
             public static extern bool MDEVICE_GetNetworkAdapterInfoItem(int index, StringBuilder name, int bufferSize);
 
-
-
             public static bool MDEVICE_GetNetworkAdapterIsWIFI(string name)
             {
                 if (name != null && (name.ToLower().Contains("wifi") || name.ToLower().Contains("wireless lan") || name.Contains("wi-fi")))
                     return true;
                 return false;
             }
-
             public static string MDEVICE_MemoryFormFactorToString(UInt16 _formFactor)
             {
                 string formFactor = string.Empty;
@@ -1033,59 +1160,151 @@ namespace PCMgr
             public static extern void MListViewProcListLock(bool locked);
         }
 
-        public static class CSCall
+        public static class MCpuInfoMonitor
         {
-            public const int M_CALLBACK_SWITCH_MAINGROUP_SET = 4;
-            public const int M_CALLBACK_SWITCH_REFESHRATE_SET = 5;
-            public const int M_CALLBACK_SWITCH_TOPMOST_SET = 6;
-            public const int M_CALLBACK_SWITCH_CLOSEHIDE_SET = 7;
-            public const int M_CALLBACK_SWITCH_MINHIDE_SET = 8;
-            public const int M_CALLBACK_GOTO_SERVICE = 9;
-            public const int M_CALLBACK_REFESH_SCLIST = 10;
-            public const int M_CALLBACK_KILLPROCTREE = 11;
-            public const int M_CALLBACK_SPY_TOOL = 12;
-            public const int M_CALLBACK_FILE_TOOL = 13;
-            public const int M_CALLBACK_ABOUT = 14;
-            public const int M_CALLBACK_ENDTASK = 15;
-            public const int M_CALLBACK_LOADDRIVER_TOOL = 16;
-            public const int M_CALLBACK_SCITEM_REMOVED = 17;
-            public const int M_CALLBACK_SHOW_PROGRESS_DLG = 18;
-            public const int M_CALLBACK_UPDATE_PROGRESS_DLG_TO_DELETEING = 19;
-            public const int M_CALLBACK_UPDATE_PROGRESS_DLG_ALL = 20;
-            public const int M_CALLBACK_UPDATE_PROGRESS_DLG_TO_COLLECTING = 21;
-            public const int M_CALLBACK_KERNEL_INIT = 22;
-            public const int M_CALLBACK_VIEW_HANDLES = 23;
-            public const int M_CALLBACK_KERNEL_INIT_LIST = 24;
-            public const int M_CALLBACK_KERNEL_SWITCH_SHOWALLDRV = 25;
-            public const int M_CALLBACK_START_ITEM_REMVED = 26;
-            public const int M_CALLBACK_VIEW_KSTRUCTS = 27;
-            public const int M_CALLBACK_VIEW_TIMER = 28;
-            public const int M_CALLBACK_VIEW_HOTKEY = 29;
-            public const int M_CALLBACK_SHOW_TRUSTED_DLG = 30;
-            public const int M_CALLBACK_MDETALS_LIST_HEADER_RIGHTCLICK = 31;
-            public const int M_CALLBACK_KDA = 32;
-            public const int M_CALLBACK_SETAFFINITY = 33;
-            public const int M_CALLBACK_UPDATE_LOAD_STATUS = 34;
-            public const int M_CALLBACK_SHOW_NOPDB_WARN = 35;
-            public const int M_CALLBACK_INVOKE_LASTLOAD_STEP = 36;
-            public const int M_CALLBACK_DBGPRINT_SHOW = 37;
-            public const int M_CALLBACK_DBGPRINT_CLOSE = 38;
-            public const int M_CALLBACK_DBGPRINT_DATA = 39;
-            public const int M_CALLBACK_DBGPRINT_EMEPTY = 40;
-            public const int M_CALLBACK_SHOW_LOAD_STATUS = 41;
-            public const int M_CALLBACK_HLDE_LOAD_STATUS = 42;
-            public const int M_CALLBACK_MDETALS_LIST_HEADER_MOUSEMOVE = 43;
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetCpuL1Cache@MCpuInfoMonitor@@SAKXZ")]
+            public static extern uint GetCpuL1Cache();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetCpuL2Cache@MCpuInfoMonitor@@SAKXZ")]
+            public static extern uint GetCpuL2Cache();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetCpuL3Cache@MCpuInfoMonitor@@SAKXZ")]
+            public static extern uint GetCpuL3Cache();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetCpuPackage@MCpuInfoMonitor@@SAKXZ")]
+            public static extern uint GetCpuPackage();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetCpuNodeCount@MCpuInfoMonitor@@SAKXZ")]
+            public static extern uint GetCpuNodeCount();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetCpuInfos@MCpuInfoMonitor@@SAHXZ")]
+            public static extern bool GetCpuInfos();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetCpuName@MCpuInfoMonitor@@SAHPA_WH@Z", CharSet = CharSet.Unicode)]
+            public static extern bool GetCpuName(StringBuilder buf, int size);
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetCpuFrequency@MCpuInfoMonitor@@SAHXZ")]
+            public static extern int GetCpuFrequency();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetProcessorNumber@MCpuInfoMonitor@@SAHXZ")]
+            public static extern int GetProcessorNumber();
+        }
+        public static class MSystemMemoryPerformanctMonitor
+        {
+            [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+            public struct SYSTEM_COMPRESSION_INFO
+            {
+                public UInt32 Version;
+                public UInt32 CompressionPid;
+                public UInt64 CompressionWorkingSetSize;
+                public UInt64 CompressSize;
+                public UInt64 CompressedSize;
+                public UInt64 NonCompressedSize;
+            }
 
-            public const int M_CALLBACK_KERNEL_VIELL_PRGV = 51;
-            public const int M_CALLBACK_KERNEL_TOOL = 52;
-            public const int M_CALLBACK_HOOKS = 53;
-            public const int M_CALLBACK_NETMON = 54;
-            public const int M_CALLBACK_REGEDIT = 55;
-            public const int M_CALLBACK_FILEMGR = 56;
-            public const int M_CALLBACK_COLLAPSE_ALL = 57;
-            public const int M_CALLBACK_SIMPLEVIEW_ACT = 58;
-            public const int M_CALLBACK_UWPKILL = 59;
-            public const int M_CALLBACK_EXPAND_ALL = 60;
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetAllMemory@MSystemMemoryPerformanctMonitor@@SA_KXZ")]
+            public static extern UInt64 GetAllMemory();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetKernelPaged@MSystemMemoryPerformanctMonitor@@SA_KXZ")]
+            public static extern UInt64 GetKernelPaged();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetKernelNonpaged@MSystemMemoryPerformanctMonitor@@SA_KXZ")]
+            public static extern UInt64 GetKernelNonpaged();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetSystemCacheSize@MSystemMemoryPerformanctMonitor@@SA_KXZ")]
+            public static extern UInt64 GetSystemCacheSize();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetCommitTotal@MSystemMemoryPerformanctMonitor@@SA_KXZ")]
+            public static extern UInt64 GetCommitTotal();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetCommitLimit@MSystemMemoryPerformanctMonitor@@SA_KXZ")]
+            public static extern UInt64 GetCommitLimit();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetMemoryAvail@MSystemMemoryPerformanctMonitor@@SA_KXZ")]
+            public static extern UInt64 GetMemoryAvail();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetMemoryUsed@MSystemMemoryPerformanctMonitor@@SA_KXZ")]
+            public static extern UInt64 GetMemoryUsed();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetMemoryAvailPageFile@MSystemMemoryPerformanctMonitor@@SA_KXZ")]
+            public static extern UInt64 GetMemoryAvailPageFile();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetMemoryUsage@MSystemMemoryPerformanctMonitor@@SANXZ")]
+            public static extern double GetMemoryUsage();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetStandBySize@MSystemMemoryPerformanctMonitor@@SA_KXZ")]
+            public static extern UInt64 GetStandBySize();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetModifiedSize@MSystemMemoryPerformanctMonitor@@SA_KXZ")]
+            public static extern UInt64 GetModifiedSize();
+
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetMemoryCompressionInfo@MSystemMemoryPerformanctMonitor@@SAHPAU_PROCESS_COMPRESSION_INFO@@@Z")]
+            public static extern bool GetMemoryCompressionInfo(ref SYSTEM_COMPRESSION_INFO outInfo);
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?UpdateMemoryListInfo@MSystemMemoryPerformanctMonitor@@SAHXZ")]
+            public static extern bool UpdateMemoryListInfo();
+        }
+        public static class MSystemPerformanctMonitor
+        {
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetThreadCount@MSystemPerformanctMonitor@@SAKXZ")]
+            public static extern uint GetThreadCount();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetHandleCount@MSystemPerformanctMonitor@@SAKXZ")]
+            public static extern uint GetHandleCount();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetProcessCount@MSystemPerformanctMonitor@@SAKXZ")]
+            public static extern uint GetProcessCount();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetPageSize@MSystemPerformanctMonitor@@SAKXZ")]
+            public static extern uint GetPageSize();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetCpuCount@MSystemPerformanctMonitor@@SAKXZ")]
+            public static extern uint GetCpuCount();
+
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetSystemRunTime@MSystemPerformanctMonitor@@SA_KXZ")]
+            public static extern UInt64 GetSystemRunTime();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?UpdatePerformance@MSystemPerformanctMonitor@@SAHXZ")]
+            public static extern bool UpdatePerformance();
+        }
+        public static class MProcessMonitor
+        {
+            [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+            public delegate bool ProcessMonitorUpdateNotIncludeItemCallBack(uint pid);
+            [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+            public delegate void ProcessMonitorRemoveItemCallBack(uint pid);
+            [UnmanagedFunctionPointer(CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+            public delegate void ProcessMonitorNewItemCallBack(uint pid, uint parentid, [MarshalAs(UnmanagedType.LPWStr)]string exename, [MarshalAs(UnmanagedType.LPWStr)]string exefullpath, IntPtr hProcess, IntPtr processItem);
+
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?CreateProcessMonitor@MProcessMonitor@@SAPAV1@P6AXK@ZP6AXKKPA_W1PAXPAUtag_MPROCESS_ITEM@@@ZP6AHK@Z@Z")]
+            public static extern IntPtr CreateProcessMonitor(IntPtr removeItemCallBack, IntPtr newItemCallBack, IntPtr updateNotIncludeItemCallBack);
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?DestroyProcessMonitor@MProcessMonitor@@SAXPAV1@@Z")]
+            public static extern void DestroyProcessMonitor(IntPtr monitor);
+
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?EnumAllProcess@MProcessMonitor@@SAHPAV1@@Z")]
+            public static extern bool EnumAllProcess(IntPtr monitor);
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?RefeshAllProcess@MProcessMonitor@@SAHPAV1@@Z")]
+            public static extern bool RefeshAllProcess(IntPtr monitor);
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?RefeshAllProcessNotInclude@MProcessMonitor@@SAHPAV1@@Z")]
+            public static extern bool RefeshAllProcessNotInclude(IntPtr monitor);
+        }
+        public static class MProcessPerformanctMonitor
+        {
+            public static int M_GET_PROCMEM_WORKINGSET = 0;
+            public static int M_GET_PROCMEM_WORKINGSETPRIVATE = 1;
+            public static int M_GET_PROCMEM_WORKINGSETSHARE = 2;
+            public static int M_GET_PROCMEM_PEAKWORKINGSET = 3;
+            public static int M_GET_PROCMEM_COMMITEDSIZE = 4;
+            public static int M_GET_PROCMEM_NONPAGEDPOOL = 5;
+            public static int M_GET_PROCMEM_PAGEDPOOL = 6;
+            public static int M_GET_PROCMEM_PAGEDFAULT = 7;
+
+            public static int M_GET_PROCIO_READ = 0;
+            public static int M_GET_PROCIO_WRITE = 1;
+            public static int M_GET_PROCIO_OTHER = 2;
+            public static int M_GET_PROCIO_READ_BYTES = 3;
+            public static int M_GET_PROCIO_WRITE_BYTES = 4;
+            public static int M_GET_PROCIO_OTHER_BYTES = 5;
+
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetProcessPrivateWoringSet@MProcessPerformanctMonitor@@CAKPAUtag_MPROCESS_ITEM@@@Z")]
+            public static extern UInt32 GetProcessPrivateWoringSet(IntPtr processItem);
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetProcessIOSpeed@MProcessPerformanctMonitor@@CAKPAUtag_MPROCESS_ITEM@@@Z")]
+            public static extern UInt32 GetProcessIOSpeed(IntPtr processItem);
+
+            public static UInt64 GetProcessNetworkSpeed(IntPtr processItem)
+            {
+                return MPERF_GetProcessNetworkSpeed(processItem);
+            }
+
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetProcessCpuUseAgeKernel@MProcessPerformanctMonitor@@CANPAUtag_MPROCESS_ITEM@@@Z")]
+            public static extern double GetProcessCpuUseAgeKernel(IntPtr processItem);
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetProcessCpuUseAgeUser@MProcessPerformanctMonitor@@CANPAUtag_MPROCESS_ITEM@@@Z")]
+            public static extern double GetProcessCpuUseAgeUser(IntPtr processItem);
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetProcessCpuUseAge@MProcessPerformanctMonitor@@CANPAUtag_MPROCESS_ITEM@@@Z")]
+            public static extern double GetProcessCpuUseAge(IntPtr processItem);
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetProcessCpuTime@MProcessPerformanctMonitor@@CA_KPAUtag_MPROCESS_ITEM@@@Z")]
+            public static extern UInt64 GetProcessCpuTime(IntPtr processItem);
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetProcessCycle@MProcessPerformanctMonitor@@CA_KPAUtag_MPROCESS_ITEM@@@Z")]
+            public static extern UInt64 GetProcessCycle(IntPtr processItem);
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetProcessMemoryInfo@MProcessPerformanctMonitor@@CAKPAUtag_MPROCESS_ITEM@@H@Z")]
+            public static extern UInt32 GetProcessMemoryInfo(IntPtr processItem, int col);
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetProcessIOInfo@MProcessPerformanctMonitor@@CA_KPAUtag_MPROCESS_ITEM@@H@Z")]
+            public static extern UInt64 GetProcessIOInfo(IntPtr processItem, int col);
         }
     }
 

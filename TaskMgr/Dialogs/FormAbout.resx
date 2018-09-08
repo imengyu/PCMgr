@@ -181,7 +181,7 @@
     <value>Top, Left, Right</value>
   </data>
   <data name="label2.Font" type="System.Drawing.Font, System.Drawing">
-    <value>微软雅黑, 20pt</value>
+    <value>Microsoft YaHei UI, 20pt</value>
   </data>
   <data name="label2.Location" type="System.Drawing.Point, System.Drawing">
     <value>2, 48</value>
@@ -334,7 +334,7 @@
     <value>Top, Left, Right</value>
   </data>
   <data name="label5.Font" type="System.Drawing.Font, System.Drawing">
-    <value>微软雅黑, 13pt</value>
+    <value>Microsoft YaHei UI, 13pt</value>
   </data>
   <data name="label5.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>

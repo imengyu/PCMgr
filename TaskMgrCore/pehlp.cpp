@@ -74,7 +74,7 @@ VOID Add2StringItem(HWND hList, LPWSTR str, LPWSTR str2) {
 VOID OpenPEFile(HWND hDlg)
 {
 	ListView_DeleteAllItems(hListTables);
-	if (MChooseFileSingal(hDlg, NULL, L"Choose a PE File", L"PE文件\0*.exe;*.dll\0所有文件\0*.*\0", NULL, L".exe", currentOpenPEFile, MAX_PATH))
+	if (M_DLG_ChooseFileSingal(hDlg, NULL, L"Choose a PE File", L"PE文件\0*.exe;*.dll\0所有文件\0*.*\0", NULL, L".exe", currentOpenPEFile, MAX_PATH))
 	{ 
 		if (MFM_FileExist(currentOpenPEFile))
 			AddAStringItem(hListTables, L"File opened");
@@ -84,7 +84,7 @@ VOID OpenPEFile(HWND hDlg)
 VOID LoadImportTables(HWND hDlg)
 {
 	ListView_DeleteAllItems(hListTables);
-	if (MStrEqual(currentOpenPEFile, L"")) {
+	if (StrEqual(currentOpenPEFile, L"")) {
 		AddAStringItem(hListTables, L"Please open a PE File first");
 		return;
 	}
@@ -210,7 +210,7 @@ UNMAP_AND_EXIT:
 VOID LoadExportTables(HWND hDlg)
 {
 	ListView_DeleteAllItems(hListTables);
-	if (MStrEqual(currentOpenPEFile, L"")) {
+	if (StrEqual(currentOpenPEFile, L"")) {
 		AddAStringItem(hListTables, L"Please open a PE File first");
 		return;
 	}
@@ -364,13 +364,13 @@ INT_PTR CALLBACK VPEDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 			ti.pszText = buf;
 			ti.hItem = hItem;
 			TreeView_GetItem(lpnmh->hwndFrom, &ti);
-			if (MStrEqual(buf, L"PE Import Table"))
+			if (StrEqual(buf, L"PE Import Table"))
 				LoadImportTables(hDlg);
-			else if (MStrEqual(buf, L"PE Export Table"))
+			else if (StrEqual(buf, L"PE Export Table"))
 				LoadExportTables(hDlg);
-			else if (MStrEqual(buf, L"Open PE File"))
+			else if (StrEqual(buf, L"Open PE File"))
 				OpenPEFile(hDlg);
-			//else if (MStrEqual(buf, L"Test"))
+			//else if (StrEqual(buf, L"Test"))
 			//	Add2StringItem(hListTables, L"Test", L"This is a test item");
 		}
 	}

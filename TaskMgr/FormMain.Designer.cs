@@ -692,9 +692,6 @@
             this.listProcessDetals.UseCompatibleStateImageBehavior = false;
             this.listProcessDetals.View = System.Windows.Forms.View.Details;
             this.listProcessDetals.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listProcessDetals_ColumnClick);
-            this.listProcessDetals.SelectedIndexChanged += new System.EventHandler(this.listProcessDetals_SelectedIndexChanged);
-            this.listProcessDetals.KeyDown += new System.Windows.Forms.KeyEventHandler(this.listProcessDetals_KeyDown);
-            this.listProcessDetals.MouseClick += new System.Windows.Forms.MouseEventHandler(this.listProcessDetals_MouseClick);
             // 
             // imageListProcessDetalsIcons
             // 

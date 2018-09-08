@@ -180,7 +180,7 @@ namespace PCMgr.Ctls
             item_writeSpeed.DrawFrontLine = true;
             item_writeSpeed.FrontLineColor = FormMain.DiskDrawColor;
 
-            performanceInfos.FontTitle = new Font("微软雅黑", 9);
+            performanceInfos.FontTitle = new Font("Microsoft YaHei UI", 9);
             performanceInfos.SpeicalItems.Add(item_diskTime);
             performanceInfos.SpeicalItems.Add(item_responseTime);
             performanceInfos.SpeicalItems.Add(item_readSpeed);

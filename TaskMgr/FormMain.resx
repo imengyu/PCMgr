@@ -558,7 +558,7 @@
     <value>8</value>
   </data>
   <data name="tabControlMain.Font" type="System.Drawing.Font, System.Drawing">
-    <value>微软雅黑, 9pt</value>
+    <value>Microsoft YaHei UI, 9pt</value>
   </data>
   <data name="tabControlMain.Location" type="System.Drawing.Point, System.Drawing">
     <value>0, 0</value>
@@ -813,7 +813,7 @@
     <value>False</value>
   </data>
   <data name="btnEndProcess.Font" type="System.Drawing.Font, System.Drawing">
-    <value>微软雅黑, 9pt</value>
+    <value>Microsoft YaHei UI, 9pt</value>
   </data>
   <data name="btnEndProcess.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -2068,7 +2068,7 @@
     <value>False</value>
   </data>
   <data name="btnEndProcessDetals.Font" type="System.Drawing.Font, System.Drawing">
-    <value>微软雅黑, 9pt</value>
+    <value>Microsoft YaHei UI, 9pt</value>
   </data>
   <data name="btnEndProcessDetals.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -2391,7 +2391,7 @@
     <value>Left, Right</value>
   </data>
   <data name="lbStartingStatus.Font" type="System.Drawing.Font, System.Drawing">
-    <value>微软雅黑, 9pt</value>
+    <value>Microsoft YaHei UI, 9pt</value>
   </data>
   <data name="lbStartingStatus.Location" type="System.Drawing.Point, System.Drawing">
     <value>2, 225</value>
@@ -2592,7 +2592,7 @@
     <value>Left, Right</value>
   </data>
   <data name="lbNoAppsTip.Font" type="System.Drawing.Font, System.Drawing">
-    <value>微软雅黑, 9pt</value>
+    <value>Microsoft YaHei UI, 9pt</value>
   </data>
   <data name="lbNoAppsTip.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -2635,7 +2635,7 @@
     <value>Flat</value>
   </data>
   <data name="expandMoreDetals.Font" type="System.Drawing.Font, System.Drawing">
-    <value>微软雅黑, 9pt</value>
+    <value>Microsoft YaHei UI, 9pt</value>
   </data>
   <data name="expandMoreDetals.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -2671,7 +2671,7 @@
     <value>False</value>
   </data>
   <data name="btnEndTaskSimple.Font" type="System.Drawing.Font, System.Drawing">
-    <value>微软雅黑, 9pt</value>
+    <value>Microsoft YaHei UI, 9pt</value>
   </data>
   <data name="btnEndTaskSimple.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -2779,7 +2779,7 @@
     <value>Fill</value>
   </data>
   <data name="pl_perfGridHost.Font" type="System.Drawing.Font, System.Drawing">
-    <value>微软雅黑, 9pt</value>
+    <value>Microsoft YaHei UI, 9pt</value>
   </data>
   <data name="pl_perfGridHost.Location" type="System.Drawing.Point, System.Drawing">
     <value>0, 0</value>

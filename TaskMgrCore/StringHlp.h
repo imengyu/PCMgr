@@ -5,46 +5,79 @@
 #include <string>  
 #include <vector>
 
+//字符串帮助类
+class M_API StringHlp
+{
+public:
+	StringHlp();
+	~StringHlp();
+
+	static std::string & FormatString(std::string & _str, const char * _Format, ...);
+	static std::wstring & FormatString(std::wstring & _str, const wchar_t * _Format, ...);
+	static std::wstring FormatString(const wchar_t * format, ...);
+	static std::wstring FormatString(const wchar_t *_Format, va_list marker);
+	static std::string FormatString(const char *_Format, va_list marker);
+	static std::string FormatString(const char * format, ...);
+
+	static wchar_t* Utf8ToUnicode(const char* szU8);
+	static char* UnicodeToAnsi(const wchar_t* szStr);
+	static char* UnicodeToUtf8(const wchar_t* unicode);
+	static wchar_t* AnsiToUnicode(const char* szStr);
+	static void FreeStringPtr(void * ptr);
+
+	static std::string* FormatStringPtr2A(std::string *_str, const char * _Format, ...);
+	static std::wstring * FormatStringPtr2W(std::wstring *_str, const wchar_t * _Format, ...);
+	static std::wstring * FormatStringPtrW(const wchar_t *format, ...);
+	static std::string *FormatStringPtrA(const char *format, ...);
+
+	static LPCWSTR StrUpW(LPCWSTR str);
+	static LPCSTR StrUpA(LPCSTR str);
+	static LPCWSTR StrLoW(LPCWSTR str);
+	static LPCSTR StrLoA(LPCSTR str);
+	static LPCWSTR StrAddW(LPCWSTR str1, LPCWSTR str2);
+	static LPCSTR StrAddA(LPCSTR str1, const LPCSTR str2);
+	//字符串是否相等
+	static BOOL StrEqualA(LPCSTR str1, LPCSTR str2);
+	//字符串是否相等
+	static BOOL StrEqualW(const wchar_t* str1, const wchar_t* str2);
+	static LPCSTR IntToStrA(int i);
+	static LPCWSTR IntToStrW(int i);
+	static LPCWSTR MIntToStrW(int i);
+	static LPCSTR LongToStrA(long i);
+	static LPCWSTR LongToStrW(long i);
+	static int StrToIntA(char * str);
+	static int StrToIntW(LPCWSTR str);
+	static DWORD StrSplitA(char * str, LPCSTR splitStr, LPCSTR * result, char ** lead);
+	static DWORD StrSplitW(wchar_t * str, const LPCWSTR splitStr, LPCWSTR * result, wchar_t ** lead);
+	static BOOL StrContainsA(LPCSTR str, LPCSTR testStr, LPCSTR * resultStr);
+	static BOOL StrContainsW(LPCWSTR str, LPCWSTR testStr, LPCWSTR * resultStr);
+	static BOOL StrContainsCharA(LPCSTR str, CHAR testStr);
+	static BOOL StrContainsCharW(LPCWSTR str, WCHAR testStr);
+	static int HexStrToIntW(wchar_t *s);
+	static long long HexStrToLongW(wchar_t *s);
+private:
+
+};
+
+//格式化字符串（仅在当前模块或/MD运行库编译时使用），其他模块请使用 FreeStringPtr
+#define FormatString StringHlp::FormatString
+//字符串是否含有某个字符
+#define StrContainsChar StringHlp::StrContainsCharW
 //字符串是否相等
-#define MStrEqual MStrEqualW
+#define StrEqual StringHlp::StrEqualW
+//字符串是否相等A
+#define StrEqualAnsi StringHlp::StrEqualA
 //窄字符转为宽字符
-#define A2W MConvertLPCSTRToLPWSTR
+#define A2W StringHlp::AnsiToUnicode
 //宽字符转为窄字符
-#define W2A MConvertLPWSTRToLPCSTR
+#define W2A StringHlp::UnicodeToAnsi
+//格式化字符串，返回的字符串指针请使用 FreeStringPtr 释放
+#define FormatStringPtr StringHlp::FormatStringPtrW
+//释放由 StringHlp 类返回的字符串指针
+#define FreeStringPtr StringHlp::FreeStringPtr
 
-EXTERN_C M_API void MConvertStrDel(void * str);
 
-//窄字符转为宽字符
-EXTERN_C M_API LPWSTR MConvertLPCSTRToLPWSTR(const char * szString);
-//宽字符转为窄字符
-EXTERN_C M_API LPCSTR MConvertLPWSTRToLPCSTR(const WCHAR * szString);
-//字符串是否相等
-EXTERN_C M_API BOOL MStrEqualA(const LPCSTR str1, const LPCSTR str2);
-//字符串是否相等
-EXTERN_C M_API BOOL MStrEqualW(const wchar_t* str1, const wchar_t* str2);
 
-std::string & FormatString(std::string & _str, const char * _Format, ...);
 
-std::wstring & FormatString(std::wstring & _str, const wchar_t * _Format, ...);
 
-std::wstring FormatString(const wchar_t * format, ...);
 
-std::wstring FormatString(const wchar_t *_Format, va_list marker);
-
-std::string FormatString(const char *_Format, va_list marker);
-
-std::string FormatString(const char * format, ...);
-
-#define FormatStringPtr FormatStringPtrW
-
-EXTERN_C M_API std::string* FormatStringPtr2A(std::string *_str, const char * _Format, ...);
-EXTERN_C M_API std::wstring * FormatStringPtr2W(std::wstring *_str, const wchar_t * _Format, ...);
-EXTERN_C M_API std::wstring * FormatStringPtrW(const wchar_t *format, ...);
-EXTERN_C M_API std::string *FormatStringPtrA(const char *format, ...);
-
-EXTERN_C M_API void FormatStringPtrDel(void * ptr);
-
-M_CAPI(wchar_t*) Utf8ToUnicode(const char* szU8);
-M_CAPI(char*) UnicodeToAnsi(const wchar_t* szStr);
-M_CAPI(char*) UnicodeToUtf8(const wchar_t* unicode);
-M_CAPI(wchar_t*) AnsiToUnicode(const char* szStr);

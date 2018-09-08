@@ -40,8 +40,9 @@ DWORD thisCommandPid = 0;
 HANDLE thisCommandhProcess = 0;
 BOOL thisCommandIsImporant = FALSE;
 BOOL thisCommandIsVeryImporant = FALSE;
-HICON HIconDef;
-HWND hWndMain;
+UCHAR thisCommandProcessPriority = 0;
+HICON HIconDef = NULL;
+HWND hWndMain = NULL;
 PSYSTEM_PROCESSES current_system_process = NULL;
 CERT_CONTEXT lastVeredCertContext = { 0 };
 
@@ -122,7 +123,7 @@ _WinStationQueryInformationW WinStationQueryInformationW;
 _MGetCurrentPeb dMGetCurrentPeb;
 
 //Enum apis
-EXTERN_C BOOL MAppVProcessAllWindows();
+extern BOOL MAppVProcessAllWindows();
 
 BOOL CALLBACK lpEnumProcWinsFunc(HWND hWnd, LPARAM lParam)
 {
@@ -406,7 +407,7 @@ M_API BOOL MGetPrivileges2()
 	CloseHandle(hToken);
 	return TRUE;
 }
-M_API BOOL MEnumProcessCore()
+M_API BOOL MUpdateProcessList()
 {
 	if (current_system_process) MEnumProcessFree();
 
@@ -435,8 +436,9 @@ M_API BOOL MEnumProcess(EnumProcessCallBack calBack, LPVOID customData)
 	{
 		HANDLE hProcess = NULL;
 		WCHAR exeFullPath[260];
+
 		MAppVProcessAllWindows();
-		if (MEnumProcessCore()) {
+		if (MUpdateProcessList()) {
 			bool done = false;
 			int ix = 0;
 			for (PSYSTEM_PROCESSES p = current_system_process; !done; p = PSYSTEM_PROCESSES(PCHAR(p) + p->NextEntryOffset))
@@ -461,7 +463,8 @@ M_API BOOL MEnumProcess2(EnumProcessCallBack2 callBack)
 	if (callBack)
 	{
 		MAppVProcessAllWindows();
-		if (MEnumProcessCore()) {
+		if (MUpdateProcessList()) 
+		{
 			bool done = false;
 			for (PSYSTEM_PROCESSES p = current_system_process; !done; p = PSYSTEM_PROCESSES(PCHAR(p) + p->NextEntryOffset))
 			{
@@ -490,8 +493,7 @@ M_API BOOL MUpdateProcess(DWORD pid, EnumProcessCallBack calBack, LPVOID customD
 }
 M_API PSYSTEM_PROCESSES MFindProcessInLoadedProcesses(DWORD pid) {
 	bool done = false;
-	for (PSYSTEM_PROCESSES p = current_system_process; !done;
-		p = PSYSTEM_PROCESSES(PCHAR(p) + p->NextEntryOffset))
+	for (PSYSTEM_PROCESSES p = current_system_process; !done; p = PSYSTEM_PROCESSES(PCHAR(p) + p->NextEntryOffset))
 	{
 		if (static_cast<DWORD>((ULONG_PTR)p->ProcessId) == pid)
 			return p;
@@ -576,6 +578,16 @@ M_API BOOL MEnumProcessHandles(DWORD pid, EHCALLBACK callback) {
 	return M_EH_EnumProcessHandles(pid, callback);
 }
 
+M_CAPI(BOOL) MEnumProcessHotKeys(DWORD pid, EnumProcessHotKeyCallBack callBack)
+{
+	return M_SU_GetProcessHotKeys(pid, callBack);
+}
+M_CAPI(BOOL) MEnumProcessTimers(DWORD pid, EnumProcessTimerCallBack callBack)
+{
+	return M_SU_GetProcessTimers(pid, callBack);
+}
+
+
 //EXE information
 M_API BOOL MGetExeInfo(LPWSTR strFilePath, LPWSTR InfoItem, LPWSTR str, int maxCount)
 {
@@ -650,7 +662,7 @@ M_API HICON MGetExeIcon(LPWSTR pszFullPath)
 	HICON hIcon = NULL;
 	if (pszFullPath != NULL)
 	{
-		if (MStrEqualW(pszFullPath, L"")) {
+		if (StrEqual(pszFullPath, L"")) {
 			hIcon = HIconDef;
 			return hIcon;
 		}
@@ -1175,11 +1187,11 @@ M_API BOOL MGetProcessFullPathEx(DWORD dwPID, LPWSTR outNter, PHANDLE phandle, L
 		wcscpy_s(outNter, 260, L"C:\\Windows\\System32\\ntoskrnl.exe"); 
 		return 1;
 	}
-	else if (dwPID == 88 && MStrEqualW(pszExeName, L"Registry")) {
+	else if (dwPID == 88 && StrEqual(pszExeName, L"Registry")) {
 		wcscpy_s(outNter, 260, L"C:\\Windows\\System32\\ntoskrnl.exe");
 		return 1;
 	}
-	else if (MStrEqualW(pszExeName, L"Memory Compression")) {
+	else if (StrEqual(pszExeName, L"Memory Compression")) {
 		wcscpy_s(outNter, 260, L"C:\\Windows\\System32\\ntoskrnl.exe");
 		return 1;
 	}
@@ -1198,14 +1210,14 @@ M_API BOOL MGetProcessFullPathEx(DWORD dwPID, LPWSTR outNter, PHANDLE phandle, L
 	else MCloseHandle(hProcess);
 	return TRUE;
 }
-M_API int MGetProcessState(PSYSTEM_PROCESSES p, HWND hWnd)
+M_API int MGetProcessState(PMPROCESS_ITEM processItem, HWND hWnd)
 {
 	bool done = false;
-	if (p)
+	if (processItem && processItem->Data)
 	{
 		if(IsWindow(hWnd) && IsHungAppWindow(hWnd))
 			return 3;
-		SYSTEM_THREADS systemThread = p->Threads[0];
+		SYSTEM_THREADS systemThread = processItem->Data->Threads[0];
 		if (systemThread.ThreadState == THREAD_STATE::StateWait && systemThread.WaitReason == Suspended)
 			return 2;
 		else return 1;
@@ -1332,9 +1344,9 @@ M_API ULONG_PTR MGetProcessWorkingSetPrivate(HANDLE hProcess, SIZE_T pageSize)
 	}
 	return 0;
 }
-M_API DWORD MGetProcessSessionID(PSYSTEM_PROCESSES p)
+M_API DWORD MGetProcessSessionID(PMPROCESS_ITEM processItem)
 {
-	if (p) return p->SessionId;
+	if (processItem && processItem->Data) return processItem->Data->SessionId;
 	return 0;
 }
 M_API BOOL MGetProcessUserName(HANDLE hProcess, LPWSTR buffer, int maxcount)
@@ -1375,14 +1387,14 @@ M_API BOOL MGetProcessUserName(HANDLE hProcess, LPWSTR buffer, int maxcount)
 
 	return result;
 }
-M_API ULONG MGetProcessThreadsCount(PSYSTEM_PROCESSES p)
+M_API ULONG MGetProcessThreadsCount(PMPROCESS_ITEM processItem)
 {
-	if(p) return p->NumberOfThreads;
+	if (processItem && processItem->Data) return processItem->Data->NumberOfThreads;
 	return 0;
 }
-M_API ULONG MGetProcessHandlesCount(PSYSTEM_PROCESSES p)
+M_API ULONG MGetProcessHandlesCount(PMPROCESS_ITEM processItem)
 {
-	if (p) return p->HandleCount;
+	if (processItem && processItem->Data) return processItem->Data->HandleCount;
 	return 0;
 }
 M_API DWORD MGetProcessSessionID(DWORD pid)
@@ -1885,33 +1897,43 @@ M_CAPI(BOOL) MEnumProcessPrivileges(DWORD dwId, EnumPrivilegesCallBack callBack)
 
 extern HWND selectItem4;
 
-void MSetProcessPriorityClassMenuHandler(UCHAR PriorityClass) {
-	NTSTATUS status = MSetProcessPriorityClass(thisCommandhProcess, PriorityClass);
-	if (!NT_SUCCESS(status))
-		MShowErrorMessageWithNTSTATUS(str_item_set_proc_priority_failed, DEFDIALOGGTITLE, status);
+void MSetProcessPriorityClassMenuHandler(UCHAR PriorityClass) 
+{
+	std::wstring str = FormatString(str_item_ChangePriorityAsk, thisCommandName);
+	if (MShowMessageDialog(hWndMain, str_item_ChangePriorityContent, DEFDIALOGGTITLE, (LPWSTR)str.c_str(), 0, MB_YESNO) == IDYES)
+	{
+		NTSTATUS status = MSetProcessPriorityClass(thisCommandhProcess, PriorityClass);
+		if (!NT_SUCCESS(status))
+			MShowErrorMessageWithNTSTATUS(str_item_set_proc_priority_failed, DEFDIALOGGTITLE, status);
+	}
 }
 void MAppProcPropertyClassHandleWmCommand(WPARAM wParam)
 {
 	switch (wParam)
 	{
 	case ID_SETPRIORTY_REALTIME: {
-		MSetProcessPriorityClassMenuHandler(PROCESS_PRIORITY_CLASS_REALTIME);
+		if (thisCommandProcessPriority != PROCESS_PRIORITY_CLASS_REALTIME)
+			MSetProcessPriorityClassMenuHandler(PROCESS_PRIORITY_CLASS_REALTIME);
 		break;
 	}
 	case ID_SETPRIORTY_HIGH: {
-		MSetProcessPriorityClassMenuHandler(PROCESS_PRIORITY_CLASS_HIGH);
+		if (thisCommandProcessPriority != PROCESS_PRIORITY_CLASS_HIGH)
+			MSetProcessPriorityClassMenuHandler(PROCESS_PRIORITY_CLASS_HIGH);
 		break;
 	}
 	case ID_SETPRIORTY_ABOVENORMAL: {
-		MSetProcessPriorityClassMenuHandler(PROCESS_PRIORITY_CLASS_ABOVE_NORMAL);
+		if (thisCommandProcessPriority != PROCESS_PRIORITY_CLASS_ABOVE_NORMAL)
+			MSetProcessPriorityClassMenuHandler(PROCESS_PRIORITY_CLASS_ABOVE_NORMAL);
 		break;
 	}
 	case ID_SETPRIORTY_NORMAL: {
-		MSetProcessPriorityClassMenuHandler(PROCESS_PRIORITY_CLASS_NORMAL);
+		if (thisCommandProcessPriority != PROCESS_PRIORITY_CLASS_NORMAL)
+			MSetProcessPriorityClassMenuHandler(PROCESS_PRIORITY_CLASS_NORMAL);
 		break;
 	}
 	case ID_SETPRIORTY_BELOWNORMAL: {
-		MSetProcessPriorityClassMenuHandler(PROCESS_PRIORITY_CLASS_BELOW_NORMAL);
+		if (thisCommandProcessPriority != PROCESS_PRIORITY_CLASS_BELOW_NORMAL)
+			MSetProcessPriorityClassMenuHandler(PROCESS_PRIORITY_CLASS_BELOW_NORMAL);
 		break;
 	}
 	case ID_SETPRIORTY_LOW: {
@@ -1924,14 +1946,14 @@ void MAppProcPropertyClassHandleWmCommand(WPARAM wParam)
 }
 
 //MENU
-M_CAPI(int) MAppWorkShowMenuProcessPrepare(LPWSTR strFilePath, LPWSTR strFileName, DWORD pid, BOOL isImporant, BOOL isVeryImporant)
+int MAppWorkShowMenuProcessPrepare(LPWSTR strFilePath, LPWSTR strFileName, DWORD pid, BOOL isImporant, BOOL isVeryImporant)
 {
 	thisCommandIsVeryImporant = isVeryImporant;
 	thisCommandIsImporant = isImporant;
 	thisCommandPid = pid;
 	if (pid > 0)
 	{
-		if (!MStrEqualW(strFilePath, L"") && wcslen(strFilePath) < 260) {
+		if (!StrEqual(strFilePath, L"") && wcslen(strFilePath) < 260) {
 			wcscpy_s(thisCommandPath, 260, strFilePath);
 			if (wcslen(strFileName) < 260)
 				wcscpy_s(thisCommandName, 260, strFileName);
@@ -1945,8 +1967,10 @@ M_CAPI(int) MAppWorkShowMenuProcessPrepare(LPWSTR strFilePath, LPWSTR strFileNam
 	}
 	return 0;
 }
-M_CAPI(int) MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWORD pid, HWND hDlg, HWND selectHWND, int data, int type, int x, int y)
+int MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWORD pid, HWND hDlg, HWND selectHWND, int data, int type, int x, int y)
 {
+	if (pid == 2) pid = 0;
+
 	thisCommandPid = pid;
 
 	HMENU hroot = LoadMenu(hInstRs, MAKEINTRESOURCE(IDR_MENUTASK));
@@ -1985,7 +2009,7 @@ M_CAPI(int) MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWOR
 			EnableMenuItem(hpop, 10 + addMenu, MF_BYPOSITION | MF_DISABLED);
 			EnableMenuItem(hpop, 11 + addMenu, MF_BYPOSITION | MF_DISABLED);
 		}
-		if (MStrEqualW(strFilePath, L"") || MStrEqualW(strFilePath, L"-")) {
+		if (StrEqual(strFilePath, L"") || StrEqual(strFilePath, L"-")) {
 			EnableMenuItem(hpop, IDM_OPENPATH, MF_DISABLED);
 			EnableMenuItem(hpop, IDM_FILEPROP, MF_DISABLED);
 		}
@@ -2054,6 +2078,7 @@ M_CAPI(int) MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWOR
 			NTSTATUS status = NtQueryInformationProcess(thisCommandhProcess, ProcessPriorityClass, &priorityClass, sizeof(PROCESS_PRIORITY_CLASS), NULL);
 			if (NT_SUCCESS(status))
 			{
+				thisCommandProcessPriority = priorityClass.PriorityClass;
 				HMENU hpopAfs = GetSubMenu(hpop, 10 + addMenu);
 				switch (priorityClass.PriorityClass)
 				{
@@ -2128,7 +2153,7 @@ M_CAPI(int) MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWOR
 		EnableMenuItem(hpop, 10, MF_BYPOSITION | MF_DISABLED);
 		EnableMenuItem(hpop, 12, MF_BYPOSITION | MF_DISABLED);
 
-		if (MStrEqualW(strFilePath, L"") || MStrEqualW(strFilePath, L"-")) {
+		if (StrEqual(strFilePath, L"") || StrEqual(strFilePath, L"-")) {
 			EnableMenuItem(hpop, IDM_OPENPATH, MF_DISABLED);
 			EnableMenuItem(hpop, IDM_FILEPROP, MF_DISABLED);
 		}
@@ -2295,7 +2320,7 @@ BOOL MIsLoadLibrary(ULONG_PTR startAddress)
 	memmove(bytes, (LPVOID)startAddress, sizeof(bytes));
 
 	std::wstring *diastring = nullptr;
-	if (M_DeAssemblier(bytes, startAddress, NULL, sizeof(bytes), &diastring))
+	if (M_KDA_DeAssemblier(bytes, startAddress, NULL, sizeof(bytes), &diastring))
 	{
 		MessageBox(0, diastring->c_str(), L"MIsLoadLibrary", 0);
 
@@ -2305,7 +2330,7 @@ BOOL MIsLoadLibrary(ULONG_PTR startAddress)
 }
 BOOL MIsATrustDll2(LPWSTR fullPath)
 {
-	if (MStrEqual(fullPath, L"C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\clr.dll"))
+	if (StrEqual(fullPath, L"C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\clr.dll"))
 		return TRUE;
 	else if (wcsncmp(fullPath, L"C:\\Windows\\", 11) == 0)
 	{
@@ -2354,7 +2379,7 @@ VOID MAnitInjectLow() {
 				if(!NT_SUCCESS(status)) MBoom();
 				return;
 			}
-			/*if (!MStrEqual(modpath, L"")) {
+			/*if (!StrEqual(modpath, L"")) {
 
 				if (MIsATrustDll2(modpath)) return;
 

@@ -119,6 +119,8 @@ extern LPWSTR str_item_deatch_debugger_title;
 extern LPWSTR str_item_deatch_debugger_err;
 extern LPWSTR str_item_deatch_debugger_notdebug;
 
+extern LPWSTR str_item_ChangePriorityAsk;
+extern LPWSTR str_item_ChangePriorityContent;
 
 
 

@@ -250,6 +250,24 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 是否要更改 &quot;%s&quot; 的优先级? 的本地化字符串。
+        /// </summary>
+        internal static string ChangePriorityAsk {
+            get {
+                return ResourceManager.GetString("ChangePriorityAsk", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 更改特定进程的优先级可能导致系统不稳定。 的本地化字符串。
+        /// </summary>
+        internal static string ChangePriorityContent {
+            get {
+                return ResourceManager.GetString("ChangePriorityContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 无法改变服务设置 的本地化字符串。
         /// </summary>
         internal static string ChangeScStartTypeFailed {
@@ -975,6 +993,15 @@ namespace PCMgr.Lanuages {
         internal static string IdleProcessDsb {
             get {
                 return ResourceManager.GetString("IdleProcessDsb", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 延迟过程调用和中断服务例程 的本地化字符串。
+        /// </summary>
+        internal static string InterruptsProcessDsb {
+            get {
+                return ResourceManager.GetString("InterruptsProcessDsb", resourceCulture);
             }
         }
         
@@ -2207,6 +2234,15 @@ namespace PCMgr.Lanuages {
         internal static string SystemIdleProcess {
             get {
                 return ResourceManager.GetString("SystemIdleProcess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 系统中断 的本地化字符串。
+        /// </summary>
+        internal static string SystemInterrupts {
+            get {
+                return ResourceManager.GetString("SystemInterrupts", resourceCulture);
             }
         }
         

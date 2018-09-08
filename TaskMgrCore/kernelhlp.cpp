@@ -218,10 +218,10 @@ BOOL MInitKernelNTPDB(BOOL usingNtosPDB, PKNTOSVALUE kNtosValue)
 
 	BOOL rs = FALSE;
 	BOOL canSend = FALSE;
-	if (kNtosValue->NtostAddress != 0 && !MStrEqualW(kNtosValue->NtosModuleName, L""))
+	if (kNtosValue->NtostAddress != 0 && !StrEqual(kNtosValue->NtosModuleName, L""))
 	{
 		uNTBaseAddress = kNtosValue->NtostAddress;
-		char* ntosNameC = (char*)MConvertLPWSTRToLPCSTR(kNtosValue->NtosModuleName);
+		char* ntosNameC = (char*)W2A(kNtosValue->NtosModuleName);
 #ifdef _AMD64_
 		Log(L"Get NTOS base info : %s 0x%I64X", kNtosValue->NtosModuleName, kNtosValue->NtostAddress);
 #else
@@ -381,7 +381,7 @@ DWORD WINAPI MDbgViewReceiveThread(LPVOID lpParameter)
 		memset(lastBuffer, 0, sizeof(lastBuffer));
 		if (M_SU_GetDbgViewLastBuffer(lastBuffer, 256, &hasMoreData))
 		{
-			if (MStrEqualW(lastBuffer, L""))
+			if (StrEqual(lastBuffer, L""))
 				MAppMainCall(M_CALLBACK_DBGPRINT_EMEPTY, 0, 0);
 			else MAppMainCall(M_CALLBACK_DBGPRINT_DATA, lastBuffer, 0);
 

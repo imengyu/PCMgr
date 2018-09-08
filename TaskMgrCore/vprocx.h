@@ -12,13 +12,11 @@
 void WindowEnumStart();
 void WindowEnumDestroy();
 
-EXTERN_C M_API BOOL MAppVProcessAllWindows();
-EXTERN_C M_API void MAppVProcessAllWindowsUWP();
-EXTERN_C M_API BOOL MAppVProcessAllWindowsGetProcessWindow(DWORD pid);
-EXTERN_C M_API BOOL MAppVProcessAllWindowsGetProcessWindow2(DWORD pid);
+BOOL MAppVProcessAllWindows();
+void MAppVProcessAllWindowsUWP();
+BOOL MAppVProcessAllWindowsGetProcessWindow(DWORD pid);
+BOOL MAppVProcessAllWindowsGetProcessWindow2(DWORD pid);
 
-EXTERN_C M_API BOOL MAppVProcess(HWND hWndParent);
-EXTERN_C M_API BOOL MAppVProcessMsg(DWORD dwPID, HWND hDlg, int type, LPWSTR procName);
 
 //显示查看模块对话框
 //    dwPID：需要查看的进程id

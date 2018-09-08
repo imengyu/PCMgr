@@ -130,7 +130,7 @@ namespace PCMgr.Ctls
             performanceGrid.DrawData2 = true;
             performanceGrid.MaxUnitPen = new Pen(FormMain.NetDrawColor);
 
-            performanceInfos.FontTitle = new Font("微软雅黑", 9);
+            performanceInfos.FontTitle = new Font("Microsoft YaHei UI", 9);
             performanceInfos.SpeicalItems.Add(item_readSpeed);
             performanceInfos.SpeicalItems.Add(item_writeSpeed);
 

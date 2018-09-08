@@ -126,8 +126,8 @@
             // 
             resources.ApplyResources(this.performanceTitle1, "performanceTitle1");
             this.performanceTitle1.Name = "performanceTitle1";
-            this.performanceTitle1.SmallTitleFont = new System.Drawing.Font("微软雅黑", 12F);
-            this.performanceTitle1.TitleFont = new System.Drawing.Font("微软雅黑", 18F);
+            this.performanceTitle1.SmallTitleFont = new System.Drawing.Font("Microsoft YaHei UI", 12F);
+            this.performanceTitle1.TitleFont = new System.Drawing.Font("Microsoft YaHei UI", 18F);
             this.performanceTitle1.MouseClick += new System.Windows.Forms.MouseEventHandler(this.PerformancePageDisk_MouseClick);
             this.performanceTitle1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.PerformancePageDisk_MouseDoubleClick);
             this.performanceTitle1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.PerformancePageDisk_MouseDown);
@@ -137,9 +137,9 @@
             this.performanceInfos.ColorText = System.Drawing.Color.Black;
             this.performanceInfos.ColorTitle = System.Drawing.Color.Gray;
             resources.ApplyResources(this.performanceInfos, "performanceInfos");
-            this.performanceInfos.FontText = new System.Drawing.Font("微软雅黑", 9F);
-            this.performanceInfos.FontTextSpeical = new System.Drawing.Font("微软雅黑", 15F);
-            this.performanceInfos.FontTitle = new System.Drawing.Font("微软雅黑", 10.5F);
+            this.performanceInfos.FontText = new System.Drawing.Font("Microsoft YaHei UI", 9F);
+            this.performanceInfos.FontTextSpeical = new System.Drawing.Font("Microsoft YaHei UI", 15F);
+            this.performanceInfos.FontTitle = new System.Drawing.Font("Microsoft YaHei UI", 10.5F);
             this.performanceInfos.ItemMargan = 10;
             this.performanceInfos.LineOffest = 6;
             this.performanceInfos.MaxSpeicalItemsWidth = 300;

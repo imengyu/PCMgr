@@ -206,7 +206,10 @@
     <ClInclude Include="loghlp.h" />
     <ClInclude Include="mainprocs.h" />
     <ClInclude Include="mapphlp.h" />
+    <ClInclude Include="MCpuInfoMonitor.h" />
+    <ClInclude Include="MProcessPerformanctMonitor.h" />
     <ClInclude Include="msup.h" />
+    <ClInclude Include="MSystemPerformanctMonitor.h" />
     <ClInclude Include="netdef.h" />
     <ClInclude Include="ntdef.h" />
     <ClInclude Include="nthlp.h" />
@@ -215,6 +218,7 @@
     <ClInclude Include="pehlp.h" />
     <ClInclude Include="perfhlp.h" />
     <ClInclude Include="prochlp.h" />
+    <ClInclude Include="MProcessMonitor.h" />
     <ClInclude Include="reghlp.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="schlp.h" />
@@ -233,6 +237,7 @@
     <ClInclude Include="uwphlp.h" />
     <ClInclude Include="VersionHelpers.h" />
     <ClInclude Include="vprocx.h" />
+    <ClInclude Include="DltHlp.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cmdhlp.cpp" />
@@ -261,13 +266,17 @@
     <ClCompile Include="loghlp.cpp" />
     <ClCompile Include="mainprocs.cpp" />
     <ClCompile Include="mapphlp.cpp" />
+    <ClCompile Include="MCpuInfoMonitor.cpp" />
+    <ClCompile Include="MProcessPerformanctMonitor.cpp" />
     <ClCompile Include="msup.cpp" />
+    <ClCompile Include="MSystemPerformanctMonitor.cpp" />
     <ClCompile Include="nthlp.cpp" />
     <ClCompile Include="ntsymbol.cpp" />
     <ClCompile Include="PathHelper.cpp" />
     <ClCompile Include="pehlp.cpp" />
     <ClCompile Include="perfhlp.cpp" />
     <ClCompile Include="prochlp.cpp" />
+    <ClCompile Include="MProcessMonitor.cpp" />
     <ClCompile Include="reghlp.cpp" />
     <ClCompile Include="schlp.cpp" />
     <ClCompile Include="settinghlp.cpp" />

@@ -2,6 +2,7 @@
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using PCMgr.Lanuages;
+using static PCMgr.NativeMethods;
 
 namespace PCMgr.Ctls
 {
@@ -11,51 +12,6 @@ namespace PCMgr.Ctls
         {
             InitializeComponent();
         }
-
-        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-        public struct SYSTEM_COMPRESSION_INFO
-        {
-            public UInt32 Version;
-            public UInt32 CompressionPid;
-            public UInt64 CompressionWorkingSetSize;
-            public UInt64 CompressSize;
-            public UInt64 CompressedSize;
-            public UInt64 NonCompressedSize;
-        }
-
-        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern double MPERF_GetRamUseAge2();
-        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern bool MPERF_UpdatePerformance();
-        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern bool MPERF_UpdateMemoryListInfo();
-        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern bool MPERF_GetMemoryCompressionInfo(ref SYSTEM_COMPRESSION_INFO _compression_info);
-
-        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern ulong MPERF_GetStandBySize();
-        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern ulong MPERF_GetModifiedSize();
-        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern ulong MPERF_GetPageSize();
-        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern ulong MPERF_GetKernelPaged();
-        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern ulong MPERF_GetKernelNonpaged();
-        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern ulong MPERF_GetSystemCacheSize();
-        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern ulong MPERF_GetCommitTotal();
-        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern ulong MPERF_GetCommitLimit();
-        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern ulong MPERF_GetRamAvail();
-        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern ulong MPERF_GetRamAvailPageFile();
-        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern ulong MPERF_GetAllRam();
-        [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern ulong MPERF_GetRamUsed();
 
         private string fTipVauleFree;
         private string fTipVauleModified;
@@ -72,11 +28,11 @@ namespace PCMgr.Ctls
             int ramuse = (int)(MPERF_GetRamUseAge2() * 100);
             if (!PageIsActive)
                 performanceGridGlobal.AddData(ramuse);
-            ulong all = MPERF_GetAllRam();
-            ulong used = MPERF_GetRamUsed();
+            ulong all = MSystemMemoryPerformanctMonitor.GetAllMemory();
+            ulong used = MSystemMemoryPerformanctMonitor.GetMemoryUsed();
 
             ulong divor = 0;
-            string unit = NativeMethods.GetBestFilesizeUnit(all, out divor);
+            string unit = GetBestFilesizeUnit(all, out divor);
 
             customString =
                (used / (double)divor).ToString("0.0") + " " + unit + "/" + (all / (double)divor).ToString("0.0") + " " + unit + "  (" + ramuse + "%)";
@@ -102,25 +58,25 @@ namespace PCMgr.Ctls
             performanceGridGlobal.AddData(ramuse);
             performanceGridGlobal.Invalidate();
 
-            if (MPERF_UpdatePerformance())
+            if (MSystemPerformanctMonitor.UpdatePerformance())
             {
-                MPERF_UpdateMemoryListInfo();
+                MSystemMemoryPerformanctMonitor.UpdateMemoryListInfo();
 
-                ulong pagesize = MPERF_GetPageSize();
-                ulong availableSize = MPERF_GetRamAvail();
+                ulong pagesize = MSystemPerformanctMonitor.GetPageSize();
+                ulong availableSize = MSystemMemoryPerformanctMonitor.GetMemoryAvail();
                 ulong usedSize = all_ram - availableSize;
                 ulong compressedSize = 0;
                 ulong compressedEstimateSize = 0;
                 ulong compressedSavedSize = 0;
-                ulong modifedSize= MPERF_GetModifiedSize();
-                ulong standbySize = MPERF_GetStandBySize();
+                ulong modifedSize= MSystemMemoryPerformanctMonitor.GetModifiedSize();
+                ulong standbySize = MSystemMemoryPerformanctMonitor.GetStandBySize();
                 ulong freeSize = availableSize - modifedSize - standbySize;
                 ulong divier = all_ram / 1048576;
 
                 if(!compressInfoFailed)
                 {
-                    SYSTEM_COMPRESSION_INFO compressionInfo = new SYSTEM_COMPRESSION_INFO();
-                    if (MPERF_GetMemoryCompressionInfo(ref compressionInfo))
+                    MSystemMemoryPerformanctMonitor.SYSTEM_COMPRESSION_INFO compressionInfo = new MSystemMemoryPerformanctMonitor.SYSTEM_COMPRESSION_INFO();
+                    if (MSystemMemoryPerformanctMonitor.GetMemoryCompressionInfo(ref compressionInfo))
                     {
                         compressedSize = compressionInfo.CompressionWorkingSetSize;
                         compressedEstimateSize = compressionInfo.CompressedSize;
@@ -138,28 +94,28 @@ namespace PCMgr.Ctls
                 performanceRamPoolGrid.VauleModified = (modifedSize / 1048576) / (double)(divier);
                 performanceRamPoolGrid.VauleStandby = (standbySize / 1048576) / (double)(divier);
                 performanceRamPoolGrid.VauleFree = (freeSize / 1048576) / (double)(divier);
-                performanceRamPoolGrid.StrVauleUsing = NativeMethods.FormatFileSize(usedSize);
-                performanceRamPoolGrid.StrVauleModified = NativeMethods.FormatFileSize(modifedSize);
-                performanceRamPoolGrid.StrVauleStandby = NativeMethods.FormatFileSize(standbySize);
-                performanceRamPoolGrid.StrVauleFree = NativeMethods.FormatFileSize(freeSize);
+                performanceRamPoolGrid.StrVauleUsing = FormatFileSize(usedSize);
+                performanceRamPoolGrid.StrVauleModified = FormatFileSize(modifedSize);
+                performanceRamPoolGrid.StrVauleStandby = FormatFileSize(standbySize);
+                performanceRamPoolGrid.StrVauleFree = FormatFileSize(freeSize);
                 performanceRamPoolGrid.TipVauleFree = string.Format(fTipVauleFree, performanceRamPoolGrid.StrVauleFree);
                 performanceRamPoolGrid.TipVauleModified = string.Format(fTipVauleModified, performanceRamPoolGrid.StrVauleModified);
                 performanceRamPoolGrid.TipVauleStandby = string.Format(fTipVauleStandby, performanceRamPoolGrid.StrVauleStandby);
 
                 if (compressInfoFailed) performanceRamPoolGrid.TipVauleUsing = string.Format(fTipVauleUsing, performanceRamPoolGrid.StrVauleUsing);
-                else performanceRamPoolGrid.TipVauleUsing = string.Format(fTipVauleUsing, performanceRamPoolGrid.StrVauleUsing, NativeMethods.FormatFileSize(compressedSize), NativeMethods.FormatFileSize(compressedEstimateSize), NativeMethods.FormatFileSize(compressedSavedSize));
+                else performanceRamPoolGrid.TipVauleUsing = string.Format(fTipVauleUsing, performanceRamPoolGrid.StrVauleUsing, FormatFileSize(compressedSize), FormatFileSize(compressedEstimateSize), NativeMethods.FormatFileSize(compressedSavedSize));
 
                 performanceRamPoolGrid.Invalidate();
 
-                if (compressInfoFailed) item_ramuseage.Value = NativeMethods.FormatFileSize(usedSize);
-                else item_ramuseage.Value = NativeMethods.FormatFileSize(usedSize) + " (" + NativeMethods.FormatFileSize(compressedSize) + ")";
+                if (compressInfoFailed) item_ramuseage.Value = FormatFileSize(usedSize);
+                else item_ramuseage.Value = FormatFileSize(usedSize) + " (" + FormatFileSize(compressedSize) + ")";
 
-                item_ramcanuse.Value = NativeMethods.FormatFileSize(availableSize);
+                item_ramcanuse.Value = FormatFileSize(availableSize);
 
-                item_sended.Value = NativeMethods.FormatFileSize(pagesize * MPERF_GetCommitTotal()) + "/" + NativeMethods.FormatFileSize(pagesize * MPERF_GetCommitLimit());
-                item_cached.Value = NativeMethods.FormatFileSize(pagesize * MPERF_GetSystemCacheSize());
-                item_nopagepool.Value = NativeMethods.FormatFileSize(pagesize * MPERF_GetKernelNonpaged());
-                item_pagepool.Value = NativeMethods.FormatFileSize(pagesize * MPERF_GetKernelPaged());
+                item_sended.Value = FormatFileSize(pagesize * MSystemMemoryPerformanctMonitor.GetCommitTotal()) + "/" + FormatFileSize(pagesize * MSystemMemoryPerformanctMonitor.GetCommitLimit());
+                item_cached.Value = FormatFileSize(pagesize * MSystemMemoryPerformanctMonitor.GetSystemCacheSize());
+                item_nopagepool.Value = FormatFileSize(pagesize * MSystemMemoryPerformanctMonitor.GetKernelNonpaged());
+                item_pagepool.Value = FormatFileSize(pagesize * MSystemMemoryPerformanctMonitor.GetKernelPaged());
                 performanceInfos.Invalidate();
             }
         }

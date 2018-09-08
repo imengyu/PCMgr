@@ -4,6 +4,7 @@
 #include "lghlp.h"
 #include "loghlp.h"
 #include "StringSplit.h"
+#include "StringHlp.h"
 #include "resource.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -94,7 +95,7 @@ M_CAPI(BOOL) MSCM_CheckDriverServices(LPWSTR fileName, LPWSTR outName, LPSERVICE
 {
 	for (unsigned int i = 0; i < dwNumberOfDriverService; i++)
 	{
-		if (MStrEqualW(pDrvscsNames[i].ServiceImagePath, fileName))
+		if (StrEqual(pDrvscsNames[i].ServiceImagePath, fileName))
 		{
 			pDrvscsNames[i].DriverServiceFounded = TRUE;
 			if (outName) wcscpy_s(outName,MAX_PATH,pDrvscsNames[i].lpServiceName);
@@ -316,33 +317,33 @@ LRESULT MSCM_HandleWmCommand(WPARAM wParam)
 	switch (wParam)
 	{
 	case ID_SCMAIN_COPYPATH: {
-		if (wcslen(currScPath) > 0 || !MStrEqualW(currScPath, L""))
+		if (wcslen(currScPath) > 0 || !StrEqual(currScPath, L""))
 			MCopyToClipboard(currScPath, wcslen(currScPath));
 		break;
 	}
 	case ID_SCMAIN_DEL: {
-		if (wcslen(currSc) > 0 || !MStrEqualW(currSc, L""))
+		if (wcslen(currSc) > 0 || !StrEqual(currSc, L""))
 			MSCM_DeleteService(currSc, str_item_delsc_err);
 		break;
 	}
 	case ID_SCMAIN_DISABLE: {
-		if (wcslen(currSc) > 0 || !MStrEqualW(currSc, L""))
+		if (wcslen(currSc) > 0 || !StrEqual(currSc, L""))
 			MSCM_ChangeScStartType(currSc, SERVICE_DISABLED, str_item_setscstart_err);
 		break;
 	}
 	case ID_SCMAIN_AUTOSTART: {
-		if (wcslen(currSc) > 0 || !MStrEqualW(currSc, L"")) 
+		if (wcslen(currSc) > 0 || !StrEqual(currSc, L"")) 
 			MSCM_ChangeScStartType(currSc, SERVICE_AUTO_START, str_item_setscstart_err);
 		break;
 	}
 	case ID_SCMAIN_NOAUTOSTART: {
-		if (wcslen(currSc) > 0 || !MStrEqualW(currSc, L""))
+		if (wcslen(currSc) > 0 || !StrEqual(currSc, L""))
 			MSCM_ChangeScStartType(currSc, SERVICE_DEMAND_START, str_item_setscstart_err);
 		break;
 	}
 	case ID_SCMAIN_REBOOT: 
 	case ID_SCSMALL_REBOOTSC: {
-		if (wcslen(currSc) > 0 || !MStrEqualW(currSc, L"")) {
+		if (wcslen(currSc) > 0 || !StrEqual(currSc, L"")) {
 			SC_HANDLE hSc = OpenService(hSCM, currSc, SERVICE_ENUMERATE_DEPENDENTS |
 				SERVICE_START | SERVICE_STOP | SERVICE_PAUSE_CONTINUE | SERVICE_QUERY_STATUS);
 			if (hSc)
@@ -367,7 +368,7 @@ LRESULT MSCM_HandleWmCommand(WPARAM wParam)
 		break;
 	}
 	case ID_SCMAIN_START: {
-		if (wcslen(currSc) > 0 || !MStrEqualW(currSc, L"")) 
+		if (wcslen(currSc) > 0 || !StrEqual(currSc, L"")) 
 		{
 			SC_HANDLE hSc = OpenService(hSCM, currSc, SERVICE_ENUMERATE_DEPENDENTS |
 				SERVICE_START | SERVICE_STOP | SERVICE_PAUSE_CONTINUE | SERVICE_QUERY_STATUS);
@@ -388,7 +389,7 @@ LRESULT MSCM_HandleWmCommand(WPARAM wParam)
 	}	
 	case ID_SCSMALL_STOPSC:
 	case ID_SCMAIN_STOP: {
-		if (wcslen(currSc) > 0 || !MStrEqualW(currSc, L"")) 
+		if (wcslen(currSc) > 0 || !StrEqual(currSc, L"")) 
 			MSCM_ControlSc(currSc, SERVICE_STOPPED, SERVICE_CONTROL_STOP, (LPWSTR)str_item_op_failed.c_str());
 		break;
 	}
@@ -397,12 +398,12 @@ LRESULT MSCM_HandleWmCommand(WPARAM wParam)
 		break;
 	}
 	case ID_SCMAIN_RESU: {
-		if (wcslen(currSc) > 0 || !MStrEqualW(currSc, L""))
+		if (wcslen(currSc) > 0 || !StrEqual(currSc, L""))
 			MSCM_ControlSc(currSc, SERVICE_RUNNING, SERVICE_CONTROL_CONTINUE, (LPWSTR)str_item_op_failed.c_str());
 		break;
 	}
 	case ID_SCMAIN_SUSP: {
-		if (wcslen(currSc) > 0 || !MStrEqualW(currSc, L"")) 
+		if (wcslen(currSc) > 0 || !StrEqual(currSc, L"")) 
 			MSCM_ControlSc(currSc, SERVICE_PAUSED, SERVICE_CONTROL_PAUSE, (LPWSTR)str_item_op_failed.c_str());
 		break;
 	}

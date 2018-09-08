@@ -1255,4 +1255,16 @@ PCMgr 需要管理员权限 才能对系统进行控制和管理。
   <data name="DetachDebuggerTitle" xml:space="preserve">
     <value>分离调试器</value>
   </data>
+  <data name="ChangePriorityAsk" xml:space="preserve">
+    <value>是否要更改 "%s" 的优先级?</value>
+  </data>
+  <data name="ChangePriorityContent" xml:space="preserve">
+    <value>更改特定进程的优先级可能导致系统不稳定。</value>
+  </data>
+  <data name="SystemInterrupts" xml:space="preserve">
+    <value>系统中断</value>
+  </data>
+  <data name="InterruptsProcessDsb" xml:space="preserve">
+    <value>延迟过程调用和中断服务例程</value>
+  </data>
 </root>

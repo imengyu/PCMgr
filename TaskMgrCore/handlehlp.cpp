@@ -252,11 +252,11 @@ M_CAPI(BOOL) M_EH_EnumProcessHandles(DWORD pid, EHCALLBACK callback)
 
 					M_EH_GetHandleTypeName(hDup, handleTypeName, 64);
 
-					if (MStrEqual(handleTypeName, L"File"))
+					if (StrEqual(handleTypeName, L"File"))
 						MGetNtPathFromHandle(hDup, handlePath, MAX_PATH);
-					else if (MStrEqual(handleTypeName, L"Process"))
+					else if (StrEqual(handleTypeName, L"Process"))
 						M_EH_GetProcessHandleValue(hProcess, (HANDLE)info.HandleValue, handlePath, MAX_PATH);
-					else if (MStrEqual(handleTypeName, L"Thread"))
+					else if (StrEqual(handleTypeName, L"Thread"))
 						M_EH_GetThreadHandleValue(hProcess, (HANDLE)info.HandleValue, handlePath, MAX_PATH);
 					else M_EH_GetObjectName(hDup, handlePath, MAX_PATH);
 				}

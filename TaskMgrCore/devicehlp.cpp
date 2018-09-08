@@ -215,7 +215,7 @@ M_CAPI(BOOL) MDEVICE_GetIsSystemDisk(LPCSTR perfStr)
 	CHAR diskLetter;
 	GetSystemDirectoryA(sysPath, sizeof(sysPath));
 	diskLetter = sysPath[0];
-	return MStrContainsCharA(perfStr, diskLetter);
+	return StringHlp::StrContainsCharA(perfStr, diskLetter);
 }
 M_CAPI(BOOL) MDEVICE_GetIsPageFileDisk(LPCSTR perfStr)
 {
@@ -467,7 +467,7 @@ M_CAPI(LPWSTR) MDEVICE_GetMemoryDeviceLocator() {
 	return memoryInfo.DeviceLocator;
 }
 M_CAPI(LPWSTR) MDEVICE_GetMemoryDeviceName() {
-	if (MStrEqual(memoryInfo.Name, L"")) {
+	if (StrEqual(memoryInfo.Name, L"")) {
 		UINT64 size = memoryInfo.Capacity / 8388608;
 		swprintf_s(memoryInfo.Name, L"%llu GB %s", size, MDEVICE_GetMemoryTypeString(memoryInfo.SMBIOSMemoryType));
 	}
@@ -495,7 +495,7 @@ std::vector<MDeviceNetworkAdapter*> netAdapters;
 MDeviceNetworkAdapter* MDEVICE_FindNetworkAdaptersInfo(LPWSTR name) {
 	for (auto it = netAdapters.begin(); it != netAdapters.end(); it++)
 	{
-		if (MStrEqual((*it)->Description, name))
+		if (StrEqual((*it)->Description, name))
 			return *it;
 	}
 	return NULL;

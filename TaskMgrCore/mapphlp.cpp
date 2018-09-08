@@ -37,9 +37,9 @@ processorArchitecture = '*' publicKeyToken = '6595b64144ccf1df' language = '*'\"
 
 #ifdef _AMD64_
 #define GWL_WNDPROC         (-4)
-#pragma comment(linker,"/export:MAppWorkCall1=PCMGR32.MAppMainThreadCall")
-#else
 #pragma comment(linker,"/export:MAppWorkCall1=PCMGR64.MAppMainThreadCall")
+#else
+#pragma comment(linker,"/export:MAppWorkCall1=PCMGR32.MAppMainThreadCall")
 #endif
 #define WM_S_APPBAR 900
 #define WM_S_MESSAGE_EXIT 901
@@ -63,16 +63,37 @@ BOOL appLoadSucessfuly = FALSE;
 
 typedef HRESULT(WINAPI*CLRCreateInstanceFun)(REFCLSID clsid, REFIID riid, LPVOID *ppInterface);
 
-HMENU hMenuMain;
-exitcallback hMainExitCallBack;
+HMENU hMenuMain = NULL;
+exitcallback hMainExitCallBack = NULL;
 extern HWND hWndMain;
 
-EnumWinsCallBack hEnumWinsCallBack;
-GetWinsCallBack hGetWinsWinsCallBack;
-CLRCreateInstanceFun _CLRCreateInstance;
-WorkerCallBack hWorkerCallBack;
-TerminateImporantWarnCallBack hTerminateImporantWarnCallBack;
-HANDLE hMutex;
+EnumWinsCallBack hEnumWinsCallBack = NULL;
+GetWinsCallBack hGetWinsWinsCallBack = NULL;
+CLRCreateInstanceFun _CLRCreateInstance = NULL;
+WorkerCallBack hWorkerCallBack = NULL;
+TerminateImporantWarnCallBack hTerminateImporantWarnCallBack = NULL;
+HANDLE hMutex = NULL;
+
+typedef struct tag_SHOWMENUPROC
+{
+	WCHAR FilePath[MAX_PATH];
+	WCHAR FileName[MAX_PATH];
+	DWORD Pid;
+	HWND hWnd;
+	HWND selectedhWnd;
+	int data;
+	int type;
+	int x;
+	int y;
+}SHOWMENUPROC, *PSHOWMENUPROC;
+typedef struct tag_SHOWMENUPROCPPER
+{
+	WCHAR FilePath[MAX_PATH];
+	WCHAR FileName[MAX_PATH];
+	DWORD Pid;
+	BOOL IsImporant;
+	BOOL IsVeryImporant;
+}SHOWMENUPROCPPER,*PSHOWMENUPROCPPER;
 
 WCHAR debuggerCommand[MAX_PATH];
 WCHAR thisGuid[MAX_PATH];
@@ -90,6 +111,9 @@ HMENU hMenuMainSet;
 HMENU hMenuMainView;
 HMENU hMenuMainViewRefeshRate;
 HWND selectItem4;
+
+WCHAR ntoskrnlPath[MAX_PATH];
+WCHAR cssrssPath[MAX_PATH];
 
 int HotKeyId = 0;
 bool has_fullscreen_window = false;
@@ -118,6 +142,15 @@ BOOL procListLock = FALSE;
 HWND hListHeaderMainProcList;
 CLRCreateInstanceFnPtr dCLRCreateInstance;
 
+extern DWORD thisCommandPid;
+extern LPWSTR thisCommandPath;
+extern LPWSTR thisCommandName;
+extern LPWSTR thisCommandUWPName;
+extern BOOL thisCommandIsImporant;
+extern BOOL thisCommandIsVeryImporant;
+extern HANDLE thisCommandhProcess;
+
+bool MLoadApp();
 bool MLoadAppBackUp();
 LONG WINAPI MUnhandledExceptionFilter(struct _EXCEPTION_POINTERS *lpExceptionInfo);
 
@@ -128,16 +161,16 @@ BOOL MAppLoadMenuSettings()
 	UINT rtIndex = -1;
 	WCHAR lastRt[16];
 	GetPrivateProfileString(L"AppSetting", L"RefeshTime", L"", lastRt, 16, iniPath);
-	if (MStrEqual(lastRt, L"Stop")) {
+	if (StrEqual(lastRt, L"Stop")) {
 		rtIndex = 2;
 		refesh_paused = true;
 	}
-	else if (MStrEqual(lastRt, L"Fast")) {
+	else if (StrEqual(lastRt, L"Fast")) {
 		rtIndex = 0;
 		refesh_paused = false;
 		refesh_fast = true;
 	}
-	else if (MStrEqual(lastRt, L"Slow")) {
+	else if (StrEqual(lastRt, L"Slow")) {
 		rtIndex = 1;
 		refesh_paused = false;
 		refesh_fast = false;
@@ -217,7 +250,7 @@ BOOL MAppStartTryActiveLastApp(LPWSTR windowTitle) {
 	}		
 	return FALSE;
 }
-M_API BOOL MAppKillOld(LPWSTR procName)
+BOOL MAppKillOld(LPWSTR procName)
 {
 	BOOL ended = FALSE;
 	PROCESSENTRY32 pe;
@@ -230,7 +263,7 @@ M_API BOOL MAppKillOld(LPWSTR procName)
 		pe.dwSize = sizeof(PROCESSENTRY32);
 		if (Process32Next(hSnapshot, &pe) == FALSE)
 			break;
-		if (MStrEqualW(pe.szExeFile, procName))
+		if (StrEqual(pe.szExeFile, procName))
 			if (pe.th32ProcessID != GetCurrentProcessId()) {
 				Log(L"Killing old PCMgr process : %d", pe.th32ProcessID);
 				ended = MTerminateProcessNt(pe.th32ProcessID, NULL) == STATUS_SUCCESS;
@@ -310,6 +343,7 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 	}
 	switch (id)
 	{
+	case 161: return IsMinimized(hWnd);
 	case 162: {
 		main_grouping = static_cast<int>((ULONG_PTR)hWnd);
 		CheckMenuItem(hMenuMainView, IDM_GROUP, main_grouping ? MF_CHECKED : MF_UNCHECKED);
@@ -603,9 +637,19 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 	}
 	case 215: SetMenu(hWnd, NULL); break;
 	case 216: SetMenu(hWnd, hMenuMain); break;
-
-	default:
-		return 0;
+	case 217: MAppVProcessAllWindowsUWP(); break;
+	case 218: return MAppVProcessAllWindowsGetProcessWindow((DWORD)(ULONG_PTR)hWnd);
+	case 219: return MAppVProcessAllWindowsGetProcessWindow2((DWORD)(ULONG_PTR)hWnd);
+	case 220: {
+		PSHOWMENUPROCPPER ppr = (PSHOWMENUPROCPPER)hWnd;
+		return MAppWorkShowMenuProcessPrepare(ppr->FilePath, ppr->FileName, ppr->Pid, ppr->IsImporant, ppr->IsVeryImporant);
+	}
+	case 221: {
+		PSHOWMENUPROC ppr = (PSHOWMENUPROC)hWnd;
+		return MAppWorkShowMenuProcess(ppr->FilePath, ppr->FileName, ppr->Pid, ppr->hWnd, ppr->selectedhWnd, ppr->data, ppr->type, ppr->x, ppr->y);
+	}
+	case 222: MAppVProcessAllWindows(); break;
+	default: break;
 	}
 	return 0;
 }	
@@ -613,11 +657,29 @@ M_API void* MAppWorkCall4(int id, void* hWnd, void*data)
 {
 	switch (id)
 	{
+	case 96: {
+		WCHAR buffer[MAX_PATH];
+		wcscpy_s(buffer, L"%%SystemRoot%%\\System32\\csrss.exe");
+		ExpandEnvironmentStrings(buffer, cssrssPath, MAX_PATH);
+		return cssrssPath;
+	}
+	case 97: {
+		WCHAR buffer[MAX_PATH];
+		wcscpy_s(buffer, L"%%SystemRoot%%\\System32\\ntoskrnl.exe");
+		ExpandEnvironmentStrings(buffer, ntoskrnlPath, MAX_PATH);
+		return ntoskrnlPath;
+	}
+	case 98: {
+		MLoadApp();
+		MLoadAppBackUp();
+		return 0;
+	}
 	case 99: return SetParent((HWND)hWnd, (HWND)data);
 	case 100: { 
 
 		break;
 	}
+	case 101:return thisCommandName;
 	}
 	return 0;
 }
@@ -628,6 +690,10 @@ M_API void* MAppWorkCall5(int id, void* hWnd, void*data1, void*data2, void*data3
 	case 50: return (LPVOID)(ULONG_PTR)MKillProcessUser2(hWndMain, (DWORD)(ULONG_PTR)data1, (BOOL)(ULONG_PTR)data2, (BOOL)(ULONG_PTR)data3);
 	case 51: MoveWindow((HWND)hWnd, 15, 15, (int)(ULONG_PTR)data1, (int)(ULONG_PTR)data2, TRUE); break;
 	case 52: MoveWindow((HWND)hWnd, (int)(ULONG_PTR)LOWORD(data1), (int)(ULONG_PTR)HIWORD(data1), (int)(ULONG_PTR)LOWORD(data2), (int)(ULONG_PTR)HIWORD(data2), TRUE); break;
+	case 53: return (LPVOID)(ULONG_PTR)MAppWorkShowMenuFM((LPWSTR)data1, (BOOL)(ULONG_PTR)data2, (int)(ULONG_PTR)data3);
+	case 54: return (LPVOID)(ULONG_PTR)MAppWorkShowMenuFMF((LPWSTR)data1);
+	case 55: return (LPVOID)(ULONG_PTR)MAppRegShowHotKey((HWND)hWnd, (UINT)(ULONG_PTR)data1, (UINT)(ULONG_PTR)data2);
+	
 	}
 	return 0;
 }
@@ -635,7 +701,7 @@ M_API void MAppHideCos()
 {
 	ShowWindow(GetConsoleWindow(), SW_HIDE);
 }
-M_API void* MAppSetCallBack(void * cp, int id)
+M_API void*MAppSetCallBack(void * cp, int id)
 {
 	switch (id)
 	{
@@ -683,7 +749,7 @@ M_API void MAppSetLanuageItems(int in, int ind, LPWSTR msg, int size)
 		break;
 	}
 }
-M_API int MAppRegShowHotKey(HWND hWnd, UINT vkkey, UINT key)
+int MAppRegShowHotKey(HWND hWnd, UINT vkkey, UINT key)
 {	
     HotKeyId = GlobalAddAtom(L"PCMgrHotKey") - 0xC000;
 	if (vkkey == 65536)//c# shift
@@ -942,10 +1008,6 @@ bool MLoadAppBackUp()
 	}
 	return false;
 }
-M_API void MAppRun2() {
-	MLoadApp();
-	MLoadAppBackUp();
-}
 
 //global ex
 M_API void MAppExit() {
@@ -1177,16 +1239,6 @@ void ThrowErrorAndErrorCodeX(NTSTATUS code, LPWSTR msg, LPWSTR title, BOOL ntsta
 	else wsprintf(errcode, L"\nError Code : %d", code);
 	MShowMessageDialog(hWndMain, errcode, title, msg, MB_ICONERROR, MB_OK);
 }
-
-extern DWORD thisCommandPid;
-extern LPWSTR thisCommandPath;
-extern LPWSTR thisCommandName;
-extern LPWSTR thisCommandUWPName;
-extern BOOL thisCommandIsImporant;
-extern BOOL thisCommandIsVeryImporant;
-extern HANDLE thisCommandhProcess;
-
-M_CAPI(LPWSTR) MAppGetCurSelectName() { return thisCommandName; }
 
 //主窗口 WinProc
 LRESULT CALLBACK MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -1894,10 +1946,6 @@ LRESULT CALLBACK MProcListHeaderWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 
 
 //Dialog boxs
-void MPrintErrorMessage(LPWSTR str, int icon)
-{
-	MShowErrorMessage(str, L"", icon, MB_OK);
-}
 int MShowMessageDialog(HWND hwnd, LPWSTR text, LPWSTR title, LPWSTR instruction, int ico, int button)
 {
 	PCWSTR tico = NULL;
@@ -1953,240 +2001,7 @@ EXTERN_C M_API HRESULT MTaskDialog(_In_opt_ HWND hwndOwner, _In_opt_ HINSTANCE h
 
 #pragma region StringHlp
 
-M_API void MConvertStrDel(void*str)
-{
-	delete str;
-}
-M_API LPWSTR MConvertLPCSTRToLPWSTR(const char * szString)
-{
-	return AnsiToUnicode(szString);
-}
-M_API LPCSTR MConvertLPWSTRToLPCSTR(const WCHAR * szString)
-{
-	return UnicodeToAnsi(szString);
-}
 
-M_API LPWSTR MStrUpW(const LPWSTR str)
-{
-	size_t len = wcslen(str) + 1;
-	_wcsupr_s((wchar_t *)str, len);
-	return str;
-}
-M_API LPCSTR MStrUpA(const LPCSTR str)
-{
-	size_t len = strlen(str) + 1;
-	_strupr_s((char*)str, len);
-	return str;
-}
-
-M_API LPWSTR MStrLoW(const LPWSTR str)
-{
-	size_t len = wcslen(str) + 1;
-	_wcslwr_s((wchar_t *)str, len);
-	return str;
-}
-M_API LPCSTR MStrLoA(const LPCSTR str)
-{
-	size_t len = strlen(str) + 1;
-	_strlwr_s((char*)str, len);
-	return str;
-}
-
-M_API BOOL MStrEqualA(const LPCSTR str1, const LPCSTR str2)
-{
-	return (strcmp(str1, str2) == 0);
-}
-M_API BOOL MStrEqualW(const wchar_t* str1, const wchar_t* str2)
-{
-	return (wcscmp(str1, str2) == 0);
-}
-
-M_API LPCSTR MIntToStrA(int i)
-{
-	int n = 1, i2 = i;
-	if (i == 0)
-		n = 2;
-	else
-	{
-		while (i2)
-		{
-			i2 = i2 / 10;
-			n++;
-		}
-		if (i < 0)
-			n++;
-	}
-
-	char *rs = new char[n];
-	_itoa_s(i, rs, n, 10);
-	return rs;
-}
-M_API LPWSTR MIntToStrW(int i)
-{
-	int n = 1, i2 = i;
-	if (i == 0)
-		n = 2;
-	else
-	{
-		while (i2)
-		{
-			i2 = i2 / 10;
-			n++;
-		}
-		if (i < 0)
-			n++;
-	}
-
-	WCHAR *rs = new WCHAR[n];
-	_itow_s(i, rs, n, 10);
-	return rs;
-}
-
-M_API LPCSTR MLongToStrA(long i)
-{
-	long n = 1, i2 = i;
-	if (i == 0)
-		n = 2;
-	else
-	{
-		while (i2)
-		{
-			i2 = i2 / 10;
-			n++;
-		}
-		if (i < 0)
-			n++;
-	}
-
-	char *rs = new char[n];
-	_ltoa_s(i, rs, n, 10);
-	return rs;
-}
-M_API LPWSTR MLongToStrW(long i)
-{
-	long n = 1, i2 = i;
-	if (i == 0)
-		n = 2;
-	else
-	{
-		while (i2)
-		{
-			i2 = i2 / 10;
-			n++;
-		}
-		if (i < 0)
-			n++;
-	}
-
-	wchar_t *rs = new wchar_t[n];
-	_ltow_s(i, rs, n, 10);
-	return rs;
-}
-
-M_API int MStrToIntA(char* str)
-{
-	return atoi(str);
-}
-M_API int MStrToIntW(LPWSTR str)
-{
-	return _wtoi(str);
-}
-
-M_API DWORD MStrSplitA(char* str, const LPCSTR splitStr, LPCSTR * result, char** lead)
-{
-	if (str)
-	{
-		char*p = strtok_s(str, splitStr, lead);
-		if (p) {
-			*result = p;
-			return 1;
-		}
-		else return 0;
-	}
-	return 0;
-}
-M_API DWORD MStrSplitW(LPWSTR str, const LPWSTR splitStr, LPWSTR * result, wchar_t ** lead)
-{
-	if (str)
-	{
-		wchar_t*p = wcstok_s(str, splitStr, lead);
-		if (p) {
-			*result = p;
-			return 1;
-		}
-		else return 0;
-	}
-	return 0;
-}
-
-M_API BOOL MStrContainsA(const LPCSTR str, const LPCSTR testStr, LPCSTR *resultStr)
-{
-	BOOL result = FALSE;
-	const char *rs = strstr(str, testStr);
-	if (rs) {
-		result = TRUE;
-		if (resultStr)*resultStr = rs;
-	}
-	return result;
-}
-M_API BOOL MStrContainsW(const LPWSTR str, const LPWSTR testStr, LPWSTR *resultStr)
-{
-	BOOL result = FALSE;
-	const wchar_t *rs = wcsstr(str, testStr);
-	if (rs) {
-		result = TRUE;
-		if (resultStr) *resultStr = (LPWSTR)rs;
-	}
-	return result;
-}
-
-M_API BOOL MStrContainsCharA(const LPCSTR str, const CHAR testStr)
-{
-	return strchr(str, testStr) != NULL;
-}
-M_API BOOL MStrContainsCharW(const LPWSTR str, const WCHAR testStr)
-{
-	return wcsrchr(str, testStr) != NULL;
-}
-
-M_API int MHexStrToIntW(wchar_t *s)
-{
-	size_t i, m = lstrlen(s);
-	int temp = 0, n;
-	for (i = 0; i<m; i++) {
-		if (s[i] >= L'A'&&s[i] <= L'F')
-			n = s[i] - L'A' + 10;
-		else if (s[i] >= L'a'&&s[i] <= L'f')
-			n = s[i] - L'a' + 10;
-		else n = s[i] - L'0';
-		temp = temp * 16 + n;
-	}
-	return temp;
-}
-M_API long long MHexStrToLongW(wchar_t *s)
-{
-	bool isx = false;
-	int len = lstrlen(s);
-	for (int i = 0; i<len; i++)
-	{
-		if (s[i] == 'x' || s[i] == 'X') {
-			isx = true;
-			break;
-		}
-	}
-	int i, m = isx ? lstrlen(s) - 2 : lstrlen(s), n, w = m;
-	long long temp = 0;
-	for (i = isx ? 2 : 0; i < m; i++) {
-		if (s[i] >= L'A'&&s[i] <= L'F')
-			n = s[i] - L'A' + 10;
-		else if (s[i] >= L'a'&&s[i] <= L'f')
-			n = s[i] - L'a' + 10;
-		else n = s[i] - L'0';
-		w--;
-		temp += static_cast<long long>(pow(16, w) * n);
-	}
-	return temp;
-}
 #pragma endregion
 
 //Crush annd MiniDump
@@ -2194,13 +2009,6 @@ M_API long long MHexStrToLongW(wchar_t *s)
 //Create MiniDump file
 int GenerateMiniDump(PEXCEPTION_POINTERS pExceptionPointers)
 {
-	typedef BOOL(WINAPI *fnMiniDumpWriteDump)(_In_ HANDLE hProcess, _In_ DWORD ProcessId, _In_ HANDLE hFile, _In_ MINIDUMP_TYPE DumpType, _In_opt_ PMINIDUMP_EXCEPTION_INFORMATION ExceptionParam, _In_opt_ PMINIDUMP_USER_STREAM_INFORMATION UserStreamParam, _In_opt_ PMINIDUMP_CALLBACK_INFORMATION CallbackParam);
-
-	fnMiniDumpWriteDump _MiniDumpWriteDump = (fnMiniDumpWriteDump)GetProcAddress(GetModuleHandle(L"dbghelp.dll"), "MiniDumpWriteDump");
-
-	if (_MiniDumpWriteDump == NULL)
-		goto QUITCREATEDUMP;
-
 	// 创建 dmp 文件件
 	TCHAR szFileName[MAX_PATH] = { 0 };
 	LPWSTR szVersion = (LPWSTR)L"\\PCMgr";
@@ -2225,7 +2033,7 @@ int GenerateMiniDump(PEXCEPTION_POINTERS pExceptionPointers)
 	expParam.ExceptionPointers = pExceptionPointers;
 	expParam.ClientPointers = FALSE;
 
-	_MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), 	hDumpFile, MiniDumpWithDataSegs, (pExceptionPointers ? &expParam : NULL), NULL, NULL);
+	MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), 	hDumpFile, MiniDumpWithDataSegs, (pExceptionPointers ? &expParam : NULL), NULL, NULL);
 
 	CloseHandle(hDumpFile);
 

@@ -1257,4 +1257,16 @@ Memory used by processes, drivers, or operating systems</value>
   <data name="DetachDebuggerTitle" xml:space="preserve">
     <value>Detach debugger</value>
   </data>
+  <data name="ChangePriorityAsk" xml:space="preserve">
+    <value>Do you want to change the priority of "%s"?</value>
+  </data>
+  <data name="ChangePriorityContent" xml:space="preserve">
+    <value>Changing the priority of some process may lead to instability of the system.</value>
+  </data>
+  <data name="SystemInterrupts" xml:space="preserve">
+    <value>System interrupts</value>
+  </data>
+  <data name="InterruptsProcessDsb" xml:space="preserve">
+    <value>Delay procedure call and interrupt service routine</value>
+  </data>
 </root>

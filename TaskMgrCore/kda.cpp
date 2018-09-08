@@ -61,7 +61,7 @@ M_CAPI(BOOL) M_KDA_Dec(PUCHAR buf, ULONG_PTR startaddress, LPVOID callback, ULON
 	else LogErr(L"Failed to disasm given code!\n");
 	return FALSE;
 }
-M_CAPI(BOOL) M_DeAssemblier(PUCHAR buf, ULONG_PTR startaddress, ULONG_PTR size, LPVOID outstr)
+M_CAPI(BOOL) M_KDA_DeAssemblier(PUCHAR buf, ULONG_PTR startaddress, ULONG_PTR size, LPVOID outstr)
 {
 	std::wstring * str = new std::wstring();
 

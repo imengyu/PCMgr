@@ -12,43 +12,19 @@
 #include <iphlpapi.h>
 #include <Tcpestats.h>
 #include <vector>
+#include <list>
+
+#include "MSystemPerformanctMonitor.h"
 
 extern NtQuerySystemInformationFun NtQuerySystemInformation;
 extern NtQueryInformationProcessFun NtQueryInformationProcess;
 extern RtlNtStatusToDosErrorFun RtlNtStatusToDosError;
 
-int cpu_Count = 0;
-__int64 LastTime = 0;
-__int64 TimeInterval = 0;
-FILETIME CreateTime;
-FILETIME ExitTime;
-
-PSYSTEM_LOGICAL_PROCESSOR_INFORMATION buffer = NULL;
-PSYSTEM_LOGICAL_PROCESSOR_INFORMATION ptr = NULL;
-PERFORMANCE_INFORMATION performance_info;
-
-DWORD numaNodeCount = 0;
-DWORD processorL1CacheCount = 0;
-DWORD processorL2CacheCount = 0;
-DWORD processorL3CacheCount = 0;
-DWORD processorPackageCount = 0;
-MEMORYSTATUSEX memory_statuex;
-SYSTEM_MEMORY_LIST_INFORMATION memoryListInfo;
-ULONG_PTR standbyPageCount = 0;
-
-void MPERF_FreeCpuInfos()
-{
-	if (buffer)
-		delete buffer;
-}
-
 //声明查询句柄hquery
 HQUERY hQuery = NULL; 
 
-M_CAPI(BOOL) MPERF_GlobalInit() {
-
-	MPERF_UpdatePerformance();	
-
+M_CAPI(BOOL) MPERF_GlobalInit()
+{
 	PDH_STATUS pdhstatus = PdhOpenQuery(0, 0, &hQuery);
 	return (pdhstatus == ERROR_SUCCESS);
 }
@@ -59,230 +35,9 @@ M_CAPI(BOOL) MPERF_GlobalUpdatePerformanceCounters()
 {
 	return !PdhCollectQueryData(hQuery);
 }
-
-M_CAPI(ULONGLONG) MPERF_GetAllRam()
-{
-	return memory_statuex.ullTotalPhys;
+M_CAPI(BOOL) MPERF_GlobalUpdateCpu() {
+	return MSystemPerformanctMonitor::UpdateCpuGlobal();
 }
-M_CAPI(ULONGLONG) MPERF_GetPageSize()
-{
-	return performance_info.PageSize;
-}
-M_CAPI(ULONGLONG) MPERF_GetKernelPaged()
-{
-	return performance_info.KernelPaged;
-}
-M_CAPI(ULONGLONG) MPERF_GetKernelNonpaged()
-{
-	return performance_info.KernelNonpaged;
-}
-M_CAPI(ULONGLONG) MPERF_GetSystemCacheSize()
-{
-	return performance_info.SystemCache;
-}
-M_CAPI(ULONGLONG) MPERF_GetCommitTotal()
-{
-	return performance_info.CommitTotal;
-}
-M_CAPI(ULONGLONG) MPERF_GetCommitLimit()
-{
-	return performance_info.CommitLimit;
-}
-M_CAPI(ULONGLONG) MPERF_GetRamAvail() {
-	return memory_statuex.ullAvailPhys;
-}
-M_CAPI(ULONGLONG) MPERF_GetRamUsed() {
-	return memory_statuex.ullTotalPhys - memory_statuex.ullAvailPhys;
-}
-M_CAPI(ULONGLONG) MPERF_GetRamAvailPageFile() {
-	return performance_info.CommitLimit*performance_info.PageSize;
-}
-M_CAPI(ULONGLONG) MPERF_GetRunTime()
-{
-	return GetTickCount64();
-}
-M_CAPI(ULONGLONG) MPERF_GetStandBySize()
-{
-	return standbyPageCount * MPERF_GetPageSize();
-}
-M_CAPI(ULONGLONG) MPERF_GetModifiedSize()
-{
-	return memoryListInfo.ModifiedPageCount*MPERF_GetPageSize();
-}
-
-M_CAPI(DWORD) MPERF_GetThreadCount() {
-	return performance_info.ThreadCount;
-}
-M_CAPI(DWORD) MPERF_GetHandleCount() {
-	return performance_info.HandleCount;
-}
-M_CAPI(DWORD) MPERF_GetProcessCount() {
-	return performance_info.ProcessCount;
-}
-M_CAPI(BOOL) MPERF_UpdatePerformance()
-{
-	return GetPerformanceInfo(&performance_info, sizeof(performance_info));
-}
-M_CAPI(BOOL) MPERF_UpdateMemoryListInfo()
-{
-	standbyPageCount = 0;
-	memset(&memoryListInfo, 0, sizeof(memoryListInfo));
-	if (NT_SUCCESS(NtQuerySystemInformation(
-		SystemMemoryListInformation,
-		&memoryListInfo,
-		sizeof(SYSTEM_MEMORY_LIST_INFORMATION),
-		NULL
-	)))
-	{
-		for (ULONG i = 0; i < 8; i++)
-			standbyPageCount += memoryListInfo.PageCountByPriority[i];
-		return TRUE;
-	}
-	return FALSE;
-}
-M_CAPI(BOOL) MPERF_GetMemoryCompressionInfo(PPROCESS_COMPRESSION_INFO outInfo)
-{
-	SYSTEM_STORE_INFORMATION storeInfo;
-	PROCESS_COMPRESSION_INFO compressInfo;
-
-	storeInfo.Version = 1;
-	storeInfo.InfoClass = ProcessCompressionInfoRequest;
-	storeInfo.Data = &compressInfo;
-	storeInfo.Length = sizeof(compressInfo);
-
-	ZeroMemory(&compressInfo, sizeof(compressInfo));
-	compressInfo.Version = 3;
-
-	NTSTATUS status = NtQuerySystemInformation(SystemStoreInformation, &storeInfo, sizeof(storeInfo), NULL);
-	if (NT_SUCCESS(status))
-	{
-		memcpy_s(outInfo, sizeof(PROCESS_COMPRESSION_INFO), &compressInfo, sizeof(compressInfo));
-		return TRUE;
-	}
-	else 
-	{
-		LogErr(L"MPERF_GetMemoryCompressionInfo failed : 0x%08X", status);
-		SetLastError(RtlNtStatusToDosError(status));
-		return FALSE;
-	}
-}
-
-M_CAPI(DWORD) MPERF_GetCpuL1Cache()
-{
-	return processorL1CacheCount;
-}
-M_CAPI(DWORD) MPERF_GetCpuL2Cache()
-{
-	return processorL2CacheCount;
-}
-M_CAPI(DWORD) MPERF_GetCpuL3Cache()
-{
-	return processorL3CacheCount;
-}
-M_CAPI(DWORD) MPERF_GetCpuPackage()
-{
-	return processorPackageCount;
-}
-M_CAPI(DWORD) MPERF_GetCpuNodeCount()
-{
-	return numaNodeCount;
-}
-M_CAPI(BOOL) MPERF_GetCpuInfos() {
-	PCACHE_DESCRIPTOR Cache;
-	DWORD returnLength = 0;
-	DWORD byteOffset = 0;
-
-	GetLogicalProcessorInformation(NULL, &returnLength);
-	buffer = (PSYSTEM_LOGICAL_PROCESSOR_INFORMATION)MAlloc(returnLength);
-	if (GetLogicalProcessorInformation(buffer, &returnLength))
-	{
-		ptr = buffer;
-		while (byteOffset + sizeof(SYSTEM_LOGICAL_PROCESSOR_INFORMATION) <= returnLength)
-		{
-			switch (ptr->Relationship)
-			{
-			case RelationNumaNode: numaNodeCount++; break;
-			case RelationCache: {
-				Cache = &ptr->Cache;
-				if (Cache->Level == 1)
-					processorL1CacheCount += Cache->Size;
-				else if (Cache->Level == 2)
-					processorL2CacheCount += Cache->Size;
-				else if (Cache->Level == 3)
-					processorL3CacheCount += Cache->Size;
-				break;
-			}
-			case RelationProcessorPackage: processorPackageCount++; break;
-			}
-			byteOffset += sizeof(SYSTEM_LOGICAL_PROCESSOR_INFORMATION);
-			ptr++;
-		}
-		return TRUE;
-	}
-	return 0;
-}
-M_CAPI(BOOL) MPERF_GetCpuName(LPWSTR buf, int size)
-{
-	HKEY hKey;
-	if (ERROR_SUCCESS == RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0", 0, KEY_READ, &hKey))
-	{
-		WCHAR szValue[64];//长整型数据，如果是字符串数据用char数组  
-		DWORD dwSize = sizeof(szValue);
-		DWORD dwType = REG_SZ;
-
-		if (RegQueryValueExW(hKey, L"ProcessorNameString", 0, &dwType, (LPBYTE)&szValue, &dwSize) == ERROR_SUCCESS)
-		{
-			wcscpy_s(buf, size, szValue);
-			RegCloseKey(hKey);
-			return TRUE;
-		}
-	}
-	RegCloseKey(hKey);
-	return 0;
-}
-M_CAPI(int) MPERF_GetCpuFrequency()	//获取CPU主频
-{
-	HKEY hKey;
-	if (ERROR_SUCCESS == RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0", 0, KEY_READ, &hKey))
-	{
-		DWORD dwValue;
-		DWORD dwSize = sizeof(dwValue);
-		DWORD dwType = REG_SZ;
-
-		if (RegQueryValueEx(hKey, L"~MHz", 0, &dwType, (LPBYTE)&dwValue, &dwSize) == ERROR_SUCCESS) {
-			RegCloseKey(hKey);
-			return static_cast<int>(dwValue);
-		}
-	}
-	RegCloseKey(hKey);
-	return 0;
-}
-M_CAPI(int) MPERF_GetProcessNumber()
-{
-	if (cpu_Count == 0) 
-	{
-		SYSTEM_INFO info;
-		GetSystemInfo(&info);
-		cpu_Count = static_cast<int>(info.dwNumberOfProcessors);
-	}
-	return (int)cpu_Count;
-}
-__int64 FileTimeToInt64(const FILETIME& time)
-{
-	ULARGE_INTEGER tt;  //64位无符号整型值
-	tt.LowPart = time.dwLowDateTime;
-	tt.HighPart = time.dwHighDateTime;
-	return(tt.QuadPart);  //返回整型值
-}
-__int64 CompareFileTime(FILETIME time1, FILETIME time2)
-{
-	__int64 a = ((__int64)time1.dwHighDateTime << 32U) | (__int64)time1.dwLowDateTime;
-	__int64 b = ((__int64)time2.dwHighDateTime << 32U) | (__int64)time2.dwLowDateTime;
-	return (b - a);
-}
-
-FILETIME LastIdleTime, LastKernelTime, LastUserTime;
-FILETIME IdleTime, KernelTime, UserTime;
 
 PDH_HCOUNTER *counter3cpuuser = NULL;//CPU性能计数器User
 PDH_HCOUNTER *counter3cpu = NULL;//CPU性能计数器
@@ -308,7 +63,7 @@ M_CAPI(LPWSTR) MPERF_EnumPerformanceCounterInstanceNames(LPWSTR counterName)
 		pwsCounterListBuffer = (LPWSTR)MAlloc(dwCounterListSize * sizeof(WCHAR));
 		pwsInstanceListBuffer = (LPWSTR)MAlloc(dwInstanceListSize * sizeof(WCHAR));
 
-		status = PdhEnumObjectItems(NULL, NULL, counterName, 
+		status = PdhEnumObjectItems(NULL, NULL, counterName,
 			pwsCounterListBuffer,
 			&dwCounterListSize,
 			pwsInstanceListBuffer,
@@ -340,7 +95,7 @@ M_CAPI(BOOL) MPERF_Init3PerformanceCounters()
 
 			//添加性能计数器
 			PDH_STATUS status = ERROR_SUCCESS;
-			status = PdhAddCounter(hQuery, L"\\Processor Information(_Total)\\% Processor Time", 0, counter3cpu);
+			status = PdhAddCounter(hQuery, L"\\Processor Information(_Total)\\% Idle Time", 0, counter3cpu);
 			if (status != ERROR_SUCCESS) {
 				GlobalFree(counter3cpu);
 				counter3cpu = NULL;
@@ -363,7 +118,7 @@ M_CAPI(BOOL) MPERF_Init3PerformanceCounters()
 
 
 			LPWSTR netInstanceNames = MPERF_EnumPerformanceCounterInstanceNames(L"Network Interface");
-			if (netInstanceNames) 
+			if (netInstanceNames)
 			{
 				std::wstring netCounterName = FormatString(L"\\Network Interface(%s)\\Bytes Total/sec", netInstanceNames);
 				status = PdhAddCounter(hQuery, netCounterName.c_str(), 0, counter3network);
@@ -409,22 +164,19 @@ M_CAPI(BOOL) MPERF_Destroy3PerformanceCounters()
 	}
 	return FALSE;
 }
+M_CAPI(double)MPERF_GetCpuUseAgeUser() {
 
-M_CAPI(double)MPERF_GetCupUseAge_OrgCalcute()
-{
-	memcpy_s(&LastIdleTime, sizeof(FILETIME), &IdleTime, sizeof(FILETIME));
-	memcpy_s(&LastKernelTime, sizeof(FILETIME), &KernelTime, sizeof(FILETIME));
-	memcpy_s(&LastUserTime, sizeof(FILETIME), &LastUserTime, sizeof(FILETIME));
-
-	GetSystemTimes(&IdleTime, &KernelTime, &UserTime);
-
-	__int64 idle = CompareFileTime(LastIdleTime, IdleTime);
-	__int64 kernel = CompareFileTime(LastKernelTime, KernelTime);
-	__int64 user = CompareFileTime(LastUserTime, LastUserTime);
-
-	return static_cast<double>((double)(kernel + user - idle) * 100 / (double)(kernel + user));
+	return MSystemPerformanctMonitor::GetCpuUsageUser();
 }
-M_CAPI(double)MPERF_GetCupUseAge_Pdh()
+M_CAPI(double)MPERF_GetCpuUseAgeKernel() {
+
+	return MSystemPerformanctMonitor::GetCpuUsageKernel();
+}
+M_CAPI(double)MPERF_GetCpuUseAge()
+{
+	return MSystemPerformanctMonitor::GetCpuUsage();
+}
+M_CAPI(double)MPERF_GetCpuUseAge2()
 {
 	if (counter3cpu)
 	{
@@ -435,8 +187,8 @@ M_CAPI(double)MPERF_GetCupUseAge_Pdh()
 	}
 	return 0;
 }
-
-M_CAPI(double)MPERF_GetCupUseAgeUserTime() {
+M_CAPI(double)MPERF_GetCpuUseAgeUser2()
+{
 	if (counter3cpuuser)
 	{
 		PDH_FMT_COUNTERVALUE pdh_counter_value;
@@ -446,22 +198,11 @@ M_CAPI(double)MPERF_GetCupUseAgeUserTime() {
 	}
 	return 0;
 }
-M_CAPI(double)MPERF_GetCupUseAge() {
-	if (counter3cpu)
-		return MPERF_GetCupUseAge_Pdh();
-	else return MPERF_GetCupUseAge_OrgCalcute();
-}
 M_CAPI(double)MPERF_GetRamUseAge2()
 {
-	if (MPERF_GetRamUseAge())
-		return  (double)((memory_statuex.ullTotalPhys - memory_statuex.ullAvailPhys) / (double)memory_statuex.ullTotalPhys);
-	return 0.0;
+	return MSystemMemoryPerformanctMonitor::GetMemoryUsage();
 }
-M_CAPI(BOOL) MPERF_GetRamUseAge()
-{
-	return GlobalMemoryStatusEx(&memory_statuex);
-}
-M_CAPI(double)MPERF_GetDiskUseage() 
+M_CAPI(double)MPERF_GetDiskUseage()
 {
 	if (counter3disk)
 	{
@@ -472,7 +213,7 @@ M_CAPI(double)MPERF_GetDiskUseage()
 	}
 	return 0;
 }
-M_CAPI(double)MPERF_GetNetWorkUseage() 
+M_CAPI(double)MPERF_GetNetWorkUseage()
 {
 	if (counter3network)
 	{
@@ -480,129 +221,6 @@ M_CAPI(double)MPERF_GetNetWorkUseage()
 		DWORD pdh_counter_value_type;
 		PdhGetFormattedCounterValue(*counter3network, PDH_FMT_DOUBLE, &pdh_counter_value_type, &pdh_counter_value);
 		return (pdh_counter_value.doubleValue * 0.0000001);
-	}
-	return 0;
-}
-
-//Process Performance
-
-M_CAPI(MPerfAndProcessData*) MPERF_PerfDataCreate()
-{
-	MPerfAndProcessData * data= new MPerfAndProcessData();
-	memset(data, 0, sizeof(MPerfAndProcessData));
-	return data;
-}
-M_CAPI(void) MPERF_PerfDataDestroy(MPerfAndProcessData*data)
-{
-	if (data) {
-		delete data;
-	}
-}
-M_CAPI(void) MPERF_CpuTimeUpdate()
-{
-	FILETIME now;
-	GetSystemTimeAsFileTime(&now);
-	__int64 nowu = FileTimeToInt64(now);
-	if (LastTime != 0) TimeInterval = nowu - LastTime;
-	LastTime = nowu;
-}
-M_CAPI(double) MPERF_GetProcessCpuUseAge(PSYSTEM_PROCESSES p, MPerfAndProcessData*data)
-{
-	if (p && data)
-	{
-		data->LastCpuTime = data->NowCpuTime;
-		data->NowCpuTime = (p->KernelTime.QuadPart + p->UserTime.QuadPart) / cpu_Count;
-		if (TimeInterval == 0) return 0;
-		__int64 i1 = (data->NowCpuTime - data->LastCpuTime) / 1000;
-		double rs = static_cast<double>((double)i1 / (double)(TimeInterval / 100000));
-		if (rs > 100) rs = 100;
-		return (rs < 0.1 && rs>0.05) ? 0.1 : rs;
-	}
-	return -1;
-}
-M_CAPI(ULONGLONG) MPERF_GetProcessCpuTime(PSYSTEM_PROCESSES p)
-{
-	if (p)
-		return (ULONGLONG)(p->KernelTime.QuadPart + p->UserTime.QuadPart);
-	return -1;
-}
-M_CAPI(ULONGLONG) MPERF_GetProcessCycle(PSYSTEM_PROCESSES p)
-{
-	if (p)
-		return (ULONGLONG)(p->CycleTime);
-	return -1;
-}
-M_CAPI(SIZE_T) MPERF_GetProcessRam(PSYSTEM_PROCESSES p, HANDLE hProcess)
-{
-	if (p) 
-		return (SIZE_T)p->WorkingSetPrivateSize.QuadPart;
-	return 0;
-}
-M_CAPI(SIZE_T) MPERF_GetProcessMemoryInfo(PSYSTEM_PROCESSES p, int col)
-{
-	if (p) {
-		switch (col) {
-		case M_GET_PROCMEM_WORKINGSET:
-			return (SIZE_T)p->VmCounters.WorkingSetSize;
-		case M_GET_PROCMEM_WORKINGSETPRIVATE:
-			return (SIZE_T)p->WorkingSetPrivateSize.QuadPart;
-		case M_GET_PROCMEM_WORKINGSETSHARE:
-			return (SIZE_T)(p->VmCounters.WorkingSetSize - (SIZE_T)p->WorkingSetPrivateSize.QuadPart);
-		case M_GET_PROCMEM_PEAKWORKINGSET:
-			return (SIZE_T)p->VmCounters.PeakWorkingSetSize;
-		case M_GET_PROCMEM_COMMITEDSIZE:
-			return (SIZE_T)p->VmCounters.VirtualSize;
-		case M_GET_PROCMEM_NONPAGEDPOOL:
-			return (SIZE_T)p->VmCounters.QuotaNonPagedPoolUsage;
-		case M_GET_PROCMEM_PAGEDPOOL:
-			return (SIZE_T)p->VmCounters.QuotaPagedPoolUsage;
-		case M_GET_PROCMEM_PAGEDFAULT:
-			return (SIZE_T)p->VmCounters.PageFaultCount;
-		}
-	}
-	return 0;
-}
-M_CAPI(ULONGLONG) MPERF_GetProcessIOInfo(PSYSTEM_PROCESSES p, int col)
-{
-	if (p) {
-		switch (col)
-		{
-		case M_GET_PROCIO_READ :
-			return p->IoCounters.ReadOperationCount;
-		case M_GET_PROCIO_WRITE :
-			return p->IoCounters.WriteOperationCount;
-		case M_GET_PROCIO_OTHER :
-			return p->IoCounters.OtherOperationCount;
-		case M_GET_PROCIO_READ_BYTES:
-			return p->IoCounters.ReadTransferCount;
-		case M_GET_PROCIO_WRITE_BYTES:
-			return p->IoCounters.WriteTransferCount;
-		case M_GET_PROCIO_OTHER_BYTES:
-			return p->IoCounters.OtherTransferCount;
-		default:
-			break;
-		}
-	}
-	return 0;
-}
-M_CAPI(DWORD) MPERF_GetProcessDiskRate(PSYSTEM_PROCESSES p, MPerfAndProcessData*data)
-{
-	if (p && data)
-	{
-		PIO_COUNTERS io_counter = &p->IoCounters;
-		if (io_counter)
-		{
-			ULONGLONG outRead = io_counter->ReadTransferCount - data->LastRead;
-			ULONGLONG outWrite = io_counter->WriteTransferCount - data->LastWrite;
-
-			data->LastRead = io_counter->ReadTransferCount;
-			data->LastWrite = io_counter->WriteTransferCount;
-
-			DWORD interval = static_cast<DWORD>(TimeInterval / 10000000);
-			if (interval <= 0)interval = 1;
-
-			return static_cast<DWORD>(((outRead + outWrite) / 1024) / interval);
-		}
 	}
 	return 0;
 }
@@ -683,9 +301,12 @@ M_CAPI(BOOL) MPERF_GetConnectNetWorkAllBuffer6(IN6_ADDR LocalAddr, DWORD dwLocal
 	return 0;
 }
 
-M_CAPI(ULONG64) MPERF_GetProcessNetWorkRate(DWORD pid, MPerfAndProcessData*data)
+M_CAPI(ULONG64) MPERF_GetProcessNetworkSpeed(PMPROCESS_ITEM p)
 {
-	if (!data)	return 0;
+	if (!p)	return 0;
+
+	MPerfAndProcessData*data = p->PerfData;
+	if (!data) return 0;
 
 	data->ConnectCount = 0;
 
@@ -694,7 +315,7 @@ M_CAPI(ULONG64) MPERF_GetProcessNetWorkRate(DWORD pid, MPerfAndProcessData*data)
 	{
 		for (UINT i = 0; i < netProcess->dwNumEntries; i++)
 		{
-			if (netProcess->table[i].dwOwningPid == pid)
+			if (netProcess->table[i].dwOwningPid == p->ProcessId)
 			{
 				MPERF_GetConnectNetWorkAllBuffer(netProcess->table[i].dwLocalAddr, netProcess->table[i].dwLocalPort,
 					netProcess->table[i].dwRemoteAddr, netProcess->table[i].dwRemotePort, netProcess->table[i].dwState, data);
@@ -1197,7 +818,7 @@ M_CAPI(MPerfNetData*) MPERF_GetNetworksPerformanceCounterWithName(LPWSTR name)
 		for (auto it = netCounters.begin(); it != netCounters.end(); it++)
 		{
 			MPerfNetData *data1 = (*it);
-			if (MStrEqual(data1->performanceCounter_Name, name))
+			if (StrEqual(data1->performanceCounter_Name, name))
 			{
 				return data1;
 			}

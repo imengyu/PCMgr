@@ -121,6 +121,8 @@ M_CAPI(void) M_SU_EnumKernelModulsItemDestroy(KernelModulSmallInfo * km);
 //    callback：枚举内核模块信息的回调
 //    showall：是否显示未加载的驱动
 M_CAPI(BOOL) M_SU_EnumKernelModuls(EnumKernelModulsCallBack callback, BOOL showall = FALSE);
+//MEnumDrivers==M_SU_EnumKernelModuls
+M_CAPI(BOOL) MEnumDrivers(EnumKernelModulsCallBack callback, BOOL showall);
 
 //Not For public。。。
 

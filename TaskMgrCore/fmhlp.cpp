@@ -83,7 +83,7 @@ M_CAPI(BOOL) MFM_EnumFileHandles(const WCHAR* pszFilePath, MFUSEINGCALLBACK call
 				WCHAR strDosPath[MAX_PATH];
 				if (MGetNtPathFromHandle(hDup, strNtPath, MAX_PATH) == ERROR_SUCCESS) {
 					if (MNtPathToDosPath(strNtPath, strDosPath, MAX_PATH) == ERROR_SUCCESS) {
-						if (MStrEqualW(strDosPath, pszFilePath))
+						if (StrEqual(strDosPath, pszFilePath))
 						{
 							WCHAR strValue[16];
 							swprintf_s(strValue, L"0x%X", pSysHandleInformation->Handles[i].HandleValue);
@@ -255,7 +255,7 @@ M_API BOOL MFM_GetFolders(LPWSTR path)
 		while (FindNextFile(hError, &FindData))
 		{
 			// 过虑.和..
-			if (MStrEqualW(FindData.cFileName, L".") || MStrEqualW(FindData.cFileName, L".."))
+			if (StrEqual(FindData.cFileName, L".") || StrEqual(FindData.cFileName, L".."))
 				continue;
 			if (!fmShowHiddenFile && FindData.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN)
 				continue;
@@ -320,9 +320,9 @@ M_API BOOL MFM_GetFiles(LPWSTR path)
 		while (FindNextFile(hError, &FindData))
 		{
 			// 过虑.和..
-			if (MStrEqualW(FindData.cFileName, L"."))
+			if (StrEqual(FindData.cFileName, L"."))
 				continue;
-			else if (MStrEqualW(FindData.cFileName, L"..")) {
+			else if (StrEqual(FindData.cFileName, L"..")) {
 				mfmain_callback(7, L"..", path);
 				continue;
 			}
@@ -694,7 +694,7 @@ BOOL MFM_RenameFile() {
 BOOL MFM_MoveFileToUser()
 {
 	WCHAR targetDir[MAX_PATH];
-	if (MChooseDir(hWndMain, NULL, (LPWSTR)str_item_choose_target_dir.c_str(), targetDir, sizeof(targetDir)))
+	if (M_DLG_ChooseDir(hWndMain, NULL, (LPWSTR)str_item_choose_target_dir.c_str(), targetDir, sizeof(targetDir)))
 	{
 		if (fmMutilSelect) {
 			std::wstring paths(fmCurrectSelectFilePath0);
@@ -736,7 +736,7 @@ BOOL MFM_MoveFileToUser()
 BOOL MFM_CopyFileToUser()
 {
 	WCHAR targetDir[MAX_PATH];
-	if (MChooseDir(hWndMain, NULL, (LPWSTR)str_item_choose_target_dir.c_str(), targetDir, sizeof(targetDir)))
+	if (M_DLG_ChooseDir(hWndMain, NULL, (LPWSTR)str_item_choose_target_dir.c_str(), targetDir, sizeof(targetDir)))
 	{
 		if (fmMutilSelect) {
 			std::wstring paths(fmCurrectSelectFilePath0);
@@ -947,7 +947,8 @@ void MFF_ShowFolder()
 {
 	MFM_Recall(19, fmCurrectSelectFolderPath0);
 }
-M_API int MAppWorkShowMenuFM(LPWSTR strFilePath, BOOL mutilSelect, int selectCount)
+
+int MAppWorkShowMenuFM(LPWSTR strFilePath, BOOL mutilSelect, int selectCount)
 {
 	fmMutilSelectCount = selectCount;
 	fmMutilSelect = mutilSelect;
@@ -979,10 +980,10 @@ M_API int MAppWorkShowMenuFM(LPWSTR strFilePath, BOOL mutilSelect, int selectCou
 	}
 	return 0;
 }
-M_API int MAppWorkShowMenuFMF(LPWSTR strfolderPath)
+int MAppWorkShowMenuFMF(LPWSTR strfolderPath)
 {
 	fmCurrectSelectFolderPath0 = strfolderPath;
-	if (!MStrEqualW(fmCurrectSelectFolderPath0, L"\\\\") && !MStrEqualW(fmCurrectSelectFolderPath0, L"mycp")) {
+	if (!StrEqual(fmCurrectSelectFolderPath0, L"\\\\") && !StrEqual(fmCurrectSelectFolderPath0, L"mycp")) {
 		HMENU hroot = LoadMenu(hInstRs, MAKEINTRESOURCE(IDR_MENUFMFOLDER));
 		if (hroot) {
 			HMENU hpop = GetSubMenu(hroot, 0);

@@ -207,7 +207,7 @@ void MRunCmd_VExp(vector<string>* cmds, int size)
 		wcscpy_s(fileName, str);
 		delete(str);
 	}
-	if (size < 2 && !MChooseFileSingal(GetConsoleWindow(), NULL, L"Choose a PE File", L"PE文件\0*.exe;*.dll\0所有文件\0*.*\0", NULL, L".exe", fileName, MAX_PATH))
+	if (size < 2 && !M_DLG_ChooseFileSingal(GetConsoleWindow(), NULL, L"Choose a PE File", L"PE文件\0*.exe;*.dll\0所有文件\0*.*\0", NULL, L".exe", fileName, MAX_PATH))
 	{
 		printf("Please enter file name.\n");
 		return;
@@ -255,7 +255,7 @@ void MRunCmd_VImp(vector<string>* cmds, int size)
 		wcscpy_s(fileName, str);
 		delete(str);
 	}
-	if (size < 2 && !MChooseFileSingal(GetConsoleWindow(), NULL, L"Choose a PE File", L"PE文件\0*.exe;*.dll\0所有文件\0*.*\0", NULL, L".exe", fileName, MAX_PATH))
+	if (size < 2 && !M_DLG_ChooseFileSingal(GetConsoleWindow(), NULL, L"Choose a PE File", L"PE文件\0*.exe;*.dll\0所有文件\0*.*\0", NULL, L".exe", fileName, MAX_PATH))
 	{
 		printf("Please enter file name.\n"); return;
 	}

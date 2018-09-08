@@ -11,8 +11,8 @@ namespace PCMgr.Ctls
             SetStyle(ControlStyles.Selectable, false);
             SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
             SetStyle(ControlStyles.ResizeRedraw, true);
-            TitleFont = new Font("微软雅黑", 18);
-            SmallTitleFont = new Font("微软雅黑", 12);
+            TitleFont = new Font("Microsoft YaHei UI", 18);
+            SmallTitleFont = new Font("Microsoft YaHei UI", 12);
             stringFormatRight = new StringFormat();
             stringFormatRight.Alignment = StringAlignment.Far;
             stringFormatRight.LineAlignment = StringAlignment.Far;

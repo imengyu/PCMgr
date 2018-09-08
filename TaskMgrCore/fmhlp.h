@@ -133,8 +133,8 @@ void MFM_ReSetShowHiddenFiles();
 
 //²Ëµ¥º¯Êý
 
-EXTERN_C M_API int MAppWorkShowMenuFM(LPWSTR strFilePath, BOOL mutilSelect, int selectCount);
-EXTERN_C M_API int MAppWorkShowMenuFMF(LPWSTR strfolderPath);
+int MAppWorkShowMenuFM(LPWSTR strFilePath, BOOL mutilSelect, int selectCount);
+int MAppWorkShowMenuFMF(LPWSTR strfolderPath);
 
 
 

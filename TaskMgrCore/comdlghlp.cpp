@@ -4,7 +4,7 @@
 #include <Shlobj.h>
 #include <Shobjidl.h>
 
-BOOL MSaveFileSingal(HWND hWnd, LPWSTR startDir, LPWSTR title, LPWSTR fileFilter, LPWSTR fileName, LPWSTR defExt, LPWSTR strrs, size_t bufsize)
+BOOL M_DLG_SaveFileSingal(HWND hWnd, LPWSTR startDir, LPWSTR title, LPWSTR fileFilter, LPWSTR fileName, LPWSTR defExt, LPWSTR strrs, size_t bufsize)
 {
 	if (strrs) {
 		OPENFILENAME ofn;
@@ -33,7 +33,7 @@ BOOL MSaveFileSingal(HWND hWnd, LPWSTR startDir, LPWSTR title, LPWSTR fileFilter
 	}
 	return 0;
 }
-BOOL MChooseFileSingal(HWND hWnd, LPWSTR startDir, LPWSTR title, LPWSTR fileFilter, LPWSTR fileName, LPWSTR defExt, LPWSTR strrs, size_t bufsize)
+BOOL M_DLG_ChooseFileSingal(HWND hWnd, LPWSTR startDir, LPWSTR title, LPWSTR fileFilter, LPWSTR fileName, LPWSTR defExt, LPWSTR strrs, size_t bufsize)
 {
 	if (strrs) {
 		OPENFILENAME ofn;
@@ -62,7 +62,7 @@ BOOL MChooseFileSingal(HWND hWnd, LPWSTR startDir, LPWSTR title, LPWSTR fileFilt
 	}
 	return 0;
 }
-BOOL MChooseDir(HWND hWnd, LPWSTR startDir, LPWSTR title, LPWSTR strrs, size_t bufsize)
+BOOL M_DLG_ChooseDir(HWND hWnd, LPWSTR startDir, LPWSTR title, LPWSTR strrs, size_t bufsize)
 {
 	if (strrs) {
 		IFileDialog *pfd = NULL;

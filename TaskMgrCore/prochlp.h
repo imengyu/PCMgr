@@ -5,6 +5,17 @@
 #include "nthlp.h"
 #include "handlehlp.h"
 
+#define MAX_PID 30000
+
+//进程条目
+typedef struct tag_MPROCESS_ITEM {
+	DWORD ProcessId;
+	PSYSTEM_PROCESSES Data;
+	MPerfAndProcessData *PerfData;
+	tag_MPROCESS_ITEM *Prvious;
+	tag_MPROCESS_ITEM *Next;
+}MPROCESS_ITEM, *PMPROCESS_ITEM;
+
 //枚举进程模块回调
 //返回FALSE中停止枚举
 typedef BOOL(__cdecl*EnumProcessModulesCallBack)(
@@ -94,12 +105,14 @@ void MKillProcessUser(BOOL ask);
 void MKillProcessTreeUser();
 BOOL MKillProcessUser2(HWND hWnd, DWORD pid, BOOL showErr, BOOL ignoreTerminateing);
 void MAppProcPropertyClassHandleWmCommand(WPARAM wParam);
+int MAppWorkShowMenuProcessPrepare(LPWSTR strFilePath, LPWSTR strFileName, DWORD pid, BOOL isImporant, BOOL isVeryImporant);
+int MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWORD pid, HWND hDlg, HWND selectHWND, int data, int type, int x, int y);
 BOOL MDetachFromDebuggerProcess(DWORD pid);
 
+//刷新进程列表
+EXTERN_C M_API BOOL MUpdateProcessList();
 //进程提权
 EXTERN_C M_API BOOL MGetPrivileges2();
-//刷新进程列表
-EXTERN_C M_API BOOL MEnumProcessCore();
 //刷新进程列表的释放资源工作
 EXTERN_C M_API void MEnumProcessFree();
 //枚举进程（返回 进程信息信息）
@@ -129,6 +142,7 @@ EXTERN_C M_API BOOL MEnumProcessModules(DWORD dwPID, EnumProcessModulesCallBack 
 //    dwPID：进程pid
 //    callBack：回调
 EXTERN_C M_API BOOL MEnumProcessHandles(DWORD pid, EHCALLBACK callback);
+
 //枚举进程所有权限
 //    dwPID：进程pid
 //    callBack：回调
@@ -242,9 +256,9 @@ EXTERN_C M_API BOOL MGetProcessIsUWP(HANDLE handle);
 //获取进程是否是32位
 EXTERN_C M_API BOOL MGetProcessIs32Bit(HANDLE handle);
 //获取进程的GDI对象个数
-M_API DWORD MGetProcessGdiHandleCount(HANDLE handle);
+EXTERN_C M_API DWORD MGetProcessGdiHandleCount(HANDLE handle);
 //获取进程的用户对象个数
-M_API DWORD MGetProcessUserHandleCount(HANDLE handle);
+EXTERN_C M_API DWORD MGetProcessUserHandleCount(HANDLE handle);
 //获取进程内核EPROCESS信息
 //    pid：进程id
 //  对 M_SU_GetEPROCESS 的封装
@@ -255,7 +269,7 @@ EXTERN_C M_API BOOL MGetProcessEprocess(DWORD pid, PPEOCESSKINFO info);
 EXTERN_C M_API ULONG_PTR MGetProcessWorkingSetPrivate(HANDLE hProcess, SIZE_T pageSize);
 //获取进程会话ID
 //    pid：进程id
-EXTERN_C M_API DWORD MGetProcessSessionID(DWORD pid);
+EXTERN_C M_API DWORD MGetProcessSessionID(PMPROCESS_ITEM pid);
 //获取进程用户名
 //    hProcess：进程句柄
 //    [OUT] buffer：输出字符串缓冲区
@@ -264,9 +278,9 @@ EXTERN_C M_API BOOL MGetProcessUserName(HANDLE hProcess, LPWSTR buffer, int maxc
 //PSID->PUSERNAME
 EXTERN_C M_API PUSERNAME MGetUserNameBySID(PSID sid);
 //获取进程线程数
-EXTERN_C M_API ULONG MGetProcessThreadsCount(PSYSTEM_PROCESSES p);
+EXTERN_C M_API ULONG MGetProcessThreadsCount(PMPROCESS_ITEM p);
 //获取进程句柄数
-EXTERN_C M_API ULONG MGetProcessHandlesCount(PSYSTEM_PROCESSES p);
+EXTERN_C M_API ULONG MGetProcessHandlesCount(PMPROCESS_ITEM p);
 //=K32GetMappedFileName
 EXTERN_C M_API NTSTATUS MGetProcessMappedFileName(HANDLE ProcessHandle, PVOID BaseAddress, LPWSTR OutFileName, int BufferSize);
 //获取进程PEB地址
@@ -323,7 +337,7 @@ EXTERN_C M_API BOOL MGetUWPPackageFullName(HANDLE handle, int * len, LPWSTR buff
 //  3：无响应/2：暂停/1：正在运行/0：未知
 //    p：枚举所给的进程信息结构
 //    hWnd：这个进程的主窗口
-EXTERN_C M_API int MGetProcessState(PSYSTEM_PROCESSES p, HWND hWnd);
+EXTERN_C M_API int MGetProcessState(PMPROCESS_ITEM p, HWND hWnd);
 //获取SYSTEM_PROCESSES下的SYSTEM_THREADS
 EXTERN_C M_API PSYSTEM_THREADS MGetProcessThreads(DWORD pid);
 //获取根据pid在进程列表里获取 SYSTEM_PROCESSES 结构（需调用 MEnumProcessCore(); 刷新列表）

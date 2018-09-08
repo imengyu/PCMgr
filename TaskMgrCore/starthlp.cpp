@@ -29,7 +29,7 @@ void MSM_OpenAndEnumKeyValues(HKEY rootkey, LPWSTR path, LPWSTR type, EnumStartu
 		DWORD dwType = REG_SZ;	      //键值的类型 
 		while (RegEnumValue(hKEY, dwIndex, valueName, &length, 0, &dwType, keyData, &lengthData) == ERROR_SUCCESS)
 		{
-			if (isKnowDLLs && MStrEqualW(valueName, L"DllDirectory")) { dwIndex++; continue; }
+			if (isKnowDLLs && StrEqual(valueName, L"DllDirectory")) { dwIndex++; continue; }
 			if (dwType == REG_SZ || dwType == REG_EXPAND_SZ) {
 				TCHAR dwValue[256];
 				DWORD dwSzType = REG_SZ;
@@ -255,7 +255,7 @@ DWORD selectedId = 0;
 
 void MSM_DelSelectedReg()
 {
-	if (!MStrEqualW(selectedKey, L""))
+	if (!StrEqual(selectedKey, L""))
 	{
 		if (!MREG_DeleteKeyValue(selectedRootkey, selectedKey, selectedValue)) {
 			LogWarn(L"Delete reg key %s\\%s\\%s failed : %d", MREG_ROOTKEYToStr(selectedRootkey), selectedKey, selectedValue, GetLastError());
@@ -266,7 +266,7 @@ void MSM_DelSelectedReg()
 }
 void MSM_DelSelectedFile()
 {
-	if (!MStrEqualW(selectedFilePath, L""))
+	if (!StrEqual(selectedFilePath, L""))
 	{
 		if (MFM_FileExist(selectedFilePath))
 			if (!MFM_DeleteDirOrFile(selectedFilePath))
@@ -298,7 +298,7 @@ M_CAPI(VOID) MStartupsMgr_ShowMenu(HKEY rootkey, LPWSTR path, LPWSTR filepath, L
 			pt.y = y;
 		}
 
-		if (!filepath || MStrEqualW(filepath, L"")) {
+		if (!filepath || StrEqual(filepath, L"")) {
 			EnableMenuItem(hpop, IDC_MENUSTART_COPYPATH, MF_DISABLED);
 			EnableMenuItem(hpop, IDC_MENUSTART_OPENPATH, MF_DISABLED);
 		}
@@ -333,7 +333,7 @@ LRESULT MSM_HandleWmCommand(WPARAM wParam)
 		break;
 	}
 	case IDC_MENUSTART_COPYPATH: {
-		if (wcslen(selectedFilePath) > 0 || !MStrEqualW(selectedFilePath, L""))
+		if (wcslen(selectedFilePath) > 0 || !StrEqual(selectedFilePath, L""))
 			MCopyToClipboard(selectedFilePath, wcslen(selectedFilePath));
 		break;
 	}
@@ -343,7 +343,7 @@ LRESULT MSM_HandleWmCommand(WPARAM wParam)
 		break;
 	}
 	case IDC_MENUSTART_OPENPATH: {
-		if (wcslen(selectedFilePath) > 0 || !MStrEqualW(selectedFilePath, L""))
+		if (wcslen(selectedFilePath) > 0 || !StrEqual(selectedFilePath, L""))
 			MFM_ShowInExplorer(selectedFilePath);
 		break;
 	}

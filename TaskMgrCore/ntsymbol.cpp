@@ -9,6 +9,7 @@
 #include "mapphlp.h"
 #include "DirectoryHelper.h"
 #include "PathHelper.h"
+#include "StringHlp.h"
 #include <psapi.h>
 
 HANDLE hProcess;
@@ -71,7 +72,7 @@ BOOLEAN LoadSymModule(char* ImageName, ULONG_PTR ModuleBase)
 		return rs;
 	}
 
-	if (!MStrEqualA(ImageName, "ntoskrnl.exe") &&! MStrEqualA(ImageName, "ntkrnlpa.exe"))
+	if (!StrEqualAnsi(ImageName, "ntoskrnl.exe") &&!StrEqualAnsi(ImageName, "ntkrnlpa.exe"))
 	{
 		CHAR ModuleSymPathDir[MAX_PATH] = { 0 };
 		strcpy_s(ModuleSymPathDir, SymPathDir);
@@ -137,35 +138,35 @@ ULONG_PTR Off_RTL_USER_PROCESS_PARAMETERS_CommandLineOffest;
 
 BOOL CALLBACKMEnumSymStruct_Off_RTL_USER_PROCESS_PARAMETERS_Routine(_In_ LPCSTR structName, _In_ LPWSTR mumberName, _In_opt_ DWORD mumberOffest)
 {
-	if (MStrEqual(mumberName, L"CommandLine"))
+	if (StrEqual(mumberName, L"CommandLine"))
 		Off_RTL_USER_PROCESS_PARAMETERS_CommandLineOffest = mumberOffest;
 	return TRUE;
 }
 BOOL CALLBACKMEnumSymStruct_Off_PEB_Routine(_In_ LPCSTR structName, _In_ LPWSTR mumberName, _In_opt_ DWORD mumberOffest)
 {
-	if (MStrEqual(mumberName, L"Ldr"))
+	if (StrEqual(mumberName, L"Ldr"))
 		Off_PEB_LdrOffest = mumberOffest;
-	if (MStrEqual(mumberName, L"ProcessParameters"))
+	if (StrEqual(mumberName, L"ProcessParameters"))
 		Off_PEB_ProcessParametersOffest = mumberOffest;
 	return TRUE;
 }
 BOOL CALLBACKMEnumSymStruct_Off_EPROCESS_Routine(_In_ LPCSTR structName, _In_ LPWSTR mumberName, _In_opt_ DWORD mumberOffest)
 {
-	if (MStrEqual(mumberName, L"RundownProtect"))
+	if (StrEqual(mumberName, L"RundownProtect"))
 		Off_EPROCESS_RundownProtectOffest = mumberOffest;
-	else 	if (MStrEqual(mumberName, L"ThreadListHead"))
+	else 	if (StrEqual(mumberName, L"ThreadListHead"))
 		Off_EPROCESS_ThreadListHeadOffest = mumberOffest;
-	else 	if (MStrEqual(mumberName, L"Flags"))
+	else 	if (StrEqual(mumberName, L"Flags"))
 		Off_EPROCESS_FlagsOffest = mumberOffest;
-	else 	if (MStrEqual(mumberName, L"SeAuditProcessCreationInfo"))
+	else 	if (StrEqual(mumberName, L"SeAuditProcessCreationInfo"))
 		Off_EPROCESS_SeAuditProcessCreationInfoOffest = mumberOffest;
 	return TRUE;
 }
 BOOL CALLBACKMEnumSymStruct_Off_ETHREAD_Routine(_In_ LPCSTR structName, _In_ LPWSTR mumberName, _In_opt_ DWORD mumberOffest)
 {
-	if (MStrEqual(mumberName, L"Tcb"))
+	if (StrEqual(mumberName, L"Tcb"))
 		Off_ETHREAD_TcbOffest = mumberOffest;
-	else 	if (MStrEqual(mumberName, L"CrossThreadFlags"))
+	else 	if (StrEqual(mumberName, L"CrossThreadFlags"))
 		Off_ETHREAD_CrossThreadFlagsOffest = mumberOffest;
 
 	return TRUE;

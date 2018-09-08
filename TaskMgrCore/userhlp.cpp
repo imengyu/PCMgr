@@ -4,6 +4,7 @@
 #include "resource.h"
 #include "lghlp.h"
 #include "mapphlp.h"
+#include "StringHlp.h"
 
 extern HINSTANCE hInstRs;
 extern HWND hWndMain;
@@ -106,7 +107,7 @@ INT_PTR CALLBACK ConnectUserDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM l
 		{
 		case IDOK:
 			GetDlgItemText(hDlg, IDC_EDIT, currentEnteredUserPassword, 32);
-			if (MStrEqual(currentEnteredUserPassword, L"")) {
+			if (StrEqual(currentEnteredUserPassword, L"")) {
 				MessageBox(hWndMain, str_item_please_enter_password, str_item_conect_ss, 0);
 				break;
 			}

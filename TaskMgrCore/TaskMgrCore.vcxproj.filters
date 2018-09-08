@@ -19,6 +19,12 @@
     <Filter Include="头文件\HLPS">
       <UniqueIdentifier>{8c3b26f9-8c4a-42c0-818b-1467fb2739d3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\Monitor">
+      <UniqueIdentifier>{09f31a97-c1b8-4e21-bfcf-9697a00682c7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Monitor">
+      <UniqueIdentifier>{be0f0705-22c2-4cf0-abb7-3f2bcd4950cd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -147,6 +153,21 @@
     <ClInclude Include="netdef.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="MCpuInfoMonitor.h">
+      <Filter>头文件\Monitor</Filter>
+    </ClInclude>
+    <ClInclude Include="MProcessPerformanctMonitor.h">
+      <Filter>头文件\Monitor</Filter>
+    </ClInclude>
+    <ClInclude Include="MSystemPerformanctMonitor.h">
+      <Filter>头文件\Monitor</Filter>
+    </ClInclude>
+    <ClInclude Include="MProcessMonitor.h">
+      <Filter>头文件\Monitor</Filter>
+    </ClInclude>
+    <ClInclude Include="DltHlp.h">
+      <Filter>头文件\HLPS</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -247,6 +268,18 @@
     </ClCompile>
     <ClCompile Include="pehlp.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MSystemPerformanctMonitor.cpp">
+      <Filter>源文件\Monitor</Filter>
+    </ClCompile>
+    <ClCompile Include="MProcessPerformanctMonitor.cpp">
+      <Filter>源文件\Monitor</Filter>
+    </ClCompile>
+    <ClCompile Include="MCpuInfoMonitor.cpp">
+      <Filter>源文件\Monitor</Filter>
+    </ClCompile>
+    <ClCompile Include="MProcessMonitor.cpp">
+      <Filter>源文件\Monitor</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

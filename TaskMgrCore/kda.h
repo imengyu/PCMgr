@@ -14,4 +14,4 @@ M_CAPI(BOOL) M_KDA_Dec(PUCHAR buf, ULONG_PTR startaddress, LPVOID callback, ULON
 //    startaddress：起始地址（在真实的机器上的地址）
 //    size：原始代码大小
 //    outstr：std::wstring** , 输出反汇编后的字符串，用完需要delete
-M_CAPI(BOOL) M_DeAssemblier(PUCHAR buf, ULONG_PTR startaddress, ULONG_PTR size, LPVOID outstr);
+M_CAPI(BOOL) M_KDA_DeAssemblier(PUCHAR buf, ULONG_PTR startaddress, ULONG_PTR size, LPVOID outstr);

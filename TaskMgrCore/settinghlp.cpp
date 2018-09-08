@@ -2,6 +2,7 @@
 #include "settinghlp.h"
 #include "mapphlp.h"
 #include "PathHelper.h"
+#include "StringHlp.h"
 
 WCHAR iniPath[MAX_PATH];
 
@@ -14,7 +15,7 @@ M_CAPI(BOOL) M_CFG_GetConfigBOOL(LPWSTR configkey, LPWSTR configSection, BOOL de
 
 	WCHAR temp[32];
 	if (GetPrivateProfileString(configSection, configkey, defaultValue ? L"TRUE" : L"FALSE", temp, 32, iniPath) > 0)
-		defaultValue = MStrEqualW(temp, L"1") || MStrEqualW(temp, L"TRUE") || MStrEqualW(temp, L"True");
+		defaultValue = StrEqual(temp, L"1") || StrEqual(temp, L"TRUE") || StrEqual(temp, L"True");
 	return defaultValue;
 }
 M_CAPI(BOOL) M_CFG_SetConfigBOOL(LPWSTR configkey, LPWSTR configSection, BOOL value)

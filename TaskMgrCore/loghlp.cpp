@@ -163,15 +163,15 @@ M_CAPI(void) M_LOG_SetLogLevel(LogLevel level)
 }
 M_CAPI(void) M_LOG_SetLogLevelStr(LPCWSTR level)
 {
-	if (MStrEqual(level, L"LogLevError"))
+	if (StrEqual(level, L"LogLevError"))
 		currentLogLevel = LogLevel::LogLevError;
-	else if (MStrEqual(level, L"LogLevDisabled")) 
+	else if (StrEqual(level, L"LogLevDisabled")) 
 		currentLogLevel = LogLevel::LogLevDisabled;
-	else if (MStrEqual(level, L"LogLevDebug"))
+	else if (StrEqual(level, L"LogLevDebug"))
 		currentLogLevel = LogLevel::LogLevDebug;
-	else if (MStrEqual(level, L"LogLevWarn"))
+	else if (StrEqual(level, L"LogLevWarn"))
 		currentLogLevel = LogLevel::LogLevWarn;
-	else if (MStrEqual(level, L"LogLevFull"))
+	else if (StrEqual(level, L"LogLevFull"))
 		currentLogLevel = LogLevel::LogLevFull;
 }
 M_CAPI(LogLevel) M_LOG_GetLogLevel(int l)

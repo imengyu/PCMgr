@@ -610,7 +610,15 @@ typedef struct _SYSTEM_BASIC_INFORMATION
 	ULONG_PTR ActiveProcessorsAffinityMask;
 	CCHAR NumberOfProcessors;
 } SYSTEM_BASIC_INFORMATION, *PSYSTEM_BASIC_INFORMATION;
-
+typedef struct _SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION
+{
+	LARGE_INTEGER IdleTime;
+	LARGE_INTEGER KernelTime;
+	LARGE_INTEGER UserTime;
+	LARGE_INTEGER DpcTime;
+	LARGE_INTEGER InterruptTime;
+	ULONG InterruptCount;
+} SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION, *PSYSTEM_PROCESSOR_PERFORMANCE_INFORMATION;
 
 typedef struct _OBJECT_NAME_INFORMATION
 {
@@ -716,7 +724,7 @@ typedef struct _SYSTEM_THREADS {
 	THREAD_STATE ThreadState;
 	KWAIT_REASON WaitReason;
 } SYSTEM_THREADS, *PSYSTEM_THREADS;
-typedef struct _SYSTEM_PROCESSES { // Information Class 5 (Latest win10)(Before win7)
+typedef struct _SYSTEM_PROCESSES { // Information Class 5 (Latest win10)(After win7)
 	ULONG NextEntryOffset;
 	ULONG NumberOfThreads;
 	LARGE_INTEGER WorkingSetPrivateSize;

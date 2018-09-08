@@ -320,7 +320,7 @@ M_CAPI(BOOL) M_SU_GetEPROCESS(DWORD pid, ULONG_PTR* lpEprocess, ULONG_PTR* lpPeb
 			if (lpPeb)(*lpPeb) = (ULONG_PTR)output->PebAddress;
 			if (lpJob)(*lpJob) = (ULONG_PTR)output->JobAddress;
 			if (imagename) {
-				LPWSTR pathw = MConvertLPCSTRToLPWSTR((CHAR*)output->ImageFileName);
+				LPWSTR pathw = A2W((CHAR*)output->ImageFileName);
 				wcscpy_s(imagename, MAX_PATH, pathw);
 				delete pathw;
 			}
@@ -488,7 +488,7 @@ M_CAPI(void) M_SU_EnumKernelModuls_ShowMenu(KernelModulSmallInfo*kmi, BOOL showa
 				pt.y = y;
 			}
 
-			if (MStrEqualW(kmi->szFullDllPath, L"")) {
+			if (StrEqual(kmi->szFullDllPath, L"")) {
 				EnableMenuItem(hpop, ID_MENUDRIVER_COPYPATH, MF_DISABLED);
 				EnableMenuItem(hpop, ID_MENUDRIVER_OPENPATH, MF_DISABLED);
 			}
@@ -496,7 +496,7 @@ M_CAPI(void) M_SU_EnumKernelModuls_ShowMenu(KernelModulSmallInfo*kmi, BOOL showa
 			if (kmi->DriverObject == NULL)
 				EnableMenuItem(hpop, ID_MENUDRIVER_UNLOAD, MF_DISABLED);
 
-			if (MStrEqualW(kmi->szServiceName, L"")) {
+			if (StrEqual(kmi->szServiceName, L"")) {
 				EnableMenuItem(hpop, ID_MENUDRIVER_COPYREG, MF_DISABLED);
 				EnableMenuItem(hpop, ID_MENUDRIVER_START_BOOT, MF_DISABLED);
 				EnableMenuItem(hpop, ID_MENUDRIVER_START_SYSTEM, MF_DISABLED);
@@ -592,12 +592,12 @@ LRESULT M_SU_EnumKernelModuls_HandleWmCommand(WPARAM wParam)
 		break;
 	}
 	case ID_MENUDRIVER_COPYPATH: {
-		if (selectedKmi && wcslen(selectedKmi->szFullDllPath) > 0 && !MStrEqualW(selectedKmi->szFullDllPath, L""))
+		if (selectedKmi && wcslen(selectedKmi->szFullDllPath) > 0 && !StrEqual(selectedKmi->szFullDllPath, L""))
 			MCopyToClipboard(selectedKmi->szFullDllPath, wcslen(selectedKmi->szFullDllPath));
 		break;
 	}
 	case ID_MENUDRIVER_COPYREG: {
-		if (selectedKmi && !MStrEqualW(selectedKmi->szServiceName, L"")) {
+		if (selectedKmi && !StrEqual(selectedKmi->szServiceName, L"")) {
 			WCHAR regpath[MAX_PATH];
 			if (MREG_GetServiceReg(selectedKmi->szServiceName, regpath, MAX_PATH))
 				MCopyToClipboard(regpath, wcslen(regpath));
@@ -614,27 +614,27 @@ LRESULT M_SU_EnumKernelModuls_HandleWmCommand(WPARAM wParam)
 		break;
 	}
 	case ID_MENUDRIVER_START_BOOT: {
-		if (selectedKmi && !MStrEqualW(selectedKmi->szServiceName, L""))
+		if (selectedKmi && !StrEqual(selectedKmi->szServiceName, L""))
 			MSCM_ChangeScStartType(selectedKmi->szServiceName, SERVICE_BOOT_START, L"");
 		break;
 	}
 	case ID_MENUDRIVER_START_SYSTEM: {
-		if (selectedKmi && !MStrEqualW(selectedKmi->szServiceName, L""))
+		if (selectedKmi && !StrEqual(selectedKmi->szServiceName, L""))
 			MSCM_ChangeScStartType(selectedKmi->szServiceName, SERVICE_SYSTEM_START, L"");
 		break;
 	}
 	case ID_MENUDRIVER_START_AUTO: {
-		if (selectedKmi && !MStrEqualW(selectedKmi->szServiceName, L""))
+		if (selectedKmi && !StrEqual(selectedKmi->szServiceName, L""))
 			MSCM_ChangeScStartType(selectedKmi->szServiceName, SERVICE_AUTO_START, L"");
 		break;
 	}
 	case ID_MENUDRIVER_START_DEMAND: {
-		if (selectedKmi && !MStrEqualW(selectedKmi->szServiceName, L""))
+		if (selectedKmi && !StrEqual(selectedKmi->szServiceName, L""))
 			MSCM_ChangeScStartType(selectedKmi->szServiceName, SERVICE_DEMAND_START, L"");
 		break;
 	}
 	case ID_MENUDRIVER_START_DISABLE: {
-		if (selectedKmi && !MStrEqualW(selectedKmi->szServiceName, L""))
+		if (selectedKmi && !StrEqual(selectedKmi->szServiceName, L""))
 			MSCM_ChangeScStartType(selectedKmi->szServiceName, SERVICE_DISABLED, L"");
 		break;
 	}
@@ -649,6 +649,10 @@ LRESULT M_SU_EnumKernelModuls_HandleWmCommand(WPARAM wParam)
 		break;
 	}
 	return 0;
+}
+M_CAPI(BOOL) MEnumDrivers(EnumKernelModulsCallBack callback, BOOL showall)
+{
+	return M_SU_EnumKernelModuls(callback, showall);
 }
 
 //MyDbgView
@@ -683,7 +687,7 @@ M_CAPI(BOOL) M_SU_GetDbgViewLastBuffer(LPWSTR outbuffer, size_t bufsize, BOOL*ha
 	DWORD ReturnLength = 0;
 	if (DeviceIoControl(hKernelDevice, CTL_GET_DBGVIEW_BUFFER, NULL, 0, &drvoutBuffer, sizeof(drvoutBuffer), &ReturnLength, NULL)) {
 		if (drvoutBuffer.HasData) {
-			LPWSTR szw = MConvertLPCSTRToLPWSTR(drvoutBuffer.Data);
+			LPWSTR szw = A2W(drvoutBuffer.Data);
 			wcscpy_s(outbuffer, bufsize, szw);
 			delete szw;
 			if (hasMoreData)
