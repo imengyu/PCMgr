@@ -1269,4 +1269,18 @@ Memory used by processes, drivers, or operating systems</value>
   <data name="InterruptsProcessDsb" xml:space="preserve">
     <value>Delay procedure call and interrupt service routine</value>
   </data>
+  <data name="CreateDumpFailed" xml:space="preserve">
+    <value>Failed to create dump file</value>
+  </data>
+  <data name="OpenFileError" xml:space="preserve">
+    <value>Open file error</value>
+  </data>
+  <data name="CreateDumpSuccess" xml:space="preserve">
+    <value>The dump file was successfully created. 
+
+The dump file is located at :</value>
+  </data>
+  <data name="PleaseEnumIn64" xml:space="preserve">
+    <value>Please use 64 bit PCMgr to enumerate 64 bit process modules.</value>
+  </data>
 </root>

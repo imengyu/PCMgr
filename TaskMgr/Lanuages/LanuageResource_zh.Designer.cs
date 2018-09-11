@@ -394,6 +394,26 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 创建转储文件失败 的本地化字符串。
+        /// </summary>
+        internal static string CreateDumpFailed {
+            get {
+                return ResourceManager.GetString("CreateDumpFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 已成功创建文件。
+        ///
+        ///文件位于 : 的本地化字符串。
+        /// </summary>
+        internal static string CreateDumpSuccess {
+            get {
+                return ResourceManager.GetString("CreateDumpSuccess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 双击此条目显示进程 _EPROCESS 的本地化字符串。
         /// </summary>
         internal static string DblCklShow_EPROCESS {
@@ -1648,6 +1668,15 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 打开文件时发生错误 的本地化字符串。
+        /// </summary>
+        internal static string OpenFileError {
+            get {
+                return ResourceManager.GetString("OpenFileError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 无法打开进程 的本地化字符串。
         /// </summary>
         internal static string OpenProcFailed {
@@ -1788,6 +1817,15 @@ namespace PCMgr.Lanuages {
         internal static string PleaseEnterTargetAddress {
             get {
                 return ResourceManager.GetString("PleaseEnterTargetAddress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 请使用 64 位的 PCMgr 枚举64位进程模块 的本地化字符串。
+        /// </summary>
+        internal static string PleaseEnumIn64 {
+            get {
+                return ResourceManager.GetString("PleaseEnumIn64", resourceCulture);
             }
         }
         

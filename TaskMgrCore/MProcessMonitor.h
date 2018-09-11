@@ -94,7 +94,7 @@ private:
 	MPROCESS_ITEM allProcessItems = { 0 };
 	PMPROCESS_ITEM allProcessItemsEnd = NULL;
 
-
+	CRITICAL_SECTION cs;
 
 	//»Øµ÷
 	ProcessMonitorRemoveItemCallBack RemoveItemCallBack;

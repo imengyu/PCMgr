@@ -59,6 +59,7 @@ namespace PCMgr.WorkWindow
 #endif
         private void FormDA_Load(object sender, EventArgs e)
         {
+            FormSettings.LoadFontSettingForUI(this);
             Callback = _DACALLBACK;
             CallbackPtr = Marshal.GetFunctionPointerForDelegate(Callback);
             textBoxDesize.Text = "000000FF";

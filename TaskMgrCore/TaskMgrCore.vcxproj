@@ -309,6 +309,12 @@
     <Image Include="..\..\..\..\图片\Res\icoPcmgr.ico" />
     <Image Include="..\TaskMgr\icoPcmgr.ico" />
     <Image Include="..\TaskMgr\icoPcmgrCos.ico" />
+    <Image Include="ico\icoActiveWin.ico" />
+    <Image Include="ico\icoDefApp.ico" />
+    <Image Include="ico\icoHiddenWin.ico" />
+    <Image Include="ico\icoLogin.ico" />
+    <Image Include="ico\icoOpen.ico" />
+    <Image Include="ico\icoShutdown.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

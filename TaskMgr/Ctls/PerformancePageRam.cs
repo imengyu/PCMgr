@@ -145,17 +145,17 @@ namespace PCMgr.Ctls
             performanceInfos.SpeicalItems.Add(item_cached);
             performanceInfos.SpeicalItems.Add(item_pagepool);
             performanceInfos.SpeicalItems.Add(item_nopagepool);
-            all_ram = MPERF_GetAllRam();
-            performanceGridGlobal.RightText = NativeMethods.FormatFileSize(all_ram);
+            all_ram = MSystemMemoryPerformanctMonitor.GetAllMemory(); 
+            performanceGridGlobal.RightText = FormatFileSize(all_ram);
 
-            NativeMethods.DeviceApi.MDEVICE_GetMemoryDeviceInfo();
-            performanceTitle.SmallTitle = Marshal.PtrToStringUni(NativeMethods.DeviceApi.MDEVICE_GetMemoryDeviceName());
-            performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem(LanuageMgr.GetStr("Speed"), NativeMethods.DeviceApi.MDEVICE_GetMemoryDeviceSpeed().ToString() + " MHz"));
+            DeviceApi.MDEVICE_GetMemoryDeviceInfo();
+            performanceTitle.SmallTitle = Marshal.PtrToStringUni(DeviceApi.MDEVICE_GetMemoryDeviceName());
+            performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem(LanuageMgr.GetStr("Speed"), DeviceApi.MDEVICE_GetMemoryDeviceSpeed().ToString() + " MHz"));
             performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem(LanuageMgr.GetStr("FormFactor"),
-              NativeMethods.DeviceApi.MDEVICE_MemoryFormFactorToString(NativeMethods.DeviceApi.MDEVICE_GetMemoryDeviceFormFactor())
+              DeviceApi.MDEVICE_MemoryFormFactorToString(DeviceApi.MDEVICE_GetMemoryDeviceFormFactor())
                 ));
             UInt16 used = 0, all = 0;
-            if (NativeMethods.DeviceApi.MDEVICE_GetMemoryDeviceUsed(ref all, ref used))
+            if (DeviceApi.MDEVICE_GetMemoryDeviceUsed(ref all, ref used))
                 performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem(LanuageMgr.GetStr("DeviceLocator"), used + "/" + all));
 
             fTipVauleFree = LanuageMgr.GetStr("MemTipFree");

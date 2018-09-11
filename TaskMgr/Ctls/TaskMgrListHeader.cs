@@ -7,6 +7,25 @@ namespace PCMgr.Ctls
 {
     public class TaskMgrListHeader : Control
     {
+        public TaskMgrListHeader()
+        {
+            SetStyle(ControlStyles.Selectable, true);
+            SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
+            SetStyle(ControlStyles.AllPaintingInWmPaint, true);
+            SetStyle(ControlStyles.SupportsTransparentBackColor, true);
+            items = new TaskMgrListHeaderItemCollection();
+            items.HearderAdd += Items_HearderAdd;
+            items.HearderRemoved += Items_HearderRemoved;
+            items.HearderInserted += Items_HearderInserted;
+            t.Tick += T_Tick;
+            t.Interval = 40;
+            lineBrush = new LinearGradientBrush(new Point(0, 0), new Point(0, 60), Color.Transparent, Color.FromArgb(187, 187, 187));
+            hotBrush = new LinearGradientBrush(new Point(0, 0), new Point(0, 60), Color.FromArgb(254, 216, 200), Color.FromArgb(254, 192, 166));
+            hotBrushHover = new LinearGradientBrush(new Point(0, 0), new Point(0, 60), Color.FromArgb(254, 242, 237), Color.FromArgb(254, 212, 194));
+            tipToolTip = new ToolTip();
+
+            CanSizeCloum = true;
+        }
         public TaskMgrListHeader(TaskMgrList par)
         {
             parent = par;
@@ -17,6 +36,7 @@ namespace PCMgr.Ctls
             items = new TaskMgrListHeaderItemCollection();
             items.HearderAdd += Items_HearderAdd;
             items.HearderRemoved += Items_HearderRemoved;
+            items.HearderInserted += Items_HearderInserted;
             t.Tick += T_Tick;
             t.Interval = 40;
             if (par != null)
@@ -41,7 +61,15 @@ namespace PCMgr.Ctls
             hotBrushHover = new LinearGradientBrush(new Point(0, 0), new Point(0, 60), Color.FromArgb(254, 242, 237), Color.FromArgb(254, 212, 194));
             tipToolTip = new ToolTip();
 
+
+            LoadAllFonts();
             CanSizeCloum = true;
+        }
+
+        private void LoadAllFonts()
+        {
+            fb = new Font(Font.FontFamily, 12f);
+            fs = new Font(Font.FontFamily, 8.5f);
         }
 
         private void Vs_ValueChanged(object sender, EventArgs e)
@@ -54,7 +82,6 @@ namespace PCMgr.Ctls
                 XOffestChanged?.Invoke(this, EventArgs.Empty);
             }
         }
-
         private void T_Tick(object sender, EventArgs e)
         {
             if (m) m = false; t.Stop();
@@ -64,6 +91,11 @@ namespace PCMgr.Ctls
         {
             vsed = false;
             obj.taskMgrListHeaderInternal = null;
+            if (sortedItems.Contains(obj))
+            {
+                sortedItems.Remove(obj);
+                RebulidColumnsIndexForDelete(obj.DisplayIndex);
+            }
             Vsitem();
         }
         private void Items_HearderAdd(TaskMgrListHeaderItem obj)
@@ -81,7 +113,18 @@ namespace PCMgr.Ctls
             sortedItems.Add(obj);
             Vsitem();
         }
+        private void Items_HearderInserted(TaskMgrListHeaderItem obj, int index)
+        {
+            if (arredItem == null)
+                if (obj.ArrowType == TaskMgrListHeaderSortArrow.Ascending || obj.ArrowType == TaskMgrListHeaderSortArrow.Descending)
+                    arredItem = obj;
+            vsed = false;
+            obj.taskMgrListHeaderInternal = this;
+            RebulidColumnsIndexForInsert(index, obj);
+            Vsitem();
+        }
 
+        private Pen blueLinePen = new Pen(Color.FromArgb(17, 125, 187), 2);
         private LinearGradientBrush hotBrushHover = null;
         private LinearGradientBrush hotBrush = null;
         private LinearGradientBrush lineBrush = null;
@@ -90,7 +133,7 @@ namespace PCMgr.Ctls
         private int xOffiest = 0;
         private TaskMgrList parent = null;
         private Timer t = new Timer();
-        private bool mouseDowned = false, m = false;
+        private bool mouseDowned = false, m = false,drawBlueLineLeft=false, drawBlueLineRight = false;
         private TaskMgrListHeaderItemCollection items;
         private TaskMgrListHeaderItem lastTooltipItem = null;
         private TaskMgrListHeaderItem enteredItem = null;
@@ -98,12 +141,13 @@ namespace PCMgr.Ctls
         private TaskMgrListHeaderItem resizeItem = null;
         private TaskMgrListHeaderItem moveItem = null;
         private ToolTip tipToolTip = null;
-        private int mouseDownXInBlock = 0;
         private int firstBlockW = 0;
         private int mouseDownXPos = 0;
+        private int mouseDownXPosInBlock = 0;
+        private int movingDownIndex = 0;
 
-        private Font fb = new Font("Microsoft YaHei UI", 12f);
-        private Font fs = new Font("Microsoft YaHei UI", 8.5f);
+        private Font fb = null;
+        private Font fs = null;
         private int allWidth = 0;
         private bool vsed = false;
         private TaskMgrListHeaderItemCollection sortedItems = new TaskMgrListHeaderItemCollection();
@@ -133,7 +177,7 @@ namespace PCMgr.Ctls
         {
             get; set;
         }
-        public int LastMoveCloumIndex { get; private set; }
+        public int LastMoveCloumIndex { get { return movingDownIndex; } }
         public int LastMoveCloumNowIndex { get; private set; }
 
         /// <summary>
@@ -190,27 +234,6 @@ namespace PCMgr.Ctls
             arredItem = enteredItem;
             Invalidate();
         }
-        private void ExchangeTwoCloseItem(int index1, bool isNext)
-        {
-            if (isNext)
-            {
-                int index2 = index1 + 1;
-
-                sortedItems[index1].TargetIndex = index2;
-
-                sortedItems[index1].X = sortedItems[index2].X + sortedItems[index2].Width;
-            }
-            else
-            {
-                int index2 = index1 - 1;
-
-                sortedItems[index2].TargetIndex = index1;
-
-                int oldx1 = items[index1].X;
-                sortedItems[index1].X = sortedItems[index2].X;
-                sortedItems[index2].X = oldx1 + sortedItems[index1].Width;
-            }
-        }
 
         protected override bool ProcessDialogKey(Keys keyData)
         {
@@ -258,6 +281,11 @@ namespace PCMgr.Ctls
             return base.ProcessDialogKey(keyData);
         }
 
+        protected override void OnFontChanged(EventArgs e)
+        {
+            base.OnFontChanged(e);
+            LoadAllFonts();
+        }
         protected override void OnHandleCreated(EventArgs e)
         {
             base.OnHandleCreated(e);
@@ -318,14 +346,7 @@ namespace PCMgr.Ctls
         }
         protected override void OnMouseDown(MouseEventArgs e)
         {
-            if (moveItem != null)
-            {
-                mouseDownXPos = e.X;
-                if (items.Count > 0)
-                    firstBlockW = sortedItems[0].Width;
-                mouseDownXInBlock = e.X - (moveItem.X - XOffest);
-                LastMoveCloumIndex = sortedItems.IndexOf(moveItem);
-            }
+            mouseDownXPos = e.X;
             mouseDowned = true;
             base.OnMouseDown(e);
         }
@@ -333,18 +354,23 @@ namespace PCMgr.Ctls
         {
             if (moveItem != null)
             {
-                if(moveItem.TargetIndex!=0 && moveItem.TargetIndex != sortedItems.IndexOf(moveItem))
+                if (moveItem.TargetIndex != 0 && moveItem.TargetIndex != sortedItems.IndexOf(moveItem))
                 {
                     moveItem.DisplayIndex = moveItem.TargetIndex;
-                    CloumIndexChanged?.Invoke(this, null);
+
                     LastMoveCloumNowIndex = moveItem.TargetIndex;
-
                     moveItem.TargetIndex = 0;
-                    
                 }
-                moveItem = null;
-                Vsitem();
 
+                moveItem.MovingDrawX = moveItem.X;
+                moveItem.IsMoveing = false;
+
+                drawBlueLineLeft = false;
+                drawBlueLineRight = false;
+
+                vsed = false;
+                Invalidate();
+                moveItem = null;
             }
             else if (resizeItem != null)
             {
@@ -380,41 +406,48 @@ namespace PCMgr.Ctls
                 else if (mouseDowned && moveItem != null)
                 {
                     int mxr = e.X + XOffest;
-                    int mx = mxr + XOffest;
-                    if (mx > firstBlockW)
+                    int mxl = mxr - mouseDownXPosInBlock;
+                    if (mxr >= firstBlockW && mxr <= allWidth)
                     {
-                        moveItem.X = mx;
+                        if (mxl >= firstBlockW && mxl <= allWidth - moveItem.Width)
+                            moveItem.MovingDrawX = mxl;
 
                         //向左移动
                         if (e.X < mouseDownXPos)
                         {
-                            int indexthis = sortedItems.IndexOf(moveItem);
-                            if (sortedItems.IndexOf(moveItem) >= 2)
+                            drawBlueLineLeft = true;
+                            drawBlueLineRight = false;
+                            for (int i = movingDownIndex; i > 0; i--)
                             {
-                                int indexlast = indexthis - 1;
-                                //超过上一个块的位置
-                                if (mxr < sortedItems[indexlast].X)
-                                {
-                                    //交换
-                                    ExchangeTwoCloseItem(indexthis, false);
-                                }
+                                int xx = sortedItems[i].X - xOffiest;
+                                int w = sortedItems[i].Width;
+                                int fw = 0;
+                                if (i > 1) fw = sortedItems[i - 1].Width;
+                                int ii = xx + w;
+                                sortedItems[i].DrawBlueLine = (x > xx - fw / 2 && x <= ii - w / 2);
+                                if (sortedItems[i].DrawBlueLine)
+                                    moveItem.TargetIndex = i;
                             }
                         }
                         //向右移动
                         else if (e.X > mouseDownXPos)
                         {
-                            int indexthis = sortedItems.IndexOf(moveItem);
-                            if (indexthis <= sortedItems.Count - 2)
+                            drawBlueLineLeft = false;
+                            drawBlueLineRight = true;
+                            for (int i = movingDownIndex; i < sortedItems.Count; i++)
                             {
-                                int indexlast = indexthis + 1;
-                                //超过上一个块的位置
-                                if (mxr < sortedItems[indexlast].X)
-                                {
-                                    //交换
-                                    ExchangeTwoCloseItem(indexthis, true);
-                                }
+                                int xx = sortedItems[i].X - xOffiest;
+                                int w = sortedItems[i].Width;
+                                int nw = 0;
+                                if(i < sortedItems.Count-1) nw= sortedItems[i+1].Width;
+                                int ii = xx + w;
+                                sortedItems[i].DrawBlueLine = (x > ii - w / 2 && x <= ii + nw / 2);
+                                if (sortedItems[i].DrawBlueLine)
+                                    moveItem.TargetIndex = i;
                             }
                         }
+
+                        Invalidate();
                     }
                 }
                 else
@@ -423,7 +456,7 @@ namespace PCMgr.Ctls
                     {
                         int xx = sortedItems[i].X - xOffiest;
                         int ii = xx + sortedItems[i].Width;
-                        if (CanSizeCloum && x > ii - 3 && x < ii + 3)
+                        if (CanSizeCloum && x > ii - 3 && x < ii + 3 && resizeItem == null)
                         {
                             Cursor = Cursors.SizeWE;
                             if (enteredItem != null)
@@ -435,7 +468,7 @@ namespace PCMgr.Ctls
                             moveItem = null;
                             break;
                         }
-                        else if (CanMoveCloum && x > xx + 3 && x < ii - 3 && e.Button == MouseButtons.Left)
+                        else if (CanMoveCloum && x > xx + 3 && x < ii - 3 && moveItem == null && e.Button == MouseButtons.Left)
                         {
                             if (enteredItem != null)
                             {
@@ -443,7 +476,16 @@ namespace PCMgr.Ctls
                                 enteredItem = null;
                             }
                             resizeItem = null;
+
                             moveItem = sortedItems[i];
+                            moveItem.IsMoveing = true;
+
+                            moveItem.MovingDrawX = moveItem.X;
+                            if (items.Count > 0)
+                                firstBlockW = sortedItems[0].Width;
+                            movingDownIndex = sortedItems.IndexOf(moveItem);
+                            mouseDownXPosInBlock = x - xx;
+
                             break;
                         }
                         else
@@ -494,60 +536,94 @@ namespace PCMgr.Ctls
                 return;
 
             Graphics g = e.Graphics;
-            int thisWidth = -xOffiest;
             using (Pen p = new Pen(lineBrush))
             {
+                TaskMgrListHeaderItem thisItem = null;
                 int h = Height - 1;
                 bool arrdrawed = false;
                 for (int i = 0; i < sortedItems.Count; i++)
                 {
-                    int x = sortedItems[i].X - XOffest;
+                    thisItem = sortedItems[i];
 
-                    if (sortedItems[i] == enteredItem)
+                    int x = (thisItem.IsMoveing ? (thisItem.MovingDrawX - XOffest) : (thisItem.X - XOffest));
+
+                    if (thisItem == enteredItem)
                     {
-                        if (sortedItems[i].IsHot)
-                            g.FillRectangle(hotBrushHover, new Rectangle((thisWidth + 1), 0, sortedItems[i].Width - 1, h));
-                        else {
-                            TaskMgrListApis.MHeaderDrawItem(hTheme, g.GetHdc(), (thisWidth + 1), 0, sortedItems[i].Width - 1, h, TaskMgrListApis.M_DRAW_HEADER_HOT);
+                        if (thisItem.IsHot)
+                            g.FillRectangle(hotBrushHover, new Rectangle((x + 1), 0, thisItem.Width - 1, h));
+                        else
+                        {
+                            TaskMgrListApis.MHeaderDrawItem(hTheme, g.GetHdc(), (x + 1), 0, thisItem.Width - 1, h, TaskMgrListApis.M_DRAW_HEADER_HOT);
                             g.ReleaseHdc();
                         }
                     }
-                    else if (sortedItems[i].IsHot) g.FillRectangle(hotBrush, new Rectangle((thisWidth + 1), 0, sortedItems[i].Width - 1, h));
+                    else if (thisItem.IsHot) g.FillRectangle(hotBrush, new Rectangle((x + 1), 0, thisItem.Width - 1, h));
 
-                    string tb = sortedItems[i].TextBig;
-                    string ts = sortedItems[i].TextSmall;
+                    string tb = thisItem.TextBig;
+                    string ts = thisItem.TextSmall;
                     if (tb != "" || ts != "")
                     {
-                        StringFormat f = sortedItems[i].AlignmentStringFormat;
+                        StringFormat f = thisItem.AlignmentStringFormat;
                         if (tb != "")
-                            g.DrawString(tb, fb, Brushes.Black, new Rectangle(thisWidth + 3, 10, sortedItems[i].Width - 6, 24), f);
+                            g.DrawString(tb, fb, Brushes.Black, new Rectangle(x + 3, 10, thisItem.Width - 6, 24), f);
                         if (ts != "")
-                            g.DrawString(ts, fs, new SolidBrush(Color.FromArgb(76, 96, 122)), new Rectangle(thisWidth + 3, Height - 22, sortedItems[i].Width - 6, 18), f);
+                            g.DrawString(ts, fs, new SolidBrush(Color.FromArgb(76, 96, 122)), new Rectangle(x + 3, Height - 22, thisItem.Width - 6, 18), f);
                     }
                     if (!arrdrawed)
-                        if (sortedItems[i].ArrowType == TaskMgrListHeaderSortArrow.Ascending)
+                    {
+                        if (thisItem.ArrowType == TaskMgrListHeaderSortArrow.Ascending)
                         {
-                            int posx = thisWidth + sortedItems[i].Width / 2 - 4;
-                            // g.DrawImage(PCMgr.Properties.Resources.listHeaderArrowAscending, posx, 0, 9, 5);
+                            int posx = x + thisItem.Width / 2 - 4;
                             TaskMgrListApis.MHeaderDrawItem(hTheme, g.GetHdc(), posx, 0, 9, 6, TaskMgrListApis.M_DRAW_HEADER_SORTUP);
                             g.ReleaseHdc();
                             arrdrawed = true;
                         }
-                        else if (sortedItems[i].ArrowType == TaskMgrListHeaderSortArrow.Descending)
+                        else if (thisItem.ArrowType == TaskMgrListHeaderSortArrow.Descending)
                         {
-                            int posx = thisWidth + sortedItems[i].Width / 2 - 4;
+                            int posx = x + thisItem.Width / 2 - 4;
                             TaskMgrListApis.MHeaderDrawItem(hTheme, g.GetHdc(), posx, 0, 9, 6, TaskMgrListApis.M_DRAW_HEADER_SORTDOWN);
                             g.ReleaseHdc();
                             arrdrawed = true;
                         }
-                    thisWidth += sortedItems[i].Width;
-                    g.DrawLine(p, new Point(x + sortedItems[i].Width, 0), new Point(x + sortedItems[i].Width, h));
+                    }
+                    g.DrawLine(p, new Point(x + thisItem.Width, 0), new Point(x + thisItem.Width, h));
+                    if (thisItem.DrawBlueLine)
+                    {
+                        if (drawBlueLineRight) g.DrawLine(blueLinePen, new Point(thisItem.X + thisItem.Width, 0), new Point(thisItem.X + thisItem.Width, h));
+                        else if (drawBlueLineLeft) g.DrawLine(blueLinePen, new Point(thisItem.X, 0), new Point(thisItem.X, h));
+                    }
                 }
                 g.DrawLine(new Pen(Color.FromArgb(160, 160, 160)), new Point(0, Height - 1), new Point(Width, Height - 1));
             }
 
         }
 
+        internal void RebulidColumnsIndexForInsert(int insertIndex, TaskMgrListHeaderItem insertItem)
+        {
+            insertItem.SetDisplayIndex(insertIndex);
+            sortedItems.Insert(insertIndex, insertItem);
+            for (int i = insertIndex + 1; i < sortedItems.Count; i++)
+                sortedItems[i].SetDisplayIndex(i);
+            ColumnsIndexChanged();
+        }
+        private void RebulidColumnsIndexForDelete(int deleteDisplayIndex)
+        {
+            int i = deleteDisplayIndex;
+            for (; i < items.Count; i++)
+            {
+                foreach (TaskMgrListHeaderItem h in Items)
+                    if (h.DisplayIndex == i + 1)
+                    {
+                        h.SetDisplayIndex(i);
+                        break;
+                    }
+            }
+            ColumnsIndexChanged();
+        }
+        internal void RebulidColumnsIndex()
+        {
+            items[0].DisplayIndex = 0;
+        }
         internal void ColumnsIndexChanged()
         {
             sortedItems.Clear();
@@ -560,6 +636,9 @@ namespace PCMgr.Ctls
                         break;
                     }
             }
+            vsed = false;
+            Vsitem();
+            CloumIndexChanged?.Invoke(this, null);
         }
 
         private void ShowToolTip()
@@ -627,12 +706,23 @@ namespace PCMgr.Ctls
                         vs.Maximum = thisWidth;
                         vs.LargeChange = parent.Width;
                         vs.SmallChange = 5;
+                        int targetVal= vs.Value - vs.Minimum;
+                        if (xOffiest != targetVal)
+                        {
+                            xOffiest = targetVal;
+                            XOffestChanged?.Invoke(this, null);
+                        }
                     }
                     else
                     {
                         parent.ishs = false;
                         if (vs.Visible)
                             vs.Hide();
+                        if (xOffiest != 0)
+                        {
+                            xOffiest = 0;
+                            XOffestChanged?.Invoke(this, null);
+                        }
                     }
                     allWidth = thisWidth;
                     return true;
@@ -702,6 +792,7 @@ namespace PCMgr.Ctls
         public void Insert(int index, TaskMgrListHeaderItem control)
         {
             List.Insert(index, control);
+            HearderInserted?.Invoke(control, index);
         }
         public bool Contains(TaskMgrListHeaderItem control)
         {
@@ -741,9 +832,11 @@ namespace PCMgr.Ctls
         }
 
         public delegate void TaskMgrListHeaderEventrHandler(TaskMgrListHeaderItem obj);
+        public delegate void TaskMgrListHeaderInsetEventrHandler(TaskMgrListHeaderItem obj, int index);
 
         public event TaskMgrListHeaderEventrHandler HearderAdd;
         public event TaskMgrListHeaderEventrHandler HearderRemoved;
+        public event TaskMgrListHeaderInsetEventrHandler HearderInserted;
     }
     public class TaskMgrListHeaderItem
     {
@@ -757,6 +850,7 @@ namespace PCMgr.Ctls
         internal TaskMgrListHeader taskMgrListHeaderInternal = null;
         internal void SetDisplayIndex(int d) { displayIndex = d; }
 
+        public int Index { get { if (taskMgrListHeaderInternal != null) return taskMgrListHeaderInternal.Items.IndexOf(this); else return -1; }  }
         public int TargetIndex { get; set; }
         public int DisplayIndex
         {
@@ -783,13 +877,13 @@ namespace PCMgr.Ctls
                         {
                             columnHeader2.displayIndex -= (flag ? 1 : -1);
                         }
-                        if (i != taskMgrListHeaderInternal.Items.IndexOf(this))
+                        if (i != Index)
                         {
                             array[columnHeader2.displayIndex] = i;
                         }
                     }
                     columnHeader.displayIndex = value;
-                    array[columnHeader.displayIndex] = taskMgrListHeaderInternal.Items.IndexOf(columnHeader);
+                    array[columnHeader.displayIndex] = Index;
                     taskMgrListHeaderInternal.ColumnsIndexChanged();
                 }
             }
@@ -797,6 +891,8 @@ namespace PCMgr.Ctls
         public string ToolTip { get; set; }
         public string Identifier { get; set; }
         public bool IsNum { get; set; }
+        public bool DrawBlueLine { get; set; }
+        public bool IsMoveing { get; set; }
         public bool IsHot
         {
             get { return m1; }
@@ -812,6 +908,7 @@ namespace PCMgr.Ctls
                     format.LineAlignment = StringAlignment.Center;
                     format.FormatFlags |= StringFormatFlags.LineLimit;
                     format.Trimming = StringTrimming.EllipsisCharacter;
+                    format.FormatFlags = StringFormatFlags.LineLimit;
                     format.Alignment = agr;
                 }
                 return format;
@@ -837,6 +934,7 @@ namespace PCMgr.Ctls
             get { return w; }
             set { w = value; }
         }
+        public int MovingDrawX { get; set; }
         public int X
         {
             get { return x; }
@@ -865,5 +963,9 @@ namespace PCMgr.Ctls
             get { return taskMgrListHeaderInternal; }
         }
 
+        public override string ToString()
+        {
+            return tsml + " (" + displayIndex + ")";
+        }
     }
 }

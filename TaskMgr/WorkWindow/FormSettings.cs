@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Drawing;
 using System.Windows.Forms;
 using PCMgr.Lanuages;
 using static PCMgr.NativeMethods;
@@ -14,6 +15,22 @@ namespace PCMgr.WorkWindow
             main = m;
         }
 
+        public static Font LoadFontSettingForUI(Control c)
+        {
+            try
+            {
+                string font = GetConfig("Font", "AppSetting", "");
+                if (font != "")
+                    c.Font = (Font)new FontConverter().ConvertFromString(font);
+                return c.Font;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private bool fontchanged = false;
         private bool load = true;
         private FormMain main;
 
@@ -57,6 +74,24 @@ namespace PCMgr.WorkWindow
                 case "en":
                     comboBox_lg.SelectedIndex = 2;
                     break;
+
+            }
+            try
+            {
+                string font = GetConfig("Font", "AppSetting");
+                if (font != "")
+                {
+                   tabControl1.Font = (Font)new FontConverter().ConvertFromString(font);
+                    lbFont.Text = font;
+                }
+                else
+                {
+                    lbFont.Text = new FontConverter().ConvertToString(tabControl1.Font);
+                }
+                fontDialog1.Font = Font;
+            }
+            catch
+            {
 
             }
 
@@ -119,6 +154,7 @@ namespace PCMgr.WorkWindow
             else FormMain.Instance.Text = FormMain.str_AppTitle;
             SetConfig("HotKey1", "AppSetting", comboBoxShowHotKey1.SelectedItem.ToString());
             SetConfig("HotKey2", "AppSetting", comboBoxShowHotKey2.SelectedItem.ToString());
+            if(fontchanged) SetConfig("Font", "AppSetting", new FontConverter().ConvertToString(tabControl1.Font));
 
             Close();
         }
@@ -153,6 +189,15 @@ namespace PCMgr.WorkWindow
         {
             if (!M_SU_SetKrlMonSet_LoadImage(checkBoxCannotLoadDriver.Checked))
                 MessageBox.Show(FormMain.str_failed);
+        }
+
+        private void btnChooseFont_Click(object sender, EventArgs e)
+        {
+            if (fontDialog1.ShowDialog() == DialogResult.OK)
+            {
+                fontchanged = true;
+                Font = fontDialog1.Font;
+            }
         }
     }
 }

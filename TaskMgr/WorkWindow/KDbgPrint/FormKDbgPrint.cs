@@ -145,6 +145,7 @@ namespace PCMgr.WorkWindow
 
         private void FormKDbgPrint_Load(object sender, EventArgs e)
         {
+            FormSettings.LoadFontSettingForUI(this);
             string set = GetConfig("DbgPrintViewPosSize", "AppSetting", "");
             if (set != "" && set.Contains("#"))
             {

@@ -74,9 +74,9 @@
             this.performanceInfos.ColorText = System.Drawing.Color.Black;
             this.performanceInfos.ColorTitle = System.Drawing.Color.Gray;
             resources.ApplyResources(this.performanceInfos, "performanceInfos");
-            this.performanceInfos.FontText = new System.Drawing.Font("Microsoft YaHei UI", 9F);
-            this.performanceInfos.FontTextSpeical = new System.Drawing.Font("Microsoft YaHei UI", 15F);
-            this.performanceInfos.FontTitle = new System.Drawing.Font("Microsoft YaHei UI", 9F);
+            this.performanceInfos.FontText = new System.Drawing.Font("微软雅黑", 9F);
+            this.performanceInfos.FontTextSpeical = new System.Drawing.Font("微软雅黑", 15F);
+            this.performanceInfos.FontTitle = new System.Drawing.Font("微软雅黑", 9F);
             this.performanceInfos.ItemMargan = 0;
             this.performanceInfos.LineOffest = 0;
             this.performanceInfos.MaxSpeicalItemsWidth = 300;
@@ -110,8 +110,8 @@
             this.performanceTitle.Cursor = System.Windows.Forms.Cursors.Default;
             resources.ApplyResources(this.performanceTitle, "performanceTitle");
             this.performanceTitle.Name = "performanceTitle";
-            this.performanceTitle.SmallTitleFont = new System.Drawing.Font("Microsoft YaHei UI", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.performanceTitle.TitleFont = new System.Drawing.Font("Microsoft YaHei UI", 21.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.performanceTitle.SmallTitleFont = new System.Drawing.Font("微软雅黑", 12F);
+            this.performanceTitle.TitleFont = new System.Drawing.Font("微软雅黑", 18F);
             this.performanceTitle.MouseClick += new System.Windows.Forms.MouseEventHandler(this.PerformancePageRam_MouseClick);
             this.performanceTitle.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.PerformancePageRam_MouseDoubleClick);
             this.performanceTitle.MouseDown += new System.Windows.Forms.MouseEventHandler(this.PerformancePageRam_MouseDown);

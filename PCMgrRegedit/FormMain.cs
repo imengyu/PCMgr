@@ -522,6 +522,9 @@ namespace PCMgrRegedit
             }
         }
 
-
+        private void 关于ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            PCMgrUWP.Caller.ShowAboutDlg();
+        }
     }
 }

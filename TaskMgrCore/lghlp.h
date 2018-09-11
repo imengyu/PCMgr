@@ -121,8 +121,10 @@ extern LPWSTR str_item_deatch_debugger_notdebug;
 
 extern LPWSTR str_item_ChangePriorityAsk;
 extern LPWSTR str_item_ChangePriorityContent;
-
-
+extern LPWSTR str_item_OpenFileError;
+extern LPWSTR str_item_CreateDumpFailed;
+extern LPWSTR str_item_CreateDumpSuccess;
+extern LPWSTR str_item_PleaseEnumIn64;
 
 
 

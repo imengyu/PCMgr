@@ -19,6 +19,7 @@ namespace PCMgr.WorkWindow
 
         private void FormDetalsistHeaders_Load(object sender, EventArgs e)
         {
+            FormSettings.LoadFontSettingForUI(this);
             NativeMethods.MAppWorkCall3(182, listItems.Handle, IntPtr.Zero);
             foreach (string s in formMain.allCols)
             {
@@ -55,6 +56,7 @@ namespace PCMgr.WorkWindow
                     formMain.ProcessListDetailsAddHeader(item.Name);
             }
             formMain.ProcessListDetailsGetColumnsIndex();
+            formMain.nextUpdateStaticVals = true;
             Close();
         }
     }

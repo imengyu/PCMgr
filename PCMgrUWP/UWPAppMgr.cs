@@ -7,6 +7,7 @@ using System.Text;
 using System.Xml;
 using Windows.ApplicationModel;
 using Windows.Management.Deployment;
+using static PCMgrUWP.NativeMethods;
 
 namespace PCMgrUWP
 {
@@ -15,43 +16,22 @@ namespace PCMgrUWP
         public string Name = "";
         public string FullName = "";
         public string Publisher = "";
-        public string Description = "";
         public string InstalledLocation = "";
-        public string MainAppDisplayName = "";
-        public string[] Apps;
         public string IconPath = null;
+        public string MainAppDisplayName = "";
+
+        public string[] Apps = new string[0];
 
         public override string ToString()
         {
             return FullName;
         }
-
     }
     public class UWPManager
     {
-        //Apis
-#if _X64_
-        public const string COREDLLNAME = "PCMgr64.dll";
-#else
-        public const string COREDLLNAME = "PCMgr32.dll";
-#endif
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern bool MFM_FileExist([MarshalAs(UnmanagedType.LPWStr)]string path);
-        [DllImport("shlwapi.dll", BestFitMapping = false, CharSet = CharSet.Unicode, ExactSpelling = true, SetLastError = false, ThrowOnUnmappableChar = true)]
-        private static extern int SHLoadIndirectString(string pszSource, StringBuilder pszOutBuf, int cchOutBuf, IntPtr ppvReserved);
-        private static string ExtractStringFromPRIFile(string pathToPRI, string resourceKey)
-        {
-            string sWin8ManifestString = string.Format("@{{{0}?{1}}}", pathToPRI, resourceKey);
-            var outBuff = new StringBuilder(1024);
-            int result = SHLoadIndirectString(sWin8ManifestString, outBuff, outBuff.Capacity, IntPtr.Zero);
-            return outBuff.ToString();
-        }
-
-        //
         private PackageManager packageManager = new PackageManager();
         private bool enumlated = false;
 
-        //
         private int packageCount = 0;
         private static string stringLocate = "zh-CN";
         private List<UWPPackage> packageDatas = new List<UWPPackage>();
@@ -165,7 +145,7 @@ namespace PCMgrUWP
                 imageFile = Path.Combine(dir, "en-us", logoPath);
                 if (MFM_FileExist(imageFile)) return imageFile;
 
-                return Path.ChangeExtension(imageFile, "scale-16.png");
+                return Path.ChangeExtension(imageFile, "Square44x44Logo.png");
             }
         }
         /// <summary>
@@ -228,6 +208,19 @@ namespace PCMgrUWP
         }
 
         /// <summary>
+        /// 清空上一次的枚举结果
+        /// </summary>
+        /// <returns></returns>
+        public bool Clear()
+        {
+            if (enumlated)
+            {
+                enumlated = false;
+                packageDatas.Clear();
+            }
+            return !enumlated;
+        }
+        /// <summary>
         /// 枚举所有 UWP 应用
         /// </summary>
         /// <returns>返回是否成功</returns>
@@ -236,12 +229,11 @@ namespace PCMgrUWP
             if (!enumlated)
             {
                 var userSecurityId = System.Security.Principal.WindowsIdentity.GetCurrent().User.Value;
-                var packages = packageManager.FindPackagesForUser(userSecurityId);
+                var packages = packageManager.FindPackagesForUserWithPackageTypes(userSecurityId, PackageTypes.Main | PackageTypes.Bundle);
                 foreach (var package in packages)
                 {
                     UWPPackage p = new UWPPackage();
                     string logoPath = "";
-                    string dsbText = "";
                     string dsbName = "";
                     string dsbPublisher = "";
                     string dsbMainApp = "";
@@ -270,8 +262,6 @@ namespace PCMgrUWP
                                     dsbName = propItem.InnerText;
                                 else if (propItem.Name == "PublisherDisplayName")
                                     dsbPublisher = propItem.InnerText;
-                                else if (propItem.Name == "Description")
-                                    dsbText = propItem.InnerText;
                                 else if (propItem.Name == "Logo")
                                     logoPath = propItem.InnerText;
                             }
@@ -307,17 +297,19 @@ namespace PCMgrUWP
                         }
                     }
 
+                    if (p.Apps.Length <= 0) continue;
+
                     p.InstalledLocation = dir;
                     p.FullName = package.Id.FullName;
+
 
                     //ms-resource:AppxManifest_DisplayName
                     //1527c705-839a-4832-9118-54d4Bd6a0c89_10.0.17134.1_neutral_neutral_cw5n1h2txyewy
                     //
 
-                   // if (p.FullName == "1527c705-839a-4832-9118-54d4Bd6a0c89_10.0.17134.1_neutral_neutral_cw5n1h2txyewy")
-                   //     ;
+                    // if (p.FullName == "1527c705-839a-4832-9118-54d4Bd6a0c89_10.0.17134.1_neutral_neutral_cw5n1h2txyewy")
+                    //     ;
 
-                    if (dsbText != "") p.Description = ExtractMSResourceString(p.InstalledLocation, package, dsbText);
                     if (dsbName != "") p.Name = ExtractMSResourceString(p.InstalledLocation, package, dsbName);
                     if (dsbPublisher != "") p.Publisher = ExtractMSResourceString(p.InstalledLocation, package, dsbPublisher);
                     if (logoPath != "") p.IconPath = ExtractDisplayIcon(p.InstalledLocation, package, logoPath);
@@ -325,10 +317,7 @@ namespace PCMgrUWP
                     else dsbMainApp = p.Name;
                     p.MainAppDisplayName = dsbMainApp;
 
-
-
-                    if (p.Name != "")
-                        packageDatas.Add(p);
+                    if (p.Name != "") packageDatas.Add(p);
                     packageCount += 1;
                 }
                 if (packageCount < 1)

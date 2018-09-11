@@ -27,11 +27,15 @@ M_CAPI(BOOL) MSCM_ChangeScStartType(LPWSTR scname, DWORD type, LPWSTR errText);
 //    targetCtl：SERVICE_CONTROL_STOP/SERVICE_CONTROL_PAUSE /SERVICE_CONTROL_CONTINUE/SERVICE_CONTROL_INTERROGATE/SERVICE_CONTROL_SHUTDOWN
 //    errText：错误文字
 M_CAPI(BOOL) MSCM_ControlSc(LPWSTR scname, DWORD targetStatus, DWORD targetCtl, LPWSTR errText);
+//启动服务
+//    scname：服务名称
+M_CAPI(BOOL) MSCM_StartSc(LPWSTR scname);
 
 M_CAPI(void) MSCM_SetCurrSelSc(LPWSTR scname);
 
 LRESULT MSCM_HandleWmCommand(WPARAM wParam);
 
+M_CAPI(BOOL) MSCM_Inited();
 //初始化，返回是否成功
 //  首先调用此函数
 M_CAPI(BOOL) MSCM_Init();

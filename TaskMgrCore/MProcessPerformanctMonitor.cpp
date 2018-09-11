@@ -53,7 +53,7 @@ ULONGLONG MProcessPerformanctMonitor::GetProcessCpuTime(PMPROCESS_ITEM processIt
 	return -1;
 }
 ULONGLONG MProcessPerformanctMonitor::GetProcessCycle(PMPROCESS_ITEM processItem) {
-	if (processItem && processItem->Data) return (ULONGLONG)(processItem->Data->CycleTime);
+	if (processItem && processItem->Data) return (ULONGLONG)(processItem->PerfData->CycleTimeDelta.Delta);
 	return -1;
 }
 
@@ -77,6 +77,10 @@ SIZE_T MProcessPerformanctMonitor::GetProcessMemoryInfo(PMPROCESS_ITEM processIt
 			return (SIZE_T)processItem->Data->VmCounters.QuotaPagedPoolUsage;
 		case M_GET_PROCMEM_PAGEDFAULT:
 			return (SIZE_T)processItem->Data->VmCounters.PageFaultCount;
+		case M_GET_PROCMEM_WORKINGSET_INC: 
+			return (SIZE_T)processItem->PerfData->PrivateWorkingSetDelta.Delta;
+		case M_GET_PROCMEM_PAGEDFAULT_INC:
+			return (SIZE_T)processItem->PerfData->PageFaultsDelta.Delta;
 		}
 	}
 	return 0;

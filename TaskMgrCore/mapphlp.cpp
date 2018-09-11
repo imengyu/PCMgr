@@ -114,6 +114,7 @@ HWND selectItem4;
 
 WCHAR ntoskrnlPath[MAX_PATH];
 WCHAR cssrssPath[MAX_PATH];
+WCHAR systemRoot[MAX_PATH];
 
 int HotKeyId = 0;
 bool has_fullscreen_window = false;
@@ -343,6 +344,14 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 	}
 	switch (id)
 	{
+	case 157: hWndMain = hWnd; break;
+	case 158: return MCreateMiniDumpForProcess((DWORD)(ULONG_PTR)data);
+	case 159: return MDetachFromDebuggerProcess((DWORD)(ULONG_PTR)data);
+	case 160: {
+		ListView_SetExtendedListViewStyleEx(hWnd, 0, LVS_EX_FULLROWSELECT | LVS_EX_TWOCLICKACTIVATE | LVS_EX_HEADERDRAGDROP);
+		SendMessage(hWnd, LVM_SETEXTENDEDLISTVIEWSTYLE, LVS_EX_DOUBLEBUFFER, LVS_EX_DOUBLEBUFFER);
+		break;
+	}
 	case 161: return IsMinimized(hWnd);
 	case 162: {
 		main_grouping = static_cast<int>((ULONG_PTR)hWnd);
@@ -657,15 +666,21 @@ M_API void* MAppWorkCall4(int id, void* hWnd, void*data)
 {
 	switch (id)
 	{
+	case 95: {
+		WCHAR buffer[MAX_PATH];
+		wcscpy_s(buffer, L"%SystemRoot%");
+		ExpandEnvironmentStrings(buffer, systemRoot, MAX_PATH);
+		return systemRoot;
+	}
 	case 96: {
 		WCHAR buffer[MAX_PATH];
-		wcscpy_s(buffer, L"%%SystemRoot%%\\System32\\csrss.exe");
+		wcscpy_s(buffer, L"%SystemRoot%\\System32\\csrss.exe");
 		ExpandEnvironmentStrings(buffer, cssrssPath, MAX_PATH);
 		return cssrssPath;
 	}
 	case 97: {
 		WCHAR buffer[MAX_PATH];
-		wcscpy_s(buffer, L"%%SystemRoot%%\\System32\\ntoskrnl.exe");
+		wcscpy_s(buffer, L"%SystemRoot%\\System32\\ntoskrnl.exe");
 		ExpandEnvironmentStrings(buffer, ntoskrnlPath, MAX_PATH);
 		return ntoskrnlPath;
 	}
@@ -889,6 +904,9 @@ M_API BOOL MAppMainRun()
 		M_CFG_GetConfigBOOL(L"LogToFile", L"Configure", FALSE));
 	M_LOG_SetLogLevelStr(logLev);
 
+	WCHAR loadFailedText[32];
+	LoadString(hInstRs, IDS_STRING_LOADAPP_FAIL, loadFailedText, 32);
+
 	WCHAR mainDllPath[MAX_PATH];
 	wcscpy_s(mainDllPath, appDir);
 #ifdef _AMD64_
@@ -898,7 +916,10 @@ M_API BOOL MAppMainRun()
 #endif
 	if (!MFM_FileExist(mainDllPath))
 	{
-		MShowErrorMessage(L"Not found Main Dll.", L"Load app failed", MB_ICONERROR);
+		WCHAR mainMissingText[32];
+		LoadString(hInstRs, IDS_STRING_MISSING_MAINDLL, mainMissingText, 32);
+
+		MShowErrorMessage(mainMissingText, loadFailedText, MB_ICONERROR);
 		LogErr(L"Main Dll missing : %s", mainDllPath);
 		return rs;
 	}
@@ -941,11 +962,22 @@ M_API BOOL MAppMainRun()
 		hr = pRuntimeHost->ExecuteInDefaultAppDomain(mainDllPath, L"PCMgr.Program", L"ProgramEntry", GetCommandLine(), &dwMainAppRet);
 		if (FAILED(hr)) {
 			LogErr(L"ExecuteInDefaultAppDomain %s failed HRESULT : 0x%08X", mainDllPath, hr);
-			if (!appLoadSucessfuly) {
-				_com_error err(hr);
-				LPCTSTR errMsg = err.ErrorMessage();
-				std::wstring hResultSr = FormatString(L"App : %s Start failed\n%s\nHRESULT : 0x%08X", mainDllPath, errMsg, hr);
-				MShowErrorMessage((LPWSTR)hResultSr.c_str(), L"Load app failed", MB_ICONERROR);
+			if (!appLoadSucessfuly) 
+			{
+				if (hr == COR_E_DLLNOTFOUND)
+				{
+					WCHAR mainMissingText[32];
+					LoadString(hInstRs, IDS_STRING_MISSINGDLL_HLP, mainMissingText, 32);
+
+					MShowErrorMessage(mainMissingText, loadFailedText, MB_ICONERROR);
+				}
+				else 
+				{
+					_com_error err(hr);
+					LPCTSTR errMsg = err.ErrorMessage();
+					std::wstring hResultSr = FormatString(L"%s\n%s\nHRESULT : 0x%08X", loadFailedText, errMsg, hr);
+					MShowErrorMessage((LPWSTR)hResultSr.c_str(), DEFDIALOGGTITLE, MB_ICONERROR);
+				}
 			}
 		}
 		else rs = TRUE;
@@ -1456,6 +1488,11 @@ LRESULT CALLBACK MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		case IDM_DEATCH_DEBUGGER: {
 			if (thisCommandPid > 4)
 				MDetachFromDebuggerProcess(thisCommandPid);
+			break;
+		}
+		case IDM_CREATE_MINI_DUMP: {
+			if (thisCommandPid > 4)
+				MCreateMiniDumpForProcess(thisCommandPid);
 			break;
 		}
 		case IDM_SGINED: {
@@ -1980,7 +2017,14 @@ int MShowErrorMessage(LPWSTR text, LPWSTR intr, int ico, int btn)
 int MShowErrorMessageWithLastErr(LPWSTR text, LPWSTR intr, int ico, int btn)
 {
 	std::wstring w = text;
-	w += FormatString(L"\nLastError : %d", GetLastError());
+
+	LPVOID buf;
+	if (FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&buf, 0, NULL))
+	{
+		w += w += FormatString(L"\n%s (%d)", (LPWSTR)buf, GetLastError());
+		LocalFree(buf);
+	}
+	else w += FormatString(L"\nLastError : %d", GetLastError());
 	return MShowMessageDialog(hWndMain, (LPWSTR)w.c_str(), DEFDIALOGGTITLE, intr, ico, btn);
 }
 void MShowErrorMessageWithNTSTATUS(LPWSTR msg, LPWSTR title, NTSTATUS status)
@@ -1999,11 +2043,6 @@ EXTERN_C M_API HRESULT MTaskDialog(_In_opt_ HWND hwndOwner, _In_opt_ HINSTANCE h
 	return TaskDialog(hwndOwner, hInstance, pszWindowTitle, pszMainInstruction, pszContent, dwCommonButtons, pszIcon, pnButton);
 }
 
-#pragma region StringHlp
-
-
-#pragma endregion
-
 //Crush annd MiniDump
 
 //Create MiniDump file
@@ -2014,7 +2053,7 @@ int GenerateMiniDump(PEXCEPTION_POINTERS pExceptionPointers)
 	LPWSTR szVersion = (LPWSTR)L"\\PCMgr";
 	SYSTEMTIME stLocalTime;
 	GetLocalTime(&stLocalTime);
-	wsprintf(szFileName, L"%s%s-%04d%02d%02d-%02d%02d%02d-Crush.dmp", appDir,
+	wsprintf(szFileName, L"%s%s-%04d%02d%02d-%02d%02d%02d-Crash!.dmp", appDir,
 		szVersion, stLocalTime.wYear, stLocalTime.wMonth, stLocalTime.wDay,
 		stLocalTime.wHour, stLocalTime.wMinute, stLocalTime.wSecond);
 

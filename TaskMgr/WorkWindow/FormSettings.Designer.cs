@@ -33,6 +33,9 @@
             this.button_cancel = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.btnChooseFont = new System.Windows.Forms.Button();
+            this.lbFont = new System.Windows.Forms.Label();
+            this.label17 = new System.Windows.Forms.Label();
             this.checkBoxShowHotKey = new System.Windows.Forms.CheckBox();
             this.label8 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
@@ -80,6 +83,7 @@
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.comboBox_lg = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
+            this.fontDialog1 = new System.Windows.Forms.FontDialog();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage4.SuspendLayout();
@@ -113,6 +117,9 @@
             // tabPage1
             // 
             resources.ApplyResources(this.tabPage1, "tabPage1");
+            this.tabPage1.Controls.Add(this.btnChooseFont);
+            this.tabPage1.Controls.Add(this.lbFont);
+            this.tabPage1.Controls.Add(this.label17);
             this.tabPage1.Controls.Add(this.checkBoxShowHotKey);
             this.tabPage1.Controls.Add(this.label8);
             this.tabPage1.Controls.Add(this.label7);
@@ -130,6 +137,23 @@
             this.tabPage1.Controls.Add(this.label2);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // btnChooseFont
+            // 
+            resources.ApplyResources(this.btnChooseFont, "btnChooseFont");
+            this.btnChooseFont.Name = "btnChooseFont";
+            this.btnChooseFont.UseVisualStyleBackColor = true;
+            this.btnChooseFont.Click += new System.EventHandler(this.btnChooseFont_Click);
+            // 
+            // lbFont
+            // 
+            resources.ApplyResources(this.lbFont, "lbFont");
+            this.lbFont.Name = "lbFont";
+            // 
+            // label17
+            // 
+            resources.ApplyResources(this.label17, "label17");
+            this.label17.Name = "label17";
             // 
             // checkBoxShowHotKey
             // 
@@ -149,7 +173,6 @@
             // 
             // comboBoxShowHotKey2
             // 
-            resources.ApplyResources(this.comboBoxShowHotKey2, "comboBoxShowHotKey2");
             this.comboBoxShowHotKey2.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxShowHotKey2.FormattingEnabled = true;
             this.comboBoxShowHotKey2.Items.AddRange(new object[] {
@@ -191,6 +214,7 @@
             resources.GetString("comboBoxShowHotKey2.Items35"),
             resources.GetString("comboBoxShowHotKey2.Items36"),
             resources.GetString("comboBoxShowHotKey2.Items37")});
+            resources.ApplyResources(this.comboBoxShowHotKey2, "comboBoxShowHotKey2");
             this.comboBoxShowHotKey2.Name = "comboBoxShowHotKey2";
             // 
             // label6
@@ -200,7 +224,6 @@
             // 
             // comboBoxShowHotKey1
             // 
-            resources.ApplyResources(this.comboBoxShowHotKey1, "comboBoxShowHotKey1");
             this.comboBoxShowHotKey1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxShowHotKey1.FormattingEnabled = true;
             this.comboBoxShowHotKey1.Items.AddRange(new object[] {
@@ -209,6 +232,7 @@
             resources.GetString("comboBoxShowHotKey1.Items2"),
             resources.GetString("comboBoxShowHotKey1.Items3"),
             resources.GetString("comboBoxShowHotKey1.Items4")});
+            resources.ApplyResources(this.comboBoxShowHotKey1, "comboBoxShowHotKey1");
             this.comboBoxShowHotKey1.Name = "comboBoxShowHotKey1";
             // 
             // label5
@@ -464,21 +488,21 @@
             // 
             // tabPage3
             // 
-            resources.ApplyResources(this.tabPage3, "tabPage3");
             this.tabPage3.Controls.Add(this.comboBox_lg);
             this.tabPage3.Controls.Add(this.label1);
+            resources.ApplyResources(this.tabPage3, "tabPage3");
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.UseVisualStyleBackColor = true;
             // 
             // comboBox_lg
             // 
-            resources.ApplyResources(this.comboBox_lg, "comboBox_lg");
             this.comboBox_lg.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_lg.FormattingEnabled = true;
             this.comboBox_lg.Items.AddRange(new object[] {
             resources.GetString("comboBox_lg.Items"),
             resources.GetString("comboBox_lg.Items1"),
             resources.GetString("comboBox_lg.Items2")});
+            resources.ApplyResources(this.comboBox_lg, "comboBox_lg");
             this.comboBox_lg.Name = "comboBox_lg";
             this.comboBox_lg.SelectedIndexChanged += new System.EventHandler(this.comboBox_lg_SelectedIndexChanged);
             // 
@@ -494,7 +518,6 @@
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.button_cancel);
             this.Controls.Add(this.button_save);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "FormSettings";
@@ -563,5 +586,9 @@
         private System.Windows.Forms.CheckBox checkBoxUseMyDbgView;
         private System.Windows.Forms.CheckBox checkBoxNTOSPDB;
         private System.Windows.Forms.CheckBox checkBoxAbortShutdown;
+        private System.Windows.Forms.Button btnChooseFont;
+        private System.Windows.Forms.Label lbFont;
+        private System.Windows.Forms.Label label17;
+        private System.Windows.Forms.FontDialog fontDialog1;
     }
 }

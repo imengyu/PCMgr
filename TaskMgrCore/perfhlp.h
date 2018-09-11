@@ -24,6 +24,7 @@ struct MPerfAndProcessData
 	MUINT64_DELTA CpuKernelDelta;
 	MUINT64_DELTA CpuUserDelta;
 	MUINT64_DELTA PageFaultsDelta;
+	MUINT64_DELTA PrivateWorkingSetDelta;
 	MUINT64_DELTA CycleTimeDelta; // since WIN7
 
 	MUINT64_DELTA IoReadDelta;

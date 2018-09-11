@@ -63,6 +63,7 @@ namespace PCMgr.WorkWindow
         }
         private void FormSetAffinity_Load(object sender, EventArgs e)
         {
+            FormSettings.LoadFontSettingForUI(this);
             if (currentPid > 4 && currentHProcess != IntPtr.Zero)
             {
                 if (systemAffinityMask == 0)

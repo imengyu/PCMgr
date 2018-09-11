@@ -577,7 +577,7 @@ namespace PCMgr
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern bool MRunUWPApp([MarshalAs(UnmanagedType.LPWStr)]string packageName, [MarshalAs(UnmanagedType.LPWStr)]string appname);
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool MUnInstallUWPApp([MarshalAs(UnmanagedType.LPWStr)]string appname);
+        public static extern bool M_UWP_UnInstallUWPApplication([MarshalAs(UnmanagedType.LPWStr)]string appname);
 
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern uint MGetProcessThreadsCount(IntPtr p);
@@ -645,11 +645,6 @@ namespace PCMgr
         public static extern double MPERF_GetDiskUseage();
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern double MPERF_GetNetWorkUseage();
-
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern ulong MPERF_GetAllRam();
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern ulong MPERF_GetRamUsed();
 
         //3
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
@@ -1011,6 +1006,18 @@ namespace PCMgr
 
         #endregion
 
+        #region UWP API
+
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool M_UWP_Init();
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool M_UWP_UnInit();
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool M_UWP_RunUWPApp([MarshalAs(UnmanagedType.LPWStr)]string strAppUserModelId, ref uint pdwProcessId);
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool M_UWP_KillUWPApplication([MarshalAs(UnmanagedType.LPWStr)]string packageName);
+
+        #endregion
 
         public static class DeviceApi
         {
@@ -1162,6 +1169,26 @@ namespace PCMgr
 
         public static class MCpuInfoMonitor
         {
+#if _X64_
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetCpuL1Cache@MCpuInfoMonitor@@SAKXZ")]
+            public static extern uint GetCpuL1Cache();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetCpuL2Cache@MCpuInfoMonitor@@SAKXZ")]
+            public static extern uint GetCpuL2Cache();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetCpuL3Cache@MCpuInfoMonitor@@SAKXZ")]
+            public static extern uint GetCpuL3Cache();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetCpuPackage@MCpuInfoMonitor@@SAKXZ")]
+            public static extern uint GetCpuPackage();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetCpuNodeCount@MCpuInfoMonitor@@SAKXZ")]
+            public static extern uint GetCpuNodeCount();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetCpuInfos@MCpuInfoMonitor@@SAHXZ")]
+            public static extern bool GetCpuInfos();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetCpuName@MCpuInfoMonitor@@SAHPEA_WH@Z", CharSet = CharSet.Unicode)]
+            public static extern bool GetCpuName(StringBuilder buf, int size);
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetCpuFrequency@MCpuInfoMonitor@@SAHXZ")]
+            public static extern int GetCpuFrequency();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetProcessorNumber@MCpuInfoMonitor@@SAHXZ")]
+            public static extern int GetProcessorNumber();
+#else
             [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetCpuL1Cache@MCpuInfoMonitor@@SAKXZ")]
             public static extern uint GetCpuL1Cache();
             [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetCpuL2Cache@MCpuInfoMonitor@@SAKXZ")]
@@ -1180,6 +1207,7 @@ namespace PCMgr
             public static extern int GetCpuFrequency();
             [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetProcessorNumber@MCpuInfoMonitor@@SAHXZ")]
             public static extern int GetProcessorNumber();
+#endif
         }
         public static class MSystemMemoryPerformanctMonitor
         {
@@ -1193,6 +1221,10 @@ namespace PCMgr
                 public UInt64 CompressedSize;
                 public UInt64 NonCompressedSize;
             }
+
+#if _X64_
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?UpdateMemoryListInfo@MSystemMemoryPerformanctMonitor@@SAHXZ")]
+            public static extern bool UpdateMemoryListInfo();
 
             [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetAllMemory@MSystemMemoryPerformanctMonitor@@SA_KXZ")]
             public static extern UInt64 GetAllMemory();
@@ -1219,13 +1251,44 @@ namespace PCMgr
             [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetModifiedSize@MSystemMemoryPerformanctMonitor@@SA_KXZ")]
             public static extern UInt64 GetModifiedSize();
 
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetMemoryCompressionInfo@MSystemMemoryPerformanctMonitor@@SAHPEAU_PROCESS_COMPRESSION_INFO@@@Z")]
+            public static extern bool GetMemoryCompressionInfo(ref SYSTEM_COMPRESSION_INFO outInfo);
+#else
             [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetMemoryCompressionInfo@MSystemMemoryPerformanctMonitor@@SAHPAU_PROCESS_COMPRESSION_INFO@@@Z")]
             public static extern bool GetMemoryCompressionInfo(ref SYSTEM_COMPRESSION_INFO outInfo);
-            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?UpdateMemoryListInfo@MSystemMemoryPerformanctMonitor@@SAHXZ")]
+
+                [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?UpdateMemoryListInfo@MSystemMemoryPerformanctMonitor@@SAHXZ")]
             public static extern bool UpdateMemoryListInfo();
+
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetAllMemory@MSystemMemoryPerformanctMonitor@@SA_KXZ")]
+            public static extern UInt64 GetAllMemory();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetKernelPaged@MSystemMemoryPerformanctMonitor@@SA_KXZ")]
+            public static extern UInt64 GetKernelPaged();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetKernelNonpaged@MSystemMemoryPerformanctMonitor@@SA_KXZ")]
+            public static extern UInt64 GetKernelNonpaged();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetSystemCacheSize@MSystemMemoryPerformanctMonitor@@SA_KXZ")]
+            public static extern UInt64 GetSystemCacheSize();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetCommitTotal@MSystemMemoryPerformanctMonitor@@SA_KXZ")]
+            public static extern UInt64 GetCommitTotal();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetCommitLimit@MSystemMemoryPerformanctMonitor@@SA_KXZ")]
+            public static extern UInt64 GetCommitLimit();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetMemoryAvail@MSystemMemoryPerformanctMonitor@@SA_KXZ")]
+            public static extern UInt64 GetMemoryAvail();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetMemoryUsed@MSystemMemoryPerformanctMonitor@@SA_KXZ")]
+            public static extern UInt64 GetMemoryUsed();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetMemoryAvailPageFile@MSystemMemoryPerformanctMonitor@@SA_KXZ")]
+            public static extern UInt64 GetMemoryAvailPageFile();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetMemoryUsage@MSystemMemoryPerformanctMonitor@@SANXZ")]
+            public static extern double GetMemoryUsage();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetStandBySize@MSystemMemoryPerformanctMonitor@@SA_KXZ")]
+            public static extern UInt64 GetStandBySize();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetModifiedSize@MSystemMemoryPerformanctMonitor@@SA_KXZ")]
+            public static extern UInt64 GetModifiedSize();
+#endif
         }
         public static class MSystemPerformanctMonitor
         {
+#if _X64_
             [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetThreadCount@MSystemPerformanctMonitor@@SAKXZ")]
             public static extern uint GetThreadCount();
             [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetHandleCount@MSystemPerformanctMonitor@@SAKXZ")]
@@ -1236,11 +1299,26 @@ namespace PCMgr
             public static extern uint GetPageSize();
             [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetCpuCount@MSystemPerformanctMonitor@@SAKXZ")]
             public static extern uint GetCpuCount();
-
-            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetSystemRunTime@MSystemPerformanctMonitor@@SA_KXZ")]
-            public static extern UInt64 GetSystemRunTime();
             [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?UpdatePerformance@MSystemPerformanctMonitor@@SAHXZ")]
             public static extern bool UpdatePerformance();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetSystemRunTime@MSystemPerformanctMonitor@@SA_KXZ")]
+            public static extern UInt64 GetSystemRunTime();
+#else
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetThreadCount@MSystemPerformanctMonitor@@SAKXZ")]
+            public static extern uint GetThreadCount();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetHandleCount@MSystemPerformanctMonitor@@SAKXZ")]
+            public static extern uint GetHandleCount();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetProcessCount@MSystemPerformanctMonitor@@SAKXZ")]
+            public static extern uint GetProcessCount();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetPageSize@MSystemPerformanctMonitor@@SAKXZ")]
+            public static extern uint GetPageSize();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetCpuCount@MSystemPerformanctMonitor@@SAKXZ")]
+            public static extern uint GetCpuCount();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?UpdatePerformance@MSystemPerformanctMonitor@@SAHXZ")]
+            public static extern bool UpdatePerformance();
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetSystemRunTime@MSystemPerformanctMonitor@@SA_KXZ")]
+            public static extern UInt64 GetSystemRunTime();
+#endif
         }
         public static class MProcessMonitor
         {
@@ -1251,6 +1329,19 @@ namespace PCMgr
             [UnmanagedFunctionPointer(CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
             public delegate void ProcessMonitorNewItemCallBack(uint pid, uint parentid, [MarshalAs(UnmanagedType.LPWStr)]string exename, [MarshalAs(UnmanagedType.LPWStr)]string exefullpath, IntPtr hProcess, IntPtr processItem);
 
+#if _X64_
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?CreateProcessMonitor@MProcessMonitor@@SAPEAV1@P6AXK@ZP6AXKKPEA_W1PEAXPEAUtag_MPROCESS_ITEM@@@ZP6AHK@Z@Z")]
+            public static extern IntPtr CreateProcessMonitor(IntPtr removeItemCallBack, IntPtr newItemCallBack, IntPtr updateNotIncludeItemCallBack);
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?DestroyProcessMonitor@MProcessMonitor@@SAXPEAV1@@Z")]
+            public static extern void DestroyProcessMonitor(IntPtr monitor);
+
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?EnumAllProcess@MProcessMonitor@@SAHPEAV1@@Z")]
+            public static extern bool EnumAllProcess(IntPtr monitor);
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?RefeshAllProcess@MProcessMonitor@@SAHPEAV1@@Z")]
+            public static extern bool RefeshAllProcess(IntPtr monitor);
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?RefeshAllProcessNotInclude@MProcessMonitor@@SAHPEAV1@@Z")]
+            public static extern bool RefeshAllProcessNotInclude(IntPtr monitor);
+#else
             [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?CreateProcessMonitor@MProcessMonitor@@SAPAV1@P6AXK@ZP6AXKKPA_W1PAXPAUtag_MPROCESS_ITEM@@@ZP6AHK@Z@Z")]
             public static extern IntPtr CreateProcessMonitor(IntPtr removeItemCallBack, IntPtr newItemCallBack, IntPtr updateNotIncludeItemCallBack);
             [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?DestroyProcessMonitor@MProcessMonitor@@SAXPAV1@@Z")]
@@ -1262,6 +1353,7 @@ namespace PCMgr
             public static extern bool RefeshAllProcess(IntPtr monitor);
             [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?RefeshAllProcessNotInclude@MProcessMonitor@@SAHPAV1@@Z")]
             public static extern bool RefeshAllProcessNotInclude(IntPtr monitor);
+#endif
         }
         public static class MProcessPerformanctMonitor
         {
@@ -1273,6 +1365,8 @@ namespace PCMgr
             public static int M_GET_PROCMEM_NONPAGEDPOOL = 5;
             public static int M_GET_PROCMEM_PAGEDPOOL = 6;
             public static int M_GET_PROCMEM_PAGEDFAULT = 7;
+            public static int M_GET_PROCMEM_WORKINGSET_INC = 8;
+            public static int M_GET_PROCMEM_PAGEDFAULT_INC = 9;
 
             public static int M_GET_PROCIO_READ = 0;
             public static int M_GET_PROCIO_WRITE = 1;
@@ -1281,16 +1375,35 @@ namespace PCMgr
             public static int M_GET_PROCIO_WRITE_BYTES = 4;
             public static int M_GET_PROCIO_OTHER_BYTES = 5;
 
-            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetProcessPrivateWoringSet@MProcessPerformanctMonitor@@CAKPAUtag_MPROCESS_ITEM@@@Z")]
-            public static extern UInt32 GetProcessPrivateWoringSet(IntPtr processItem);
-            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetProcessIOSpeed@MProcessPerformanctMonitor@@CAKPAUtag_MPROCESS_ITEM@@@Z")]
-            public static extern UInt32 GetProcessIOSpeed(IntPtr processItem);
-
             public static UInt64 GetProcessNetworkSpeed(IntPtr processItem)
             {
                 return MPERF_GetProcessNetworkSpeed(processItem);
             }
 
+#if _X64_
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetProcessPrivateWoringSet@MProcessPerformanctMonitor@@CA_KPEAUtag_MPROCESS_ITEM@@@Z")]
+            public static extern UInt32 GetProcessPrivateWoringSet(IntPtr processItem);
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetProcessIOSpeed@MProcessPerformanctMonitor@@CA_KPEAUtag_MPROCESS_ITEM@@@Z")]
+            public static extern UInt32 GetProcessIOSpeed(IntPtr processItem);
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetProcessCpuUseAgeKernel@MProcessPerformanctMonitor@@CANPEAUtag_MPROCESS_ITEM@@@Z")]
+            public static extern double GetProcessCpuUseAgeKernel(IntPtr processItem);
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetProcessCpuUseAgeUser@MProcessPerformanctMonitor@@CANPEAUtag_MPROCESS_ITEM@@@Z")]
+            public static extern double GetProcessCpuUseAgeUser(IntPtr processItem);
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetProcessCpuUseAge@MProcessPerformanctMonitor@@CANPEAUtag_MPROCESS_ITEM@@@Z")]
+            public static extern double GetProcessCpuUseAge(IntPtr processItem);
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetProcessCpuTime@MProcessPerformanctMonitor@@CA_KPEAUtag_MPROCESS_ITEM@@@Z")]
+            public static extern UInt64 GetProcessCpuTime(IntPtr processItem);
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetProcessCycle@MProcessPerformanctMonitor@@CA_KPEAUtag_MPROCESS_ITEM@@@Z")]
+            public static extern UInt64 GetProcessCycle(IntPtr processItem);
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetProcessMemoryInfo@MProcessPerformanctMonitor@@CA_KPEAUtag_MPROCESS_ITEM@@H@Z")]
+            public static extern UInt32 GetProcessMemoryInfo(IntPtr processItem, int col);
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetProcessIOInfo@MProcessPerformanctMonitor@@CA_KPEAUtag_MPROCESS_ITEM@@H@Z")]
+            public static extern UInt64 GetProcessIOInfo(IntPtr processItem, int col);
+#else
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetProcessPrivateWoringSet@MProcessPerformanctMonitor@@CAKPAUtag_MPROCESS_ITEM@@@Z")]
+            public static extern UInt32 GetProcessPrivateWoringSet(IntPtr processItem);
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetProcessIOSpeed@MProcessPerformanctMonitor@@CAKPAUtag_MPROCESS_ITEM@@@Z")]
+            public static extern UInt32 GetProcessIOSpeed(IntPtr processItem);
             [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetProcessCpuUseAgeKernel@MProcessPerformanctMonitor@@CANPAUtag_MPROCESS_ITEM@@@Z")]
             public static extern double GetProcessCpuUseAgeKernel(IntPtr processItem);
             [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetProcessCpuUseAgeUser@MProcessPerformanctMonitor@@CANPAUtag_MPROCESS_ITEM@@@Z")]
@@ -1305,6 +1418,7 @@ namespace PCMgr
             public static extern UInt32 GetProcessMemoryInfo(IntPtr processItem, int col);
             [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetProcessIOInfo@MProcessPerformanctMonitor@@CA_KPAUtag_MPROCESS_ITEM@@H@Z")]
             public static extern UInt64 GetProcessIOInfo(IntPtr processItem, int col);
+#endif
         }
     }
 

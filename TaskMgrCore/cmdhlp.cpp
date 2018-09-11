@@ -14,6 +14,7 @@
 #include "msup.h"
 #include "StringHlp.h"
 #include "StringSplit.h"
+#include "PathHelper.h"
 
 #include <shellapi.h>
 #include <locale>
@@ -162,14 +163,19 @@ int MPrintMumberWithLen(DWORD n, size_t len)
 int MPrintStrWithLenW(LPWSTR s, size_t len)
 {
 	if (s != NULL) {
-		wprintf_s(L"%s", s);
 		size_t slen = wcslen(s);
 		if (slen > 0)
 		{
 			if (len > (size_t)slen) {
+				wprintf_s(s);
 				size_t soutlen = len - (size_t)slen;
 				for (size_t i = 0; i < soutlen; i++)
 					putchar(' ');
+			}
+			else
+			{
+				for (size_t i  = 0; i < len; i++)
+					putwchar(s[i]);
 			}
 			return static_cast<int>(len - slen);
 		}
@@ -179,17 +185,21 @@ int MPrintStrWithLenW(LPWSTR s, size_t len)
 int MPrintStrWithLenA(LPCSTR s, size_t len)
 {
 	if (s != NULL) {
-		printf_s("%s", s);
 		size_t slen = strlen(s);
 		if (slen > 0)
 		{
 			if (len > (size_t)slen) {
+				printf_s(s);
 				size_t soutlen = len - (size_t)slen;
 				for (size_t i = 0; i < soutlen; i++)
 					putchar(' ');
-				return static_cast<int>(len - slen);
 			}
-			return 0;
+			else
+			{
+				for (size_t i = 0; i < len; i++)
+					putchar(s[i]);
+			}
+			return static_cast<int>(len - slen);
 		}
 	}
 	return 0;
@@ -212,6 +222,8 @@ void MRunCmd_VExp(vector<string>* cmds, int size)
 		printf("Please enter file name.\n");
 		return;
 	}
+
+	Path::RemoveQuotes(fileName, wcslen(fileName) + 1);
 
 	wprintf(fileName);
 	printf("\n");
@@ -259,6 +271,8 @@ void MRunCmd_VImp(vector<string>* cmds, int size)
 	{
 		printf("Please enter file name.\n"); return;
 	}
+
+	Path::RemoveQuotes(fileName, wcslen(fileName) + 1);
 
 	wprintf(fileName);
 	printf("\n");

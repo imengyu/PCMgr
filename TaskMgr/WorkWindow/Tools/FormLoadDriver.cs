@@ -76,5 +76,10 @@ namespace PCMgr.WorkWindow
                 e.Effect = DragDropEffects.None;
             }
         }
+
+        private void FormLoadDriver_Load(object sender, EventArgs e)
+        {
+            FormSettings.LoadFontSettingForUI(this);
+        }
     }
 }

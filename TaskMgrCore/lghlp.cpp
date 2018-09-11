@@ -21,9 +21,9 @@ std::wstring str_item_cantmovefile;
 std::wstring str_item_choose_target_dir;
 
 void MLG_Startup() {
-	str_item_access_denied = L"拒绝访问";
-	str_item_invalidproc = L"无效进程";
-	str_item_op_failed = L"操作失败";
+	str_item_access_denied = L"Access denied";
+	str_item_invalidproc = L"Invalid process";
+	str_item_op_failed = L"Operation failed";
 }
 void MLG_SetLanuageItems_0(int id, LPWSTR msg, int size)
 {
@@ -131,6 +131,10 @@ LPWSTR str_item_deatch_debugger_notdebug;
 
 LPWSTR str_item_ChangePriorityAsk;
 LPWSTR str_item_ChangePriorityContent;
+LPWSTR str_item_OpenFileError;
+LPWSTR str_item_CreateDumpFailed;
+LPWSTR str_item_CreateDumpSuccess;
+LPWSTR str_item_PleaseEnumIn64;
 
 #define HASSTR(x) x=(LPWSTR)MAlloc(size*sizeof(WCHAR));wcscpy_s(x, size, msg)
 
@@ -169,6 +173,7 @@ LPWSTR MLG_GetLanuageItem(LPWSTR name)
 }
 void MLG_SetLanuageItems_Destroy()
 {
+	
 	if (!lgRealloc)return;
 	if(str_item_copying==0)return;
 	delete str_item_copying;
@@ -256,6 +261,10 @@ void MLG_SetLanuageItems_Destroy()
 	delete str_item_deatch_debugger_notdebug;
 	delete str_item_ChangePriorityAsk;
 	delete str_item_ChangePriorityContent;
+	delete str_item_OpenFileError;
+	delete str_item_CreateDumpFailed;
+	delete str_item_CreateDumpSuccess;
+	delete str_item_PleaseEnumIn64;
 }
 void MLG_SetLanuageItems_1(int id, LPWSTR msg, int size)
 {
@@ -352,6 +361,13 @@ void MLG_SetLanuageItems_2(int id, LPWSTR msg, int size)
 	case 31: HASSTR(str_item_deatch_debugger_notdebug); break;
 	case 32: HASSTR(str_item_ChangePriorityAsk); break;
 	case 33: HASSTR(str_item_ChangePriorityContent); break;
+	case 34: HASSTR(str_item_OpenFileError); break;
+	case 35: HASSTR(str_item_CreateDumpFailed); break;
+	case 36: HASSTR(str_item_CreateDumpSuccess); break;
+	case 37: HASSTR(str_item_PleaseEnumIn64); break;
+
+
+
 	}
 
 

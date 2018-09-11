@@ -114,6 +114,7 @@
             this.Controls.Add(this.buttonLoad);
             this.MaximizeBox = false;
             this.Name = "FormLoadDriver";
+            this.Load += new System.EventHandler(this.FormLoadDriver_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 

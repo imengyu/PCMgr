@@ -22,23 +22,20 @@ namespace PCMgr
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.ThreadException += Application_ThreadException;
 
             bool run = true;
-
+            //Agrs
             if (agrs.Length > 0)
                 run = MainRunAgrs(agrs);
 
+            //Start Warns
             if (run && !NativeMethods.MIsRunasAdmin())
                 run = ShowNOADMINWarn();
 #if !_X64_
             if (run && NativeMethods.MIs64BitOS())
                 run = Show64Warn();
 #endif
-
-            NativeMethods.MAppWorkCall3(177, IntPtr.Zero, IntPtr.Zero);
-
-            //Application.Run(new WorkWindow.FormAbout());
+            //if (run) Application.Run(new FormSL(agrs));
             if (run) Application.Run(new FormMain(agrs));
         }
 
@@ -148,6 +145,11 @@ namespace PCMgr
                             else NativeMethods.Log("Invalid args[1] : " + agrs[1] + " File not exists");
                         }
                         break;
+                    case "test":
+                        {
+                            Application.Run(new WorkWindow.FormTest());
+                            return false;
+                        }
                 }
             }
             return true;
@@ -213,13 +215,32 @@ namespace PCMgr
 
         #endregion
 
+        private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            var ex = e.ExceptionObject as Exception;
+            if (ex != null)
+            {
+                NativeMethods.FLogErr(ex.ToString());
+                DialogResult d = MessageBox.Show("An exception occurs, click \"Abort\" to forec exit process immediately. \n" + ex.ToString(), "Exception ! ", MessageBoxButtons.AbortRetryIgnore, MessageBoxIcon.Error);
+                if (d == DialogResult.Abort) Environment.Exit(0);
+            }
+            else
+            {
+                DialogResult d = MessageBox.Show("An exception occurs, causing the program to stop running. Do you want to generate an error report?", "Exception ! ", MessageBoxButtons.YesNo, MessageBoxIcon.Error);
+                if (d == DialogResult.No)
+                    Environment.Exit(0);
+                else
+                {
+
+                }
+            }
+        }
         private static void Application_ThreadException(object sender, System.Threading.ThreadExceptionEventArgs e)
         {
             NativeMethods.FLogErr(e.Exception.ToString());
 
-            DialogResult d = MessageBox.Show(e.Exception.ToString(), "Exception ! ", MessageBoxButtons.AbortRetryIgnore, MessageBoxIcon.Error);
-            if (d == DialogResult.Abort)
-                Environment.Exit(0);
+            DialogResult d = MessageBox.Show("An exception occurs, click \"Abort\" to forec exit process immediately. \n" + e.Exception.ToString(), "Exception ! ", MessageBoxButtons.AbortRetryIgnore, MessageBoxIcon.Error);
+            if (d == DialogResult.Abort) Environment.Exit(0);
         }
 
         #region Program Entry
@@ -231,12 +252,19 @@ namespace PCMgr
         [DllImport(NativeMethods.COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern void MAppMainGetArgsFreeAll();
 
-        public static int ProgramEntry2()
-        {
-            return ProgramEntry(NativeMethods.Win32.GetCommandLineW());
-        }
+        [STAThread]
         public static int ProgramEntry(string cmdline)
         {
+            //Set STAThread
+            System.Threading.Thread.CurrentThread.SetApartmentState(System.Threading.ApartmentState.STA);
+            //Handle Exception
+            Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+            Application.ThreadException += Application_ThreadException;
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+
+            if (NativeMethods.GetConfigBool("BreakInStart", "AppSetting"))
+                MessageBox.Show("Program Entry break , you an attatch to debugger now.");
+
             int argscount = MAppMainGetArgs(cmdline);
             List<string> agrs = new List<string>();
             for (int i = 0; i < argscount; i++)

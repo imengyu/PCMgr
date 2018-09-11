@@ -220,6 +220,14 @@ wchar_t* StringHlp::Utf8ToUnicode(const char* szU8)
 	return wszString;
 }
 
+BOOLEAN StrEmepty(LPCWSTR str)
+{
+	return !str || StringHlp::StrEqualW(str, L"");
+}
+BOOLEAN StrEmeptyAnsi(LPCSTR str)
+{
+	return !str || StringHlp::StrEqualA(str, "");
+}
 LPCWSTR StringHlp::StrUpW(LPCWSTR str)
 {
 	size_t len = wcslen(str) + 1;

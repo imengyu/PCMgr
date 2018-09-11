@@ -12,7 +12,7 @@ namespace PCMgr.WorkWindow.KDbgPrint
 
         private void FormFind_Load(object sender, EventArgs e)
         {
-
+            FormSettings.LoadFontSettingForUI(this);
         }
         public bool Down { get { return radioButtonFindLow.Checked; } set { radioButtonFindLow.Checked = value; } }
         public bool Up { get { return radioButtonFindUp.Checked; } set { radioButtonFindUp.Checked = value; } }

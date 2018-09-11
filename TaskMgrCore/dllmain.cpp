@@ -74,6 +74,9 @@ void DllDestroy() {
 	MSystemPerformanctMonitor::DestroyGlobal();
 	MCpuInfoMonitor::FreeCpuInfos();
 
+	if (M_UWP_IsInited())
+		M_UWP_UnInit();
+
 	MPERF_GlobalDestroy();
 	WindowEnumDestroy();
 	MUnInitMyDbgView();

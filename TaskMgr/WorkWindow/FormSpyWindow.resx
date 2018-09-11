@@ -568,9 +568,6 @@
   <data name="textBoxClassName.Location" type="System.Drawing.Point, System.Drawing">
     <value>517, 17</value>
   </data>
-  <data name="labelState.Font" type="System.Drawing.Font, System.Drawing">
-    <value>Microsoft YaHei UI, 9pt</value>
-  </data>
   <data name="&gt;&gt;textBoxHandle.Type" xml:space="preserve">
     <value>System.Windows.Forms.TextBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

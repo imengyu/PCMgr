@@ -1,0 +1,66 @@
+﻿<Window x:Class="PCMgrUWP.AboutWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PCMgrUWP"
+        mc:Ignorable="d"
+        Title="关于 PCMgr" Height="452" Width="482" ResizeMode="NoResize" Initialized="Window_Initialized" WindowStyle="None" Background="{x:Null}" AllowsTransparency="True" MouseLeftButtonDown="Window_MouseLeftButtonDown" BorderThickness="12" WindowStartupLocation="CenterScreen">
+    <Window.Effect>
+        <DropShadowEffect BlurRadius="24" Color="#FF858484" Direction="90" ShadowDepth="2" Opacity="0.8"/>
+    </Window.Effect>
+    <Grid Margin="0,0,0,0" Background="White">
+        <Button x:Name="CloseButton" Content="确定" HorizontalAlignment="Left" Margin="354,382,0,0" VerticalAlignment="Top" Width="85" Click="CloseButton_Click" Height="30" FontSize="14"/>
+        <Label Content="PC Manager" HorizontalAlignment="Left" Margin="38,35,0,0" VerticalAlignment="Top" FontSize="29"/>
+        <Label x:Name="LabelVersion" Content="Version 1.2 (2018.9) Pre Release" HorizontalAlignment="Left" Margin="50,100,0,0" VerticalAlignment="Top" FontSize="15"/>
+        <Label Content="A rebulid task manager in C#" HorizontalAlignment="Left" Margin="50,79,0,0" VerticalAlignment="Top" Foreground="#FF6E6E6E"/>
+        <Label Content="Copyright © 2018 DreamFish" HorizontalAlignment="Left" Margin="50,356,0,0" VerticalAlignment="Top" Background="White" Foreground="#FF8D8D8D" FontStyle="Italic"/>
+        <Expander Header="关于软件的更多信息" HorizontalAlignment="Left" Height="85" Margin="24,386,0,-43" VerticalAlignment="Top" Width="323" Collapsed="Expander_Collapsed" Expanded="Expander_Expanded">
+            <Label x:Name="LabelMoreDetals" Content="软件版本：1.2.0.1&#x0a;生成日期：2018/9/29" HorizontalAlignment="Left" Margin="10,0,0,0"/>
+        </Expander>
+        <Image x:Name="ImageOSBit" HorizontalAlignment="Left" Height="30" Margin="223,35,0,0" VerticalAlignment="Top" Width="70" RenderTransformOrigin="1.243,0.933"/>
+        <TextBlock Margin="55,134,19,85" FontSize="15"> 这是一个开源项目，你可以在 Github 上找到它：
+            <LineBreak/> 
+            <Hyperlink NavigateUri="https://github.com/717021/PCMgr" Click="Hyperlink_Click">github.com/717021/PCMgr</Hyperlink>
+            <LineBreak/>欢迎向我提出这个软件的 <Run  FontWeight="Bold">BUG</Run> ，如果你想和我一起讨论，
+            <LineBreak/>可以加我的 QQ <Run   FontStyle="Italic">1501076885</Run>
+             <LineBreak/>
+             <LineBreak/>
+             本软件还使用了一些<Hyperlink NavigateUri="#" Click="MoreHilpers_Click">第三方软件</Hyperlink>
+             <LineBreak/>
+             <LineBreak/>免责声明：如果因为您的操作而导致系统损坏或给您造成
+             <LineBreak/>损害，本软件概不负责，自您使用本软件起即认为您接受
+             <LineBreak/>此声明。
+             <LineBreak/><Hyperlink NavigateUri="#" Click="License_Click">软件许可协议</Hyperlink>
+        </TextBlock>
+        <Grid Margin="0,0,0,0" x:Name="GridMoreHelps" HorizontalAlignment="Left" Background="#55000000"  VerticalAlignment="Top" Height="438" Width="468" Visibility="Hidden">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Background="White" Margin="0,104,10,149">
+                <TextBlock x:Name="xt" Grid.Row="0" Margin="10,10,10,10" TextWrapping="Wrap" FontSize="14">
+                    其中，本软件使用了一下第三方模块：<LineBreak/>
+                    <LineBreak/><Hyperlink NavigateUri="http/www.capstone-engine.org" Click="Hyperlink_Click">Capstone Ultimate Disassembly Framework </Hyperlink>
+                    <LineBreak/><Hyperlink NavigateUri="https://aerowizard.codeplex.com" Click="Hyperlink_Click">AeroWizard</Hyperlink>
+                    <LineBreak/><Hyperlink NavigateUri="https://processhacker.sourceforge.io/" Click="Hyperlink_Click">Process Hacker</Hyperlink> 本软件有许多功能借鉴了 Process Hacker 的方法，感谢开源的 Process Hacker 。
+                </TextBlock>
+            </ScrollViewer>
+            <Button x:Name="ButtonHideMoreHelp" Content="关闭" HorizontalAlignment="Left" Margin="354,382,0,0" VerticalAlignment="Top" Width="85" Click="ButtonHideMoreHelp_Click" Height="30" FontSize="15"/>
+        </Grid>
+        <Grid Margin="0,0,0,0" x:Name="GridLicense" HorizontalAlignment="Left" Background="#55000000"  VerticalAlignment="Top" Height="438" Width="468" Visibility="Hidden">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Background="White" Margin="0,33,10,72">
+                <TextBlock Grid.Row="0" Margin="10,10,10,10" TextWrapping="Wrap" FontSize="14">
+                    <Run  FontWeight="Bold">软件许可协议</Run>
+                       <LineBreak/>本软件开源，您可以在 Github 上下载完整源代码。
+                       <LineBreak/><Run  FontWeight="Bold">本开源遵循 MIT 协议。</Run>
+                     <LineBreak/>
+                     <LineBreak/>Copyright (c) 2018-Now, Dream Fish<LineBreak/>
+<LineBreak/>Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+<LineBreak/><LineBreak/>The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+<LineBreak/>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+               <LineBreak/>
+                    <LineBreak/><Run Foreground="Red" FontWeight="Bold">其中：软件原副本（软件本体）严禁用于商业用途</Run>
+                </TextBlock>
+            </ScrollViewer>
+            <Button x:Name="ButtonHideLicense" Content="关闭" HorizontalAlignment="Left" Margin="354,382,0,0" VerticalAlignment="Top" Width="85" Click="ButtonHideLicense_Click" Height="30" FontSize="15"/>
+            <Label Content="PC Manager" HorizontalAlignment="Left" Margin="10,6,0,0" VerticalAlignment="Top" Foreground="White"/>
+        </Grid>
+    </Grid>
+</Window>

@@ -31,12 +31,19 @@ WCHAR currScPath[MAX_PATH];
 
 LPENUM_SERVICE_STATUS_PROCESS pBufDrvscs = NULL;
 LPSERVICE_STORAGE pDrvscsNames = NULL;
+BOOL scmIninFailed = FALSE;
 
+M_CAPI(BOOL) MSCM_Inited()
+{
+	return hSCM != NULL;
+}
 M_CAPI(BOOL) MSCM_Init()
 {
+	if(scmIninFailed) return FALSE;
 	hSCM = OpenSCManager(NULL, NULL, SC_MANAGER_CONNECT | SC_MANAGER_ENUMERATE_SERVICE);
 	if (NULL == hSCM) {
 		LogErr(L"OpenSCManager failed ! Last error : %d .", GetLastError());
+		scmIninFailed = TRUE;
 		return FALSE;
 	}
 	return TRUE;
@@ -307,6 +314,24 @@ M_CAPI(BOOL) MSCM_ControlSc(LPWSTR scname, DWORD targetStatus, DWORD targetCtl, 
 	}
 	return FALSE;
 }
+M_CAPI(BOOL) MSCM_StartSc(LPWSTR scname)
+{
+	SC_HANDLE hSc = OpenService(hSCM, currSc, SERVICE_ENUMERATE_DEPENDENTS |
+		SERVICE_START | SERVICE_STOP | SERVICE_PAUSE_CONTINUE | SERVICE_QUERY_STATUS);
+	if (hSc)
+	{
+		SERVICE_STATUS status;
+		QueryServiceStatus(hSc, &status);
+		if (status.dwCurrentState != SERVICE_RUNNING)
+			return StartService(hSc, 0, NULL);
+		else {
+			CloseServiceHandle(hSc);
+			return TRUE;
+		}
+	}
+	else ThrowErrorAndErrorCodeX(GetLastError(), str_item_opensc_err, (LPWSTR)str_item_op_failed.c_str(), FALSE);
+	return FALSE;
+}
 M_CAPI(void) MSCM_SetCurrSelSc(LPWSTR scname)
 {
 	wcscpy_s(currSc, scname);
@@ -368,23 +393,8 @@ LRESULT MSCM_HandleWmCommand(WPARAM wParam)
 		break;
 	}
 	case ID_SCMAIN_START: {
-		if (wcslen(currSc) > 0 || !StrEqual(currSc, L"")) 
-		{
-			SC_HANDLE hSc = OpenService(hSCM, currSc, SERVICE_ENUMERATE_DEPENDENTS |
-				SERVICE_START | SERVICE_STOP | SERVICE_PAUSE_CONTINUE | SERVICE_QUERY_STATUS);
-			if (hSc)
-			{
-				SERVICE_STATUS status;
-				QueryServiceStatus(hSc, &status);
-				if (status.dwCurrentState != SERVICE_RUNNING)
-					return StartService(hSc, 0, NULL);
-				else {
-					CloseServiceHandle(hSc);
-					return TRUE;
-				}
-			}
-			else ThrowErrorAndErrorCodeX(GetLastError(), str_item_opensc_err, (LPWSTR)str_item_op_failed.c_str(), FALSE);
-		}
+		if (wcslen(currSc) > 0 || !StrEqual(currSc, L""))
+			MSCM_StartSc(currSc);
 		break;
 	}	
 	case ID_SCSMALL_STOPSC:

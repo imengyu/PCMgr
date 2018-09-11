@@ -123,7 +123,25 @@
   <data name="button_cancel.Text" xml:space="preserve">
     <value>Cancel</value>
   </data>
+  <data name="tabPage1.Text" xml:space="preserve">
+    <value>App</value>
+  </data>
+  <data name="btnChooseFont.Text" xml:space="preserve">
+    <value>Choose font</value>
+  </data>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="lbFont.Size" type="System.Drawing.Size, System.Drawing">
+    <value>47, 12</value>
+  </data>
+  <data name="lbFont.Text" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="label17.Size" type="System.Drawing.Size, System.Drawing">
+    <value>29, 12</value>
+  </data>
+  <data name="label17.Text" xml:space="preserve">
+    <value>Font</value>
+  </data>
   <data name="label8.Location" type="System.Drawing.Point, System.Drawing">
     <value>201, 137</value>
   </data>
@@ -185,11 +203,11 @@
   <data name="label2.Text" xml:space="preserve">
     <value>App Settings</value>
   </data>
-  <data name="tabPage1.Text" xml:space="preserve">
-    <value>App</value>
+  <data name="tabPage4.Text" xml:space="preserve">
+    <value>Config</value>
   </data>
   <data name="checkBoxNTOSPDB.Location" type="System.Drawing.Point, System.Drawing">
-    <value>20, 543</value>
+    <value>20, 555</value>
   </data>
   <data name="checkBoxNTOSPDB.Size" type="System.Drawing.Size, System.Drawing">
     <value>306, 16</value>
@@ -209,11 +227,15 @@
   <data name="checkBoxAutoLoadDriver.Text" xml:space="preserve">
     <value>Auto load driver</value>
   </data>
+  <data name="checkBoxHighLightNoSystetm.Location" type="System.Drawing.Point, System.Drawing">
+    <value>20, 603</value>
+  </data>
   <data name="checkBoxHighLightNoSystetm.Size" type="System.Drawing.Size, System.Drawing">
-    <value>384, 16</value>
+    <value>264, 28</value>
   </data>
   <data name="checkBoxHighLightNoSystetm.Text" xml:space="preserve">
-    <value>For non system processes, services etc. use blue highlighted</value>
+    <value>For non system processes, services etc. 
+use blue highlighted</value>
   </data>
   <data name="label16.Size" type="System.Drawing.Size, System.Drawing">
     <value>54, 12</value>
@@ -221,12 +243,15 @@
   <data name="label16.Text" xml:space="preserve">
     <value>Display</value>
   </data>
+  <data name="label15.Location" type="System.Drawing.Point, System.Drawing">
+    <value>37, 348</value>
+  </data>
   <data name="label15.Size" type="System.Drawing.Size, System.Drawing">
-    <value>353, 24</value>
+    <value>312, 39</value>
   </data>
   <data name="label15.Text" xml:space="preserve">
-    <value>Use ZwTerminateProcess/NtTerminateThread End (default, if 
-unsuccessful, use the following two methods)</value>
+    <value>Use ZwTerminateProcess/NtTerminateThread End
+ (default, if unsuccessful, use the following two methods)</value>
   </data>
   <data name="checkBoxShowDebugWindow.Size" type="System.Drawing.Size, System.Drawing">
     <value>168, 16</value>
@@ -268,20 +293,22 @@ unsuccessful, use the following two methods)</value>
     <value>20, 509</value>
   </data>
   <data name="radioButtonRefuseNoSginedAndAsk.Size" type="System.Drawing.Size, System.Drawing">
-    <value>425, 28</value>
+    <value>275, 40</value>
   </data>
   <data name="radioButtonRefuseNoSginedAndAsk.Text" xml:space="preserve">
-    <value>For loading unsigned drivers, callback to application layer pop-up 
-dialog asks if you load and Log.</value>
+    <value>For loading unsigned drivers, callback to 
+application layer pop-up dialog asks 
+if you load and Log.</value>
   </data>
   <data name="checkBoxEnableLoadDrvCallback.Location" type="System.Drawing.Point, System.Drawing">
-    <value>158, 362</value>
+    <value>158, 434</value>
   </data>
   <data name="checkBoxEnableLoadDrvCallback.Size" type="System.Drawing.Size, System.Drawing">
-    <value>246, 16</value>
+    <value>204, 28</value>
   </data>
   <data name="checkBoxEnableLoadDrvCallback.Text" xml:space="preserve">
-    <value>Enabled (only 32 bit systems can use)</value>
+    <value>Enabled
+ (only 32 bit systems can use)</value>
   </data>
   <data name="radioButtonRefuseNoSginedDrv.Location" type="System.Drawing.Point, System.Drawing">
     <value>20, 487</value>
@@ -334,11 +361,15 @@ dialog asks if you load and Log.</value>
   <data name="checkBoxCannotCreateProc.Text" xml:space="preserve">
     <value>Prohibit create process</value>
   </data>
+  <data name="label11.Location" type="System.Drawing.Point, System.Drawing">
+    <value>6, 44</value>
+  </data>
   <data name="label11.Size" type="System.Drawing.Size, System.Drawing">
-    <value>383, 12</value>
+    <value>222, 24</value>
   </data>
   <data name="label11.Text" xml:space="preserve">
-    <value>Temporary configuration (effective after driving load)</value>
+    <value>Temporary configuration
+ (effective after driving load)</value>
   </data>
   <data name="radioButtonApcPspTerProc.Text" xml:space="preserve">
     <value>Ke APC + PspExitThread</value>
@@ -349,11 +380,15 @@ dialog asks if you load and Log.</value>
   <data name="radioButtonPspTerProc.Text" xml:space="preserve">
     <value>PspTerminateThreadByPointer</value>
   </data>
+  <data name="label10.Location" type="System.Drawing.Point, System.Drawing">
+    <value>3, 291</value>
+  </data>
   <data name="label10.Size" type="System.Drawing.Size, System.Drawing">
-    <value>395, 12</value>
+    <value>221, 24</value>
   </data>
   <data name="label10.Text" xml:space="preserve">
-    <value>R3 Terminate Process/Thread：NtTerminateProcess/NtTerminateThread</value>
+    <value>R3 Terminate Process/Thread：
+NtTerminateProcess/NtTerminateThread</value>
   </data>
   <data name="label9.Size" type="System.Drawing.Size, System.Drawing">
     <value>194, 12</value>
@@ -361,19 +396,19 @@ dialog asks if you load and Log.</value>
   <data name="label9.Text" xml:space="preserve">
     <value>R0 Terminate Process/Thread</value>
   </data>
-  <data name="tabPage4.Text" xml:space="preserve">
-    <value>Config</value>
-  </data>
   <data name="tabPage2.Text" xml:space="preserve">
     <value>Others</value>
+  </data>
+  <data name="tabPage3.Text" xml:space="preserve">
+    <value>Lanuage</value>
+  </data>
+  <data name="comboBox_lg.Size" type="System.Drawing.Size, System.Drawing">
+    <value>230, 20</value>
   </data>
   <data name="label1.Size" type="System.Drawing.Size, System.Drawing">
     <value>47, 12</value>
   </data>
   <data name="label1.Text" xml:space="preserve">
-    <value>Lanuage</value>
-  </data>
-  <data name="tabPage3.Text" xml:space="preserve">
     <value>Lanuage</value>
   </data>
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">

@@ -25,13 +25,17 @@
 #define IDS_STRING_RUN2TEXT             121
 #define IDR_MENUUSER                    121
 #define IDS_STRING_CONRUN               122
-#define IDD_CONNECTSESS                 122
+#define IDS_STRING_MISSING_MAINDLL 130
+#define IDD_CONNECTSESS                 131
 #define IDS_STRING_CANRUN               123
 #define IDS_STRING_KILLOLD              124
 #define IDD_STATS                       124
 #define IDD_VWINS                       125
+#define IDS_STRING_MISSINGDLL_HLP       132
 #define IDS_STRING_KILLOLDFAILED        126
 #define IDD_PEVIEW                      127
+#define IDS_STRING_LOADAPP_FAIL         127
+#define IDD_CREATEDUMP                  129
 #define IDI_ICONACTIVEDWIN              206
 #define IDR_WINSMENU                    209
 #define IDR_MODULSMENU                  214
@@ -55,12 +59,14 @@
 #define IDC_EXPORTTABLES                1012
 #define IDC_TABLES                      1012
 #define IDC_TREEITEMS                   1013
+#define IDC_STATUS                      1014
 #define IDC_WINSLIST                    1106
+#define IDM_CREATE_MINI_DUMP            1135
 #define IDC_RESULT                      1136
-#define IDM_EXPAND 40000
-#define IDM_COLLAPSE 40001
-#define IDM_GROUP 40002
-#define IDM_DEATCH_DEBUGGER  40003
+#define IDM_EXPAND                      40000
+#define IDM_COLLAPSE                    40001
+#define IDM_GROUP                       40002
+#define IDM_DEATCH_DEBUGGER             40003
 #define IDM_ABOUT                       40004
 #define IDM_SETTINGS                    40005
 #define IDM_TEXIT                       40006
@@ -234,15 +240,15 @@
 #define IDC_PCMGR_REGEDIT               41171
 #define IDC_PCMGR_FILEMGR               41172
 #define IDM_RELOADPDB                   41173
-#define IDM_SYSTEM_HIBERNATE  41174
+#define IDM_SYSTEM_HIBERNATE            41174
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        129
+#define _APS_NEXT_RESOURCE_VALUE        131
 #define _APS_NEXT_COMMAND_VALUE         40208
-#define _APS_NEXT_CONTROL_VALUE         1014
+#define _APS_NEXT_CONTROL_VALUE         1017
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

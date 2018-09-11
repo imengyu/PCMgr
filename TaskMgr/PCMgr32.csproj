@@ -119,10 +119,8 @@
       <HintPath>..\AeroWizard32.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Aero\CommandLink.cs">
@@ -194,6 +192,12 @@
     <Compile Include="FormMain.Designer.cs">
       <DependentUpon>FormMain.cs</DependentUpon>
     </Compile>
+    <Compile Include="FormSL.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormSL.Designer.cs">
+      <DependentUpon>FormSL.cs</DependentUpon>
+    </Compile>
     <Compile Include="Helpers\IconUtils.cs" />
     <Compile Include="Helpers\SysVer.cs" />
     <Compile Include="Lanuages\LanuageMgr.cs" />
@@ -218,12 +222,6 @@
     <Compile Include="Ctls\TaskMgrList.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Dialogs\FormAbout.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Dialogs\FormAbout.Designer.cs">
-      <DependentUpon>FormAbout.cs</DependentUpon>
-    </Compile>
     <Compile Include="WorkWindow\FormCheckFileUse.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -247,6 +245,12 @@
     </Compile>
     <Compile Include="WorkWindow\FormSetAffinity.Designer.cs">
       <DependentUpon>FormSetAffinity.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WorkWindow\FormTest.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WorkWindow\FormTest.Designer.cs">
+      <DependentUpon>FormTest.cs</DependentUpon>
     </Compile>
     <Compile Include="WorkWindow\FormVHotKeys.cs">
       <SubType>Form</SubType>
@@ -368,14 +372,15 @@
     <EmbeddedResource Include="Ctls\PerformancePageRam.resx">
       <DependentUpon>PerformancePageRam.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\FormAbout.en.resx">
-      <DependentUpon>FormAbout.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="FormMain.en.resx">
       <DependentUpon>FormMain.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FormMain.resx">
       <DependentUpon>FormMain.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormSL.resx">
+      <DependentUpon>FormSL.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Lanuages\LanuageResource_en.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -386,6 +391,7 @@
     </EmbeddedResource>
     <EmbeddedResource Include="WorkWindow\FormDetalsistHeaders.resx">
       <DependentUpon>FormDetalsistHeaders.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="WorkWindow\FormFirst.resx">
       <DependentUpon>FormFirst.cs</DependentUpon>
@@ -395,6 +401,10 @@
     </EmbeddedResource>
     <EmbeddedResource Include="WorkWindow\FormSetAffinity.resx">
       <DependentUpon>FormSetAffinity.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormTest.resx">
+      <DependentUpon>FormTest.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="WorkWindow\FormVHotKeys.en.resx">
       <DependentUpon>FormVHotKeys.cs</DependentUpon>
@@ -469,9 +479,6 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="Dialogs\FormAbout.resx">
-      <DependentUpon>FormAbout.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="WorkWindow\FormCheckFileUse.en.resx">
       <DependentUpon>FormCheckFileUse.cs</DependentUpon>
     </EmbeddedResource>
@@ -510,6 +517,7 @@
     </EmbeddedResource>
     <EmbeddedResource Include="WorkWindow\FormSpyWindow.resx">
       <DependentUpon>FormSpyWindow.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <None Include="app.config" />
     <None Include="app.manifest" />
@@ -587,6 +595,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Dialogs\" />
     <Folder Include="WorkWindow\KMgr\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

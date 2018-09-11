@@ -13,6 +13,12 @@ namespace PCMgrNetMon
         public FormMain()
         {
             InitializeComponent();
+            PCMgrUWP.Caller.ShowAboutDlg();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            PCMgrUWP.Caller.ShowAboutDlg();
         }
     }
 }

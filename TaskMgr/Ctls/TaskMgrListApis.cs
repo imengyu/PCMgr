@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace PCMgr.Ctls
 {
-    static class TaskMgrListApis
+    internal static class TaskMgrListApis
     {
         public static int M_DRAW_HEADER_HOT = 1;
         public static int M_DRAW_HEADER_PRESSED = 2;

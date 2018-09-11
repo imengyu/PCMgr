@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -10,13 +11,18 @@ namespace PCMgr.Ctls
         {
             brushText = new SolidBrush(Color.Black);
             brushTitle = new SolidBrush(Color.Gray);
-            FontTextSpeical = new Font("Microsoft YaHei UI", 15);
-            FontText = new Font("Microsoft YaHei UI", 10.5f);
-            FontTitle = new Font("Microsoft YaHei UI", 10.5f);
+            LoadAllFonts();
             MaxSpeicalItemsWidth = 200;
 
             SetStyle(ControlStyles.Selectable, true);
             SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
+        }
+
+        private void LoadAllFonts()
+        {
+            FontTextSpeical = new Font(Font.FontFamily, 15);
+            FontText = new Font(Font.FontFamily, 9f);
+            FontTitle = new Font(Font.FontFamily, 9f);
         }
 
         public Color ColorTitle
@@ -128,6 +134,11 @@ namespace PCMgr.Ctls
             else Invalidate(new Rectangle(0, 0, MaxSpeicalItemsWidth, Height));
         }
 
+        protected override void OnFontChanged(EventArgs e)
+        {
+            base.OnFontChanged(e);
+            LoadAllFonts();
+        }
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
@@ -197,8 +208,8 @@ namespace PCMgr.Ctls
                     PerformanceInfoStaticItem it = StaticItems[i];
                     int w = (int)(g.MeasureString(it.Name, FontTitle).Width);
                     if (w > maxWidth) maxWidth = w;
-                    g.DrawString(it.Name, FontTitle, brushTitle, MaxSpeicalItemsWidth, curY);
-                    curY += FontTitleHeight;
+                    g.DrawString(it.Name, FontText, brushTitle, MaxSpeicalItemsWidth, curY);
+                    curY += FontTextHeight;
                 }
                 maxWidth += MaxSpeicalItemsWidth + 5;
                 curY = 0;

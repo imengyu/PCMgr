@@ -21,6 +21,10 @@
 #define M_GET_PROCMEM_PAGEDPOOL 6
 //页面错误
 #define M_GET_PROCMEM_PAGEDFAULT 7
+//页面错误增量
+#define M_GET_PROCMEM_WORKINGSET_INC  8
+//工作集增量
+#define M_GET_PROCMEM_PAGEDFAULT_INC  9
 
 //IO读取操作数
 #define M_GET_PROCIO_READ 0

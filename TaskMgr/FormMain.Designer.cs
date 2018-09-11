@@ -116,7 +116,6 @@
             this.复制发布者ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.listApps = new PCMgr.Ctls.TaskMgrList();
             this.pl_simple = new System.Windows.Forms.Panel();
-            this.lbNoAppsTip = new System.Windows.Forms.Label();
             this.expandMoreDetals = new PCMgr.Aero.ExpandButton();
             this.btnEndTaskSimple = new System.Windows.Forms.Button();
             this.contextMenuStripProcDetalsCol = new System.Windows.Forms.ContextMenuStrip(this.components);
@@ -127,9 +126,21 @@
             this.contextMenuStripTray = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.显示隐藏主界面ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.退出程序ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.pl_perfGridHost = new System.Windows.Forms.Panel();
+            this.contextMenuStripMainHeader = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.资源值ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.内存ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.百分比ToolStripMenuItemRam = new System.Windows.Forms.ToolStripMenuItem();
+            this.值ToolStripMenuItemRam = new System.Windows.Forms.ToolStripMenuItem();
+            this.磁盘ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.百分比ToolStripMenuItemDisk = new System.Windows.Forms.ToolStripMenuItem();
+            this.值ToolStripMenuItemDisk = new System.Windows.Forms.ToolStripMenuItem();
+            this.网络ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.百分比ToolStripMenuItemNet = new System.Windows.Forms.ToolStripMenuItem();
+            this.值ToolStripMenuItemNet = new System.Windows.Forms.ToolStripMenuItem();
             this.fileSystemWatcher = new System.IO.FileSystemWatcher();
             this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
-            this.pl_perfGridHost = new System.Windows.Forms.Panel();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerPerfCtls)).BeginInit();
             this.splitContainerPerfCtls.Panel1.SuspendLayout();
             this.splitContainerPerfCtls.SuspendLayout();
@@ -159,6 +170,7 @@
             this.pl_simple.SuspendLayout();
             this.contextMenuStripProcDetalsCol.SuspendLayout();
             this.contextMenuStripTray.SuspendLayout();
+            this.contextMenuStripMainHeader.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.fileSystemWatcher)).BeginInit();
             this.SuspendLayout();
             // 
@@ -688,10 +700,15 @@
             this.listProcessDetals.FullRowSelect = true;
             this.listProcessDetals.MultiSelect = false;
             this.listProcessDetals.Name = "listProcessDetals";
+            this.listProcessDetals.ShowItemToolTips = true;
             this.listProcessDetals.SmallImageList = this.imageListProcessDetalsIcons;
             this.listProcessDetals.UseCompatibleStateImageBehavior = false;
             this.listProcessDetals.View = System.Windows.Forms.View.Details;
             this.listProcessDetals.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listProcessDetals_ColumnClick);
+            this.listProcessDetals.ColumnReordered += new System.Windows.Forms.ColumnReorderedEventHandler(this.listProcessDetals_ColumnReordered);
+            this.listProcessDetals.SelectedIndexChanged += new System.EventHandler(this.listProcessDetals_SelectedIndexChanged);
+            this.listProcessDetals.KeyDown += new System.Windows.Forms.KeyEventHandler(this.listProcessDetals_KeyDown);
+            this.listProcessDetals.MouseClick += new System.Windows.Forms.MouseEventHandler(this.listProcessDetals_MouseClick);
             // 
             // imageListProcessDetalsIcons
             // 
@@ -775,6 +792,7 @@
             this.复制完整名称ToolStripMenuItem,
             this.复制发布者ToolStripMenuItem});
             this.contextMenuStripUWP.Name = "contextMenuStripUWP";
+            this.contextMenuStripUWP.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
             resources.ApplyResources(this.contextMenuStripUWP, "contextMenuStripUWP");
             // 
             // 打开应用ToolStripMenuItem
@@ -832,19 +850,11 @@
             // 
             // pl_simple
             // 
-            this.pl_simple.Controls.Add(this.lbNoAppsTip);
             this.pl_simple.Controls.Add(this.expandMoreDetals);
             this.pl_simple.Controls.Add(this.btnEndTaskSimple);
             this.pl_simple.Controls.Add(this.listApps);
             resources.ApplyResources(this.pl_simple, "pl_simple");
             this.pl_simple.Name = "pl_simple";
-            // 
-            // lbNoAppsTip
-            // 
-            resources.ApplyResources(this.lbNoAppsTip, "lbNoAppsTip");
-            this.lbNoAppsTip.AutoEllipsis = true;
-            this.lbNoAppsTip.ForeColor = System.Drawing.Color.DimGray;
-            this.lbNoAppsTip.Name = "lbNoAppsTip";
             // 
             // expandMoreDetals
             // 
@@ -870,6 +880,7 @@
             this.toolStripSeparator1,
             this.将此列调整为合适大小ToolStripMenuItem});
             this.contextMenuStripProcDetalsCol.Name = "contextMenuStripProcDetalsCol";
+            this.contextMenuStripProcDetalsCol.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
             resources.ApplyResources(this.contextMenuStripProcDetalsCol, "contextMenuStripProcDetalsCol");
             // 
             // 隐藏列ToolStripMenuItem
@@ -901,6 +912,7 @@
             this.显示隐藏主界面ToolStripMenuItem,
             this.退出程序ToolStripMenuItem});
             this.contextMenuStripTray.Name = "contextMenuStripTray";
+            this.contextMenuStripTray.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
             resources.ApplyResources(this.contextMenuStripTray, "contextMenuStripTray");
             this.contextMenuStripTray.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStripTray_Opening);
             // 
@@ -915,6 +927,95 @@
             this.退出程序ToolStripMenuItem.Name = "退出程序ToolStripMenuItem";
             resources.ApplyResources(this.退出程序ToolStripMenuItem, "退出程序ToolStripMenuItem");
             this.退出程序ToolStripMenuItem.Click += new System.EventHandler(this.退出程序ToolStripMenuItem_Click);
+            // 
+            // pl_perfGridHost
+            // 
+            resources.ApplyResources(this.pl_perfGridHost, "pl_perfGridHost");
+            this.pl_perfGridHost.Cursor = System.Windows.Forms.Cursors.Arrow;
+            this.pl_perfGridHost.Name = "pl_perfGridHost";
+            // 
+            // contextMenuStripMainHeader
+            // 
+            this.contextMenuStripMainHeader.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripSeparator2,
+            this.资源值ToolStripMenuItem});
+            this.contextMenuStripMainHeader.Name = "contextMenuStripMainHeader";
+            this.contextMenuStripMainHeader.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
+            resources.ApplyResources(this.contextMenuStripMainHeader, "contextMenuStripMainHeader");
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            resources.ApplyResources(this.toolStripSeparator2, "toolStripSeparator2");
+            // 
+            // 资源值ToolStripMenuItem
+            // 
+            this.资源值ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.内存ToolStripMenuItem,
+            this.磁盘ToolStripMenuItem,
+            this.网络ToolStripMenuItem});
+            resources.ApplyResources(this.资源值ToolStripMenuItem, "资源值ToolStripMenuItem");
+            this.资源值ToolStripMenuItem.Name = "资源值ToolStripMenuItem";
+            // 
+            // 内存ToolStripMenuItem
+            // 
+            this.内存ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.百分比ToolStripMenuItemRam,
+            this.值ToolStripMenuItemRam});
+            this.内存ToolStripMenuItem.Name = "内存ToolStripMenuItem";
+            resources.ApplyResources(this.内存ToolStripMenuItem, "内存ToolStripMenuItem");
+            // 
+            // 百分比ToolStripMenuItemRam
+            // 
+            this.百分比ToolStripMenuItemRam.Name = "百分比ToolStripMenuItemRam";
+            resources.ApplyResources(this.百分比ToolStripMenuItemRam, "百分比ToolStripMenuItemRam");
+            this.百分比ToolStripMenuItemRam.Click += new System.EventHandler(this.百分比ToolStripMenuItemRam_Click);
+            // 
+            // 值ToolStripMenuItemRam
+            // 
+            this.值ToolStripMenuItemRam.Name = "值ToolStripMenuItemRam";
+            resources.ApplyResources(this.值ToolStripMenuItemRam, "值ToolStripMenuItemRam");
+            this.值ToolStripMenuItemRam.Click += new System.EventHandler(this.值ToolStripMenuItemRam_Click);
+            // 
+            // 磁盘ToolStripMenuItem
+            // 
+            this.磁盘ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.百分比ToolStripMenuItemDisk,
+            this.值ToolStripMenuItemDisk});
+            this.磁盘ToolStripMenuItem.Name = "磁盘ToolStripMenuItem";
+            resources.ApplyResources(this.磁盘ToolStripMenuItem, "磁盘ToolStripMenuItem");
+            // 
+            // 百分比ToolStripMenuItemDisk
+            // 
+            this.百分比ToolStripMenuItemDisk.Name = "百分比ToolStripMenuItemDisk";
+            resources.ApplyResources(this.百分比ToolStripMenuItemDisk, "百分比ToolStripMenuItemDisk");
+            this.百分比ToolStripMenuItemDisk.Click += new System.EventHandler(this.百分比ToolStripMenuItemDisk_Click);
+            // 
+            // 值ToolStripMenuItemDisk
+            // 
+            this.值ToolStripMenuItemDisk.Name = "值ToolStripMenuItemDisk";
+            resources.ApplyResources(this.值ToolStripMenuItemDisk, "值ToolStripMenuItemDisk");
+            this.值ToolStripMenuItemDisk.Click += new System.EventHandler(this.值ToolStripMenuItemDisk_Click);
+            // 
+            // 网络ToolStripMenuItem
+            // 
+            this.网络ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.百分比ToolStripMenuItemNet,
+            this.值ToolStripMenuItemNet});
+            this.网络ToolStripMenuItem.Name = "网络ToolStripMenuItem";
+            resources.ApplyResources(this.网络ToolStripMenuItem, "网络ToolStripMenuItem");
+            // 
+            // 百分比ToolStripMenuItemNet
+            // 
+            this.百分比ToolStripMenuItemNet.Name = "百分比ToolStripMenuItemNet";
+            resources.ApplyResources(this.百分比ToolStripMenuItemNet, "百分比ToolStripMenuItemNet");
+            this.百分比ToolStripMenuItemNet.Click += new System.EventHandler(this.百分比ToolStripMenuItemNet_Click);
+            // 
+            // 值ToolStripMenuItemNet
+            // 
+            this.值ToolStripMenuItemNet.Name = "值ToolStripMenuItemNet";
+            resources.ApplyResources(this.值ToolStripMenuItemNet, "值ToolStripMenuItemNet");
+            this.值ToolStripMenuItemNet.Click += new System.EventHandler(this.值ToolStripMenuItemNet_Click);
             // 
             // fileSystemWatcher
             // 
@@ -932,19 +1033,13 @@
             this.notifyIcon.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon_MouseDoubleClick);
             this.notifyIcon.MouseMove += new System.Windows.Forms.MouseEventHandler(this.notifyIcon_MouseMove);
             // 
-            // pl_perfGridHost
-            // 
-            resources.ApplyResources(this.pl_perfGridHost, "pl_perfGridHost");
-            this.pl_perfGridHost.Cursor = System.Windows.Forms.Cursors.Arrow;
-            this.pl_perfGridHost.Name = "pl_perfGridHost";
-            // 
             // FormMain
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
-            this.Controls.Add(this.lbStartingStatus);
             this.Controls.Add(this.spBottom);
+            this.Controls.Add(this.lbStartingStatus);
             this.Controls.Add(this.tabControlMain);
             this.Controls.Add(this.pl_simple);
             this.Controls.Add(this.pl_perfGridHost);
@@ -965,7 +1060,6 @@
             this.splitContainerFm.ResumeLayout(false);
             this.tabControlMain.ResumeLayout(false);
             this.tabPageProcCtl.ResumeLayout(false);
-            this.tabPageProcCtl.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.sp4)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.spl1)).EndInit();
             this.tabPageKernelCtl.ResumeLayout(false);
@@ -977,7 +1071,6 @@
             this.pl_UWPEnumFailTip.ResumeLayout(false);
             this.tabPageUsers.ResumeLayout(false);
             this.tabPageScCtl.ResumeLayout(false);
-            this.tabPageScCtl.PerformLayout();
             this.pl_ScNeedAdminTip.ResumeLayout(false);
             this.pl_ScNeedAdminTip.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.sp2)).EndInit();
@@ -990,6 +1083,7 @@
             this.pl_simple.ResumeLayout(false);
             this.contextMenuStripProcDetalsCol.ResumeLayout(false);
             this.contextMenuStripTray.ResumeLayout(false);
+            this.contextMenuStripMainHeader.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.fileSystemWatcher)).EndInit();
             this.ResumeLayout(false);
 
@@ -1092,11 +1186,22 @@
         private Ctls.TaskMgrList listUsers;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem 将此列调整为合适大小ToolStripMenuItem;
-        private System.Windows.Forms.Label lbNoAppsTip;
         private System.Windows.Forms.ContextMenuStrip contextMenuStripTray;
         private System.Windows.Forms.ToolStripMenuItem 显示隐藏主界面ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 退出程序ToolStripMenuItem;
         private System.Windows.Forms.Panel pl_perfGridHost;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStripMainHeader;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.ToolStripMenuItem 资源值ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 内存ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 百分比ToolStripMenuItemRam;
+        private System.Windows.Forms.ToolStripMenuItem 值ToolStripMenuItemRam;
+        private System.Windows.Forms.ToolStripMenuItem 磁盘ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 百分比ToolStripMenuItemDisk;
+        private System.Windows.Forms.ToolStripMenuItem 值ToolStripMenuItemDisk;
+        private System.Windows.Forms.ToolStripMenuItem 网络ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 百分比ToolStripMenuItemNet;
+        private System.Windows.Forms.ToolStripMenuItem 值ToolStripMenuItemNet;
     }
 }
 

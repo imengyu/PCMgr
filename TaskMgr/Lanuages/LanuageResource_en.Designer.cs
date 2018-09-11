@@ -385,6 +385,26 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 Failed to create dump file 的本地化字符串。
+        /// </summary>
+        internal static string CreateDumpFailed {
+            get {
+                return ResourceManager.GetString("CreateDumpFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 The dump file was successfully created. 
+        ///
+        ///The dump file is located at : 的本地化字符串。
+        /// </summary>
+        internal static string CreateDumpSuccess {
+            get {
+                return ResourceManager.GetString("CreateDumpSuccess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Double Click this item to show _EPROCESS of process 的本地化字符串。
         /// </summary>
         internal static string DblCklShow_EPROCESS {
@@ -1647,6 +1667,15 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 Open file error 的本地化字符串。
+        /// </summary>
+        internal static string OpenFileError {
+            get {
+                return ResourceManager.GetString("OpenFileError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Unable to open the process 的本地化字符串。
         /// </summary>
         internal static string OpenProcFailed {
@@ -1787,6 +1816,15 @@ namespace PCMgr.Lanuages {
         internal static string PleaseEnterTargetAddress {
             get {
                 return ResourceManager.GetString("PleaseEnterTargetAddress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Please use 64 bit PCMgr to enumerate 64 bit process modules. 的本地化字符串。
+        /// </summary>
+        internal static string PleaseEnumIn64 {
+            get {
+                return ResourceManager.GetString("PleaseEnumIn64", resourceCulture);
             }
         }
         

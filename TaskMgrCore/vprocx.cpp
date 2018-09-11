@@ -466,6 +466,16 @@ BOOL MAppVModuls(DWORD dwPID, HWND hDlg, LPWSTR procName)
 
 		BOOL bRet = FALSE;
 
+#ifndef _AMD64_
+		BOOL bWow64Proc = FALSE;
+		IsWow64Process(hProcess, &bWow64Proc);
+		if (!bWow64Proc)
+		{
+			SetWindowText(htitle, str_item_PleaseEnumIn64);
+			return FALSE;
+		}
+#endif
+
 		PPEB_LDR_DATA pLdr = NULL;
 		PPEB pPeb = 0;
 
@@ -549,7 +559,7 @@ BOOL MAppVModuls(DWORD dwPID, HWND hDlg, LPWSTR procName)
 		}
 		else {
 			LogWarn(L"View Modules Failed in MGetProcessPeb  : %s", MNtStatusToStr(status));
-			wstring str = FormatString(L"%s\n%s\nError Code : %s", str_item_enum_modulefailed, L"Failed to get peb", MNtStatusToStr(status));
+			wstring str = FormatString(L"%s : %s \n Error Code : %s", str_item_enum_modulefailed, L"Failed to get peb", MNtStatusToStr(status));
 			SetWindowText(htitle, str.c_str());
 		}
 

@@ -1267,4 +1267,18 @@ PCMgr 需要管理员权限 才能对系统进行控制和管理。
   <data name="InterruptsProcessDsb" xml:space="preserve">
     <value>延迟过程调用和中断服务例程</value>
   </data>
+  <data name="CreateDumpFailed" xml:space="preserve">
+    <value>创建转储文件失败</value>
+  </data>
+  <data name="OpenFileError" xml:space="preserve">
+    <value>打开文件时发生错误</value>
+  </data>
+  <data name="CreateDumpSuccess" xml:space="preserve">
+    <value>已成功创建文件。
+
+文件位于 :</value>
+  </data>
+  <data name="PleaseEnumIn64" xml:space="preserve">
+    <value>请使用 64 位的 PCMgr 枚举64位进程模块</value>
+  </data>
 </root>

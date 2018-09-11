@@ -180,6 +180,13 @@ M_API LPWSTR MFM_GetMyComputerName()
 
 M_API VOID MShowFileProp(LPWSTR file)
 {
+#ifndef _AMD64_
+	bool isDisableWow64FsRedirectionSuccess = false;
+	PVOID OldValue = NULL;
+	if (MIs64BitOS()) 
+		isDisableWow64FsRedirectionSuccess = Wow64DisableWow64FsRedirection(&OldValue);
+#endif // !_AMD64_
+
 	SHELLEXECUTEINFO info = { 0 };
 	info.cbSize = sizeof(SHELLEXECUTEINFO);
 	info.hwnd = hWndMain;
@@ -188,6 +195,10 @@ M_API VOID MShowFileProp(LPWSTR file)
 	info.nShow = SW_SHOW;
 	info.fMask = SEE_MASK_INVOKEIDLIST;
 	ShellExecuteEx(&info);
+
+#ifndef _AMD64_
+	if(isDisableWow64FsRedirectionSuccess) Wow64RevertWow64FsRedirection(OldValue);
+#endif // !_AMD64_
 }
 
 M_API void MFM_GetRoots()

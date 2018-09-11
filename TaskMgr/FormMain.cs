@@ -48,9 +48,11 @@ namespace PCMgr
             baseProcessRefeshTimerLowUWP.Interval = 5000;
             baseProcessRefeshTimerLowUWP.Tick += BaseProcessRefeshTimerLowUWP_Tick;
             this.agrs = agrs;
+
+            LoadAllFonts();
+
+
         }
-
-
 
         public static string cfgFilePath = "";
         private string[] agrs = null;
@@ -96,6 +98,10 @@ namespace PCMgr
 
         private bool isGlobalRefeshing = false;
         private bool isGlobalRefeshingAll = false;
+
+        private bool isRamPercentage = false;
+        private bool isDiskPercentage = false;
+        private bool isNetPercentage = false;
 
         private class PsItem
         {
@@ -212,10 +218,13 @@ namespace PCMgr
 
         private string csrssPath = "";
         private string ntoskrnlPath = "";
+        private string systemRootPath = "";
+        private string svchostPath = "";
+        private string svchostPathwow = "";
 
         private TaskMgrListItem nextKillItem = null;
         private bool isRunAsAdmin = false;
-        private Font smallListFont = new Font("微软雅黑", 9f);
+        private Font smallListFont = null;
         private TaskMgrListItem thisLoadItem = null;
 
         private void MainGetWinsCallBack(IntPtr hWnd, IntPtr data, int i)
@@ -489,47 +498,35 @@ namespace PCMgr
                     check_showAllProcess.Visible = true;
                 }
 
-                csrssPath = Marshal.PtrToStringUni(MAppWorkCall4(96, Nullptr, Nullptr));
-                ntoskrnlPath = Marshal.PtrToStringUni(MAppWorkCall4(97, Nullptr, Nullptr));
+                smallListFont = new Font(tabControlMain.Font.FontFamily, 9f);
+
+                if (systemRootPath == "") systemRootPath = Marshal.PtrToStringUni(MAppWorkCall4(95, Nullptr, Nullptr));
+                if (csrssPath == "") csrssPath = Marshal.PtrToStringUni(MAppWorkCall4(96, Nullptr, Nullptr));
+                if (ntoskrnlPath == "") ntoskrnlPath = Marshal.PtrToStringUni(MAppWorkCall4(97, Nullptr, Nullptr));
+                if (svchostPath == "")
+                {
+                    svchostPath = (systemRootPath + @"\System32\svchost.exe").ToLower();
+                    svchostPathwow = (systemRootPath + @"\syswow64\svchost.exe").ToLower();
+                }
 
                 windowsProcess.Add(@"C:\Program Files\Windows Defender\NisSrv.exe".ToLower());
                 windowsProcess.Add(@"C:\Program Files\Windows Defender\MsMpEng.exe".ToLower());
-                windowsProcess.Add(@"C:\Windows\System32\svchost.exe".ToLower());
-                windowsProcess.Add(@"C:\Windows\System32\csrss.exe".ToLower());
-                windowsProcess.Add(@"C:\Windows\System32\conhost.exe".ToLower());
-                windowsProcess.Add(@"‪C:\Windows\System32\sihost.exe".ToLower());
-                windowsProcess.Add(@"C:\Windows\System32\winlogon.exe".ToLower());
-                windowsProcess.Add(@"C:\Windows\System32\wininit.exe".ToLower());
-                windowsProcess.Add(@"C:\Windows\System32\smss.exe".ToLower());
-                windowsProcess.Add(@"C:\Windows\System32\services.exe".ToLower());
-                windowsProcess.Add(@"C:\Windows\System32\dwm.exe".ToLower());
-                windowsProcess.Add("c:\\windows\\system32\\lsass.exe");
-                windowsProcess.Add("c:\\windows\\explorer.exe");
+                windowsProcess.Add(svchostPath);
+                windowsProcess.Add((systemRootPath + @"\System32\csrss.exe").ToLower());
+                windowsProcess.Add((systemRootPath + @"\System32\conhost.exe").ToLower());
+                windowsProcess.Add((systemRootPath + @"‪\System32\sihost.exe").ToLower());
+                windowsProcess.Add((systemRootPath + @"\System32\winlogon.exe").ToLower());
+                windowsProcess.Add((systemRootPath + @"\System32\wininit.exe").ToLower());
+                windowsProcess.Add((systemRootPath + @"\System32\smss.exe").ToLower());
+                windowsProcess.Add((systemRootPath + @"\System32\services.exe").ToLower());
+                windowsProcess.Add((systemRootPath + @"\System32\dwm.exe").ToLower());
+                windowsProcess.Add((systemRootPath + @"\System32\lsass.exe").ToLower());
+                windowsProcess.Add((systemRootPath + @"\explorer.exe").ToLower());
 
-                veryimporantProcess.Add(@"C:\Windows\System32\wininit.exe".ToLower());
-                veryimporantProcess.Add("c:\\windows\\system32\\csrss.exe".ToLower());
-                veryimporantProcess.Add("c:\\windows\\system32\\lsass.exe");
-                veryimporantProcess.Add("c:\\windows\\system32\\smss.exe");
-                //veryimporantProcess.Add(@"‪".ToLower());
-                //veryimporantProcess.Add(@"‪".ToLower());
-
-                /*
-                windowsProcess.Add(@"".ToLower());
-                windowsProcess.Add(@"".ToLower());       
-                windowsProcess.Add(@"".ToLower());        
-                windowsProcess.Add(@"".ToLower());   
-                windowsProcess.Add(@"".ToLower());       
-                windowsProcess.Add(@"".ToLower());      
-                windowsProcess.Add(@"".ToLower());          
-                windowsProcess.Add(@"".ToLower());         
-                windowsProcess.Add(@"".ToLower());      
-                windowsProcess.Add(@"".ToLower());      
-                windowsProcess.Add(@"".ToLower());
-                windowsProcess.Add(@"".ToLower());
-                windowsProcess.Add(@"".ToLower());
-                windowsProcess.Add(@"".ToLower());
-                windowsProcess.Add(@"".ToLower());
-                */
+                veryimporantProcess.Add((systemRootPath + @"\System32\wininit.exe").ToLower());
+                veryimporantProcess.Add((systemRootPath + @"\System32\csrss.exe").ToLower());
+                veryimporantProcess.Add((systemRootPath + @"\System32\lsass.exe").ToLower());
+                veryimporantProcess.Add((systemRootPath + @"\System32\smss.exe").ToLower()); 
 
                 processListInited = true;
 
@@ -685,7 +682,7 @@ namespace PCMgr
                 }
             }
         }
-        private void ProcessListForceRefeshAll()
+        private void ProcessListForceRefeshAll(bool refeshStaticValues = false)
         {               
             if(isGlobalRefeshing)
             {
@@ -697,8 +694,27 @@ namespace PCMgr
             {
                 TaskMgrListItem li = p.item;
                 if (li.Type == TaskMgrListItemType.ItemUWPHost)
+                {
                     ProcessListUpdate(p.pid, false, li, -1);
-                else ProcessListUpdate(p.pid, false, li, -1);
+                    if(refeshStaticValues)
+                    {
+                        foreach (TaskMgrListItem ix in li.Childs)
+                            if (ix.Type == TaskMgrListItemType.ItemProcess)
+                                ProcessListLoadStaticValues(ix.PID, ix, ((PsItem)ix.Tag));
+                    }
+                }
+                else
+                {
+                    if (refeshStaticValues && li.Type == TaskMgrListItemType.ItemProcess)
+                        ProcessListLoadStaticValues(p.pid, li, p);
+                    else if (refeshStaticValues && li.Type == TaskMgrListItemType.ItemProcessHost)
+                    {
+                        foreach (TaskMgrListItem ix in li.Childs)
+                            if(ix.Type == TaskMgrListItemType.ItemProcess)
+                                ProcessListLoadStaticValues(ix.PID, ix, ((PsItem)ix.Tag));
+                    }
+                    ProcessListUpdate(p.pid, false, li, -1);
+                }
             }
         }
         private void ProcessListForceRefeshAllUWP()
@@ -712,9 +728,9 @@ namespace PCMgr
 
         private void ProcessListLoad(uint pid, uint ppid, string exename, string exefullpath, IntPtr hprocess, IntPtr processItem)
         {
-            PsItem oldps = ProcessListFindPsItem(pid);
-            if (oldps != null)
-                Log("ProcessListLoad for a alreday contains item : " + oldps);
+            //PsItem oldps = ProcessListFindPsItem(pid);
+            //if (oldps != null)
+            //    Log("ProcessListLoad for a alreday contains item : " + oldps);
 
             bool need_add_tolist = true;
             //base
@@ -734,13 +750,12 @@ namespace PCMgr
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.Append(exefullpath);
 
-            bool epgeted = false, isw = false;
+            bool isw = false;
             PEOCESSKINFO infoStruct = new PEOCESSKINFO();
             if (canUseKernel)
             {
                 if (MGetProcessEprocess(pid, ref infoStruct))
                 {
-                    epgeted = true;
                     if (string.IsNullOrEmpty(exefullpath))
                     {
                         exefullpath = infoStruct.ImageFullName;
@@ -769,14 +784,14 @@ namespace PCMgr
                 taskMgrListItem = new TaskMgrListItem("System");
                 stringBuilder.Append(ntoskrnlPath);
             }
-            else if (pid == 88 && exename == "Registry") { isw = true; taskMgrListItem = new TaskMgrListItem("Registry"); }
+            else if (pid == 88 && exename == "Registry") { isw = true; taskMgrListItem = new TaskMgrListItem("Registry"); stringBuilder.Append(ntoskrnlPath); }
             else if (pid < 1024 && hprocess == Nullptr && exename == "csrss.exe")
             {
                 isw = true;
                 taskMgrListItem = new TaskMgrListItem("Client Server Runtime Process");
                 stringBuilder.Append(csrssPath);
             }
-            else if (exename == "Memory Compression") { isw = true; taskMgrListItem = new TaskMgrListItem("Memory Compression"); }
+            else if (exename == "Memory Compression") { isw = true; taskMgrListItem = new TaskMgrListItem("Memory Compression"); stringBuilder.Append(ntoskrnlPath); }
             else if (stringBuilder.ToString() != "")
             {
                 StringBuilder exeDescribe = new StringBuilder(256);
@@ -814,7 +829,7 @@ namespace PCMgr
 
             //Test service
             bool isSvcHoct = false;
-            if (exefullpath != null && (exefullpath.ToLower() == @"c:\windows\system32\svchost.exe" || exefullpath.ToLower() == @"c:\windows\syswow64\svchost.exe") || exename == "svchost.exe")
+            if (exefullpath != null && (exefullpath.ToLower() == svchostPath || exefullpath.ToLower() == svchostPathwow) || exename == "svchost.exe")
             {
                 //svchost.exe add a icon
                 taskMgrListItem.Icon = PCMgr.Properties.Resources.icoServiceHost;
@@ -871,8 +886,8 @@ namespace PCMgr
 
             taskMgrListItem.Tag = p;
 
-            //10 empty item
-            for (int i = 0; i < 10; i++) taskMgrListItem.SubItems.Add(new TaskMgrListItem.TaskMgrListViewSubItem());
+            //13 empty item
+            for (int i = 0; i < 13; i++) taskMgrListItem.SubItems.Add(new TaskMgrListItem.TaskMgrListViewSubItem());
 
             //UWP app
 
@@ -935,6 +950,8 @@ namespace PCMgr
                         parentItem = new UwpItem();
 
                         TaskMgrListItemGroup g = new TaskMgrListItemGroup(uapp.Text);
+                        UWPPackage pkg = uapp.Tag as UWPPackage;
+
                         g.Icon = uapp.Icon;
                         g.Image = uapp.Image;
                         g.Childs.Add(taskMgrListItem);
@@ -944,10 +961,9 @@ namespace PCMgr
 
                         g.PID = (uint)1;
                         //10 empty item
-                        for (int i = 0; i < 10; i++) g.SubItems.Add(new TaskMgrListItem.TaskMgrListViewSubItem() { Font = listProcess.Font });
+                        for (int i = 0; i < 13; i++) g.SubItems.Add(new TaskMgrListItem.TaskMgrListViewSubItem() { Font = listProcess.Font });
                         if (stateindex != -1)
                         {
-                            g.DrawUWPPausedIconIndex = stateindex;
                             g.SubItems[stateindex].DrawUWPPausedIcon = true;
                         }
                         if (nameindex != -1) g.SubItems[nameindex].Text = p.uwpFullName;
@@ -955,8 +971,8 @@ namespace PCMgr
 
                         g.Tag = parentItem;
 
-                        parentItem.uwpMainAppDebText = uapp.SubItems[5].Text;
-                        parentItem.uwpInstallDir = uapp.SubItems[4].Text;
+                        parentItem.uwpMainAppDebText = pkg.MainAppDisplayName;
+                        parentItem.uwpInstallDir = pkg.InstalledLocation;
                         parentItem.uwpFullName = p.uwpFullName;
                         parentItem.uwpItem = g;
                         p.uwpItem = parentItem;
@@ -992,40 +1008,7 @@ namespace PCMgr
             }
 
             //data items
-
-            if (stateindex != -1) taskMgrListItem.DrawUWPPausedIconIndex = stateindex;
-            if (nameindex != -1)
-            {
-                if (pid == 0) taskMgrListItem.SubItems[nameindex].Text = str_idle_process;
-                else if (pid == 4) taskMgrListItem.SubItems[nameindex].Text = "ntoskrnl.exe";
-                else taskMgrListItem.SubItems[nameindex].Text = exename;
-            }
-            if (pidindex != -1)
-            {
-                if (pid == 2)
-                    taskMgrListItem.SubItems[pidindex].Text = "-";
-                else taskMgrListItem.SubItems[pidindex].Text = pid.ToString();
-            }
-            if (pathindex != -1) if (stringBuilder.ToString() != "") taskMgrListItem.SubItems[pathindex].Text = stringBuilder.ToString();
-            if (cmdindex != -1)
-            {
-                StringBuilder s = new StringBuilder(1024);
-                if (MGetProcessCommandLine(hprocess, s, 1024, pid))
-                    taskMgrListItem.SubItems[cmdindex].Text = s.ToString();
-            }
-            if (companyindex != -1)
-            {
-                if (stringBuilder.ToString() != "")
-                {
-                    StringBuilder exeCompany = new StringBuilder(256);
-                    if (MGetExeCompany(stringBuilder.ToString(), exeCompany, 256)) taskMgrListItem.SubItems[companyindex].Text = exeCompany.ToString();
-                }
-            }
-            if (eprocessindex != -1)
-            {
-                if (epgeted) taskMgrListItem.SubItems[eprocessindex].Text = infoStruct.Eprocess;
-                else taskMgrListItem.SubItems[eprocessindex].Text = "-";
-            }
+            ProcessListLoadStaticValues(pid, taskMgrListItem, p);
 
             //Init performance
 
@@ -1038,7 +1021,7 @@ namespace PCMgr
 
             if (taskMgrListItem.Childs.Count > 0)
                 taskMgrListItem.Group = listProcess.Groups[0];
-            else if (pid == 0 || pid == 2 || pid == 4 || IsWindowsProcess(exefullpath))
+            else if (p.isWindowsProcess)
                 taskMgrListItem.Group = listProcess.Groups[2];
             else taskMgrListItem.Group = listProcess.Groups[1];
 
@@ -1046,6 +1029,37 @@ namespace PCMgr
             if (need_add_tolist) listProcess.Items.Add(taskMgrListItem);
 
             ProcessListUpdate(pid, true, taskMgrListItem);
+        }
+        private void ProcessListLoadStaticValues(uint pid, TaskMgrListItem it, PsItem p)
+        {
+            if (nameindex != -1)
+            {
+                if (pid == 0) it.SubItems[nameindex].Text = str_idle_process;
+                else if (pid == 4) it.SubItems[nameindex].Text = "ntoskrnl.exe";
+                else it.SubItems[nameindex].Text = p.exename;
+            }
+            if (pidindex != -1)
+            {
+                if (pid == 2)
+                    it.SubItems[pidindex].Text = "-";
+                else it.SubItems[pidindex].Text = pid.ToString();
+            }
+            if (pathindex != -1) if (p.exepath != "") it.SubItems[pathindex].Text = p.exepath;
+            if (cmdindex != -1 && p.handle != Nullptr)
+            {
+                StringBuilder s = new StringBuilder(1024);
+                if (MGetProcessCommandLine(p.handle, s, 1024, pid))
+                    it.SubItems[cmdindex].Text = s.ToString();
+            }
+            if (companyindex != -1)
+            {
+                if (p.exepath != "")
+                {
+                    StringBuilder exeCompany = new StringBuilder(256);
+                    if (MGetExeCompany(p.exepath, exeCompany, 256))
+                        it.SubItems[companyindex].Text = exeCompany.ToString();
+                }
+            }
         }
         private void ProcessListUpdate(uint pid, bool isload, TaskMgrListItem it, int ipdateOneDataCloum = -1, bool forceProcessHost = false)
         {
@@ -1058,18 +1072,20 @@ namespace PCMgr
                 {
                     bool ispause = false;
                     bool running = ProcessListGetUwpIsRunning(it, out ((UwpItem)it.Tag).firstHwnd);
-                    if (stateindex != -1 && ipdateOneDataCloum != stateindex && it.Childs.Count > 0)
+                    if (it.Childs.Count > 0)
                     {
                         foreach (TaskMgrListItem ix in it.Childs)
                             if (ix.Type == TaskMgrListItemType.ItemProcess)
                             {
-                                if (ix.SubItems[stateindex].Text == str_status_paused)
+                                if (((PsItem)ix.Tag).isPaused)
                                 {
                                     ispause = true;
                                     break;
                                 }
                             }
-                        it.SubItems[stateindex].Text = ispause ? str_status_paused : "";
+                        if (stateindex != -1 && stateindex != ipdateOneDataCloum)
+                            it.SubItems[stateindex].Text = ispause ? str_status_paused : "";
+                        it.DrawUWPPaused = ispause;
                         if (ispause && running)
                             running = MAppWorkCall3(161, ((UwpItem)it.Tag).firstHwnd) == 1;
                     }
@@ -1261,8 +1277,6 @@ namespace PCMgr
             }
             else
             {
-                
-
                 PsItem p = ((PsItem)it.Tag);
                 if (stateindex != -1 && ipdateOneDataCloum == stateindex) ProcessListUpdate_State(pid, it, p);
 
@@ -1283,7 +1297,7 @@ namespace PCMgr
                     foreach (PsItem p in loadedPs)
                         ProcessListUpdateOnePerfCloum(p.pid, p.item, refeshAllDataColum);
 
-                for (int i = listProcess.ShowedItems.Count - 1; i >= 0; i--)
+                for (int i = listProcess.ShowedItems.Count - 1; i < listProcess.ShowedItems.Count && i >= 0; i--)
                 {
                     if (listProcess.ShowedItems[i].Parent != null) continue;
                     //只刷新显示的条目
@@ -1304,16 +1318,25 @@ namespace PCMgr
                 if (!child.isWindowShow)
                 {
                     allCount++;
-                    if (!it.Childs.Contains(child.item))
-                        it.Childs.Add(child.item);
+
                     if (listProcess.Items.Contains(child.item))
                         listProcess.Items.Remove(child.item);
+                    else if (child.item.Parent != null)
+                        child.item.Parent.Childs.Remove(child.item);
+
+                    if (!it.Childs.Contains(child.item))
+                        it.Childs.Add(child.item);
+
                     if (child.childs.Count > 0)
                         allCount += ProcessListUpdate_ChildItemsAdd(it, child);
                 }
-                else if (it.Childs.Contains(child.item))
+                else
                 {
-                    it.Childs.Remove(child.item);
+                    if (it.Childs.Contains(child.item))
+                        it.Childs.Remove(child.item);
+                    else if (child.item.Parent != null)
+                        child.item.Parent.Childs.Remove(child.item);
+
                     if (!listProcess.Items.Contains(child.item))
                         listProcess.Items.Add(child.item);
                 }
@@ -1338,8 +1361,8 @@ namespace PCMgr
                     cloneItem.DisplayChildValue = 0;
                     cloneItem.IsCloneItem = true; cloneItem.IsFullData = true;
                     cloneItem.Icon = it.Icon; cloneItem.Image = it.Image;
-                    //Copy 10 empty item
-                    for (int i = 0; i < 10; i++)
+                    //Copy 13 empty item
+                    for (int i = 0; i < 13; i++)
                     {
                         cloneItem.SubItems.Add(new TaskMgrListItem.TaskMgrListViewSubItem());
                         cloneItem.SubItems[i].Text = it.SubItems[i].Text;
@@ -1347,11 +1370,23 @@ namespace PCMgr
                     }
                     //Make it hight light
                     cloneItem.SubItems[0].ForeColor = Color.FromArgb(0x11, 0x66, 0x00);
+                    if (pidindex != -1)
+                        it.SubItems[pidindex].Text = "";
                     it.Childs.Add(cloneItem);
                 }
 
                 it.DisplayChildCount = true;
                 it.DisplayChildValue = ProcessListUpdate_ChildItemsAdd(it, p) + 1;
+
+                if (it.DisplayChildValue == 1)
+                {
+                    if (!ProcessListUpdate_GroupChildsIsValid(it))
+                    {
+                        it.Type = TaskMgrListItemType.ItemProcess;
+                        it.DisplayChildCount = false;
+                        ProcessListUpdate_BreakProcHost(it, true);
+                    }
+                }
             }
             else
             {
@@ -1361,25 +1396,37 @@ namespace PCMgr
                 it.DisplayChildCount = false;
 
                 if (it.Childs.Count > 0)
-                {
-                    for (int i = it.Childs.Count - 1; i >= 0; i--)
-                    {
-                        TaskMgrListItem childit = it.Childs[i];
-                        if (childit.Type == TaskMgrListItemType.ItemProcess && !childit.IsCloneItem)
-                        {
-                            it.Childs.Remove(childit);
-                            if (!listProcess.Items.Contains(childit))
-                                listProcess.Items.Add(childit);
-                        }
-                    }
-                }
+                    ProcessListUpdate_BreakProcHost(it, true);
             }
         }
         private void ProcessListUpdate_GroupChilds(bool isload, TaskMgrListItem ii, int ipdateOneDataCloum = -1)
         {
-            foreach (TaskMgrListItem ix in ii.Childs)
-                if (ix.Type == TaskMgrListItemType.ItemProcess)
-                    ProcessListUpdate(ix.PID, isload, ix, ipdateOneDataCloum);
+            for (int i = ii.Childs.Count - 1; i >= 0; i--)
+            {
+                TaskMgrListItem li = ii.Childs[i];
+                if (li.Type == TaskMgrListItemType.ItemProcess)
+                    ProcessListUpdate(li.PID, isload, li, ipdateOneDataCloum);
+            }
+        }
+        private bool ProcessListUpdate_GroupChildsIsValid(TaskMgrListItem it)
+        {
+            bool findCloneItem = false, findRealItem = false;
+            if (it.Childs.Count > 0)
+            {
+
+                for (int i = it.Childs.Count - 1; i >= 0; i--)
+                {
+                    TaskMgrListItem lics = it.Childs[i];
+                    if (lics.Type == TaskMgrListItemType.ItemProcess)
+                    {
+                        if (lics.IsCloneItem) findCloneItem = true;
+                        else findRealItem = true;
+                        if(findCloneItem && findRealItem)
+                            return true;
+                    }
+                }
+            }
+            return findCloneItem && findRealItem;
         }
 
         //All runtime data
@@ -1480,7 +1527,7 @@ namespace PCMgr
             if (i == 1)
             {
                 p.isPaused = false;
-                it.SubItems[stateindex].Text = "";
+                if (stateindex != -1) it.SubItems[stateindex].Text = "";
                 if (p.isSvchost == false && it.Childs.Count > 0)
                 {
                     bool hung = false;
@@ -1513,6 +1560,10 @@ namespace PCMgr
                 }
             }
             else p.isPaused = false;
+
+            if (p.isUWP && it.Parent != null)
+                it.DrawUWPPaused = p.isPaused;
+            else it.DrawUWPPaused = false;
         }
         private void ProcessListUpdatePerf_Cpu(uint pid, TaskMgrListItem it, PsItem p)
         {
@@ -1612,18 +1663,22 @@ namespace PCMgr
             it.SubItems[netindex].CustomData = 0;
             it.SubItems[netindex].BackColor = dataGridZeroColor;
         }
-        private void ProcessListUpdate_BreakProcHost(TaskMgrListItem it)
+        private void ProcessListUpdate_BreakProcHost(TaskMgrListItem it, bool doNotClearall = false)
         {
-            if (it.Group != listProcess.Groups[0])
+            if (it.Childs.Count > 0)
             {
-                if (it.Childs.Count > 0)
+                for (int i = it.Childs.Count - 1; i >= 0; i--)
                 {
-                    foreach (TaskMgrListItem lics in it.Childs)
-                        if (lics.Type == TaskMgrListItemType.ItemProcess && lics.IsCloneItem == false)
-                            listProcess.Items.Add(lics);
-                    it.Childs.Clear();
+                    TaskMgrListItem lics = it.Childs[i];
+                    if (lics.Type == TaskMgrListItemType.ItemProcess)
+                    {
+                        if (lics.IsCloneItem == false) listProcess.Items.Add(lics);
+                        if (doNotClearall) it.Childs.Remove(lics);
+                    }
                 }
+                if(!doNotClearall) it.Childs.Clear();
             }
+            if (pidindex != -1) it.SubItems[pidindex].Text = it.PID.ToString();
         }
 
         //Delete
@@ -1642,7 +1697,6 @@ namespace PCMgr
             foreach (PsItem pchid in it.childs)
                 pchid.parent = null;
             it.childs.Clear();
-
 
             if (it.parent != null)
             {
@@ -1771,11 +1825,22 @@ namespace PCMgr
                 }
                 else if (taskMgrListItem.Type == TaskMgrListItemType.ItemUWPHost)
                 {
-                    foreach (TaskMgrListItem lichild in taskMgrListItem.Childs)
+                    bool ananyrs = false;
+                    IntPtr target = ((UwpItem)taskMgrListItem.Tag).firstHwnd;
+                    if (target != Nullptr)
                     {
-                        if (lichild.Type == TaskMgrListItemType.ItemProcess)
-                            MKillProcessUser2(lichild.PID, true, true);
+                        if (MAppWorkCall3(192, IntPtr.Zero, target) == 1)
+                            ananyrs = true;
                     }
+                    if (ananyrs)
+                    {
+                        foreach (TaskMgrListItem lichild in taskMgrListItem.Childs)
+                        {
+                            if (lichild.Type == TaskMgrListItemType.ItemProcess)
+                                MKillProcessUser2(lichild.PID, true, true);
+                        }
+                    }
+                    else nextKillItem = taskMgrListItem;
                 }
                 else if (taskMgrListItem.Type == TaskMgrListItemType.ItemProcess)
                 {
@@ -1820,7 +1885,7 @@ namespace PCMgr
         }
         private void ProcessListKillProcTree(PsItem p, bool showerr)
         {
-            for (int i = p.childs.Count; i >= 0; i--)
+            for (int i = p.childs.Count - 1; i >= 0; i--)
             {
                 PsItem child = ProcessListFindPsItem(p.childs[i].pid);
                 if (child.childs.Count > 0)
@@ -1834,13 +1899,29 @@ namespace PCMgr
             {
                 if (listProcess.Items.Contains(nextKillItem))
                 {
-                    foreach (TaskMgrListItem lichild in nextKillItem.Childs)
+                    if (nextKillItem.Type == TaskMgrListItemType.ItemProcessHost)
                     {
-                        if (lichild.Type == TaskMgrListItemType.ItemProcess)
-                            if (!MKillProcessUser2(lichild.PID, false, true))
-                                break;
+                        foreach (TaskMgrListItem lichild in nextKillItem.Childs)
+                        {
+                            if (lichild.Type == TaskMgrListItemType.ItemProcess)
+                                if (!MKillProcessUser2(lichild.PID, false, true))
+                                    break;
+                        }
+                        MKillProcessUser2(nextKillItem.PID, true, true);
                     }
-                    MKillProcessUser2(nextKillItem.PID, true, true);
+                    else if (nextKillItem.Type == TaskMgrListItemType.ItemUWPHost)
+                    {
+                        if(!M_UWP_KillUWPApplication(((UwpItem)nextKillItem.Tag).uwpFullName))
+                        {
+                            foreach (TaskMgrListItem lichild in nextKillItem.Childs)
+                            {
+                                if (lichild.Type == TaskMgrListItemType.ItemProcess)
+                                    if (!MKillProcessUser2(lichild.PID, false, true))
+                                        break;
+                            }
+                            MKillProcessUser2(nextKillItem.PID, true, true);
+                        }
+                    }
                 }
                 nextKillItem = null;
             }
@@ -1879,7 +1960,6 @@ namespace PCMgr
                         listApps.Items.Add(li);
                 }
             }
-            lbNoAppsTip.Visible = listApps.Items.Count == 0;
             listApps.Locked = false;
             listApps.SyncItems(true);
             listApps_SelectItemChanged(null, null);
@@ -2232,6 +2312,10 @@ namespace PCMgr
                 listProcess.Locked = false;
                 listProcess.Invalidate();
             }
+            else if (e.MouseEventArgs.Button == MouseButtons.Right)
+            {
+                contextMenuStripMainHeader.Show(MousePosition);
+            }
         }
 
         private class TaskListViewColumnSorter : ListViewColumnSorter
@@ -2266,13 +2350,65 @@ namespace PCMgr
             }
         }
 
+        private void 百分比ToolStripMenuItemRam_Click(object sender, EventArgs e)
+        {
+            if(!isRamPercentage)
+            {
+                isRamPercentage = true;
+                百分比ToolStripMenuItemRam.Checked = true;
+                值ToolStripMenuItemRam.Checked = false;
+            }
+        }
+        private void 值ToolStripMenuItemRam_Click(object sender, EventArgs e)
+        {
+            if (isRamPercentage)
+            {
+                isRamPercentage = false;
+                百分比ToolStripMenuItemRam.Checked = false;
+                值ToolStripMenuItemRam.Checked = true;
+            }
+        }
+        private void 百分比ToolStripMenuItemDisk_Click(object sender, EventArgs e)
+        {
+            if (!isDiskPercentage)
+            {
+                isDiskPercentage = true;
+                百分比ToolStripMenuItemDisk.Checked = true;
+                值ToolStripMenuItemDisk.Checked = false;
+            }
+        }
+        private void 值ToolStripMenuItemDisk_Click(object sender, EventArgs e)
+        {
+            if (isDiskPercentage)
+            {
+                isDiskPercentage = false;
+                百分比ToolStripMenuItemDisk.Checked = false;
+                值ToolStripMenuItemDisk.Checked = true;
+            }
+        }
+        private void 百分比ToolStripMenuItemNet_Click(object sender, EventArgs e)
+        {
+            if (!isNetPercentage)
+            {
+                isNetPercentage = true;
+                百分比ToolStripMenuItemNet.Checked = true;
+                值ToolStripMenuItemNet.Checked = false;
+            }
+        }
+        private void 值ToolStripMenuItemNet_Click(object sender, EventArgs e)
+        {
+            if (isNetPercentage)
+            {
+                isNetPercentage = false;
+                百分比ToolStripMenuItemNet.Checked = false;
+                值ToolStripMenuItemNet.Checked = true;
+            }
+        }
+
         #endregion
 
         #region Headers
 
-        /*TitleRam");
-            diskindex = listProcessGetListIndex("TitleDisk");
-            netindex = listProcessGetListIndex("TitleNet");*/
         public class itemheader
         {
             public itemheader(int index, string name, int wi)
@@ -2298,6 +2434,16 @@ namespace PCMgr
             public string herdername;
             public string name;
         }
+        public struct itemheaderDef
+        {
+            public itemheaderDef(string hn, int width)
+            {
+                herdername = hn;
+                this.width = width;
+            }
+            public string herdername;
+            public int width;
+        }
         public bool saveheader = true;
         private List<itemheader> headers = new List<itemheader>();
         private itemheaderTip[] headerTips = new itemheaderTip[]{
@@ -2306,7 +2452,31 @@ namespace PCMgr
             new itemheaderTip("TitleDisk", "TipDisk"),
             new itemheaderTip("TitleNet", "TipNet"),
         };
+        private itemheaderDef[] headerDefs = new itemheaderDef[]{
+            new itemheaderDef("TitleProcName", 170),
+            new itemheaderDef("TitleType", 100),
+            new itemheaderDef("TitlePublisher", 100),
+            new itemheaderDef("TitleStatus", 80),
+            new itemheaderDef("TitlePID", 55),
+            new itemheaderDef("TitleCPU", 75),
+            new itemheaderDef("TitleRam", 75),
+            new itemheaderDef("TitleDisk", 75),
+            new itemheaderDef("TitleNet", 75),
+            new itemheaderDef("TitleProcPath", 240),
+            new itemheaderDef("TitleCmdLine", 200),
+            new itemheaderDef("TitleEProcess", 100),
+
+        };
         private int currHeaderI = 0;
+        private int listProcessTryGetHeaderDefaultWidth(string name)
+        {
+            foreach (itemheaderDef d in headerDefs)
+            {
+                if (d.herdername == name)
+                    return d.width;
+            }
+            return 100;
+        }
         private string listProcessTryGetHeaderTip(string name)
         {
             foreach (itemheaderTip t in headerTips)
@@ -2318,6 +2488,7 @@ namespace PCMgr
         }
         private void listProcessAddHeader(string name, int width)
         {
+            if (listProcessGetListHeaderItem(name) != null) return;
             headers.Add(new itemheader(currHeaderI, name, width));
             currHeaderI++;
             TaskMgrListHeaderItem li = new TaskMgrListHeaderItem();
@@ -2332,14 +2503,11 @@ namespace PCMgr
         private int listProcessGetListIndex(string name)
         {
             int rs = -1;
-            for (int i = 0; i < headers.Count; i++)
+            foreach (TaskMgrListHeaderItem li in listProcess.Colunms)
             {
-                if (headers[i].name == name)
+                if (li.Identifier == name)
                 {
-                    if (headers[i].show)
-                    {
-                        rs = headers[i].index;
-                    }
+                    rs = li.Index;
                     break;
                 }
             }
@@ -2358,10 +2526,139 @@ namespace PCMgr
             }
             return rs;
         }
+        private void listProcessAddHeaderMenu(string name)
+        {
+            ToolStripItem item = new ToolStripMenuItem(LanuageMgr.GetStr(name));
+
+            item.Name = name;
+            item.Click += MainHeadeMenuItem_Click;
+
+            contextMenuStripMainHeader.Items.Insert(contextMenuStripMainHeader.Items.Count - 2, item);
+        }
+        private void listProcessCheckHeaderMenu(string name, bool show)
+        {
+            foreach (ToolStripItem item in contextMenuStripMainHeader.Items)
+            {
+                if ((item is ToolStripMenuItem) && item.Name == name)
+                {
+                    ((ToolStripMenuItem)item).Checked = show;
+                    break;
+                }
+            }
+        }
+        private int listProcessGetHeaderMenuDefIndex(string name)
+        {
+            int index = 1;
+            for (int i = 1; i < contextMenuStripMainHeader.Items.Count; i++)
+            {
+                ToolStripItem item = contextMenuStripMainHeader.Items[i];
+                if ((item is ToolStripMenuItem))
+                {
+                    if (((ToolStripMenuItem)item).Checked)
+                        index++;
+                }
+                if (item.Name == name)
+                    break;
+            }
+            return index;
+        }
+        private void listProcessGetAllHeaderIndexs(string name = "")
+        {
+            if (name == "")
+            {
+                nameindex = listProcessGetListIndex("TitleProcName");
+                companyindex = listProcessGetListIndex("TitlePublisher");
+                stateindex = listProcessGetListIndex("TitleStatus");
+                pidindex = listProcessGetListIndex("TitlePID");
+                cpuindex = listProcessGetListIndex("TitleCPU");
+                ramindex = listProcessGetListIndex("TitleRam");
+                diskindex = listProcessGetListIndex("TitleDisk");
+                netindex = listProcessGetListIndex("TitleNet");
+                pathindex = listProcessGetListIndex("TitleProcPath");
+                cmdindex = listProcessGetListIndex("TitleCmdLine");
+                eprocessindex = listProcessGetListIndex("TitleEProcess");
+                typeindex = listProcessGetListIndex("TitleType");
+            }
+            else
+            {
+                if (name == "TitleProcName") nameindex = listProcessGetListIndex("TitleProcName");
+                else if (name == "TitlePublisher") companyindex = listProcessGetListIndex("TitlePublisher");
+                else if (name == "TitleStatus") stateindex = listProcessGetListIndex("TitleStatus");
+                else if (name == "TitlePID") pidindex = listProcessGetListIndex("TitlePID");
+                else if (name == "TitleCPU") cpuindex = listProcessGetListIndex("TitleCPU");
+                else if (name == "TitleRam") ramindex = listProcessGetListIndex("TitleRam");
+                else if (name == "TitleDisk") diskindex = listProcessGetListIndex("TitleDisk");
+                else if (name == "TitleNet") netindex = listProcessGetListIndex("TitleNet");
+                else if (name == "TitleProcPath") pathindex = listProcessGetListIndex("TitleProcPath");
+                else if (name == "TitleCmdLine") cmdindex = listProcessGetListIndex("TitleCmdLine");
+                else if (name == "TitleEProcess") eprocessindex = listProcessGetListIndex("TitleEProcess");
+                else if (name == "TitleType") typeindex = listProcessGetListIndex("TitleType");
+            }
+        }
+        private void listProcessInsertHeader(string name, int width, int index)
+        {
+            if (listProcessGetListHeaderItem(name) != null) return;
+            headers.Add(new itemheader(index, name, width));
+            currHeaderI++;
+            TaskMgrListHeaderItem li = new TaskMgrListHeaderItem();
+            string tip = listProcessTryGetHeaderTip(name);
+            if (name != null)
+                li.ToolTip = tip;
+            li.TextSmall = LanuageMgr.GetStr(name);
+            li.Identifier = name;
+            li.Width = width;
+            listProcess.Colunms.Add(li);
+
+            li.DisplayIndex = index;
+
+            listProcessGetAllHeaderIndexs("");
+            listProcess.Header.Invalidate();
+            ProcessListForceRefeshAll(true);
+
+        }
+        private void listProcessRemoveHeader(string name)
+        {
+            itemheader h = listProcessGetListHeaderItem(name);
+            if (h != null)
+            {
+                headers.Remove(h);
+
+                foreach (TaskMgrListHeaderItem li in listProcess.Colunms)
+                {
+                    if (li.Identifier == name)
+                    {
+                        listProcess.Colunms.Remove(li);
+                        break;
+                    }
+                }
+
+                listProcessGetAllHeaderIndexs("");
+                listProcess.Header.Invalidate();
+                ProcessListForceRefeshAll();
+            }
+        }
+
+        private void MainHeadeMenuItem_Click(object sender, EventArgs e)
+        {
+            ToolStripMenuItem item = sender as ToolStripMenuItem;
+            if (item.Checked)
+            {
+                item.Checked = false;
+                listProcessRemoveHeader(item.Name);
+            }
+            else
+            {
+                item.Checked = true;
+                int index = listProcessGetHeaderMenuDefIndex(item.Name);
+                if (index < 1) index = 1;
+                listProcessInsertHeader(item.Name, listProcessTryGetHeaderDefaultWidth(item.Name), index);
+            }
+            listProcessGetAllHeaderIndexs(item.Name);
+        }
 
         int nameindex = 0;
         int companyindex = 0;
-        int stateindex = 0;
+        public int stateindex = 0;
         int pidindex = 0;
         int cpuindex = 0;
         int ramindex = 0;
@@ -2390,6 +2687,7 @@ namespace PCMgr
             public uint pid;
             public uint ppid;
             public string exename;
+            public string eprocess;
             public string exepath;
             public IntPtr processItem = IntPtr.Zero;
             public ProcessDetalItem parent = null;
@@ -2397,6 +2695,7 @@ namespace PCMgr
             public List<ProcessDetalItem> childs = new List<ProcessDetalItem>();
         }
 
+        public bool nextUpdateStaticVals = false;
 
         //Find iten
         private bool ProcessListDetailsIsProcessLoaded(uint pid, out ProcessDetalItem item)
@@ -2432,8 +2731,7 @@ namespace PCMgr
         {
             if (!processListDetailsInited)
             {
-               
-                if (!processListInited) ProcessListInit();
+                //if (!processListInited) ProcessListInit();
 
                 listViewItemComparerProcDetals = new ListViewItemComparerProcDetals();
 
@@ -2445,10 +2743,14 @@ namespace PCMgr
 
                 processMonitorDetals = MProcessMonitor.CreateProcessMonitor(ptrProcessRemoveItemCallBackDetails, ptrProcessNewItemCallBackDetails, Nullptr);
 
-                MAppWorkCall3(179, listProcessDetals.Handle);
+                MAppWorkCall3(160, listProcessDetals.Handle);
                 MAppWorkCall3(182, listProcessDetals.Handle);
                 listProcessDetals.ListViewItemSorter = listViewItemComparerProcDetals;
                 ComCtlApi.MListViewProcListWndProc(listProcessDetals.Handle);
+
+                if (systemRootPath == "") systemRootPath = Marshal.PtrToStringUni(MAppWorkCall4(95, Nullptr, Nullptr));
+                if (csrssPath == "") csrssPath = Marshal.PtrToStringUni(MAppWorkCall4(96, Nullptr, Nullptr));
+                if (ntoskrnlPath == "") ntoskrnlPath = Marshal.PtrToStringUni(MAppWorkCall4(97, Nullptr, Nullptr));
 
                 ProcessListDetailsLoadColumns();
                 ProcessListDetailsILoadAllItem();
@@ -2504,19 +2806,21 @@ namespace PCMgr
                 exename = str_idle_process;
             else if (pid == 2)
                 exename = str_system_interrupts;
-            else if (pid == 4)
+            else if (pid == 4 || exename == "Registry" || exename == "Memory Compression")
                 exefullpath = ntoskrnlPath;
+            else if (pid < 800 && ppid < 500 && exename == "csrss.exe")
+                exefullpath = csrssPath;
 
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.Append(exefullpath);
 
-            bool epgeted = false;
             PEOCESSKINFO infoStruct = new PEOCESSKINFO();
             if (canUseKernel)
             {
                 if (MGetProcessEprocess(pid, ref infoStruct))
                 {
-                    epgeted = true;
+                    p.eprocess = infoStruct.Eprocess;
+
                     if (string.IsNullOrEmpty(exefullpath))
                     {
                         exefullpath = infoStruct.ImageFullName;
@@ -2531,7 +2835,6 @@ namespace PCMgr
             p.processItem = processItem;
             p.handle = hprocess;
             p.exename = exename;
-            p.pid = pid;
             p.exepath = stringBuilder.ToString();
 
             //icon
@@ -2541,24 +2844,36 @@ namespace PCMgr
             //16 empty item
             for (int i = 0; i < 16; i++) li.SubItems.Add(new ListViewItem.ListViewSubItem());
 
+
+
             //static items
-            if (colNameIndex != -1)
-                li.SubItems[colNameIndex].Text = exename;
-            if (colPathIndex != -1)
-                li.SubItems[colPathIndex].Text = p.exepath;
-            if (colPIDIndex != -1)
+            ProcessListDetailsUpdateStaticItems(pid, li, p);
+
+            ProcessListDetailsUpdate(pid, true, li);
+
+            listProcessDetals.Items.Add(li);
+        }
+
+        //Update dyamic data
+        private void ProcessListDetailsUpdateStaticItems(uint pid, ListViewItem li, ProcessDetalItem p)
+        {
+            //static items
+            if (colNameIndex != -1 && string.IsNullOrEmpty(li.SubItems[colNameIndex].Text))  li.SubItems[colNameIndex].Text = p.exename;
+            if (colPathIndex != -1 && string.IsNullOrEmpty(li.SubItems[colPathIndex].Text)) li.SubItems[colPathIndex].Text = p.exepath;
+            if (colPIDIndex != -1 && string.IsNullOrEmpty(li.SubItems[colPIDIndex].Text))
             {
                 if (pid == 2)
                     li.SubItems[colPIDIndex].Text = "-";
                 else li.SubItems[colPIDIndex].Text = pid.ToString();
-            }     
-            if (colDescriptionIndex != -1 && p.exepath != "")
+            }
+            if (colPPIDIndex != -1 && string.IsNullOrEmpty(li.SubItems[colPPIDIndex].Text)) li.SubItems[colPPIDIndex].Text = p.ppid.ToString();
+            if (colDescriptionIndex != -1 && string.IsNullOrEmpty(li.SubItems[colDescriptionIndex].Text))
             {
                 if (pid == 0)
                     li.SubItems[colDescriptionIndex].Text = str_IdleProcessDsb;
                 else if (pid == 2)
                     li.SubItems[colDescriptionIndex].Text = str_InterruptsProcessDsb;
-                else
+                else if (p.exepath != "")
                 {
                     StringBuilder stringBuilderDescription = new StringBuilder(260);
                     if (MGetExeDescribe(p.exepath, stringBuilderDescription, 260))
@@ -2569,40 +2884,32 @@ namespace PCMgr
             if (pid == 2)
                 goto JUMPADD;
 
-            if (colPPIDIndex != -1)
-                li.SubItems[colPPIDIndex].Text = ppid.ToString();
-            if (colCommandLineIndex != -1)
+            if (colEprocessIndex != -1 && string.IsNullOrEmpty(li.SubItems[colEprocessIndex].Text))
+                li.SubItems[colEprocessIndex].Text = p.eprocess;
+            if (colCommandLineIndex != -1 && string.IsNullOrEmpty(li.SubItems[colCommandLineIndex].Text))
             {
                 StringBuilder stringBuilderCommandLine = new StringBuilder(512);
-                if (hprocess != IntPtr.Zero && MGetProcessCommandLine(hprocess, stringBuilderCommandLine, 512, pid))
+                if (p.handle != IntPtr.Zero && MGetProcessCommandLine(p.handle, stringBuilderCommandLine, 512, pid))
                     li.SubItems[colCommandLineIndex].Text = stringBuilderCommandLine.ToString();
             }
-            if (is64OS && colPlatformIndex != -1)
+            if (is64OS && colPlatformIndex != -1 && string.IsNullOrEmpty(li.SubItems[colPlatformIndex].Text))
             {
-                if (MGetProcessIs32Bit(hprocess))
+                if (MGetProcessIs32Bit(p.handle))
                     li.SubItems[colCommandLineIndex].Text = str_proc_32;
                 else li.SubItems[colCommandLineIndex].Text = str_proc_64;
             }
 
-            if (colEprocessIndex != -1 && epgeted)
-                li.SubItems[colEprocessIndex].Text = infoStruct.Eprocess;
-            if (colJobIDIndex != -1 && epgeted)
-                li.SubItems[colEprocessIndex].Text = infoStruct.JobAddress;
-            if (colUserNameIndex != -1 && p.handle != IntPtr.Zero)
+            if (colUserNameIndex != -1 && p.handle != IntPtr.Zero && string.IsNullOrEmpty(li.SubItems[colUserNameIndex].Text))
             {
                 StringBuilder stringBuilderUserName = new StringBuilder(260);
                 if (MGetProcessUserName(p.handle, stringBuilderUserName, 260))
                     li.SubItems[colUserNameIndex].Text = stringBuilderUserName.ToString();
             }
-            if (colSessionIDIndex != -1)
-                li.SubItems[colSessionIDIndex].Text = MGetProcessSessionID(processItem).ToString();
-
+            if (colSessionIDIndex != -1 && string.IsNullOrEmpty(li.SubItems[colSessionIDIndex].Text))
+                li.SubItems[colSessionIDIndex].Text = MGetProcessSessionID(p.processItem).ToString();
             JUMPADD:
-            ProcessListDetailsUpdate(pid, true, li);
-
-            listProcessDetals.Items.Add(li);
+            return;
         }
-        //Update dyamic data
         private void ProcessListDetailsUpdate(uint pid, bool isload, ListViewItem it, int ipdateOneDataCloum = -1, bool forceProcessHost = false)
         {
             ProcessDetalItem p = it.Tag as ProcessDetalItem;
@@ -2651,6 +2958,10 @@ namespace PCMgr
                 ProcessListDetails_Perf_Update_GdiHandleCount(it, p);
             if (colUserObjectIndex != -1 && colUserObjectIndex != ipdateOneDataCloum)
                 ProcessListDetails_Perf_Update_UserHandleCount(it, p);
+            if (colWorkingSetIncreasementIndex != -1 && colWorkingSetIncreasementIndex != ipdateOneDataCloum)
+                ProcessListDetails_Perf_Update_WorkingSetIncreasement(it, p);
+            if (colPageErrorIncreasementIndex != -1 && colPageErrorIncreasementIndex != ipdateOneDataCloum)
+                ProcessListDetails_Perf_Update_PageFaultIncreasement(it, p);
         }
         //update a column be use to sort
         private void ProcessListDetailsUpdateOnePerfCloum(uint pid, ListViewItem it, int ipdateOneDataCloum, bool forceProcessHost = false)
@@ -2708,14 +3019,33 @@ namespace PCMgr
                 ProcessListDetails_Perf_Update_GdiHandleCount(it, p);
             else if (colUserObjectIndex != -1 && colUserObjectIndex == ipdateOneDataCloum)
                 ProcessListDetails_Perf_Update_UserHandleCount(it, p);
+            else if (colWorkingSetIncreasementIndex != -1 && colWorkingSetIncreasementIndex == ipdateOneDataCloum)
+                ProcessListDetails_Perf_Update_WorkingSetIncreasement(it, p);
+            else if (colPageErrorIncreasementIndex != -1 && colPageErrorIncreasementIndex == ipdateOneDataCloum)
+                ProcessListDetails_Perf_Update_PageFaultIncreasement(it, p);
         }
-        private void ProcessListDetailsUpdateValues(int refeshAllDataColum)
+        private void ProcessListDetailsUpdateValues(int refeshAllDataColum, bool updateStaticItems=false)
         {
             //update process perf data
             foreach (ListViewItem it in listProcessDetals.Items)
             {
+                if (updateStaticItems)
+                    ProcessListDetailsUpdateStaticItems(((ProcessDetalItem)it.Tag).pid, it, (ProcessDetalItem)it.Tag);
                 if (refeshAllDataColum != -1)
                     ProcessListDetailsUpdateOnePerfCloum(((ProcessDetalItem)it.Tag).pid, it, refeshAllDataColum);
+            }
+            if (updateStaticItems)
+            {
+
+                foreach (ColumnHeader c in listProcessDetals.Columns)
+                {
+                    itemheaderTag t = ((itemheaderTag)c.Tag);
+                    if (t.needAutoSize)
+                    {
+                        listProcessDetals.AutoResizeColumn(c.Index, ColumnHeaderAutoResizeStyle.ColumnContent);
+                        t.needAutoSize = false;
+                    }
+                }
             }
             if (listProcessDetals.Items.Count == 0) return;
             int start = listProcessDetals.Items.IndexOf(listProcessDetals.TopItem), end = listProcessDetals.Items.Count;
@@ -2767,6 +3097,12 @@ namespace PCMgr
             it.SubItems[colWorkingSetIndex].Text = FormatFileSizeMenSingal(data);
             it.SubItems[colWorkingSetIndex].Tag = data;
         }
+        private void ProcessListDetails_Perf_Update_WorkingSetIncreasement(ListViewItem it, ProcessDetalItem p)
+        {
+            uint data = MProcessPerformanctMonitor.GetProcessMemoryInfo(p.processItem, MProcessPerformanctMonitor.M_GET_PROCMEM_WORKINGSET_INC);
+            it.SubItems[colWorkingSetIndex].Text = FormatFileSizeMenSingal(data);
+            it.SubItems[colWorkingSetIndex].Tag = data;
+        }
         private void ProcessListDetails_Perf_Update_PeakWorkingSet(ListViewItem it, ProcessDetalItem p)
         {
             uint data = MProcessPerformanctMonitor.GetProcessMemoryInfo(p.processItem, MProcessPerformanctMonitor.M_GET_PROCMEM_PEAKWORKINGSET);
@@ -2794,32 +3130,38 @@ namespace PCMgr
         private void ProcessListDetails_Perf_Update_PageFault(ListViewItem it, ProcessDetalItem p)
         {
             uint data = MProcessPerformanctMonitor.GetProcessMemoryInfo(p.processItem, MProcessPerformanctMonitor.M_GET_PROCMEM_PAGEDFAULT);
-            it.SubItems[colPageErrorIndex].Text = FormatFileSizeMenSingal(data);
+            it.SubItems[colPageErrorIndex].Text = data.ToString();
+            it.SubItems[colPageErrorIndex].Tag = data;
+        }
+        private void ProcessListDetails_Perf_Update_PageFaultIncreasement(ListViewItem it, ProcessDetalItem p)
+        {
+            uint data = MProcessPerformanctMonitor.GetProcessMemoryInfo(p.processItem, MProcessPerformanctMonitor.M_GET_PROCMEM_PAGEDFAULT_INC);
+            it.SubItems[colPageErrorIndex].Text = data.ToString();
             it.SubItems[colPageErrorIndex].Tag = data;
         }
 
         private void ProcessListDetails_Perf_Update_HandleCount(ListViewItem it, ProcessDetalItem p)
         {
             uint data = MGetProcessHandlesCount(p.processItem);
-            it.SubItems[colHandleCountIndex].Text = FormatFileSizeMenSingal(data);
+            it.SubItems[colHandleCountIndex].Text = data.ToString();
             it.SubItems[colHandleCountIndex].Tag = data;
         }
         private void ProcessListDetails_Perf_Update_ThreadsCount(ListViewItem it, ProcessDetalItem p)
         {
             uint data = MGetProcessThreadsCount(p.processItem);
-            it.SubItems[colThreadCountIndex].Text = FormatFileSizeMenSingal(data);
+            it.SubItems[colThreadCountIndex].Text = data.ToString();
             it.SubItems[colThreadCountIndex].Tag = data;
         }
         private void ProcessListDetails_Perf_Update_GdiHandleCount(ListViewItem it, ProcessDetalItem p)
         {
             uint data = MGetProcessGdiHandleCount(p.handle);
-            it.SubItems[colGDIObjectIndex].Text = FormatFileSizeMenSingal(data);
+            it.SubItems[colGDIObjectIndex].Text = data.ToString();
             it.SubItems[colGDIObjectIndex].Tag = data;
         }
         private void ProcessListDetails_Perf_Update_UserHandleCount(ListViewItem it, ProcessDetalItem p)
         {
             uint data = MGetProcessUserHandleCount(p.handle);
-            it.SubItems[colUserObjectIndex].Text = FormatFileSizeMenSingal(data);
+            it.SubItems[colUserObjectIndex].Text = data.ToString();
             it.SubItems[colUserObjectIndex].Tag = data;
         }
 
@@ -2909,8 +3251,10 @@ namespace PCMgr
             MProcessMonitor.RefeshAllProcess(processMonitorDetals);
             //刷新性能数据
             bool refeshAColumData = ProcessListDetailsIsDyamicDataColumn(listViewItemComparerProcDetals.SortColumn);
-            ProcessListDetailsUpdateValues(refeshAColumData ? listViewItemComparerProcDetals.SortColumn : -1);
+            ProcessListDetailsUpdateValues(refeshAColumData ? listViewItemComparerProcDetals.SortColumn : -1, nextUpdateStaticVals);
             ProcessListRefeshPidTree();
+
+            nextUpdateStaticVals = false;
 
             listProcessDetals.Sort();
             ComCtlApi.MListViewProcListLock(false);
@@ -2940,9 +3284,10 @@ namespace PCMgr
         //Ico
         private string ProcessListDetailsGetIcon(string exepath)
         {
+            if (exepath == "") exepath = "Default";
             if (!imageListProcessDetalsIcons.Images.ContainsKey(exepath))
             {
-                IntPtr intPtr = MGetExeIcon(exepath);
+                IntPtr intPtr = MGetExeIcon(exepath == "Default" ? null : exepath);
                 if (intPtr != IntPtr.Zero)
                     imageListProcessDetalsIcons.Images.Add(exepath, Icon.FromHandle(intPtr));
             }
@@ -3020,19 +3365,19 @@ namespace PCMgr
         private int colCPUTimeIndex = -1;//ok
         private int colCycleIndex = -1;//ok
         private int colPeakWorkingSetIndex = -1;//ok
-        private int colWorkingSetIncreasementIndex = -1;
+        private int colWorkingSetIncreasementIndex = -1;//ok
         private int colWorkingSetIndex = -1;//ok
         private int colWorkingSetPrivateIndex = -1;//ok
         private int colWorkingSetShareIndex = -1;//ok
-        private int colCommitedSizeIndex = -1;//ok but not
+        private int colCommitedSizeIndex = -1;//ok
         private int colPagedPoolIndex = -1;//ok
         private int colNonPagedPoolIndex = -1;//ok
         private int colPageErrorIndex = -1;//ok
-        private int colPageErrorIncreasementIndex = -1;
+        private int colPageErrorIncreasementIndex = -1;//ok
         private int colHandleCountIndex = -1;//ok
         private int colThreadCountIndex = -1;//ok
-        private int colUserObjectIndex = -1;
-        private int colGDIObjectIndex = -1;
+        private int colUserObjectIndex = -1;//ok
+        private int colGDIObjectIndex = -1;//ok
         private int colIOReadIndex = -1;//ok
         private int colIOWriteIndex = -1;//ok
         private int colIOOtherIndex = -1;//ok
@@ -3097,6 +3442,11 @@ namespace PCMgr
             new itemheaderTip("TitleIOWrite", "TipIOWrite"),
             new itemheaderTip("TitleIOWriteBytes", "TipIOWriteBytes"),
         };
+        private class itemheaderTag
+        {
+            public string tip;
+            public bool needAutoSize;
+        }
 
         public string ProcessListDetailsGetHeaderTip(string name)
         {
@@ -3107,18 +3457,27 @@ namespace PCMgr
             }
             return null;
         }
-        public void ProcessListDetailsAddHeader(string name, int width = 100)
+        public void ProcessListDetailsAddHeader(string name, int width = -1)
         {
+            itemheaderTag t = new itemheaderTag();
             ColumnHeader li = new ColumnHeader();
             li.Name = name;
             li.Text = LanuageMgr.GetStr(name);
+            if (width == -1)
+            {
+                t.needAutoSize = true;
+                width = 100;
+            }
+            else t.needAutoSize = false;
             li.Width = width;
             string tip = ProcessListDetailsGetHeaderTip(name);
             if (ProcessListDetailsIsMumberColumn(name))
                 li.TextAlign = HorizontalAlignment.Right;
             listProcessDetals.Columns.Add(li);
-            if (tip != null)
-                li.Tag = tip;
+
+            if (tip != null) t.tip = tip;
+
+            li.Tag = t;
         }
         public int ProcessListDetailsGetListIndex(string name)
         {
@@ -3279,6 +3638,7 @@ namespace PCMgr
                         listViewItemComparerProcDetals.SortColumn = col;
                     if (sortInfo2[1] == "Asdening") listViewItemComparerProcDetals.Asdening = true;
                     else if (sortInfo2[1] == "Descending") listViewItemComparerProcDetals.Asdening = false;
+                    ComCtlApi.MListViewSetColumnSortArrow(hListHeader, listViewItemComparerProcDetals.SortColumn, listViewItemComparerProcDetals.Asdening, false);
                 }
             }
         }
@@ -3292,7 +3652,7 @@ namespace PCMgr
                 if (ss.Length >= 2)
                     int.TryParse(ss[1], out width);
             }
-            if (width > 1000 || width <= 0) width = 70;
+            if (width > 1024 || width <= 0) width = 70;
             if (s.Trim() != "") ProcessListDetailsAddHeader(sname, width);
         }
 
@@ -3345,7 +3705,7 @@ namespace PCMgr
                     ColumnHeader col = listProcessDetals.Columns[index];
                     if (col.Tag != null)
                     {
-                        colsTip.Show(col.Tag.ToString(), listProcessDetals, p.X, p.Y + 3, 5000);
+                        colsTip.Show(((itemheaderTag)col.Tag).tip, listProcessDetals, p.X, p.Y + 3, 5000);
                     }
                     else
                     {
@@ -3359,6 +3719,10 @@ namespace PCMgr
                 listProcessDetals_lastEnterColumn = -1;
                 colsTip.Hide(listProcessDetals);
             }
+        }
+        private void listProcessDetals_ColumnReordered(object sender, ColumnReorderedEventArgs e)
+        {
+            nextUpdateStaticVals = true;
         }
 
         private ListViewItemComparerProcDetals listViewItemComparerProcDetals = null;
@@ -3417,6 +3781,8 @@ namespace PCMgr
             if (!fileListInited)
             {
                 fileListInited = true;
+
+                DelingDialogInit();
 
                 fileMgrCallBack = FileMgrCallBack;
                 MFM_SetCallBack(Marshal.GetFunctionPointerForDelegate(fileMgrCallBack));
@@ -4274,27 +4640,25 @@ namespace PCMgr
                 return compareResult;
             }
         }
+        private object uWPManager = null;
 
         private TaskListViewUWPColumnSorter uWPColumnSorter = new TaskListViewUWPColumnSorter();
         private void UWPListRefesh()
         {
-            listUwpApps.Show();
-            pl_UWPEnumFailTip.Hide();
-            listUwpApps.Items.Clear();
-            uwpListInited = false;
-            UWPListInit();
-        }
-        private void UWPListInit()
-        {
-            if (!uwpListInited)
+            if (uwpListInited)
             {
-                UWPManager uWPManager = new UWPManager();
+                listUwpApps.Show();
+                pl_UWPEnumFailTip.Hide();
+                listUwpApps.Items.Clear();
+                if (uWPManager != null) ((UWPManager)uWPManager).Clear();
                 try
                 {
-                    uWPManager.EnumlateAll();
-                    for (int i = 0; i < uWPManager.Packages.Count; i++)
+                    ((UWPManager)uWPManager).EnumlateAll();
+                    for (int i = 0; i < ((UWPManager)uWPManager).Packages.Count; i++)
                     {
-                        TaskMgrListItem li = new TaskMgrListItem(LanuageMgr.IsChinese ? UWPManager.DisplayNameTozhCN(uWPManager.Packages[i].Name) : uWPManager.Packages[i].Name);
+                        UWPPackage pkg = ((UWPManager)uWPManager).Packages[i];
+
+                        TaskMgrListItem li = new TaskMgrListItem(LanuageMgr.IsChinese ? UWPManager.DisplayNameTozhCN(pkg.Name) : pkg.Name);
                         li.SubItems.Add(new TaskMgrListItem.TaskMgrListViewSubItem());
                         li.SubItems.Add(new TaskMgrListItem.TaskMgrListViewSubItem());
                         li.SubItems.Add(new TaskMgrListItem.TaskMgrListViewSubItem());
@@ -4305,17 +4669,15 @@ namespace PCMgr
                         li.SubItems[1].Font = listUwpApps.Font;
                         li.SubItems[2].Font = listUwpApps.Font;
                         li.SubItems[3].Font = listUwpApps.Font;
-                        li.SubItems[4].Font = listUwpApps.Font;
-                        li.SubItems[0].Text = LanuageMgr.IsChinese ? UWPManager.DisplayNameTozhCN(uWPManager.Packages[i].Name) : uWPManager.Packages[i].Name;
-                        li.SubItems[1].Text = uWPManager.Packages[i].Publisher;
-                        li.SubItems[2].Text = uWPManager.Packages[i].Description;
-                        li.SubItems[3].Text = uWPManager.Packages[i].FullName;
-                        li.SubItems[4].Text = uWPManager.Packages[i].InstalledLocation;
-                        li.SubItems[5].Text = uWPManager.Packages[i].MainAppDisplayName;
-                        li.Tag = uWPManager.Packages[i];
+                        li.SubItems[0].Text = LanuageMgr.IsChinese ? UWPManager.DisplayNameTozhCN(pkg.Name) : pkg.Name;
+                        li.SubItems[1].Text = pkg.Publisher;
+                        li.SubItems[2].Text = pkg.FullName;
+                        li.SubItems[3].Text = pkg.InstalledLocation;
+                        li.SubItems[4].Text = pkg.MainAppDisplayName;
+                        li.Tag = pkg;
                         li.IsUWPICO = true;
 
-                        string iconpath = uWPManager.Packages[i].IconPath;
+                        string iconpath = pkg.IconPath;
                         if (iconpath != "" && MFM_FileExist(iconpath))
                         {
                             using (Image img = Image.FromFile(iconpath))
@@ -4332,11 +4694,25 @@ namespace PCMgr
                     pl_UWPEnumFailTip.Show();
                     lbUWPEnumFailText.Text = LanuageMgr.GetStr("UWPEnumFail") + "\n\n" + e.ToString();
                 }
+            }
+        }
+        private void UWPListInit()
+        {
+            if (!uwpListInited)
+            {
+                uWPManager = new UWPManager();
                 uwpListInited = true;
+                UWPListRefesh();
 
                 listUwpApps.ListViewItemSorter = uWPColumnSorter;
                 listUwpApps.Header.CloumClick += UWPList_Header_CloumClick;
             }
+        }
+        private void UWPListUnInit()
+        {
+            listUwpApps.Items.Clear();
+            ((UWPManager)uWPManager).Clear();
+            uWPManager = null;
         }
 
         private void UWPList_Header_CloumClick(object sender, TaskMgrListHeader.TaskMgrListHeaderEventArgs e)
@@ -4373,51 +4749,46 @@ namespace PCMgr
         {
             if (listUwpApps.SelectedItem != null)
             {
-                //explorer shell:AppsFolder\
-                //explorer shell:AppsFolder\1F8B0F94.122165AE053F_1.4.1.0_x64__j2p0p5q0044a6!App
-                //explorer shell:AppsFolder\c5e2524a-ea46-4f67-841f-6a9465d9d515_cw5n1h2txyewy!App
-                //1F8B0F94.122165AE053F_1.4.1.0_x64__j2p0p5q0044a6
                 UWPPackage pkg = ((UWPPackage)listUwpApps.SelectedItem.Tag);
-                if (pkg != null & pkg.Apps != null && pkg.Apps.Length > 0)
+                if (pkg.Apps.Length > 0)
                 {
-                    string pkhname = listUwpApps.SelectedItem.Tag.ToString();
-                    if (pkhname.Contains("_") && pkhname.LastIndexOf('_') != 0)
-                    {
-                        int startindex = pkhname.IndexOf('_');
-                        int endindex = pkhname.LastIndexOf('_');
-                        if (endindex > startindex && endindex - startindex > 0)
-                        {
-                            string pkhnamez = pkhname.Substring(startindex, endindex - startindex);
-                            pkhname = pkhname.Replace(pkhnamez, "");
-                        }
-                    }
-                    MRunUWPApp(pkhname, pkg.Apps[0]);
+                    int first_ = pkg.FullName.IndexOf('_');
+                    int last_ = pkg.FullName.LastIndexOf('_');
+                    string indxxstr = pkg.FullName;
+                    if (first_ < last_ && last_ > 0 && last_ < indxxstr.Length)
+                        indxxstr = indxxstr.Replace(indxxstr.Substring(first_, last_ - first_), "");
+                    uint processid = 0;
+                    M_UWP_RunUWPApp(indxxstr + "!" + pkg.Apps[0], ref processid);
                 }
             }
         }
         private void 卸载应用ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (listUwpApps.SelectedItem != null)
-            {
-                MUnInstallUWPApp(((UWPPackage)listUwpApps.SelectedItem.Tag).ToString());
-            }
+            MRunExe("ms-settings:appsfeatures", null);
         }
         private void 打开安装位置ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (listUwpApps.SelectedItem != null)
             {
-                MFM_OpenFile(listUwpApps.SelectedItem.SubItems[4].Text, Handle);
+                UWPPackage pkg = ((UWPPackage)listUwpApps.SelectedItem.Tag);
+                MFM_OpenFile(pkg.InstalledLocation, Handle);
             }
         }
         private void 复制名称ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (listUwpApps.SelectedItem != null)
-                MCopyToClipboard2(listUwpApps.SelectedItem.SubItems[0].Text);
+            {
+                UWPPackage pkg = ((UWPPackage)listUwpApps.SelectedItem.Tag);
+                MCopyToClipboard2(pkg.Name);
+            }
         }
         private void 复制完整名称ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (listUwpApps.SelectedItem != null)
-                MCopyToClipboard2(listUwpApps.SelectedItem.SubItems[3].Text);
+            {
+                UWPPackage pkg = ((UWPPackage)listUwpApps.SelectedItem.Tag);
+                MCopyToClipboard2(pkg.FullName);
+            }
         }
         private void 复制发布者ToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -4694,6 +5065,7 @@ namespace PCMgr
             //c.Size = new Size(splitContainerPerfCtls.Panel2.Width - 30, splitContainerPerfCtls.Panel2.Height - 30);
             c.Location = new Point(15, 15);
             c.Text = "资源信息页 " + name;
+            c.Font = tabControlMain.Font;
         }
         private void PerfPagesResize(Size targetSize)
         {
@@ -4839,8 +5211,8 @@ namespace PCMgr
                 formSpeedBall.Show();
                 ShowWindow(formSpeedBall.Handle, 0);
 
-                Font itemHugeFont = new Font("Microsoft YaHei UI", 10.5f);
-                Font itemValueFont = new Font("Microsoft YaHei UI", 10.5f);
+                Font itemHugeFont = new Font(Font.FontFamily, 10.5f);
+                Font itemValueFont = new Font(Font.FontFamily, 10.5f);
 
                 itemCpu = new FormSpeedBall.SpeedItem("CPU", CpuBgColor2, CpuDrawColor);
                 itemRam = new FormSpeedBall.SpeedItem(LanuageMgr.GetStr("TitleRam"), RamBgColor2, RamDrawColor2);
@@ -5109,7 +5481,11 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
             }
 
             InitLanuageItems();
-            if (lanuage != "" && lanuage != "zh" && lanuage != "zh-CN") System.Threading.Thread.CurrentThread.CurrentUICulture = new System.Globalization.CultureInfo(lanuage);
+            if (lanuage != "" && lanuage != "zh" && lanuage != "zh-CN")
+            {
+                UWPManager.StringLocate = lanuage;
+                System.Threading.Thread.CurrentThread.CurrentUICulture = new System.Globalization.CultureInfo(lanuage);
+            }
         }
         private static void InitLanuageItems()
         {
@@ -5327,6 +5703,10 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                 MAppSetLanuageItems(2, 31, LanuageMgr.GetStr2("DetachDebuggerNotDebugger", out size), size);
                 MAppSetLanuageItems(2, 32, LanuageMgr.GetStr2("ChangePriorityAsk", out size), size);
                 MAppSetLanuageItems(2, 33, LanuageMgr.GetStr2("ChangePriorityContent", out size), size);
+                MAppSetLanuageItems(2, 34, LanuageMgr.GetStr2("OpenFileError", out size), size);
+                MAppSetLanuageItems(2, 35, LanuageMgr.GetStr2("CreateDumpFailed", out size), size);
+                MAppSetLanuageItems(2, 36, LanuageMgr.GetStr2("CreateDumpSuccess", out size), size);
+                MAppSetLanuageItems(2, 37, LanuageMgr.GetStr2("PleaseEnumIn64", out size), size);
                 
 
             }
@@ -5435,13 +5815,14 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
             listStartup.Items.Clear();
             startId = 0;
 
-            listStartup.Items.Add(knowDlls);
-            listStartup.Items.Add(rightMenu1);
-            listStartup.Items.Add(rightMenu2);
-            listStartup.Items.Add(rightMenu3);
-            listStartup.Items.Add(printMonitors);
-            listStartup.Items.Add(printProviders);
             MEnumStartups(enumStartupsCallBackPtr);
+
+            if (knowDlls.Childs.Count > 0) listStartup.Items.Add(knowDlls);
+            if (rightMenu1.Childs.Count > 0) listStartup.Items.Add(rightMenu1);
+            if (rightMenu2.Childs.Count > 0) listStartup.Items.Add(rightMenu2);
+            if (rightMenu3.Childs.Count > 0) listStartup.Items.Add(rightMenu3);
+            if (printMonitors.Childs.Count > 0) listStartup.Items.Add(printMonitors);
+            if (printProviders.Childs.Count > 0) listStartup.Items.Add(printProviders);
         }
         private void StartMList_CallBack(IntPtr name, IntPtr type, IntPtr path, IntPtr rootregpath, IntPtr regpath, IntPtr regvalue)
         {
@@ -5870,8 +6251,6 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                 enumUsersCallBack = UsersListEnumUsersCallBack;
                 enumUsersCallBackCallBack_ptr = Marshal.GetFunctionPointerForDelegate(enumUsersCallBack);
 
-                listUsers.Font = new Font("微软雅黑", 9f);
-
                 UsersListLoad();
                 usersListInited = true;
             }
@@ -5957,11 +6336,15 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
         {
             delingdialog = new FormDelFileProgress();
             delingdialog.Show(this);
+            MAppWorkCall3(200, delingdialog.Handle, IntPtr.Zero);
         }
         private void DelingDialogClose()
         {
-            delingdialog.Close();
-            delingdialog = null;
+            if (delingdialog != null)
+            {
+                delingdialog.Close();
+                delingdialog = null;
+            }
         }
         private void ShowHideDelingDialog(bool show)
         {
@@ -6360,7 +6743,7 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                     }
                 case M_CALLBACK_ABOUT:
                     {
-                        new FormAbout().ShowDialog();
+                        Caller.ShowAboutDlg();
                         break;
                     }
                 case M_CALLBACK_ENDTASK:
@@ -6692,6 +7075,8 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                     break;
             }
             MAppWorkCall3(188, IntPtr.Zero, IntPtr.Zero);
+            MAppWorkCall3(177, IntPtr.Zero, IntPtr.Zero);
+
         }
         private void AppLoadKernel()
         {
@@ -6744,9 +7129,7 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
         private void AppOnLoad()
         {
             //初始化函数
-            DelingDialogInit();
-            DelingDialogInitHide();
-
+ 
             Log("Loading callbacks...");
 
             exitCallBack = AppExit;
@@ -6774,7 +7157,9 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
             LoadSettings();
 
             SysVer.Get();
-            if (!SysVer.IsWin8Upper()) tabControlMain.TabPages.Remove(tabPageUWPCtl);
+            if (!SysVer.IsWin8Upper())
+                tabControlMain.TabPages.Remove(tabPageUWPCtl);
+            else M_UWP_Init();
 
             if (!MGetPrivileges()) TaskDialog.Show(LanuageMgr.GetStr("FailedGetPrivileges"), str_AppTitle, "", TaskDialogButton.OK, TaskDialogIcon.Warning);
 #if _X64_
@@ -6813,6 +7198,11 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                 MSCM_Exit();
                 KernelListUnInit();
                 M_LOG_Close();
+                if (SysVer.IsWin8Upper())
+                {
+                    UWPListUnInit();
+                    M_UWP_UnInit();
+                }
                 MAppWorkCall3(204, IntPtr.Zero, IntPtr.Zero);
                 MAppWorkCall3(207, Handle, IntPtr.Zero);
                 exitCalled = true;
@@ -6868,6 +7258,13 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
         private bool min_hide = false;
         private bool highlight_nosystem = false;
 
+        private void LoadAllFonts()
+        {
+            FormSettings.LoadFontSettingForUI(tabControlMain);
+            pl_simple.Font = tabControlMain.Font;
+            pl_perfGridHost.Font = tabControlMain.Font;
+            lbStartingStatus.Font = tabControlMain.Font;
+        }
         private void LoadList()
         {
             lvwColumnSorter = new TaskListViewColumnSorter(this);
@@ -6914,10 +7311,6 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
             li9.TextSmall = LanuageMgr.GetStr("TitlePublisher");
             li9.Width = 100;
             listUwpApps.Colunms.Add(li9);
-            TaskMgrListHeaderItem li12 = new TaskMgrListHeaderItem();
-            li12.TextSmall = LanuageMgr.GetStr("TitleDescription");
-            li12.Width = 100;
-            listUwpApps.Colunms.Add(li12);
             TaskMgrListHeaderItem li10 = new TaskMgrListHeaderItem();
             li10.TextSmall = LanuageMgr.GetStr("TitleFullName");
             li10.Width = 130;
@@ -6947,6 +7340,18 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
             li16.Width = 60;
             listUsers.Colunms.Add(li16);
 
+            listProcessAddHeaderMenu("TitleProcName");
+            listProcessAddHeaderMenu("TitleType");
+            listProcessAddHeaderMenu("TitlePublisher");
+            listProcessAddHeaderMenu("TitleStatus");
+            listProcessAddHeaderMenu("TitlePID");
+            listProcessAddHeaderMenu("TitleCPU");
+            listProcessAddHeaderMenu("TitleRam");
+            listProcessAddHeaderMenu("TitleDisk");
+            listProcessAddHeaderMenu("TitleNet");
+            listProcessAddHeaderMenu("TitleProcPath");
+            listProcessAddHeaderMenu("TitleCmdLine");
+
             string s1 = GetConfig("MainHeaders1", "AppSetting");
             if (s1 != "") listProcessAddHeader("TitleName", int.Parse(s1));
             else listProcessAddHeader("TitleName", 200);
@@ -6958,34 +7363,30 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                 {
                     if (headersv[i].Contains("-"))
                     {
+                        int width = 0;
                         string[] headersvx = headersv[i].Split('-');
-                        listProcessAddHeader(headersvx[0], int.Parse(headersvx[1]));
+                        if (headersv.Length >= 2)
+                        {
+                            if (!int.TryParse(headersvx[1], out width) || width < 0 || width > 512)
+                                width = listProcessTryGetHeaderDefaultWidth(headersvx[0]);
+                            listProcessAddHeader(headersvx[0], width);
+                            listProcessCheckHeaderMenu(headersvx[0], true);
+                        }
                     }
                 }
             }
             else if (headers == "")
             {
-                listProcessAddHeader("TitleStatus", 70);
-                listProcessAddHeader("TitlePID", 55);
-                listProcessAddHeader("TitleProcName", 130);
-                listProcessAddHeader("TitleCPU", 75);
-                listProcessAddHeader("TitleRam", 75);
-                listProcessAddHeader("TitleDisk", 75);
-                listProcessAddHeader("TitleNet", 75);
+                listProcessAddHeader("TitleStatus", listProcessTryGetHeaderDefaultWidth("TitleStatus"));
+                listProcessAddHeader("TitlePID", listProcessTryGetHeaderDefaultWidth("TitlePID"));
+                listProcessAddHeader("TitleProcName", listProcessTryGetHeaderDefaultWidth("TitleProcName"));
+                listProcessAddHeader("TitleCPU", listProcessTryGetHeaderDefaultWidth("TitleCPU"));
+                listProcessAddHeader("TitleRam", listProcessTryGetHeaderDefaultWidth("TitleRam"));
+                listProcessAddHeader("TitleDisk", listProcessTryGetHeaderDefaultWidth("TitleDisk"));
+                listProcessAddHeader("TitleNet", listProcessTryGetHeaderDefaultWidth("TitleNet"));
             }
 
-            nameindex = listProcessGetListIndex("TitleProcName");
-            companyindex = listProcessGetListIndex("TitlePublisher");
-            stateindex = listProcessGetListIndex("TitleStatus");
-            pidindex = listProcessGetListIndex("TitlePID");
-            cpuindex = listProcessGetListIndex("TitleCPU");
-            ramindex = listProcessGetListIndex("TitleRam");
-            diskindex = listProcessGetListIndex("TitleDisk");
-            netindex = listProcessGetListIndex("TitleNet");
-            pathindex = listProcessGetListIndex("TitleProcPath");
-            cmdindex = listProcessGetListIndex("TitleCmdLine");
-            eprocessindex = listProcessGetListIndex("TitleEProcess");
-            typeindex = listProcessGetListIndex("TitleType");
+            listProcessGetAllHeaderIndexs();
 
             if (pidindex != -1) listProcess.Header.Items[pidindex].Alignment = StringAlignment.Far;
             if (cpuindex != -1)
@@ -7023,6 +7424,24 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
             MAppWorkCall3(206, IntPtr.Zero, new IntPtr(GetConfig("TerProcFun", "Configure", "PspTerProc") == "ApcPspTerProc" ? 1 : 0));
             highlight_nosystem = GetConfigBool("HighLightNoSystetm", "Configure", false);
             mergeApps = GetConfigBool("MergeApps", "Configure", true);
+
+            int iSplitterDistanceperf = 0;
+            if (int.TryParse(GetConfig("SplitterDistancePerf", "AppSetting", "0"), out iSplitterDistanceperf) && iSplitterDistanceperf > 0)
+                splitContainerPerfCtls.SplitterDistance = iSplitterDistanceperf;
+
+            isRamPercentage = GetConfigBool("RamPercentage", "Configure", false);
+            isDiskPercentage = GetConfigBool("DiskPercentage", "Configure", false);
+            isNetPercentage = GetConfigBool("NetPercentage", "Configure", false);
+
+            if (isRamPercentage) 百分比ToolStripMenuItemRam.Checked = true;
+            else 值ToolStripMenuItemRam.Checked = true;
+
+            if (isDiskPercentage) 百分比ToolStripMenuItemDisk.Checked = true;
+            else 值ToolStripMenuItemDisk.Checked = true;
+
+            if (isNetPercentage) 百分比ToolStripMenuItemNet.Checked = true;
+            else 值ToolStripMenuItemNet.Checked = true;
+
             MAppWorkCall3(194, IntPtr.Zero, GetConfigBool("TopMost", "AppSetting", false) ? new IntPtr(1) : IntPtr.Zero);
             MAppWorkCall3(195, IntPtr.Zero, GetConfigBool("CloseHideToNotfication", "AppSetting", false) ? new IntPtr(1) : IntPtr.Zero);
             MAppWorkCall3(196, IntPtr.Zero, GetConfigBool("MinHide", "AppSetting", false) ? new IntPtr(1) : IntPtr.Zero);
@@ -7321,12 +7740,12 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
             switch (id)
             {
                 //def in resource.h
-                case 40005:
+                case 40005://Settings
                     {
                         new FormSettings(this).ShowDialog();
                         break;
                     }
-                case 40034:
+                case 40034://Choose column
                     {
                         if (tabControlMain.SelectedTab == tabPageProcCtl)
                         {
@@ -7340,9 +7759,8 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                         }
                         break;
                     }
-                case 40017:
+                case 40017: //Sleep system
                     {
-                        //Sleep system
                         Application.SetSuspendState(PowerState.Suspend, true, true);
                         break;
                     }
@@ -7353,7 +7771,7 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                         break;
                     }
                 case 41130:
-                case 41012:
+                case 41012://Refesh
                     {
                         if (tabControlMain.SelectedTab == tabPageProcCtl)
                             ProcessListRefesh();
@@ -7375,44 +7793,44 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                             UsersListLoad();
                         break;
                     }
-                case 40019:
+                case 40019://Reboot
                     {
                         TaskDialog t = new TaskDialog(LanuageMgr.GetStr("TitleReboot"), str_AppTitle, LanuageMgr.GetStr("TitleContinue"), TaskDialogButton.Yes | TaskDialogButton.No, TaskDialogIcon.Warning);
                         if (t.Show(this).CommonButton == Result.Yes)
                             MAppWorkCall3(185, IntPtr.Zero, IntPtr.Zero);
                         break;
                     }
-                case 41020:
+                case 41020://Logoff
                     {
                         TaskDialog t = new TaskDialog(LanuageMgr.GetStr("TitleLogoOff"), str_AppTitle, LanuageMgr.GetStr("TitleContinue"), TaskDialogButton.Yes | TaskDialogButton.No, TaskDialogIcon.Warning);
                         if (t.Show(this).CommonButton == Result.Yes)
                             MAppWorkCall3(186, IntPtr.Zero, IntPtr.Zero);
                         break;
                     }
-                case 40018:
+                case 40018://Shutdown
                     {
                         TaskDialog t = new TaskDialog(LanuageMgr.GetStr("TitleShutdown"), str_AppTitle, LanuageMgr.GetStr("TitleContinue"), TaskDialogButton.Yes | TaskDialogButton.No, TaskDialogIcon.Warning);
                         if (t.Show(this).CommonButton == Result.Yes)
                             MAppWorkCall3(187, IntPtr.Zero, IntPtr.Zero);
                         break;
                     }
-                case 41151:
+                case 41151://FShutdown
                     {
                         TaskDialog t = new TaskDialog(LanuageMgr.GetStr("TitleFShutdown"), str_AppTitle, LanuageMgr.GetStr("TitleContinue"), TaskDialogButton.Yes | TaskDialogButton.No, TaskDialogIcon.Warning);
                         if (t.Show(this).CommonButton == Result.Yes)
                             MAppWorkCall3(201, IntPtr.Zero, IntPtr.Zero);
                         break;
                     }
-                case 41152:
+                case 41152://FRebbot
                     {
                         TaskDialog t = new TaskDialog(LanuageMgr.GetStr("TitleFRebbot"), str_AppTitle, LanuageMgr.GetStr("TitleContinue"), TaskDialogButton.Yes | TaskDialogButton.No, TaskDialogIcon.Warning);
                         if (t.Show(this).CommonButton == Result.Yes)
                             MAppWorkCall3(202, IntPtr.Zero, IntPtr.Zero);
                         break;
                     }
-                case 41153:
+                case 41153://Test2
                     {
-
+                        //MCller
                         break;
                     }
 
@@ -7427,6 +7845,7 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                 return;
             }
 
+            GetConfig("SplitterDistancePerf", "AppSetting", splitContainerPerfCtls.SplitterDistance.ToString());
             SetConfigBool("MainGrouping", "AppSetting", listProcess.ShowGroup);
             SetConfig("ListSortIndex", "AppSetting", sortitem.ToString());
             if (sorta) SetConfig("ListSortDk", "AppSetting", "TRUE");
@@ -7436,12 +7855,15 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
             else SetConfig("OldSize", "AppSetting", lastSize.Width.ToString() + "-" + lastSize.Height.ToString());
             SetConfig("OldPos", "AppSetting", Left.ToString() + "-" + Top.ToString());
             SetConfigBool("OldIsMax", "AppSetting", WindowState == FormWindowState.Maximized);
+            SetConfigBool("RamPercentage", "Configure", isRamPercentage);
+            SetConfigBool("DiskPercentage", "Configure", isDiskPercentage);
+            SetConfigBool("NetPercentage", "Configure", isNetPercentage);
 
             if (saveheader)
             {
                 string headers = "";
-                for (int i = 1; i < listProcess.Colunms.Count; i++)
-                    headers = headers + "#" + listProcess.Colunms[i].Identifier + "-" + listProcess.Colunms[i].Width;
+                for (int i = 1; i < listProcess.Header.SortedItems.Count; i++)
+                    headers = headers + "#" + listProcess.Header.SortedItems[i].Identifier + "-" + listProcess.Header.SortedItems[i].Width;
                 SetConfig("MainHeaders", "AppSetting", headers);
             }
             SetConfig("MainHeaders1", "AppSetting", listProcess.Colunms[0].Width.ToString());

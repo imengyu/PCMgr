@@ -274,6 +274,100 @@ BOOL MDetachFromDebuggerProcess(DWORD pid)
 	return TRUE;
 }
 
+
+DWORD WINAPI CreateMiniDumpForProcessThread(LPVOID lpParameter)
+{
+	HWND hWnd = (HWND)lpParameter;
+
+	WCHAR szFullPath[MAX_PATH];
+	WCHAR strBuffer[MAX_PATH];
+	WCHAR strDir[MAX_PATH];
+	WCHAR strFileName[MAX_PATH];
+	if (NT_SUCCESS(MGetProcessImageFileNameWin32(thisCommandhProcess, strBuffer, MAX_PATH)))
+	{
+		std::wstring *dir = Path::GetDirectoryName(strBuffer);
+		std::wstring *fname = Path::GetFileNameWithoutExtension(strBuffer);
+
+		wcscpy_s(strDir, dir->c_str());
+		wcscpy_s(strFileName, fname->c_str());
+
+		FreeStringPtr(dir);
+		FreeStringPtr(fname);
+	}
+	else
+	{
+		GetTempPath(MAX_PATH, strDir);
+		swprintf_s(strFileName, L"\\MiniDumpForProcess %d .dmp", thisCommandPid);
+	}
+
+	PathYetAnotherMakeUniqueName(szFullPath, strDir, NULL, strFileName);
+
+	HANDLE hDumpFile = CreateFile(szFullPath, GENERIC_READ | GENERIC_WRITE,
+		FILE_SHARE_WRITE | FILE_SHARE_READ, 0, CREATE_ALWAYS, 0, 0);
+
+	if (INVALID_HANDLE_VALUE != hDumpFile)
+	{
+		if (!MiniDumpWriteDump(thisCommandhProcess, thisCommandPid, hDumpFile, MiniDumpNormal, NULL, NULL, NULL))
+			MShowErrorMessageWithLastErr(str_item_CreateDumpFailed, DEFDIALOGGTITLE, MB_ICONERROR, 0);
+		else {
+			SetDlgItemText(hWnd, IDC_EDIT, szFullPath);
+			SetDlgItemText(hWnd, IDC_STATUS, str_item_CreateDumpSuccess);
+			ShowWindow(GetDlgItem(hWnd, IDCANCEL), SW_HIDE);
+			ShowWindow(GetDlgItem(hWnd, IDOK), SW_SHOW);
+		}
+
+		return MCloseHandle(hDumpFile);
+	}
+	else {
+		SendMessage(hWnd, WM_SYSCOMMAND, SC_CLOSE, NULL);
+		MShowErrorMessageWithLastErr(str_item_OpenFileError, str_item_CreateDumpFailed, MB_ICONERROR, 0);
+	}
+
+	return 0;
+}
+INT_PTR CALLBACK CreateMiniDumpForProcessDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch (msg)
+	{
+	case WM_INITDIALOG: {
+
+		break;
+	}
+	case WM_SHOWWINDOW: {
+		if (wParam) 
+			CreateThread(NULL, 0, CreateMiniDumpForProcessThread, hDlg, 0, NULL);
+		break;
+	}
+	case WM_SYSCOMMAND: {
+		if (wParam == SC_CLOSE) 
+			EndDialog(hDlg, IDOK);
+		return 0;
+	}
+	case WM_COMMAND: {
+		switch (wParam)
+		{
+		case IDOK: SendMessage(hDlg, WM_SYSCOMMAND, SC_CLOSE, NULL); break;
+		case IDCANCEL: {
+
+
+
+			SendMessage(hDlg, WM_SYSCOMMAND, SC_CLOSE, NULL);
+			break;
+		}
+		}
+		break;
+	}
+	}
+	return (INT_PTR)FALSE;
+}
+
+BOOL MCreateMiniDumpForProcess(DWORD pid)
+{
+	if (thisCommandhProcess)
+		return DialogBoxW(hInstRs, MAKEINTRESOURCE(IDD_CREATEDUMP), hWndMain, CreateMiniDumpForProcessDlgProc) == 0;
+	return FALSE;
+}
+
 void MProcessHANDLEStorageDestroyItem(DWORD pid) {
 	PPROCHANDLE_STORAGE target = NULL;
 	for (auto it = processHandleStorage.begin(); it != processHandleStorage.end(); it++)
@@ -675,8 +769,7 @@ M_API HICON MGetExeIcon(LPWSTR pszFullPath)
 		}
 		//ExtractIconEx(pszFullPath, 0, NULL, &hIcon, 1);
 	}
-	if (hIcon == NULL)
-		hIcon = HIconDef;
+	if (hIcon == NULL) hIcon = HIconDef;
 	return hIcon;
 }
 //PE Signature Verify
@@ -1181,18 +1274,6 @@ M_API BOOL MGetProcessFullPathEx(DWORD dwPID, LPWSTR outNter, PHANDLE phandle, L
 	if (dwPID == 0) {
 		wcscpy_s(outNter, 260, str_item_systemidleproc);
 		MOpenProcessNt(dwPID, phandle);
-		return 1;
-	}
-	else if (dwPID == 4) {
-		wcscpy_s(outNter, 260, L"C:\\Windows\\System32\\ntoskrnl.exe"); 
-		return 1;
-	}
-	else if (dwPID == 88 && StrEqual(pszExeName, L"Registry")) {
-		wcscpy_s(outNter, 260, L"C:\\Windows\\System32\\ntoskrnl.exe");
-		return 1;
-	}
-	else if (StrEqual(pszExeName, L"Memory Compression")) {
-		wcscpy_s(outNter, 260, L"C:\\Windows\\System32\\ntoskrnl.exe");
 		return 1;
 	}
 
@@ -1838,9 +1919,7 @@ M_API BOOL MRunUWPApp(LPWSTR packageName, LPWSTR name)
 	std::wstring cmdline = FormatString(L"shell:AppsFolder\\%s!%s", packageName, name);
 	return ShellExecute(hWndMain, L"open", L"explorer.exe", (LPWSTR)cmdline.c_str(), NULL, 5) > (HINSTANCE)32;
 }
-M_API NTSTATUS MCreateProcess() {
-	return 0;
-}
+
 //Process Privileges
 M_CAPI(BOOL) MEnumProcessPrivileges(DWORD dwId, EnumPrivilegesCallBack callBack)
 {
@@ -1993,7 +2072,6 @@ int MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWORD pid, H
 			EnableMenuItem(hpop, IDM_RESPROC, MF_DISABLED);
 			EnableMenuItem(hpop, IDM_KILLKERNEL, MF_DISABLED);
 			EnableMenuItem(hpop, IDM_KILLPROCTREE, MF_DISABLED);
-			EnableMenuItem(hpop, IDM_OPENPATH, MF_DISABLED);
 			EnableMenuItem(hpop, IDM_VTHREAD, MF_DISABLED);
 			EnableMenuItem(hpop, IDM_VHANDLES, MF_DISABLED);
 			EnableMenuItem(hpop, IDM_VMODULS, MF_DISABLED);
@@ -2009,12 +2087,16 @@ int MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWORD pid, H
 			EnableMenuItem(hpop, 10 + addMenu, MF_BYPOSITION | MF_DISABLED);
 			EnableMenuItem(hpop, 11 + addMenu, MF_BYPOSITION | MF_DISABLED);
 		}
-		if (StrEqual(strFilePath, L"") || StrEqual(strFilePath, L"-")) {
+		if (!strFilePath || StrEqual(strFilePath, L"")) {
 			EnableMenuItem(hpop, IDM_OPENPATH, MF_DISABLED);
 			EnableMenuItem(hpop, IDM_FILEPROP, MF_DISABLED);
 		}
-		else if (wcslen(strFilePath) < 260)
+		else if (wcslen(strFilePath) < 260) 
+		{
 			wcscpy_s(thisCommandPath, 260, strFilePath);
+			EnableMenuItem(hpop, IDM_OPENPATH, MF_ENABLED);
+			EnableMenuItem(hpop, IDM_FILEPROP, MF_ENABLED);
+		}
 		if (wcslen(strFileName) < 260)
 			wcscpy_s(thisCommandName, 260, strFileName);
 
@@ -2153,14 +2235,6 @@ int MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWORD pid, H
 		EnableMenuItem(hpop, 10, MF_BYPOSITION | MF_DISABLED);
 		EnableMenuItem(hpop, 12, MF_BYPOSITION | MF_DISABLED);
 
-		if (StrEqual(strFilePath, L"") || StrEqual(strFilePath, L"-")) {
-			EnableMenuItem(hpop, IDM_OPENPATH, MF_DISABLED);
-			EnableMenuItem(hpop, IDM_FILEPROP, MF_DISABLED);
-		}
-
-		if (wcslen(strFilePath) < 260)
-			wcscpy_s(thisCommandPath, 260, strFilePath);
-
 		TrackPopupMenu(hpop,
 			TPM_LEFTALIGN | TPM_TOPALIGN | TPM_RIGHTBUTTON,
 			pt.x,
@@ -2189,6 +2263,12 @@ HINSTANCE hComBase;
 HINSTANCE hClr;
 HINSTANCE hGdiPlus;
 HINSTANCE hWinsta;
+
+NTSTATUS MReadVirtualMemory(_In_ HANDLE ProcessHandle, _In_opt_ PVOID BaseAddress, _Out_writes_bytes_(BufferSize) PVOID Buffer, _In_ SIZE_T BufferSize, _Out_opt_ PSIZE_T NumberOfBytesRead)
+{
+	return NtReadVirtualMemory(ProcessHandle, BaseAddress, Buffer, BufferSize, NumberOfBytesRead);
+}
+
 
 //¶¯Ì¬¼ÓÔØapi
 BOOL LoadDll()

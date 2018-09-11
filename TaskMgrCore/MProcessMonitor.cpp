@@ -8,6 +8,7 @@ using namespace std;
 #define LPVOID_PID(ptr) ((DWORD)(ULONG_PTR)ptr)
 #define PSYP_PID(ptr) ((DWORD)(ULONG_PTR)ptr->ProcessId)
 
+extern PSYSTEM_PROCESSES current_system_process;
 
 extern NtQuerySystemInformationFun NtQuerySystemInformation;
 extern RtlNtStatusToDosErrorFun RtlNtStatusToDosError;
@@ -61,17 +62,23 @@ MProcessMonitorCore::MProcessMonitorCore(ProcessMonitorRemoveItemCallBack remove
 
 	memset(&InterruptsProcessInformation, 0, sizeof(InterruptsProcessInformation));
 	InterruptsProcessInformation.ProcessId = (LPVOID)(ULONG_PTR)2UL;
+
+	InitializeCriticalSection(&cs);
 }
 MProcessMonitorCore::~MProcessMonitorCore()
 {
 	FreeAllProcessItems();
 	FreeProcessBuffer();
 	ClearVaildPids();
+
+	DeleteCriticalSection(&cs);
 }
 
 //Global Enum and Refesh
 bool MProcessMonitorCore::EnumAllProcess()
 {
+	EnterCriticalSection(&cs);
+
 	if (RefreshProcessBuffer())
 	{
 		FreeAllProcessItems();
@@ -82,12 +89,20 @@ bool MProcessMonitorCore::EnumAllProcess()
 
 		RefreshVaildPids();
 		RefreshAllProcessItem();
+
+		LeaveCriticalSection(&cs);
+
 		return true;
 	}
+
+	LeaveCriticalSection(&cs);
+
 	return false;
 }
 bool MProcessMonitorCore::RefeshAllProcess()
 {
+	EnterCriticalSection(&cs);
+
 	if (RefreshProcessBuffer()) 
 	{
 		ClearVaildPids();
@@ -98,12 +113,18 @@ bool MProcessMonitorCore::RefeshAllProcess()
 		//刷新进程关系
 		RefreshVaildPids();
 		RefreshAllProcessItem();
+
+		LeaveCriticalSection(&cs);
 		return true;
 	}
+
+	LeaveCriticalSection(&cs);
 	return false;
 }
 bool MProcessMonitorCore::RefeshAllProcessNotInclude()
 {
+	EnterCriticalSection(&cs);
+
 	if (UpdateNotIncludeItemCallBack)
 	{
 		if (allProcessItems.Next)//此循环用来刷新项目以及cpu信息
@@ -129,7 +150,10 @@ bool MProcessMonitorCore::RefeshAllProcessNotInclude()
 
 			} while (pn);
 		}
+		LeaveCriticalSection(&cs);
+		return true;
 	}
+	LeaveCriticalSection(&cs);
 	return false;
 }
 
@@ -157,6 +181,7 @@ void MProcessMonitorCore::FreeProcessBuffer()
 	{
 		free(currentProcessBuffer);
 		currentProcessBuffer = nullptr;
+		current_system_process = nullptr;
 	}
  	if (processesStorage)
 	{
@@ -273,7 +298,10 @@ bool MProcessMonitorCore::RefreshProcessBuffer()
 		status = NtQuerySystemInformation(SystemProcessInformation, currentProcessBuffer, dwSize, 0);
 		if (!NT_SUCCESS(status))
 			SetLastError(RtlNtStatusToDosError(status));
-		else return true;
+		else {
+			current_system_process = currentProcessBuffer;
+			return true;
+		}
 	}
 	return false;
 }
@@ -335,7 +363,7 @@ void MProcessMonitorCore::RefreshAllProcessItem()
 			{
 				if (RemoveItemCallBack) RemoveItemCallBack(item->ProcessId);
 
-				Log(L"RemoveItem : %d", item->ProcessId);
+				//Log(L"RemoveItem : %d", item->ProcessId);
 
 				MProcessHANDLEStorageDestroyItem(item->ProcessId);
 
@@ -411,6 +439,8 @@ void MProcessMonitorCore::RefreshAllProcessItem()
 				MUpdateDelta(&perfdata->IoReadCountDelta, psp->IoCounters.ReadOperationCount);
 				MUpdateDelta(&perfdata->IoWriteCountDelta, psp->IoCounters.WriteOperationCount);
 				MUpdateDelta(&perfdata->IoOtherCountDelta, psp->IoCounters.OtherOperationCount);
+				MUpdateDelta(&perfdata->PrivateWorkingSetDelta, psp->WorkingSetPrivateSize.QuadPart);
+			
 			}
 			else 
 			{

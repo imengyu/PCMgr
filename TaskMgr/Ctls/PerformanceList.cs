@@ -28,6 +28,7 @@ namespace PCMgr.Ctls
             scrol.ValueChanged += Scrol_ValueChanged; ;
             scrol.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             Controls.Add(scrol);
+            LoadAllFonts();
 
             t = new Timer();
             t.Tick += T_Tick;
@@ -49,14 +50,20 @@ namespace PCMgr.Ctls
         {
         }
         private void Items_ItemAdd(PerformanceListItem obj)
-        { 
+        {
+        }
+
+        private void LoadAllFonts()
+        {
+            hugeTextFont = new Font(Font.FontFamily, 10.5f);
+            smallTextFont = new Font(Font.FontFamily, 9f);
         }
 
         private IntPtr hThemeListView = IntPtr.Zero;
         private bool m = false;
         private Timer t;
-        private Font hugeTextFont = new Font("Microsoft YaHei UI", 10.5f);
-        private Font smallTextFont = new Font("Microsoft YaHei UI", 9f);
+        private Font hugeTextFont = null;
+        private Font smallTextFont = null;
         private PerformanceListItemCollection items = null;
         private int yOffest = 0;
         private int allItemHeight = 0;
@@ -241,6 +248,11 @@ namespace PCMgr.Ctls
             return base.ProcessDialogKey(keyData);
         }
 
+        protected override void OnFontChanged(EventArgs e)
+        {
+            base.OnFontChanged(e);
+            LoadAllFonts();
+        }
         protected override void CreateHandle()
         {
             base.CreateHandle();

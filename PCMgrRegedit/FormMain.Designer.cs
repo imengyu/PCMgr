@@ -35,6 +35,7 @@
             this.contextMenuStripTree = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.新建ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.项ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.二进制值ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.字符串值ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dWORD32位值ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.qWORD64位值ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -51,6 +52,20 @@
             this.columnHeaderName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeaderType = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeaderData = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.contextMenuStripView = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.修改ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.修改二进制数据ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.新建ToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem6 = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem7 = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem5 = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem4 = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
+            this.删除ToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.重命名ToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.textBoxAddress = new System.Windows.Forms.TextBox();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.文件ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -64,29 +79,14 @@
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.statusProgressBar = new System.Windows.Forms.ToolStripProgressBar();
-            this.二进制值ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.contextMenuStripView = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.修改ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.修改二进制数据ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.删除ToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.重命名ToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
-            this.新建ToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem4 = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem5 = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem6 = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem7 = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).BeginInit();
             this.splitContainer.Panel1.SuspendLayout();
             this.splitContainer.Panel2.SuspendLayout();
             this.splitContainer.SuspendLayout();
             this.contextMenuStripTree.SuspendLayout();
+            this.contextMenuStripView.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
-            this.contextMenuStripView.SuspendLayout();
             this.SuspendLayout();
             // 
             // splitContainer
@@ -159,6 +159,13 @@
             this.项ToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
             this.项ToolStripMenuItem.Text = "项(&K)";
             this.项ToolStripMenuItem.Click += new System.EventHandler(this.项ToolStripMenuItem_Click);
+            // 
+            // 二进制值ToolStripMenuItem
+            // 
+            this.二进制值ToolStripMenuItem.Name = "二进制值ToolStripMenuItem";
+            this.二进制值ToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
+            this.二进制值ToolStripMenuItem.Text = "二进制值(&B)";
+            this.二进制值ToolStripMenuItem.Click += new System.EventHandler(this.二进制值ToolStripMenuItem_Click);
             // 
             // 字符串值ToolStripMenuItem
             // 
@@ -278,6 +285,112 @@
             this.columnHeaderData.Text = "数据";
             this.columnHeaderData.Width = 330;
             // 
+            // contextMenuStripView
+            // 
+            this.contextMenuStripView.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.修改ToolStripMenuItem,
+            this.修改二进制数据ToolStripMenuItem,
+            this.toolStripSeparator3,
+            this.新建ToolStripMenuItem1,
+            this.toolStripSeparator4,
+            this.删除ToolStripMenuItem1,
+            this.重命名ToolStripMenuItem1});
+            this.contextMenuStripView.Name = "contextMenuStripView";
+            this.contextMenuStripView.Size = new System.Drawing.Size(177, 126);
+            // 
+            // 修改ToolStripMenuItem
+            // 
+            this.修改ToolStripMenuItem.Name = "修改ToolStripMenuItem";
+            this.修改ToolStripMenuItem.Size = new System.Drawing.Size(176, 22);
+            this.修改ToolStripMenuItem.Text = "修改(&M)";
+            this.修改ToolStripMenuItem.Click += new System.EventHandler(this.修改ToolStripMenuItem_Click);
+            // 
+            // 修改二进制数据ToolStripMenuItem
+            // 
+            this.修改二进制数据ToolStripMenuItem.Name = "修改二进制数据ToolStripMenuItem";
+            this.修改二进制数据ToolStripMenuItem.Size = new System.Drawing.Size(176, 22);
+            this.修改二进制数据ToolStripMenuItem.Text = "修改二进制数据(&B)";
+            this.修改二进制数据ToolStripMenuItem.Click += new System.EventHandler(this.修改二进制数据ToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(173, 6);
+            // 
+            // 新建ToolStripMenuItem1
+            // 
+            this.新建ToolStripMenuItem1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripMenuItem6,
+            this.toolStripMenuItem7,
+            this.toolStripMenuItem5,
+            this.toolStripMenuItem4,
+            this.toolStripMenuItem3,
+            this.toolStripMenuItem1});
+            this.新建ToolStripMenuItem1.Name = "新建ToolStripMenuItem1";
+            this.新建ToolStripMenuItem1.Size = new System.Drawing.Size(176, 22);
+            this.新建ToolStripMenuItem1.Text = "新建(&N)";
+            // 
+            // toolStripMenuItem6
+            // 
+            this.toolStripMenuItem6.Name = "toolStripMenuItem6";
+            this.toolStripMenuItem6.Size = new System.Drawing.Size(193, 22);
+            this.toolStripMenuItem6.Text = "字符串值(&S)";
+            this.toolStripMenuItem6.Click += new System.EventHandler(this.字符串值ToolStripMenuItem_Click);
+            // 
+            // toolStripMenuItem7
+            // 
+            this.toolStripMenuItem7.Name = "toolStripMenuItem7";
+            this.toolStripMenuItem7.Size = new System.Drawing.Size(193, 22);
+            this.toolStripMenuItem7.Text = "二进制值(&B)";
+            this.toolStripMenuItem7.Click += new System.EventHandler(this.二进制值ToolStripMenuItem_Click);
+            // 
+            // toolStripMenuItem5
+            // 
+            this.toolStripMenuItem5.Name = "toolStripMenuItem5";
+            this.toolStripMenuItem5.Size = new System.Drawing.Size(193, 22);
+            this.toolStripMenuItem5.Text = "DWORD (32位)值(&D)";
+            this.toolStripMenuItem5.Click += new System.EventHandler(this.dWORD32位值ToolStripMenuItem_Click);
+            // 
+            // toolStripMenuItem4
+            // 
+            this.toolStripMenuItem4.Name = "toolStripMenuItem4";
+            this.toolStripMenuItem4.Size = new System.Drawing.Size(193, 22);
+            this.toolStripMenuItem4.Text = "QWORD (64位)值(&Q)";
+            this.toolStripMenuItem4.Click += new System.EventHandler(this.qWORD64位值ToolStripMenuItem_Click);
+            // 
+            // toolStripMenuItem3
+            // 
+            this.toolStripMenuItem3.Name = "toolStripMenuItem3";
+            this.toolStripMenuItem3.Size = new System.Drawing.Size(193, 22);
+            this.toolStripMenuItem3.Text = "多字符串值(&M)";
+            this.toolStripMenuItem3.Click += new System.EventHandler(this.多字符串值ToolStripMenuItem_Click);
+            // 
+            // toolStripMenuItem1
+            // 
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(193, 22);
+            this.toolStripMenuItem1.Text = "可扩充字符串值(&E)";
+            this.toolStripMenuItem1.Click += new System.EventHandler(this.可扩充字符串值ToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator4
+            // 
+            this.toolStripSeparator4.Name = "toolStripSeparator4";
+            this.toolStripSeparator4.Size = new System.Drawing.Size(173, 6);
+            // 
+            // 删除ToolStripMenuItem1
+            // 
+            this.删除ToolStripMenuItem1.Name = "删除ToolStripMenuItem1";
+            this.删除ToolStripMenuItem1.Size = new System.Drawing.Size(176, 22);
+            this.删除ToolStripMenuItem1.Text = "删除(&D)";
+            this.删除ToolStripMenuItem1.Click += new System.EventHandler(this.删除ToolStripMenuItem1_Click);
+            // 
+            // 重命名ToolStripMenuItem1
+            // 
+            this.重命名ToolStripMenuItem1.Name = "重命名ToolStripMenuItem1";
+            this.重命名ToolStripMenuItem1.Size = new System.Drawing.Size(176, 22);
+            this.重命名ToolStripMenuItem1.Text = "重命名(&R)";
+            this.重命名ToolStripMenuItem1.Click += new System.EventHandler(this.重命名ToolStripMenuItem1_Click);
+            // 
             // textBoxAddress
             // 
             this.textBoxAddress.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
@@ -358,6 +471,7 @@
             this.关于ToolStripMenuItem.Name = "关于ToolStripMenuItem";
             this.关于ToolStripMenuItem.Size = new System.Drawing.Size(60, 21);
             this.关于ToolStripMenuItem.Text = "关于(&A)";
+            this.关于ToolStripMenuItem.Click += new System.EventHandler(this.关于ToolStripMenuItem_Click);
             // 
             // statusStrip1
             // 
@@ -382,119 +496,6 @@
             this.statusProgressBar.Size = new System.Drawing.Size(100, 16);
             this.statusProgressBar.Visible = false;
             // 
-            // 二进制值ToolStripMenuItem
-            // 
-            this.二进制值ToolStripMenuItem.Name = "二进制值ToolStripMenuItem";
-            this.二进制值ToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
-            this.二进制值ToolStripMenuItem.Text = "二进制值(&B)";
-            this.二进制值ToolStripMenuItem.Click += new System.EventHandler(this.二进制值ToolStripMenuItem_Click);
-            // 
-            // contextMenuStripView
-            // 
-            this.contextMenuStripView.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.修改ToolStripMenuItem,
-            this.修改二进制数据ToolStripMenuItem,
-            this.toolStripSeparator3,
-            this.新建ToolStripMenuItem1,
-            this.toolStripSeparator4,
-            this.删除ToolStripMenuItem1,
-            this.重命名ToolStripMenuItem1});
-            this.contextMenuStripView.Name = "contextMenuStripView";
-            this.contextMenuStripView.Size = new System.Drawing.Size(177, 126);
-            // 
-            // 修改ToolStripMenuItem
-            // 
-            this.修改ToolStripMenuItem.Name = "修改ToolStripMenuItem";
-            this.修改ToolStripMenuItem.Size = new System.Drawing.Size(176, 22);
-            this.修改ToolStripMenuItem.Text = "修改(&M)";
-            this.修改ToolStripMenuItem.Click += new System.EventHandler(this.修改ToolStripMenuItem_Click);
-            // 
-            // 修改二进制数据ToolStripMenuItem
-            // 
-            this.修改二进制数据ToolStripMenuItem.Name = "修改二进制数据ToolStripMenuItem";
-            this.修改二进制数据ToolStripMenuItem.Size = new System.Drawing.Size(176, 22);
-            this.修改二进制数据ToolStripMenuItem.Text = "修改二进制数据(&B)";
-            this.修改二进制数据ToolStripMenuItem.Click += new System.EventHandler(this.修改二进制数据ToolStripMenuItem_Click);
-            // 
-            // 删除ToolStripMenuItem1
-            // 
-            this.删除ToolStripMenuItem1.Name = "删除ToolStripMenuItem1";
-            this.删除ToolStripMenuItem1.Size = new System.Drawing.Size(176, 22);
-            this.删除ToolStripMenuItem1.Text = "删除(&D)";
-            this.删除ToolStripMenuItem1.Click += new System.EventHandler(this.删除ToolStripMenuItem1_Click);
-            // 
-            // 重命名ToolStripMenuItem1
-            // 
-            this.重命名ToolStripMenuItem1.Name = "重命名ToolStripMenuItem1";
-            this.重命名ToolStripMenuItem1.Size = new System.Drawing.Size(176, 22);
-            this.重命名ToolStripMenuItem1.Text = "重命名(&R)";
-            this.重命名ToolStripMenuItem1.Click += new System.EventHandler(this.重命名ToolStripMenuItem1_Click);
-            // 
-            // toolStripSeparator3
-            // 
-            this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(173, 6);
-            // 
-            // 新建ToolStripMenuItem1
-            // 
-            this.新建ToolStripMenuItem1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripMenuItem6,
-            this.toolStripMenuItem7,
-            this.toolStripMenuItem5,
-            this.toolStripMenuItem4,
-            this.toolStripMenuItem3,
-            this.toolStripMenuItem1});
-            this.新建ToolStripMenuItem1.Name = "新建ToolStripMenuItem1";
-            this.新建ToolStripMenuItem1.Size = new System.Drawing.Size(176, 22);
-            this.新建ToolStripMenuItem1.Text = "新建(&N)";
-            // 
-            // toolStripSeparator4
-            // 
-            this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(173, 6);
-            // 
-            // toolStripMenuItem1
-            // 
-            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(193, 22);
-            this.toolStripMenuItem1.Text = "可扩充字符串值(&E)";
-            this.toolStripMenuItem1.Click += new System.EventHandler(this.可扩充字符串值ToolStripMenuItem_Click);
-            // 
-            // toolStripMenuItem3
-            // 
-            this.toolStripMenuItem3.Name = "toolStripMenuItem3";
-            this.toolStripMenuItem3.Size = new System.Drawing.Size(193, 22);
-            this.toolStripMenuItem3.Text = "多字符串值(&M)";
-            this.toolStripMenuItem3.Click += new System.EventHandler(this.多字符串值ToolStripMenuItem_Click);
-            // 
-            // toolStripMenuItem4
-            // 
-            this.toolStripMenuItem4.Name = "toolStripMenuItem4";
-            this.toolStripMenuItem4.Size = new System.Drawing.Size(193, 22);
-            this.toolStripMenuItem4.Text = "QWORD (64位)值(&Q)";
-            this.toolStripMenuItem4.Click += new System.EventHandler(this.qWORD64位值ToolStripMenuItem_Click);
-            // 
-            // toolStripMenuItem5
-            // 
-            this.toolStripMenuItem5.Name = "toolStripMenuItem5";
-            this.toolStripMenuItem5.Size = new System.Drawing.Size(193, 22);
-            this.toolStripMenuItem5.Text = "DWORD (32位)值(&D)";
-            this.toolStripMenuItem5.Click += new System.EventHandler(this.dWORD32位值ToolStripMenuItem_Click);
-            // 
-            // toolStripMenuItem6
-            // 
-            this.toolStripMenuItem6.Name = "toolStripMenuItem6";
-            this.toolStripMenuItem6.Size = new System.Drawing.Size(193, 22);
-            this.toolStripMenuItem6.Text = "字符串值(&S)";
-            this.toolStripMenuItem6.Click += new System.EventHandler(this.字符串值ToolStripMenuItem_Click);
-            // 
-            // toolStripMenuItem7
-            // 
-            this.toolStripMenuItem7.Name = "toolStripMenuItem7";
-            this.toolStripMenuItem7.Size = new System.Drawing.Size(193, 22);
-            this.toolStripMenuItem7.Text = "二进制值(&B)";
-            this.toolStripMenuItem7.Click += new System.EventHandler(this.二进制值ToolStripMenuItem_Click);
-            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -517,11 +518,11 @@
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).EndInit();
             this.splitContainer.ResumeLayout(false);
             this.contextMenuStripTree.ResumeLayout(false);
+            this.contextMenuStripView.ResumeLayout(false);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
-            this.contextMenuStripView.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 

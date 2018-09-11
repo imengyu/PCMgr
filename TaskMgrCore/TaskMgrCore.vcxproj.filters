@@ -315,5 +315,23 @@
     <Image Include="..\TaskMgr\icoPcmgr.ico">
       <Filter>资源文件</Filter>
     </Image>
+    <Image Include="ico\icoDefApp.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="ico\icoActiveWin.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="ico\icoHiddenWin.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="ico\icoOpen.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="ico\icoShutdown.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="ico\icoLogin.ico">
+      <Filter>资源文件</Filter>
+    </Image>
   </ItemGroup>
 </Project>

@@ -30,6 +30,11 @@ public:
 	static std::wstring * FormatStringPtrW(const wchar_t *format, ...);
 	static std::string *FormatStringPtrA(const char *format, ...);
 
+	//字符串是否是空的
+	static BOOLEAN StrEmeptyW(LPCWSTR str);
+	//字符串是否是空的
+	static BOOLEAN StrEmeptyA(LPCSTR str);
+
 	static LPCWSTR StrUpW(LPCWSTR str);
 	static LPCSTR StrUpA(LPCSTR str);
 	static LPCWSTR StrLoW(LPCWSTR str);
@@ -59,10 +64,14 @@ private:
 
 };
 
-//格式化字符串（仅在当前模块或/MD运行库编译时使用），其他模块请使用 FreeStringPtr
+//格式化字符串（仅在当前模块或/MD运行库编译时使用），其他模块请使用 FormatStringPtr
 #define FormatString StringHlp::FormatString
 //字符串是否含有某个字符
 #define StrContainsChar StringHlp::StrContainsCharW
+//检测字符串是否是空的
+#define StrEmepty StringHlp::StrEmeptyW
+//检测字符串是否是空的
+#define StrEmeptyAnsi StringHlp::StrEmeptyA
 //字符串是否相等
 #define StrEqual StringHlp::StrEqualW
 //字符串是否相等A

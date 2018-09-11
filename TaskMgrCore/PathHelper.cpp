@@ -13,6 +13,23 @@ Path::~Path()
 {
 }
 
+bool Path::RemoveQuotes(LPWSTR pathBuffer, size_t bufferSize)
+{
+	if (pathBuffer[0] == L'\"')
+	{
+		size_t size = wcslen(pathBuffer);
+		if (pathBuffer[size - 1] == L'\"')
+		{
+			for (size_t i = 1; i < size -1 && i < bufferSize; i++) {
+				pathBuffer[i - 1] = pathBuffer[i];
+			}
+			pathBuffer[size - 1] = L'\0';
+			pathBuffer[size - 2] = L'\0';
+			return true;
+		}
+	}	
+	return false;
+}
 bool Path::IsValidateFolderFileName(std::wstring * path)
 {
 	bool ret = true;

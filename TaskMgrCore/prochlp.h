@@ -108,6 +108,7 @@ void MAppProcPropertyClassHandleWmCommand(WPARAM wParam);
 int MAppWorkShowMenuProcessPrepare(LPWSTR strFilePath, LPWSTR strFileName, DWORD pid, BOOL isImporant, BOOL isVeryImporant);
 int MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWORD pid, HWND hDlg, HWND selectHWND, int data, int type, int x, int y);
 BOOL MDetachFromDebuggerProcess(DWORD pid);
+BOOL MCreateMiniDumpForProcess(DWORD pid);
 
 //刷新进程列表
 EXTERN_C M_API BOOL MUpdateProcessList();
@@ -345,6 +346,8 @@ EXTERN_C M_API PSYSTEM_PROCESSES MGetProcessInfo(DWORD pid);
 
 EXTERN_C M_API PPEB MGetCurrentPeb();
 EXTERN_C M_API PTEB MGetCurrentTeb();
+
+M_CAPI(NTSTATUS) MReadVirtualMemory(_In_ HANDLE ProcessHandle, _In_opt_ PVOID BaseAddress, _Out_writes_bytes_(BufferSize) PVOID Buffer, _In_ SIZE_T BufferSize, _Out_opt_ PSIZE_T NumberOfBytesRead);
 
 
 

@@ -89,7 +89,7 @@ namespace PCMgr.WorkWindow
 
         private void FormMainListHeaders_Load(object sender, EventArgs e)
         {
-
+            FormSettings.LoadFontSettingForUI(this);
             Add("TitleProcName", 170);
             Add("TitleType", 100);
             Add("TitlePublisher", 100);

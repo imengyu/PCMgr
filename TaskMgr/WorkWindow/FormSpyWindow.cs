@@ -78,6 +78,8 @@ namespace PCMgr.WorkWindow
 
         private void FormSpyWindow_Load(object sender, EventArgs e)
         {
+            FormSettings.LoadFontSettingForUI(this);
+
             #region Datas
             m_dic_style = new Dictionary<uint, string>();
             m_dic_style.Add(0x00000000, "WS_OVERLAPPED");

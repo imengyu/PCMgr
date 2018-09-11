@@ -57,7 +57,7 @@ namespace PCMgr.Ctls
         }
         public void PageUpdate()
         {
-            cpuUseage = (int)(MPERF_GetCpuUseAge2());
+            //cpuUseage = (int)(MPERF_GetCpuUseAge2());
 
             if (!notDrawGrid)
             {
@@ -96,7 +96,8 @@ namespace PCMgr.Ctls
         }
         public bool PageUpdateSimple(out string customString, out int outdata1, out int outdata2)
         {
-            cpuUseage = (int)(MPERF_GetCpuUseAge() );
+            cpuUseage = (int)(MPERF_GetCpuUseAge2());
+
             customString = cpuUseage.ToString() + "%  " + maxSpeed;
             outdata1 = cpuUseage;
             outdata2 = -1;

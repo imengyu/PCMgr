@@ -95,7 +95,7 @@ M_CAPI(BOOL) MPERF_Init3PerformanceCounters()
 
 			//添加性能计数器
 			PDH_STATUS status = ERROR_SUCCESS;
-			status = PdhAddCounter(hQuery, L"\\Processor Information(_Total)\\% Idle Time", 0, counter3cpu);
+			status = PdhAddCounter(hQuery, L"\\Processor Information(_Total)\\% Processor Time", 0, counter3cpu);
 			if (status != ERROR_SUCCESS) {
 				GlobalFree(counter3cpu);
 				counter3cpu = NULL;

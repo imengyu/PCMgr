@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
+using System.Drawing.Design;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
@@ -29,6 +31,7 @@ namespace PCMgr.Ctls
             Controls.Add(header);
             header.XOffestChanged += Header_XOffestChanged;
             header.CloumWidthChanged += Header_HearderWidthChanged;
+            header.CloumIndexChanged += Header_CloumIndexChanged;
             groups = new TaskMgrListGroupCollection();
             items = new TaskMgrListItemCollection();
             items.ItemAdd += Items_ItemAdd;
@@ -48,12 +51,14 @@ namespace PCMgr.Ctls
             ChildStringFormat = new StringFormat();
             ChildStringFormat.LineAlignment = StringAlignment.Center;
             ChildStringFormat.Trimming = StringTrimming.EllipsisCharacter;
+            ChildStringFormat.FormatFlags = StringFormatFlags.LineLimit;
             ChildStringFormat.Alignment = StringAlignment.Near;
+            CenterStringFormat = new StringFormat();
+            CenterStringFormat.Alignment = StringAlignment.Center;
+            CenterStringFormat.LineAlignment = StringAlignment.Near;
+            CenterStringFormat.FormatFlags = StringFormatFlags.LineLimit;
             Controls.Add(scrol);
             scrol.Hide();
-            t = new Timer();
-            t.Tick += T_Tick;
-            t.Interval = 50;
             defLineColorPen = new Pen(Color.FromArgb(234, 213, 160));
             hotLineColorPen = new Pen(Color.FromArgb(248, 106, 42));
             defBgSolidBrush = new SolidBrush(Color.FromArgb(255, 249, 228));
@@ -62,10 +67,17 @@ namespace PCMgr.Ctls
             defChildColorPen = new Pen(Color.FromArgb(0, 120, 215), 3);
             DrawIcon = true;
             PauseUwpIco = Properties.Resources.icoBackgroundUwp;
+
+            LoadAllFonts();
         }
 
+        private void Header_CloumIndexChanged(object sender, EventArgs e)
+        {
+            SyncItems(true);
+        }
         private void Header_HearderWidthChanged(object sender, EventArgs e)
         {
+            locked = false;
             Invalidate();
         }
 
@@ -81,23 +93,17 @@ namespace PCMgr.Ctls
             if (!b1)
             {
                 yOffest = ((VScrollBar)sender).Value - ((VScrollBar)sender).Minimum;
-                if (!m)
-                {
-                    m = true;
-                    t.Start();
-                    SyncItems(true);                   
-                }
+
+                if (fastOpCount > int.MaxValue) fastOpCount = 0;
+                fastOpCount++;
+                if (fastOpCount % 3 == 0)
+                    SyncItems(true);
+
             }
         }
         private void Header_XOffestChanged(object sender, EventArgs e)
         {
             XOffest = header.XOffest;
-        }
-        private void T_Tick(object sender, EventArgs e)
-        {
-            if (m)
-                m = false;
-            t.Stop();
         }
         private void Items_ItemRemoved(TaskMgrListItem obj)
         {
@@ -119,9 +125,24 @@ namespace PCMgr.Ctls
                 else SyncItems(true);
         }
 
+        protected override void OnFontChanged(EventArgs e)
+        {
+            base.OnFontChanged(e);
+
+            LoadAllFonts();
+        }
+
+        private void LoadAllFonts()
+        {
+            fnormalText = new Font(Font.FontFamily, 13f);
+            fgroupText = new Font(Font.FontFamily, 13f);
+            fnormalText2 = new Font(Font.FontFamily, 9f);
+            fsmallText2 = new Font(Font.FontFamily, 8.5f);
+        }
+
+        private int fastOpCount = 0;
         private IntPtr hThemeListView = IntPtr.Zero;
         private IntPtr hThemeTreeView = IntPtr.Zero;
-        private Timer t;
         private SolidBrush errTagSolidBrush = null;
         private SolidBrush defTagSolidBrush = null;
         private SolidBrush defBgSolidBrush = null;
@@ -133,16 +154,16 @@ namespace PCMgr.Ctls
         private TaskMgrListItemCollection items = null;
         private TaskMgrListItemCollection showedItems = null;
         private TaskMgrListHeader header;
-        private bool showGroup = false, m = false;
+        private bool showGroup = false;
         private double value = 0;
         private int xOffest = 0;
         private int yOffest = 0;
         private ImageList imageList;
         private int allItemHeight = 0;
-        private Font fnormalText = new Font("Microsoft YaHei UI", 13f);
-        private Font fgroupText = new Font("Microsoft YaHei UI", 13f);
-        private Font fnormalText2 = new Font("Microsoft YaHei UI", 9f);
-        private Font fsmallText2 = new Font("Microsoft YaHei UI", 8.5f);
+        private Font fnormalText = null;
+        private Font fgroupText = null;
+        private Font fnormalText2 = null;
+        private Font fsmallText2 = null;
         private SolidBrush bsmallText2 = new SolidBrush(Color.FromArgb(0xFF, 0x7F, 0x24));
         private TaskMgrListItem selectedItem = null;
         private TaskMgrListItem mouseenteredItem_ = null;
@@ -167,6 +188,7 @@ namespace PCMgr.Ctls
         private ListViewColumnSorter sorter = null;
         private bool sorted = false;
         private StringFormat ChildStringFormat = null;
+        private StringFormat CenterStringFormat = null;
         private Image PauseUwpIco = null;
         private bool noHeader = false;
 
@@ -198,15 +220,20 @@ namespace PCMgr.Ctls
             }
         }
 
+        [Localizable(true), Editor("System.ComponentModel.Design.MultilineStringEditor, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", typeof(UITypeEditor))]
+        [Description("当列表没有项目时显示的文字")]
+        public string NonItemText { get; set; }
         public TaskMgrListItem SelectedChildItem
         {
             get { return selectedChildItem; }
         }
+        [Browsable(false)]
         public ListViewColumnSorter ListViewItemSorter
         {
             get { return sorter; }
             set { sorter = value; }
         }
+        [Browsable(false)]
         public TaskMgrListItem SelectedItem
         {
             get
@@ -225,32 +252,39 @@ namespace PCMgr.Ctls
                     InvalidAItem(selectedItem);
             }
         }
+        [Description("列表的表头")]
         public TaskMgrListHeader Header
         {
             get { return header; }
         }
+        [Browsable(false)]
         public bool FocusedType
         {
             get { return focused; }
             set { focused = value; if(Visible) Invalidate(); }
         }
+        [Browsable(false)]
         public TaskMgrListItemCollection ShowedItems
         {
             get { return showedItems; }
         }
+        [Description("列表的组项目")]
         public TaskMgrListGroupCollection Groups
         {
             get { return groups; }
         }
+        [Description("列表的项目")]
         public TaskMgrListItemCollection Items
         {
             get { return items; }
         }
+        [Description("列表是否分组显示")]
         public bool ShowGroup
         {
             get { return showGroup; }
             set { showGroup = value; }
         }
+        [Browsable(false)]
         public double Value
         {
             get { return value; }
@@ -268,24 +302,29 @@ namespace PCMgr.Ctls
             get { return imageList; }
             set { imageList = value; }
         }
+        [Description("列表的标题列")]
         public TaskMgrListHeaderItemCollection Colunms
         {
             get { return header.Items; }
         }
+        [Browsable(false)]
         public int XOffest
         {
             get { return xOffest; }
             set { xOffest = value; SyncItems(true); }
         }
+        [Browsable(false)]
         public int YOffest
         {
             get { return yOffest; }
         }
+        [Browsable(false)]
         public bool Locked
         {
             get { return locked; }
             set { locked = value; }
         }
+        [Description("列表是否有标题")]
         public bool NoHeader
         {
             get { return noHeader; }
@@ -304,6 +343,7 @@ namespace PCMgr.Ctls
                 }
             }
         }
+        [Description("列表是否有绘制图表")]
         public bool DrawIcon
         {
             get;set;
@@ -473,7 +513,7 @@ namespace PCMgr.Ctls
                 bool drawAsPausedIcon = false;
                 bool drawAsPausedGray = false;
 
-                if (item.DrawUWPPausedIconIndex != 0 && item.SubItems[item.DrawUWPPausedIconIndex].DrawUWPPausedIcon && item.SubItems[item.DrawUWPPausedIconIndex].Text == FormMain.str_status_paused)
+                if (item.DrawUWPPaused)
                 {
                     drawAsPausedIcon = true;
                     drawAsPausedGray = item.DrawUWPPausedGray;
@@ -482,31 +522,34 @@ namespace PCMgr.Ctls
                 int currItemHeight = isChildItem ? smallItemHeight : itemHeight;
                 for (int i2 = 0; i2 < item.SubItems.Count && i2 < header.SortedItems.Count; i2++)
                 {
-                    int x = header.SortedItems[i2].X - xOffest;
-                    if (x <= rect.Right && x + header.SortedItems[i2].Width > rect.Left)
+                    TaskMgrListHeaderItem headerItem = header.SortedItems[i2];
+                    int iReal = headerItem.Index;
+                    int x = headerItem.X - xOffest;
+                    if (x <= rect.Right && x + headerItem.Width > rect.Left)
                     {
-                        Color bgcolor = item.SubItems[i2].BackColor;
-                        StringFormat f = header.SortedItems[i2].AlignmentStringFormat;
+                        Color bgcolor = item.SubItems[iReal].BackColor;
+                        StringFormat f = headerItem.AlignmentStringFormat;
                         if (bgcolor.A != 0 && !(bgcolor.R == 255 && bgcolor.G == 255 && bgcolor.B == 255))
                         {
                             using (SolidBrush s = (selectedItem == item || mouseenteredItem == item) ?
                                new SolidBrush(Color.FromArgb(150, bgcolor)) : new SolidBrush(bgcolor))
-                                g.FillRectangle(s, x + 1, item.YPos - yOffest, header.Items[i2].Width - 1, currItemHeight);
+                                g.FillRectangle(s, x + 1, item.YPos - yOffest, headerItem.Width - 1, currItemHeight);
                         }
 
-                        if (i2 > 0 && item.SubItems[i2].Text != "") g.DrawString(item.SubItems[i2].Text, item.SubItems[i2].Font, drawAsPausedGray ? Brushes.Gray : item.SubItems[i2].ForeColorSolidBrush, new Rectangle(x + 6, item.YPos - yOffest, header.SortedItems[i2].Width - 10, currItemHeight), f);
-                        else if (i2 == 0)
+                        if (iReal > 0 && item.SubItems[iReal].Text != "")
+                            g.DrawString(item.SubItems[iReal].Text, item.SubItems[iReal].Font, drawAsPausedGray ? Brushes.Gray : item.SubItems[iReal].ForeColorSolidBrush, new Rectangle(x + 6, item.YPos - yOffest + 2, headerItem.Width - 10, currItemHeight - 2), f);
+                        else if (iReal == 0)
                         {
                             if (item.DisplayChildCount)
                             {
-                                if (item.DisplayChildValue == 0) g.DrawString(item.Text + " (" + item.Childs.Count + ")", fnormalText2, item.SubItems[0].ForeColorSolidBrush, new Rectangle(x + (DrawIcon ? 63 : 25) + (isChildItem ? 5 : 0), item.YPos - yOffest, header.SortedItems[0].Width - (DrawIcon ? 60 : 25) - (isChildItem ? 5 : 0), currItemHeight), f);
-                                else g.DrawString(item.Text + " (" + item.DisplayChildValue + ")", fnormalText2, item.SubItems[0].ForeColorSolidBrush, new Rectangle(x + (DrawIcon ? 63 : 25) + (isChildItem ? 5 : 0), item.YPos - yOffest, header.SortedItems[0].Width - (DrawIcon ? 60 : 25) - (isChildItem ? 5 : 0), currItemHeight), f);
+                                if (item.DisplayChildValue == 0) g.DrawString(item.Text + " (" + item.Childs.Count + ")", fnormalText2, item.SubItems[0].ForeColorSolidBrush, new Rectangle(x + (DrawIcon ? 63 : 25) + (isChildItem ? 5 : 0), item.YPos - yOffest + 2, headerItem.Width - (DrawIcon ? 60 : 25) - (isChildItem ? 5 : 0), currItemHeight - 4), ChildStringFormat);
+                                else g.DrawString(item.Text + " (" + item.DisplayChildValue + ")", fnormalText2, item.SubItems[0].ForeColorSolidBrush, new Rectangle(x + (DrawIcon ? 63 : 25) + (isChildItem ? 5 : 0), item.YPos - yOffest + 2, headerItem.Width - (DrawIcon ? 60 : 25) - (isChildItem ? 5 : 0), currItemHeight - 4), ChildStringFormat);
                             }
-                            else g.DrawString(item.Text, fnormalText2, item.SubItems[0].ForeColorSolidBrush, new Rectangle(x + (DrawIcon ? 63 : 25) + (isChildItem ? 5 : 0), item.YPos - yOffest, header.SortedItems[0].Width - (DrawIcon ? 60 : 25) - (isChildItem ? 5 : 0), currItemHeight), f);
+                            else g.DrawString(item.Text, fnormalText2, item.SubItems[0].ForeColorSolidBrush, new Rectangle(x + (DrawIcon ? 63 : 25) + (isChildItem ? 5 : 0), item.YPos - yOffest + 2, headerItem.Width - (DrawIcon ? 60 : 25) - (isChildItem ? 5 : 0), currItemHeight - 4), ChildStringFormat);
                         }
 
-                        if (drawAsPausedIcon && i2 == item.DrawUWPPausedIconIndex)
-                            g.DrawImage(PauseUwpIco, new Rectangle(x + header.SortedItems[i2].Width - PauseUwpIco.Width - 2, item.YPos - yOffest + (isChildItem ? -2 : 2), PauseUwpIco.Width, PauseUwpIco.Height));
+                        if (drawAsPausedIcon && iReal == item.DrawUWPPausedIconIndex)
+                            g.DrawImage(PauseUwpIco, new Rectangle(x + headerItem.Width - PauseUwpIco.Width - 2, item.YPos - yOffest + (isChildItem ? -2 : 2), PauseUwpIco.Width, PauseUwpIco.Height));
                     }
                     else if (x > rect.Right) break;
                 }
@@ -611,6 +654,14 @@ namespace PCMgr.Ctls
                     }
                     else if (x >= r.Right) break;
                 }
+            }
+            if (items.Count == 0)
+            {
+                if (!string.IsNullOrEmpty(NonItemText))
+                    if (noHeader) g.DrawString(NonItemText, Font, Brushes.Gray, new Rectangle(0, 10, Width, Height - 10), CenterStringFormat);
+                    else g.DrawString(NonItemText, Font, Brushes.Gray, new Rectangle(0, header.Height + 10, Width, Height - header.Height), CenterStringFormat);
+
+                return;
             }
 
             if (showGroup)
@@ -875,12 +926,8 @@ namespace PCMgr.Ctls
         protected override void OnMouseMove(MouseEventArgs e)
         {
             base.OnMouseMove(e);
-            if (!m)
-            {              
-                m = true;
-                t.Start();
-                TestEnteredItem(e.Location);
-            }
+
+            TestEnteredItem(e.Location);
         }
         protected override void OnPaint(PaintEventArgs e)
         {
@@ -1277,8 +1324,11 @@ namespace PCMgr.Ctls
         }
         public Image Image { get; set; }
 
+        public bool DrawUWPPaused { get; set; }
         public bool DrawUWPPausedGray { get; set; }
-        public int DrawUWPPausedIconIndex { get; set; }
+        public int DrawUWPPausedIconIndex { get {
+                return FormMain.Instance.stateindex;
+            } }
 
         public int DisplayChildValue { get; set; }
         public bool DisplayChildCount { get; set; }

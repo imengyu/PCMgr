@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -11,8 +12,7 @@ namespace PCMgr.Ctls
             SetStyle(ControlStyles.Selectable, false);
             SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
             SetStyle(ControlStyles.ResizeRedraw, true);
-            TitleFont = new Font("Microsoft YaHei UI", 18);
-            SmallTitleFont = new Font("Microsoft YaHei UI", 12);
+            LoadAllFonts();
             stringFormatRight = new StringFormat();
             stringFormatRight.Alignment = StringAlignment.Far;
             stringFormatRight.LineAlignment = StringAlignment.Far;
@@ -20,6 +20,11 @@ namespace PCMgr.Ctls
             stringFormatRight.FormatFlags = StringFormatFlags.LineLimit;
         }
 
+        private void LoadAllFonts()
+        {
+            TitleFont = new Font(Font.FontFamily, 18);
+            SmallTitleFont = new Font(Font.FontFamily, 12);
+        }
 
         public Font TitleFont { get; set; }
         public Font SmallTitleFont { get; set; }
@@ -30,6 +35,11 @@ namespace PCMgr.Ctls
 
         private StringFormat stringFormatRight = null;
 
+        protected override void OnFontChanged(EventArgs e)
+        {
+            base.OnFontChanged(e);
+            LoadAllFonts();
+        }
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
