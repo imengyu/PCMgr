@@ -241,6 +241,15 @@
 #define IDC_PCMGR_FILEMGR               41172
 #define IDM_RELOADPDB                   41173
 #define IDM_SYSTEM_HIBERNATE            41174
+#define IDM_ALWAYSTOP                       41175
+#define IDM_CANCELTOP                       41176
+#define IDM_SHOWBORDER                      41177
+#define IDM_START_MHOOK                     41178
+#define IDM_END_MHOOK                      41179
+#define IDM_SE_AOT                      41180
+#define IDC_CLOSE_PCMGR_CMD 41181
+#define IDM_HELP 41182
+
 
 // Next default values for new objects
 // 

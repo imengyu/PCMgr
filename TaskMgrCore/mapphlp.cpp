@@ -18,6 +18,7 @@
 #include "loghlp.h"
 #include "nthlp.h"
 #include "userhlp.h"
+#include "thdhlp.h"
 #include "pehlp.h"
 #include <Windowsx.h>
 #include <shellapi.h>
@@ -45,6 +46,12 @@ processorArchitecture = '*' publicKeyToken = '6595b64144ccf1df' language = '*'\"
 #define WM_S_MESSAGE_EXIT 901
 #define WM_S_MESSAGE_ACTIVE 902
 #define WM_S_MAINTHREAD_ACT 903
+
+#define ID_AOP 701
+
+//程序主版本
+#define APP_VERSION L"1.3.2.6"
+#define APP_BULID_DATE L"2019-2-3"
 
 extern HINSTANCE hInst;
 extern HINSTANCE hInstRs;
@@ -128,6 +135,8 @@ bool min_hide = false;
 bool close_hide = false;
 bool top_most = false;
 bool main_grouping = false;
+bool alwaysOnTop = false;
+bool aopTimer = false;
 
 M_CAPI(VOID) TryCallThis()
 {
@@ -154,6 +163,9 @@ extern HANDLE thisCommandhProcess;
 bool MLoadApp();
 bool MLoadAppBackUp();
 LONG WINAPI MUnhandledExceptionFilter(struct _EXCEPTION_POINTERS *lpExceptionInfo);
+M_CAPI(BOOL) InstallMouseHook();
+M_CAPI(BOOL) UninstallMouseHook();
+LRESULT CALLBACK LowLevelMouseProc(INT nCode, WPARAM wParam, LPARAM lParam);
 
 BOOL MAppLoadMenuSettings()
 {
@@ -188,6 +200,14 @@ BOOL MAppShowLoadDrvWarn() {
 	return TRUE;
 }
 //Worker Calls
+BOOL MAppFkillWnd(HWND hWnd) {
+	HANDLE hThread;
+	DWORD pid = 0, tid = GetWindowThreadProcessId(hWnd, &pid);
+	if (pid == GetCurrentProcessId())return TRUE;
+	if (NT_SUCCESS(MOpenThreadNt(tid, &hThread, 0)))
+		return NT_SUCCESS(MTerminateThreadNt(hThread));
+	return FALSE;
+}
 BOOL MAppStartLoadSomeZZ()
 {
 	return FreeLibrary(GetModuleHandle(L"mscoree.dll"));
@@ -239,7 +259,8 @@ BOOL MAppStartTestZz(void*v)
 	return TRUE;
 }
 BOOL MAppStartEnd() {
-	return CloseHandle(hMutex);
+	if(hMutex) return CloseHandle(hMutex);
+	return FALSE;
 }
 BOOL MAppStartTryActiveLastApp(LPWSTR windowTitle) {
 	HWND hWnd = FindWindow(NULL, windowTitle);
@@ -344,6 +365,19 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 	}
 	switch (id)
 	{
+	case 156: {
+		alwaysOnTop = static_cast<int>((ULONG_PTR)data);
+		if (top_most) {
+			if (alwaysOnTop)
+				MAppMainCall(M_CALLBACK_SW_AOP_WND, (LPVOID)TRUE, (LPVOID)0);
+			else
+				MAppMainCall(M_CALLBACK_SW_AOP_WND, (LPVOID)FALSE, (LPVOID)0);
+		}
+		CheckMenuItem(hMenuMainSet, IDM_ALWAYSTOP, alwaysOnTop ? MF_CHECKED : MF_UNCHECKED);
+		M_CFG_SetConfigBOOL(L"AppSetting", L"AlwaysOnTop", alwaysOnTop);
+		hWorkerCallBack(M_CALLBACK_SWITCH_IDM_ALWAYSTOP_SET, (LPVOID)static_cast<ULONG_PTR>(alwaysOnTop), 0);
+		break;
+	}
 	case 157: hWndMain = hWnd; break;
 	case 158: return MCreateMiniDumpForProcess((DWORD)(ULONG_PTR)data);
 	case 159: return MDetachFromDebuggerProcess((DWORD)(ULONG_PTR)data);
@@ -595,7 +629,7 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 		ShowWindow(hWnd, SW_SHOW);
 		if (IsIconic(hWnd))
 			ShowWindow(hWnd, SW_RESTORE);
-		if (has_fullscreen_window)
+		if (has_fullscreen_window && !top_most)
 			SendMessage(hWnd, WM_COMMAND, IDM_TOPMOST, 0);
 		SetForegroundWindow(hWnd);
 		break;
@@ -658,6 +692,11 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 		return MAppWorkShowMenuProcess(ppr->FilePath, ppr->FileName, ppr->Pid, ppr->hWnd, ppr->selectedhWnd, ppr->data, ppr->type, ppr->x, ppr->y);
 	}
 	case 222: MAppVProcessAllWindows(); break;
+	case 223:return aopTimer;
+	case 224: {
+		MAppWorkCall3(223, hWndMain, NULL);
+		break;
+	}
 	default: break;
 	}
 	return 0;
@@ -695,6 +734,31 @@ M_API void* MAppWorkCall4(int id, void* hWnd, void*data)
 		break;
 	}
 	case 101:return thisCommandName;
+	case 102:return (void*)(ULONG_PTR)MAppFkillWnd((HWND)hWnd);
+	case 103: {
+		HWND h = (HWND)hWnd;
+		LONG exstytle = GetWindowLong(h, GWL_EXSTYLE);
+		if ((exstytle & WS_EX_TOPMOST) == WS_EX_TOPMOST) {
+			exstytle ^= WS_EX_TOPMOST;
+			LONG rs = SetWindowLong(h, GWL_EXSTYLE, exstytle);
+			if (rs == 0 && GetLastError() == 5) MAppFkillWnd(h);
+			rs = SetWindowLong(h, GWL_STYLE, GetWindowLong(h, GWL_STYLE) | WS_OVERLAPPEDWINDOW);
+			if (rs == 0 && GetLastError() == 5) MAppFkillWnd(h);
+		}
+		break;
+	}
+	case 104: {
+		HWND h = (HWND)hWnd;
+		LONG exstytle = GetWindowLong(h, GWL_EXSTYLE);
+		if ((exstytle & WS_EX_TOPMOST) == WS_EX_TOPMOST) {
+			exstytle ^= WS_EX_TOPMOST;
+			LONG rs = SetWindowLong(h, GWL_EXSTYLE, exstytle);
+			if (rs == 0 && GetLastError() == 5)
+				MAppFkillWnd(h);
+		}
+		SetForegroundWindow(hWndMain);
+		break;
+	}
 	}
 	return 0;
 }
@@ -816,6 +880,7 @@ M_API void MAppTest(int id, void*v) {
 		FreeLibrary(hInst);
 		break;
 	case 1:
+		MessageBox(0, L"Test", L"MAppTest", 0);
 		break;
 	default:
 		break;
@@ -826,6 +891,19 @@ M_API LRESULT MAppMainThreadCall(WPARAM wParam, LPARAM lParam)
 	if (!executeByLoader)
 		return 0;
 	return SendMessage(hWndMain, WM_S_MAINTHREAD_ACT, wParam, lParam);
+}
+M_API LPWSTR MAppGetName() { return appName; }
+M_API LPWSTR MAppGetVersion() { 
+	return APP_VERSION; 
+}
+M_API LPWSTR MAppGetBulidDate() { return APP_BULID_DATE; }
+
+M_CAPI(HMODULE) MAppGetCoreModulHandle() {
+#ifdef _X64_
+	return GetModuleHandle(L"PCMgr64.dll");
+#else
+	return GetModuleHandle(L"PCMgr32.dll");
+#endif
 }
 
 //...
@@ -1090,6 +1168,24 @@ M_API void MAppRebotAdmin2(LPWSTR agrs) {
 		}
 	}
 }
+M_API void MAppRebotAdmin3(LPWSTR agrs, BOOL *userCanceled) {
+
+	TCHAR exeFullPath[MAX_PATH];
+	GetModuleFileName(NULL, exeFullPath, MAX_PATH);
+
+	if (userCanceled)*userCanceled = FALSE;
+
+	if (static_cast<int>((ULONG_PTR)ShellExecute(NULL, L"runas", exeFullPath, agrs, NULL, 5)) > 32)
+	{
+		MAppStartEnd();
+		if (hMainExitCallBack) hMainExitCallBack();
+	}
+	else {
+		if (GetLastError() == ERROR_CANCELLED) {
+			if (userCanceled)*userCanceled = TRUE;
+		}
+	}
+}
 
 //Theme
 M_API HANDLE MOpenThemeData(HWND hWnd, LPWSTR className)
@@ -1335,6 +1431,10 @@ LRESULT CALLBACK MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			MAppWorkCall3(194, 0, (LPVOID)static_cast<ULONG_PTR>(!top_most));
 			break;
 		}
+		case IDM_ALWAYSTOP: {
+			MAppWorkCall3(156, 0, (LPVOID)static_cast<ULONG_PTR>(!alwaysOnTop));
+			break;
+		}
 		case IDM_MINHIDE: {
 			MAppWorkCall3(196, 0, (LPVOID)static_cast<ULONG_PTR>(!min_hide));
 			break;
@@ -1367,6 +1467,10 @@ LRESULT CALLBACK MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		case IDM_ABOUT: {
 			//DialogBox(hInstRs, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
 			MAppMainCall(M_CALLBACK_ABOUT, 0, 0);
+			break;
+		}
+		case IDM_HELP: {
+			MAppMainCall(M_CALLBACK_SHOW_HELP, 0, 0);
 			break;
 		}
 		case IDM_TEXIT: {
@@ -1526,9 +1630,18 @@ LRESULT CALLBACK MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				M_LOG_Close();
 				M_LOG_Init(1, 0);
 			}
-			else if(showConsole)
+			else if (showConsole) {
 				M_LOG_FocusConsoleWindow();
+			}
 			else M_LOG_Init(1, 0);
+			break;
+		}
+		case IDC_CLOSE_PCMGR_CMD: {
+			if (showConsole) {
+				M_LOG_CloseConsole(TRUE, TRUE);
+				M_CFG_SetConfigBOOL(L"ShowDebugWindow", L"Configure", FALSE);
+				showConsole = false;
+			}
 			break;
 		}
 		case IDC_SOFTACT_SHOW_KDA: {
@@ -1611,11 +1724,41 @@ LRESULT CALLBACK MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				SetForegroundWindow(selectItem4);
 			break;
 		}
+		case IDM_CANCELTOP: {
+			if (IsWindow(selectItem4))
+			{
+				LONG exstytle = GetWindowLong(selectItem4, GWL_EXSTYLE);
+				if ((exstytle & WS_EX_TOPMOST) == WS_EX_TOPMOST) {
+					exstytle ^= WS_EX_TOPMOST;
+					LONG rs = SetWindowLong(selectItem4, GWL_EXSTYLE, exstytle);
+					if (rs == 0 && GetLastError() == 5) {
+						HANDLE hThread;
+						if (NT_SUCCESS(MOpenThreadNt(GetWindowThreadProcessId(selectItem4, NULL), &hThread, 0)))
+							MTerminateThreadNt(hThread);
+					}
+				}
+				break;
+			}
+		}
+		case IDM_SHOWBORDER: {
+			if (IsWindow(selectItem4))
+			{
+				LONG stytle = GetWindowLong(selectItem4, GWL_STYLE);
+				stytle |= WS_OVERLAPPEDWINDOW;
+				LONG rs = SetWindowLong(selectItem4, GWL_STYLE, stytle);
+				if (rs == 0 && GetLastError() == 5) {
+					HANDLE hThread;
+					if (NT_SUCCESS(MOpenThreadNt(GetWindowThreadProcessId(selectItem4, NULL), &hThread, 0)))
+						MTerminateThreadNt(hThread);
+				}
+				break;
+			}
+		}
 		case ID_SETPRIORTY_REALTIME:
-		case ID_SETPRIORTY_HIGH: 
-		case ID_SETPRIORTY_ABOVENORMAL: 		
-		case ID_SETPRIORTY_NORMAL: 		
-		case ID_SETPRIORTY_BELOWNORMAL: 
+		case ID_SETPRIORTY_HIGH:
+		case ID_SETPRIORTY_ABOVENORMAL:
+		case ID_SETPRIORTY_NORMAL:
+		case ID_SETPRIORTY_BELOWNORMAL:
 		case ID_SETPRIORTY_LOW: {
 			MAppProcPropertyClassHandleWmCommand(wParam);
 			break;
@@ -1832,6 +1975,31 @@ LRESULT CALLBACK MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			MAppWmCommandTools(wParam);
 			break;
 		}
+		case IDM_START_MHOOK: {
+			if(InstallMouseHook())
+				MessageBox(hWnd, L"Mouse hook started!", L"Tip", 0);
+			else {
+				LogErr2(L"Install Mouse hook failed, lasterr : %d", GetLastError());
+				MessageBox(hWnd, L"Install Mouse hook failed!", L"Tip", 0);
+			}
+			break;
+		}
+		case IDM_END_MHOOK: {
+			if (UninstallMouseHook())
+				MessageBox(hWnd, L"Mouse hook stopped!", L"Tip", 0);
+			break;
+		}
+		case IDM_SE_AOT: {
+			if (aopTimer) {
+				KillTimer(hWnd, ID_AOP); aopTimer = false;
+				MAppMainCall(M_CALLBACK_SW_AOP_WND, (LPVOID)2, (LPVOID)L"Aoptimer stopped!");
+			}
+			else {
+				SetTimer(hWnd, ID_AOP, 10000, NULL); aopTimer = true;
+				MAppMainCall(M_CALLBACK_SW_AOP_WND, (LPVOID)2, (LPVOID)L"Aoptimer started!");
+			}
+			break;
+		}
 		case IDC_SOFTACT_TEST1: {
 			Log(L"IDC_SOFTACT_TEST1");
 			ULONG_PTR addrWin32k = 0;
@@ -1840,7 +2008,7 @@ LRESULT CALLBACK MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		case IDC_SOFTACT_TEST2: {
-			Log(L"IDC_SOFTACT_TEST2");
+			M_UWP_EnumUWPApplications();
 			break;
 		}
 		case IDC_SOFTACT_TEST3: {
@@ -1871,6 +2039,51 @@ LRESULT CALLBACK MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			if (min_hide) ShowWindow(hWnd, SW_HIDE);
 		}
 		break;
+	}
+	case WM_TIMER: {
+		switch (wParam)
+		{
+		case ID_AOP: {
+			if (top_most && alwaysOnTop) {
+
+				POINT  _mousepoint;
+				GetCursorPos(&_mousepoint);
+				HWND hWndPoint = WindowFromPoint(_mousepoint);
+				LONG exstytle = GetWindowLong(hWndPoint, GWL_EXSTYLE);
+				if (hWndPoint != hWndMain && (exstytle & WS_EX_TOPMOST) == WS_EX_TOPMOST) {
+					//Top and not this window
+					DWORD pid = 0, tid = GetWindowThreadProcessId(hWndPoint, &pid);
+					if (pid == GetCurrentProcessId()) break;
+					//Show a dialog to ask if want to close this window
+					MAppMainCall(M_CALLBACK_SW_AOP_WND, (LPVOID)2, (LPVOID)L"AopCheck finished and checked");
+					MAppMainCall(M_CALLBACK_CLEAR_ILLEGAL_TOP_WND, hWndPoint, (LPVOID)(ULONG_PTR)tid);
+				}
+				else if (GetForegroundWindow() != hWndMain) {
+					LONG exthis = GetWindowLong(hWndMain, GWL_EXSTYLE);
+					if ((exthis & WS_EX_TOPMOST) != WS_EX_TOPMOST)
+					{
+						exthis |= WS_EX_TOPMOST;
+						SetWindowLong(hWndMain, GWL_EXSTYLE, exthis);
+						SetForegroundWindow(hWndMain);
+					}
+					MAppMainCall(M_CALLBACK_SW_AOP_WND, (LPVOID)2, (LPVOID)L"AopCheck finished reactived");
+				}
+				else {
+					LONG exthis = GetWindowLong(hWndMain, GWL_EXSTYLE);
+					if ((exthis & WS_EX_TOPMOST) != WS_EX_TOPMOST)
+					{
+						exthis |= WS_EX_TOPMOST;
+						SetWindowLong(hWndMain, GWL_EXSTYLE, exthis);
+						SetForegroundWindow(hWndMain);
+					}
+					MAppMainCall(M_CALLBACK_SW_AOP_WND, (LPVOID)2, (LPVOID)L"AopCheck finished and not checked");
+				}
+				break;
+			}
+		default:
+			break;
+		}
+		}
 	}
 	default:
 		break;
@@ -2131,6 +2344,66 @@ LONG WINAPI MUnhandledExceptionFilter(struct _EXCEPTION_POINTERS *lpExceptionInf
 	if (IsDebuggerPresent())
 		return EXCEPTION_CONTINUE_SEARCH;
 	return GenerateMiniDump(lpExceptionInfo);
+}
+
+HHOOK mouse_Hook = NULL;
+
+//Mouse hook
+M_CAPI(BOOL) InstallMouseHook()
+{
+	if (mouse_Hook)  UninstallMouseHook();
+	mouse_Hook = SetWindowsHookEx(WH_MOUSE_LL,
+		(HOOKPROC)(LowLevelMouseProc), hInst, NULL);
+	return(mouse_Hook != NULL);
+}
+M_CAPI(BOOL) UninstallMouseHook()
+{
+	BOOL jud = FALSE;
+	if (mouse_Hook) {
+		jud = UnhookWindowsHookEx(mouse_Hook);
+		mouse_Hook = NULL;  //set NULL  
+	}
+
+	return jud;
+}
+
+LRESULT CALLBACK LowLevelMouseProc(INT nCode, WPARAM wParam, LPARAM lParam)
+{
+	POINT  _mousepoint;
+	MSLLHOOKSTRUCT *pkbhs = (MSLLHOOKSTRUCT *)lParam;
+	switch (nCode)
+	{
+	case HC_ACTION:
+	{
+		//鼠标左击  
+		if ((top_most && alwaysOnTop) && (wParam == WM_MBUTTONUP || wParam == WM_LBUTTONUP || wParam == WM_RBUTTONUP)) {
+			//获取鼠标的位置，并进行必要的判断
+			LONG exthis = GetWindowLong(hWndMain, GWL_EXSTYLE);
+			if ((exthis & WS_EX_TOPMOST) != WS_EX_TOPMOST)
+			{
+				exthis |= WS_EX_TOPMOST;
+				SetWindowLong(hWndMain, GWL_EXSTYLE, exthis);
+				SetForegroundWindow(hWndMain);
+			}
+
+			GetCursorPos(&_mousepoint);
+			HWND hWndPoint = WindowFromPoint(_mousepoint);
+			LONG exstytle = GetWindowLong(hWndPoint, GWL_EXSTYLE);
+			if (hWndPoint != hWndMain) {
+				//Top and not this window
+				DWORD pid = 0, tid = GetWindowThreadProcessId(hWndPoint, &pid);
+				if (pid == GetCurrentProcessId()) break;
+				//Show a dialog to ask if want to close this window
+				MAppMainCall(M_CALLBACK_CLEAR_ILLEGAL_TOP_WND, hWndPoint, (LPVOID)(ULONG_PTR)tid);
+			}
+		}
+		break;
+	}
+	default:   
+		break;
+	}
+
+	return CallNextHookEx(NULL, nCode, wParam, lParam);
 }
 
 

@@ -68,6 +68,7 @@ EXTERN_C M_API void MAppExit();
 EXTERN_C M_API void MAppRebot();
 EXTERN_C M_API void MAppRebotAdmin();
 EXTERN_C M_API void MAppRebotAdmin2(LPWSTR agrs);
+EXTERN_C M_API void MAppRebotAdmin3(LPWSTR agrs, BOOL * userCanceled);
 
 EXTERN_C M_API HANDLE MOpenThemeData(HWND hWnd, LPWSTR className);
 EXTERN_C M_API void MCloseThemeData(HANDLE hTheme);
@@ -87,6 +88,9 @@ EXTERN_C M_API int MAppWorkCall3(int id, HWND hWnd, void*data);
 EXTERN_C M_API void* MAppWorkCall4(int id, void* hWnd, void*data);
 EXTERN_C M_API void* MAppWorkCall5(int id, void* hWnd, void*data1, void*data2, void*data3);
 EXTERN_C M_API LRESULT MAppMainThreadCall(WPARAM wParam, LPARAM lParam);
+EXTERN_C M_API LPWSTR MAppGetName();
+EXTERN_C M_API LPWSTR MAppGetVersion();
+EXTERN_C M_API LPWSTR MAppGetBulidDate();
 
 //获取窗口的图标
 //    hWnd ：窗口句柄

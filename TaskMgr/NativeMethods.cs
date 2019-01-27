@@ -1,26 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Reflection;
-using System.Threading.Tasks;
+
 using System.Text;
 
 namespace PCMgr
 {
+    /// <summary>
+    /// Native 函数
+    /// </summary>
     class NativeMethods
     {
-        public static class 想反编译这个程序吗
-        {
-            public const string Copyright = "Copyright (C) 2018 DreamFish";
-            public const string 版权所有 = "版权所有 Copyright (C) 2018 DreamFish";
-            public const string 不用反编译了 = "大部分核心功能都在C++模块里，PCMgr32.dll 自己慢慢反编译去吧";
-            public const string QQ = "1501076885";
-        }
-        public const string Copyright = "Copyright (C) 2018 DreamFish";
-        public const string Key = "The key is TryCallThis api";
-
         public static IntPtr Nullptr = new IntPtr(0);
 
         public static IntPtr True = new IntPtr(1);
@@ -35,6 +28,9 @@ namespace PCMgr
             return ptr != Nullptr;
         }
 
+        /// <summary>
+        /// Win32 API
+        /// </summary>
         public static class Win32
         {
             //Win32 api
@@ -214,7 +210,10 @@ namespace PCMgr
         //C++ 模块api
 
         //所有API说明及参数说明其参照 PCMgrCore项目 的头文件中的注释
-        //dll名称
+
+        /// <summary>
+        /// Native dll名称
+        /// </summary>
 #if _X64_
         public const string COREDLLNAME = "PCMgr64.dll";
 #else
@@ -223,8 +222,14 @@ namespace PCMgr
 
         #region Main Api
 
+        /// <summary>
+        /// Native 回调类型，其对应 PCMgrCore项目 的 cscall.h
+        /// </summary>
         public static class CSCall
         {
+            public const int M_CALLBACK_SW_AOP_WND = 1;
+            public const int M_CALLBACK_CLEAR_ILLEGAL_TOP_WND = 2;
+            public const int M_CALLBACK_SWITCH_IDM_ALWAYSTOP_SET = 3;
             public const int M_CALLBACK_SWITCH_MAINGROUP_SET = 4;
             public const int M_CALLBACK_SWITCH_REFESHRATE_SET = 5;
             public const int M_CALLBACK_SWITCH_TOPMOST_SET = 6;
@@ -276,6 +281,7 @@ namespace PCMgr
             public const int M_CALLBACK_SIMPLEVIEW_ACT = 58;
             public const int M_CALLBACK_UWPKILL = 59;
             public const int M_CALLBACK_EXPAND_ALL = 60;
+            public const int M_CALLBACK_SHOW_HELP = 61;
         }
 
 
@@ -325,6 +331,16 @@ namespace PCMgr
         public static extern void LogInfo([MarshalAs(UnmanagedType.LPWStr)]string format);
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "M_LOG_LogW")]
         public static extern void Log([MarshalAs(UnmanagedType.LPWStr)]string format);
+
+        [return:MarshalAs(UnmanagedType.LPWStr)]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern string MAppGetName();
+        [return: MarshalAs(UnmanagedType.LPWStr)]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern string MAppGetVersion();
+        [return: MarshalAs(UnmanagedType.LPWStr)]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern string MAppGetBulidDate();
 
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern bool MGetPrivileges();
@@ -414,7 +430,11 @@ namespace PCMgr
             Win32.GetPrivateProfileString(configSection, configkey, configDefData, temp, 1024, FormMain.cfgFilePath);
             return temp.ToString();
         }
-
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern bool MREG_SetCurrentIEVersion(uint ver, [MarshalAs(UnmanagedType.LPWStr)]string currentProcessName);
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern bool MREG_IsCurrentIEVersionOK(uint ver, [MarshalAs(UnmanagedType.LPWStr)]string currentProcessName);
+        
         #endregion
 
         #region PROC API
@@ -1017,6 +1037,40 @@ namespace PCMgr
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern bool M_UWP_KillUWPApplication([MarshalAs(UnmanagedType.LPWStr)]string packageName);
 
+
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool M_UWP_EnumUWPApplications();
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int M_UWP_GetUWPApplicationsCount();
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool M_UWP_GetUWPApplicationAt(uint i, ref UWP_PACKAGE_INFO infoStruct);
+        public static UWP_PACKAGE_INFO M_UWP_GetUWPApplicationAt(uint i)
+        {
+            UWP_PACKAGE_INFO uWP_PACKAGE_INFO = new UWP_PACKAGE_INFO();
+            M_UWP_GetUWPApplicationAt(i, ref uWP_PACKAGE_INFO);
+            return uWP_PACKAGE_INFO;
+        }
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+        public struct UWP_PACKAGE_INFO
+        {
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
+            public string AppUserModelId;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
+            public string AppPackageFamilyName;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
+            public string AppPackageFullName;
+
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
+            public string InstallPath;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
+            public string IconPath;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
+            public string DisplayName;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
+            public string PublisherDisplayName;
+        }
+
         #endregion
 
         public static class DeviceApi
@@ -1055,7 +1109,7 @@ namespace PCMgr
 
             public static bool MDEVICE_GetNetworkAdapterIsWIFI(string name)
             {
-                if (name != null && (name.ToLower().Contains("wifi") || name.ToLower().Contains("wireless lan") || name.Contains("wi-fi")))
+                if (name != null && (name.ToLower().Contains("wifi") || name.ToLower().Contains("wireless lan") || name.ToLower().Contains("wireless") || name.Contains("wi-fi")))
                     return true;
                 return false;
             }

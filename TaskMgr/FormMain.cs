@@ -11,27 +11,31 @@ using PCMgr.Ctls;
 using PCMgr.Helpers;
 using PCMgr.Lanuages;
 using PCMgr.WorkWindow;
-using PCMgrUWP;
 using static PCMgr.NativeMethods;
 using static PCMgr.NativeMethods.Win32;
 using static PCMgr.NativeMethods.DeviceApi;
 using static PCMgr.NativeMethods.CSCall;
 
+//
+// 说明 ：这里是主窗口 上层的逻辑代码
+//
+// C++ Native 层的代码 请到项目 PCMgrCore 查看
+//
+// 在看代码之前请先按 Ctrl+M,Ctrl+O 折叠大纲，这样看起来会清爽一点
+// 个人代码水平有限，写不出优质的代码，各位看官就当一个笑话看看好了
+// 此软件并非仅我一人开发，因此代码风格会很乱，真的抱歉
+//
+// 这是一个垃圾的软件
+// 2019
+//
+
 namespace PCMgr
 {
+    /// <summary>
+    /// 主窗口
+    /// </summary>
     public partial class FormMain : Form
     {
-        #region ToZz
-        public static class 想反编译这个程序吗
-        {
-            public const string Copyright = "Copyright (C) 2018 DreamFish";
-            public const string 版权所有 = "版权所有 Copyright (C) 2018 DreamFish";
-            public const string 不用反编译了 = "为什么没有混淆？因为大部分核心功能都在C++模块里（PCMgr32.dll），" +
-                "C++的程序多难反编译啊！";
-            public const string QQ = "1501076885";
-        }
-        #endregion
-
         public FormMain(string[] agrs)
         {
             Instance = this;
@@ -60,6 +64,7 @@ namespace PCMgr
         //private bool showSystemProcess = false;
         private bool showHiddenFiles = false;
 
+        //全局某个功能是否加载
         private bool processListInited = false;
         private bool driverListInited = false;
         private bool scListInited = false;
@@ -77,6 +82,8 @@ namespace PCMgr
         public const string MICROSOFT = "Microsoft Corporation";
 
         #region ProcessListWork
+
+        //主页进程页面代码
 
         private const double PERF_LIMIT_MIN_DATA_DISK = 0.005;
         private const double PERF_LIMIT_MIN_DATA_NETWORK = 0.001;
@@ -226,6 +233,8 @@ namespace PCMgr
         private bool isRunAsAdmin = false;
         private Font smallListFont = null;
         private TaskMgrListItem thisLoadItem = null;
+
+        private int maxMem = 1024;
 
         private void MainGetWinsCallBack(IntPtr hWnd, IntPtr data, int i)
         {
@@ -526,7 +535,14 @@ namespace PCMgr
                 veryimporantProcess.Add((systemRootPath + @"\System32\wininit.exe").ToLower());
                 veryimporantProcess.Add((systemRootPath + @"\System32\csrss.exe").ToLower());
                 veryimporantProcess.Add((systemRootPath + @"\System32\lsass.exe").ToLower());
-                veryimporantProcess.Add((systemRootPath + @"\System32\smss.exe").ToLower()); 
+                veryimporantProcess.Add((systemRootPath + @"\System32\smss.exe").ToLower());
+
+                //计算单个程序最大理想内存mb，项目颜色需要用
+                ulong allMem = MSystemMemoryPerformanctMonitor.GetAllMemory();
+                if (allMem > 34359738368) maxMem = 16384;
+                else if (allMem > 17179869184) maxMem = 8192;
+                else if (allMem > 8589934592) maxMem = 4096;
+                else if (allMem > 4294967296) maxMem = 2048;
 
                 processListInited = true;
 
@@ -841,6 +857,7 @@ namespace PCMgr
                 IntPtr intPtr = MGetExeIcon(stringBuilder.ToString());
                 if (intPtr != IntPtr.Zero) taskMgrListItem.Icon = Icon.FromHandle(intPtr);
             }
+
             //try get service info
             if (scCanUse && scValidPid.Contains(pid))
             {
@@ -865,8 +882,8 @@ namespace PCMgr
                     TaskMgrListItemChild tx = null;
                     for (int i = 0; i < p.svcs.Count; i++)
                     {
-                        tx = new TaskMgrListItemChild(p.svcs[0].scDsb, icoSc);
-                        tx.Tag = p.svcs[0].scName;
+                        tx = new TaskMgrListItemChild(p.svcs[i].scDsb, icoSc);
+                        tx.Tag = p.svcs[i].scName;
                         tx.Type = TaskMgrListItemType.ItemService;
                         taskMgrListItem.Childs.Add(tx);
                     }
@@ -950,7 +967,7 @@ namespace PCMgr
                         parentItem = new UwpItem();
 
                         TaskMgrListItemGroup g = new TaskMgrListItemGroup(uapp.Text);
-                        UWPPackage pkg = uapp.Tag as UWPPackage;
+                        UWP_PACKAGE_INFO pkg = (UWP_PACKAGE_INFO)uapp.Tag;
 
                         g.Icon = uapp.Icon;
                         g.Image = uapp.Image;
@@ -967,12 +984,12 @@ namespace PCMgr
                             g.SubItems[stateindex].DrawUWPPausedIcon = true;
                         }
                         if (nameindex != -1) g.SubItems[nameindex].Text = p.uwpFullName;
-                        if (pathindex != -1) g.SubItems[pathindex].Text = uapp.SubItems[4].Text;
+                        if (pathindex != -1) g.SubItems[pathindex].Text = uapp.SubItems[3].Text;
 
                         g.Tag = parentItem;
 
-                        parentItem.uwpMainAppDebText = pkg.MainAppDisplayName;
-                        parentItem.uwpInstallDir = pkg.InstalledLocation;
+                        parentItem.uwpMainAppDebText = pkg.DisplayName;
+                        parentItem.uwpInstallDir = pkg.InstallPath;
                         parentItem.uwpFullName = p.uwpFullName;
                         parentItem.uwpItem = g;
                         p.uwpItem = parentItem;
@@ -1122,7 +1139,7 @@ namespace PCMgr
                         if (ix.Type == TaskMgrListItemType.ItemProcess)
                             d += ix.SubItems[ramindex].CustomData;
                     it.SubItems[ramindex].Text = FormatFileSizeMen(Convert.ToInt64(d * 1024));
-                    it.SubItems[ramindex].BackColor = ProcessListGetColorFormValue(d / 1024, 1024);
+                    it.SubItems[ramindex].BackColor = ProcessListGetColorFormValue(d / 1024, maxMem);
                     it.SubItems[ramindex].CustomData = d;
                 }
                 if (diskindex != -1 && ipdateOneDataCloum != diskindex)
@@ -1241,7 +1258,7 @@ namespace PCMgr
                     else if (ramindex != -1 && ipdateOneDataCloum == ramindex)
                     {
                         it.SubItems[ramindex].Text = FormatFileSizeMen(Convert.ToInt64(d * 1024));
-                        it.SubItems[ramindex].BackColor = ProcessListGetColorFormValue(d / 1024, 1024);
+                        it.SubItems[ramindex].BackColor = ProcessListGetColorFormValue(d / 1024, maxMem);
                         it.SubItems[ramindex].CustomData = d;
                     }
                     else if (diskindex != -1 && ipdateOneDataCloum == diskindex)
@@ -1606,7 +1623,7 @@ namespace PCMgr
             {
                 uint ii = MProcessPerformanctMonitor.GetProcessPrivateWoringSet(p.processItem);
                 it.SubItems[ramindex].Text = FormatFileSizeMen(Convert.ToInt64(ii));
-                it.SubItems[ramindex].BackColor = ProcessListGetColorFormValue(ii / 1048576, 1024);
+                it.SubItems[ramindex].BackColor = ProcessListGetColorFormValue(ii / 1048576, maxMem);
                 it.SubItems[ramindex].CustomData = ii / 1024d;
             }
         }
@@ -1739,10 +1756,7 @@ namespace PCMgr
                 {
                     TaskMgrListItem iii = li.Parent;
                     iii.Childs.Remove(li);
-
-                    if (listProcess.Items.Contains(li))
-                        listProcess.Items.Remove(li);
-
+                    listProcess.Items.Remove(li);
                     //uwp host item
                     if (iii.Type == TaskMgrListItemType.ItemUWPHost)
                     {
@@ -1755,7 +1769,10 @@ namespace PCMgr
                         }
                     }
                 }
-                else listProcess.Items.Remove(li);
+                else
+                {
+                    listProcess.Items.Remove(li);
+                }
             }
         }
 
@@ -2673,6 +2690,8 @@ namespace PCMgr
         #endregion
 
         #region ProcessDetalsListWork
+
+        //详细信息 页面代码
 
         private IntPtr processMonitorDetals = IntPtr.Zero;
 
@@ -3770,6 +3789,8 @@ namespace PCMgr
         #endregion
 
         #region FileMgrWork
+       
+        //文件管理器页代码
 
         private Dictionary<string, string> fileTypeNames = new Dictionary<string, string>();
         private TreeNode lastClickTreeNode = null;
@@ -4346,6 +4367,8 @@ namespace PCMgr
 
         #region ScMgrWork
 
+        //服务管理
+
         private class ListViewItemComparer : IComparer
         {
             private int col;
@@ -4622,6 +4645,8 @@ namespace PCMgr
 
         #region UWPMWork
 
+        //枚举通用应用
+
         private class TaskListViewUWPColumnSorter : ListViewColumnSorter
         {
             public TaskListViewUWPColumnSorter()
@@ -4640,7 +4665,6 @@ namespace PCMgr
                 return compareResult;
             }
         }
-        private object uWPManager = null;
 
         private TaskListViewUWPColumnSorter uWPColumnSorter = new TaskListViewUWPColumnSorter();
         private void UWPListRefesh()
@@ -4650,49 +4674,46 @@ namespace PCMgr
                 listUwpApps.Show();
                 pl_UWPEnumFailTip.Hide();
                 listUwpApps.Items.Clear();
-                if (uWPManager != null) ((UWPManager)uWPManager).Clear();
-                try
-                {
-                    ((UWPManager)uWPManager).EnumlateAll();
-                    for (int i = 0; i < ((UWPManager)uWPManager).Packages.Count; i++)
-                    {
-                        UWPPackage pkg = ((UWPManager)uWPManager).Packages[i];
 
-                        TaskMgrListItem li = new TaskMgrListItem(LanuageMgr.IsChinese ? UWPManager.DisplayNameTozhCN(pkg.Name) : pkg.Name);
-                        li.SubItems.Add(new TaskMgrListItem.TaskMgrListViewSubItem());
-                        li.SubItems.Add(new TaskMgrListItem.TaskMgrListViewSubItem());
-                        li.SubItems.Add(new TaskMgrListItem.TaskMgrListViewSubItem());
-                        li.SubItems.Add(new TaskMgrListItem.TaskMgrListViewSubItem());
-                        li.SubItems.Add(new TaskMgrListItem.TaskMgrListViewSubItem());
-                        li.SubItems.Add(new TaskMgrListItem.TaskMgrListViewSubItem());
-                        li.SubItems[0].Font = listUwpApps.Font;
-                        li.SubItems[1].Font = listUwpApps.Font;
-                        li.SubItems[2].Font = listUwpApps.Font;
-                        li.SubItems[3].Font = listUwpApps.Font;
-                        li.SubItems[0].Text = LanuageMgr.IsChinese ? UWPManager.DisplayNameTozhCN(pkg.Name) : pkg.Name;
-                        li.SubItems[1].Text = pkg.Publisher;
-                        li.SubItems[2].Text = pkg.FullName;
-                        li.SubItems[3].Text = pkg.InstalledLocation;
-                        li.SubItems[4].Text = pkg.MainAppDisplayName;
-                        li.Tag = pkg;
-                        li.IsUWPICO = true;
-
-                        string iconpath = pkg.IconPath;
-                        if (iconpath != "" && MFM_FileExist(iconpath))
-                        {
-                            using (Image img = Image.FromFile(iconpath))
-                                li.Icon = IconUtils.ConvertToIcon(img);
-                            //
-                            //     li.Image = IconUtils.GetThumbnail(new Bitmap(iconpath), 16, 16);
-                        }
-                        listUwpApps.Items.Add(li);
-                    }
-                }
-                catch (Exception e)
+                if (!M_UWP_EnumUWPApplications())
                 {
                     listUwpApps.Hide();
                     pl_UWPEnumFailTip.Show();
-                    lbUWPEnumFailText.Text = LanuageMgr.GetStr("UWPEnumFail") + "\n\n" + e.ToString();
+                    lbUWPEnumFailText.Text = LanuageMgr.GetStr("UWPEnumFail");
+                    return;
+                }
+
+
+                int count = M_UWP_GetUWPApplicationsCount();
+                for (int i = 0; i < count; i++)
+                {
+                    UWP_PACKAGE_INFO info = M_UWP_GetUWPApplicationAt((uint)i);
+
+                    TaskMgrListItem li = new TaskMgrListItem(info.DisplayName);
+                    li.SubItems.Add(new TaskMgrListItem.TaskMgrListViewSubItem());
+                    li.SubItems.Add(new TaskMgrListItem.TaskMgrListViewSubItem());
+                    li.SubItems.Add(new TaskMgrListItem.TaskMgrListViewSubItem());
+                    li.SubItems.Add(new TaskMgrListItem.TaskMgrListViewSubItem());
+                    li.SubItems.Add(new TaskMgrListItem.TaskMgrListViewSubItem());
+                    li.SubItems.Add(new TaskMgrListItem.TaskMgrListViewSubItem());
+                    li.SubItems[0].Font = listUwpApps.Font;
+                    li.SubItems[1].Font = listUwpApps.Font;
+                    li.SubItems[2].Font = listUwpApps.Font;
+                    li.SubItems[0].Text = info.DisplayName;
+                    li.SubItems[1].Text = info.AppPackageFullName;
+                    li.SubItems[2].Text = info.InstallPath;
+                    li.SubItems[3].Text = info.AppUserModelId;
+                    li.Tag = info;
+                    li.IsUWPICO = true;
+
+                    string iconpath = UWPSearchIcon(info.InstallPath, info.IconPath);
+                    if (iconpath != "" && MFM_FileExist(iconpath))
+                    {
+                        using (Image img = Image.FromFile(iconpath))
+                            li.Icon = IconUtils.ConvertToIcon(img);
+                            // li.Image = IconUtils.GetThumbnail(new Bitmap(iconpath), 16, 16);
+                    }
+                    listUwpApps.Items.Add(li);
                 }
             }
         }
@@ -4700,7 +4721,6 @@ namespace PCMgr
         {
             if (!uwpListInited)
             {
-                uWPManager = new UWPManager();
                 uwpListInited = true;
                 UWPListRefesh();
 
@@ -4711,8 +4731,40 @@ namespace PCMgr
         private void UWPListUnInit()
         {
             listUwpApps.Items.Clear();
-            ((UWPManager)uWPManager).Clear();
-            uWPManager = null;
+        }
+        private string UWPSearchIcon(string dir, string logoPath)
+        {
+            //Force search
+            var imageFile = Path.Combine(dir, logoPath);
+            var name = Path.GetFileName(imageFile);
+
+            if (MFM_FileExist(imageFile)) return imageFile;
+            var
+            scaleImage = Path.ChangeExtension(imageFile, "scale-200.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
+            scaleImage = Path.ChangeExtension(imageFile, "scale-100.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
+            scaleImage = Path.ChangeExtension(imageFile, "contrast-black_scale-200.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
+            scaleImage = Path.ChangeExtension(imageFile, "contrast-black_scale-100.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
+            scaleImage = Path.ChangeExtension(imageFile, "targetsize-16.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
+            scaleImage = Path.ChangeExtension(imageFile, "targetsize-24.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
+            scaleImage = Path.ChangeExtension(imageFile, "targetsize-44.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
+            scaleImage = Path.ChangeExtension(imageFile, "contrast-black.targetsize-44.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
+            scaleImage = Path.ChangeExtension(imageFile, "scale-200_contrast-black.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
+            scaleImage = Path.ChangeExtension(imageFile, "scale-100_contrast-black.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
+            scaleImage = Path.ChangeExtension(imageFile, "Theme-Dark_Scale-200.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
+            scaleImage = Path.ChangeExtension(imageFile, "Theme-Dark_Scale-100.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
+            imageFile = dir + "\\" + logoPath.Replace(name, "") + "contrast-black\\" + name;
+            scaleImage = Path.ChangeExtension(imageFile, "scale-200.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
+            scaleImage = Path.ChangeExtension(imageFile, "scale-100.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
+            scaleImage = Path.ChangeExtension(imageFile, "contrast-black_scale-200.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
+            scaleImage = Path.ChangeExtension(imageFile, "contrast-black_scale-100.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
+            scaleImage = Path.ChangeExtension(imageFile, "scale-200_contrast-black.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
+            scaleImage = Path.ChangeExtension(imageFile, "scale-100_contrast-black.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
+            scaleImage = Path.ChangeExtension(imageFile, "Theme-Dark_Scale-200.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
+            scaleImage = Path.ChangeExtension(imageFile, "Theme-Dark_Scale-100.png"); if (MFM_FileExist(scaleImage)) return scaleImage;
+
+            imageFile = Path.Combine(dir, "en-us", logoPath);
+            if (MFM_FileExist(imageFile)) return imageFile;
+            return "";
         }
 
         private void UWPList_Header_CloumClick(object sender, TaskMgrListHeader.TaskMgrListHeaderEventArgs e)
@@ -4737,7 +4789,7 @@ namespace PCMgr
         {
             TaskMgrListItem rs = null;
             foreach (TaskMgrListItem r in listUwpApps.Items)
-                if (r.Tag.ToString() == fullName)
+                if (((UWP_PACKAGE_INFO)r.Tag).AppPackageFullName == fullName)
                 {
                     rs = r;
                     break;
@@ -4749,16 +4801,11 @@ namespace PCMgr
         {
             if (listUwpApps.SelectedItem != null)
             {
-                UWPPackage pkg = ((UWPPackage)listUwpApps.SelectedItem.Tag);
-                if (pkg.Apps.Length > 0)
+                UWP_PACKAGE_INFO pkg = ((UWP_PACKAGE_INFO)listUwpApps.SelectedItem.Tag);
+                if (pkg.AppUserModelId != "")
                 {
-                    int first_ = pkg.FullName.IndexOf('_');
-                    int last_ = pkg.FullName.LastIndexOf('_');
-                    string indxxstr = pkg.FullName;
-                    if (first_ < last_ && last_ > 0 && last_ < indxxstr.Length)
-                        indxxstr = indxxstr.Replace(indxxstr.Substring(first_, last_ - first_), "");
                     uint processid = 0;
-                    M_UWP_RunUWPApp(indxxstr + "!" + pkg.Apps[0], ref processid);
+                    M_UWP_RunUWPApp(pkg.AppUserModelId, ref processid);
                 }
             }
         }
@@ -4770,24 +4817,24 @@ namespace PCMgr
         {
             if (listUwpApps.SelectedItem != null)
             {
-                UWPPackage pkg = ((UWPPackage)listUwpApps.SelectedItem.Tag);
-                MFM_OpenFile(pkg.InstalledLocation, Handle);
+                UWP_PACKAGE_INFO pkg = ((UWP_PACKAGE_INFO)listUwpApps.SelectedItem.Tag);
+                MFM_OpenFile(pkg.InstallPath, Handle);
             }
         }
         private void 复制名称ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (listUwpApps.SelectedItem != null)
             {
-                UWPPackage pkg = ((UWPPackage)listUwpApps.SelectedItem.Tag);
-                MCopyToClipboard2(pkg.Name);
+                UWP_PACKAGE_INFO pkg = ((UWP_PACKAGE_INFO)listUwpApps.SelectedItem.Tag);
+                MCopyToClipboard2(pkg.DisplayName);
             }
         }
         private void 复制完整名称ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (listUwpApps.SelectedItem != null)
             {
-                UWPPackage pkg = ((UWPPackage)listUwpApps.SelectedItem.Tag);
-                MCopyToClipboard2(pkg.FullName);
+                UWP_PACKAGE_INFO pkg = ((UWP_PACKAGE_INFO)listUwpApps.SelectedItem.Tag);
+                MCopyToClipboard2(pkg.AppPackageFullName);
             }
         }
         private void 复制发布者ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -4824,6 +4871,8 @@ namespace PCMgr
         #endregion
 
         #region PerfWork
+
+        //性能页面代码
 
         public static Color CpuDrawColor = Color.FromArgb(17, 125, 187);
         public static Color CpuBgColor = Color.FromArgb(241, 246, 250);
@@ -5100,6 +5149,7 @@ namespace PCMgr
         }
         private void PerfInit()
         {
+            //初始化perf页面
             if (!perfInited)
             {
                 MDEVICE_Init();
@@ -5116,9 +5166,9 @@ namespace PCMgr
                 perf_ram.BgBrush = new SolidBrush(RamBgColor);
                 performanceLeftList.Items.Add(perf_ram);
 
-
                 PerfPagesInit();
 
+                //磁盘页面
                 MDEVICE_GetLogicalDiskInfo();
                 uint count = MPERF_InitDisksPerformanceCounters();
                 for (int i = 0; i < count; i++)
@@ -5129,7 +5179,7 @@ namespace PCMgr
 
                     StringBuilder sb = new StringBuilder(32);
                     MPERF_GetDisksPerformanceCountersInstanceName(perfItemHeader.performanceCounterNative, sb, 32);
-                    uint diskIndex = (uint)(count - i - 1);// MDEVICE_GetPhysicalDriveFromPartitionLetter(sb.ToString()[2]);
+                    uint diskIndex = (uint)i ;// MDEVICE_GetPhysicalDriveFromPartitionLetter(sb.ToString()[2]);
 
                     perfItemHeader.item.Name = LanuageMgr.GetStr("TitleDisk") + sb.ToString();
                     perfItemHeader.item.BasePen = new Pen(DiskDrawColor);
@@ -5149,6 +5199,7 @@ namespace PCMgr
                     performanceLeftList.Items.Add(perfItemHeader.item);
                 }
 
+                //网卡页面
                 count = MDEVICE_GetNetworkAdaptersInfo();
                 for (int i = 0; i < count; i++)
                 {
@@ -5333,6 +5384,8 @@ namespace PCMgr
 
         #region LanuageWork
 
+        //语言（说真的，这是我见过最烂的代码（好像不是我写的），超级想改掉，但是不敢改）
+
         public static string str_system_interrupts = "";
         public static string str_idle_process = "";
         public static string str_service_host = "";
@@ -5482,10 +5535,7 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
 
             InitLanuageItems();
             if (lanuage != "" && lanuage != "zh" && lanuage != "zh-CN")
-            {
-                UWPManager.StringLocate = lanuage;
                 System.Threading.Thread.CurrentThread.CurrentUICulture = new System.Globalization.CultureInfo(lanuage);
-            }
         }
         private static void InitLanuageItems()
         {
@@ -5723,6 +5773,8 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
         #endregion
 
         #region StartMWork
+
+        //启动项 页面（借鉴了PCHunter）
 
         private TaskMgrListItemGroup knowDlls = null;
         private TaskMgrListItemGroup rightMenu1 = null;
@@ -6035,6 +6087,8 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
 
         #region KernelMWork
 
+        //内核驱动枚举代码
+
         private class ListViewItemComparerKr : IComparer
         {
             private int col;
@@ -6244,6 +6298,8 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
 
         #region UsersWork
 
+        //用户页代码
+
         private void UsersListInit()
         {
             if (!usersListInited)
@@ -6325,6 +6381,8 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
         #endregion
 
         #region NotifyWork
+
+        //一些对话框
 
         private FormDelFileProgress delingdialog = null;
 
@@ -6486,6 +6544,8 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
 
         #region Callbacks
 
+        //所有 Native 回调
+
         private static LanuageItems_CallBack lanuageItems_CallBack;
 
         private EnumUsersCallBack enumUsersCallBack;
@@ -6570,7 +6630,7 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                 formSpeedBall.Invalidate();
             }
 
-            if (!Visible) return;
+            if (!Visible || (WindowState == FormWindowState.Minimized)) return;
             if (forceRefeshLowLock) return;
             //base RefeshTimer
             if (tabControlMain.SelectedTab == tabPageProcCtl && processListInited)
@@ -6643,9 +6703,50 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
         //Worker Callback
         private void AppWorkerCallBack(int msg, IntPtr wParam, IntPtr lParam)
         {
-            //这是从 c++ 调用回来的函数
+            //这是从 c++ native 调用回来的函数
             switch (msg)
             {
+                case M_CALLBACK_SW_AOP_WND:
+                    {
+                        if (wParam.ToInt32() == 1)
+                        {
+                            if (aopWnd == null)
+                            {
+                                aopWnd = new FormAlwaysOnTop();
+                                aopWnd.Show();
+                            }
+                        }
+                        else if (wParam.ToInt32() == 0)
+                        {
+                            if (aopWnd != null)
+                            {
+                                aopWnd.Close();
+                                aopWnd = null;
+                            }
+                        }
+                        else if (wParam.ToInt32() == 2)
+                        {
+                            if (aopWnd != null)
+                            {
+                                aopWnd.UpdateText(Marshal.PtrToStringUni(lParam));
+                                MAppWorkCall3(213, aopWnd.Handle);
+                            }
+                        }
+                        break;
+                    }
+                case M_CALLBACK_CLEAR_ILLEGAL_TOP_WND:
+                    {
+                        StringBuilder sb = new StringBuilder(260);
+                        GetWindowText(wParam, sb, 260);
+                        FormWindowKillAsk fa = new FormWindowKillAsk("窗口名称 ：" + sb.ToString(), wParam);
+                        fa.Show();
+                        MAppWorkCall3(213, fa.Handle);
+                        break;
+                    }
+                case M_CALLBACK_SWITCH_IDM_ALWAYSTOP_SET:
+                    {
+                        break;
+                    }
                 case M_CALLBACK_SWITCH_MAINGROUP_SET:
                     {
                         if (tabControlMain.SelectedTab == tabPageProcCtl)
@@ -6743,7 +6844,7 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                     }
                 case M_CALLBACK_ABOUT:
                     {
-                        Caller.ShowAboutDlg();
+                        new FormAbout().ShowDialog();
                         break;
                     }
                 case M_CALLBACK_ENDTASK:
@@ -7008,12 +7109,17 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                             StartMListExpandAll();
                         break;
                     }
+                case M_CALLBACK_SHOW_HELP:
+                    {
+                        new FormHelp().ShowDialog();
+                        break;
+                    }
             }
         }
 
         #region FormEvent
 
-        public const string QQ = "1501076885";
+        //窗口的一些事件
 
         private void AppLastLoadStep()
         {
@@ -7244,6 +7350,7 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
             return 0;
         }
 
+        private FormAlwaysOnTop aopWnd = null;
         private FormKDbgPrint kDbgPrint = null;
         private bool exitkDbgPrintCalled = false;
         private void KDbgPrint_FormClosed(object sender, FormClosedEventArgs e)
@@ -7258,6 +7365,7 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
         private bool min_hide = false;
         private bool highlight_nosystem = false;
 
+        //加载
         private void LoadAllFonts()
         {
             FormSettings.LoadFontSettingForUI(tabControlMain);
@@ -7305,19 +7413,15 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
 
             TaskMgrListHeaderItem li8 = new TaskMgrListHeaderItem();
             li8.TextSmall = LanuageMgr.GetStr("TitleName");
-            li8.Width = 400;
+            li8.Width = 300;
             listUwpApps.Colunms.Add(li8);
-            TaskMgrListHeaderItem li9 = new TaskMgrListHeaderItem();
-            li9.TextSmall = LanuageMgr.GetStr("TitlePublisher");
-            li9.Width = 100;
-            listUwpApps.Colunms.Add(li9);
             TaskMgrListHeaderItem li10 = new TaskMgrListHeaderItem();
             li10.TextSmall = LanuageMgr.GetStr("TitleFullName");
-            li10.Width = 130;
+            li10.Width = 260;
             listUwpApps.Colunms.Add(li10);
             TaskMgrListHeaderItem li11 = new TaskMgrListHeaderItem();
             li11.TextSmall = LanuageMgr.GetStr("TitleInstallDir");
-            li11.Width = 130;
+            li11.Width = 260;
             listUwpApps.Colunms.Add(li11);
 
             listUsers.Header.Height = 36;
@@ -7446,6 +7550,7 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
             MAppWorkCall3(195, IntPtr.Zero, GetConfigBool("CloseHideToNotfication", "AppSetting", false) ? new IntPtr(1) : IntPtr.Zero);
             MAppWorkCall3(196, IntPtr.Zero, GetConfigBool("MinHide", "AppSetting", false) ? new IntPtr(1) : IntPtr.Zero);
             MAppWorkCall3(162, IntPtr.Zero, GetConfigBool("MainGrouping", "AppSetting", false) ? new IntPtr(1) : IntPtr.Zero);
+            MAppWorkCall3(156, IntPtr.Zero, GetConfigBool("AlwaysOnTop", "AppSetting", false) ? new IntPtr(1) : IntPtr.Zero);
             MAppWorkCall3(164, IntPtr.Zero, IntPtr.Zero);
             MAppWorkCall3(163, IntPtr.Zero, IntPtr.Zero);
         }
@@ -7554,6 +7659,7 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
             }
         }
 
+        //保存和读取视图列的宽度
         private void LoadListColumnsWidth()
         {
             string s = GetConfig("ListStartsWidths", "AppSetting", "");
@@ -7638,6 +7744,8 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
 
         private void InitializeCtlText()
         {
+            //自定义控件文字？？？
+
             spBottom.Text = "底部分隔符";
             spl1.Text = "分隔符";
             sp5.Text = "分隔符";
@@ -7662,9 +7770,8 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
 
         }
 
-        //notifyIcon
+        //notifyIcon 托盘图标事件
         private bool notifyIcon_mouseEntered = false;
-
         private void notifyIcon_MouseEnter(object sender, EventArgs e)
         {
             PerfSetTrayPos();
@@ -7687,7 +7794,7 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
             }
         }
 
-        //notifyIcon menu
+        //notifyIcon menu 托盘图标菜单事件
         private void 退出程序ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             AppExit();
@@ -7707,6 +7814,7 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                 显示隐藏主界面ToolStripMenuItem.Text = str_ShowMain;
         }
 
+        //窗口事件
         private void FormMain_Shown(object sender, EventArgs e)
         {
             AppLoad();
@@ -7906,6 +8014,7 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
                 if (min_hide && m.WParam.ToInt32() == 0xF20)//SC_MINIMIZE
                     Hide();
             }
+            //WndProc部分交予 Native 控制
             coreWndProc?.Invoke(m.HWnd, Convert.ToUInt32(m.Msg), m.WParam, m.LParam);
         }
 
@@ -7916,6 +8025,7 @@ DblCklShow_RTL_USER_PROCESS_PARAMETERS	Double Click this item to show RTL_USER_P
 
         #endregion
 
+        //标签点击事件
         private void tabControlMain_Selected(object sender, TabControlEventArgs e)
         {
             if (e.TabPage == tabPageProcCtl)

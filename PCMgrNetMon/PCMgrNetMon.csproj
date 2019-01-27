@@ -120,11 +120,5 @@
   <ItemGroup>
     <Content Include="icoPcmgrNetMon.ico" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\PCMgrUWP\PCMgrUWP.csproj">
-      <Project>{70682f19-24fd-4717-95d3-cfbfb4e02f00}</Project>
-      <Name>PCMgrUWP</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -1,0 +1,168 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+
+<head>
+    <title>PageAbout</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <style>
+        body{
+            margin: 0;
+            font-family: 'Microsoft YaHei UI';
+        }
+        div {
+            position: relative;
+        }
+        .center {
+            text-align:center;
+        }
+        div.block {
+            border-top: 1px dashed #808080;
+            margin: 25px;
+            margin-top: 30px;
+            padding-top: 10px;
+            padding-left: 10px;
+        }
+            div.block h3 {
+                position: absolute;
+                top: -25px;
+                background-color: #ff6a00;
+                padding: .5rem 2rem;
+                border-radius: 5rem;
+                color: #fff;
+                margin: 0 auto;
+            }
+        .forkme_link {
+            position: absolute;
+            top: 0;
+            right: 0;
+            border: 0;
+            z-index: 5;
+        }
+        h2, h3 {
+            margin: 0;
+        }
+        .txt-title {
+            color: #ff6a00;
+            font-size: 29px;
+            margin-top: 25px;
+        }
+        .txt-ver{
+            background-color:#0081de;
+            border-radius: 0.25rem;
+            padding: 5px;
+            font-size: 10px;
+            color: #fff;
+            position: absolute;
+            top: 20px;
+            left: 385px;
+        }
+        .txt-footer-copyright {
+            font-size: 20px;
+            color: #ff6a00;
+        }
+        .img-platform {
+            position: absolute;
+            top: -3px;
+            right: 70px;
+        }
+        .btn-ok {
+            position: absolute;
+            top: 0px;
+            right: 0px;
+        }
+        #txt_updates{
+            margin-left: 10px;
+            color: #ff6a00;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="https://github.com/717021/pcmgr" target="_blank" class="forkme_link">
+        <img src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" />
+    </a>
+    <span id="txt_current_ver" style="display:none">0.0.0.0</span>
+    <div class="center">
+        <h2 class="txt-title"></h2>
+        <img id="txt_title" src="" />
+        <span id="txt_show_ver" class="txt-ver">未知版本</span>
+        <p>一个模仿 Windows 任务管理器的软件</p>
+    </div>
+    <div class="block">
+        <h3>关于</h3>
+        <p>
+            这是一个适用于 Windows 的任务管理器软件，模仿了 Windows 10 的任务管理器，在其基础上添加了一些附加的功能，
+            可以说是普通任务管理器的加强版（实际上是垃圾版），当然，还有很多功能没有完善。
+        </p>
+        <p>
+            <b>本软件开源，遵守 MIT 协议</b>，如果你对这个软件感兴趣，欢迎访问 <a href="https://github.com/717021/pcmgr" target="_blank">github</a> 下载软件源码研究（请原谅我的代码水平糟糕）。
+        </p>
+        <p>
+            <b>免责声明</b>：您在使用本软件时，可能会对系统做出意外的更改，造成系统故障或是其他损失，因此软件在默认情况下不会允许危险的操作。
+            如果您意外操作本软件造成了损失，本软件概不负责，因此，请参照软件帮助使用本软件。<br />
+        </p>
+    </div>
+    <div class="block">
+        <h3>更新</h3>
+        <p>理论上来说，我有空就会更新一下，加一点小功能，或许我会一直更新到 Windows 系统不再流行的那天。</p>
+        <p>本软件有在线更新功能，您可以点击下面的检钮检测新版本。</p>
+        <p><button id="btn_check_update" onclick="check_update()">检测更新</button><span id="txt_updates">点击按钮检测更新</span></p>
+    </div>
+    <div class="block">
+        <h3>联系我们</h3>
+        <p>
+            <b>制作者：</b>Drimfish（YuZeCheng）<br />
+            <b>QQ：</b>1501076885<br />
+            <b>博客：</b><a href="https://www.imyzc.com" target="_blank">www.imyzc.com</a><br />
+        </p>
+        <div class="txt-footer-copyright">Copyright © 2019 All rights reserved <img id="img_platform" class="img-platform" /><button class="btn-ok" onclick="window.external.BtnClose()">关闭</button></div>
+    </div>
+    <script>
+        var update_checked = false;
+        var xhr;
+
+        function check_update() {
+            if (update_checked) {
+                window.external.BtnRunUpdate()
+            } else {
+                xhr = null;
+                if (window.XMLHttpRequest) {
+                    // code for all new browsers
+                    xhr = new XMLHttpRequest();
+                }
+                else if (window.ActiveXObject) {
+                    // code for IE5 and IE6
+                    xhr = new ActiveXObject("Microsoft.XMLHTTP");
+                }
+                if (xhr != null) {
+                    xhr.onreadystatechange = check_update_callback;
+                    xhr.open("GET", "http://www.imyzc.com/softs/pcmgr/?checkupdate=" + document.getElementById('txt_current_ver').innerText, true);
+                    xhr.send(null);
+                }
+                else alert("Your browser does not support XMLHTTP.");
+            }
+        }
+        function check_update_callback() {
+            if (xhr.readyState == 4 && (xhr.status == 0 || xhr.status == 200)) {
+                update_checked = true;
+                var b = xhr.responseText;
+                if (b == "newupdate") {
+                    document.getElementById('txt_updates').innerText = '有新的更新，点击按钮开始更新';
+                    document.getElementById('btn_check_update').innerText = '立即更新';
+                } else if (b == "latest") {
+                    document.getElementById('txt_updates').innerText = '当前已经是最新版本';
+                    document.getElementById('btn_check_update').setAttribute('style', 'display:none');
+                } else {
+                    document.getElementById('txt_updates').innerText = '更新错误 ' + b;
+                    document.getElementById('btn_check_update').setAttribute('style', 'display:none');
+                }
+            } else if (xhr.status >= 400) {
+                document.getElementById('txt_updates').innerText = '更新错误 ' + xhr.status;
+                document.getElementById('btn_check_update').setAttribute('style', 'display:none');
+            }
+        }
+    </script>
+</body>
+
+</html>

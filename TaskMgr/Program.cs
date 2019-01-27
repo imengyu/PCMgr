@@ -150,6 +150,11 @@ namespace PCMgr
                             Application.Run(new WorkWindow.FormTest());
                             return false;
                         }
+                    case "about":
+                        {
+                            Application.Run(new WorkWindow.FormAbout());
+                            return false;
+                        }
                 }
             }
             return true;
@@ -262,8 +267,9 @@ namespace PCMgr
             Application.ThreadException += Application_ThreadException;
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 
+            //开始的暂停调试功能
             if (NativeMethods.GetConfigBool("BreakInStart", "AppSetting"))
-                MessageBox.Show("Program Entry break , you an attatch to debugger now.");
+                MessageBox.Show("Program Entry break , you can attatch to debugger now.");
 
             int argscount = MAppMainGetArgs(cmdline);
             List<string> agrs = new List<string>();

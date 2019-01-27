@@ -536,3 +536,79 @@ M_CAPI(BOOL) MREG_EnumKeys(HKEY hRootKey, LPWSTR path, ENUMKEYSCALLBACK callBack
 	else LogErr(L"Enum child key (%s\\%s) failed in RegOpenKeyEx : %d", MREG_ROOTKEYToStr(hRootKey), path, lastErr);
 	return FALSE;
 }
+
+M_CAPI(BOOL) MREG_IsCurrentIEVersionOK(DWORD ver, LPWSTR currentProcessName) {
+	BOOL ok = FALSE;
+	HKEY hKey = NULL;
+#ifdef _X64_
+	lastErr = RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Internet Explorer\\MAIN\\FeatureControl\\FEATURE_BROWSER_EMULATION", 0, KEY_READ, &hKey);
+	if (lastErr == ERROR_SUCCESS) {
+		DWORD dwValue;
+		DWORD dwSize = sizeof(dwValue);
+		DWORD dwType = REG_DWORD;
+
+		if (RegQueryValueEx(hKey, currentProcessName, 0, &dwType, (LPBYTE)&dwValue, &dwSize) == ERROR_SUCCESS)
+			if (dwValue >= ver) ok = TRUE;
+		RegCloseKey(hKey);
+}
+	lastErr = RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Wow6432Node\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\FEATURE_BROWSER_EMULATION", 0, KEY_READ, &hKey);
+	if (lastErr == ERROR_SUCCESS) {
+		DWORD dwValue;
+		DWORD dwSize = sizeof(dwValue);
+		DWORD dwType = REG_DWORD;
+
+		if (RegQueryValueEx(hKey, currentProcessName, 0, &dwType, (LPBYTE)&dwValue, &dwSize) == ERROR_SUCCESS)
+			if (dwValue >= ver) ok = TRUE;
+		RegCloseKey(hKey);
+}
+#else
+	lastErr = RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Wow6432Node\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\FEATURE_BROWSER_EMULATION", 0, KEY_READ | KEY_WRITE, &hKey);
+	if (lastErr == ERROR_SUCCESS) {
+		DWORD dwValue;
+		DWORD dwSize = sizeof(dwValue);
+		DWORD dwType = REG_DWORD;
+
+		if (RegQueryValueEx(hKey, currentProcessName, 0, &dwType, (LPBYTE)&dwValue, &dwSize) == ERROR_SUCCESS)
+			if (dwValue >= ver) ok = TRUE;
+		RegCloseKey(hKey);
+	}
+#endif
+	return ok;
+}
+M_CAPI(BOOL) MREG_SetCurrentIEVersion(DWORD ver, LPWSTR currentProcessName) {
+	HKEY hKey;
+#ifdef _X64_
+	lastErr = RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Internet Explorer\\MAIN\\FeatureControl\\FEATURE_BROWSER_EMULATION", 0, KEY_READ | KEY_WRITE, &hKey);
+	if (lastErr == ERROR_SUCCESS)
+	{
+		lastErr = RegSetValueEx(hKey, currentProcessName, 0, REG_DWORD, (LPBYTE)&ver, sizeof(DWORD));
+		if (lastErr != ERROR_SUCCESS)
+			LogErr2(L"RegSetValueEx failed : %d", lastErr);
+		return lastErr == ERROR_SUCCESS;
+	}
+	else LogErr2(L"RegOpenKeyEx failed : %d", lastErr);
+	RegCloseKey(hKey);
+	lastErr = RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Wow6432Node\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\FEATURE_BROWSER_EMULATION", 0, KEY_READ | KEY_WRITE, &hKey);
+	if (lastErr == ERROR_SUCCESS)
+	{
+		lastErr = RegSetValueEx(hKey, currentProcessName, 0, REG_DWORD, (LPBYTE)&ver, sizeof(DWORD));
+		if (lastErr != ERROR_SUCCESS)
+			LogErr2(L"RegSetValueEx failed : %d", lastErr);
+		return lastErr == ERROR_SUCCESS;
+	}
+	else LogErr2(L"RegOpenKeyEx failed : %d", lastErr);
+	RegCloseKey(hKey);
+#else
+	lastErr = RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Wow6432Node\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\FEATURE_BROWSER_EMULATION", 0, KEY_READ | KEY_WRITE, &hKey);
+	if (lastErr == ERROR_SUCCESS)
+	{
+		lastErr = RegSetValueEx(hKey, currentProcessName, 0, REG_DWORD, (LPBYTE)&ver, sizeof(DWORD));
+		if (lastErr != ERROR_SUCCESS)
+			LogErr2(L"RegSetValueEx failed : %d", lastErr);
+		return lastErr == ERROR_SUCCESS;
+	}
+	else LogErr2(L"RegOpenKeyEx failed : %d", lastErr);
+	RegCloseKey(hKey);
+#endif
+	return FALSE;
+}

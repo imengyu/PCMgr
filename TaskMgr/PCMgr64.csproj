@@ -81,6 +81,7 @@
     <PlatformTarget>x64</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
     <OutputPath>..\Release_64\</OutputPath>
@@ -91,6 +92,7 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <DebugSymbols>true</DebugSymbols>
@@ -101,6 +103,7 @@
     <PlatformTarget>x64</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <OutputPath>..\Release_64\</OutputPath>
@@ -111,13 +114,11 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup />
   <PropertyGroup />
   <ItemGroup>
-    <Reference Include="AeroWizard64">
-      <HintPath>..\AeroWizard64.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
@@ -222,6 +223,18 @@
     <Compile Include="Ctls\TaskMgrList.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="WorkWindow\FormAbout.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WorkWindow\FormAbout.Designer.cs">
+      <DependentUpon>FormAbout.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WorkWindow\FormAlwaysOnTop.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WorkWindow\FormAlwaysOnTop.Designer.cs">
+      <DependentUpon>FormAlwaysOnTop.cs</DependentUpon>
+    </Compile>
     <Compile Include="WorkWindow\FormCheckFileUse.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -234,12 +247,6 @@
     <Compile Include="WorkWindow\FormDetalsistHeaders.Designer.cs">
       <DependentUpon>FormDetalsistHeaders.cs</DependentUpon>
     </Compile>
-    <Compile Include="WorkWindow\FormFirst.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="WorkWindow\FormFirst.Designer.cs">
-      <DependentUpon>FormFirst.cs</DependentUpon>
-    </Compile>
     <Compile Include="WorkWindow\FormDelFileProgress.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -251,6 +258,12 @@
     </Compile>
     <Compile Include="WorkWindow\FormFillWithData.Designer.cs">
       <DependentUpon>FormFillWithData.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WorkWindow\FormHelp.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WorkWindow\FormHelp.Designer.cs">
+      <DependentUpon>FormHelp.cs</DependentUpon>
     </Compile>
     <Compile Include="WorkWindow\FormSetAffinity.cs">
       <SubType>Form</SubType>
@@ -275,6 +288,12 @@
     </Compile>
     <Compile Include="WorkWindow\FormVTimers.Designer.cs">
       <DependentUpon>FormVTimers.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WorkWindow\FormWindowKillAsk.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WorkWindow\FormWindowKillAsk.Designer.cs">
+      <DependentUpon>FormWindowKillAsk.cs</DependentUpon>
     </Compile>
     <Compile Include="WorkWindow\KDbgPrint\FormKDbgPrint.cs">
       <SubType>Form</SubType>
@@ -385,17 +404,23 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>LanuageResource_en.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormAbout.resx">
+      <DependentUpon>FormAbout.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormAlwaysOnTop.resx">
+      <DependentUpon>FormAlwaysOnTop.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="WorkWindow\FormDetalsistHeaders.en.resx">
       <DependentUpon>FormDetalsistHeaders.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="WorkWindow\FormDetalsistHeaders.resx">
       <DependentUpon>FormDetalsistHeaders.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="WorkWindow\FormFirst.resx">
-      <DependentUpon>FormFirst.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="WorkWindow\FormDelFileProgress.en.resx">
       <DependentUpon>FormDelFileProgress.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormHelp.resx">
+      <DependentUpon>FormHelp.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="WorkWindow\FormSetAffinity.en.resx">
       <DependentUpon>FormSetAffinity.cs</DependentUpon>
@@ -417,6 +442,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="WorkWindow\FormVTimers.resx">
       <DependentUpon>FormVTimers.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormWindowKillAsk.resx">
+      <DependentUpon>FormWindowKillAsk.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="WorkWindow\KDbgPrint\FormKDbgPrint.resx">
       <DependentUpon>FormKDbgPrint.cs</DependentUpon>
@@ -580,12 +608,6 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\PCMgrUWP\PCMgrUWP64.csproj">
-      <Project>{ded02cbd-498e-4301-a7d5-1f9102ceafaf}</Project>
-      <Name>PCMgrUWP64</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Dialogs\" />

@@ -10,6 +10,7 @@ typedef BOOL(*ENUMKEYSCALLBACK)(HKEY hRootKey, LPWSTR path, LPWSTR childKeyName,
 M_CAPI(BOOL) MREG_RenameKey(HKEY hRootKey, LPWSTR path, LPWSTR newName);
 //强制删除驱动服务的注册表
 M_CAPI(BOOL) MREG_ForceDeleteServiceRegkey(LPWSTR lpszDriverName);
+
 //获取服务的注册表键值路径
 //    servicName：服务名称
 //    [OUT] buf：输出注册表键值路径

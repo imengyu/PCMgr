@@ -22,7 +22,7 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{E2499B72-39C2-4DFA-900D-67000CCC2634}</ProjectGuid>
     <RootNamespace>PCMgrCoreen</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -70,7 +70,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);E:\主数据库\编程\方案8\PCMgr\TaskMgrCore;</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\TaskMgrCore</IncludePath>
     <TargetName>PCMgrApp32.resource2</TargetName>
     <OutDir>$(SolutionDir)$(Configuration)\en\</OutDir>
     <GenerateManifest>false</GenerateManifest>
@@ -79,7 +79,7 @@
     <EmbedManifest>false</EmbedManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);E:\主数据库\编程\方案8\PCMgr\TaskMgrCore</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\TaskMgrCore</IncludePath>
     <TargetName>PCMgrApp32.resource2</TargetName>
     <OutDir>$(SolutionDir)$(Configuration)\en\</OutDir>
     <GenerateManifest>false</GenerateManifest>
@@ -90,7 +90,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <TargetName>PCMgrApp64.resource2</TargetName>
     <OutDir>$(SolutionDir)$(Configuration)_64\en\</OutDir>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);E:\主数据库\编程\方案8\PCMgr\TaskMgrCore;</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\TaskMgrCore</IncludePath>
     <GenerateManifest>false</GenerateManifest>
     <LinkIncremental>
     </LinkIncremental>
@@ -99,7 +99,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <TargetName>PCMgrApp64.resource2</TargetName>
     <OutDir>$(SolutionDir)$(Configuration)_64\en\</OutDir>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);E:\主数据库\编程\方案8\PCMgr\TaskMgrCore;</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\TaskMgrCore</IncludePath>
     <GenerateManifest>false</GenerateManifest>
     <LinkIncremental>
     </LinkIncremental>

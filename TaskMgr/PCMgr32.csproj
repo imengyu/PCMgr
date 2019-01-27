@@ -75,12 +75,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>..\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;_X86_</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DebugType>full</DebugType>
     <PlatformTarget>x86</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
     <OutputPath>..\Release\</OutputPath>
@@ -91,6 +92,7 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <DebugSymbols>true</DebugSymbols>
@@ -101,6 +103,7 @@
     <PlatformTarget>x86</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <OutputPath>..\Release\</OutputPath>
@@ -111,16 +114,16 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup />
   <PropertyGroup />
   <ItemGroup>
-    <Reference Include="AeroWizard32">
-      <HintPath>..\AeroWizard32.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Aero\CommandLink.cs">
@@ -222,6 +225,18 @@
     <Compile Include="Ctls\TaskMgrList.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="WorkWindow\FormAbout.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WorkWindow\FormAbout.Designer.cs">
+      <DependentUpon>FormAbout.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WorkWindow\FormAlwaysOnTop.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WorkWindow\FormAlwaysOnTop.Designer.cs">
+      <DependentUpon>FormAlwaysOnTop.cs</DependentUpon>
+    </Compile>
     <Compile Include="WorkWindow\FormCheckFileUse.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -234,11 +249,11 @@
     <Compile Include="WorkWindow\FormDetalsistHeaders.Designer.cs">
       <DependentUpon>FormDetalsistHeaders.cs</DependentUpon>
     </Compile>
-    <Compile Include="WorkWindow\FormFirst.cs">
+    <Compile Include="WorkWindow\FormHelp.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="WorkWindow\FormFirst.Designer.cs">
-      <DependentUpon>FormFirst.cs</DependentUpon>
+    <Compile Include="WorkWindow\FormHelp.Designer.cs">
+      <DependentUpon>FormHelp.cs</DependentUpon>
     </Compile>
     <Compile Include="WorkWindow\FormSetAffinity.cs">
       <SubType>Form</SubType>
@@ -263,6 +278,12 @@
     </Compile>
     <Compile Include="WorkWindow\FormVTimers.Designer.cs">
       <DependentUpon>FormVTimers.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WorkWindow\FormWindowKillAsk.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WorkWindow\FormWindowKillAsk.Designer.cs">
+      <DependentUpon>FormWindowKillAsk.cs</DependentUpon>
     </Compile>
     <Compile Include="WorkWindow\Tools\FormKDA.cs">
       <SubType>Form</SubType>
@@ -386,6 +407,15 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>LanuageResource_en.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormAbout.en.resx">
+      <DependentUpon>FormAbout.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormAbout.resx">
+      <DependentUpon>FormAbout.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormAlwaysOnTop.resx">
+      <DependentUpon>FormAlwaysOnTop.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="WorkWindow\FormDetalsistHeaders.en.resx">
       <DependentUpon>FormDetalsistHeaders.cs</DependentUpon>
     </EmbeddedResource>
@@ -393,8 +423,8 @@
       <DependentUpon>FormDetalsistHeaders.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="WorkWindow\FormFirst.resx">
-      <DependentUpon>FormFirst.cs</DependentUpon>
+    <EmbeddedResource Include="WorkWindow\FormHelp.resx">
+      <DependentUpon>FormHelp.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="WorkWindow\FormSetAffinity.en.resx">
       <DependentUpon>FormSetAffinity.cs</DependentUpon>
@@ -417,6 +447,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="WorkWindow\FormVTimers.resx">
       <DependentUpon>FormVTimers.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormWindowKillAsk.resx">
+      <DependentUpon>FormWindowKillAsk.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="WorkWindow\Tools\FormKDA.en.resx">
       <DependentUpon>FormKDA.cs</DependentUpon>
@@ -532,6 +565,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="WorkWindow\PageAbout.html" />
     <None Include="Resources\img_x64.png" />
     <None Include="Resources\img_x32inx64.png" />
     <None Include="Resources\img_x32.png" />
@@ -587,12 +621,6 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\PCMgrUWP\PCMgrUWP.csproj">
-      <Project>{70682f19-24fd-4717-95d3-cfbfb4e02f00}</Project>
-      <Name>PCMgrUWP</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Dialogs\" />

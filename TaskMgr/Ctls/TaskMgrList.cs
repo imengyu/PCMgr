@@ -108,14 +108,14 @@ namespace PCMgr.Ctls
         private void Items_ItemRemoved(TaskMgrListItem obj)
         {
             //SyncItems(true);
+            if (showedItems.Contains(obj))
+            {
+                showedItems.Remove(obj);
+            }
             if (obj == selectedItem)
             {
                 selectedItem = null;
                 SelectItemChanged?.Invoke(this, EventArgs.Empty);
-            }
-            if(showedItems.Contains(obj))
-            {
-                showedItems.Remove(obj);
             }
         }
         private void Items_ItemAdd(TaskMgrListItem obj)
