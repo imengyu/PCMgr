@@ -5,10 +5,10 @@ namespace PCMgr.WorkWindow
 {
     public partial class FormDetalsistHeaders : Form
     {
-        public FormDetalsistHeaders()
+        public FormDetalsistHeaders(FormMain m)
         {
             InitializeComponent();
-            formMain = FormMain.Instance;
+            formMain = m;
         }
 
         private FormMain formMain = null;
@@ -21,12 +21,12 @@ namespace PCMgr.WorkWindow
         {
             FormSettings.LoadFontSettingForUI(this);
             NativeMethods.MAppWorkCall3(182, listItems.Handle, IntPtr.Zero);
-            foreach (string s in formMain.allCols)
+            foreach (string s in formMain.MainPageProcessDetails.allCols)
             {
                 ListViewItem item = new ListViewItem();
                 item.Name = s;
                 item.Text = Lanuages.LanuageMgr.GetStr(s);
-                if (formMain.ProcessListDetailsGetListIndex(s) != -1)
+                if (formMain.MainPageProcessDetails.ProcessListDetailsGetListIndex(s) != -1)
                 {
                     item.Tag = "OldShow";
                     item.Checked = true;
@@ -51,12 +51,12 @@ namespace PCMgr.WorkWindow
             foreach (ListViewItem item in listItems.Items)
             {
                 if (item.Tag.ToString() == "OldShow" && item.Checked == false)
-                    formMain.ProcessListDetailsRemoveHeader(item.Name);
+                    formMain.MainPageProcessDetails.ProcessListDetailsRemoveHeader(item.Name);
                 if (item.Tag.ToString() == "NewShow" && item.Checked)
-                    formMain.ProcessListDetailsAddHeader(item.Name);
+                    formMain.MainPageProcessDetails.ProcessListDetailsAddHeader(item.Name);
             }
-            formMain.ProcessListDetailsGetColumnsIndex();
-            formMain.nextUpdateStaticVals = true;
+            formMain.MainPageProcessDetails.ProcessListDetailsGetColumnsIndex();
+            formMain.MainPageProcessDetails.nextUpdateStaticVals = true;
             Close();
         }
     }

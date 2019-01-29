@@ -104,8 +104,8 @@ namespace PCMgr.Ctls
                 performanceGrid.AddData((int)(lastReceive / 1024 * 8));
             }
 
-            customString = FormMain.str_Sent + " : " + (lastSent / 1024 * 8).ToString("0.0") + " "
-                + FormMain.str_Receive + " : " + (lastReceive / 1024 * 8).ToString("0.0") + " Kbps";
+            customString = LanuageMgr.GetStr("Send") + " " + (lastSent / 1024 * 8).ToString("0.0") + " "
+                + LanuageMgr.GetStr("Receive") + " " + (lastReceive / 1024 * 8).ToString("0.0") + " Kbps";
             outdata1 = (int)(lastSent * 0.0001);
             outdata2 = (int)(lastReceive * 0.0001);
             return true;
@@ -118,17 +118,17 @@ namespace PCMgr.Ctls
             item_readSpeed = new PerformanceInfos.PerformanceInfoSpeicalItem();
             item_writeSpeed = new PerformanceInfos.PerformanceInfoSpeicalItem();
             item_writeSpeed.LineSp = true;
-            item_readSpeed.Name = FormMain.str_Sent;
-            item_writeSpeed.Name = FormMain.str_Receive;
+            item_readSpeed.Name = LanuageMgr.GetStr("Send");
+            item_writeSpeed.Name = LanuageMgr.GetStr("Receive");
             item_readSpeed.DrawFrontLine = true;
-            item_readSpeed.FrontLineColor = FormMain.NetDrawColor;
+            item_readSpeed.FrontLineColor = Main.MainPagePerf.NetDrawColor;
             item_readSpeed.FrontLineIsDotted = true;
             item_writeSpeed.DrawFrontLine = true;
-            item_writeSpeed.FrontLineColor = FormMain.NetDrawColor;
+            item_writeSpeed.FrontLineColor = Main.MainPagePerf.NetDrawColor;
 
             performanceGrid.MaxValue = 100;
             performanceGrid.DrawData2 = true;
-            performanceGrid.MaxUnitPen = new Pen(FormMain.NetDrawColor);
+            performanceGrid.MaxUnitPen = new Pen(Main.MainPagePerf.NetDrawColor);
 
             performanceInfos.FontTitle = new Font("Microsoft YaHei UI", 9);
             performanceInfos.SpeicalItems.Add(item_readSpeed);
@@ -163,9 +163,13 @@ namespace PCMgr.Ctls
                     return 5120;//5m
                 if (lastMaxSpeed < 10300)
                     return 10240;//10m
-                if (lastMaxSpeed < 103000)
+                if (lastMaxSpeed < 20500)
+                    return 20480;//20m
+                if (lastMaxSpeed < 51000)
+                    return 51200;//50m
+                if (lastMaxSpeed < 103400)
                     return 102400;//100m
-                if (lastMaxSpeed < 513000)
+                if (lastMaxSpeed < 520000)
                     return 512000;//500m
                 else return 1048576;//1g
             }

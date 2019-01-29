@@ -99,9 +99,9 @@ namespace PCMgr.Lanuages {
         /// <summary>
         ///   查找类似 重新启动(E) 的本地化字符串。
         /// </summary>
-        internal static string BtnRestartText {
+        internal static string BtnRestart {
             get {
-                return ResourceManager.GetString("BtnRestartText", resourceCulture);
+                return ResourceManager.GetString("BtnRestart", resourceCulture);
             }
         }
         

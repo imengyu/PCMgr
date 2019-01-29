@@ -111,7 +111,7 @@ namespace PCMgr.WorkWindow
                 formFind.Hide();
                 MAppWorkCall3(213, Handle, IntPtr.Zero);
             }
-            else MessageBox.Show(FormMain.str_CantFind + " \"" + keyword + "\"");
+            else MessageBox.Show(Lanuages.LanuageMgr.GetStr("CantFind") + " \"" + keyword + "\"");
         }
 
         private void addItem(string s)

@@ -129,7 +129,7 @@
   <data name="BtnEndTask" xml:space="preserve">
     <value>结束任务(E)</value>
   </data>
-  <data name="BtnRestartText" xml:space="preserve">
+  <data name="BtnRestart" xml:space="preserve">
     <value>重新启动(E)</value>
   </data>
   <data name="CancelRun" xml:space="preserve">

@@ -67,13 +67,13 @@ namespace PCMgr.WorkWindow
                     succeed = true;
                 }
             }
-            else MessageBox.Show(FormMain.str_filenotexist);
+            else MessageBox.Show(Lanuages.LanuageFBuffers.Str_FileNotExist);
 
             if (!succeed)
             {
                 btnRelease.Enabled = false;
                 btnReleaseAll.Enabled = false;
-                MessageBox.Show(FormMain.str_failed);
+                MessageBox.Show(Lanuages.LanuageFBuffers.Str_Failed);
             }
         }
 
@@ -83,8 +83,8 @@ namespace PCMgr.WorkWindow
             {
                 IntPtr handle = (IntPtr)listViewUsing.SelectedItems[0].Tag;
                 if (M_SU_CloseHandleWithProcess(handle))
-                    MessageBox.Show(FormMain.str_UnlockFileSuccess);
-                else MessageBox.Show(FormMain.str_UnlockFileFailed);
+                    MessageBox.Show(Lanuages.LanuageMgr.GetStr("UnlockFileSuccess"));
+                else MessageBox.Show(Lanuages.LanuageMgr.GetStr("UnlockFileFailed"));
             }
 
         }
@@ -97,7 +97,7 @@ namespace PCMgr.WorkWindow
                 {
                     IntPtr handle = (IntPtr)listViewUsing.Items[i].Tag;
                     if (!M_SU_CloseHandleWithProcess(handle))
-                        MessageBox.Show(FormMain.str_UnlockFileFailed + " : " + listViewUsing.Items[i].SubItems[1].Text);
+                        MessageBox.Show(Lanuages.LanuageMgr.GetStr("UnlockFileFailed") + " : " + listViewUsing.Items[i].SubItems[1].Text);
                 }
             }
         }

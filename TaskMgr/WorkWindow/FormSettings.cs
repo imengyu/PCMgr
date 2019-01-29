@@ -76,24 +76,7 @@ namespace PCMgr.WorkWindow
                     break;
 
             }
-            try
-            {
-                string font = GetConfig("Font", "AppSetting");
-                if (font != "")
-                {
-                   tabControl1.Font = (Font)new FontConverter().ConvertFromString(font);
-                    lbFont.Text = font;
-                }
-                else
-                {
-                    lbFont.Text = new FontConverter().ConvertToString(tabControl1.Font);
-                }
-                fontDialog1.Font = Font;
-            }
-            catch
-            {
-
-            }
+           
 
             checkBoxAbortShutdown.Checked = GetConfigBool("AbortShutdown", "AppSetting", false);
             checkBoxTop.Checked = GetConfigBool("TopMost", "AppSetting", false);
@@ -149,9 +132,6 @@ namespace PCMgr.WorkWindow
             SetConfigBool("HotKey", "AppSetting", checkBoxShowHotKey.Checked);
             SetConfigBool("SelfProtect", "AppSetting", checkBoxSelfProtect.Checked);
             SetConfig("Title", "AppSetting", textBoxTitle.Text);
-            if (textBoxTitle.Text != "")
-                FormMain.Instance.Text = textBoxTitle.Text;
-            else FormMain.Instance.Text = FormMain.str_AppTitle;
             SetConfig("HotKey1", "AppSetting", comboBoxShowHotKey1.SelectedItem.ToString());
             SetConfig("HotKey2", "AppSetting", comboBoxShowHotKey2.SelectedItem.ToString());
             if(fontchanged) SetConfig("Font", "AppSetting", new FontConverter().ConvertToString(tabControl1.Font));
@@ -178,17 +158,17 @@ namespace PCMgr.WorkWindow
         private void checkBoxCannotCreateProc_CheckedChanged(object sender, EventArgs e)
         {
             if (!M_SU_SetKrlMonSet_CreateProcess(checkBoxCannotCreateProc.Checked))
-                MessageBox.Show(FormMain.str_failed);
+                MessageBox.Show(LanuageFBuffers.Str_Failed);
         }
         private void checkBoxCannotCreateThread_CheckedChanged(object sender, EventArgs e)
         {
             if (!M_SU_SetKrlMonSet_CreateThread(checkBoxCannotCreateThread.Checked))
-                MessageBox.Show(FormMain.str_failed);
+                MessageBox.Show(LanuageFBuffers.Str_Failed);
         }
         private void checkBoxCannotLoadDriver_CheckedChanged(object sender, EventArgs e)
         {
             if (!M_SU_SetKrlMonSet_LoadImage(checkBoxCannotLoadDriver.Checked))
-                MessageBox.Show(FormMain.str_failed);
+                MessageBox.Show(LanuageFBuffers.Str_Failed);
         }
 
         private void btnChooseFont_Click(object sender, EventArgs e)

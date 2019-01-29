@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using PCMgr.Lanuages;
 using static PCMgr.NativeMethods;
 
 namespace PCMgr.WorkWindow
@@ -41,7 +42,7 @@ namespace PCMgr.WorkWindow
             textBoxBariny.Text += barinystr;
             add_Item(Marshal.PtrToStringUni(addressstr), Marshal.PtrToStringUni(shell), barinystr, Marshal.PtrToStringUni(asm));
             if (showedsize == oncemaxdsize)
-                add_Item("", "", FormMain.str_DblClickToDa, "conload");
+                add_Item("", "",  LanuageMgr.GetStr("DblClickToDa"), "conload");
         }
 #else
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -54,7 +55,7 @@ namespace PCMgr.WorkWindow
             textBoxBariny.Text += barinystr;
             add_Item(Marshal.PtrToStringUni(addressstr), Marshal.PtrToStringUni(shell), barinystr, Marshal.PtrToStringUni(asm));
             if (showedsize == oncemaxdsize)
-                add_Item("", "", FormMain.str_DblClickToDa, "conload");
+                add_Item("", "", LanuageMgr.GetStr("DblClickToDa"), "conload");
         }
 #endif
         private void FormDA_Load(object sender, EventArgs e)
@@ -102,17 +103,17 @@ namespace PCMgr.WorkWindow
             textBoxBariny.Text = "";
             if (!MCanUseKernel())
             {
-                show_err(FormMain.str_DriverLoadFailed);
+                show_err(LanuageMgr.GetStr("DriverLoadFailed"));
                 return;
             }
             if (textBoxTargetAddress.Text == "")
             {
-                show_err(FormMain.str_PleaseEnterTargetAddress);
+                show_err(LanuageMgr.GetStr("PleaseEnterTargetAddress"));
                 return;
             }
             if (textBoxDesize.Text == "")
             {
-                show_err(FormMain.str_PleaseEnterDaSize);
+                show_err(LanuageMgr.GetStr("PleaseEnterDaSize"));
                 return;
             }
 
@@ -137,7 +138,7 @@ namespace PCMgr.WorkWindow
             if (size > oncemaxdsize)
                 rs = M_SU_KDA(CallbackPtr, address, oncemaxdsize);
             else rs = M_SU_KDA(CallbackPtr, address, size);
-            if (!rs) NativeMethods.LogErr("KDA Failed!");
+            if (!rs) LogErr("KDA Failed!");
         }
         private void show_err(string s)
         {

@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
-using System.Runtime.InteropServices;
-using System.Diagnostics;
 using PCMgr.Lanuages;
 using static PCMgr.NativeMethods;
 
@@ -155,32 +152,32 @@ namespace PCMgr.Ctls
                 notDrawGrid = true;
             }
 
-            performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem(LanuageMgr.GetStr("MaxSpeed"), MCpuInfoMonitor.GetCpuFrequency().ToString() + " MHz"));
-            performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem(LanuageMgr.GetStr("CpuCpunt"), cpuCount.ToString()));
+            performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem(LanuageMgr.GetStr("MaxSpeed", false), MCpuInfoMonitor.GetCpuFrequency().ToString() + " MHz"));
+            performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem(LanuageMgr.GetStr("CpuCpunt", false), cpuCount.ToString()));
 
             if (MCpuInfoMonitor.GetCpuInfos())
             {
-                performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem(LanuageMgr.GetStr("CpuPackageCount"), MCpuInfoMonitor.GetCpuPackage().ToString()));
-                performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem("L" + 1 + LanuageMgr.GetStr("Cache"), FormatFileSize1(Convert.ToInt32(MCpuInfoMonitor.GetCpuL1Cache()))));
-                performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem("L" + 2 + LanuageMgr.GetStr("Cache"), FormatFileSize1(Convert.ToInt32(MCpuInfoMonitor.GetCpuL2Cache()))));
-                if (MCpuInfoMonitor.GetCpuL3Cache() != 0) performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem("L" + 3 + LanuageMgr.GetStr("Cache"), FormatFileSize1(Convert.ToInt32(MCpuInfoMonitor.GetCpuL3Cache()))));
+                performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem(LanuageMgr.GetStr("CpuPackageCount", false), MCpuInfoMonitor.GetCpuPackage().ToString()));
+                performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem("L" + 1 + LanuageMgr.GetStr("Cache", false), FormatFileSize1(Convert.ToInt32(MCpuInfoMonitor.GetCpuL1Cache()))));
+                performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem("L" + 2 + LanuageMgr.GetStr("Cache", false), FormatFileSize1(Convert.ToInt32(MCpuInfoMonitor.GetCpuL2Cache()))));
+                if (MCpuInfoMonitor.GetCpuL3Cache() != 0) performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem("L" + 3 + LanuageMgr.GetStr("Cache", false), FormatFileSize1(Convert.ToInt32(MCpuInfoMonitor.GetCpuL3Cache()))));
             }
         }
         private void InitRuntimeInfo()
         {
             item_cpuuseage = new PerformanceInfos.PerformanceInfoSpeicalItem();
-            item_cpuuseage.Name = LanuageMgr.GetStr("Useage");
+            item_cpuuseage.Name = LanuageMgr.GetStr("Useage", false);
             item_cpuuseage_freq = new PerformanceInfos.PerformanceInfoSpeicalItem();
             item_cpuuseage_freq.Name = "";
             item_cpuuseage_freq.Value = "              ";
             item_process_count = new PerformanceInfos.PerformanceInfoSpeicalItem();
-            item_process_count.Name = FormMain.str_proc_count;
+            item_process_count.Name = LanuageMgr.GetStr("ProcessCount");
             item_thread_count = new PerformanceInfos.PerformanceInfoSpeicalItem();
-            item_thread_count.Name = LanuageMgr.GetStr("ThreadCount");
+            item_thread_count.Name = LanuageMgr.GetStr("ThreadCount", false);
             item_handle_count = new PerformanceInfos.PerformanceInfoSpeicalItem();
-            item_handle_count.Name = LanuageMgr.GetStr("HandleCount");
+            item_handle_count.Name = LanuageMgr.GetStr("HandleCount", false);
             item_run_time = new PerformanceInfos.PerformanceInfoSpeicalItem();
-            item_run_time.Name = LanuageMgr.GetStr("RunTime");
+            item_run_time.Name = LanuageMgr.GetStr("RunTime", false);
             performanceInfos.SpeicalItems.Add(item_cpuuseage);
             performanceInfos.SpeicalItems.Add(item_cpuuseage_freq);
             performanceInfos.SpeicalItems.Add(item_process_count);

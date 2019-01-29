@@ -14,6 +14,16 @@ namespace PCMgr
     /// </summary>
     class NativeMethods
     {
+        private static string _cfgFilePath = "";
+
+        public static string cfgFilePath
+        {
+            get
+            {
+                if(_cfgFilePath == "") _cfgFilePath = Marshal.PtrToStringUni(M_CFG_GetCfgFilePath());
+                return _cfgFilePath;
+            }
+        }
         public static IntPtr Nullptr = new IntPtr(0);
 
         public static IntPtr True = new IntPtr(1);
@@ -421,13 +431,13 @@ namespace PCMgr
         }
         public static bool SetConfig(string configkey, string configSection, string configData)
         {
-            long OpStation = Win32.WritePrivateProfileString(configSection, configkey, configData, FormMain.cfgFilePath);
+            long OpStation = Win32.WritePrivateProfileString(configSection, configkey, configData, cfgFilePath);
             return (OpStation != 0);
         }
         public static string GetConfig(string configkey, string configSection, string configDefData = "")
         {
             StringBuilder temp = new StringBuilder(1024);
-            Win32.GetPrivateProfileString(configSection, configkey, configDefData, temp, 1024, FormMain.cfgFilePath);
+            Win32.GetPrivateProfileString(configSection, configkey, configDefData, temp, 1024, cfgFilePath);
             return temp.ToString();
         }
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]

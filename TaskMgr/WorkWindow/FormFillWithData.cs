@@ -30,15 +30,15 @@ namespace PCMgr.WorkWindow
                 else
                 {
                     if(MFM_FillData(file, checkBoxForce.Checked, Convert.ToUInt32(numericUpDownFileSize.Value) * 1024))
-                        MessageBox.Show(FormMain.str_filldatasuccess);
-                    else MessageBox.Show(FormMain.str_filldatafailed);
+                        MessageBox.Show(LanuageMgr.GetStr("FillFileSuccess"));
+                    else MessageBox.Show(LanuageMgr.GetStr("FillFileFailed"));
                 }
             }
             else if(radioButtonEmepty.Checked)
             {
                 if(MFM_EmeptyFile(file, checkBoxForce.Checked))
-                    MessageBox.Show(FormMain.str_filldatasuccess);
-                else MessageBox.Show(FormMain.str_filldatafailed);
+                    MessageBox.Show(LanuageMgr.GetStr("FillFileSuccess"));
+                else MessageBox.Show(LanuageMgr.GetStr("FillFileFailed"));
             }
         }
     }

@@ -61,12 +61,12 @@ namespace PCMgr.WorkWindow
                     AddItem("ImageFileName", info.ImageFileName);
                 }
 
-                AddItem(FormMain.str_DblCklShow_EPROCESS, "", "_EPROCESS");
-                AddItem(FormMain.str_DblCklShow_PEB, "", "_PEB");
-                AddItem(FormMain.str_DblCklShow_KPROCESS, "", "_KPROCES");
-                AddItem(FormMain.str_DblCklShow_RTL_USER_PROCESS_PARAMETERS, "", "_RTL_USER_PROCESS_PARAMETERS");
+                AddItem(Lanuages.LanuageMgr.GetStr("DblCklShow_EPROCESS", false), "", "_EPROCESS");
+                AddItem(Lanuages.LanuageMgr.GetStr("DblCklShow_PEB", false), "", "_PEB");
+                AddItem(Lanuages.LanuageMgr.GetStr("DblCklShow_KPROCESS", false), "", "_KPROCES");
+                AddItem(Lanuages.LanuageMgr.GetStr("DblCklShow_RTL_USER_PROCESS_PARAMETERS", false), "", "_RTL_USER_PROCESS_PARAMETERS");
             }
-            else AddItem("", FormMain.str_DriverNotLoad);
+            else AddItem("", Lanuages.LanuageFBuffers.Str_DriverNotLoad);
         }
 
         private void AddItem(string name, string value, object tag = null)

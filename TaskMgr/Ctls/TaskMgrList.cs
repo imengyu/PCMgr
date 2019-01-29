@@ -13,6 +13,8 @@ namespace PCMgr.Ctls
     {
         internal const int itemHeight = 28, groupHeaderHeight = 38, smallItemHeight = 22;
 
+        public delegate int GetIndexCallback();
+
         public TaskMgrList()
         {
             SetStyle(ControlStyles.AllPaintingInWmPaint, true);
@@ -192,8 +194,19 @@ namespace PCMgr.Ctls
         private Image PauseUwpIco = null;
         private bool noHeader = false;
 
-        public bool isvs = false;
-        public bool ishs = false;
+        public GetIndexCallback DrawUWPPausedIconIndexGetCallback { get; set; }
+        public int DrawUWPPausedIconIndex
+        {
+            get
+            {
+                if (DrawUWPPausedIconIndexGetCallback != null)
+                    return DrawUWPPausedIconIndexGetCallback.Invoke();
+                return 0;
+            }
+        }
+
+        internal bool isvs = false;
+        internal bool ishs = false;
 
         /// <summary>
         /// 获取一个值，用以指示 System.ComponentModel.Component 当前是否处于设计模式。
@@ -548,7 +561,7 @@ namespace PCMgr.Ctls
                             else g.DrawString(item.Text, fnormalText2, item.SubItems[0].ForeColorSolidBrush, new Rectangle(x + (DrawIcon ? 63 : 25) + (isChildItem ? 5 : 0), item.YPos - yOffest + 2, headerItem.Width - (DrawIcon ? 60 : 25) - (isChildItem ? 5 : 0), currItemHeight - 4), ChildStringFormat);
                         }
 
-                        if (drawAsPausedIcon && iReal == item.DrawUWPPausedIconIndex)
+                        if (drawAsPausedIcon && iReal == DrawUWPPausedIconIndex)
                             g.DrawImage(PauseUwpIco, new Rectangle(x + headerItem.Width - PauseUwpIco.Width - 2, item.YPos - yOffest + (isChildItem ? -2 : 2), PauseUwpIco.Width, PauseUwpIco.Height));
                     }
                     else if (x > rect.Right) break;
@@ -1326,9 +1339,6 @@ namespace PCMgr.Ctls
 
         public bool DrawUWPPaused { get; set; }
         public bool DrawUWPPausedGray { get; set; }
-        public int DrawUWPPausedIconIndex { get {
-                return FormMain.Instance.stateindex;
-            } }
 
         public int DisplayChildValue { get; set; }
         public bool DisplayChildCount { get; set; }

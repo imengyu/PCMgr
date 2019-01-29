@@ -7,8 +7,9 @@ namespace PCMgr.WorkWindow
 {
     public partial class FormSpeedBall : Form
     {
-        public FormSpeedBall()
+        public FormSpeedBall(FormMain m)
         {
+            formMain = m;
             Items = new List<SpeedItem>();
             InitializeComponent();
 
@@ -18,6 +19,8 @@ namespace PCMgr.WorkWindow
             rightCenterFormat.LineAlignment = StringAlignment.Center;
             rightCenterFormat.Alignment = StringAlignment.Far;
         }
+
+        private FormMain formMain = null;
 
         private StringFormat leftCenterFormat;
         private StringFormat rightCenterFormat;
@@ -198,13 +201,13 @@ namespace PCMgr.WorkWindow
         private void FormSpeedBall_Deactivate(object sender, System.EventArgs e)
         {
             Visible = false;
-            FormMain.Instance.notifyIcon_MouseLeave(sender, e);
+            formMain.notifyIcon_MouseLeave(sender, e);
         }
 
         private void FormSpeedBall_MouseLeave(object sender, System.EventArgs e)
         {
             Visible = false;
-            FormMain.Instance.notifyIcon_MouseLeave(sender, e);
+            formMain.notifyIcon_MouseLeave(sender, e);
         }
     }
 }

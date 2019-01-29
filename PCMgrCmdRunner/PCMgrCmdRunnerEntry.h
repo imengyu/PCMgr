@@ -14,6 +14,7 @@ CMD_CAPI(BOOL) MStartRunCmdThread();
 CMD_CAPI(BOOL) MStopRunCmdThread();
 CMD_CAPI(int) MAppCmdStart();
 
+M_CMD_HANDLER(MRunCmd_Fix);
 M_CMD_HANDLER(MRunCmd_TaskList);
 M_CMD_HANDLER(MRunCmd_ScList);
 M_CMD_HANDLER(MRunCmd_ScStop);

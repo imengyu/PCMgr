@@ -11,8 +11,8 @@ namespace PCMgr.Ctls
         {
             SetStyle(ControlStyles.Selectable, false);
             SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
-            BgBrush = new SolidBrush(FormMain.RamBgColor);
-            DrawPen = new Pen(FormMain.RamDrawColor);
+            BgBrush = new SolidBrush(Main.MainPagePerf.RamBgColor);
+            DrawPen = new Pen(Main.MainPagePerf.RamDrawColor);
             GridPen = new Pen(Color.FromArgb(206, 176, 215));
             TextBrush = new SolidBrush(Color.Gray);
             stringFormatRight = new StringFormat();
@@ -157,7 +157,7 @@ namespace PCMgr.Ctls
                     g.DrawLine(DrawPen, w, r.Top, w, r.Bottom);
                     if (w > 100)
                     {
-                        g.DrawString(FormMain.str_MemUsingS, Font, TextBrush, 0, Height - TopTextHeight + BottomTextOffestY);
+                        g.DrawString(Lanuages.LanuageMgr.GetStr("MemUsingS"), Font, TextBrush, 0, Height - TopTextHeight + BottomTextOffestY);
                         g.DrawString(StrVauleUsing, Font, TextBrush, rectInUse, stringFormatCenter);
                     }
                 }
@@ -174,7 +174,7 @@ namespace PCMgr.Ctls
                     g.DrawLine(DrawPen, w, r.Top, w, r.Bottom);
 
                     if (rectInUse.Width > 100)//右
-                        g.DrawString(FormMain.str_MemModifed, Font, TextBrush, new Rectangle(rectInUse.X, Height - TopTextHeight + BottomTextOffestY, rectInUse.Width + rectModified.Width, TopTextHeight), stringFormatRight);
+                        g.DrawString(Lanuages.LanuageMgr.GetStr("MemModifed"), Font, TextBrush, new Rectangle(rectInUse.X, Height - TopTextHeight + BottomTextOffestY, rectInUse.Width + rectModified.Width, TopTextHeight), stringFormatRight);
                     if (w - oldw > 50)
                         g.DrawString(StrVauleModified, Font, TextBrush, rectModified, stringFormatCenter);
                 }
@@ -191,7 +191,7 @@ namespace PCMgr.Ctls
                     g.DrawLine(DrawPen, w, r.Top, w, r.Bottom);
 
                     if (w - oldw > 50)           
-                        g.DrawString(FormMain.str_MemStandby, Font, TextBrush, oldw, Height - TopTextHeight + BottomTextOffestY);
+                        g.DrawString(Lanuages.LanuageMgr.GetStr("MemStandby"), Font, TextBrush, oldw, Height - TopTextHeight + BottomTextOffestY);
                     if (w - oldw > 50)
                         g.DrawString(StrVauleStandby, Font, TextBrush, rectStandby, stringFormatCenter);
                  
@@ -204,7 +204,7 @@ namespace PCMgr.Ctls
                 w += (int)(VauleFree * Width);
                 rectFree = new Rectangle(oldw, r.Top, w - oldw, r.Height);
                 if (rectStandby.Width > 50)//右
-                    g.DrawString(FormMain.str_MemFree, Font, TextBrush, new Rectangle(rectStandby.X, Height - TopTextHeight + BottomTextOffestY, rectStandby.Width + rectFree.Width, TopTextHeight), stringFormatRight);
+                    g.DrawString(Lanuages.LanuageMgr.GetStr("MemFree"), Font, TextBrush, new Rectangle(rectStandby.X, Height - TopTextHeight + BottomTextOffestY, rectStandby.Width + rectFree.Width, TopTextHeight), stringFormatRight);
                 if (w - oldw > 50)
                     g.DrawString(StrVauleFree, Font, TextBrush, rectFree, stringFormatCenter);
                 

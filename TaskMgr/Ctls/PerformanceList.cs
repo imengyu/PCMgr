@@ -412,9 +412,12 @@ namespace PCMgr.Ctls
     {
         public PerformanceListItem()
         {
+            dataIem2 = new List<int>();
             dataIem = new List<int>();
             for (int i = 0; i < 30; i++)
                 Data.Add(0);
+            for (int i = 0; i < 30; i++)
+                Data2.Add(0);
             Gray = false;
         }
 
@@ -441,6 +444,7 @@ namespace PCMgr.Ctls
         }
         public string Name { get; set; }
         public List<int> Data { get { return dataIem; } }
+        public List<int> Data2 { get { return dataIem2; } }
 
         public object Tag { get; set; }
 

@@ -228,7 +228,7 @@ namespace PCMgr.WorkWindow
                     d.loaded = false;
                     d.info = wi;
                     nd.Tag = d;
-                    TreeNode ndnull = new TreeNode(FormMain.str_loading);
+                    TreeNode ndnull = new TreeNode(Lanuages.LanuageMgr.GetStr("Loading", false));
                     ndnull.Name = "ndnull";
                     nd.Nodes.Add(ndnull);
                     treeViewMain.Nodes.Add(nd);
@@ -236,11 +236,11 @@ namespace PCMgr.WorkWindow
                     labelState.Hide();
                     panelMain.Show();
 
-                    if (re) MessageBox.Show(FormMain.str_RefeshSuccess);
+                    if (re) MessageBox.Show(Lanuages.LanuageMgr.GetStr("RefeshSuccess"));
                 }
-                else labelState.Text = FormMain.str_InvalidHwnd;
+                else labelState.Text = Lanuages.LanuageMgr.GetStr("InvalidHwnd");
             }
-            else labelState.Text = FormMain.str_InvalidHwnd;
+            else labelState.Text = Lanuages.LanuageMgr.GetStr("InvalidHwnd");
             return false;
         }
         private void LoadChilds(IntPtr hWnd, TreeNode treeNode)
@@ -402,7 +402,7 @@ namespace PCMgr.WorkWindow
         {
             if (e.KeyData == Keys.Enter)
             {
-                if (MessageBox.Show(FormMain.str_ChangeWindowTextAsk, Text, MessageBoxButtons.YesNo, MessageBoxIcon.Information) == DialogResult.Yes)
+                if (MessageBox.Show(Lanuages.LanuageMgr.GetStr("ChangeWindowTextAsk"), Text, MessageBoxButtons.YesNo, MessageBoxIcon.Information) == DialogResult.Yes)
                 {
                     textBoxText.Text.Remove(textBoxText.Text.Length - 1);
                     SetWindowText(selectHwnd, textBoxText.Text);

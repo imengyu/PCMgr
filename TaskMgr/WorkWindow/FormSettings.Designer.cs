@@ -33,9 +33,6 @@
             this.button_cancel = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.btnChooseFont = new System.Windows.Forms.Button();
-            this.lbFont = new System.Windows.Forms.Label();
-            this.label17 = new System.Windows.Forms.Label();
             this.checkBoxShowHotKey = new System.Windows.Forms.CheckBox();
             this.label8 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
@@ -117,9 +114,6 @@
             // tabPage1
             // 
             resources.ApplyResources(this.tabPage1, "tabPage1");
-            this.tabPage1.Controls.Add(this.btnChooseFont);
-            this.tabPage1.Controls.Add(this.lbFont);
-            this.tabPage1.Controls.Add(this.label17);
             this.tabPage1.Controls.Add(this.checkBoxShowHotKey);
             this.tabPage1.Controls.Add(this.label8);
             this.tabPage1.Controls.Add(this.label7);
@@ -137,23 +131,6 @@
             this.tabPage1.Controls.Add(this.label2);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.UseVisualStyleBackColor = true;
-            // 
-            // btnChooseFont
-            // 
-            resources.ApplyResources(this.btnChooseFont, "btnChooseFont");
-            this.btnChooseFont.Name = "btnChooseFont";
-            this.btnChooseFont.UseVisualStyleBackColor = true;
-            this.btnChooseFont.Click += new System.EventHandler(this.btnChooseFont_Click);
-            // 
-            // lbFont
-            // 
-            resources.ApplyResources(this.lbFont, "lbFont");
-            this.lbFont.Name = "lbFont";
-            // 
-            // label17
-            // 
-            resources.ApplyResources(this.label17, "label17");
-            this.label17.Name = "label17";
             // 
             // checkBoxShowHotKey
             // 
@@ -586,9 +563,6 @@
         private System.Windows.Forms.CheckBox checkBoxUseMyDbgView;
         private System.Windows.Forms.CheckBox checkBoxNTOSPDB;
         private System.Windows.Forms.CheckBox checkBoxAbortShutdown;
-        private System.Windows.Forms.Button btnChooseFont;
-        private System.Windows.Forms.Label lbFont;
-        private System.Windows.Forms.Label label17;
         private System.Windows.Forms.FontDialog fontDialog1;
     }
 }

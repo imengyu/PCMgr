@@ -15,8 +15,7 @@ namespace PCMgr
         [STAThread]
         public static void Main(string[]agrs)
         {
-            FormMain.cfgFilePath = Marshal.PtrToStringUni(NativeMethods.M_CFG_GetCfgFilePath());
-            FormMain.InitLanuage();
+            LanuageMgr.InitLanuage();
 
             NativeMethods.MGetPrivileges2();
 
@@ -49,7 +48,7 @@ namespace PCMgr
                 {
                     case "reboot":
                         {
-                            TaskDialog t = new TaskDialog(LanuageMgr.GetStr("TitleReboot"), FormMain.str_AppTitle, LanuageMgr.GetStr("TitleContinue"), TaskDialogButton.Yes | TaskDialogButton.No, TaskDialogIcon.Warning);
+                            TaskDialog t = new TaskDialog(LanuageMgr.GetStr("TitleReboot"), LanuageFBuffers.Str_AppTitle, LanuageMgr.GetStr("TitleContinue"), TaskDialogButton.Yes | TaskDialogButton.No, TaskDialogIcon.Warning);
                             if (t.Show().CommonButton == Result.Yes)
                             {
                                 NativeMethods.MGetPrivileges();
@@ -59,7 +58,7 @@ namespace PCMgr
                         }
                     case "shutdown":
                         {
-                            TaskDialog t = new TaskDialog(LanuageMgr.GetStr("TitleShutdown"), FormMain.str_AppTitle, LanuageMgr.GetStr("TitleContinue"), TaskDialogButton.Yes | TaskDialogButton.No, TaskDialogIcon.Warning);
+                            TaskDialog t = new TaskDialog(LanuageMgr.GetStr("TitleShutdown"), LanuageFBuffers.Str_AppTitle, LanuageMgr.GetStr("TitleContinue"), TaskDialogButton.Yes | TaskDialogButton.No, TaskDialogIcon.Warning);
                             if (t.Show().CommonButton == Result.Yes)
                             {
                                 NativeMethods.MGetPrivileges();
@@ -150,6 +149,11 @@ namespace PCMgr
                             Application.Run(new WorkWindow.FormTest());
                             return false;
                         }
+                    case "test2":
+                        {
+                            LanuageMgr.InitLanuage();
+                            return false;
+                        }
                     case "about":
                         {
                             Application.Run(new WorkWindow.FormAbout());
@@ -166,7 +170,7 @@ namespace PCMgr
         {
             if (NativeMethods.GetConfigBool("X32Warning", "AppSetting", true))
             {
-                TaskDialog t = new TaskDialog(LanuageMgr.GetStr("X64WarnTitle"), FormMain.str_AppTitle);
+                TaskDialog t = new TaskDialog(LanuageMgr.GetStr("X64WarnTitle"), LanuageFBuffers.Str_AppTitle);
                 t.Content = LanuageMgr.GetStr("X64WarnText");
                 t.CommonIcon = TaskDialogIcon.Warning;
                 t.VerificationText = LanuageMgr.GetStr("DoNotRemidMeLater");
@@ -187,7 +191,7 @@ namespace PCMgr
         {
             if (NativeMethods.GetConfigBool("NOAdminWarning", "AppSetting", false))
             {
-                TaskDialog t = new TaskDialog(LanuageMgr.GetStr("NeedAdmin"), FormMain.str_AppTitle, LanuageMgr.GetStr("RequestAdminText"));
+                TaskDialog t = new TaskDialog(LanuageMgr.GetStr("NeedAdmin"), LanuageFBuffers.Str_AppTitle, LanuageMgr.GetStr("RequestAdminText"));
                 t.CommonIcon = TaskDialogIcon.Warning;
                 t.VerificationText = LanuageMgr.GetStr("DoNotRemidMeLater");
                 t.VerificationClick += T_TaskDialog_NOADMINWarn_VerificationClick;

@@ -1,6 +1,7 @@
 ﻿using PCMgr.Lanuages;
 using System;
 using System.Windows.Forms;
+using static PCMgr.Main.MainUtils;
 
 namespace PCMgr.WorkWindow
 {
@@ -24,7 +25,7 @@ namespace PCMgr.WorkWindow
                 if (listView1.Items[i].Checked)
                     headers = headers + "#" + ((aa)listView1.Items[i].Tag).a + "-" + ((aa)listView1.Items[i].Tag).b;
             NativeMethods.SetConfig("MainHeaders", "AppSetting", headers);
-            f.saveheader = false;
+            f.MainPageProcess.saveheader = false;
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -64,7 +65,7 @@ namespace PCMgr.WorkWindow
             ListViewItem li = new ListViewItem(LanuageMgr.GetStr(name));
             if (en)
             {
-                FormMain.itemheader i = f.listProcessGetListHeaderItem(name);
+                itemheader i = f.MainPageProcess.listProcessGetListHeaderItem(name);
                 if (i != null)
                 {
                     aa a = new aa();

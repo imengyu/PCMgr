@@ -184,12 +184,33 @@ M_CAPI(BOOL) MCommandLineToFilePath(LPWSTR cmdline, LPWSTR buffer, int size)
 	if (cmdline && buffer)
 	{
 		int argc = 0;
-		LPWSTR *szArglist = CommandLineToArgvW(cmdline, &argc);
-		if (szArglist)
-		{
-			wcscpy_s(buffer, size, szArglist[0]);
-			LocalFree(szArglist);
-			return  TRUE;
+		size_t len = wcslen(cmdline);
+		if (len > 0 && len < MAX_PATH && cmdline[0] == L'\"' && cmdline[len - 1] == L'\"') {
+			WCHAR fixcmdline[MAX_PATH];
+			wcscpy_s(fixcmdline, cmdline);
+
+			WCHAR* firstArgPos = wcswcs(fixcmdline, L".exe -");
+			if (firstArgPos) {
+				*(firstArgPos + 2 * sizeof(WCHAR)) = L'\"';
+				*(firstArgPos + 3 * sizeof(WCHAR)) = L'\0';
+			}
+
+			LPWSTR *szArglist = CommandLineToArgvW(fixcmdline, &argc);
+			if (szArglist && argc > 0)
+			{
+				wcscpy_s(buffer, size, szArglist[0]);
+				LocalFree(szArglist);
+				return  TRUE;
+			}
+		}
+		else {
+			LPWSTR *szArglist = CommandLineToArgvW(cmdline, &argc);
+			if (szArglist && argc > 0)
+			{
+				wcscpy_s(buffer, size, szArglist[0]);
+				LocalFree(szArglist);
+				return  TRUE;
+			}
 		}
 	}
 	return  FALSE;

@@ -1298,10 +1298,15 @@ M_API int MGetProcessState(PMPROCESS_ITEM processItem, HWND hWnd)
 	{
 		if(IsWindow(hWnd) && IsHungAppWindow(hWnd))
 			return 3;
-		SYSTEM_THREADS systemThread = processItem->Data->Threads[0];
-		if (systemThread.ThreadState == THREAD_STATE::StateWait && systemThread.WaitReason == Suspended)
-			return 2;
-		else return 1;
+		__try {
+			SYSTEM_THREADS systemThread = processItem->Data->Threads[0];
+			if (systemThread.ThreadState == THREAD_STATE::StateWait && systemThread.WaitReason == Suspended)
+				return 2;
+			else return 1;
+		}
+		__except (EXCEPTION_EXECUTE_HANDLER) {
+			return -1;
+		}
 	}	
 	return 0;
 }

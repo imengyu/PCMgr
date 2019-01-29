@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PCMgr.Lanuages;
+using System;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
@@ -33,8 +34,7 @@ namespace PCMgr.WorkWindow
             if (textBoxFilePath.Text != "")
             {
                 if (MFM_DeleteFileForce(textBoxFilePath.Text))
-                    MessageBox.Show(FormMain.str_frocedelsuccess);
-
+                    MessageBox.Show(LanuageMgr.GetStr("FroceDelSuccess"));
             }
         }
 
@@ -51,7 +51,7 @@ namespace PCMgr.WorkWindow
                 StringBuilder buf = new StringBuilder(256);
                 if (MFM_GetFileInformationString(textBoxFilePath.Text, buf, 256))
                     labelFileInformation.Text = buf.ToString();
-                else labelFileInformation.Text = FormMain.str_getfileinfofailed;
+                else labelFileInformation.Text = LanuageMgr.GetStr("GetFileInfoFailed");
             }
         }
     }

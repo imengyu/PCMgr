@@ -138,11 +138,6 @@ bool main_grouping = false;
 bool alwaysOnTop = false;
 bool aopTimer = false;
 
-M_CAPI(VOID) TryCallThis()
-{
-	MAppWorkCall3(176, 0, 0);
-}
-
 bool can_debug = false;
 bool use_apc = false;
 int IDC_MAINLIST_HEADER = 0;
@@ -1202,10 +1197,6 @@ M_API void MSetAsExplorerTheme(HWND hWnd)
 	SetWindowTheme(hWnd, L"Explorer", NULL);
 }
 
-M_API void MDrawImage(HDC hdc, int x, int y)
-{
-
-}
 M_API void MDrawIcon(HICON hIcon, HDC hdc, int x, int y)
 {
 	DrawIconEx(hdc, x, y, hIcon, 16, 16, 0, NULL, DI_NORMAL);
@@ -1976,8 +1967,7 @@ LRESULT CALLBACK MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		case IDM_START_MHOOK: {
-			if(InstallMouseHook())
-				MessageBox(hWnd, L"Mouse hook started!", L"Tip", 0);
+			if(InstallMouseHook()) MessageBox(hWnd, L"Mouse hook started!", L"Tip", 0);
 			else {
 				LogErr2(L"Install Mouse hook failed, lasterr : %d", GetLastError());
 				MessageBox(hWnd, L"Install Mouse hook failed!", L"Tip", 0);

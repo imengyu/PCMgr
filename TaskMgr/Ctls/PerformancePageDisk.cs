@@ -65,8 +65,8 @@ namespace PCMgr.Ctls
                 ref read, ref write, ref avgque);
 
             //下面的条目
-            item_readSpeed.Value = NativeMethods.FormatFileSize(Convert.ToInt64(readbytes)) + "/" + FormMain.str_sec;
-            item_writeSpeed.Value = NativeMethods.FormatFileSize(Convert.ToInt64(writebytes)) + "/" + FormMain.str_sec;
+            item_readSpeed.Value = NativeMethods.FormatFileSize(Convert.ToInt64(readbytes)) + "/" + LanuageFBuffers.Str_Second;
+            item_writeSpeed.Value = NativeMethods.FormatFileSize(Convert.ToInt64(writebytes)) + "/" + LanuageFBuffers.Str_Second;
 
             item_responseTime.Value = avgque.ToString("0.0") + "%";
 
@@ -84,7 +84,7 @@ namespace PCMgr.Ctls
             if (lastMaxSpeed > performanceGridSpeed.MaxValue)
             {
                 performanceGridSpeed.MaxValue = GetSpeedMaxUnit();
-                performanceGridSpeed.RightText = NativeMethods.FormatFileSizeKBUnit(performanceGridSpeed.MaxValue) + "/" + FormMain.str_sec;
+                performanceGridSpeed.RightText = NativeMethods.FormatFileSizeKBUnit(performanceGridSpeed.MaxValue) + "/" + LanuageFBuffers.Str_Second;
             }
             else if (lastMaxSpeed < performanceGridSpeed.MaxValue)
             {
@@ -92,7 +92,7 @@ namespace PCMgr.Ctls
                 if (performanceGridSpeed.MaxValue > maxValue)
                 {
                     performanceGridSpeed.MaxValue = maxValue;
-                    performanceGridSpeed.RightText = NativeMethods.FormatFileSizeKBUnit(maxValue) + "/" + FormMain.str_sec;
+                    performanceGridSpeed.RightText = NativeMethods.FormatFileSizeKBUnit(maxValue) + "/" + LanuageFBuffers.Str_Second;
                 }
             }
             //刷新最大速度标尺
@@ -101,7 +101,7 @@ namespace PCMgr.Ctls
                 && lastMaxSpeed <= performanceGridSpeed.MaxValue * 0.95)
             {
                 performanceGridSpeed.MaxScaleValue = lastMaxSpeed;
-                performanceGridSpeed.MaxScaleText = NativeMethods.FormatFileSizeKBUnit(lastMaxSpeed) + "/" + FormMain.str_sec;
+                performanceGridSpeed.MaxScaleText = NativeMethods.FormatFileSizeKBUnit(lastMaxSpeed) + "/" + LanuageFBuffers.Str_Second;
             }
             else performanceGridSpeed.MaxScaleValue = 0;
 
@@ -176,9 +176,9 @@ namespace PCMgr.Ctls
             item_writeSpeed.Name = LanuageMgr.GetStr("WriteSpeed");
             item_readSpeed.DrawFrontLine = true;
             item_readSpeed.FrontLineIsDotted = true;
-            item_readSpeed.FrontLineColor = FormMain.DiskDrawColor;
+            item_readSpeed.FrontLineColor = Main.MainPagePerf.DiskDrawColor;
             item_writeSpeed.DrawFrontLine = true;
-            item_writeSpeed.FrontLineColor = FormMain.DiskDrawColor;
+            item_writeSpeed.FrontLineColor = Main.MainPagePerf.DiskDrawColor;
 
             performanceInfos.FontTitle = new Font("Microsoft YaHei UI", 9);
             performanceInfos.SpeicalItems.Add(item_diskTime);
@@ -186,7 +186,7 @@ namespace PCMgr.Ctls
             performanceInfos.SpeicalItems.Add(item_readSpeed);
             performanceInfos.SpeicalItems.Add(item_writeSpeed);
 
-            performanceGridSpeed.RightText = NativeMethods.FormatFileSizeKBUnit(lastMaxSpeed) + "/" + FormMain.str_sec;
+            performanceGridSpeed.RightText = NativeMethods.FormatFileSizeKBUnit(lastMaxSpeed) + "/" + LanuageFBuffers.Str_Second;
             performanceGridSpeed.MaxValue = 100;
             performanceGridSpeed.DrawData2 = true;
         }
@@ -204,8 +204,8 @@ namespace PCMgr.Ctls
                     size = UInt64.Parse(stringBuilderSize.ToString());
                 performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem(LanuageMgr.GetStr("Capacity"), NativeMethods.FormatFileSizeKBUnit(Convert.ToInt64(size / 1024))));
                 performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem(LanuageMgr.GetStr("Formatted"), NativeMethods.FormatFileSizeKBUnit(Convert.ToInt64(size / 1024))));
-                performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem(LanuageMgr.GetStr("IsSystemDir"), MDEVICE_GetIsSystemDisk(currDiskName) ? FormMain.str_Yes : FormMain.str_No));
-                performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem(LanuageMgr.GetStr("PageFile"), MDEVICE_GetIsPageFileDisk(currDiskName) ? FormMain.str_Yes : FormMain.str_No));
+                performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem(LanuageMgr.GetStr("IsSystemDir"), MDEVICE_GetIsSystemDisk(currDiskName) ? LanuageMgr.GetStr("Yes") : LanuageMgr.GetStr("No")));
+                performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem(LanuageMgr.GetStr("PageFile"), MDEVICE_GetIsPageFileDisk(currDiskName) ? LanuageMgr.GetStr("Yes") : LanuageMgr.GetStr("No")));
 
                 performanceTitle1.SmallTitle = stringBuilderName.ToString();
             }
