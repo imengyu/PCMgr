@@ -1,15 +1,9 @@
-﻿using PCMgr.Aero.TaskDialog;
-using PCMgr.Ctls;
+﻿using PCMgr.Ctls;
 using PCMgr.Lanuages;
-using PCMgr.WorkWindow;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Windows.Forms;
 using static PCMgr.Main.MainUtils;
 using static PCMgr.NativeMethods;
@@ -81,7 +75,7 @@ namespace PCMgr.Main
         public void UsersListLoad()
         {
             listUsers.Items.Clear();
-            MEnumUsers(NativeBridge.enumUsersCallBackCallBack_ptr, IntPtr.Zero);
+            NativeMethods.M_User_EnumUsers(NativeBridge.enumUsersCallBackCallBack_ptr, IntPtr.Zero);
             listUsers.Sort();
         }
         private void UsersListLoadCols() {
@@ -119,6 +113,7 @@ namespace PCMgr.Main
 
             li.Childs.Sort(listViewItemCompareUsers);
         }
+
 
         private void listUsers_KeyDown(object sender, KeyEventArgs e)
         {
@@ -213,14 +208,14 @@ namespace PCMgr.Main
 
         private bool UsersListEnumUsersCallBack(IntPtr userName, uint sessionId, uint userId, IntPtr domain, IntPtr customData)
         {
-            string name = Marshal.PtrToStringUni(userName);
+            string username = Marshal.PtrToStringUni(userName);
             string domainStr = Marshal.PtrToStringUni(domain);
-            TaskMgrListItem li = new TaskMgrListItem(name);
+            TaskMgrListItem li = new TaskMgrListItem(username);
             li.SubItems.Add(new TaskMgrListItem.TaskMgrListViewSubItem());
             li.SubItems.Add(new TaskMgrListItem.TaskMgrListViewSubItem());
             li.SubItems.Add(new TaskMgrListItem.TaskMgrListViewSubItem());
             li.SubItems.Add(new TaskMgrListItem.TaskMgrListViewSubItem());
-            li.SubItems[0].Text = name;
+            li.SubItems[0].Text = username;
             li.SubItems[1].Text = userId.ToString();
             li.SubItems[2].Text = sessionId.ToString();
             li.SubItems[3].Text = domainStr;
@@ -232,11 +227,38 @@ namespace PCMgr.Main
             li.DisplayChildCount = true;
             li.IsUWPICO = true;
 
-            UsersListAddProcess(li, name);
+            string userFullName, userIcoPath;
+            if (UsersListEnumGetUserInfos(username, out userIcoPath, out userFullName))
+            {
+                li.Text = userFullName + " (" + username + ")";
+                li.SubItems[0].Text = li.Text;
+            }
+
+            UsersListAddProcess(li, username);
+            if (li.Childs.Count == 0) li.DisplayChildCount = false;
 
             listUsers.Items.Add(li);
             return true;
         }
 
+        private bool UsersListEnumGetUserInfos(string username, out string userIcoPath, out string userFullName)
+        {
+            IntPtr userIcoPathBuf = Marshal.AllocHGlobal(520);
+            IntPtr userFullNameBuf = Marshal.AllocHGlobal(512);
+            if (NativeMethods.M_User_GetUserInfo(username, userIcoPathBuf, userFullNameBuf, 256))
+            {
+                userFullName = Marshal.PtrToStringUni(userFullNameBuf);
+                userIcoPath = Marshal.PtrToStringUni(userIcoPathBuf);
+                Marshal.FreeHGlobal(userFullNameBuf);
+                Marshal.FreeHGlobal(userIcoPathBuf);
+                return true;
+            }
+            else
+            {
+                userFullName = "";
+                userIcoPath = "";
+                return false;
+            }
+        }
     }
 }

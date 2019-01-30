@@ -153,6 +153,66 @@ namespace PCMgr.Properties {
         /// <summary>
         ///   查找类似于 (图标) 的 System.Drawing.Icon 类型的本地化资源。
         /// </summary>
+        internal static System.Drawing.Icon icoWifiLevel0 {
+            get {
+                object obj = ResourceManager.GetObject("icoWifiLevel0", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似于 (图标) 的 System.Drawing.Icon 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Icon icoWifiLevel1 {
+            get {
+                object obj = ResourceManager.GetObject("icoWifiLevel1", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似于 (图标) 的 System.Drawing.Icon 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Icon icoWifiLevel2 {
+            get {
+                object obj = ResourceManager.GetObject("icoWifiLevel2", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似于 (图标) 的 System.Drawing.Icon 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Icon icoWifiLevel3 {
+            get {
+                object obj = ResourceManager.GetObject("icoWifiLevel3", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似于 (图标) 的 System.Drawing.Icon 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Icon icoWifiLevel4 {
+            get {
+                object obj = ResourceManager.GetObject("icoWifiLevel4", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似于 (图标) 的 System.Drawing.Icon 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Icon icoWifiLevel5 {
+            get {
+                object obj = ResourceManager.GetObject("icoWifiLevel5", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似于 (图标) 的 System.Drawing.Icon 类型的本地化资源。
+        /// </summary>
         internal static System.Drawing.Icon icoWins {
             get {
                 object obj = ResourceManager.GetObject("icoWins", resourceCulture);
@@ -257,6 +317,7 @@ namespace PCMgr.Properties {
         ///    &lt;style&gt;
         ///        body{
         ///            margin: 0;
+        ///            font-family: &apos;Microsoft YaHei UI&apos;;
         ///        }
         ///        div {
         ///            position: relative;
@@ -265,12 +326,99 @@ namespace PCMgr.Properties {
         ///            text-align:center;
         ///        }
         ///        div.block {
-        ///            border-top: 1px dashed #808080;
-        ///      [字符串的其余部分被截断]&quot;; 的本地化字符串。
+        ///   [字符串的其余部分被截断]&quot;; 的本地化字符串。
         /// </summary>
         internal static string PageAbout {
             get {
                 return ResourceManager.GetString("PageAbout", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 &lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Transitional//EN&quot;
+        ///          &quot;http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd&quot;&gt;
+        ///&lt;html&gt;
+        ///
+        ///&lt;head&gt;
+        ///    &lt;title&gt;PageAbout&lt;/title&gt;
+        ///    &lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot; /&gt;
+        ///    &lt;style&gt;
+        ///        body{
+        ///            margin: 0;
+        ///            font-family: &apos;Microsoft YaHei UI&apos;;
+        ///        }
+        ///        div {
+        ///            position: relative;
+        ///        }
+        ///        .center {
+        ///            text-align:center;
+        ///        }
+        ///        div.block {
+        ///   [字符串的其余部分被截断]&quot;; 的本地化字符串。
+        /// </summary>
+        internal static string PageAboutEn {
+            get {
+                return ResourceManager.GetString("PageAboutEn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap pointCpu {
+            get {
+                object obj = ResourceManager.GetObject("pointCpu", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap pointDisk {
+            get {
+                object obj = ResourceManager.GetObject("pointDisk", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap pointGpu {
+            get {
+                object obj = ResourceManager.GetObject("pointGpu", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap pointGray {
+            get {
+                object obj = ResourceManager.GetObject("pointGray", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap pointNet {
+            get {
+                object obj = ResourceManager.GetObject("pointNet", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap pointRam {
+            get {
+                object obj = ResourceManager.GetObject("pointRam", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         

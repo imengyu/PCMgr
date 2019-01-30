@@ -128,7 +128,18 @@ namespace PCMgr.Ctls
         /// <summary>
         /// .数据12平均值
         /// </summary>
-        public int DataAverage { get { return (lastDataAverage1 + lastDataAverage2) / 2; } }
+        public int DataAverage
+        {
+            get
+            {
+                if (DrawData2)
+                {
+                    if (lastDataAverage1 > lastDataAverage2) return lastDataAverage1;
+                    else return lastDataAverage2;
+                }
+                else return (lastDataAverage1 + lastDataAverage2) / 2;
+            }
+        }
         /// <summary>
         /// 数据1平均值
         /// </summary>
@@ -161,6 +172,8 @@ namespace PCMgr.Ctls
         /// </summary>
         public void AddData(int d)
         {
+            if (d < 0) return;
+
             float single = 1.0F * Width / (60 - 1);
             if (xLineOffist < (single * 4))
                 xLineOffist += (int)(single);
@@ -175,6 +188,8 @@ namespace PCMgr.Ctls
         /// </summary>
         public void AddData2(int d)
         {
+            if (d < 0) return;
+
             dataIem2.RemoveAt(0);
             dataIem2.Add(d);
         }

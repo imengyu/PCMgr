@@ -28,17 +28,6 @@ using PCMgr.Main;
 //
 // 这是一个垃圾的软件
 // 2019
-//
-//
-//      ■■■■■■■■■■■■                            ■
-//      ■                                        ■                            ■
-//      ■■■■■■■■■■■■                            ■                
-//      ■        ■       ■          ■                                   ■                
-//      ■            ■   ■     ■                                        ■                
-//     ■    ■■■■■■■■■             ■                ■                ■
-//    ■          ■       ■          ■               ■                ■                ■
-//    ■     ■            ■               ■          ■■■■■■■■■■■
-//
 //屎山
 
 namespace PCMgr
@@ -55,6 +44,8 @@ namespace PCMgr
 
             baseProcessRefeshTimer.Interval = 1000;
             baseProcessRefeshTimer.Tick += BaseProcessRefeshTimer_Tick;
+
+            lbStartingStatus.BringToFront();
         }
 
         private string[] agrs = null;
@@ -556,6 +547,8 @@ namespace PCMgr
             //初始化
             MAppWorkCall3(181, IntPtr.Zero, IntPtr.Zero);
             MAppWorkCall3(183, Handle, IntPtr.Zero);
+            MAppWorkCall3(164, IntPtr.Zero, IntPtr.Zero);
+            MAppWorkCall3(163, IntPtr.Zero, IntPtr.Zero);
 
             //初始化语言
             LanuageMgr.InitLanuage();
@@ -584,6 +577,15 @@ namespace PCMgr
 
             //提升权限
             if (!MGetPrivileges()) TaskDialog.Show(LanuageMgr.GetStr("FailedGetPrivileges"), LanuageFBuffers.Str_AppTitle, "", TaskDialogButton.OK, TaskDialogIcon.Warning);
+
+            //tab 头 的自定义
+            TaskMgrTabHeader tabHeader = new TaskMgrTabHeader(tabControlMain);
+            Controls.Add(tabHeader);
+            tabHeader.Dock = DockStyle.Top;
+            tabHeader.Height = 27;
+            tabHeader.BringToFront();
+            tabHeader.Font = tabControlMain.Font;
+            if (IsSimpleView) tabHeader.Visible = false;
         }
         private void AppOnLoad()
         { 
@@ -972,7 +974,5 @@ namespace PCMgr
                 mainPageUserMgr.UsersListInit();
             }
         }
-
-
     }
 }

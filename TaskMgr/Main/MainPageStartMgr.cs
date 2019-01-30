@@ -119,6 +119,15 @@ namespace PCMgr.Main
                 printProviders.DisplayChildCount = true;
                 printProviders.Icon = Properties.Resources.icoWins;
 
+                StringBuilder sbBIOSTime = new StringBuilder(6);
+                if (MREG_GetBIOSTime(sbBIOSTime))
+                {
+                    FormMain.pl_bios_time.Show();
+                    FormMain.lbBiosTime.Text = sbBIOSTime.ToString() + " " + LanuageFBuffers.Str_Second;
+                    listStartup.Top = 30;
+                    listStartup.Height -= 30;
+                }
+
                 Inited = true;
 
                 StartMListRefesh();

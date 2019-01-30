@@ -15,7 +15,7 @@ typedef BOOL(__cdecl*EnumUsersCallBack)(
 	);
 
 //枚举计算机上所有用户
-M_CAPI(int) MEnumUsers(EnumUsersCallBack callBack, LPVOID customData);
+M_CAPI(int) M_User_EnumUsers(EnumUsersCallBack callBack, LPVOID customData);
 void MUsersSetCurrentSelect(DWORD sessionId);
 void MUsersSetCurrentSelectUserName(LPWSTR userName);
 

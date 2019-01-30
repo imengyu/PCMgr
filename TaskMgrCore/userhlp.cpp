@@ -5,6 +5,7 @@
 #include "lghlp.h"
 #include "mapphlp.h"
 #include "StringHlp.h"
+#include <Lm.h>
 
 extern HINSTANCE hInstRs;
 extern HWND hWndMain;
@@ -38,7 +39,8 @@ LPWSTR MGetUserPrev(DWORD n)
 		break;
 	}
 }
-M_CAPI(int) MEnumUsers(EnumUsersCallBack callBack, LPVOID customData)
+
+M_CAPI(int) M_User_EnumUsers(EnumUsersCallBack callBack, LPVOID customData)
 {
 	if (!callBack) return FALSE;
 
@@ -80,11 +82,21 @@ M_CAPI(int) MEnumUsers(EnumUsersCallBack callBack, LPVOID customData)
 
 	return 0;
 }
+
 void MUsersSetCurrentSelect(DWORD sessionId) {
 	selectSessionId = sessionId;
 }
 void MUsersSetCurrentSelectUserName(LPWSTR userName) {
 	wcscpy_s(currentUserName, userName);
+}
+
+M_CAPI(BOOL) M_User_GetUserInfo(LPWSTR userName , LPWSTR userIcoPath, LPWSTR userFullName, int max2) {
+	PUSER_INFO_10 userInfo = NULL;
+	if (NetUserGetInfo(NULL, userName, 0xA, (LPBYTE*)&userInfo) == NERR_Success) {
+		wcscpy_s(userFullName, max2, userInfo->usri10_full_name);
+		return TRUE;
+	}
+	return FALSE;
 }
 
 INT_PTR CALLBACK ConnectUserDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)

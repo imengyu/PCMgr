@@ -25,17 +25,17 @@
 #define IDS_STRING_RUN2TEXT             121
 #define IDR_MENUUSER                    121
 #define IDS_STRING_CONRUN               122
-#define IDS_STRING_MISSING_MAINDLL 130
-#define IDD_CONNECTSESS                 131
 #define IDS_STRING_CANRUN               123
 #define IDS_STRING_KILLOLD              124
 #define IDD_STATS                       124
 #define IDD_VWINS                       125
-#define IDS_STRING_MISSINGDLL_HLP       132
 #define IDS_STRING_KILLOLDFAILED        126
 #define IDD_PEVIEW                      127
 #define IDS_STRING_LOADAPP_FAIL         127
 #define IDD_CREATEDUMP                  129
+#define IDS_STRING_MISSING_MAINDLL      130
+#define IDD_CONNECTSESS                 131
+#define IDS_STRING_MISSINGDLL_HLP       132
 #define IDI_ICONACTIVEDWIN              206
 #define IDR_WINSMENU                    209
 #define IDR_MODULSMENU                  214
@@ -241,21 +241,25 @@
 #define IDC_PCMGR_FILEMGR               41172
 #define IDM_RELOADPDB                   41173
 #define IDM_SYSTEM_HIBERNATE            41174
-#define IDM_ALWAYSTOP                       41175
-#define IDM_CANCELTOP                       41176
-#define IDM_SHOWBORDER                      41177
-#define IDM_START_MHOOK                     41178
-#define IDM_END_MHOOK                      41179
+#define IDM_ALWAYSTOP                   41175
+#define IDM_CANCELTOP                   41176
+#define IDM_SHOWBORDER                  41177
+#define IDM_START_MHOOK                 41178
+#define IDM_END_MHOOK                   41179
 #define IDM_SE_AOT                      41180
-#define IDC_CLOSE_PCMGR_CMD 41181
-#define IDM_HELP 41182
+#define IDC_CLOSE_PCMGR_CMD             41181
+#define IDM_HELP                        41182
 
+#define IDS_STRING_LOAD_DOTNET_FAILED_QUIT   139
+#define IDS_STRING_LOAD_DOTNET_FAILED_TITLE 140
+#define IDS_STRING_LOAD_DOTNET_FAILED   141
+#define IDS_STRING_LOAD_DOTNET_FAILED_INSTALL   142
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        131
+#define _APS_NEXT_RESOURCE_VALUE        133
 #define _APS_NEXT_COMMAND_VALUE         40208
 #define _APS_NEXT_CONTROL_VALUE         1017
 #define _APS_NEXT_SYMED_VALUE           101

@@ -1813,20 +1813,23 @@ namespace PCMgr.Main
         }
         public void ProcessListFreeAll()
         {
-            //the exit clear
-            uwps.Clear();
-            uwpHostPid.Clear();
-            for (int i = 0; i < loadedPs.Count; i++)
-                ProcessListFree(loadedPs[i]);
-            loadedPs.Clear();
-            listProcess.Items.Clear();
+            if (Inited)
+            {
+                //the exit clear
+                uwps.Clear();
+                uwpHostPid.Clear();
+                for (int i = 0; i < loadedPs.Count; i++)
+                    ProcessListFree(loadedPs[i]);
+                loadedPs.Clear();
+                listProcess.Items.Clear();
 
-            MProcessMonitor.DestroyProcessMonitor(processMonitor);
+                MProcessMonitor.DestroyProcessMonitor(processMonitor);
 
-            ProcessListSaveCols();
-            ProcessListSaveSettings();
-            ProcessListUnInitPerfs();
-            ProcessListSimpleExit();
+                ProcessListSaveCols();
+                ProcessListSaveSettings();
+                ProcessListUnInitPerfs();
+                ProcessListSimpleExit();
+            }
         }
         private void ProcessListRemoveItem(TaskMgrListItem li)
         {
@@ -2069,8 +2072,6 @@ namespace PCMgr.Main
             listApps.NoHeader = true;
             FormMain.expandFewerDetals.Show();
             FormMain.expandFewerDetals.Expanded = true;
-
-            FormMain.IsSimpleView = GetConfigBool("SimpleView", "AppSetting", true);
         }
         private void ProcessListSimpleExit()
         {

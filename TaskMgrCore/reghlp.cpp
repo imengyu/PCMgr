@@ -612,3 +612,24 @@ M_CAPI(BOOL) MREG_SetCurrentIEVersion(DWORD ver, LPWSTR currentProcessName) {
 #endif
 	return FALSE;
 }
+
+M_CAPI(BOOL) MREG_GetBIOSTime(LPWSTR time) {
+	HKEY hKey;
+	lastErr = RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"System\\CurrentControlSet\\Control\\Session Manager\\Power", 0, KEY_READ, &hKey);
+	if (lastErr == ERROR_SUCCESS)
+	{
+		DWORD dwValue;
+		DWORD dwSize = sizeof(dwValue);
+		DWORD dwType = REG_DWORD;
+
+		if (RegQueryValueEx(hKey, L"FwPOSTTime", 0, &dwType, (LPBYTE)&dwValue, &dwSize) == ERROR_SUCCESS)
+		{
+			swprintf_s(time, 6, L"%.1f", (dwValue / 1000.0));
+			return TRUE;
+		}
+		else LogErr2(L"RegQueryValueEx failed : %d", lastErr);
+		RegCloseKey(hKey);
+	}
+	else LogErr2(L"RegQueryValueEx failed : %d", lastErr);
+	return FALSE;
+}

@@ -259,4 +259,43 @@
   <data name="PageAbout" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\WorkWindow\PageAbout.html;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
+  <data name="icoWifiLevel0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\icoWifiLevel0.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="icoWifiLevel1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\icoWifiLevel1.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="icoWifiLevel2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\icoWifiLevel2.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="icoWifiLevel3" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\icoWifiLevel3.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="icoWifiLevel4" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\icoWifiLevel4.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="icoWifiLevel5" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\icoWifiLevel5.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="pointCpu" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\pointCpu.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="pointDisk" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\pointDisk.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="pointNet" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\pointNet.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="pointRam" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\pointRam.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="pointGpu" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\pointGpu.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="pointGray" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\pointGray.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="PageAboutEn" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\WorkWindow\PageAboutEn.html;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
 </root>

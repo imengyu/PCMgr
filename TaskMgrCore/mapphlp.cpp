@@ -155,7 +155,7 @@ extern BOOL thisCommandIsImporant;
 extern BOOL thisCommandIsVeryImporant;
 extern HANDLE thisCommandhProcess;
 
-bool MLoadApp();
+int MLoadApp();
 bool MLoadAppBackUp();
 LONG WINAPI MUnhandledExceptionFilter(struct _EXCEPTION_POINTERS *lpExceptionInfo);
 M_CAPI(BOOL) InstallMouseHook();
@@ -343,6 +343,42 @@ BOOL MAppStartShowRun2Warn()
 		}
 	}
 	return FALSE;
+}
+VOID MAppStartShowLoadNetFailed(LPWSTR lastLg, LPWSTR errInfo)
+{
+	WCHAR errTilte[16];
+	LoadString(hInstRs, IDS_STRING_LOAD_DOTNET_FAILED_TITLE, errTilte, 16);
+	WCHAR errText[256];
+	LoadString(hInstRs, IDS_STRING_LOAD_DOTNET_FAILED, errText, 256);
+
+	WCHAR errInstall[32];
+	LoadString(hInstRs, IDS_STRING_LOAD_DOTNET_FAILED_INSTALL, errInstall, 32);
+	WCHAR errExit[20];
+	LoadString(hInstRs, IDS_STRING_LOAD_DOTNET_FAILED_QUIT, errExit, 20);
+
+	TASKDIALOGCONFIG cfg = { 0 };
+	cfg.cbSize = sizeof(TASKDIALOGCONFIG);
+	cfg.hInstance = hInst;
+	cfg.dwFlags = TDF_USE_COMMAND_LINKS_NO_ICON;
+	cfg.pszWindowTitle = DEFDIALOGGTITLE;
+	cfg.pszMainInstruction = errTilte;
+	cfg.pszContent = errText;
+	cfg.nDefaultButton = 0;
+	cfg.pszExpandedInformation = errInfo;
+
+	TASKDIALOG_BUTTON btn[3] = { 0 };
+	btn[0] = TASKDIALOG_BUTTON{ 1, errInstall };
+	btn[1] = TASKDIALOG_BUTTON{ 2, errExit };
+	cfg.pButtons = btn;
+	cfg.cButtons = 2;
+
+	int selectButton = 0;
+	if (SUCCEEDED(TaskDialogIndirect(&cfg, &selectButton, NULL, NULL)))
+	{
+		if (selectButton == 1) 
+			if(wcscmp(lastLg, L"en") ==0) MRunExe(L"https://www.microsoft.com/en-us/download/details.aspx?id=17851", L"", FALSE, NULL);
+			else MRunExe(L"https://www.microsoft.com/zh-cn/download/confirmation.aspx?id=17718", L"", FALSE, NULL);
+	}
 }
 M_API void MAppWorkCall2(UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -1004,16 +1040,29 @@ M_API BOOL MAppMainRun()
 		ICLRRuntimeInfo *pRuntimeInfo = nullptr;
 
 		HRESULT hr = dCLRCreateInstance(CLSID_CLRMetaHost, IID_ICLRMetaHost, (LPVOID*)&pMetaHost);
+		if (FAILED(hr)) {
+			_com_error err(hr);
+			LPCTSTR errMsg = err.ErrorMessage();
+
+			MAppStartShowLoadNetFailed(lastLg, (LPWSTR)FormatString(L"CLRCreateInstance failed : %s\nHRESULT : 0x%08X", errMsg, hr).c_str());
+			LogErr(L"CLRCreateInstance failed HRESULT : 0x%08X", hr);
+			goto cleanup;
+		}
 		hr = pMetaHost->GetRuntime(L"v4.0.30319", IID_PPV_ARGS(&pRuntimeInfo));
 
 		if (FAILED(hr)) {
-			MShowErrorMessage(L"Not found .NET framework runtime v4.0.30319.", L"Load app failed", MB_ICONERROR);
+
+			_com_error err(hr);
+			LPCTSTR errMsg = err.ErrorMessage();
+
+			MAppStartShowLoadNetFailed(lastLg, (LPWSTR)FormatString(L" pMetaHost->GetRuntime failed : %s\nHRESULT : 0x%08X", errMsg, hr).c_str());
 			LogErr(L"GetRuntime v4.0.30319 failed HRESULT : 0x%08X", hr);
 			goto cleanup;
 		}
 		hr = pRuntimeInfo->GetInterface(CLSID_CLRRuntimeHost, IID_PPV_ARGS(&pRuntimeHost));
+
 		if (FAILED(hr)) {
-			MShowErrorMessage(L"Create CLRRuntimeHost Failed.", L"Load app failed", MB_ICONERROR);
+			MShowErrorMessage((LPWSTR)FormatString(L"GetInterface CLSID_CLRRuntimeHost failed HRESULT : 0x%08X", hr).c_str(), L"意外错误", MB_ICONERROR);
 			LogErr(L"GetInterface CLSID_CLRRuntimeHost failed HRESULT : 0x%08X", hr);
 			goto cleanup;
 		}
@@ -1029,7 +1078,11 @@ M_API BOOL MAppMainRun()
 		else LogWarn2(L"GetCLRControl faild HRESULT : 0x%X08", hr);
 
 		hr = pRuntimeHost->Start();
-		if (FAILED(hr)) { LogErr(L"Start RuntimeHost failed HRESULT : 0x%08X", hr); goto cleanup; }
+		if (FAILED(hr)) { 
+			MShowErrorMessage((LPWSTR)FormatString(L"Start RuntimeHost failed HRESULT : 0x%08X", hr).c_str(), L"意外错误", MB_ICONERROR);
+			LogErr(L"Start RuntimeHost failed HRESULT : 0x%08X", hr); 
+			goto cleanup; 
+		}
 
 		LogInfo(L"Load main app : %s", mainDllPath);
 		hr = pRuntimeHost->ExecuteInDefaultAppDomain(mainDllPath, L"PCMgr.Program", L"ProgramEntry", GetCommandLine(), &dwMainAppRet);
@@ -1097,7 +1150,7 @@ typedef void(*startfun)();
 
 EXTERN_C BOOL STDMETHODCALLTYPE _CorDllMain(HINSTANCE hInst, DWORD dwReason, LPVOID lpReserved);
 
-bool MLoadApp() {
+int MLoadApp() {
 	return _CorDllMain(hInst, 0, 0);
 }
 bool MLoadAppBackUp()
@@ -1628,11 +1681,8 @@ LRESULT CALLBACK MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		case IDC_CLOSE_PCMGR_CMD: {
-			if (showConsole) {
-				M_LOG_CloseConsole(TRUE, TRUE);
-				M_CFG_SetConfigBOOL(L"ShowDebugWindow", L"Configure", FALSE);
-				showConsole = false;
-			}
+			M_LOG_CloseConsole(FALSE, TRUE);
+			M_CFG_SetConfigBOOL(L"ShowDebugWindow", L"Configure", FALSE);
 			break;
 		}
 		case IDC_SOFTACT_SHOW_KDA: {

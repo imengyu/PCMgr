@@ -894,5 +894,11 @@ M_CAPI(double)MPERF_GetNetworksPerformanceCountersSimpleValues(MPerfNetData*data
 	return 0;
 }
 
+//Gpu
 
-
+M_CAPI(BOOL) MPERF_InitGpuPerformanceCounters() {
+	return FALSE;
+}
+M_CAPI(BOOL) MPERF_DestroyGpuPerformanceCounters() {
+	return FALSE;
+}

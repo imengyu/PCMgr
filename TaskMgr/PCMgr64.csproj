@@ -187,6 +187,9 @@
     <Compile Include="Ctls\TaskMgrListHeader.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Ctls\TaskMgrTabHeader.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="FormMain.cs">
       <SubType>Form</SubType>
     </Compile>

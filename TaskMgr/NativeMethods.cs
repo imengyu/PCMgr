@@ -1010,6 +1010,9 @@ namespace PCMgr
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern IntPtr MREG_ROOTKEYToStr(IntPtr krootkey);
 
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern bool MREG_GetBIOSTime(StringBuilder stringBuilder);
+
         #endregion
 
         #region KRNL API
@@ -1032,7 +1035,9 @@ namespace PCMgr
         public delegate bool EnumUsersCallBack(IntPtr userName, uint sessionId, uint userId, IntPtr domain, IntPtr customData);
 
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool MEnumUsers(IntPtr callback, IntPtr customData);
+        public static extern bool M_User_EnumUsers(IntPtr callback, IntPtr customData);
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern bool M_User_GetUserInfo([MarshalAs(UnmanagedType.LPWStr)]string userName, IntPtr userIcoPath, IntPtr userFullName, int max2);
 
         #endregion
 

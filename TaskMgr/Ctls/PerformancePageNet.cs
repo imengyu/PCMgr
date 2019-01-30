@@ -86,7 +86,7 @@ namespace PCMgr.Ctls
                 && lastMaxSpeed <= performanceGrid.MaxValue * 0.95)
             {
                 performanceGrid.MaxScaleValue = lastMaxSpeed;
-                performanceGrid.MaxScaleText = NativeMethods.FormatNetSpeedUnit(lastMaxSpeed * 1024 / 8);
+                performanceGrid.MaxScaleText = NativeMethods.FormatNetSpeed(lastMaxSpeed * 1024 / 8);
             }
             else performanceGrid.MaxScaleValue = 0;
 
@@ -106,8 +106,8 @@ namespace PCMgr.Ctls
 
             customString = LanuageMgr.GetStr("Send") + " " + (lastSent / 1024 * 8).ToString("0.0") + " "
                 + LanuageMgr.GetStr("Receive") + " " + (lastReceive / 1024 * 8).ToString("0.0") + " Kbps";
-            outdata1 = (int)(lastSent * 0.0001);
-            outdata2 = (int)(lastReceive * 0.0001);
+            outdata2 = (int)(lastSent / 1024 * 8);
+            outdata1 = (int)(lastReceive / 1024 * 8);
             return true;
         }
         public void PageInit()
@@ -148,32 +148,36 @@ namespace PCMgr.Ctls
             performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem(LanuageMgr.GetStr("IPV4"), v4));
             performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem(LanuageMgr.GetStr("IPV6"), v6));
         }
-
-        private int GetSpeedMaxUnit()
+        public int PageGetSpeedMaxUnit(int speed)
         {
-            if (lastMaxSpeed > 100)
+            if (speed > 100)
             {
-                if (lastMaxSpeed < 600)
+                if (speed < 600)
                     return 500;//500k
-                if (lastMaxSpeed < 1030)
+                if (speed < 1030)
                     return 1024;//1m
-                if (lastMaxSpeed < 2050)
+                if (speed < 2050)
                     return 2048;//2m
-                if (lastMaxSpeed < 5130)
+                if (speed < 5130)
                     return 5120;//5m
                 if (lastMaxSpeed < 10300)
                     return 10240;//10m
-                if (lastMaxSpeed < 20500)
+                if (speed < 20500)
                     return 20480;//20m
-                if (lastMaxSpeed < 51000)
+                if (speed < 51000)
                     return 51200;//50m
-                if (lastMaxSpeed < 103400)
+                if (speed < 103400)
                     return 102400;//100m
-                if (lastMaxSpeed < 520000)
+                if (speed < 520000)
                     return 512000;//500m
                 else return 1048576;//1g
             }
             return 100;
+        }
+
+        private int GetSpeedMaxUnit()
+        {
+            return PageGetSpeedMaxUnit(lastMaxSpeed);
         }
 
         private PerformanceInfos.PerformanceInfoSpeicalItem item_readSpeed = null;

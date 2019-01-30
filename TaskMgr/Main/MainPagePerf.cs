@@ -39,8 +39,9 @@ namespace PCMgr.Main
         {
             splitContainerPerfCtls.Panel2.SizeChanged += splitContainerPerfCtls_Panel2_SizeChanged;
             performanceLeftList.SelectedtndexChanged += performanceLeftList_SelectedtndexChanged;
+            performanceLeftList.MouseClick += PerformanceLeftList_MouseClick;
             FormMain.linkLabelOpenPerfMon.LinkClicked += linkLabelOpenPerfMon_LinkClicked;
-
+            FormMain.隐藏图形ToolStripMenuItem.Click += 隐藏图形ToolStripMenuItem_Click;
 
             base.OnLoadControlEvents();
         }
@@ -336,12 +337,14 @@ namespace PCMgr.Main
                 perf_cpu.SmallText = "-- %";
                 perf_cpu.BasePen = new Pen(CpuDrawColor, 2);
                 perf_cpu.BgBrush = new SolidBrush(CpuBgColor);
+                perf_cpu.NoGridImage = Properties.Resources.pointCpu;
                 performanceLeftList.Items.Add(perf_cpu);
 
                 perf_ram.Name = LanuageMgr.GetStr("TitleRam");
                 perf_ram.SmallText = "-- %";
                 perf_ram.BasePen = new Pen(RamDrawColor, 2);
                 perf_ram.BgBrush = new SolidBrush(RamBgColor);
+                perf_ram.NoGridImage = Properties.Resources.pointRam;
                 performanceLeftList.Items.Add(perf_ram);
 
                 PerfPagesInit();
@@ -354,6 +357,7 @@ namespace PCMgr.Main
                     PerfItemHeader perfItemHeader = new PerfItemHeader();
                     perfItemHeader.performanceCounterNative = MPERF_GetDisksPerformanceCounters(i);
                     perfItemHeader.item = new PerformanceListItem();
+                    perfItemHeader.item.NoGridImage = Properties.Resources.pointDisk;
 
                     StringBuilder sb = new StringBuilder(32);
                     MPERF_GetDisksPerformanceCountersInstanceName(perfItemHeader.performanceCounterNative, sb, 32);
@@ -393,7 +397,13 @@ namespace PCMgr.Main
                         perfItemHeader.item.Name = isWifi ? "Wi-Fi" : LanuageMgr.GetStr("Ethernet");
                         perfItemHeader.item.BasePen = new Pen(NetDrawColor);
                         perfItemHeader.item.BgBrush = new SolidBrush(NetBgColor);
+                        perfItemHeader.item.BasePen2 = new Pen(NetDrawColor2);
+                        perfItemHeader.item.BasePen2.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
+                        perfItemHeader.item.BgBrush2 = Brushes.White;
                         perfItemHeader.item.Tag = perfItemHeader;
+                        perfItemHeader.item.NoGridImage = Properties.Resources.pointNet;
+                        perfItemHeader.item.EnableAutoMax = true;
+                        perfItemHeader.item.EnableData2 = true;
                         perfItems.Add(perfItemHeader);
 
                         StringBuilder sbIPV4 = new StringBuilder(32);
@@ -415,6 +425,7 @@ namespace PCMgr.Main
 
                         perfItemHeader.performancePage = performancenet;
 
+                        perfItemHeader.item.AutoMaxCallback = performancenet.PageGetSpeedMaxUnit;
                         perfItemHeader.item.PageIndex = perfPages.Count - 1;
                         performanceLeftList.Items.Add(perfItemHeader.item);
                     }
@@ -443,6 +454,13 @@ namespace PCMgr.Main
                 }
                 catch { }
             }
+            performanceLeftList.DrawDataGrid = GetConfigBool("PerfShowGraphic", "AppSetting", true);
+            FormMain.隐藏图形ToolStripMenuItem.Checked = !performanceLeftList.DrawDataGrid;
+        }
+        private void PerfSaveSettings()
+        {
+            SetConfig("OldSizeGraphic", "AppSetting", lastGraphicSize.Width + "-" + lastGraphicSize.Height);
+            SetConfigBool("PerfShowGraphic", "AppSetting", performanceLeftList.DrawDataGrid);
         }
         public void PerfInitTray()
         {
@@ -531,7 +549,7 @@ namespace PCMgr.Main
             MDEVICE_DestroyNetworkAdaptersInfo();
             MDEVICE_UnInit();
 
-            SetConfig("OldSizeGraphic", "AppSetting", lastGraphicSize.Width + "-" + lastGraphicSize.Height);
+            PerfSaveSettings();
 
             formSpeedBall.Close();
         }
@@ -623,10 +641,26 @@ namespace PCMgr.Main
 
         private FormSpeedBall formSpeedBall = null;
 
+        private void PerformanceLeftList_MouseClick(object sender, MouseEventArgs e)
+        {
+            if(e.Button == MouseButtons.Right) FormMain.contextMenuStripPerfListLeft.Show(MousePosition);
+        }
         private void linkLabelOpenPerfMon_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             MRunExe("perfmon.exe", "/res");
         }
-
+        private void 隐藏图形ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (performanceLeftList.DrawDataGrid)
+            {
+                performanceLeftList.DrawDataGrid = false;
+                FormMain.隐藏图形ToolStripMenuItem.Checked = true;
+            }
+            else
+            {
+                performanceLeftList.DrawDataGrid = true;
+                FormMain.隐藏图形ToolStripMenuItem.Checked = false;
+            }
+        }
     }
 }

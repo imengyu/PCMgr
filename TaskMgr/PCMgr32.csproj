@@ -189,6 +189,9 @@
     <Compile Include="Ctls\TaskMgrListHeader.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Ctls\TaskMgrTabHeader.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="FormMain.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -580,6 +583,19 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="WorkWindow\PageAboutEn.html" />
+    <None Include="Resources\pointGray.png" />
+    <None Include="Resources\pointGpu.png" />
+    <None Include="Resources\pointRam.png" />
+    <None Include="Resources\pointNet.png" />
+    <None Include="Resources\pointDisk.png" />
+    <None Include="Resources\pointCpu.png" />
+    <None Include="Resources\icoWifiLevel5.ico" />
+    <None Include="Resources\icoWifiLevel4.ico" />
+    <None Include="Resources\icoWifiLevel3.ico" />
+    <None Include="Resources\icoWifiLevel2.ico" />
+    <None Include="Resources\icoWifiLevel1.ico" />
+    <None Include="Resources\icoWifiLevel0.ico" />
     <None Include="WorkWindow\PageAbout.html" />
     <None Include="Resources\img_x64.png" />
     <None Include="Resources\img_x32inx64.png" />

@@ -24,5 +24,6 @@ depends.exe - 快捷方式.lnk
 *.iobj
 *.ipdb
 *.enc
+*.ini
 Release_x86_1.2.rar
 Release_x64_1.2.rar

@@ -27,6 +27,7 @@ namespace PCMgr.Main
         {
             ShowHiddenFiles = GetConfigBool("ShowHiddenFiles", "AppSetting");
             HighlightNoSystem = GetConfigBool("HighLightNoSystetm", "Configure", false);
+            formMain.IsSimpleView = GetConfigBool("SimpleView", "AppSetting", true);
 
             int iSplitterDistanceperf = 0;
             if (int.TryParse(GetConfig("SplitterDistancePerf", "AppSetting", "0"), out iSplitterDistanceperf) && iSplitterDistanceperf > 0)
@@ -56,8 +57,6 @@ namespace PCMgr.Main
             MAppWorkCall3(196, IntPtr.Zero, GetConfigBool("MinHide", "AppSetting", false) ? new IntPtr(1) : IntPtr.Zero);
             MAppWorkCall3(162, IntPtr.Zero, GetConfigBool("MainGrouping", "AppSetting", false) ? new IntPtr(1) : IntPtr.Zero);
             MAppWorkCall3(156, IntPtr.Zero, GetConfigBool("AlwaysOnTop", "AppSetting", false) ? new IntPtr(1) : IntPtr.Zero);
-            MAppWorkCall3(164, IntPtr.Zero, IntPtr.Zero);
-            MAppWorkCall3(163, IntPtr.Zero, IntPtr.Zero);
             MAppWorkCall3(206, IntPtr.Zero, new IntPtr(GetConfig("TerProcFun", "Configure", "PspTerProc") == "ApcPspTerProc" ? 1 : 0));
         }
         private void LoadLastPos()
@@ -81,6 +80,19 @@ namespace PCMgr.Main
                     }
                     catch { }
                 }
+                string s = GetConfig("OldSize", "AppSetting", "780-500");
+                if (s.Contains("-"))
+                {
+                    string[] ss = s.Split('-');
+                    try
+                    {
+                        int w = int.Parse(ss[0]); if (w + formMain.Left > Screen.PrimaryScreen.WorkingArea.Width) w = Screen.PrimaryScreen.WorkingArea.Width - formMain.Left;
+                        int h = int.Parse(ss[1]); if (h + formMain.Top > Screen.PrimaryScreen.WorkingArea.Height) h = Screen.PrimaryScreen.WorkingArea.Height - formMain.Top;
+                        formMain.LastSize = new Size(w, h);
+                        formMain.Size = new Size(w, h);
+                    }
+                    catch { }
+                }
                 string sl = GetConfig("OldSizeSimple", "AppSetting", "380-334");
                 if (sl.Contains("-"))
                 {
@@ -92,22 +104,7 @@ namespace PCMgr.Main
                         formMain.LastSimpleSize = new Size(w, h);
 
                         if (GetConfigBool("SimpleView", "AppSetting", true))
-                        {
-                            formMain.Width = w;
-                            formMain.Height = h;
-                        }
-                    }
-                    catch { }
-                }
-                string s = GetConfig("OldSize", "AppSetting", "780-500");
-                if (s.Contains("-"))
-                {
-                    string[] ss = s.Split('-');
-                    try
-                    {
-                        int w = int.Parse(ss[0]); if (w + formMain.Left > Screen.PrimaryScreen.WorkingArea.Width) w = Screen.PrimaryScreen.WorkingArea.Width - formMain.Left;
-                        int h = int.Parse(ss[1]); if (h + formMain.Top > Screen.PrimaryScreen.WorkingArea.Height) h = Screen.PrimaryScreen.WorkingArea.Height - formMain.Top;
-                        formMain.LastSize = new Size(w, h);
+                            formMain.Size = formMain.LastSimpleSize;
                     }
                     catch { }
                 }

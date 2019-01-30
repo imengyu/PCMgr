@@ -99,6 +99,9 @@
             this.listProcessDetals = new System.Windows.Forms.ListView();
             this.imageListProcessDetalsIcons = new System.Windows.Forms.ImageList(this.components);
             this.tabPageStartCtl = new System.Windows.Forms.TabPage();
+            this.pl_bios_time = new System.Windows.Forms.Panel();
+            this.lbBiosTime = new System.Windows.Forms.Label();
+            this.lbBiosTimeText = new System.Windows.Forms.Label();
             this.listStartup = new PCMgr.Ctls.TaskMgrList();
             this.tabPageFileCtl = new System.Windows.Forms.TabPage();
             this.lbFileMgrStatus = new System.Windows.Forms.Label();
@@ -141,6 +144,8 @@
             this.值ToolStripMenuItemNet = new System.Windows.Forms.ToolStripMenuItem();
             this.fileSystemWatcher = new System.IO.FileSystemWatcher();
             this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
+            this.contextMenuStripPerfListLeft = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.隐藏图形ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerPerfCtls)).BeginInit();
             this.splitContainerPerfCtls.Panel1.SuspendLayout();
             this.splitContainerPerfCtls.SuspendLayout();
@@ -164,6 +169,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.sp2)).BeginInit();
             this.tabPageDetals.SuspendLayout();
             this.tabPageStartCtl.SuspendLayout();
+            this.pl_bios_time.SuspendLayout();
             this.tabPageFileCtl.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.spBottom)).BeginInit();
             this.contextMenuStripUWP.SuspendLayout();
@@ -172,6 +178,7 @@
             this.contextMenuStripTray.SuspendLayout();
             this.contextMenuStripMainHeader.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.fileSystemWatcher)).BeginInit();
+            this.contextMenuStripPerfListLeft.SuspendLayout();
             this.SuspendLayout();
             // 
             // splitContainerPerfCtls
@@ -181,32 +188,28 @@
             // 
             // splitContainerPerfCtls.Panel1
             // 
-            resources.ApplyResources(this.splitContainerPerfCtls.Panel1, "splitContainerPerfCtls.Panel1");
             this.splitContainerPerfCtls.Panel1.Controls.Add(this.sp3);
             this.splitContainerPerfCtls.Panel1.Controls.Add(this.performanceLeftList);
-            this.toolTip.SetToolTip(this.splitContainerPerfCtls.Panel1, resources.GetString("splitContainerPerfCtls.Panel1.ToolTip"));
+            resources.ApplyResources(this.splitContainerPerfCtls.Panel1, "splitContainerPerfCtls.Panel1");
             // 
             // splitContainerPerfCtls.Panel2
             // 
             resources.ApplyResources(this.splitContainerPerfCtls.Panel2, "splitContainerPerfCtls.Panel2");
-            this.toolTip.SetToolTip(this.splitContainerPerfCtls.Panel2, resources.GetString("splitContainerPerfCtls.Panel2.ToolTip"));
-            this.toolTip.SetToolTip(this.splitContainerPerfCtls, resources.GetString("splitContainerPerfCtls.ToolTip"));
             // 
             // sp3
             // 
-            resources.ApplyResources(this.sp3, "sp3");
             this.sp3.BackColor = System.Drawing.Color.Silver;
             this.sp3.Cursor = System.Windows.Forms.Cursors.SizeWE;
+            resources.ApplyResources(this.sp3, "sp3");
             this.sp3.Name = "sp3";
-            this.toolTip.SetToolTip(this.sp3, resources.GetString("sp3.ToolTip"));
             // 
             // performanceLeftList
             // 
-            resources.ApplyResources(this.performanceLeftList, "performanceLeftList");
             this.performanceLeftList.BackColor = System.Drawing.Color.White;
+            resources.ApplyResources(this.performanceLeftList, "performanceLeftList");
+            this.performanceLeftList.DrawDataGrid = true;
             this.performanceLeftList.Name = "performanceLeftList";
             this.performanceLeftList.Selectedtem = null;
-            this.toolTip.SetToolTip(this.performanceLeftList, resources.GetString("performanceLeftList.ToolTip"));
             // 
             // splitContainerFm
             // 
@@ -215,16 +218,13 @@
             // 
             // splitContainerFm.Panel1
             // 
-            resources.ApplyResources(this.splitContainerFm.Panel1, "splitContainerFm.Panel1");
             this.splitContainerFm.Panel1.Controls.Add(this.treeFmLeft);
-            this.toolTip.SetToolTip(this.splitContainerFm.Panel1, resources.GetString("splitContainerFm.Panel1.ToolTip"));
+            resources.ApplyResources(this.splitContainerFm.Panel1, "splitContainerFm.Panel1");
             // 
             // splitContainerFm.Panel2
             // 
-            resources.ApplyResources(this.splitContainerFm.Panel2, "splitContainerFm.Panel2");
             this.splitContainerFm.Panel2.Controls.Add(this.listFm);
-            this.toolTip.SetToolTip(this.splitContainerFm.Panel2, resources.GetString("splitContainerFm.Panel2.ToolTip"));
-            this.toolTip.SetToolTip(this.splitContainerFm, resources.GetString("splitContainerFm.ToolTip"));
+            resources.ApplyResources(this.splitContainerFm.Panel2, "splitContainerFm.Panel2");
             // 
             // treeFmLeft
             // 
@@ -232,8 +232,6 @@
             this.treeFmLeft.FullRowSelect = true;
             this.treeFmLeft.ImageList = this.imageListFileMgrLeft;
             this.treeFmLeft.Name = "treeFmLeft";
-            this.toolTip.SetToolTip(this.treeFmLeft, resources.GetString("treeFmLeft.ToolTip"));
-
             // 
             // imageListFileMgrLeft
             // 
@@ -245,7 +243,6 @@
             // 
             // listFm
             // 
-            resources.ApplyResources(this.listFm, "listFm");
             this.listFm.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader1,
             this.columnHeader3,
@@ -253,14 +250,13 @@
             this.columnHeader4,
             this.columnHeader5,
             this.columnHeader6});
+            resources.ApplyResources(this.listFm, "listFm");
             this.listFm.FullRowSelect = true;
             this.listFm.Name = "listFm";
             this.listFm.ShowItemToolTips = true;
             this.listFm.SmallImageList = this.imageListFileTypeList;
-            this.toolTip.SetToolTip(this.listFm, resources.GetString("listFm.ToolTip"));
             this.listFm.UseCompatibleStateImageBehavior = false;
             this.listFm.View = System.Windows.Forms.View.Details;
-
             // 
             // columnHeader1
             // 
@@ -305,14 +301,14 @@
             this.tabControlMain.Controls.Add(this.tabPageStartCtl);
             this.tabControlMain.Controls.Add(this.tabPageFileCtl);
             this.tabControlMain.Cursor = System.Windows.Forms.Cursors.Default;
+            this.tabControlMain.HotTrack = true;
+            this.tabControlMain.Multiline = true;
             this.tabControlMain.Name = "tabControlMain";
             this.tabControlMain.SelectedIndex = 0;
-            this.toolTip.SetToolTip(this.tabControlMain, resources.GetString("tabControlMain.ToolTip"));
             this.tabControlMain.Selected += new System.Windows.Forms.TabControlEventHandler(this.tabControlMain_Selected);
             // 
             // tabPageProcCtl
             // 
-            resources.ApplyResources(this.tabPageProcCtl, "tabPageProcCtl");
             this.tabPageProcCtl.Controls.Add(this.sp4);
             this.tabPageProcCtl.Controls.Add(this.check_showAllProcess);
             this.tabPageProcCtl.Controls.Add(this.spl1);
@@ -320,8 +316,8 @@
             this.tabPageProcCtl.Controls.Add(this.listProcess);
             this.tabPageProcCtl.Controls.Add(this.lbProcessCount);
             this.tabPageProcCtl.Controls.Add(this.expandFewerDetals);
+            resources.ApplyResources(this.tabPageProcCtl, "tabPageProcCtl");
             this.tabPageProcCtl.Name = "tabPageProcCtl";
-            this.toolTip.SetToolTip(this.tabPageProcCtl, resources.GetString("tabPageProcCtl.ToolTip"));
             this.tabPageProcCtl.UseVisualStyleBackColor = true;
             // 
             // sp4
@@ -330,13 +326,11 @@
             this.sp4.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(207)))), ((int)(((byte)(207)))), ((int)(((byte)(207)))));
             this.sp4.Name = "sp4";
             this.sp4.TabStop = false;
-            this.toolTip.SetToolTip(this.sp4, resources.GetString("sp4.ToolTip"));
             // 
             // check_showAllProcess
             // 
             resources.ApplyResources(this.check_showAllProcess, "check_showAllProcess");
             this.check_showAllProcess.Name = "check_showAllProcess";
-            this.toolTip.SetToolTip(this.check_showAllProcess, resources.GetString("check_showAllProcess.ToolTip"));
             this.check_showAllProcess.UseVisualStyleBackColor = true;
             // 
             // spl1
@@ -345,13 +339,11 @@
             this.spl1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(207)))), ((int)(((byte)(207)))), ((int)(((byte)(207)))));
             this.spl1.Name = "spl1";
             this.spl1.TabStop = false;
-            this.toolTip.SetToolTip(this.spl1, resources.GetString("spl1.ToolTip"));
             // 
             // btnEndProcess
             // 
             resources.ApplyResources(this.btnEndProcess, "btnEndProcess");
             this.btnEndProcess.Name = "btnEndProcess";
-            this.toolTip.SetToolTip(this.btnEndProcess, resources.GetString("btnEndProcess.ToolTip"));
             this.btnEndProcess.UseVisualStyleBackColor = true;
             // 
             // listProcess
@@ -359,6 +351,7 @@
             resources.ApplyResources(this.listProcess, "listProcess");
             this.listProcess.BackColor = System.Drawing.SystemColors.Window;
             this.listProcess.DrawIcon = true;
+            this.listProcess.DrawUWPPausedIconIndexGetCallback = null;
             this.listProcess.FocusedType = false;
             this.listProcess.Icons = null;
             this.listProcess.ListViewItemSorter = null;
@@ -366,7 +359,6 @@
             this.listProcess.NoHeader = false;
             this.listProcess.SelectedItem = null;
             this.listProcess.ShowGroup = false;
-            this.toolTip.SetToolTip(this.listProcess, resources.GetString("listProcess.ToolTip"));
             this.listProcess.Value = 0D;
             this.listProcess.XOffest = 0;
             // 
@@ -374,7 +366,6 @@
             // 
             resources.ApplyResources(this.lbProcessCount, "lbProcessCount");
             this.lbProcessCount.Name = "lbProcessCount";
-            this.toolTip.SetToolTip(this.lbProcessCount, resources.GetString("lbProcessCount.ToolTip"));
             // 
             // expandFewerDetals
             // 
@@ -382,19 +373,17 @@
             this.expandFewerDetals.BackColor = System.Drawing.Color.White;
             this.expandFewerDetals.Expanded = false;
             this.expandFewerDetals.Name = "expandFewerDetals";
-            this.toolTip.SetToolTip(this.expandFewerDetals, resources.GetString("expandFewerDetals.ToolTip"));
             this.expandFewerDetals.UseVisualStyleBackColor = false;
             // 
             // tabPageKernelCtl
             // 
-            resources.ApplyResources(this.tabPageKernelCtl, "tabPageKernelCtl");
             this.tabPageKernelCtl.Controls.Add(this.sp5);
             this.tabPageKernelCtl.Controls.Add(this.linkLabelShowKernelTools);
             this.tabPageKernelCtl.Controls.Add(this.pl_driverNotLoadTip);
             this.tabPageKernelCtl.Controls.Add(this.lbDriversCount);
             this.tabPageKernelCtl.Controls.Add(this.listDrivers);
+            resources.ApplyResources(this.tabPageKernelCtl, "tabPageKernelCtl");
             this.tabPageKernelCtl.Name = "tabPageKernelCtl";
-            this.toolTip.SetToolTip(this.tabPageKernelCtl, resources.GetString("tabPageKernelCtl.ToolTip"));
             this.tabPageKernelCtl.UseVisualStyleBackColor = true;
             // 
             // sp5
@@ -403,7 +392,6 @@
             this.sp5.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(207)))), ((int)(((byte)(207)))), ((int)(((byte)(207)))));
             this.sp5.Name = "sp5";
             this.sp5.TabStop = false;
-            this.toolTip.SetToolTip(this.sp5, resources.GetString("sp5.ToolTip"));
             // 
             // linkLabelShowKernelTools
             // 
@@ -412,7 +400,6 @@
             this.linkLabelShowKernelTools.LinkColor = System.Drawing.Color.DodgerBlue;
             this.linkLabelShowKernelTools.Name = "linkLabelShowKernelTools";
             this.linkLabelShowKernelTools.TabStop = true;
-            this.toolTip.SetToolTip(this.linkLabelShowKernelTools, resources.GetString("linkLabelShowKernelTools.ToolTip"));
             // 
             // pl_driverNotLoadTip
             // 
@@ -420,29 +407,25 @@
             this.pl_driverNotLoadTip.Controls.Add(this.linkRestartAsAdminDriver);
             this.pl_driverNotLoadTip.Controls.Add(this.lbRestartAsAdminDriver);
             this.pl_driverNotLoadTip.Name = "pl_driverNotLoadTip";
-            this.toolTip.SetToolTip(this.pl_driverNotLoadTip, resources.GetString("pl_driverNotLoadTip.ToolTip"));
             // 
             // linkRestartAsAdminDriver
             // 
-            resources.ApplyResources(this.linkRestartAsAdminDriver, "linkRestartAsAdminDriver");
             this.linkRestartAsAdminDriver.DisabledLinkColor = System.Drawing.SystemColors.MenuHighlight;
+            resources.ApplyResources(this.linkRestartAsAdminDriver, "linkRestartAsAdminDriver");
             this.linkRestartAsAdminDriver.LinkBehavior = System.Windows.Forms.LinkBehavior.HoverUnderline;
             this.linkRestartAsAdminDriver.LinkColor = System.Drawing.SystemColors.MenuHighlight;
             this.linkRestartAsAdminDriver.Name = "linkRestartAsAdminDriver";
             this.linkRestartAsAdminDriver.TabStop = true;
-            this.toolTip.SetToolTip(this.linkRestartAsAdminDriver, resources.GetString("linkRestartAsAdminDriver.ToolTip"));
             // 
             // lbRestartAsAdminDriver
             // 
             resources.ApplyResources(this.lbRestartAsAdminDriver, "lbRestartAsAdminDriver");
             this.lbRestartAsAdminDriver.Name = "lbRestartAsAdminDriver";
-            this.toolTip.SetToolTip(this.lbRestartAsAdminDriver, resources.GetString("lbRestartAsAdminDriver.ToolTip"));
             // 
             // lbDriversCount
             // 
             resources.ApplyResources(this.lbDriversCount, "lbDriversCount");
             this.lbDriversCount.Name = "lbDriversCount";
-            this.toolTip.SetToolTip(this.lbDriversCount, resources.GetString("lbDriversCount.ToolTip"));
             // 
             // listDrivers
             // 
@@ -459,10 +442,8 @@
             this.columnHeader23});
             this.listDrivers.FullRowSelect = true;
             this.listDrivers.Name = "listDrivers";
-            this.toolTip.SetToolTip(this.listDrivers, resources.GetString("listDrivers.ToolTip"));
             this.listDrivers.UseCompatibleStateImageBehavior = false;
             this.listDrivers.View = System.Windows.Forms.View.Details;
-
             // 
             // columnHeader15
             // 
@@ -498,11 +479,10 @@
             // 
             // tabPagePerfCtl
             // 
-            resources.ApplyResources(this.tabPagePerfCtl, "tabPagePerfCtl");
             this.tabPagePerfCtl.Controls.Add(this.linkLabelOpenPerfMon);
             this.tabPagePerfCtl.Controls.Add(this.splitContainerPerfCtls);
+            resources.ApplyResources(this.tabPagePerfCtl, "tabPagePerfCtl");
             this.tabPagePerfCtl.Name = "tabPagePerfCtl";
-            this.toolTip.SetToolTip(this.tabPagePerfCtl, resources.GetString("tabPagePerfCtl.ToolTip"));
             this.tabPagePerfCtl.UseVisualStyleBackColor = true;
             // 
             // linkLabelOpenPerfMon
@@ -514,15 +494,13 @@
             this.linkLabelOpenPerfMon.LinkColor = System.Drawing.SystemColors.MenuHighlight;
             this.linkLabelOpenPerfMon.Name = "linkLabelOpenPerfMon";
             this.linkLabelOpenPerfMon.TabStop = true;
-            this.toolTip.SetToolTip(this.linkLabelOpenPerfMon, resources.GetString("linkLabelOpenPerfMon.ToolTip"));
             // 
             // tabPageUWPCtl
             // 
-            resources.ApplyResources(this.tabPageUWPCtl, "tabPageUWPCtl");
             this.tabPageUWPCtl.Controls.Add(this.pl_UWPEnumFailTip);
             this.tabPageUWPCtl.Controls.Add(this.listUwpApps);
+            resources.ApplyResources(this.tabPageUWPCtl, "tabPageUWPCtl");
             this.tabPageUWPCtl.Name = "tabPageUWPCtl";
-            this.toolTip.SetToolTip(this.tabPageUWPCtl, resources.GetString("tabPageUWPCtl.ToolTip"));
             this.tabPageUWPCtl.UseVisualStyleBackColor = true;
             // 
             // pl_UWPEnumFailTip
@@ -530,35 +508,32 @@
             resources.ApplyResources(this.pl_UWPEnumFailTip, "pl_UWPEnumFailTip");
             this.pl_UWPEnumFailTip.Controls.Add(this.lbUWPEnumFailText);
             this.pl_UWPEnumFailTip.Name = "pl_UWPEnumFailTip";
-            this.toolTip.SetToolTip(this.pl_UWPEnumFailTip, resources.GetString("pl_UWPEnumFailTip.ToolTip"));
             // 
             // lbUWPEnumFailText
             // 
             resources.ApplyResources(this.lbUWPEnumFailText, "lbUWPEnumFailText");
             this.lbUWPEnumFailText.Name = "lbUWPEnumFailText";
-            this.toolTip.SetToolTip(this.lbUWPEnumFailText, resources.GetString("lbUWPEnumFailText.ToolTip"));
             // 
             // listUwpApps
             // 
             resources.ApplyResources(this.listUwpApps, "listUwpApps");
             this.listUwpApps.BackColor = System.Drawing.SystemColors.Window;
             this.listUwpApps.DrawIcon = true;
+            this.listUwpApps.DrawUWPPausedIconIndexGetCallback = null;
             this.listUwpApps.FocusedType = false;
             this.listUwpApps.ListViewItemSorter = null;
             this.listUwpApps.Name = "listUwpApps";
             this.listUwpApps.NoHeader = false;
             this.listUwpApps.SelectedItem = null;
             this.listUwpApps.ShowGroup = false;
-            this.toolTip.SetToolTip(this.listUwpApps, resources.GetString("listUwpApps.ToolTip"));
             this.listUwpApps.Value = 0D;
             this.listUwpApps.XOffest = 0;
             // 
             // tabPageUsers
             // 
-            resources.ApplyResources(this.tabPageUsers, "tabPageUsers");
             this.tabPageUsers.Controls.Add(this.listUsers);
+            resources.ApplyResources(this.tabPageUsers, "tabPageUsers");
             this.tabPageUsers.Name = "tabPageUsers";
-            this.toolTip.SetToolTip(this.tabPageUsers, resources.GetString("tabPageUsers.ToolTip"));
             this.tabPageUsers.UseVisualStyleBackColor = true;
             // 
             // listUsers
@@ -566,26 +541,25 @@
             resources.ApplyResources(this.listUsers, "listUsers");
             this.listUsers.BackColor = System.Drawing.Color.White;
             this.listUsers.DrawIcon = true;
+            this.listUsers.DrawUWPPausedIconIndexGetCallback = null;
             this.listUsers.FocusedType = false;
             this.listUsers.ListViewItemSorter = null;
             this.listUsers.Name = "listUsers";
             this.listUsers.NoHeader = false;
             this.listUsers.SelectedItem = null;
             this.listUsers.ShowGroup = false;
-            this.toolTip.SetToolTip(this.listUsers, resources.GetString("listUsers.ToolTip"));
             this.listUsers.Value = 0D;
             this.listUsers.XOffest = 0;
             // 
             // tabPageScCtl
             // 
-            resources.ApplyResources(this.tabPageScCtl, "tabPageScCtl");
             this.tabPageScCtl.Controls.Add(this.pl_ScNeedAdminTip);
             this.tabPageScCtl.Controls.Add(this.sp2);
             this.tabPageScCtl.Controls.Add(this.linkOpenScMsc);
             this.tabPageScCtl.Controls.Add(this.listService);
             this.tabPageScCtl.Controls.Add(this.lbServicesCount);
+            resources.ApplyResources(this.tabPageScCtl, "tabPageScCtl");
             this.tabPageScCtl.Name = "tabPageScCtl";
-            this.toolTip.SetToolTip(this.tabPageScCtl, resources.GetString("tabPageScCtl.ToolTip"));
             this.tabPageScCtl.UseVisualStyleBackColor = true;
             // 
             // pl_ScNeedAdminTip
@@ -594,23 +568,20 @@
             this.pl_ScNeedAdminTip.Controls.Add(this.linkRebootAsAdmin);
             this.pl_ScNeedAdminTip.Controls.Add(this.lbScNeedAdminTip);
             this.pl_ScNeedAdminTip.Name = "pl_ScNeedAdminTip";
-            this.toolTip.SetToolTip(this.pl_ScNeedAdminTip, resources.GetString("pl_ScNeedAdminTip.ToolTip"));
             // 
             // linkRebootAsAdmin
             // 
-            resources.ApplyResources(this.linkRebootAsAdmin, "linkRebootAsAdmin");
             this.linkRebootAsAdmin.DisabledLinkColor = System.Drawing.SystemColors.MenuHighlight;
+            resources.ApplyResources(this.linkRebootAsAdmin, "linkRebootAsAdmin");
             this.linkRebootAsAdmin.LinkBehavior = System.Windows.Forms.LinkBehavior.HoverUnderline;
             this.linkRebootAsAdmin.LinkColor = System.Drawing.SystemColors.MenuHighlight;
             this.linkRebootAsAdmin.Name = "linkRebootAsAdmin";
             this.linkRebootAsAdmin.TabStop = true;
-            this.toolTip.SetToolTip(this.linkRebootAsAdmin, resources.GetString("linkRebootAsAdmin.ToolTip"));
             // 
             // lbScNeedAdminTip
             // 
             resources.ApplyResources(this.lbScNeedAdminTip, "lbScNeedAdminTip");
             this.lbScNeedAdminTip.Name = "lbScNeedAdminTip";
-            this.toolTip.SetToolTip(this.lbScNeedAdminTip, resources.GetString("lbScNeedAdminTip.ToolTip"));
             // 
             // sp2
             // 
@@ -618,7 +589,6 @@
             this.sp2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(207)))), ((int)(((byte)(207)))), ((int)(((byte)(207)))));
             this.sp2.Name = "sp2";
             this.sp2.TabStop = false;
-            this.toolTip.SetToolTip(this.sp2, resources.GetString("sp2.ToolTip"));
             // 
             // linkOpenScMsc
             // 
@@ -628,7 +598,6 @@
             this.linkOpenScMsc.LinkColor = System.Drawing.SystemColors.MenuHighlight;
             this.linkOpenScMsc.Name = "linkOpenScMsc";
             this.linkOpenScMsc.TabStop = true;
-            this.toolTip.SetToolTip(this.linkOpenScMsc, resources.GetString("linkOpenScMsc.ToolTip"));
             // 
             // listService
             // 
@@ -647,10 +616,8 @@
             this.listService.FullRowSelect = true;
             this.listService.MultiSelect = false;
             this.listService.Name = "listService";
-            this.toolTip.SetToolTip(this.listService, resources.GetString("listService.ToolTip"));
             this.listService.UseCompatibleStateImageBehavior = false;
             this.listService.View = System.Windows.Forms.View.Details;
-
             // 
             // columnHeader7
             // 
@@ -692,38 +659,32 @@
             // 
             resources.ApplyResources(this.lbServicesCount, "lbServicesCount");
             this.lbServicesCount.Name = "lbServicesCount";
-            this.toolTip.SetToolTip(this.lbServicesCount, resources.GetString("lbServicesCount.ToolTip"));
             // 
             // tabPageDetals
             // 
-            resources.ApplyResources(this.tabPageDetals, "tabPageDetals");
             this.tabPageDetals.Controls.Add(this.btnEndProcessDetals);
             this.tabPageDetals.Controls.Add(this.listProcessDetals);
+            resources.ApplyResources(this.tabPageDetals, "tabPageDetals");
             this.tabPageDetals.Name = "tabPageDetals";
-            this.toolTip.SetToolTip(this.tabPageDetals, resources.GetString("tabPageDetals.ToolTip"));
             this.tabPageDetals.UseVisualStyleBackColor = true;
             // 
             // btnEndProcessDetals
             // 
             resources.ApplyResources(this.btnEndProcessDetals, "btnEndProcessDetals");
             this.btnEndProcessDetals.Name = "btnEndProcessDetals";
-            this.toolTip.SetToolTip(this.btnEndProcessDetals, resources.GetString("btnEndProcessDetals.ToolTip"));
             this.btnEndProcessDetals.UseVisualStyleBackColor = true;
-
             // 
             // listProcessDetals
             // 
-            resources.ApplyResources(this.listProcessDetals, "listProcessDetals");
             this.listProcessDetals.AllowColumnReorder = true;
+            resources.ApplyResources(this.listProcessDetals, "listProcessDetals");
             this.listProcessDetals.FullRowSelect = true;
             this.listProcessDetals.MultiSelect = false;
             this.listProcessDetals.Name = "listProcessDetals";
             this.listProcessDetals.ShowItemToolTips = true;
             this.listProcessDetals.SmallImageList = this.imageListProcessDetalsIcons;
-            this.toolTip.SetToolTip(this.listProcessDetals, resources.GetString("listProcessDetals.ToolTip"));
             this.listProcessDetals.UseCompatibleStateImageBehavior = false;
             this.listProcessDetals.View = System.Windows.Forms.View.Details;
-
             // 
             // imageListProcessDetalsIcons
             // 
@@ -733,43 +694,62 @@
             // 
             // tabPageStartCtl
             // 
-            resources.ApplyResources(this.tabPageStartCtl, "tabPageStartCtl");
+            this.tabPageStartCtl.Controls.Add(this.pl_bios_time);
             this.tabPageStartCtl.Controls.Add(this.listStartup);
+            resources.ApplyResources(this.tabPageStartCtl, "tabPageStartCtl");
             this.tabPageStartCtl.Name = "tabPageStartCtl";
-            this.toolTip.SetToolTip(this.tabPageStartCtl, resources.GetString("tabPageStartCtl.ToolTip"));
             this.tabPageStartCtl.UseVisualStyleBackColor = true;
+            // 
+            // pl_bios_time
+            // 
+            resources.ApplyResources(this.pl_bios_time, "pl_bios_time");
+            this.pl_bios_time.Controls.Add(this.lbBiosTime);
+            this.pl_bios_time.Controls.Add(this.lbBiosTimeText);
+            this.pl_bios_time.Name = "pl_bios_time";
+            // 
+            // lbBiosTime
+            // 
+            this.lbBiosTime.AutoEllipsis = true;
+            this.lbBiosTime.ForeColor = System.Drawing.Color.Black;
+            resources.ApplyResources(this.lbBiosTime, "lbBiosTime");
+            this.lbBiosTime.Name = "lbBiosTime";
+            // 
+            // lbBiosTimeText
+            // 
+            this.lbBiosTimeText.AutoEllipsis = true;
+            this.lbBiosTimeText.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(76)))), ((int)(((byte)(96)))), ((int)(((byte)(122)))));
+            resources.ApplyResources(this.lbBiosTimeText, "lbBiosTimeText");
+            this.lbBiosTimeText.Name = "lbBiosTimeText";
             // 
             // listStartup
             // 
             resources.ApplyResources(this.listStartup, "listStartup");
             this.listStartup.BackColor = System.Drawing.Color.White;
             this.listStartup.DrawIcon = true;
+            this.listStartup.DrawUWPPausedIconIndexGetCallback = null;
             this.listStartup.FocusedType = false;
             this.listStartup.ListViewItemSorter = null;
             this.listStartup.Name = "listStartup";
             this.listStartup.NoHeader = false;
             this.listStartup.SelectedItem = null;
             this.listStartup.ShowGroup = false;
-            this.toolTip.SetToolTip(this.listStartup, resources.GetString("listStartup.ToolTip"));
             this.listStartup.Value = 0D;
             this.listStartup.XOffest = 0;
             // 
             // tabPageFileCtl
             // 
-            resources.ApplyResources(this.tabPageFileCtl, "tabPageFileCtl");
             this.tabPageFileCtl.Controls.Add(this.lbFileMgrStatus);
             this.tabPageFileCtl.Controls.Add(this.btnFmAddGoto);
             this.tabPageFileCtl.Controls.Add(this.textBoxFmCurrent);
             this.tabPageFileCtl.Controls.Add(this.splitContainerFm);
+            resources.ApplyResources(this.tabPageFileCtl, "tabPageFileCtl");
             this.tabPageFileCtl.Name = "tabPageFileCtl";
-            this.toolTip.SetToolTip(this.tabPageFileCtl, resources.GetString("tabPageFileCtl.ToolTip"));
             this.tabPageFileCtl.UseVisualStyleBackColor = true;
             // 
             // lbFileMgrStatus
             // 
             resources.ApplyResources(this.lbFileMgrStatus, "lbFileMgrStatus");
             this.lbFileMgrStatus.Name = "lbFileMgrStatus";
-            this.toolTip.SetToolTip(this.lbFileMgrStatus, resources.GetString("lbFileMgrStatus.ToolTip"));
             // 
             // btnFmAddGoto
             // 
@@ -777,22 +757,18 @@
             this.btnFmAddGoto.Name = "btnFmAddGoto";
             this.toolTip.SetToolTip(this.btnFmAddGoto, resources.GetString("btnFmAddGoto.ToolTip"));
             this.btnFmAddGoto.UseVisualStyleBackColor = true;
-
             // 
             // textBoxFmCurrent
             // 
             resources.ApplyResources(this.textBoxFmCurrent, "textBoxFmCurrent");
             this.textBoxFmCurrent.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBoxFmCurrent.Name = "textBoxFmCurrent";
-            this.toolTip.SetToolTip(this.textBoxFmCurrent, resources.GetString("textBoxFmCurrent.ToolTip"));
-
             // 
             // lbStartingStatus
             // 
             resources.ApplyResources(this.lbStartingStatus, "lbStartingStatus");
             this.lbStartingStatus.AutoEllipsis = true;
             this.lbStartingStatus.Name = "lbStartingStatus";
-            this.toolTip.SetToolTip(this.lbStartingStatus, resources.GetString("lbStartingStatus.ToolTip"));
             // 
             // spBottom
             // 
@@ -800,11 +776,9 @@
             this.spBottom.BackColor = System.Drawing.Color.DarkGray;
             this.spBottom.Name = "spBottom";
             this.spBottom.TabStop = false;
-            this.toolTip.SetToolTip(this.spBottom, resources.GetString("spBottom.ToolTip"));
             // 
             // contextMenuStripUWP
             // 
-            resources.ApplyResources(this.contextMenuStripUWP, "contextMenuStripUWP");
             this.contextMenuStripUWP.ImageScalingSize = new System.Drawing.Size(32, 32);
             this.contextMenuStripUWP.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.打开应用ToolStripMenuItem,
@@ -815,59 +789,59 @@
             this.复制发布者ToolStripMenuItem});
             this.contextMenuStripUWP.Name = "contextMenuStripUWP";
             this.contextMenuStripUWP.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
-            this.toolTip.SetToolTip(this.contextMenuStripUWP, resources.GetString("contextMenuStripUWP.ToolTip"));
+            resources.ApplyResources(this.contextMenuStripUWP, "contextMenuStripUWP");
             // 
             // 打开应用ToolStripMenuItem
             // 
-            resources.ApplyResources(this.打开应用ToolStripMenuItem, "打开应用ToolStripMenuItem");
             this.打开应用ToolStripMenuItem.Name = "打开应用ToolStripMenuItem";
+            resources.ApplyResources(this.打开应用ToolStripMenuItem, "打开应用ToolStripMenuItem");
             // 
             // 卸载应用ToolStripMenuItem
             // 
+            this.卸载应用ToolStripMenuItem.Name = "卸载应用ToolStripMenuItem";
             resources.ApplyResources(this.卸载应用ToolStripMenuItem, "卸载应用ToolStripMenuItem");
             // 
             // 打开安装位置ToolStripMenuItem
             // 
-            resources.ApplyResources(this.打开安装位置ToolStripMenuItem, "打开安装位置ToolStripMenuItem");
             this.打开安装位置ToolStripMenuItem.Name = "打开安装位置ToolStripMenuItem";
+            resources.ApplyResources(this.打开安装位置ToolStripMenuItem, "打开安装位置ToolStripMenuItem");
             // 
             // 复制名称ToolStripMenuItem
             // 
-            resources.ApplyResources(this.复制名称ToolStripMenuItem, "复制名称ToolStripMenuItem");
             this.复制名称ToolStripMenuItem.Name = "复制名称ToolStripMenuItem";
+            resources.ApplyResources(this.复制名称ToolStripMenuItem, "复制名称ToolStripMenuItem");
             // 
             // 复制完整名称ToolStripMenuItem
             // 
-            resources.ApplyResources(this.复制完整名称ToolStripMenuItem, "复制完整名称ToolStripMenuItem");
             this.复制完整名称ToolStripMenuItem.Name = "复制完整名称ToolStripMenuItem";
+            resources.ApplyResources(this.复制完整名称ToolStripMenuItem, "复制完整名称ToolStripMenuItem");
             // 
             // 复制发布者ToolStripMenuItem
             // 
-            resources.ApplyResources(this.复制发布者ToolStripMenuItem, "复制发布者ToolStripMenuItem");
             this.复制发布者ToolStripMenuItem.Name = "复制发布者ToolStripMenuItem";
+            resources.ApplyResources(this.复制发布者ToolStripMenuItem, "复制发布者ToolStripMenuItem");
             // 
             // listApps
             // 
             resources.ApplyResources(this.listApps, "listApps");
             this.listApps.DrawIcon = true;
+            this.listApps.DrawUWPPausedIconIndexGetCallback = null;
             this.listApps.FocusedType = false;
             this.listApps.ListViewItemSorter = null;
             this.listApps.Name = "listApps";
             this.listApps.NoHeader = false;
             this.listApps.SelectedItem = null;
             this.listApps.ShowGroup = false;
-            this.toolTip.SetToolTip(this.listApps, resources.GetString("listApps.ToolTip"));
             this.listApps.Value = 0D;
             this.listApps.XOffest = 0;
             // 
             // pl_simple
             // 
-            resources.ApplyResources(this.pl_simple, "pl_simple");
             this.pl_simple.Controls.Add(this.expandMoreDetals);
             this.pl_simple.Controls.Add(this.btnEndTaskSimple);
             this.pl_simple.Controls.Add(this.listApps);
+            resources.ApplyResources(this.pl_simple, "pl_simple");
             this.pl_simple.Name = "pl_simple";
-            this.toolTip.SetToolTip(this.pl_simple, resources.GetString("pl_simple.ToolTip"));
             // 
             // expandMoreDetals
             // 
@@ -875,19 +849,16 @@
             this.expandMoreDetals.BackColor = System.Drawing.Color.White;
             this.expandMoreDetals.Expanded = false;
             this.expandMoreDetals.Name = "expandMoreDetals";
-            this.toolTip.SetToolTip(this.expandMoreDetals, resources.GetString("expandMoreDetals.ToolTip"));
             this.expandMoreDetals.UseVisualStyleBackColor = false;
             // 
             // btnEndTaskSimple
             // 
             resources.ApplyResources(this.btnEndTaskSimple, "btnEndTaskSimple");
             this.btnEndTaskSimple.Name = "btnEndTaskSimple";
-            this.toolTip.SetToolTip(this.btnEndTaskSimple, resources.GetString("btnEndTaskSimple.ToolTip"));
             this.btnEndTaskSimple.UseVisualStyleBackColor = true;
             // 
             // contextMenuStripProcDetalsCol
             // 
-            resources.ApplyResources(this.contextMenuStripProcDetalsCol, "contextMenuStripProcDetalsCol");
             this.contextMenuStripProcDetalsCol.ImageScalingSize = new System.Drawing.Size(32, 32);
             this.contextMenuStripProcDetalsCol.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.隐藏列ToolStripMenuItem,
@@ -896,50 +867,49 @@
             this.将此列调整为合适大小ToolStripMenuItem});
             this.contextMenuStripProcDetalsCol.Name = "contextMenuStripProcDetalsCol";
             this.contextMenuStripProcDetalsCol.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
-            this.toolTip.SetToolTip(this.contextMenuStripProcDetalsCol, resources.GetString("contextMenuStripProcDetalsCol.ToolTip"));
+            resources.ApplyResources(this.contextMenuStripProcDetalsCol, "contextMenuStripProcDetalsCol");
             // 
             // 隐藏列ToolStripMenuItem
             // 
-            resources.ApplyResources(this.隐藏列ToolStripMenuItem, "隐藏列ToolStripMenuItem");
             this.隐藏列ToolStripMenuItem.Name = "隐藏列ToolStripMenuItem";
+            resources.ApplyResources(this.隐藏列ToolStripMenuItem, "隐藏列ToolStripMenuItem");
             // 
             // 选择列ToolStripMenuItem
             // 
-            resources.ApplyResources(this.选择列ToolStripMenuItem, "选择列ToolStripMenuItem");
             this.选择列ToolStripMenuItem.Name = "选择列ToolStripMenuItem";
+            resources.ApplyResources(this.选择列ToolStripMenuItem, "选择列ToolStripMenuItem");
             // 
             // toolStripSeparator1
             // 
-            resources.ApplyResources(this.toolStripSeparator1, "toolStripSeparator1");
             this.toolStripSeparator1.Name = "toolStripSeparator1";
+            resources.ApplyResources(this.toolStripSeparator1, "toolStripSeparator1");
             // 
             // 将此列调整为合适大小ToolStripMenuItem
             // 
-            resources.ApplyResources(this.将此列调整为合适大小ToolStripMenuItem, "将此列调整为合适大小ToolStripMenuItem");
             this.将此列调整为合适大小ToolStripMenuItem.Name = "将此列调整为合适大小ToolStripMenuItem";
+            resources.ApplyResources(this.将此列调整为合适大小ToolStripMenuItem, "将此列调整为合适大小ToolStripMenuItem");
             // 
             // contextMenuStripTray
             // 
-            resources.ApplyResources(this.contextMenuStripTray, "contextMenuStripTray");
             this.contextMenuStripTray.ImageScalingSize = new System.Drawing.Size(32, 32);
             this.contextMenuStripTray.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.显示隐藏主界面ToolStripMenuItem,
             this.退出程序ToolStripMenuItem});
             this.contextMenuStripTray.Name = "contextMenuStripTray";
             this.contextMenuStripTray.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
-            this.toolTip.SetToolTip(this.contextMenuStripTray, resources.GetString("contextMenuStripTray.ToolTip"));
+            resources.ApplyResources(this.contextMenuStripTray, "contextMenuStripTray");
             this.contextMenuStripTray.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStripTray_Opening);
             // 
             // 显示隐藏主界面ToolStripMenuItem
             // 
-            resources.ApplyResources(this.显示隐藏主界面ToolStripMenuItem, "显示隐藏主界面ToolStripMenuItem");
             this.显示隐藏主界面ToolStripMenuItem.Name = "显示隐藏主界面ToolStripMenuItem";
+            resources.ApplyResources(this.显示隐藏主界面ToolStripMenuItem, "显示隐藏主界面ToolStripMenuItem");
             this.显示隐藏主界面ToolStripMenuItem.Click += new System.EventHandler(this.显示隐藏主界面ToolStripMenuItem_Click);
             // 
             // 退出程序ToolStripMenuItem
             // 
-            resources.ApplyResources(this.退出程序ToolStripMenuItem, "退出程序ToolStripMenuItem");
             this.退出程序ToolStripMenuItem.Name = "退出程序ToolStripMenuItem";
+            resources.ApplyResources(this.退出程序ToolStripMenuItem, "退出程序ToolStripMenuItem");
             this.退出程序ToolStripMenuItem.Click += new System.EventHandler(this.退出程序ToolStripMenuItem_Click);
             // 
             // pl_perfGridHost
@@ -947,105 +917,110 @@
             resources.ApplyResources(this.pl_perfGridHost, "pl_perfGridHost");
             this.pl_perfGridHost.Cursor = System.Windows.Forms.Cursors.Arrow;
             this.pl_perfGridHost.Name = "pl_perfGridHost";
-            this.toolTip.SetToolTip(this.pl_perfGridHost, resources.GetString("pl_perfGridHost.ToolTip"));
             // 
             // contextMenuStripMainHeader
             // 
-            resources.ApplyResources(this.contextMenuStripMainHeader, "contextMenuStripMainHeader");
             this.contextMenuStripMainHeader.ImageScalingSize = new System.Drawing.Size(32, 32);
             this.contextMenuStripMainHeader.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripSeparator2,
             this.资源值ToolStripMenuItem});
             this.contextMenuStripMainHeader.Name = "contextMenuStripMainHeader";
             this.contextMenuStripMainHeader.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
-            this.toolTip.SetToolTip(this.contextMenuStripMainHeader, resources.GetString("contextMenuStripMainHeader.ToolTip"));
+            resources.ApplyResources(this.contextMenuStripMainHeader, "contextMenuStripMainHeader");
             // 
             // toolStripSeparator2
             // 
-            resources.ApplyResources(this.toolStripSeparator2, "toolStripSeparator2");
             this.toolStripSeparator2.Name = "toolStripSeparator2";
+            resources.ApplyResources(this.toolStripSeparator2, "toolStripSeparator2");
             // 
             // 资源值ToolStripMenuItem
             // 
-            resources.ApplyResources(this.资源值ToolStripMenuItem, "资源值ToolStripMenuItem");
             this.资源值ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.内存ToolStripMenuItem,
             this.磁盘ToolStripMenuItem,
             this.网络ToolStripMenuItem});
+            resources.ApplyResources(this.资源值ToolStripMenuItem, "资源值ToolStripMenuItem");
             this.资源值ToolStripMenuItem.Name = "资源值ToolStripMenuItem";
             // 
             // 内存ToolStripMenuItem
             // 
-            resources.ApplyResources(this.内存ToolStripMenuItem, "内存ToolStripMenuItem");
             this.内存ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.百分比ToolStripMenuItemRam,
             this.值ToolStripMenuItemRam});
             this.内存ToolStripMenuItem.Name = "内存ToolStripMenuItem";
+            resources.ApplyResources(this.内存ToolStripMenuItem, "内存ToolStripMenuItem");
             // 
             // 百分比ToolStripMenuItemRam
             // 
-            resources.ApplyResources(this.百分比ToolStripMenuItemRam, "百分比ToolStripMenuItemRam");
             this.百分比ToolStripMenuItemRam.Name = "百分比ToolStripMenuItemRam";
-
+            resources.ApplyResources(this.百分比ToolStripMenuItemRam, "百分比ToolStripMenuItemRam");
             // 
             // 值ToolStripMenuItemRam
             // 
-            resources.ApplyResources(this.值ToolStripMenuItemRam, "值ToolStripMenuItemRam");
             this.值ToolStripMenuItemRam.Name = "值ToolStripMenuItemRam";
-
+            resources.ApplyResources(this.值ToolStripMenuItemRam, "值ToolStripMenuItemRam");
             // 
             // 磁盘ToolStripMenuItem
             // 
-            resources.ApplyResources(this.磁盘ToolStripMenuItem, "磁盘ToolStripMenuItem");
             this.磁盘ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.百分比ToolStripMenuItemDisk,
             this.值ToolStripMenuItemDisk});
             this.磁盘ToolStripMenuItem.Name = "磁盘ToolStripMenuItem";
+            resources.ApplyResources(this.磁盘ToolStripMenuItem, "磁盘ToolStripMenuItem");
             // 
             // 百分比ToolStripMenuItemDisk
             // 
-            resources.ApplyResources(this.百分比ToolStripMenuItemDisk, "百分比ToolStripMenuItemDisk");
             this.百分比ToolStripMenuItemDisk.Name = "百分比ToolStripMenuItemDisk";
-
+            resources.ApplyResources(this.百分比ToolStripMenuItemDisk, "百分比ToolStripMenuItemDisk");
             // 
             // 值ToolStripMenuItemDisk
             // 
-            resources.ApplyResources(this.值ToolStripMenuItemDisk, "值ToolStripMenuItemDisk");
             this.值ToolStripMenuItemDisk.Name = "值ToolStripMenuItemDisk";
-
+            resources.ApplyResources(this.值ToolStripMenuItemDisk, "值ToolStripMenuItemDisk");
             // 
             // 网络ToolStripMenuItem
             // 
-            resources.ApplyResources(this.网络ToolStripMenuItem, "网络ToolStripMenuItem");
             this.网络ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.百分比ToolStripMenuItemNet,
             this.值ToolStripMenuItemNet});
             this.网络ToolStripMenuItem.Name = "网络ToolStripMenuItem";
+            resources.ApplyResources(this.网络ToolStripMenuItem, "网络ToolStripMenuItem");
             // 
             // 百分比ToolStripMenuItemNet
             // 
-            resources.ApplyResources(this.百分比ToolStripMenuItemNet, "百分比ToolStripMenuItemNet");
             this.百分比ToolStripMenuItemNet.Name = "百分比ToolStripMenuItemNet";
-
+            resources.ApplyResources(this.百分比ToolStripMenuItemNet, "百分比ToolStripMenuItemNet");
             // 
             // 值ToolStripMenuItemNet
             // 
-            resources.ApplyResources(this.值ToolStripMenuItemNet, "值ToolStripMenuItemNet");
             this.值ToolStripMenuItemNet.Name = "值ToolStripMenuItemNet";
-
+            resources.ApplyResources(this.值ToolStripMenuItemNet, "值ToolStripMenuItemNet");
             // 
             // fileSystemWatcher
             // 
             this.fileSystemWatcher.EnableRaisingEvents = true;
             this.fileSystemWatcher.SynchronizingObject = this;
-
             // 
             // notifyIcon
             // 
-            resources.ApplyResources(this.notifyIcon, "notifyIcon");
             this.notifyIcon.ContextMenuStrip = this.contextMenuStripTray;
+            resources.ApplyResources(this.notifyIcon, "notifyIcon");
             this.notifyIcon.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon_MouseDoubleClick);
             this.notifyIcon.MouseMove += new System.Windows.Forms.MouseEventHandler(this.notifyIcon_MouseMove);
+            // 
+            // contextMenuStripPerfListLeft
+            // 
+            this.contextMenuStripPerfListLeft.ImageScalingSize = new System.Drawing.Size(32, 32);
+            this.contextMenuStripPerfListLeft.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.隐藏图形ToolStripMenuItem});
+            this.contextMenuStripPerfListLeft.Name = "contextMenuStripMainHeader";
+            this.contextMenuStripPerfListLeft.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
+            resources.ApplyResources(this.contextMenuStripPerfListLeft, "contextMenuStripPerfListLeft");
+            // 
+            // 隐藏图形ToolStripMenuItem
+            // 
+            this.隐藏图形ToolStripMenuItem.Name = "隐藏图形ToolStripMenuItem";
+            resources.ApplyResources(this.隐藏图形ToolStripMenuItem, "隐藏图形ToolStripMenuItem");
             // 
             // FormMain
             // 
@@ -1059,7 +1034,6 @@
             this.Controls.Add(this.pl_perfGridHost);
             this.Cursor = System.Windows.Forms.Cursors.AppStarting;
             this.Name = "FormMain";
-            this.toolTip.SetToolTip(this, resources.GetString("$this.ToolTip"));
             this.Activated += new System.EventHandler(this.FormMain_Activated);
             this.Deactivate += new System.EventHandler(this.FormMain_Deactivate);
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FormMain_FormClosing);
@@ -1091,6 +1065,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.sp2)).EndInit();
             this.tabPageDetals.ResumeLayout(false);
             this.tabPageStartCtl.ResumeLayout(false);
+            this.pl_bios_time.ResumeLayout(false);
             this.tabPageFileCtl.ResumeLayout(false);
             this.tabPageFileCtl.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.spBottom)).EndInit();
@@ -1100,6 +1075,7 @@
             this.contextMenuStripTray.ResumeLayout(false);
             this.contextMenuStripMainHeader.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.fileSystemWatcher)).EndInit();
+            this.contextMenuStripPerfListLeft.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -1217,6 +1193,11 @@
         public System.Windows.Forms.ToolStripMenuItem 网络ToolStripMenuItem;
         public System.Windows.Forms.ToolStripMenuItem 百分比ToolStripMenuItemNet;
         public System.Windows.Forms.ToolStripMenuItem 值ToolStripMenuItemNet;
+        public System.Windows.Forms.ContextMenuStrip contextMenuStripPerfListLeft;
+        private System.Windows.Forms.Label lbBiosTimeText;
+        public System.Windows.Forms.Panel pl_bios_time;
+        public System.Windows.Forms.Label lbBiosTime;
+        public System.Windows.Forms.ToolStripMenuItem 隐藏图形ToolStripMenuItem;
     }
 }
 
