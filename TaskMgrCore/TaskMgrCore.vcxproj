@@ -162,6 +162,7 @@
       </ModuleDefinitionFile>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
       <AdditionalLibraryDirectories>$(SolutionDir)$(Configuration)\</AdditionalLibraryDirectories>
+      <Profile>true</Profile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -186,6 +187,7 @@
       </ModuleDefinitionFile>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
       <AdditionalLibraryDirectories>$(SolutionDir)$(Configuration)_64\</AdditionalLibraryDirectories>
+      <Profile>true</Profile>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -199,6 +201,7 @@
     <ClInclude Include="DirectoryHelper.h" />
     <ClInclude Include="fmhlp.h" />
     <ClInclude Include="handlehlp.h" />
+    <ClInclude Include="icoutils.h" />
     <ClInclude Include="ioctls.h" />
     <ClInclude Include="kda.h" />
     <ClInclude Include="kernelhlp.h" />
@@ -206,7 +209,9 @@
     <ClInclude Include="loghlp.h" />
     <ClInclude Include="mainprocs.h" />
     <ClInclude Include="mapphlp.h" />
+    <ClInclude Include="MConnectionMonitor.h" />
     <ClInclude Include="MCpuInfoMonitor.h" />
+    <ClInclude Include="MMonitor.h" />
     <ClInclude Include="MProcessPerformanctMonitor.h" />
     <ClInclude Include="msup.h" />
     <ClInclude Include="MSystemPerformanctMonitor.h" />
@@ -260,13 +265,16 @@
     </ClCompile>
     <ClCompile Include="fmhlp.cpp" />
     <ClCompile Include="handlehlp.cpp" />
+    <ClCompile Include="icoutils.cpp" />
     <ClCompile Include="kda.cpp" />
     <ClCompile Include="kernelhlp.cpp" />
     <ClCompile Include="lghlp.cpp" />
     <ClCompile Include="loghlp.cpp" />
     <ClCompile Include="mainprocs.cpp" />
     <ClCompile Include="mapphlp.cpp" />
+    <ClCompile Include="MConnectionMonitor.cpp" />
     <ClCompile Include="MCpuInfoMonitor.cpp" />
+    <ClCompile Include="MMonitor.cpp" />
     <ClCompile Include="MProcessPerformanctMonitor.cpp" />
     <ClCompile Include="msup.cpp" />
     <ClCompile Include="MSystemPerformanctMonitor.cpp" />

@@ -122,7 +122,7 @@
         AAEAAAD/////AQAAAAAAAAAMAgAAAFdTeXN0ZW0uV2luZG93cy5Gb3JtcywgVmVyc2lvbj00LjAuMC4w
         LCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODkFAQAAACZTeXN0
         ZW0uV2luZG93cy5Gb3Jtcy5JbWFnZUxpc3RTdHJlYW1lcgEAAAAERGF0YQcCAgAAAAkDAAAADwMAAADw
-        CAAAAk1TRnQBSQFMAgEBAwEAAWQBCQFkAQkBEAEAARABAAT/ASEBAAj/AUIBTQE2BwABNgMAASgDAAFA
+        CAAAAk1TRnQBSQFMAgEBAwEAAYwBCQGMAQkBEAEAARABAAT/ASEBAAj/AUIBTQE2BwABNgMAASgDAAFA
         AwABEAMAAQEBAAEgBgABELYAAlgBYgHvAlgBYgHvDAACWAFiAe8CWAFiAe+EAAGyAgAB/wwAAmIBWAHv
         AdwBjwEAAf8B6AGXAQAB/wHoAZcBAAH/AegBlwEAAf8BwwIAAf8CRwFGAYAcAAGOAeQC/wGNAeMC/wGL
         AeMC/wGKAeIC/wGIAeIC/wGHAeEC/wIAAb4B/wIAAeYB/wIAAbwB/wEAAdYB/AH/AgABuQH/AgAB3gH/
@@ -163,12 +163,30 @@
         AR4B4AEHAgAG/wIACw==
 </value>
   </data>
+  <data name="columnHeader1.Text" xml:space="preserve">
+    <value>File name</value>
+  </data>
+  <data name="columnHeader3.Text" xml:space="preserve">
+    <value>File type</value>
+  </data>
+  <data name="columnHeader2.Text" xml:space="preserve">
+    <value>Size</value>
+  </data>
+  <data name="columnHeader4.Text" xml:space="preserve">
+    <value>Creation time</value>
+  </data>
+  <data name="columnHeader5.Text" xml:space="preserve">
+    <value>Modification time</value>
+  </data>
+  <data name="columnHeader6.Text" xml:space="preserve">
+    <value>Attribute</value>
+  </data>
   <data name="imageListFileTypeList.ImageStream" mimetype="application/x-microsoft.net.object.binary.base64">
     <value>
         AAEAAAD/////AQAAAAAAAAAMAgAAAFdTeXN0ZW0uV2luZG93cy5Gb3JtcywgVmVyc2lvbj00LjAuMC4w
         LCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODkFAQAAACZTeXN0
         ZW0uV2luZG93cy5Gb3Jtcy5JbWFnZUxpc3RTdHJlYW1lcgEAAAAERGF0YQcCAgAAAAkDAAAADwMAAACw
-        BAAAAk1TRnQBSQFMAwEBAAEsAQkBLAEJARABAAEQAQAE/wEhAQAI/wFCAU0BNgcAATYDAAEoAwABQAMA
+        BAAAAk1TRnQBSQFMAwEBAAFUAQkBVAEJARABAAEQAQAE/wEhAQAI/wFCAU0BNgcAATYDAAEoAwABQAMA
         ARADAAEBAQABIAYAARA8AAHNAf8MAAJQAVEBnwJQAVEBn8wAAvsB+gH/AvsB+gH/AvsB+gH/AvsB+gH/
         AvsB+gH/AvsB+gH/A/0B/wIAAdsB/wIAAdkB/wP9Af8CUAFRAZ8CAAHeAf8CUAFRAZ/MAAP7Af8B9wL2
         Af8B9wH2AfUB/wH3AfYB9QH/AfcB9gH1Af8B9wH2AfUB/wH3AfYB9QH/AvsB+gH/AgAB2wH/AgAB2QH/
@@ -191,7 +209,13 @@
         Av8GAAs=
 </value>
   </data>
+  <data name="tabPageProcCtl.Text" xml:space="preserve">
+    <value>Processes</value>
+  </data>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="sp4.Location" type="System.Drawing.Point, System.Drawing">
+    <value>122, 384</value>
+  </data>
   <data name="check_showAllProcess.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAO
@@ -207,8 +231,44 @@
         vqgqAAAAAElFTkSuQmCC
 </value>
   </data>
-  <data name="tabPageKernelCtl.Size" type="System.Drawing.Size, System.Drawing">
-    <value>716, 411</value>
+  <data name="check_showAllProcess.Location" type="System.Drawing.Point, System.Drawing">
+    <value>270, 381</value>
+  </data>
+  <data name="check_showAllProcess.Size" type="System.Drawing.Size, System.Drawing">
+    <value>216, 23</value>
+  </data>
+  <data name="check_showAllProcess.Text" xml:space="preserve">
+    <value>Show process of &amp;All users</value>
+  </data>
+  <data name="spl1.Location" type="System.Drawing.Point, System.Drawing">
+    <value>263, 384</value>
+  </data>
+  <data name="btnEndProcess.Location" type="System.Drawing.Point, System.Drawing">
+    <value>611, 379</value>
+  </data>
+  <data name="btnEndProcess.Size" type="System.Drawing.Size, System.Drawing">
+    <value>95, 24</value>
+  </data>
+  <data name="btnEndProcess.Text" xml:space="preserve">
+    <value>&amp;End process</value>
+  </data>
+  <data name="listProcess.NonItemText" xml:space="preserve">
+    <value>Not shown? Try refreshing</value>
+  </data>
+  <data name="lbProcessCount.Location" type="System.Drawing.Point, System.Drawing">
+    <value>130, 380</value>
+  </data>
+  <data name="lbProcessCount.Size" type="System.Drawing.Size, System.Drawing">
+    <value>130, 22</value>
+  </data>
+  <data name="lbProcessCount.Text" xml:space="preserve">
+    <value>Process count : --</value>
+  </data>
+  <data name="expandFewerDetals.Text" xml:space="preserve">
+    <value>Fewer &amp;details</value>
+  </data>
+  <data name="tabPageKernelCtl.Text" xml:space="preserve">
+    <value>Drivers</value>
   </data>
   <data name="pl_driverNotLoadTip.Location" type="System.Drawing.Point, System.Drawing">
     <value>74, 141</value>
@@ -228,8 +288,80 @@
         vqgqAAAAAElFTkSuQmCC
 </value>
   </data>
+  <data name="linkRestartAsAdminDriver.Location" type="System.Drawing.Point, System.Drawing">
+    <value>71, 39</value>
+  </data>
+  <data name="linkRestartAsAdminDriver.Size" type="System.Drawing.Size, System.Drawing">
+    <value>430, 21</value>
+  </data>
+  <data name="linkRestartAsAdminDriver.Text" xml:space="preserve">
+    <value>Restart the software and load the driver with administrator privileges</value>
+  </data>
+  <data name="lbRestartAsAdminDriver.Text" xml:space="preserve">
+    <value>Driver not load</value>
+  </data>
+  <data name="lbDriversCount.Size" type="System.Drawing.Size, System.Drawing">
+    <value>106, 17</value>
+  </data>
+  <data name="lbDriversCount.Text" xml:space="preserve">
+    <value>Drivers count : --</value>
+  </data>
   <data name="listDrivers.Size" type="System.Drawing.Size, System.Drawing">
     <value>715, 372</value>
+  </data>
+  <data name="columnHeader15.Text" xml:space="preserve">
+    <value>Driver name</value>
+  </data>
+  <data name="columnHeader16.Text" xml:space="preserve">
+    <value>Base address</value>
+  </data>
+  <data name="columnHeader17.Text" xml:space="preserve">
+    <value>Size of image</value>
+  </data>
+  <data name="columnHeader18.Text" xml:space="preserve">
+    <value>Driver objects</value>
+  </data>
+  <data name="columnHeader19.Text" xml:space="preserve">
+    <value>Binary file path</value>
+  </data>
+  <data name="columnHeader20.Text" xml:space="preserve">
+    <value>Service name</value>
+  </data>
+  <data name="columnHeader22.Text" xml:space="preserve">
+    <value>Load order</value>
+  </data>
+  <data name="columnHeader23.Text" xml:space="preserve">
+    <value>Publisher</value>
+  </data>
+  <data name="tabPagePerfCtl.Text" xml:space="preserve">
+    <value>Performance</value>
+  </data>
+  <data name="linkLabelOpenPerfMon.Size" type="System.Drawing.Size, System.Drawing">
+    <value>172, 17</value>
+  </data>
+  <data name="linkLabelOpenPerfMon.Text" xml:space="preserve">
+    <value>Open Resource Monitor</value>
+  </data>
+  <data name="tabPageUWPCtl.Text" xml:space="preserve">
+    <value>Universal apps</value>
+  </data>
+  <data name="lbUWPEnumFailText.Text" xml:space="preserve">
+    <value>Unknown error</value>
+  </data>
+  <data name="listUwpApps.NonItemText" xml:space="preserve">
+    <value>No data to show</value>
+  </data>
+  <data name="tabPageUsers.Text" xml:space="preserve">
+    <value>Users</value>
+  </data>
+  <data name="tabPageScCtl.Text" xml:space="preserve">
+    <value>Services</value>
+  </data>
+  <data name="pl_ScNeedAdminTip.Location" type="System.Drawing.Point, System.Drawing">
+    <value>141, 160</value>
+  </data>
+  <data name="pl_ScNeedAdminTip.Size" type="System.Drawing.Size, System.Drawing">
+    <value>401, 55</value>
   </data>
   <data name="linkRebootAsAdmin.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
@@ -246,6 +378,24 @@
         vqgqAAAAAElFTkSuQmCC
 </value>
   </data>
+  <data name="linkRebootAsAdmin.Location" type="System.Drawing.Point, System.Drawing">
+    <value>44, 27</value>
+  </data>
+  <data name="linkRebootAsAdmin.Size" type="System.Drawing.Size, System.Drawing">
+    <value>297, 21</value>
+  </data>
+  <data name="linkRebootAsAdmin.Text" xml:space="preserve">
+    <value>Restart software with administrator privileges</value>
+  </data>
+  <data name="lbScNeedAdminTip.Size" type="System.Drawing.Size, System.Drawing">
+    <value>392, 17</value>
+  </data>
+  <data name="lbScNeedAdminTip.Text" xml:space="preserve">
+    <value>Administrator privileges are required to start the service manager</value>
+  </data>
+  <data name="sp2.Location" type="System.Drawing.Point, System.Drawing">
+    <value>141, 384</value>
+  </data>
   <data name="linkOpenScMsc.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAABGdBTUEAALGPC/xhBQAAAb9JREFUSEvt
@@ -259,12 +409,70 @@
         VLIgMXSPz/+M8BsYl3X883A4XgEYYaNsCNPSbAAAAABJRU5ErkJggg==
 </value>
   </data>
+  <data name="linkOpenScMsc.Location" type="System.Drawing.Point, System.Drawing">
+    <value>145, 382</value>
+  </data>
+  <data name="linkOpenScMsc.Size" type="System.Drawing.Size, System.Drawing">
+    <value>117, 17</value>
+  </data>
+  <data name="linkOpenScMsc.Text" xml:space="preserve">
+    <value>Open services</value>
+  </data>
+  <data name="columnHeader7.Text" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="columnHeader9.Text" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="columnHeader10.Text" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="columnHeader11.Text" xml:space="preserve">
+    <value>Group</value>
+  </data>
+  <data name="columnHeader12.Text" xml:space="preserve">
+    <value>Startup type</value>
+  </data>
+  <assembly alias="mscorlib" name="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="columnHeader12.Width" type="System.Int32, mscorlib">
+    <value>86</value>
+  </data>
+  <data name="columnHeader13.Text" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="columnHeader14.Text" xml:space="preserve">
+    <value>File path</value>
+  </data>
+  <data name="columnHeader21.Text" xml:space="preserve">
+    <value>Publisher</value>
+  </data>
+  <data name="lbServicesCount.Size" type="System.Drawing.Size, System.Drawing">
+    <value>124, 17</value>
+  </data>
+  <data name="lbServicesCount.Text" xml:space="preserve">
+    <value>Service count : --</value>
+  </data>
+  <data name="lbServicesCount.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleLeft</value>
+  </data>
+  <data name="tabPageDetals.Text" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="btnEndProcessDetals.Location" type="System.Drawing.Point, System.Drawing">
+    <value>605, 377</value>
+  </data>
+  <data name="btnEndProcessDetals.Size" type="System.Drawing.Size, System.Drawing">
+    <value>100, 24</value>
+  </data>
+  <data name="btnEndProcessDetals.Text" xml:space="preserve">
+    <value>&amp;End process</value>
+  </data>
   <data name="imageListProcessDetalsIcons.ImageStream" mimetype="application/x-microsoft.net.object.binary.base64">
     <value>
         AAEAAAD/////AQAAAAAAAAAMAgAAAFdTeXN0ZW0uV2luZG93cy5Gb3JtcywgVmVyc2lvbj00LjAuMC4w
         LCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODkFAQAAACZTeXN0
         ZW0uV2luZG93cy5Gb3Jtcy5JbWFnZUxpc3RTdHJlYW1lcgEAAAAERGF0YQcCAgAAAAkDAAAADwMAAACw
-        BAAAAk1TRnQBSQFMAwEBAAE0AQkBNAEJARABAAEQAQAE/wEhAQAI/wFCAU0BNgcAATYDAAEoAwABQAMA
+        BAAAAk1TRnQBSQFMAwEBAAFcAQkBXAEJARABAAEQAQAE/wEhAQAI/wFCAU0BNgcAATYDAAEoAwABQAMA
         ARADAAEBAQABIAYAARA8AAHNAf8MAAJQAVEBnwJQAVEBn8wAAvsB+gH/AvsB+gH/AvsB+gH/AvsB+gH/
         AvsB+gH/AvsB+gH/A/0B/wIAAdsB/wIAAdkB/wP9Af8CUAFRAZ8CAAHeAf8CUAFRAZ/MAAP7Af8B9wL2
         Af8B9wH2AfUB/wH3AfYB9QH/AfcB9gH1Af8B9wH2AfUB/wH3AfYB9QH/AvsB+gH/AgAB2wH/AgAB2QH/
@@ -287,6 +495,36 @@
         Av8GAAs=
 </value>
   </data>
+  <data name="tabPageStartCtl.Text" xml:space="preserve">
+    <value>Startup</value>
+  </data>
+  <data name="lbBiosTime.Location" type="System.Drawing.Point, System.Drawing">
+    <value>174, 0</value>
+  </data>
+  <data name="lbBiosTime.Size" type="System.Drawing.Size, System.Drawing">
+    <value>49, 21</value>
+  </data>
+  <data name="lbBiosTime.Text" xml:space="preserve">
+    <value>0.0 s</value>
+  </data>
+  <data name="lbBiosTimeText.Size" type="System.Drawing.Size, System.Drawing">
+    <value>162, 21</value>
+  </data>
+  <data name="lbBiosTimeText.Text" xml:space="preserve">
+    <value>Last BIOS time:</value>
+  </data>
+  <data name="listStartup.NonItemText" xml:space="preserve">
+    <value>There is currently no startup item</value>
+  </data>
+  <data name="tabPageFileCtl.Text" xml:space="preserve">
+    <value>File</value>
+  </data>
+  <data name="lbFileMgrStatus.Size" type="System.Drawing.Size, System.Drawing">
+    <value>44, 17</value>
+  </data>
+  <data name="lbFileMgrStatus.Text" xml:space="preserve">
+    <value>Ready</value>
+  </data>
   <data name="btnFmAddGoto.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAO
@@ -302,6 +540,166 @@
         cjoFiOGIeYYRhKmBRkdvop3QASha1BlKA6eJA8A/wzaxMmBOh0MM2H93SdJPnkQ2KO7DXA0AAAAASUVO
         RK5CYII=
 </value>
+  </data>
+  <data name="btnFmAddGoto.ToolTip" xml:space="preserve">
+    <value>Jump To</value>
+  </data>
+  <data name="contextMenuStripUWP.Size" type="System.Drawing.Size, System.Drawing">
+    <value>203, 136</value>
+  </data>
+  <data name="打开应用ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>202, 22</value>
+  </data>
+  <data name="打开应用ToolStripMenuItem.Text" xml:space="preserve">
+    <value>&amp;Open application</value>
+  </data>
+  <data name="卸载应用ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>202, 22</value>
+  </data>
+  <data name="卸载应用ToolStripMenuItem.Text" xml:space="preserve">
+    <value>&amp;Uninstall</value>
+  </data>
+  <data name="打开安装位置ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>202, 22</value>
+  </data>
+  <data name="打开安装位置ToolStripMenuItem.Text" xml:space="preserve">
+    <value>Open install &amp;Directory</value>
+  </data>
+  <data name="复制名称ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>202, 22</value>
+  </data>
+  <data name="复制名称ToolStripMenuItem.Text" xml:space="preserve">
+    <value>Copy &amp;Name</value>
+  </data>
+  <data name="复制完整名称ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>202, 22</value>
+  </data>
+  <data name="复制完整名称ToolStripMenuItem.Text" xml:space="preserve">
+    <value>Copy f&amp;ull name</value>
+  </data>
+  <data name="复制发布者ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>202, 22</value>
+  </data>
+  <data name="复制发布者ToolStripMenuItem.Text" xml:space="preserve">
+    <value>&amp;Copy</value>
+  </data>
+  <data name="listApps.NonItemText" xml:space="preserve">
+    <value>Currently, there is no running application
+You can click "Details" to see more background applications.</value>
+  </data>
+  <data name="contextMenuStripProcDetalsCol.Size" type="System.Drawing.Size, System.Drawing">
+    <value>321, 76</value>
+  </data>
+  <data name="隐藏列ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>320, 22</value>
+  </data>
+  <data name="隐藏列ToolStripMenuItem.Text" xml:space="preserve">
+    <value>&amp;Hidden column</value>
+  </data>
+  <data name="选择列ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>320, 22</value>
+  </data>
+  <data name="选择列ToolStripMenuItem.Text" xml:space="preserve">
+    <value>&amp;Choose columns</value>
+  </data>
+  <data name="toolStripSeparator1.Size" type="System.Drawing.Size, System.Drawing">
+    <value>317, 6</value>
+  </data>
+  <data name="将此列调整为合适大小ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>320, 22</value>
+  </data>
+  <data name="将此列调整为合适大小ToolStripMenuItem.Text" xml:space="preserve">
+    <value>Adjust this column to the appropriate size</value>
+  </data>
+  <data name="contextMenuStripTray.Size" type="System.Drawing.Size, System.Drawing">
+    <value>220, 48</value>
+  </data>
+  <data name="显示隐藏主界面ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>219, 22</value>
+  </data>
+  <data name="显示隐藏主界面ToolStripMenuItem.Text" xml:space="preserve">
+    <value>Show/Hide main window</value>
+  </data>
+  <data name="退出程序ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>219, 22</value>
+  </data>
+  <data name="退出程序ToolStripMenuItem.Text" xml:space="preserve">
+    <value>Exit program</value>
+  </data>
+  <data name="contextMenuStripMainHeader.Size" type="System.Drawing.Size, System.Drawing">
+    <value>109, 32</value>
+  </data>
+  <data name="toolStripSeparator2.Size" type="System.Drawing.Size, System.Drawing">
+    <value>105, 6</value>
+  </data>
+  <data name="资源值ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>108, 22</value>
+  </data>
+  <data name="资源值ToolStripMenuItem.Text" xml:space="preserve">
+    <value>Value</value>
+  </data>
+  <data name="内存ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>126, 22</value>
+  </data>
+  <data name="内存ToolStripMenuItem.Text" xml:space="preserve">
+    <value>RAM</value>
+  </data>
+  <data name="百分比ToolStripMenuItemRam.Size" type="System.Drawing.Size, System.Drawing">
+    <value>141, 22</value>
+  </data>
+  <data name="百分比ToolStripMenuItemRam.Text" xml:space="preserve">
+    <value>Percentage</value>
+  </data>
+  <data name="值ToolStripMenuItemRam.Size" type="System.Drawing.Size, System.Drawing">
+    <value>141, 22</value>
+  </data>
+  <data name="值ToolStripMenuItemRam.Text" xml:space="preserve">
+    <value>Value</value>
+  </data>
+  <data name="磁盘ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>126, 22</value>
+  </data>
+  <data name="磁盘ToolStripMenuItem.Text" xml:space="preserve">
+    <value>Disk</value>
+  </data>
+  <data name="百分比ToolStripMenuItemDisk.Size" type="System.Drawing.Size, System.Drawing">
+    <value>141, 22</value>
+  </data>
+  <data name="百分比ToolStripMenuItemDisk.Text" xml:space="preserve">
+    <value>Percentage</value>
+  </data>
+  <data name="值ToolStripMenuItemDisk.Size" type="System.Drawing.Size, System.Drawing">
+    <value>141, 22</value>
+  </data>
+  <data name="值ToolStripMenuItemDisk.Text" xml:space="preserve">
+    <value>Value</value>
+  </data>
+  <data name="网络ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>126, 22</value>
+  </data>
+  <data name="网络ToolStripMenuItem.Text" xml:space="preserve">
+    <value>Network</value>
+  </data>
+  <data name="百分比ToolStripMenuItemNet.Size" type="System.Drawing.Size, System.Drawing">
+    <value>141, 22</value>
+  </data>
+  <data name="百分比ToolStripMenuItemNet.Text" xml:space="preserve">
+    <value>Percentage</value>
+  </data>
+  <data name="值ToolStripMenuItemNet.Size" type="System.Drawing.Size, System.Drawing">
+    <value>141, 22</value>
+  </data>
+  <data name="值ToolStripMenuItemNet.Text" xml:space="preserve">
+    <value>Value</value>
+  </data>
+  <data name="contextMenuStripPerfListLeft.Size" type="System.Drawing.Size, System.Drawing">
+    <value>173, 26</value>
+  </data>
+  <data name="隐藏图形ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>172, 22</value>
+  </data>
+  <data name="隐藏图形ToolStripMenuItem.Text" xml:space="preserve">
+    <value>Hidden graphics</value>
   </data>
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
@@ -926,6 +1324,9 @@
         AP//AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//wAA//8A
         AA==
 </value>
+  </data>
+  <data name="$this.Text" xml:space="preserve">
+    <value>PC Manager</value>
   </data>
   <data name="notifyIcon.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>

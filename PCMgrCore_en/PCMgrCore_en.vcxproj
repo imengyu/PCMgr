@@ -179,6 +179,7 @@
       <ProgramDatabaseFile />
       <FullProgramDatabaseFile>false</FullProgramDatabaseFile>
       <NoEntryPoint>true</NoEntryPoint>
+      <Profile>true</Profile>
     </Link>
     <ProjectReference>
       <LinkLibraryDependencies>false</LinkLibraryDependencies>
@@ -207,6 +208,7 @@
       <FullProgramDatabaseFile>false</FullProgramDatabaseFile>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <NoEntryPoint>true</NoEntryPoint>
+      <Profile>true</Profile>
     </Link>
     <ProjectReference>
       <LinkLibraryDependencies>false</LinkLibraryDependencies>

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Resources;
 using System.Windows.Forms;
+using static PCMgr.NativeMethods.LogApi;
 using static PCMgr.NativeMethods;
 
 namespace PCMgr.Lanuages
@@ -10,6 +11,16 @@ namespace PCMgr.Lanuages
     {
         private static ResourceManager resLG;
         private static Dictionary<string, string> lanuageBuffers = new Dictionary<string, string>();
+        private static List<string> lanuageBadRes = new List<string>();
+
+        private static int cacheUseage = 0;
+        private static int badResource = 0;
+
+        private static void AddBadRes(string s)
+        {
+            badResource++;
+            lanuageBadRes.Add(s);
+        }
 
         public static string CurrentLanuage { get; private set; }
         public static bool IsChinese { get; private set; }
@@ -56,14 +67,17 @@ namespace PCMgr.Lanuages
             if (!buffer)
             {
                 string s1 = resLG.GetString(name);
-                if (s1 == null)  s1 = "[" + name + "::ResoureceNotFounnd]";
+                if (s1 == null) { s1 = "[" + name + "::ResoureceNotFounnd]"; AddBadRes(s1); }
                 return s1;
             }
             if (lanuageBuffers.ContainsKey(name))
+            {
+                cacheUseage++;
                 return lanuageBuffers[name];
+            }
             string s = resLG.GetString(name);
             if (s != null) lanuageBuffers.Add(name, s);
-            else s = "[" + name + "::ResoureceNotFounnd]";
+            else { s = "[" + name + "::ResoureceNotFounnd]"; AddBadRes(s); }
             return s;
         }
         public static string GetStr2(string name, out int size)
@@ -80,12 +94,12 @@ namespace PCMgr.Lanuages
             {
                 try
                 {
-                    Log("Load Lanuage Resource : " + lanuage);
+                    Log("Loading Lanuage Resource : " + lanuage);
                     LoadLanuageResource(lanuage);
                 }
                 catch (Exception e)
                 {
-                    LogErr("Lanuage resource load failed !\n" + e.ToString());
+                    LogErr2("Lanuage resource load failed !\n" + e.ToString());
                     MessageBox.Show(e.ToString(), "ERROR !", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
@@ -215,6 +229,57 @@ namespace PCMgr.Lanuages
             {
                 MessageBox.Show(e.ToString(), "ERROR !", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        public static void DebugCmd(string[] cmd, uint size)
+        {
+            if (size >= 2)
+            {
+                string cmd1 = cmd[1];
+                switch (cmd1)
+                {
+                    case "viewbadres":
+                        {
+                            string ss = "All bad resource key (" + badResource + "):";
+                            foreach (string s in lanuageBadRes)
+                                ss += s + "\n";
+                            LogText(ss);
+                            break;
+                        }
+                    case "get":
+                        if (size >= 3) LogText("Lanuage resource for " + cmd[2] + " : " + GetStr(cmd[2], false));
+                        else LogErr("Invalid input resource name.");
+                        break;
+                    case "clearbuf":
+                        lanuageBuffers.Clear();
+                        Log("LanuageMgr buffer has been emptied.");
+                        break;
+                    case "buffer":
+                        LogText("LanuageMgr buffer stats" +
+                            "\nBuffer count : " + lanuageBuffers.Count + "" +
+                            "\nCache Useage : " + cacheUseage + "" +
+                            "\nBad Resource : " + badResource + "" + "");
+                        break;
+                    case "vbuffer":
+                        {
+                            string ss = "All lanuage buffer (" + lanuageBuffers.Count + ") :";
+                            foreach (string s in lanuageBuffers.Keys)
+                                ss += s + "\n";
+                            LogText(ss);
+                            break;
+                        }
+                    case "?":
+                    case "help":
+                        LogText("app lg commands help: \n" +
+                            "\nviewbadres view bad res" +
+                            "\nget [string:reskey] get lanuage string resoure" +
+                            "\nclearbuf clear all resoure caches" +
+                            "\nbuffer LanuageMgr cache status" +
+                            "\nvbuffer list LanuageMgr cache");
+                        break;
+                }
+            }
+            else LogText("LanuageMgr.CurrentLanuage : " + CurrentLanuage);
         }
     }
 }

@@ -319,6 +319,7 @@
             resources.ApplyResources(this.checkBoxAutoLoadDriver, "checkBoxAutoLoadDriver");
             this.checkBoxAutoLoadDriver.Name = "checkBoxAutoLoadDriver";
             this.checkBoxAutoLoadDriver.UseVisualStyleBackColor = true;
+            this.checkBoxAutoLoadDriver.CheckedChanged += new System.EventHandler(this.checkBoxAutoLoadDriver_CheckedChanged);
             // 
             // checkBoxHighLightNoSystetm
             // 
@@ -477,8 +478,7 @@
             this.comboBox_lg.FormattingEnabled = true;
             this.comboBox_lg.Items.AddRange(new object[] {
             resources.GetString("comboBox_lg.Items"),
-            resources.GetString("comboBox_lg.Items1"),
-            resources.GetString("comboBox_lg.Items2")});
+            resources.GetString("comboBox_lg.Items1")});
             resources.ApplyResources(this.comboBox_lg, "comboBox_lg");
             this.comboBox_lg.Name = "comboBox_lg";
             this.comboBox_lg.SelectedIndexChanged += new System.EventHandler(this.comboBox_lg_SelectedIndexChanged);

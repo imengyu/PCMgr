@@ -2,6 +2,7 @@
 using PCMgr.Lanuages;
 using PCMgr.WorkWindow;
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
@@ -42,6 +43,7 @@ namespace PCMgr.Main
         }
 
         private FormMain formMain = null;
+        private FormTcp formTcp = null;
 
         //所有 Native 回调
 
@@ -93,14 +95,14 @@ namespace PCMgr.Main
                         MAppWorkCall3(213, fa.Handle);
                         break;
                     }
-                case M_CALLBACK_SWITCH_IDM_ALWAYSTOP_SET:  break;
+                case M_CALLBACK_SWITCH_IDM_ALWAYSTOP_SET: break;
                 case M_CALLBACK_SWITCH_MAINGROUP_SET: formMain.GroupSwitch(wParam.ToInt32() == 1); break;
                 case M_CALLBACK_SWITCH_REFESHRATE_SET: formMain.SetMainRefeshTimerInterval(wParam.ToInt32()); break;
                 case M_CALLBACK_SWITCH_TOPMOST_SET: formMain.TopMost = wParam.ToInt32() == 1; break;
                 case M_CALLBACK_SWITCH_CLOSEHIDE_SET: formMain.MainSettings.CloseHide = wParam.ToInt32() == 1; break;
-                case M_CALLBACK_SWITCH_MINHIDE_SET:  formMain.MainSettings.MinHide = wParam.ToInt32() == 1; break;
-                case M_CALLBACK_GOTO_SERVICE: formMain.MainPageScMgr.ScMgrGoToService(Marshal.PtrToStringUni(wParam));break;
-                case M_CALLBACK_REFESH_SCLIST: formMain.MainPageScMgr.ScMgrRefeshList(); break;             
+                case M_CALLBACK_SWITCH_MINHIDE_SET: formMain.MainSettings.MinHide = wParam.ToInt32() == 1; break;
+                case M_CALLBACK_GOTO_SERVICE: formMain.MainPageScMgr.ScMgrGoToService(Marshal.PtrToStringUni(wParam)); break;
+                case M_CALLBACK_REFESH_SCLIST: formMain.MainPageScMgr.ScMgrRefeshList(); break;
                 case M_CALLBACK_KILLPROCTREE: formMain.MainPageProcess.ProcessListKillProcTree((uint)wParam.ToInt32()); break;
                 case M_CALLBACK_SPY_TOOL:
                     {
@@ -161,27 +163,27 @@ namespace PCMgr.Main
                         else MessageBox.Show(LanuageFBuffers.Str_DriverNotLoad);
                         break;
                     }
-                case M_CALLBACK_SHOW_TRUSTED_DLG:  formMain.VeryTrust(Marshal.PtrToStringUni(wParam)); break;
-                case M_CALLBACK_MDETALS_LIST_HEADER_RIGHTCLICK: formMain.MainPageProcessDetails.ProcessListDetailsHeaderRightClick(wParam.ToInt32());  break;                  
+                case M_CALLBACK_SHOW_TRUSTED_DLG: formMain.VeryTrust(Marshal.PtrToStringUni(wParam)); break;
+                case M_CALLBACK_MDETALS_LIST_HEADER_RIGHTCLICK: formMain.MainPageProcessDetails.ProcessListDetailsHeaderRightClick(wParam.ToInt32()); break;
                 case M_CALLBACK_KDA: new FormKDA().ShowDialog(formMain); break;
-                case M_CALLBACK_SETAFFINITY:  new FormSetAffinity((uint)wParam.ToInt32(), lParam).ShowDialog();  break;
+                case M_CALLBACK_SETAFFINITY: new FormSetAffinity((uint)wParam.ToInt32(), lParam).ShowDialog(); break;
                 case M_CALLBACK_UPDATE_LOAD_STATUS: formMain.StartingProgressUpdate(Marshal.PtrToStringUni(wParam)); break;
                 case M_CALLBACK_SHOW_NOPDB_WARN: formMain.ShowNoPdbWarn(Marshal.PtrToStringAnsi(wParam)); break;
                 case M_CALLBACK_INVOKE_LASTLOAD_STEP: formMain.Invoke(new Action(formMain.AppLastLoadStep)); break;
                 case M_CALLBACK_DBGPRINT_SHOW: formMain.KDbgPrintShow(); break;
                 case M_CALLBACK_DBGPRINT_CLOSE: formMain.KDbgPrintClose(); break;
                 case M_CALLBACK_DBGPRINT_DATA: formMain.KDbgPrintData(Marshal.PtrToStringUni(wParam)); break;
-                case M_CALLBACK_DBGPRINT_EMEPTY: formMain.KDbgPrintData(); break;             
-                case M_CALLBACK_SHOW_LOAD_STATUS: formMain. StartingProgressShowHide(true); break;
+                case M_CALLBACK_DBGPRINT_EMEPTY: formMain.KDbgPrintData(); break;
+                case M_CALLBACK_SHOW_LOAD_STATUS: formMain.StartingProgressShowHide(true); break;
                 case M_CALLBACK_HLDE_LOAD_STATUS: formMain.StartingProgressShowHide(false); break;
-                case M_CALLBACK_MDETALS_LIST_HEADER_MOUSEMOVE: formMain.MainPageProcessDetails. ProcessListDetailsHeaderMouseMove(wParam.ToInt32(), new System.Drawing.Point(LOWORD(lParam), HIWORD(lParam))); break;
+                case M_CALLBACK_MDETALS_LIST_HEADER_MOUSEMOVE: formMain.MainPageProcessDetails.ProcessListDetailsHeaderMouseMove(wParam.ToInt32(), new System.Drawing.Point(LOWORD(lParam), HIWORD(lParam))); break;
                 case M_CALLBACK_KERNEL_VIELL_PRGV: new FormVPrivilege(Convert.ToUInt32(wParam.ToInt32()), Marshal.PtrToStringUni(lParam)).ShowDialog(); break;
                 case M_CALLBACK_KERNEL_TOOL: formMain.ShowKernelTools(); break;
                 case M_CALLBACK_HOOKS: formMain.ShowFormHooks(); break;
                 case M_CALLBACK_NETMON: /*netmon*/ break;
                 case M_CALLBACK_REGEDIT: /*regedit*/ break;
                 case M_CALLBACK_FILEMGR: formMain.SetToFileMgr(); break;
-                case M_CALLBACK_COLLAPSE_ALL: formMain.CollapseAll(); break; 
+                case M_CALLBACK_COLLAPSE_ALL: formMain.CollapseAll(); break;
                 case M_CALLBACK_SIMPLEVIEW_ACT:
                     {
                         if (wParam.ToInt32() == 1) formMain.MainPageProcess.ProcessListEndCurrentApp();
@@ -189,9 +191,44 @@ namespace PCMgr.Main
                         break;
                     }
                 case M_CALLBACK_UWPKILL: formMain.MainPageProcess.ProcessListKillCurrentUWP(); break;
-                case M_CALLBACK_EXPAND_ALL: formMain.ExpandAll();  break;
+                case M_CALLBACK_EXPAND_ALL: formMain.ExpandAll(); break;
                 case M_CALLBACK_SHOW_HELP: new FormHelp().ShowDialog(); break;
+                case M_CALLBACK_RUN_APP_CMD:
+                    {
+                        List<string> cmds = new List<string>();
+
+                        StringBuilder sb = new StringBuilder(260);
+                        uint count = MAppCmdGetCount();
+                        for (uint i = 0; i < count; i++)
+                        {
+                            sb.Clear();
+                            if (MAppCmdGetAt(i, sb, 260))
+                                cmds.Add(sb.ToString());
+                        }
+
+                        formMain.AppDebugCmd(cmds.ToArray(), count);
+
+                        cmds.Clear();
+                        cmds = null;
+
+                        break;
+                    }
+                case M_CALLBACK_VIEW_TCP:
+                    {
+                        if (formTcp == null)
+                        {
+                            formTcp = new FormTcp(formMain);
+                            formTcp.FormClosed += FormTcp_FormClosed;
+                        }
+                        formTcp.Show();
+                        break;
+                    }
             }
+        }
+
+        private void FormTcp_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            formTcp = null;
         }
     }
 }

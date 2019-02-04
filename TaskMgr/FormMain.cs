@@ -13,7 +13,7 @@ using PCMgr.Lanuages;
 using PCMgr.WorkWindow;
 using static PCMgr.NativeMethods;
 using static PCMgr.NativeMethods.Win32;
-using static PCMgr.NativeMethods.DeviceApi;
+using static PCMgr.NativeMethods.LogApi;
 
 using PCMgr.Main;
 
@@ -543,22 +543,14 @@ namespace PCMgr
             //加载设置和所有页的代码
             AppLoadPages();
             AppLoadSettings();
-
-            //初始化
-            MAppWorkCall3(181, IntPtr.Zero, IntPtr.Zero);
-            MAppWorkCall3(183, Handle, IntPtr.Zero);
-            MAppWorkCall3(164, IntPtr.Zero, IntPtr.Zero);
-            MAppWorkCall3(163, IntPtr.Zero, IntPtr.Zero);
-
-            //初始化语言
-            LanuageMgr.InitLanuage();
+            AppLoadAllMenuStyles();
 
             //标题
             SetConfig("LastWindowTitle", "AppSetting", Text);
             Text = GetConfig("Title", "AppSetting", "任务管理器");
             if (Text == "") Text = LanuageFBuffers.Str_AppTitle;
 
-            mainPagePerf.PerfInitTray();
+            new System.Threading.Thread(mainPagePerf.PerfInitTray).Start();
 
             //系统位数
 #if _X64_
@@ -586,6 +578,17 @@ namespace PCMgr
             tabHeader.BringToFront();
             tabHeader.Font = tabControlMain.Font;
             if (IsSimpleView) tabHeader.Visible = false;
+
+            //Shell Icon
+            IntPtr shellIconPtr = MGetShieldIcon2();
+            Icon shellIcon = Icon.FromHandle(shellIconPtr);
+            Bitmap shellIcoBtimap = MainUtils.IconToBitmap(shellIcon, 16, 16);
+
+            check_showAllProcess.Image = shellIcoBtimap;
+            linkRebootAsAdmin.Image = shellIcoBtimap;
+            linkRestartAsAdminDriver.Image = shellIcoBtimap;
+
+            DestroyIcon(shellIconPtr);
         }
         private void AppOnLoad()
         { 
@@ -605,7 +608,7 @@ namespace PCMgr
                 
                 mainNativeBridge.AppWorkerCallBack(38, IntPtr.Zero, IntPtr.Zero);
                 DelingDialogClose();
-                MPERF_NET_FreeAllProcessNetInfo();
+
                 mainPageUserMgr.UsersListUnInit();
                 mainPagePerf.PerfClear();
 
@@ -625,6 +628,15 @@ namespace PCMgr
             }
         }
 
+        private void AppLoadAllMenuStyles()
+        {
+            contextMenuStripMainHeader.Renderer = new ClassicalMenuRender(Handle);
+            contextMenuStripPerfListLeft.Renderer = contextMenuStripMainHeader.Renderer;
+            contextMenuStripProcDetalsCol.Renderer = contextMenuStripMainHeader.Renderer;
+            contextMenuStripTray.Renderer = contextMenuStripMainHeader.Renderer;
+            contextMenuStripUWP.Renderer = contextMenuStripMainHeader.Renderer;
+        }
+
         private void AppLoadSettings()
         {
             MainSettings.LoadSettings();
@@ -635,6 +647,34 @@ namespace PCMgr
             MainSettings.SaveListColumnsWidth();
             MainSettings.SaveSettings();
         }
+
+        #region App debug cmd
+
+        public void AppDebugCmd(string[] cmd, uint size)
+        {
+            string cmd0 = cmd[0];
+            switch (cmd0)
+            {
+                case "test": Log("app test success!"); break;
+                case "gc": GC.Collect(); break;
+                case "?":
+                case "help":
+                    LogText("app debug commands help: \n" +
+                        "exit Save exit application" +
+                        "reboot Reboot application" +
+                        "stat Show app run stats" +
+                        "procs MainPageProcess debug (?)" +
+                        "lg LanuageMgr debug (?)" +
+                        "settings SettingsMgr debug (?)");
+                    break;
+                case "sets": MainSettings.DebugCmd(cmd, size); break;
+                case "procs": mainPageProcess.DebugCmd(cmd, size); break;
+                case "lg": LanuageMgr.DebugCmd(cmd, size); break;
+                default: LogWarn("Not found command : " + cmd0); break;
+            }
+        }
+
+        #endregion
 
         #region KDbgPrint
 
@@ -931,6 +971,7 @@ namespace PCMgr
             else if (tabControlMain.SelectedTab == tabPageStartCtl)
                 mainPageStartMgr.StartMListExpandAll();
         }
+
 
         #endregion
 

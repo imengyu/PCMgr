@@ -24,8 +24,10 @@ typedef BOOL(WINAPI*_CryptUIDlgViewContext)(DWORD dwContextType, const void *pvC
 typedef ULONG(WINAPI* _GetPerTcpConnectionEStats)(_In_ PMIB_TCPROW Row, _In_ TCP_ESTATS_TYPE EstatsType, _Out_writes_bytes_opt_(RwSize) PUCHAR Rw, _In_ ULONG RwVersion, _In_ ULONG RwSize, _Out_writes_bytes_opt_(RosSize) PUCHAR Ros, _In_ ULONG RosVersion, _In_ ULONG RosSize, _Out_writes_bytes_opt_(RodSize) PUCHAR Rod, _In_ ULONG RodVersion, _In_ ULONG RodSize);
 typedef ULONG(WINAPI*_GetPerTcp6ConnectionEStats)(_In_ PMIB_TCP6ROW Row, _In_ TCP_ESTATS_TYPE EstatsType, _Out_writes_bytes_opt_(RwSize) PUCHAR Rw, _In_  ULONG RwVersion, _In_  ULONG RwSize, _Out_writes_bytes_opt_(RosSize) PUCHAR Ros, _In_  ULONG RosVersion, _In_  ULONG RosSize, _Out_writes_bytes_opt_(RodSize) PUCHAR Rod, _In_  ULONG RodVersion, _In_  ULONG RodSize);
 typedef ULONG(WINAPI*_SetPerTcpConnectionEStats)(_In_ PMIB_TCPROW Row, _In_ TCP_ESTATS_TYPE EstatsType, _In_reads_bytes_(RwSize) PUCHAR Rw, _In_ ULONG RwVersion, _In_ ULONG RwSize, _In_ ULONG Offset);
+typedef ULONG(WINAPI*_SetPerTcp6ConnectionEStats)(_In_ PMIB_TCP6ROW Row, _In_ TCP_ESTATS_TYPE EstatsType, _In_reads_bytes_(RwSize) PUCHAR Rw, _In_ ULONG RwVersion, _In_ ULONG RwSize, _In_ ULONG Offset);
 typedef DWORD(WINAPI*_GetExtendedTcpTable)(PVOID pTcpTable, PDWORD pdwSize, BOOL bOrder, ULONG ulAf, TCP_TABLE_CLASS TableClass, ULONG Reserved);
 typedef BOOL(WINAPI*_CancelShutdown)();
+typedef PWSTR(WINAPI *_RtlIpv6AddressToStringW)(const in6_addr *Addr, 	PWSTR S);
 
 typedef BOOL(WINAPI *fnIMAGEUNLOAD)(__in PLOADED_IMAGE LoadedImage);
 typedef PLOADED_IMAGE(WINAPI *fnIMAGELOAD)(__in PSTR DllName,	__in  PSTR DllPath);
@@ -135,5 +137,29 @@ typedef BOOLEAN(WINAPI*_WinStationReset)(_In_opt_ HANDLE hServer,_In_ ULONG Sess
 typedef BOOLEAN(WINAPI*_WinStationFreeMemory)(	_In_ PVOID Buffer);
 typedef BOOLEAN(WINAPI*_WinStationEnumerateW)(	_In_opt_ HANDLE hServer,	_Out_ PSESSIONIDW *SessionIds,	_Out_ PULONG Count);
 typedef BOOLEAN(WINAPI*_WinStationQueryInformationW)(_In_opt_ HANDLE hServer, _In_ ULONG SessionId, _In_ WINSTATIONINFOCLASS WinStationInformationClass, _Out_writes_bytes_(WinStationInformationLength) PVOID pWinStationInformation, _In_ ULONG WinStationInformationLength, _Out_ PULONG pReturnLength);
+
+#include <ws2tcpip.h>
+#include <ws2ipdef.h>
+
+//ws32
+typedef int (WSAAPI *_WSAStartup)(
+	_In_ WORD wVersionRequested,
+	_Out_ LPWSADATA lpWSAData
+	);
+typedef int (WSAAPI *_WSAGetLastError)();
+typedef INT(WSAAPI *_GetNameInfoW)(
+	_In_reads_bytes_(SockaddrLength) const SOCKADDR *pSockaddr,
+	_In_ socklen_t SockaddrLength,
+	_Out_writes_opt_(NodeBufferSize) PWCHAR pNodeBuffer,
+	_In_ DWORD NodeBufferSize,
+	_Out_writes_opt_(ServiceBufferSize) PWCHAR pServiceBuffer,
+	_In_ DWORD ServiceBufferSize,
+	_In_ INT Flags
+	);
+typedef struct hostent *(WSAAPI *_gethostbyaddr)(
+	_In_reads_bytes_(len) const char *addr,
+	_In_ int len,
+	_In_ int type
+	);
 
 #pragma endregion

@@ -100,6 +100,7 @@ namespace PCMgr.Main
             }
             if (lastShowDir != path)
             {
+                fileSystemWatcher.EnableRaisingEvents = true;
                 lastShowDir = path;
                 listFm.Items.Clear();
                 if (lastShowDir == "mycp" || lastShowDir == "\\\\")
@@ -113,10 +114,8 @@ namespace PCMgr.Main
                     MFM_GetFiles(lastShowDir);
                     textBoxFmCurrent.Text = lastShowDir;
                 }
-                if (path == "mycp") fileSystemWatcher.Path = "";
+                if (path == "mycp") fileSystemWatcher.EnableRaisingEvents = false;
                 else fileSystemWatcher.Path = path;
-                fileSystemWatcher.EnableRaisingEvents = true;
-
 
                 FileMgrUpdateStatus(1);
             }

@@ -142,7 +142,7 @@ bool MProcessMonitorCore::RefeshAllProcessNotInclude()
 					WCHAR exeFullPath[260];
 					memset(exeFullPath, 0, sizeof(exeFullPath));
 
-					HANDLE hProcess = NULL;
+					HANDLE hProcess = NULL; 
 					MGetProcessFullPathEx(static_cast<DWORD>((ULONG_PTR)p->ProcessId), exeFullPath, &hProcess, p->ImageName.Buffer);
 
 					NewItemCallBack(static_cast<DWORD>((ULONG_PTR)p->ProcessId), static_cast<DWORD>((ULONG_PTR)p->InheritedFromProcessId), p->ImageName.Buffer, exeFullPath, hProcess, item);
@@ -502,6 +502,10 @@ void MProcessMonitorCore::RefreshAllProcessItem()
 				newItem->Prvious = allProcessItemsEnd;
 				newItem->Next = nullptr;
 
+				memset(newItem->PerfData, 0, sizeof(MPerfAndProcessData));
+
+				newItem->PerfData->ProcessId = 2;
+
 				allProcessItemsEnd->Next = newItem;
 				allProcessItemsEnd = newItem;
 
@@ -517,6 +521,10 @@ void MProcessMonitorCore::RefreshAllProcessItem()
 				newItem->PerfData = new MPerfAndProcessData();
 				newItem->Prvious = allProcessItemsEnd;
 				newItem->Next = nullptr;
+
+				memset(newItem->PerfData, 0, sizeof(MPerfAndProcessData));
+
+				newItem->PerfData->ProcessId = newItem->ProcessId;
 
 				allProcessItemsEnd->Next = newItem;
 				allProcessItemsEnd = newItem;

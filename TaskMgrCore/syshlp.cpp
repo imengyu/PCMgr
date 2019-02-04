@@ -277,7 +277,7 @@ M_CAPI(BOOL) MGetWindowsBulidVersion() {
 		DWORD buildLabType = REG_SZ;
 		err = RegQueryValueEx(hKey, L"BuildLab", 0, &buildLabType, (LPBYTE)&buildLab, &buildLabLength);
 
-		Log(L"Windows Bulid version : %s \n      Internal bulid Version : %s", bulidver, buildLab);
+		Log(L"Windows Bulid version : %s \n     Internal bulid Version : %s", bulidver, buildLab);
 	}
 	return FALSE;
 }

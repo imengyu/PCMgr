@@ -123,25 +123,7 @@
   <data name="button_cancel.Text" xml:space="preserve">
     <value>Cancel</value>
   </data>
-  <data name="tabPage1.Text" xml:space="preserve">
-    <value>App</value>
-  </data>
-  <data name="btnChooseFont.Text" xml:space="preserve">
-    <value>Choose font</value>
-  </data>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-  <data name="lbFont.Size" type="System.Drawing.Size, System.Drawing">
-    <value>47, 12</value>
-  </data>
-  <data name="lbFont.Text" xml:space="preserve">
-    <value>Default</value>
-  </data>
-  <data name="label17.Size" type="System.Drawing.Size, System.Drawing">
-    <value>29, 12</value>
-  </data>
-  <data name="label17.Text" xml:space="preserve">
-    <value>Font</value>
-  </data>
   <data name="label8.Location" type="System.Drawing.Point, System.Drawing">
     <value>201, 137</value>
   </data>
@@ -158,7 +140,7 @@
     <value>248, 132</value>
   </data>
   <data name="label5.Size" type="System.Drawing.Size, System.Drawing">
-    <value>161, 24</value>
+    <value>180, 34</value>
   </data>
   <data name="label5.Text" xml:space="preserve">
     <value>Hotkey to Show main window
@@ -168,13 +150,13 @@
     <value>Window title</value>
   </data>
   <data name="checkBox2.Size" type="System.Drawing.Size, System.Drawing">
-    <value>90, 16</value>
+    <value>99, 21</value>
   </data>
   <data name="checkBox2.Text" xml:space="preserve">
     <value>Not support</value>
   </data>
   <data name="checkBoxSelfProtect.Size" type="System.Drawing.Size, System.Drawing">
-    <value>222, 16</value>
+    <value>209, 21</value>
   </data>
   <data name="checkBoxSelfProtect.Text" xml:space="preserve">
     <value>Kernel driver for process lifting</value>
@@ -186,13 +168,13 @@
     <value>Self protect</value>
   </data>
   <data name="checkBoxCloseHide.Size" type="System.Drawing.Size, System.Drawing">
-    <value>180, 16</value>
+    <value>187, 21</value>
   </data>
   <data name="checkBoxCloseHide.Text" xml:space="preserve">
     <value>Hide window when click "X"</value>
   </data>
   <data name="checkBoxTop.Size" type="System.Drawing.Size, System.Drawing">
-    <value>72, 16</value>
+    <value>83, 21</value>
   </data>
   <data name="checkBoxTop.Text" xml:space="preserve">
     <value>Top most</value>
@@ -203,26 +185,26 @@
   <data name="label2.Text" xml:space="preserve">
     <value>App Settings</value>
   </data>
-  <data name="tabPage4.Text" xml:space="preserve">
-    <value>Config</value>
+  <data name="tabPage1.Text" xml:space="preserve">
+    <value>App</value>
   </data>
   <data name="checkBoxNTOSPDB.Location" type="System.Drawing.Point, System.Drawing">
     <value>20, 555</value>
   </data>
   <data name="checkBoxNTOSPDB.Size" type="System.Drawing.Size, System.Drawing">
-    <value>306, 16</value>
+    <value>308, 21</value>
   </data>
   <data name="checkBoxNTOSPDB.Text" xml:space="preserve">
     <value>Auto load debug information of  ntoskrnl (PDB) </value>
   </data>
   <data name="checkBoxUseMyDbgView.Size" type="System.Drawing.Size, System.Drawing">
-    <value>96, 16</value>
+    <value>104, 21</value>
   </data>
   <data name="checkBoxUseMyDbgView.Text" xml:space="preserve">
     <value>Log DbgPrint</value>
   </data>
   <data name="checkBoxAutoLoadDriver.Size" type="System.Drawing.Size, System.Drawing">
-    <value>120, 16</value>
+    <value>122, 21</value>
   </data>
   <data name="checkBoxAutoLoadDriver.Text" xml:space="preserve">
     <value>Auto load driver</value>
@@ -231,7 +213,7 @@
     <value>20, 603</value>
   </data>
   <data name="checkBoxHighLightNoSystetm.Size" type="System.Drawing.Size, System.Drawing">
-    <value>264, 28</value>
+    <value>260, 38</value>
   </data>
   <data name="checkBoxHighLightNoSystetm.Text" xml:space="preserve">
     <value>For non system processes, services etc. 
@@ -254,7 +236,7 @@ use blue highlighted</value>
  (default, if unsuccessful, use the following two methods)</value>
   </data>
   <data name="checkBoxShowDebugWindow.Size" type="System.Drawing.Size, System.Drawing">
-    <value>168, 16</value>
+    <value>192, 21</value>
   </data>
   <data name="checkBoxShowDebugWindow.Text" xml:space="preserve">
     <value>Show Debug OutPut window</value>
@@ -269,7 +251,7 @@ use blue highlighted</value>
     <value>146, 20</value>
   </data>
   <data name="labelDriverLoadStatus.Size" type="System.Drawing.Size, System.Drawing">
-    <value>83, 12</value>
+    <value>81, 17</value>
   </data>
   <data name="labelDriverLoadStatus.Text" xml:space="preserve">
     <value>Driver status</value>
@@ -284,7 +266,7 @@ use blue highlighted</value>
     <value>20, 465</value>
   </data>
   <data name="radioButtonDrvLog.Size" type="System.Drawing.Size, System.Drawing">
-    <value>71, 16</value>
+    <value>76, 21</value>
   </data>
   <data name="radioButtonDrvLog.Text" xml:space="preserve">
     <value>Log only</value>
@@ -293,7 +275,7 @@ use blue highlighted</value>
     <value>20, 509</value>
   </data>
   <data name="radioButtonRefuseNoSginedAndAsk.Size" type="System.Drawing.Size, System.Drawing">
-    <value>275, 40</value>
+    <value>268, 55</value>
   </data>
   <data name="radioButtonRefuseNoSginedAndAsk.Text" xml:space="preserve">
     <value>For loading unsigned drivers, callback to 
@@ -304,7 +286,7 @@ if you load and Log.</value>
     <value>158, 434</value>
   </data>
   <data name="checkBoxEnableLoadDrvCallback.Size" type="System.Drawing.Size, System.Drawing">
-    <value>204, 28</value>
+    <value>198, 38</value>
   </data>
   <data name="checkBoxEnableLoadDrvCallback.Text" xml:space="preserve">
     <value>Enabled
@@ -314,7 +296,7 @@ if you load and Log.</value>
     <value>20, 487</value>
   </data>
   <data name="radioButtonRefuseNoSginedDrv.Size" type="System.Drawing.Size, System.Drawing">
-    <value>287, 16</value>
+    <value>296, 21</value>
   </data>
   <data name="radioButtonRefuseNoSginedDrv.Text" xml:space="preserve">
     <value>Prevent unsigned driver from loading and Log</value>
@@ -326,37 +308,37 @@ if you load and Log.</value>
     <value>Load driver callback</value>
   </data>
   <data name="checkBoxCannotLoadDriver.Size" type="System.Drawing.Size, System.Drawing">
-    <value>144, 16</value>
+    <value>140, 21</value>
   </data>
   <data name="checkBoxCannotLoadDriver.Text" xml:space="preserve">
     <value>Prohibit load driver</value>
   </data>
   <data name="checkBoxCannoteLoadModule.Size" type="System.Drawing.Size, System.Drawing">
-    <value>144, 16</value>
+    <value>150, 21</value>
   </data>
   <data name="checkBoxCannoteLoadModule.Text" xml:space="preserve">
     <value>Prohibit load module</value>
   </data>
   <data name="checkBoxCannotCreateReg.Size" type="System.Drawing.Size, System.Drawing">
-    <value>222, 16</value>
+    <value>220, 21</value>
   </data>
   <data name="checkBoxCannotCreateReg.Text" xml:space="preserve">
     <value>Prohibit create reg key and value</value>
   </data>
   <data name="checkBoxCannotCreateFile.Size" type="System.Drawing.Size, System.Drawing">
-    <value>144, 16</value>
+    <value>133, 21</value>
   </data>
   <data name="checkBoxCannotCreateFile.Text" xml:space="preserve">
     <value>Prohibit create file</value>
   </data>
   <data name="checkBoxCannotCreateThread.Size" type="System.Drawing.Size, System.Drawing">
-    <value>156, 16</value>
+    <value>154, 21</value>
   </data>
   <data name="checkBoxCannotCreateThread.Text" xml:space="preserve">
     <value>Prohibit create thread</value>
   </data>
   <data name="checkBoxCannotCreateProc.Size" type="System.Drawing.Size, System.Drawing">
-    <value>162, 16</value>
+    <value>162, 21</value>
   </data>
   <data name="checkBoxCannotCreateProc.Text" xml:space="preserve">
     <value>Prohibit create process</value>
@@ -371,11 +353,14 @@ if you load and Log.</value>
     <value>Temporary configuration
  (effective after driving load)</value>
   </data>
+  <data name="radioButtonApcPspTerProc.Size" type="System.Drawing.Size, System.Drawing">
+    <value>167, 21</value>
+  </data>
   <data name="radioButtonApcPspTerProc.Text" xml:space="preserve">
     <value>Ke APC + PspExitThread</value>
   </data>
   <data name="radioButtonPspTerProc.Size" type="System.Drawing.Size, System.Drawing">
-    <value>185, 16</value>
+    <value>201, 21</value>
   </data>
   <data name="radioButtonPspTerProc.Text" xml:space="preserve">
     <value>PspTerminateThreadByPointer</value>
@@ -384,7 +369,7 @@ if you load and Log.</value>
     <value>3, 291</value>
   </data>
   <data name="label10.Size" type="System.Drawing.Size, System.Drawing">
-    <value>221, 24</value>
+    <value>243, 34</value>
   </data>
   <data name="label10.Text" xml:space="preserve">
     <value>R3 Terminate Process/Thread：
@@ -396,19 +381,34 @@ NtTerminateProcess/NtTerminateThread</value>
   <data name="label9.Text" xml:space="preserve">
     <value>R0 Terminate Process/Thread</value>
   </data>
+  <data name="tabPage4.Size" type="System.Drawing.Size, System.Drawing">
+    <value>418, 281</value>
+  </data>
+  <data name="tabPage4.Text" xml:space="preserve">
+    <value>Config</value>
+  </data>
+  <data name="tabPage2.Size" type="System.Drawing.Size, System.Drawing">
+    <value>418, 281</value>
+  </data>
   <data name="tabPage2.Text" xml:space="preserve">
     <value>Others</value>
   </data>
-  <data name="tabPage3.Text" xml:space="preserve">
-    <value>Lanuage</value>
+  <data name="comboBox_lg.Location" type="System.Drawing.Point, System.Drawing">
+    <value>83, 21</value>
   </data>
   <data name="comboBox_lg.Size" type="System.Drawing.Size, System.Drawing">
-    <value>230, 20</value>
+    <value>214, 25</value>
   </data>
   <data name="label1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>47, 12</value>
+    <value>57, 17</value>
   </data>
   <data name="label1.Text" xml:space="preserve">
+    <value>Lanuage</value>
+  </data>
+  <data name="tabPage3.Size" type="System.Drawing.Size, System.Drawing">
+    <value>418, 281</value>
+  </data>
+  <data name="tabPage3.Text" xml:space="preserve">
     <value>Lanuage</value>
   </data>
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">

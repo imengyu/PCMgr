@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using static PCMgr.Main.MainUtils;
 using static PCMgr.NativeMethods;
+using static PCMgr.NativeMethods.LogApi;
 
 namespace PCMgr.Main
 {

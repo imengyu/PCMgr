@@ -163,7 +163,7 @@
     <value>performanceInfos</value>
   </data>
   <data name="&gt;&gt;performanceInfos.Type" xml:space="preserve">
-    <value>PCMgr.Ctls.PerformanceInfos, PCMgrApp32, Version=1.2.0.1, Culture=neutral, PublicKeyToken=null</value>
+    <value>PCMgr.Ctls.PerformanceInfos, PCMgrApp32, Version=1.3.2.6, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;performanceInfos.Parent" xml:space="preserve">
     <value>$this</value>
@@ -214,7 +214,7 @@
     <value>performanceGridGlobal</value>
   </data>
   <data name="&gt;&gt;performanceGridGlobal.Type" xml:space="preserve">
-    <value>PCMgr.Ctls.PerformanceGrid, PCMgrApp32, Version=1.2.0.1, Culture=neutral, PublicKeyToken=null</value>
+    <value>PCMgr.Ctls.PerformanceGrid, PCMgrApp32, Version=1.3.2.6, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;performanceGridGlobal.Parent" xml:space="preserve">
     <value>panelGrid</value>
@@ -247,7 +247,7 @@
     <value>performanceTitle</value>
   </data>
   <data name="&gt;&gt;performanceTitle.Type" xml:space="preserve">
-    <value>PCMgr.Ctls.PerformanceTitle, PCMgrApp32, Version=1.2.0.1, Culture=neutral, PublicKeyToken=null</value>
+    <value>PCMgr.Ctls.PerformanceTitle, PCMgrApp32, Version=1.3.2.6, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;performanceTitle.Parent" xml:space="preserve">
     <value>panelGrid</value>
@@ -289,31 +289,31 @@
     <value>118, 17</value>
   </metadata>
   <data name="显示内核时间ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>148, 22</value>
+    <value>180, 22</value>
   </data>
   <data name="显示内核时间ToolStripMenuItem.Text" xml:space="preserve">
     <value>显示内核时间</value>
   </data>
   <data name="图形摘要视图ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>148, 22</value>
+    <value>180, 22</value>
   </data>
   <data name="图形摘要视图ToolStripMenuItem.Text" xml:space="preserve">
-    <value>图形摘要视图</value>
+    <value>图形摘要视图(&amp;G)</value>
   </data>
   <data name="查看ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>148, 22</value>
+    <value>180, 22</value>
   </data>
   <data name="查看ToolStripMenuItem.Text" xml:space="preserve">
-    <value>查看</value>
+    <value>查看(&amp;V)</value>
   </data>
   <data name="复制ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>148, 22</value>
+    <value>180, 22</value>
   </data>
   <data name="复制ToolStripMenuItem.Text" xml:space="preserve">
-    <value>复制</value>
+    <value>复制(&amp;C)</value>
   </data>
   <data name="contextMenuStrip.Size" type="System.Drawing.Size, System.Drawing">
-    <value>149, 92</value>
+    <value>181, 114</value>
   </data>
   <data name="&gt;&gt;contextMenuStrip.Name" xml:space="preserve">
     <value>contextMenuStrip</value>

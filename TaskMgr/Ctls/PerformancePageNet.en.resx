@@ -117,12 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="performanceInfos.ToolTip" xml:space="preserve">
-    <value />
-  </data>
-  <data name="performanceTitle.ToolTip" xml:space="preserve">
-    <value />
-  </data>
   <data name="performanceGrid.LeftBottomText" xml:space="preserve">
     <value>60 s</value>
   </data>
@@ -132,7 +126,17 @@
   <data name="performanceGrid.ToolTip" xml:space="preserve">
     <value>Sending and receiving activities on this network</value>
   </data>
-  <data name="$this.ToolTip" xml:space="preserve">
-    <value />
+  <data name="图形摘要视图ToolStripMenuItem.Text" xml:space="preserve">
+    <value>&amp;Graphic view</value>
+  </data>
+  <data name="查看ToolStripMenuItem.Text" xml:space="preserve">
+    <value>&amp;View</value>
+  </data>
+  <data name="复制ToolStripMenuItem.Text" xml:space="preserve">
+    <value>&amp;Copy</value>
+  </data>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="contextMenuStrip.Size" type="System.Drawing.Size, System.Drawing">
+    <value>151, 70</value>
   </data>
 </root>

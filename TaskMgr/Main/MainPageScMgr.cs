@@ -38,8 +38,14 @@ namespace PCMgr.Main
         protected override void OnLoad()
         {
             mainSettings = FormMain.MainSettings;
+
+            updateScTimer.Interval = 1000;
+            updateScTimer.Tick += UpdateScTimer_Tick;
+
             base.OnLoad();
         }
+
+
 
         //服务管理
 
@@ -66,6 +72,8 @@ namespace PCMgr.Main
         private Dictionary<string, string> scGroupFriendlyName = new Dictionary<string, string>();
         private bool scCanUse = false;
         private IntPtr hListHeaderSc = IntPtr.Zero;
+        private Timer updateScTimer = new Timer();
+        private ListViewItem updateScItem = null;
 
         public Icon IcoSc { get { return icoSc; } }
         public List<uint> ScValidPid { get { return scValidPid; } }
@@ -171,86 +179,130 @@ namespace PCMgr.Main
             }
         }
         private void ScMgrIEnumServicesCallBack(IntPtr dspName, IntPtr scName, uint scType, uint currentState, uint dwProcessId, bool syssc,
-            uint dwStartType, IntPtr lpBinaryPathName, IntPtr lpLoadOrderGroup)
+            uint dwStartType, IntPtr lpBinaryPathName, IntPtr lpLoadOrderGroup, bool add)
         {
-            ListViewItem li = new ListViewItem(Marshal.PtrToStringUni(scName));
-            ScTag t = new ScTag();
-            t.name = li.Text;
-            t.runningState = currentState;
-            t.startType = scType;
-            t.binaryPathName = Marshal.PtrToStringUni(lpBinaryPathName);
-            li.SubItems.Add(dwProcessId == 0 ? "" : dwProcessId.ToString());
-            li.Tag = t;
-            if (dwProcessId != 0)
+            if (add)
             {
-                scValidPid.Add(dwProcessId);
-                runningSc.Add(new ScItem(Convert.ToInt32(dwProcessId), Marshal.PtrToStringUni(lpLoadOrderGroup), Marshal.PtrToStringUni(scName), Marshal.PtrToStringUni(dspName)));
-            }
-            li.SubItems.Add(Marshal.PtrToStringUni(dspName));
-            switch (currentState)
-            {
-                case 0x0001:
-                case 0x0003: li.SubItems.Add(LanuageFBuffers.Str_StatusStoppeed); break;
-                case 0x0002:
-                case 0x0004: li.SubItems.Add(LanuageFBuffers.Str_StatusRunning); break;
-                case 0x0006:
-                case 0x0007: li.SubItems.Add(LanuageFBuffers.Str_StatusPaused); break;
-                default: li.SubItems.Add(""); break;
-            }
-            li.SubItems.Add(Marshal.PtrToStringUni(lpLoadOrderGroup));
-            switch (dwStartType)
-            {
-                case 0x0000: li.SubItems.Add(LanuageFBuffers.Str_DriverLoad); break;
-                case 0x0001: li.SubItems.Add(LanuageFBuffers.Str_DriverLoad); break;
-                case 0x0002: li.SubItems.Add(LanuageFBuffers.Str_AutoStart); break;
-                case 0x0003: li.SubItems.Add(LanuageFBuffers.Str_DemandStart); break;
-                case 0x0004: li.SubItems.Add(LanuageFBuffers.Str_Disabled); break;
-                case 0x0080: li.SubItems.Add(""); break;
-                default: li.SubItems.Add(""); break;
-            }
-            switch (scType)
-            {
-                case 0x0002: li.SubItems.Add(LanuageFBuffers.Str_FileSystem); break;
-                case 0x0001: li.SubItems.Add(LanuageFBuffers.Str_KernelDriver); break;
-                case 0x0010: li.SubItems.Add(LanuageFBuffers.Str_UserService); break;
-                case 0x0020: li.SubItems.Add(LanuageFBuffers.Str_SystemService); break;
-                default: li.SubItems.Add(""); break;
-            }
-
-            string path = Marshal.PtrToStringUni(lpBinaryPathName);
-            if (!MFM_FileExist(path))
-            {
-                StringBuilder spath = new StringBuilder(260);
-                if (MCommandLineToFilePath(path, spath, 260))
-                    path = spath.ToString();
-            }
-
-            bool hightlight = false;
-            if (!string.IsNullOrEmpty(path) && MFM_FileExist(path))
-            {
-                li.SubItems.Add(path);
-                StringBuilder exeCompany = new StringBuilder(256);
-                if (MGetExeCompany(path, exeCompany, 256))
+                ListViewItem li = new ListViewItem(Marshal.PtrToStringUni(scName));
+                ScTag t = new ScTag();
+                t.name = li.Text;
+                t.runningState = currentState;
+                t.startType = scType;
+                t.binaryPathName = Marshal.PtrToStringUni(lpBinaryPathName);
+                li.SubItems.Add(dwProcessId == 0 ? "" : dwProcessId.ToString());
+                li.Tag = t;
+                if (dwProcessId != 0)
                 {
-                    li.SubItems.Add(exeCompany.ToString());
-                    if (mainSettings.HighlightNoSystem && exeCompany.ToString() != ConstVals.MICROSOFT)
-                        hightlight = true;
+                    scValidPid.Add(dwProcessId);
+                    runningSc.Add(new ScItem(Convert.ToInt32(dwProcessId), Marshal.PtrToStringUni(lpLoadOrderGroup), Marshal.PtrToStringUni(scName), Marshal.PtrToStringUni(dspName)));
                 }
-                else if (mainSettings.HighlightNoSystem) hightlight = true;
+                li.SubItems.Add(Marshal.PtrToStringUni(dspName));
+                switch (currentState)
+                {
+                    case 0x0001:
+                    case 0x0003: li.SubItems.Add(LanuageFBuffers.Str_StatusStopped); break;
+                    case 0x0002:
+                    case 0x0004: li.SubItems.Add(LanuageFBuffers.Str_StatusRunning); break;
+                    case 0x0006:
+                    case 0x0007: li.SubItems.Add(LanuageFBuffers.Str_StatusPaused); break;
+                    default: li.SubItems.Add(""); break;
+                }
+                li.SubItems.Add(Marshal.PtrToStringUni(lpLoadOrderGroup));
+                switch (dwStartType)
+                {
+                    case 0x0000: li.SubItems.Add(LanuageFBuffers.Str_DriverLoad); break;
+                    case 0x0001: li.SubItems.Add(LanuageFBuffers.Str_DriverLoad); break;
+                    case 0x0002: li.SubItems.Add(LanuageFBuffers.Str_AutoStart); break;
+                    case 0x0003: li.SubItems.Add(LanuageFBuffers.Str_DemandStart); break;
+                    case 0x0004: li.SubItems.Add(LanuageFBuffers.Str_Disabled); break;
+                    case 0x0080: li.SubItems.Add(""); break;
+                    default: li.SubItems.Add(""); break;
+                }
+                switch (scType)
+                {
+                    case 0x0002: li.SubItems.Add(LanuageFBuffers.Str_FileSystem); break;
+                    case 0x0001: li.SubItems.Add(LanuageFBuffers.Str_KernelDriver); break;
+                    case 0x0010: li.SubItems.Add(LanuageFBuffers.Str_UserService); break;
+                    case 0x0020: li.SubItems.Add(LanuageFBuffers.Str_SystemService); break;
+                    default: li.SubItems.Add(""); break;
+                }
+
+                string path = Marshal.PtrToStringUni(lpBinaryPathName);
+                if (!MFM_FileExist(path))
+                {
+                    StringBuilder spath = new StringBuilder(260);
+                    if (MCommandLineToFilePath(path, spath, 260))
+                        path = spath.ToString();
+                }
+
+                bool hightlight = false;
+                if (!string.IsNullOrEmpty(path) && MFM_FileExist(path))
+                {
+                    li.SubItems.Add(path);
+                    StringBuilder exeCompany = new StringBuilder(256);
+                    if (MGetExeCompany(path, exeCompany, 256))
+                    {
+                        li.SubItems.Add(exeCompany.ToString());
+                        if (mainSettings.HighlightNoSystem && exeCompany.ToString() != ConstVals.MICROSOFT)
+                            hightlight = true;
+                    }
+                    else if (mainSettings.HighlightNoSystem) hightlight = true;
+                }
+                else
+                {
+                    li.SubItems.Add(path);
+                    li.SubItems.Add(LanuageFBuffers.Str_FileNotExist);
+                    if (mainSettings.HighlightNoSystem) hightlight = true;
+                }
+                if (hightlight)
+                {
+                    li.ForeColor = Color.Blue;
+                    foreach (ListViewItem.ListViewSubItem s in li.SubItems)
+                        s.ForeColor = Color.Blue;
+                }
+                listService.Items.Add(li);
             }
-            else
+            else if (updateScItem != null)
             {
-                li.SubItems.Add(path);
-                li.SubItems.Add(LanuageFBuffers.Str_FileNotExist);
-                if (mainSettings.HighlightNoSystem) hightlight = true;
+                ScTag t = (ScTag)updateScItem.Tag;
+                t.runningState = currentState;
+                t.startType = scType;
+                if (dwProcessId != 0)
+                {
+                    scValidPid.Add(dwProcessId);
+                    updateScItem.SubItems[1].Text = dwProcessId.ToString();
+                }
+                else
+                {
+                    if (updateScItem.SubItems[1].Text != "")
+                    {
+                        uint oldpid = UInt32.Parse(updateScItem.SubItems[1].Text);
+                        if (scValidPid.Contains(oldpid)) scValidPid.Remove(oldpid);
+                    }
+                    updateScItem.SubItems[1].Text = "";
+                }
+                switch (currentState)
+                {
+                    case 0x0001:
+                    case 0x0003: updateScItem.SubItems[3].Text = LanuageFBuffers.Str_StatusStopped; break;
+                    case 0x0002:
+                    case 0x0004: updateScItem.SubItems[3].Text = LanuageFBuffers.Str_StatusRunning; break;
+                    case 0x0006:
+                    case 0x0007: updateScItem.SubItems[3].Text = LanuageFBuffers.Str_StatusPaused; break;
+                    default: updateScItem.SubItems[3].Text = ""; break;
+                }
+                switch (dwStartType)
+                {
+                    case 0x0000: updateScItem.SubItems[5].Text = LanuageFBuffers.Str_DriverLoad; break;
+                    case 0x0001: updateScItem.SubItems[5].Text = LanuageFBuffers.Str_DriverLoad; break;
+                    case 0x0002: updateScItem.SubItems[5].Text = LanuageFBuffers.Str_AutoStart; break;
+                    case 0x0003: updateScItem.SubItems[5].Text = LanuageFBuffers.Str_DemandStart; break;
+                    case 0x0004: updateScItem.SubItems[5].Text = LanuageFBuffers.Str_Disabled; break;
+                    case 0x0080: updateScItem.SubItems[5].Text = ""; break;
+                    default: updateScItem.SubItems[5].Text = ""; break;
+                }
+                updateScItem = null;
             }
-            if (hightlight)
-            {
-                li.ForeColor = Color.Blue;
-                foreach (ListViewItem.ListViewSubItem s in li.SubItems)
-                    s.ForeColor = Color.Blue;
-            }
-            listService.Items.Add(li);
         }
         public void ScMgrRemoveInvalidItem(string targetName)
         {
@@ -282,6 +334,26 @@ namespace PCMgr.Main
                 }
                 else it.Selected = false;
             }
+        }
+        public void ScMgrUpdateService(string targetName)
+        {
+            foreach (ListViewItem it in listService.Items)
+            {
+                if (it.Text == targetName)
+                {
+                    updateScItem = it;
+                    updateScTimer.Start();
+                    break;
+                }
+            }
+        }
+
+        private void UpdateScTimer_Tick(object sender, EventArgs e)
+        {
+            if (!MSCM_UpdateServiceStatus(updateScItem.Text, NativeBridge.scMgrEnumServicesCallBackPtr))
+                LogApi.LogErr2("UpdateServiceStatus for service " + updateScItem.Text + " failed.");
+
+            updateScTimer.Stop();
         }
 
         private void listService_KeyDown(object sender, KeyEventArgs e)

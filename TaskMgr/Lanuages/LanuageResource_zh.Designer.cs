@@ -3453,6 +3453,15 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 请使用 64 位的 PC Manager 进行加载驱动 的本地化字符串。
+        /// </summary>
+        internal static string X64EnumDriver {
+            get {
+                return ResourceManager.GetString("X64EnumDriver", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 
         ///已经在您的软件目录下找到64位的 PCMgr ，点击”启动64位版本“可以直接启动软件。 的本地化字符串。
         /// </summary>

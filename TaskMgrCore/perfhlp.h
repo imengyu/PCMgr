@@ -34,19 +34,19 @@ struct MPerfAndProcessData
 	MUINT64_DELTA IoWriteCountDelta;
 	MUINT64_DELTA IoOtherCountDelta;
 
-	ULONG64 InBandwidth;
-	ULONG64 OutBandwidth;
-	ULONG64 InBandwidth6;
-	ULONG64 OutBandwidth6;
-	ULONG64 ConnectCount;
+	ULONG64 LastInBytes;
+	ULONG64 LastOutBytes;
+	ULONG64 LastData;
 
-	ULONG64 LastBandwidth;
+	ULONG64 InBytes;
+	ULONG64 OutBytes;	
+
+
+	ULONG64 ConnectCount;
 
 	PACKAGE_ID* packageId=NULL;
 };
 
-//释放所有进程的网络信息
-M_CAPI(void) MPERF_NET_FreeAllProcessNetInfo();
 
 
 //枚举性能计数器下所有的实例名称

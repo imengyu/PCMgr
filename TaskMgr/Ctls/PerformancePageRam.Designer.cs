@@ -71,9 +71,9 @@
             // 
             // performanceInfos
             // 
+            resources.ApplyResources(this.performanceInfos, "performanceInfos");
             this.performanceInfos.ColorText = System.Drawing.Color.Black;
             this.performanceInfos.ColorTitle = System.Drawing.Color.Gray;
-            resources.ApplyResources(this.performanceInfos, "performanceInfos");
             this.performanceInfos.FontText = new System.Drawing.Font("微软雅黑", 9F);
             this.performanceInfos.FontTextSpeical = new System.Drawing.Font("微软雅黑", 15F);
             this.performanceInfos.FontTitle = new System.Drawing.Font("微软雅黑", 9F);
@@ -107,8 +107,8 @@
             // 
             // performanceTitle
             // 
-            this.performanceTitle.Cursor = System.Windows.Forms.Cursors.Default;
             resources.ApplyResources(this.performanceTitle, "performanceTitle");
+            this.performanceTitle.Cursor = System.Windows.Forms.Cursors.Default;
             this.performanceTitle.Name = "performanceTitle";
             this.performanceTitle.SmallTitleFont = new System.Drawing.Font("微软雅黑", 12F);
             this.performanceTitle.TitleFont = new System.Drawing.Font("微软雅黑", 18F);
@@ -118,29 +118,29 @@
             // 
             // contextMenuStrip
             // 
+            resources.ApplyResources(this.contextMenuStrip, "contextMenuStrip");
             this.contextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.图形摘要视图ToolStripMenuItem,
             this.查看ToolStripMenuItem,
             this.复制ToolStripMenuItem});
             this.contextMenuStrip.Name = "contextMenuStrip";
-            resources.ApplyResources(this.contextMenuStrip, "contextMenuStrip");
             this.contextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip_Opening);
             // 
             // 图形摘要视图ToolStripMenuItem
             // 
-            this.图形摘要视图ToolStripMenuItem.Name = "图形摘要视图ToolStripMenuItem";
             resources.ApplyResources(this.图形摘要视图ToolStripMenuItem, "图形摘要视图ToolStripMenuItem");
+            this.图形摘要视图ToolStripMenuItem.Name = "图形摘要视图ToolStripMenuItem";
             this.图形摘要视图ToolStripMenuItem.Click += new System.EventHandler(this.图形摘要视图ToolStripMenuItem_Click);
             // 
             // 查看ToolStripMenuItem
             // 
-            this.查看ToolStripMenuItem.Name = "查看ToolStripMenuItem";
             resources.ApplyResources(this.查看ToolStripMenuItem, "查看ToolStripMenuItem");
+            this.查看ToolStripMenuItem.Name = "查看ToolStripMenuItem";
             // 
             // 复制ToolStripMenuItem
             // 
-            this.复制ToolStripMenuItem.Name = "复制ToolStripMenuItem";
             resources.ApplyResources(this.复制ToolStripMenuItem, "复制ToolStripMenuItem");
+            this.复制ToolStripMenuItem.Name = "复制ToolStripMenuItem";
             this.复制ToolStripMenuItem.Click += new System.EventHandler(this.复制ToolStripMenuItem_Click);
             // 
             // panelGrid
@@ -159,6 +159,7 @@
             this.Controls.Add(this.performanceInfos);
             this.Controls.Add(this.panelGrid);
             this.Name = "PerformancePageRam";
+            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.PerformancePageRam_KeyUp);
             this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.PerformancePageRam_MouseClick);
             this.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.PerformancePageRam_MouseDoubleClick);
             this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.PerformancePageRam_MouseDown);

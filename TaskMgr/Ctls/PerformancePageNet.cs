@@ -112,6 +112,8 @@ namespace PCMgr.Ctls
         }
         public void PageInit()
         {
+            contextMenuStrip.Renderer = new Helpers.ClassicalMenuRender(Handle);
+
             performanceTitle.Title = currNetIsWifi ? "Wi-Fi" : LanuageMgr.GetStr("Ethernet");
             performanceTitle.SmallTitle = currNetName;
 
@@ -174,6 +176,10 @@ namespace PCMgr.Ctls
             }
             return 100;
         }
+        public void PageShowRightMenu()
+        {
+            contextMenuStrip.Show(this, Point.Empty);
+        }
 
         private int GetSpeedMaxUnit()
         {
@@ -190,7 +196,8 @@ namespace PCMgr.Ctls
 
         public event OpeningPageMenuEventHandler OpeningPageMenu;
         public event SwithGraphicViewEventHandler SwithGraphicView;
-
+        public event EventHandler AppKeyDown;
+        
         private void PerformancePageNet_MouseClick(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Right)
@@ -201,6 +208,10 @@ namespace PCMgr.Ctls
             string s = performanceTitle.Title + "\n    " + performanceTitle.SmallTitle;
             s += performanceInfos.GetCopyString();
             Clipboard.SetText(s);
+        }
+        private void 图形摘要视图ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SwithGraphicView?.Invoke(this);
         }
 
         private void PerformancePageNet_MouseDoubleClick(object sender, MouseEventArgs e)
@@ -214,10 +225,9 @@ namespace PCMgr.Ctls
                 if (e.Button == MouseButtons.Left && e.Clicks == 1)
                     NativeMethods.MAppWorkCall3(165, IntPtr.Zero, IntPtr.Zero);
         }
-
-        private void 图形摘要视图ToolStripMenuItem_Click(object sender, EventArgs e)
+        private void PerformancePageNet_KeyUp(object sender, KeyEventArgs e)
         {
-            SwithGraphicView?.Invoke(this);
+            if (e.KeyCode == Keys.Apps) AppKeyDown?.Invoke(this, e);
         }
 
         private void contextMenuStrip_Opening(object sender, System.ComponentModel.CancelEventArgs e)
@@ -226,7 +236,5 @@ namespace PCMgr.Ctls
             OpeningPageMenu?.Invoke(this, 查看ToolStripMenuItem);
 
         }
-
-
     }
 }

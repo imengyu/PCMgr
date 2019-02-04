@@ -122,6 +122,7 @@
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Aero\CommandLink.cs">
@@ -202,6 +203,7 @@
     <Compile Include="FormSL.Designer.cs">
       <DependentUpon>FormSL.cs</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\ClassicalMenuRender.cs" />
     <Compile Include="Helpers\ConstVals.cs" />
     <Compile Include="Helpers\IconUtils.cs" />
     <Compile Include="Helpers\SysVer.cs" />
@@ -211,11 +213,6 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>LanuageResource_en.resx</DependentUpon>
-    </Compile>
-    <Compile Include="Lanuages\LanuageResource_zh-Hant.Designer.cs">
-      <DependentUpon>LanuageResource_zh-Hant.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="Lanuages\LanuageResource_zh.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -288,6 +285,12 @@
     </Compile>
     <Compile Include="WorkWindow\FormSetAffinity.Designer.cs">
       <DependentUpon>FormSetAffinity.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WorkWindow\FormTcp.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WorkWindow\FormTcp.Designer.cs">
+      <DependentUpon>FormTcp.cs</DependentUpon>
     </Compile>
     <Compile Include="WorkWindow\FormTest.cs">
       <SubType>Form</SubType>
@@ -446,6 +449,9 @@
     <EmbeddedResource Include="WorkWindow\FormSetAffinity.resx">
       <DependentUpon>FormSetAffinity.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="WorkWindow\FormTcp.resx">
+      <DependentUpon>FormTcp.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="WorkWindow\FormTest.resx">
       <DependentUpon>FormTest.cs</DependentUpon>
     </EmbeddedResource>
@@ -509,10 +515,6 @@
     <EmbeddedResource Include="WorkWindow\Tools\FormLoadDriver.resx">
       <DependentUpon>FormLoadDriver.cs</DependentUpon>
     </EmbeddedResource>
-    <Resource Include="Lanuages\LanuageResource_zh-Hant.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>LanuageResource_zh-Hant.Designer.cs</LastGenOutput>
-    </Resource>
     <EmbeddedResource Include="Lanuages\LanuageResource_zh.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>LanuageResource_zh.Designer.cs</LastGenOutput>

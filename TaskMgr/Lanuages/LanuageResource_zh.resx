@@ -1281,4 +1281,7 @@ PCMgr 需要管理员权限 才能对系统进行控制和管理。
   <data name="PleaseEnumIn64" xml:space="preserve">
     <value>请使用 64 位的 PCMgr 枚举64位进程模块</value>
   </data>
+  <data name="X64EnumDriver" xml:space="preserve">
+    <value>请使用 64 位的 PC Manager 进行加载驱动</value>
+  </data>
 </root>

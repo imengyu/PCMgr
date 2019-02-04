@@ -20,6 +20,7 @@
 #include "userhlp.h"
 #include "thdhlp.h"
 #include "pehlp.h"
+#include "icoutils.h"
 #include <Windowsx.h>
 #include <shellapi.h>
 #include <Vsstyle.h>
@@ -122,6 +123,7 @@ HWND selectItem4;
 WCHAR ntoskrnlPath[MAX_PATH];
 WCHAR cssrssPath[MAX_PATH];
 WCHAR systemRoot[MAX_PATH];
+WCHAR system32Path[MAX_PATH];
 
 int HotKeyId = 0;
 bool has_fullscreen_window = false;
@@ -146,6 +148,7 @@ WNDPROC procListHeaderWndProc = NULL;
 BOOL procListLock = FALSE;
 HWND hListHeaderMainProcList;
 CLRCreateInstanceFnPtr dCLRCreateInstance;
+HICON hIconShell;
 
 extern DWORD thisCommandPid;
 extern LPWSTR thisCommandPath;
@@ -168,7 +171,7 @@ BOOL MAppLoadMenuSettings()
 
 	UINT rtIndex = -1;
 	WCHAR lastRt[16];
-	GetPrivateProfileString(L"AppSetting", L"RefeshTime", L"", lastRt, 16, iniPath);
+	GetPrivateProfileString(L"AppSetting", L"RefeshTime", L"Fast", lastRt, 16, iniPath);
 	if (StrEqual(lastRt, L"Stop")) {
 		rtIndex = 2;
 		refesh_paused = true;
@@ -186,6 +189,9 @@ BOOL MAppLoadMenuSettings()
 
 	if (rtIndex != -1)
 		CheckMenuRadioItem(hMenuMainViewRefeshRate, 0, 2, rtIndex, MF_BYPOSITION);
+
+	main_grouping = M_CFG_GetConfigBOOL(L"MainGrouping", L"AppSetting", TRUE);
+	CheckMenuItem(hMenuMainView, IDM_GROUP, main_grouping ? MF_CHECKED : MF_UNCHECKED);
 
 	return TRUE;
 }
@@ -396,6 +402,8 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 	}
 	switch (id)
 	{
+	case 154: MAppVPE((LPWSTR)data, hWnd); break;
+	case 155: return MAppShowLoadDrvWarn();
 	case 156: {
 		alwaysOnTop = static_cast<int>((ULONG_PTR)data);
 		if (top_most) {
@@ -405,7 +413,7 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 				MAppMainCall(M_CALLBACK_SW_AOP_WND, (LPVOID)FALSE, (LPVOID)0);
 		}
 		CheckMenuItem(hMenuMainSet, IDM_ALWAYSTOP, alwaysOnTop ? MF_CHECKED : MF_UNCHECKED);
-		M_CFG_SetConfigBOOL(L"AppSetting", L"AlwaysOnTop", alwaysOnTop);
+		M_CFG_SetConfigBOOL(L"AlwaysOnTop", L"AppSetting", alwaysOnTop);
 		hWorkerCallBack(M_CALLBACK_SWITCH_IDM_ALWAYSTOP_SET, (LPVOID)static_cast<ULONG_PTR>(alwaysOnTop), 0);
 		break;
 	}
@@ -421,7 +429,7 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 	case 162: {
 		main_grouping = static_cast<int>((ULONG_PTR)hWnd);
 		CheckMenuItem(hMenuMainView, IDM_GROUP, main_grouping ? MF_CHECKED : MF_UNCHECKED);
-		M_CFG_SetConfigBOOL(L"AppSetting", L"MainGrouping", main_grouping);
+		M_CFG_SetConfigBOOL(L"MainGrouping", L"AppSetting", main_grouping);
 		hWorkerCallBack(M_CALLBACK_SWITCH_MAINGROUP_SET, (LPVOID)static_cast<ULONG_PTR>(main_grouping), 0);
 		break;
 	}
@@ -511,8 +519,14 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 		hMenuMainFile = GetSubMenu(hMenuMain, 0);
 		hMenuMainSet = GetSubMenu(hMenuMain, 1);
 		hMenuMainView = GetSubMenu(hMenuMain, 3);
-		if (!MIsRunasAdmin())
+		
+		if (!MIsRunasAdmin()) {
 			InsertMenu(hMenuMainFile, 1, MF_BYPOSITION, IDM_REBOOT_AS_ADMIN, str_item_rebootasadmin);
+			HICON hShellIcon = MGetShieldIcon();
+			HBITMAP hShellIconBitmap = MIconToBitmap(hShellIcon, 16, 16);
+			SetMenuItemBitmaps(hMenuMainFile, IDM_REBOOT_AS_ADMIN, MF_BYCOMMAND, hShellIconBitmap, hShellIconBitmap);
+			DestroyIcon(hShellIcon);
+		}
 		else {
 #ifdef _AMD64_
 			InsertMenu(hMenuMainFile, 2, MF_BYPOSITION, IDM_UNLOAD_DRIVER, str_item_unloaddriver);
@@ -627,21 +641,21 @@ M_API int MAppWorkCall3(int id, HWND hWnd, void*data)
 	case 194: {
 		top_most = static_cast<int>((ULONG_PTR)data);
 		CheckMenuItem(hMenuMainSet, IDM_TOPMOST, top_most ? MF_CHECKED : MF_UNCHECKED);
-		M_CFG_SetConfigBOOL(L"AppSetting", L"TopMost", top_most);
+		M_CFG_SetConfigBOOL(L"TopMost", L"AppSetting", top_most);
 		hWorkerCallBack(M_CALLBACK_SWITCH_TOPMOST_SET, (LPVOID)static_cast<ULONG_PTR>(top_most), 0);
 		break;
 	}
 	case 195: {
 		close_hide = static_cast<int>((ULONG_PTR)data);
 		CheckMenuItem(hMenuMainSet, IDM_CLOSETOHIDE, close_hide ? MF_CHECKED : MF_UNCHECKED);
-		M_CFG_SetConfigBOOL(L"AppSetting", L"CloseHideToNotfication", close_hide);
+		M_CFG_SetConfigBOOL(L"CloseHideToNotfication", L"AppSetting", close_hide);
 		hWorkerCallBack(M_CALLBACK_SWITCH_CLOSEHIDE_SET, (LPVOID)static_cast<ULONG_PTR>(close_hide), 0);
 		break;
 	}
 	case 196: {
 		min_hide = static_cast<int>((ULONG_PTR)data);
 		CheckMenuItem(hMenuMainSet, IDM_MINHIDE, min_hide ? MF_CHECKED : MF_UNCHECKED);
-		M_CFG_SetConfigBOOL(L"AppSetting", L"MinHide", min_hide);
+		M_CFG_SetConfigBOOL(L"MinHide", L"AppSetting", min_hide);
 		hWorkerCallBack(M_CALLBACK_SWITCH_MINHIDE_SET, (LPVOID)static_cast<ULONG_PTR>(min_hide), 0);
 		break;
 	}
@@ -736,6 +750,12 @@ M_API void* MAppWorkCall4(int id, void* hWnd, void*data)
 {
 	switch (id)
 	{
+	case 94: {
+		WCHAR buffer[MAX_PATH];
+		wcscpy_s(buffer, L"%SystemRoot%\\System32\\");
+		ExpandEnvironmentStrings(buffer, system32Path, MAX_PATH);
+		return system32Path;
+	}
 	case 95: {
 		WCHAR buffer[MAX_PATH];
 		wcscpy_s(buffer, L"%SystemRoot%");
@@ -1341,6 +1361,38 @@ M_API void MListDrawItem(HANDLE hTheme, HDC hdc, int x, int y, int w, int h, int
 		break;
 	}
 }
+//Theme draw menu
+M_API void MMenuDrawItem(HANDLE hTheme, HDC hdc, int x, int y, int w, int h, int state, BOOL enabled)
+{
+	if (hTheme)
+	{
+		RECT rc;
+		rc.left = x;
+		rc.top = y;
+		rc.right = x + w;
+		rc.bottom = y + h;
+		switch (state)
+		{
+		case M_DRAW_MENU_HOT:
+			DrawThemeBackground(hTheme, hdc, MENU_POPUPITEM, enabled ? MPI_HOT : MPI_DISABLEDHOT, &rc, &rc);
+			break;
+		case M_DRAW_MENU_CHECK:
+			DrawThemeBackground(hTheme, hdc, MENU_POPUPCHECK, enabled ? MC_CHECKMARKNORMAL : MC_CHECKMARKDISABLED, &rc, &rc);
+			break;
+		case M_DRAW_MENU_CHECK_BACKGROUND:
+			DrawThemeBackground(hTheme, hdc, MENU_POPUPCHECKBACKGROUND, enabled ? MCB_NORMAL : MCB_DISABLED, &rc, &rc);
+			break;
+		case M_DRAW_MENU_RADIO:
+			DrawThemeBackground(hTheme, hdc, MENU_POPUPCHECK, enabled ? MC_BULLETNORMAL : MC_BULLETDISABLED, &rc, &rc);
+			break;
+		case M_DRAW_MENU_SUB:
+			DrawThemeBackground(hTheme, hdc, MENU_POPUPSUBMENU, enabled ? MSM_NORMAL : MSM_DISABLED, &rc, &rc);
+			break;
+
+		}
+	}
+}
+
 
 M_CAPI(void) MListViewSetColumnSortArrow(HWND hListHeader, int index, BOOL isUp, BOOL no) {
 	HDITEM item = { 0 };
@@ -1384,15 +1436,11 @@ void MAppWmCommandTools(WPARAM wParam)
 {
 	switch (wParam)
 	{
-	case IDC_SOFTACT_SHOWDRIVER_LOADERTOOL: 
-		MAppMainCall(M_CALLBACK_LOADDRIVER_TOOL, GetDesktopWindow(), 0);
-		break;
-	case IDC_SOFTACT_SHOWSPY:
-		MAppMainCall(M_CALLBACK_SPY_TOOL, GetDesktopWindow(), 0);
-		break;
-	case IDC_SOFTACT_SHOWFILETOOL:
-		MAppMainCall(M_CALLBACK_FILE_TOOL, 0, 0);
-		break;
+	case IDC_SOFTACT_SHOWDRIVER_LOADERTOOL:  MAppMainCall(M_CALLBACK_LOADDRIVER_TOOL, GetDesktopWindow(), 0); break;
+	case IDM_VIEW_WINDOW:
+	case IDC_SOFTACT_SHOWSPY: MAppMainCall(M_CALLBACK_SPY_TOOL, GetDesktopWindow(), 0); break;
+	case IDC_SOFTACT_SHOWFILETOOL: MAppMainCall(M_CALLBACK_FILE_TOOL, 0, 0); break;
+	case IDM_VIEW_TCP_CONS: MAppMainCall(M_CALLBACK_VIEW_TCP, 0, 0); break;
 	default:
 		break;
 	}
@@ -1427,15 +1475,7 @@ LRESULT CALLBACK MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		break;
 	}
 	case WM_S_MAINTHREAD_ACT: {
-		switch (wParam)
-		{
-		case M_MTMSG_COSCLOSE: {
-			M_LOG_CloseConsole(FALSE);
-			break;
-		}
-		default:
-			break;
-		}
+		MAppMainThreadCallProc(hWnd, wParam, lParam);
 		break;
 	}
 	case WM_S_MESSAGE_EXIT: {
@@ -2010,6 +2050,8 @@ LRESULT CALLBACK MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		case ID_MENUDRIVER_START_DISABLE: {
 			return M_SU_EnumKernelModuls_HandleWmCommand(wParam);
 		}
+		case IDM_VIEW_WINDOW:
+		case IDM_VIEW_TCP_CONS:
 		case IDC_SOFTACT_SHOWSPY:
 		case IDC_SOFTACT_SHOWFILETOOL:
 		case IDC_SOFTACT_SHOWDRIVER_LOADERTOOL: {
@@ -2233,7 +2275,20 @@ LRESULT CALLBACK MProcListHeaderWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 	}
 	return procListHeaderWndProc(hWnd, msg, wParam, lParam);
 }
-
+LRESULT CALLBACK MAppMainThreadCallProc(HWND hWnd, WPARAM wParam, LPARAM lParam)
+{
+	switch (wParam)
+	{
+	case M_MTMSG_COSCLOSE:  M_LOG_CloseConsole(FALSE); break;
+	case M_MTMSG_MAIN_EXIT: SendMessage(hWnd, WM_COMMAND, IDM_TEXIT,NULL); break;
+	case M_MTMSG_MAIN_REBOOT: SendMessage(hWnd, WM_COMMAND, IDM_TREBOT, NULL); break;
+	case M_MTMSG_MAIN_RUN_APP_CMD: hWorkerCallBack(M_CALLBACK_RUN_APP_CMD, NULL, NULL); SetEvent((HANDLE)lParam); break;
+	case M_MTMSG_MAIN_SHOW_STAT: MShowProgramStats(); break;
+	default:
+		break;
+	}
+	return 0;
+}
 
 //Dialog boxs
 int MShowMessageDialog(HWND hwnd, LPWSTR text, LPWSTR title, LPWSTR instruction, int ico, int button)

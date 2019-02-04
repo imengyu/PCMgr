@@ -1,5 +1,6 @@
 ﻿using System;
 using static PCMgr.NativeMethods;
+using static PCMgr.NativeMethods.LogApi;
 using System.Windows.Forms;
 using System.Drawing;
 using PCMgr.Ctls;
@@ -27,7 +28,7 @@ namespace PCMgr.Main
         {
             ShowHiddenFiles = GetConfigBool("ShowHiddenFiles", "AppSetting");
             HighlightNoSystem = GetConfigBool("HighLightNoSystetm", "Configure", false);
-            formMain.IsSimpleView = GetConfigBool("SimpleView", "AppSetting", true);
+            
 
             int iSplitterDistanceperf = 0;
             if (int.TryParse(GetConfig("SplitterDistancePerf", "AppSetting", "0"), out iSplitterDistanceperf) && iSplitterDistanceperf > 0)
@@ -36,6 +37,8 @@ namespace PCMgr.Main
             LoadNativeSettings();
             LoadLastPos();
             LoadHotKey();
+
+            formMain.IsSimpleView = GetConfigBool("SimpleView", "AppSetting", true);
         }
         public void SaveSettings()
         {
@@ -52,10 +55,15 @@ namespace PCMgr.Main
         private void LoadNativeSettings()
         {
             MFM_SetShowHiddenFiles(ShowHiddenFiles);
+
+            MAppWorkCall3(181, IntPtr.Zero, IntPtr.Zero);
+            MAppWorkCall3(183, formMain.Handle, IntPtr.Zero);
+            MAppWorkCall3(164, IntPtr.Zero, IntPtr.Zero);
+            MAppWorkCall3(163, IntPtr.Zero, IntPtr.Zero);
+
             MAppWorkCall3(194, IntPtr.Zero, GetConfigBool("TopMost", "AppSetting", false) ? new IntPtr(1) : IntPtr.Zero);
             MAppWorkCall3(195, IntPtr.Zero, GetConfigBool("CloseHideToNotfication", "AppSetting", false) ? new IntPtr(1) : IntPtr.Zero);
             MAppWorkCall3(196, IntPtr.Zero, GetConfigBool("MinHide", "AppSetting", false) ? new IntPtr(1) : IntPtr.Zero);
-            MAppWorkCall3(162, IntPtr.Zero, GetConfigBool("MainGrouping", "AppSetting", false) ? new IntPtr(1) : IntPtr.Zero);
             MAppWorkCall3(156, IntPtr.Zero, GetConfigBool("AlwaysOnTop", "AppSetting", false) ? new IntPtr(1) : IntPtr.Zero);
             MAppWorkCall3(206, IntPtr.Zero, new IntPtr(GetConfig("TerProcFun", "Configure", "PspTerProc") == "ApcPspTerProc" ? 1 : 0));
         }
@@ -217,6 +225,49 @@ namespace PCMgr.Main
             foreach (ColumnHeader he in formMain.listService.Columns)
                 s += "#" + he.Width;
             SetConfig("ListServiceWidths", "AppSetting", s);
+        }
+
+        public static void DebugCmd(string[] cmd, uint size)
+        {
+            if (size >= 2)
+            {
+                string cmd1 = cmd[1];
+                switch (cmd1)
+                {
+                    case "getapp":
+                        if (size >= 3) LogText(GetConfig(cmd[2], "AppSetting", ""));
+                        else LogErr("Bad pararm 0 [string].");
+                        break;
+                    case "setapp":
+                        if (size >= 3) {
+                            if (size >= 4)
+                                SetConfig(cmd[2], cmd[3], "");
+                            else LogErr("Bad pararm 2 [string].");
+                        }
+                        else LogErr("Bad pararm 0 [string].");
+                        break;
+                    case "getcfg":
+                        if (size >= 3) LogText(GetConfig(cmd[2], "Configure", ""));
+                        else LogErr("Bad pararm 0 [string].");
+                        break;
+                    case "setcfg":
+                        if (size >= 3)
+                        {
+                            if (size >= 4)
+                                SetConfig(cmd[2], "Configure", cmd[3]);
+                            else LogErr("Bad pararm 2 [string].");
+                        }
+                        else LogErr("Bad pararm 0 [string].");
+                        break;
+                    case "?":
+                    case "help":
+                        LogText("app lg commands help: \n" +
+                            "\nget(app/cfg) [string:key] get setting item for app/cfg" +
+                            "\nset(app/cfg) [string:key] [string:values] set setting item for app/cfg");
+                        break;
+                }
+            }
+            else LogErr("Bad pararm 0 [string].");
         }
     }
 }

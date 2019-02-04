@@ -12,9 +12,18 @@ typedef struct _SERVICE_STORAGE {
 } SERVICE_STORAGE, *LPSERVICE_STORAGE;
 
 //枚举服务回调
-typedef void(__cdecl*EnumServicesCallBack)(LPWSTR dspName, LPWSTR scName,
-	DWORD scType, DWORD currentState, DWORD dwProcessId,	BOOL sysSc, DWORD dwStartType,
-	LPWSTR lpBinaryPathName, LPWSTR lpLoadOrderGroup);
+typedef void(__cdecl*EnumServicesCallBack)(
+	LPWSTR dspName, //显示名称
+	LPWSTR scName,//服务名称
+	DWORD scType, //服务类型
+	DWORD currentState, //当前状态
+	DWORD dwProcessId,	//对应进程pid
+	BOOL sysSc, 
+	DWORD dwStartType,//启动类型
+	LPWSTR lpBinaryPathName, //二进制文件路径
+	LPWSTR lpLoadOrderGroup, //组
+	BOOL add//添加为TRUE刷新为FALSE
+	);
 
 //更改服务的启动类型
 //    scname：服务名称

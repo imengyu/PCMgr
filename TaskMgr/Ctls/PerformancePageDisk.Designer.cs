@@ -88,30 +88,31 @@
             // 
             // contextMenuStrip
             // 
+            resources.ApplyResources(this.contextMenuStrip, "contextMenuStrip");
             this.contextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.图形摘要视图ToolStripMenuItem,
             this.查看ToolStripMenuItem,
             this.复制ToolStripMenuItem});
             this.contextMenuStrip.Name = "contextMenuStrip";
-            resources.ApplyResources(this.contextMenuStrip, "contextMenuStrip");
+            this.toolTip1.SetToolTip(this.contextMenuStrip, resources.GetString("contextMenuStrip.ToolTip"));
             this.contextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip_Opening);
             // 
             // 图形摘要视图ToolStripMenuItem
             // 
+            resources.ApplyResources(this.图形摘要视图ToolStripMenuItem, "图形摘要视图ToolStripMenuItem");
             this.图形摘要视图ToolStripMenuItem.CheckOnClick = true;
             this.图形摘要视图ToolStripMenuItem.Name = "图形摘要视图ToolStripMenuItem";
-            resources.ApplyResources(this.图形摘要视图ToolStripMenuItem, "图形摘要视图ToolStripMenuItem");
             this.图形摘要视图ToolStripMenuItem.Click += new System.EventHandler(this.图形摘要视图ToolStripMenuItem_Click);
             // 
             // 查看ToolStripMenuItem
             // 
-            this.查看ToolStripMenuItem.Name = "查看ToolStripMenuItem";
             resources.ApplyResources(this.查看ToolStripMenuItem, "查看ToolStripMenuItem");
+            this.查看ToolStripMenuItem.Name = "查看ToolStripMenuItem";
             // 
             // 复制ToolStripMenuItem
             // 
-            this.复制ToolStripMenuItem.Name = "复制ToolStripMenuItem";
             resources.ApplyResources(this.复制ToolStripMenuItem, "复制ToolStripMenuItem");
+            this.复制ToolStripMenuItem.Name = "复制ToolStripMenuItem";
             this.复制ToolStripMenuItem.Click += new System.EventHandler(this.复制ToolStripMenuItem_Click);
             // 
             // panelGrid
@@ -121,6 +122,7 @@
             this.panelGrid.Controls.Add(this.performanceGridDiskTime);
             this.panelGrid.Controls.Add(this.performanceGridSpeed);
             this.panelGrid.Name = "panelGrid";
+            this.toolTip1.SetToolTip(this.panelGrid, resources.GetString("panelGrid.ToolTip"));
             // 
             // performanceTitle1
             // 
@@ -128,15 +130,16 @@
             this.performanceTitle1.Name = "performanceTitle1";
             this.performanceTitle1.SmallTitleFont = new System.Drawing.Font("微软雅黑", 12F);
             this.performanceTitle1.TitleFont = new System.Drawing.Font("微软雅黑", 18F);
+            this.toolTip1.SetToolTip(this.performanceTitle1, resources.GetString("performanceTitle1.ToolTip"));
             this.performanceTitle1.MouseClick += new System.Windows.Forms.MouseEventHandler(this.PerformancePageDisk_MouseClick);
             this.performanceTitle1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.PerformancePageDisk_MouseDoubleClick);
             this.performanceTitle1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.PerformancePageDisk_MouseDown);
             // 
             // performanceInfos
             // 
+            resources.ApplyResources(this.performanceInfos, "performanceInfos");
             this.performanceInfos.ColorText = System.Drawing.Color.Black;
             this.performanceInfos.ColorTitle = System.Drawing.Color.Gray;
-            resources.ApplyResources(this.performanceInfos, "performanceInfos");
             this.performanceInfos.FontText = new System.Drawing.Font("微软雅黑", 9F);
             this.performanceInfos.FontTextSpeical = new System.Drawing.Font("微软雅黑", 15F);
             this.performanceInfos.FontTitle = new System.Drawing.Font("微软雅黑", 9F);
@@ -145,6 +148,7 @@
             this.performanceInfos.MaxSpeicalItemsWidth = 300;
             this.performanceInfos.MaxSpeicalItemsWidthLimit = 300;
             this.performanceInfos.Name = "performanceInfos";
+            this.toolTip1.SetToolTip(this.performanceInfos, resources.GetString("performanceInfos.ToolTip"));
             this.performanceInfos.MouseClick += new System.Windows.Forms.MouseEventHandler(this.PerformancePageDisk_MouseClick);
             this.performanceInfos.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.PerformancePageDisk_MouseDoubleClick);
             // 
@@ -156,7 +160,9 @@
             this.Controls.Add(this.performanceInfos);
             this.Controls.Add(this.panelGrid);
             this.Name = "PerformancePageDisk";
+            this.toolTip1.SetToolTip(this, resources.GetString("$this.ToolTip"));
             this.Load += new System.EventHandler(this.PerformancePageDisk_Load);
+            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.PerformancePageDisk_KeyUp);
             this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.PerformancePageDisk_MouseClick);
             this.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.PerformancePageDisk_MouseDoubleClick);
             this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.PerformancePageDisk_MouseDown);

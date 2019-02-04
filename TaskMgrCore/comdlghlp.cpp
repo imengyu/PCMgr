@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "comdlghlp.h"
+#include "loghlp.h"
 #include <CommDlg.h>
 #include <Shlobj.h>
 #include <Shobjidl.h>
@@ -30,6 +31,7 @@ BOOL M_DLG_SaveFileSingal(HWND hWnd, LPWSTR startDir, LPWSTR title, LPWSTR fileF
 			wcscpy_s(strrs, bufsize, szFile);
 			return TRUE;
 		}
+		else LogErr2(L"GetSaveFileName failed : %d", GetLastError());
 	}
 	return 0;
 }
@@ -59,6 +61,7 @@ BOOL M_DLG_ChooseFileSingal(HWND hWnd, LPWSTR startDir, LPWSTR title, LPWSTR fil
 			wcscpy_s(strrs, bufsize, szFile);
 			return TRUE;
 		}
+		else LogErr2(L"GetOpenFileName failed : %d", GetLastError());
 	}
 	return 0;
 }
@@ -97,6 +100,7 @@ BOOL M_DLG_ChooseDir(HWND hWnd, LPWSTR startDir, LPWSTR title, LPWSTR strrs, siz
 			wcscpy_s(strrs, bufsize, pathrs);
 			return TRUE;
 		}
+		else LogErr2(L"Create FileOpenDialog instance failed with HRESULT : 0x%x", hr);
 	}
 	return FALSE;
 }

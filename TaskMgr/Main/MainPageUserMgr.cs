@@ -121,7 +121,7 @@ namespace PCMgr.Main
             {
                 if (listUsers.SelectedItem != null && !listUsers.SelectedItem.IsChildItem && listUsers.SelectedChildItem == null)
                 {
-                    Point p = listUsers.GetiItemPoint(listUsers.SelectedItem);
+                    Point p = listUsers.GetItemPoint(listUsers.SelectedItem);
                     p = listUsers.PointToScreen(p);
 
                     MAppWorkCall3(212, new IntPtr(p.X), new IntPtr(p.Y));

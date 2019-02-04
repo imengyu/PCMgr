@@ -18,42 +18,14 @@ HWND hListTree;
 
 WCHAR currentOpenPEFile[MAX_PATH];
 
-BOOL MAppVPECheck(LPBYTE lpBaseAddress) {
-	//check MZ signature
-	BOOL bMZ = FALSE;
-	BYTE *bMZsig = (BYTE*)lpBaseAddress;
-	if ('M' == *bMZsig)
-	{
-		bMZsig++;
-		if ('Z' == *bMZsig)
-		{
-			bMZ = TRUE;
-		}
-	}
-
-	//check PE signature
-	BOOL bPE = FALSE;
-	BYTE  *bPEoffset = (BYTE*)lpBaseAddress + sizeof(IMAGE_DOS_HEADER) - 4;
-	BYTE *bPEsig = (BYTE*)lpBaseAddress + (*bPEoffset);
-	if ('P' == *bPEsig)
-	{
-		bPEsig++;
-		if ('E' == *bPEsig)
-			bPE = TRUE;
-	}
-	return (bMZ && bPE);
-}
-
 VOID AddAStringItem(HWND hList, LPWSTR str)
 {
 	LVITEM li = { 0 };
 	li.mask = LVIF_TEXT;
 	li.iItem = ListView_GetItemCount(hList);
-	li.iSubItem = 0;
 	li.pszText = L"";
 	li.cchTextMax = 1;
 	ListView_InsertItem(hList, &li);
-	li.iItem = 0;
 	li.iSubItem = 1;
 	li.pszText = str;
 	li.cchTextMax = static_cast<int>(wcslen(str) + 1);
@@ -61,6 +33,7 @@ VOID AddAStringItem(HWND hList, LPWSTR str)
 }
 VOID Add2StringItem(HWND hList, LPWSTR str, LPWSTR str2) {
 	LVITEM li = { 0 };
+	li.iItem = ListView_GetItemCount(hList);
 	li.mask = LVIF_TEXT;
 	li.pszText = str;
 	li.cchTextMax = static_cast<int>(wcslen(str) + 1);
@@ -69,6 +42,25 @@ VOID Add2StringItem(HWND hList, LPWSTR str, LPWSTR str2) {
 	li.pszText = str2;
 	li.cchTextMax = static_cast<int>(wcslen(str2) + 1);
 	ListView_SetItem(hList, &li);
+}
+
+DWORD RvaToOffset(PIMAGE_NT_HEADERS pImageNtHeaders, DWORD dwRva)
+{
+	PIMAGE_SECTION_HEADER pImageSectionHeader;
+	DWORD dwCount;
+	DWORD dwFileOffset;
+	pImageSectionHeader = IMAGE_FIRST_SECTION(pImageNtHeaders);
+	dwFileOffset = dwRva;
+	for (dwCount = 0; dwCount < pImageNtHeaders->FileHeader.NumberOfSections; dwCount++)
+	{
+		if (dwRva >= pImageSectionHeader[dwCount].VirtualAddress && dwRva < (pImageSectionHeader[dwCount].VirtualAddress + pImageSectionHeader[dwCount].SizeOfRawData))
+		{
+			dwFileOffset -= pImageSectionHeader[dwCount].VirtualAddress;
+			dwFileOffset += pImageSectionHeader[dwCount].PointerToRawData;
+			return dwFileOffset;
+		}
+	}
+	return 0;
 }
 
 VOID OpenPEFile(HWND hDlg)
@@ -94,105 +86,74 @@ VOID LoadImportTables(HWND hDlg)
 		return;
 	}
 
-	HANDLE hFile = CreateFile(currentOpenPEFile, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	HANDLE hFile = NULL;
+	HANDLE hFileMapping = NULL;
+	LPBYTE lpBaseAddress = NULL;
+
+	hFile = CreateFile(currentOpenPEFile, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hFile == INVALID_HANDLE_VALUE)
 	{
-		WCHAR err[32]; swprintf_s(err, L"Create file failed : %d", GetLastError());
-		AddAStringItem(hListTables, err);
+		WCHAR str[32];
+		swprintf_s(str, L"Create file failed : %d", GetLastError());
+		AddAStringItem(hListTables, str);
+
 		return;
 	}
 
-	HANDLE hFileMapping = CreateFileMapping(hFile, NULL, PAGE_READONLY, 0, 0, NULL);
+	hFileMapping = CreateFileMapping(hFile, NULL, PAGE_READONLY, 0, 0, NULL);
 	if (hFileMapping == NULL || hFileMapping == INVALID_HANDLE_VALUE)
 	{
-		WCHAR err[64]; swprintf_s(err, L"Could not create file mapping object (%d)", GetLastError());
-		AddAStringItem(hListTables, err);
-		CloseHandle(hFile);
-		return;
+		WCHAR str[55];
+		swprintf_s(str, L"Could not create file mapping object (%d)", GetLastError());
+		AddAStringItem(hListTables, str);
+
+		goto UNMAP_AND_EXIT;
 	}
 
-	LPBYTE lpBaseAddress = (LPBYTE)MapViewOfFile(hFileMapping, FILE_MAP_READ, 0, 0, 0);
+	lpBaseAddress = (LPBYTE)MapViewOfFile(hFileMapping, FILE_MAP_READ, 0, 0, 0);
 	if (lpBaseAddress == NULL)
 	{
-		WCHAR err[64]; swprintf_s(err, L"Could not map view of file (%d)", GetLastError());
-		AddAStringItem(hListTables, err);
-		CloseHandle(hFileMapping);
-		CloseHandle(hFile);
-		return;
-	}
-	if (!MAppVPECheck(lpBaseAddress)) {
-		AddAStringItem(hListTables, L"This is not a valid PE file.");
+		WCHAR str[32];
+		swprintf_s(str, L"Could not map view of file (%d)", GetLastError());
+		AddAStringItem(hListTables, str);
 		goto UNMAP_AND_EXIT;
 	}
 
 	PIMAGE_DOS_HEADER pDosHeader = (PIMAGE_DOS_HEADER)lpBaseAddress;
 	PIMAGE_NT_HEADERS pNtHeaders = (PIMAGE_NT_HEADERS)(lpBaseAddress + pDosHeader->e_lfanew);
 
-	//导入表的rva：0x2a000;
 	DWORD Rva_import_table = pNtHeaders->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress;
 	if (Rva_import_table == 0)
 	{
-		AddAStringItem(hListTables, L"No import table!");
+		AddAStringItem(hListTables, L"No import table!"); 
 		goto UNMAP_AND_EXIT;
 	}
 
-	//这个虽然是内存地址，但是减去文件开头的地址，就是文件地址了
-	//这个地址可以直接从里面读取你想要的东西了
-	PIMAGE_IMPORT_DESCRIPTOR pImportTable = (PIMAGE_IMPORT_DESCRIPTOR)ImageRvaToVa(
-		pNtHeaders,
-		lpBaseAddress,
-		Rva_import_table,
-		NULL
-	);
-
-	//减去内存映射的首地址，就是文件地址了。。（很简单吧）
-	//printf("FileAddress Of ImportTable: %p\n", ((DWORD)pImportTable - (DWORD)lpBaseAddress));
-
-	//现在来到了导入表的面前：IMAGE_IMPORT_DESCRIPTOR 数组（以0元素为终止）
-	//定义表示数组结尾的null元素！
+	PIMAGE_IMPORT_DESCRIPTOR pImportTable = (PIMAGE_IMPORT_DESCRIPTOR)ImageRvaToVa(pNtHeaders, lpBaseAddress, Rva_import_table, NULL);
 	IMAGE_IMPORT_DESCRIPTOR null_iid;
 	IMAGE_THUNK_DATA null_thunk;
 	memset(&null_iid, 0, sizeof(null_iid));
 	memset(&null_thunk, 0, sizeof(null_thunk));
 
-	//每个元素代表了一个引入的DLL。
 	int i, j;
 	for (i = 0; memcmp(pImportTable + i, &null_iid, sizeof(null_iid)) != 0; i++)
-	{		
-		//拿到了DLL的名字
-		//LPCSTR: 就是 const char*
-		LPCSTR szDllName = (LPCSTR)ImageRvaToVa(
-			pNtHeaders, lpBaseAddress,
-			pImportTable[i].Name, //DLL名称的RVA
-			NULL);
-
-		//现在去看看从该DLL中引入了哪些函数
-		//我们来到该DLL的 IMAGE_TRUNK_DATA 数组（IAT：导入地址表）前面
-		PIMAGE_THUNK_DATA32 pThunk = (PIMAGE_THUNK_DATA32)ImageRvaToVa(
-			pNtHeaders, lpBaseAddress,
-			pImportTable[i].OriginalFirstThunk, //【注意】这里使用的是OriginalFirstThunk
-			NULL);
+	{
+		LPCSTR szDllName = (LPCSTR)ImageRvaToVa(pNtHeaders, lpBaseAddress, pImportTable[i].Name, NULL);
+		PIMAGE_THUNK_DATA32 pThunk = (PIMAGE_THUNK_DATA32)ImageRvaToVa(pNtHeaders, lpBaseAddress, pImportTable[i].OriginalFirstThunk, NULL);
 
 		for (j = 0; memcmp(pThunk + j, &null_thunk, sizeof(null_thunk)) != 0; j++)
 		{
-			//这里通过RVA的最高位判断函数的导入方式，
-			//如果最高位为1，按序号导入，否则按名称导入
 			if (pThunk[j].u1.AddressOfData & IMAGE_ORDINAL_FLAG32)
 			{
 				WCHAR msg[32];
 				WCHAR number[32];
 				swprintf_s(msg, L"#%d %hs", j, szDllName);
-				swprintf_s(number, L"%ld",pThunk[j].u1.AddressOfData & 0xffff);
+				swprintf_s(number, L"%ld", pThunk[j].u1.AddressOfData & 0xffff);
 				Add2StringItem(hListTables, msg, number);
 			}
 			else
 			{
-				//按名称导入，我们再次定向到函数序号和名称
-				//注意其地址不能直接用，因为仍然是RVA！
-				PIMAGE_IMPORT_BY_NAME pFuncName = (PIMAGE_IMPORT_BY_NAME)ImageRvaToVa(
-					pNtHeaders, lpBaseAddress,
-					pThunk[j].u1.AddressOfData,
-					NULL);
+				PIMAGE_IMPORT_BY_NAME pFuncName = (PIMAGE_IMPORT_BY_NAME)ImageRvaToVa(pNtHeaders, lpBaseAddress, pThunk[j].u1.AddressOfData, NULL);
 
 				WCHAR msg[32];
 				WCHAR number[64];
@@ -203,9 +164,9 @@ VOID LoadImportTables(HWND hDlg)
 		}
 	}
 UNMAP_AND_EXIT:
-	UnmapViewOfFile(lpBaseAddress);
-	CloseHandle(hFileMapping);
-	CloseHandle(hFile);
+	if (lpBaseAddress) UnmapViewOfFile(lpBaseAddress);
+	if (hFileMapping) CloseHandle(hFileMapping);
+	if (hFile) CloseHandle(hFile);
 }
 VOID LoadExportTables(HWND hDlg)
 {
@@ -218,63 +179,106 @@ VOID LoadExportTables(HWND hDlg)
 	{
 		AddAStringItem(hListTables, L"File was not exist");
 		return;
-	}		
+	}
 
-	HANDLE hFile = CreateFile(currentOpenPEFile, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	HANDLE hFile = NULL;
+	HANDLE hFileMapping = NULL;
+	LPBYTE lpBaseAddress = NULL;
+
+	hFile = CreateFile(currentOpenPEFile, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hFile == INVALID_HANDLE_VALUE)
 	{
-		WCHAR err[32]; swprintf_s(err, L"Create file failed : %d", GetLastError());
-		AddAStringItem(hListTables, err);
+		WCHAR str[32];
+		swprintf_s(str, L"Create file failed : %d", GetLastError());
+		AddAStringItem(hListTables, str);
 		return;
 	}
-
-	HANDLE hFileMapping = CreateFileMapping(hFile, NULL, PAGE_READONLY, 0, 0, NULL);
+	hFileMapping = CreateFileMapping(hFile, NULL, PAGE_READONLY, 0, 0, NULL);
 	if (hFileMapping == NULL || hFileMapping == INVALID_HANDLE_VALUE)
 	{
-		WCHAR err[64]; swprintf_s(err, L"Could not create file mapping object (%d)", GetLastError());
-		AddAStringItem(hListTables, err);
-		CloseHandle(hFile);
-		return;
-	}
-
-	//内存映射文件的基址
-	LPBYTE lpBaseAddress = (LPBYTE)MapViewOfFile(hFileMapping, FILE_MAP_READ, 0, 0, 0);
-	if (lpBaseAddress == NULL)
-	{
-		WCHAR err[64]; swprintf_s(err, L"Could not map view of file (%d)", GetLastError());
-		AddAStringItem(hListTables, err);
-		CloseHandle(hFileMapping);
-		CloseHandle(hFile);
-		return;
-	}
-	if (!MAppVPECheck(lpBaseAddress)) {
-		AddAStringItem(hListTables, L"This is not a valid PE file.");
+		WCHAR str[64];
+		swprintf_s(str, L"Could not create file mapping object (%d)", GetLastError());
+		AddAStringItem(hListTables, str);
 		goto UNMAP_AND_EXIT;
 	}
 
-	PIMAGE_DOS_HEADER pDosHeader = (PIMAGE_DOS_HEADER)lpBaseAddress;
-	PIMAGE_NT_HEADERS pNtHeader = (PIMAGE_NT_HEADERS)((ULONG_PTR)lpBaseAddress + pDosHeader->e_lfanew);
-	PIMAGE_OPTIONAL_HEADER pOptionalHeader = (PIMAGE_OPTIONAL_HEADER)((PBYTE)lpBaseAddress + pDosHeader->e_lfanew + offsetof(IMAGE_NT_HEADERS, OptionalHeader));
-	PIMAGE_EXPORT_DIRECTORY pExportDirectory = (PIMAGE_EXPORT_DIRECTORY)((PBYTE)lpBaseAddress + pOptionalHeader->DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress);
-	PDWORD aryAddressOfNames = (PDWORD)((PBYTE)lpBaseAddress + pExportDirectory->AddressOfNames);
-	DWORD dwNumberOfNames = pExportDirectory->NumberOfNames;
-	if (dwNumberOfNames == 0)AddAStringItem(hListTables, L"This PE File has not export table");
-	else {
-		for (UINT i = 0; i < dwNumberOfNames; i++)
-		{
-			char *strFunction = (char *)(aryAddressOfNames[i] + (ULONG_PTR)lpBaseAddress);
-			WCHAR msg[32];
-			WCHAR number[32];
-			swprintf_s(msg, L"#%d", i);
-			swprintf_s(number, L"%hs", strFunction);
-			Add2StringItem(hListTables, msg, number);
-		}
+	lpBaseAddress = (LPBYTE)MapViewOfFile(hFileMapping, FILE_MAP_READ, 0, 0, 0);
+	if (lpBaseAddress == NULL)
+	{
+		WCHAR str[64];
+		swprintf_s(str, L"Could not map view of file (%d)", GetLastError());
+		AddAStringItem(hListTables, str);
+		goto UNMAP_AND_EXIT;
+	}
+
+	PIMAGE_DOS_HEADER pImageDOSHeader;
+	PIMAGE_NT_HEADERS pImageNTHeader;
+	PIMAGE_EXPORT_DIRECTORY pImageExportDirectory;
+	DWORD dwCount;
+	DWORD dwCount2;
+	DWORD dwFileOffset;
+	DWORD dwOrdinals;
+	DWORD dwFunctions;
+	char *szFunctionName;
+	DWORD dwNames;
+	PDWORD dwName;
+	PDWORD dwFunction;
+	PWORD dwOrdinal;
+
+	pImageDOSHeader = (PIMAGE_DOS_HEADER)lpBaseAddress;
+	if (pImageDOSHeader->e_magic != IMAGE_DOS_SIGNATURE)
+		goto UNMAP_AND_EXIT;
+	pImageNTHeader = (PIMAGE_NT_HEADERS)((PUCHAR)lpBaseAddress + pImageDOSHeader->e_lfanew);
+	if (pImageNTHeader->Signature != IMAGE_NT_SIGNATURE)
+		goto UNMAP_AND_EXIT;
+	if (!(pImageNTHeader->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress))
+	{
+		AddAStringItem(hListTables, L"No export function!");
+		goto UNMAP_AND_EXIT;
+	}
+	//导出表文件偏移
+	dwFileOffset = RvaToOffset(pImageNTHeader, pImageNTHeader->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress);
+	pImageExportDirectory = (PIMAGE_EXPORT_DIRECTORY)((PUCHAR)lpBaseAddress + dwFileOffset);
+	dwCount = pImageExportDirectory->NumberOfFunctions;
+	dwOrdinals = RvaToOffset(pImageNTHeader, pImageExportDirectory->AddressOfNameOrdinals);
+	dwFunctions = RvaToOffset(pImageNTHeader, pImageExportDirectory->AddressOfFunctions);
+	dwNames = RvaToOffset(pImageNTHeader, pImageExportDirectory->AddressOfNames);
+	for (dwCount2 = 0; dwCount2 < dwCount; dwCount2++)
+	{
+		dwOrdinal = (PWORD)((PUCHAR)lpBaseAddress + dwOrdinals + dwCount2 * 2); // 地址
+		dwFunction = (PDWORD)((PUCHAR)lpBaseAddress + dwFunctions + dwCount2 * 4); // 地址
+		dwName = (PDWORD)((PUCHAR)lpBaseAddress + dwNames + dwCount2 * 4); //地址
+		szFunctionName = ((PCHAR)lpBaseAddress + RvaToOffset(pImageNTHeader, *dwName));
+
+		WCHAR number[32];
+		WCHAR fun[256];
+
+		swprintf_s(number, L"#%d 0x%04X", *dwOrdinal, *dwFunction);
+		if (dwCount2 == *dwOrdinal) 
+			swprintf_s(fun, L"%hs", szFunctionName);
+
+		Add2StringItem(hListTables, number, fun);
 	}
 
 UNMAP_AND_EXIT:
-	UnmapViewOfFile(lpBaseAddress);
-	CloseHandle(hFileMapping);
-	CloseHandle(hFile);
+	if (lpBaseAddress) UnmapViewOfFile(lpBaseAddress);
+	if (hFileMapping) CloseHandle(hFileMapping);
+	if (hFile) CloseHandle(hFile);
+}
+VOID LoadPEInfo(HWND hDlg)
+{
+	ListView_DeleteAllItems(hListTables);
+	if (StrEqual(currentOpenPEFile, L"")) {
+		AddAStringItem(hListTables, L"Please open a PE File first");
+		return;
+	}
+	if (!MFM_FileExist(currentOpenPEFile))
+	{
+		AddAStringItem(hListTables, L"File was not exist");
+		return;
+	}
+
+
 }
 
 INT_PTR CALLBACK VPEDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -307,6 +311,11 @@ INT_PTR CALLBACK VPEDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 		SendMessage(hListTree, TVM_INSERTITEM, 0, (LPARAM)&tvs);
 		tvs.item.mask = TVIF_TEXT;
 		tvs.hInsertAfter = TVI_LAST;
+		tvs.item.pszText = L"PE Info";
+		tvs.hParent = NULL;
+		SendMessage(hListTree, TVM_INSERTITEM, 0, (LPARAM)&tvs);
+		tvs.item.mask = TVIF_TEXT;
+		tvs.hInsertAfter = TVI_LAST;
 		tvs.item.pszText = L"PE Import Table";
 		tvs.hParent = NULL;	
 		SendMessage(hListTree, TVM_INSERTITEM, 0, (LPARAM)&tvs);
@@ -321,13 +330,16 @@ INT_PTR CALLBACK VPEDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 		tvs.hParent = NULL;
 		SendMessage(hListTree, TVM_INSERTITEM, 0, (LPARAM)&tvs);
 
-		std::wstring w = FormatString(L"View %s", currentOpenPEFile);
-		SetWindowText(hDlg, w.c_str());
+		if (!StrEmepty(currentOpenPEFile)) 
+		{
+			std::wstring w = FormatString(L"View %s", currentOpenPEFile);
+			SetWindowText(hDlg, w.c_str());
 
-		if (vImportTables)
-			LoadImportTables(hDlg);
-		else if (vExportTables)
-			LoadExportTables(hDlg);
+			if (vImportTables)
+				LoadImportTables(hDlg);
+			else if (vExportTables)
+				LoadExportTables(hDlg);
+		}
 
 		break;
 	}
@@ -370,6 +382,9 @@ INT_PTR CALLBACK VPEDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 				LoadExportTables(hDlg);
 			else if (StrEqual(buf, L"Open PE File"))
 				OpenPEFile(hDlg);
+			else if (StrEqual(buf, L"PE Info"))
+				LoadPEInfo(hDlg);
+			
 			//else if (StrEqual(buf, L"Test"))
 			//	Add2StringItem(hListTables, L"Test", L"This is a test item");
 		}
@@ -380,12 +395,12 @@ INT_PTR CALLBACK VPEDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 }
 
 
-VOID MAppVPE(LPWSTR pszFile, HWND hWnd) 
+VOID MAppVPE(LPWSTR pszFile, HWND hWnd)
 {
 
 	vImportTables = FALSE;
 	vExportTables = FALSE;
-	wcscpy_s(currentOpenPEFile, pszFile);
+	if (!StrEmepty(pszFile))  wcscpy_s(currentOpenPEFile, pszFile);
 	DialogBoxW(hInst, MAKEINTRESOURCE(IDD_PEVIEW), hWnd, VPEDlgProc);
 }
 VOID MAppVPEExp(LPWSTR pszFile, HWND hWnd)

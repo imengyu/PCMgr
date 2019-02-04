@@ -40,11 +40,13 @@ namespace PCMgr.Main
             splitContainerPerfCtls.Panel2.SizeChanged += splitContainerPerfCtls_Panel2_SizeChanged;
             performanceLeftList.SelectedtndexChanged += performanceLeftList_SelectedtndexChanged;
             performanceLeftList.MouseClick += PerformanceLeftList_MouseClick;
+            performanceLeftList.KeyUp += PerformanceLeftList_KeyUp;
             FormMain.linkLabelOpenPerfMon.LinkClicked += linkLabelOpenPerfMon_LinkClicked;
             FormMain.隐藏图形ToolStripMenuItem.Click += 隐藏图形ToolStripMenuItem_Click;
 
             base.OnLoadControlEvents();
         }
+
 
         //性能页面代码
 
@@ -105,6 +107,7 @@ namespace PCMgr.Main
         private Size lastGraphicSize = new Size();
         private Control lastGridParent = null;
         private Size lastGridSize = new Size();
+        private bool perfTrayShowed = false;
         private Size lastSize { get => FormMain.LastSize; set { FormMain.LastSize = value; } }
 
         private void splitContainerPerfCtls_Panel2_SizeChanged(object sender, EventArgs e)
@@ -147,26 +150,6 @@ namespace PCMgr.Main
                 else if (i.Checked) i.Checked = false;
             }
         }
-
-        private void Tx_Click(object sender, EventArgs e)
-        {
-            PerfItemHeader tag = null;
-            ToolStripItem item = sender as ToolStripItem;
-            if (item.Tag != null)
-            {
-                tag = (PerfItemHeader)item.Tag;
-                PerfPagesTo(tag.performancePage, tag);
-            }
-        }
-        private void Tcpu_Click(object sender, EventArgs e)
-        {
-            PerfPagesTo(0, perfItemHeaderCpu);
-        }
-        private void Tram_Click(object sender, EventArgs e)
-        {
-            PerfPagesTo(1, perfItemHeaderRam);
-        }
-
         private void SwithGraphicViewEventHandler(IPerformancePage sender)
         {
             Panel gridPanel = sender.GridPanel;
@@ -212,6 +195,29 @@ namespace PCMgr.Main
                 lastGraphicSize = Size;
                 Size = lastSize;
             }
+        }
+        private void AppKeyDown(object sender, EventArgs e)
+        {
+            ((IPerformancePage)sender).PageShowRightMenu();
+        }
+
+        private void Tx_Click(object sender, EventArgs e)
+        {
+            PerfItemHeader tag = null;
+            ToolStripItem item = sender as ToolStripItem;
+            if (item.Tag != null)
+            {
+                tag = (PerfItemHeader)item.Tag;
+                PerfPagesTo(tag.performancePage, tag);
+            }
+        }
+        private void Tcpu_Click(object sender, EventArgs e)
+        {
+            PerfPagesTo(0, perfItemHeaderCpu);
+        }
+        private void Tram_Click(object sender, EventArgs e)
+        {
+            PerfPagesTo(1, perfItemHeaderRam);
         }
 
         private void PerfPagesToNull()
@@ -305,6 +311,7 @@ namespace PCMgr.Main
             PerformancePageCpu performanceCpu = new PerformancePageCpu();
             performanceCpu.OpeningPageMenu += OpeningPageMenuEventHandler;
             performanceCpu.SwithGraphicView += SwithGraphicViewEventHandler;
+            performanceCpu.AppKeyDown += AppKeyDown;
             PerfPagesAddToCtl(performanceCpu, perf_cpu.Name);
             perfPages.Add(performanceCpu);
 
@@ -316,6 +323,7 @@ namespace PCMgr.Main
             PerformancePageRam performanceRam = new PerformancePageRam();
             performanceRam.OpeningPageMenu += OpeningPageMenuEventHandler;
             performanceRam.SwithGraphicView += SwithGraphicViewEventHandler;
+            performanceRam.AppKeyDown += AppKeyDown;
             PerfPagesAddToCtl(performanceRam, perf_ram.Name);
             perfPages.Add(performanceRam);
 
@@ -361,7 +369,8 @@ namespace PCMgr.Main
 
                     StringBuilder sb = new StringBuilder(32);
                     MPERF_GetDisksPerformanceCountersInstanceName(perfItemHeader.performanceCounterNative, sb, 32);
-                    uint diskIndex = (uint)i;// MDEVICE_GetPhysicalDriveFromPartitionLetter(sb.ToString()[2]);
+                    string index = sb.ToString().Split(' ')[0];
+                    uint diskIndex = MDEVICE_GetPhysicalDriveIndexInWMI(index);
 
                     perfItemHeader.item.Name = LanuageMgr.GetStr("TitleDisk") + sb.ToString();
                     perfItemHeader.item.BasePen = new Pen(DiskDrawColor);
@@ -372,6 +381,7 @@ namespace PCMgr.Main
                     PerformancePageDisk performancedisk = new PerformancePageDisk(perfItemHeader.performanceCounterNative, diskIndex);
                     performancedisk.OpeningPageMenu += OpeningPageMenuEventHandler;
                     performancedisk.SwithGraphicView += SwithGraphicViewEventHandler;
+                    performancedisk.AppKeyDown += AppKeyDown;
                     PerfPagesAddToCtl(performancedisk, perfItemHeader.item.Name);
                     perfPages.Add(performancedisk);
 
@@ -419,6 +429,7 @@ namespace PCMgr.Main
                         performancenet.SwithGraphicView += SwithGraphicViewEventHandler;
                         performancenet.v4 = sbIPV4.ToString();
                         performancenet.v6 = sbIPV6.ToString();
+                        performancenet.AppKeyDown += AppKeyDown;
 
                         PerfPagesAddToCtl(performancenet, perfItemHeader.item.Name);
                         perfPages.Add(performancenet);
@@ -440,6 +451,7 @@ namespace PCMgr.Main
                 Inited = true;
             }
         }
+
         private void PerfLoadSettings()
         {
             string sg = GetConfig("OldSizeGraphic", "AppSetting", "640-320");
@@ -470,6 +482,7 @@ namespace PCMgr.Main
                     netCounterMain = MPERF_GetNetworksPerformanceCounters(0);
 
                 formSpeedBall = new FormSpeedBall(FormMain);
+                formSpeedBall.VisibleChanged += FormSpeedBall_VisibleChanged;
                 formSpeedBall.Show();
                 ShowWindow(formSpeedBall.Handle, 0);
 
@@ -503,6 +516,12 @@ namespace PCMgr.Main
                 perfTrayInited = true;
             }
         }
+
+        private void FormSpeedBall_VisibleChanged(object sender, EventArgs e)
+        {
+            perfTrayShowed = formSpeedBall.Visible;
+        }
+
         public void PerfUpdate()
         {
             foreach (PerfItemHeader h in perfItems)
@@ -551,7 +570,7 @@ namespace PCMgr.Main
 
             PerfSaveSettings();
 
-            formSpeedBall.Close();
+            formSpeedBall.Invoke(new Action(formSpeedBall.Close));
         }
         public void PerfUpdateGridUnit()
         {
@@ -584,16 +603,20 @@ namespace PCMgr.Main
             if (t.Y < 0) t.Y = 2;
             if (t.Y > Screen.PrimaryScreen.Bounds.Height - formSpeedBall.Height) t.X = Screen.PrimaryScreen.Bounds.Height - formSpeedBall.Height - 2;
 
-            formSpeedBall.Location = t;
+            formSpeedBall.Invoke(new Action(delegate { formSpeedBall.Location = t; }));
         }
         public void PerfShowSpeedBall()
         {
             PerfSetTrayPos();
-            ShowWindow(formSpeedBall.Handle, 5);
+            formSpeedBall.Invoke(new Action(delegate
+           {
+               ShowWindow(formSpeedBall.Handle, 5);
+           }));
+
         }
         public void PerfDayUpdate(out double cpu, out double ram, out double disk, out double net, out bool perfsimpleGeted)
         {
-            if (IsWindowVisible(formSpeedBall.Handle))
+            if (perfTrayShowed)
             {
                 MPERF_GlobalUpdatePerformanceCounters();
 
@@ -627,7 +650,10 @@ namespace PCMgr.Main
                         + LanuageMgr.GetStr("Receive") + " " + (netreceive / 1024 * 8).ToString("0.0") + " Kbps";
                 else itemNet.Value = net.ToString("0.0") + " %";
 
-                formSpeedBall.Invalidate();
+                formSpeedBall.Invoke(new Action(delegate
+                {
+                    formSpeedBall.Invalidate();
+                }));
             }
             else
             {
@@ -661,6 +687,10 @@ namespace PCMgr.Main
                 performanceLeftList.DrawDataGrid = true;
                 FormMain.隐藏图形ToolStripMenuItem.Checked = false;
             }
+        }
+        private void PerformanceLeftList_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Apps) FormMain.contextMenuStripPerfListLeft.Show(MousePosition);
         }
     }
 }

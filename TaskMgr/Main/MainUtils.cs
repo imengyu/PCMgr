@@ -1,14 +1,48 @@
 ﻿using PCMgr.Ctls;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Drawing;
+using System.Reflection;
 
 namespace PCMgr.Main
 {
     static class MainUtils
     {
+        public static Color HexStrToColor(string s)
+        {
+            if (string.IsNullOrEmpty(s) || s == "transparent")
+                    return Color.FromArgb(0, 120, 215);
+            if (s[0] == '#')
+            {
+                s = s.Remove(0, 1);
+                int r, g, b;
+                int.TryParse(s.Substring(0, 2), out r);
+                int.TryParse(s.Substring(2, 2), out g);
+                int.TryParse(s.Substring(3, 2), out b);
+                return Color.FromArgb(r, g, b);
+            }
+            else return Color.FromName(s);
+        }
+        public static Color Uint32StrToColor(uint u)
+        {
+            if (u == 0) return Color.FromArgb(0, 120, 215);
+
+            uint r, g, b;
+            b = (u & 0xff0000) >> 16;
+            g = (u & 0x00ff00) >> 8;
+            r = (u & 0x0000ff);
+
+            return Color.FromArgb((int)r, (int)g, (int)b);
+        }
+        public static Bitmap IconToBitmap(Icon ico, int w, int h)
+        {
+            Bitmap b = new Bitmap(w, h, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            Graphics g = Graphics.FromImage(b);
+            g.DrawIcon(ico, new Rectangle(0, 0, w, h));
+            g.Dispose();
+            return b;
+        }
+
         public class PsItem
         {
             public IntPtr processItem = IntPtr.Zero;
@@ -32,12 +66,24 @@ namespace PCMgr.Main
             public UwpItem uwpItem = null;
             public string uwpFullName;
             public bool uwpRealApp = false;
+            public string uwpPackageIdName;
 
             public bool updateLock = false;
 
             public override string ToString()
             {
                 return "(" + pid + ")  " + exename + " " + exepath;
+            }
+            public string Print()
+            {
+                string s = "(" + pid + ")  " + exename + " " + exepath;
+
+                Type t = typeof(PsItem);
+                FieldInfo[] fields = t.GetFields();
+                foreach (FieldInfo field in fields)
+                    s += "\n" + field.FieldType + " " + field.Name + " = " + field.GetValue(this);
+
+                return s;
             }
 
             public PsItem parent = null;
@@ -52,6 +98,17 @@ namespace PCMgr.Main
             public string uwpMainAppDebText = "";
             public IntPtr firstHwnd;
 
+            public string Print()
+            {
+                string s = ToString();
+
+                Type t = typeof(PsItem);
+                FieldInfo[] fields = t.GetFields();
+                foreach (FieldInfo field in fields)
+                    s += "\n" + field.FieldType + " " + field.Name + " = " + field.GetValue(this);
+
+                return s;
+            }
             public override string ToString()
             {
                 return uwpMainAppDebText + " (" + uwpFullName + ")";
@@ -61,6 +118,11 @@ namespace PCMgr.Main
         {
             public IntPtr hWnd = IntPtr.Zero;
             public uint ownerPid = 0;
+
+            public override string ToString()
+            {
+                return "HWND " + hWnd + " ( pid : " + ownerPid + ")";
+            }
         }
         public class UwpHostItem
         {

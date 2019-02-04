@@ -168,6 +168,15 @@
     <ClInclude Include="DltHlp.h">
       <Filter>头文件\HLPS</Filter>
     </ClInclude>
+    <ClInclude Include="icoutils.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MConnectionMonitor.h">
+      <Filter>头文件\Monitor</Filter>
+    </ClInclude>
+    <ClInclude Include="MMonitor.h">
+      <Filter>头文件\Monitor</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -279,6 +288,15 @@
       <Filter>源文件\Monitor</Filter>
     </ClCompile>
     <ClCompile Include="MProcessMonitor.cpp">
+      <Filter>源文件\Monitor</Filter>
+    </ClCompile>
+    <ClCompile Include="icoutils.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MConnectionMonitor.cpp">
+      <Filter>源文件\Monitor</Filter>
+    </ClCompile>
+    <ClCompile Include="MMonitor.cpp">
       <Filter>源文件\Monitor</Filter>
     </ClCompile>
   </ItemGroup>

@@ -1283,4 +1283,10 @@ The dump file is located at :</value>
   <data name="PleaseEnumIn64" xml:space="preserve">
     <value>Please use 64 bit PCMgr to enumerate 64 bit process modules.</value>
   </data>
+  <data name="String1" xml:space="preserve">
+    <value>Please use 64-bit PC Manager for load driver</value>
+  </data>
+  <data name="X64EnumDriver" xml:space="preserve">
+    <value>Please use 64-bit PC Manager for load driver</value>
+  </data>
 </root>

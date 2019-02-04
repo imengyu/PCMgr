@@ -122,8 +122,14 @@ namespace PCMgr.Ctls
         }
         public void PageInit()
         {
+            contextMenuStrip.Renderer = new Helpers.ClassicalMenuRender(Handle);
+
             InitValues();
             InitStaticValues();
+        }
+        public void PageShowRightMenu()
+        {
+            contextMenuStrip.Show(this, Point.Empty);
         }
 
         private PerformanceInfos.PerformanceInfoSpeicalItem item_diskTime = null;
@@ -218,6 +224,7 @@ namespace PCMgr.Ctls
 
         public event SwithGraphicViewEventHandler SwithGraphicView;
         public event OpeningPageMenuEventHandler OpeningPageMenu;
+        public event EventHandler AppKeyDown;
 
         private void 复制ToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -231,6 +238,10 @@ namespace PCMgr.Ctls
             OpeningPageMenu?.Invoke(this, 查看ToolStripMenuItem);
         }
 
+        private void PerformancePageDisk_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Apps) AppKeyDown?.Invoke(this, e);
+        }
         private void PerformancePageDisk_MouseClick(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Right)
@@ -252,5 +263,7 @@ namespace PCMgr.Ctls
         {
             SwithGraphicView?.Invoke(this);
         }
+
+
     }
 }

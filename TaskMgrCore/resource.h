@@ -249,6 +249,8 @@
 #define IDM_SE_AOT                      41180
 #define IDC_CLOSE_PCMGR_CMD             41181
 #define IDM_HELP                        41182
+#define IDM_VIEW_TCP_CONS 41183
+#define IDM_VIEW_WINDOW 41184
 
 #define IDS_STRING_LOAD_DOTNET_FAILED_QUIT   139
 #define IDS_STRING_LOAD_DOTNET_FAILED_TITLE 140

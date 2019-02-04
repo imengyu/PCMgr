@@ -4,8 +4,12 @@
 #include "cscall.h"
 #include "msup.h"
 
-#define M_MTMSG_ 1
+#define M_MTMSG_NULL 0
 #define M_MTMSG_COSCLOSE 1
+#define M_MTMSG_MAIN_EXIT 2
+#define M_MTMSG_MAIN_RUN_APP_CMD 3
+#define M_MTMSG_MAIN_REBOOT 4
+#define M_MTMSG_MAIN_SHOW_STAT 5
 
 #define M_DRAW_HEADER_HOT 1
 #define M_DRAW_HEADER_PRESSED 2
@@ -26,6 +30,13 @@
 #define M_DRAW_EXPAND_HOVER 2
 #define M_DRAW_EXPAND_PRESSED 3
 
+#define M_DRAW_MENU_HOT 1
+
+#define M_DRAW_MENU_CHECK 3
+#define M_DRAW_MENU_CHECK_BACKGROUND 4
+#define M_DRAW_MENU_RADIO 5
+#define M_DRAW_MENU_SUB 6
+
 typedef void(__cdecl *exitcallback)();
 typedef int(__cdecl *taskdialogcallback)(HWND hwnd, LPWSTR text, LPWSTR title, LPWSTR apptl, int ico, int button);
 typedef void(__cdecl *EnumWinsCallBack)(HWND hWnd, HWND hWndParent);
@@ -38,6 +49,7 @@ LRESULT CALLBACK MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK MProcListWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK MProcListHeaderWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK MAppMainThreadCallProc(HWND hWnd, WPARAM wParam, LPARAM lParam);
 
 //显示一个对话框
 int MShowMessageDialog(HWND hwnd, LPWSTR text, LPWSTR title, LPWSTR instruction, int i=0, int button=0);
@@ -77,6 +89,7 @@ EXTERN_C M_API void MDrawIcon(HICON hIcon, HDC hdc, int x, int y);
 EXTERN_C M_API void MExpandDrawButton(HANDLE hTheme, HDC hdc, int x, int y, int state, BOOL on);
 EXTERN_C M_API void MHeaderDrawItem(HANDLE hTheme, HDC hdc, int x, int y, int w, int h, int state);
 EXTERN_C M_API void MListDrawItem(HANDLE hTheme, HDC hdc, int x, int y, int w, int h, int state);
+EXTERN_C M_API void MMenuDrawItem(HANDLE hTheme, HDC hdc, int x, int y, int w, int h, int state, BOOL enabled);
 int MAppRegShowHotKey(HWND hWnd, UINT vkkey, UINT key);
 BOOL MAppStartEnd();
 BOOL MAppStartTryActiveLastApp(LPWSTR windowTitle);
@@ -91,6 +104,7 @@ EXTERN_C M_API LRESULT MAppMainThreadCall(WPARAM wParam, LPARAM lParam);
 EXTERN_C M_API LPWSTR MAppGetName();
 EXTERN_C M_API LPWSTR MAppGetVersion();
 EXTERN_C M_API LPWSTR MAppGetBulidDate();
+EXTERN_C M_API HICON MAppGetFolderIcon();
 
 //获取窗口的图标
 //    hWnd ：窗口句柄

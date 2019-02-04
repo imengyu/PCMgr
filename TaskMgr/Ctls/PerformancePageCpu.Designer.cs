@@ -171,6 +171,7 @@
             this.Controls.Add(this.panelGrid);
             this.Name = "PerformancePageCpu";
             this.Load += new System.EventHandler(this.PerformanceCpu_Load);
+            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.PerformancePageCpu_KeyUp);
             this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.PerformancePageCpu_MouseClick);
             this.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.PerformancePageCpu_MouseDoubleClick);
             this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.PerformancePageCpu_MouseDown);

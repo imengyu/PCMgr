@@ -40,7 +40,7 @@ M_CAPI(BOOL) MLoadKernelDriver(LPWSTR lpszDriverName, LPWSTR driverPath, LPWSTR 
 #ifndef _AMD64_
 	if (MIs64BitOS())
 	{
-		LogErr(L"You need to use 64 bit version PCMgr application to load driver.");
+		LogErr2(L"You need to use 64 bit version PCMgr application to load driver.");
 		return FALSE;
 	}
 #endif
@@ -58,7 +58,7 @@ M_CAPI(BOOL) MLoadKernelDriver(LPWSTR lpszDriverName, LPWSTR driverPath, LPWSTR 
 		hServiceMgr = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
 		if (hServiceMgr == NULL)
 		{
-			LogErr(L"Load driver error in OpenSCManager : %d", GetLastError());
+			LogErr2(L"Load driver error in OpenSCManager : %d", GetLastError());
 			bRet = FALSE;
 			goto BeforeLeave;
 		}
@@ -72,7 +72,7 @@ M_CAPI(BOOL) MLoadKernelDriver(LPWSTR lpszDriverName, LPWSTR driverPath, LPWSTR 
 			dwRtn = GetLastError();
 			if (dwRtn == ERROR_SERVICE_MARKED_FOR_DELETE)
 			{
-				LogErr(L"Load driver error in CreateService : ERROR_SERVICE_MARKED_FOR_DELETE");
+				LogErr2(L"Load driver error in CreateService : ERROR_SERVICE_MARKED_FOR_DELETE. lpszDriverName : %s", lpszDriverName);
 				if (!recreatee) {
 					recreatee = true;
 					if (hServiceDDK) CloseServiceHandle(hServiceDDK);
@@ -82,7 +82,7 @@ M_CAPI(BOOL) MLoadKernelDriver(LPWSTR lpszDriverName, LPWSTR driverPath, LPWSTR 
 			}
 			if (dwRtn != ERROR_IO_PENDING && dwRtn != ERROR_SERVICE_EXISTS)
 			{
-				LogErr(L"Load driver error in CreateService : %d", dwRtn);
+				LogErr2(L"Load driver error in CreateService : %d. lpszDriverName : %s", dwRtn, lpszDriverName);
 				bRet = FALSE;
 				goto BeforeLeave;
 			}
@@ -90,7 +90,7 @@ M_CAPI(BOOL) MLoadKernelDriver(LPWSTR lpszDriverName, LPWSTR driverPath, LPWSTR 
 			if (hServiceDDK == NULL)
 			{
 				dwRtn = GetLastError();
-				LogErr(L"Load driver error in OpenService : %d", dwRtn);
+				LogErr2(L"Load driver error in OpenService : %d. lpszDriverName : %s", dwRtn, lpszDriverName);
 				bRet = FALSE;
 				goto BeforeLeave;
 			}
@@ -101,7 +101,7 @@ M_CAPI(BOOL) MLoadKernelDriver(LPWSTR lpszDriverName, LPWSTR driverPath, LPWSTR 
 			DWORD dwRtn = GetLastError();
 			if (dwRtn != ERROR_IO_PENDING && dwRtn != ERROR_SERVICE_ALREADY_RUNNING)
 			{
-				LogErr(L"Load driver error in StartService : %d", dwRtn);
+				LogErr2(L"Load driver error in StartService : %d. lpszDriverName : %s", dwRtn, lpszDriverName);
 				bRet = FALSE;
 				goto BeforeLeave;
 			}
@@ -125,7 +125,7 @@ M_CAPI(BOOL) MLoadKernelDriver(LPWSTR lpszDriverName, LPWSTR driverPath, LPWSTR 
 		if (hServiceDDK) CloseServiceHandle(hServiceDDK);
 		if (hServiceMgr) CloseServiceHandle(hServiceMgr);
 		return bRet;
-	}else LogErr(L"Load driver error because need adminstrator.");
+	}else LogErr2(L"Load driver error because need adminstrator. driverPath : %s", driverPath);
 	return FALSE;
 }
 //卸载驱动
@@ -140,7 +140,7 @@ M_CAPI(BOOL) MUnLoadKernelDriver(LPWSTR szSvrName)
 	hServiceMgr = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
 	if (hServiceMgr == NULL)
 	{
-		LogErr(L"UnLoad driver error in OpenSCManager : %d", GetLastError());
+		LogErr2(L"UnLoad driver error in OpenSCManager : %d", GetLastError());
 		bRet = FALSE;
 		goto BeforeLeave;
 	}
@@ -149,18 +149,18 @@ M_CAPI(BOOL) MUnLoadKernelDriver(LPWSTR szSvrName)
 	if (hServiceDDK == NULL)
 	{
 		if (GetLastError() == ERROR_SERVICE_DOES_NOT_EXIST)
-			LogErr(L"UnLoad driver error because driver not load.");
-		else LogErr(L"UnLoad driver error in OpenService : %d", GetLastError());
+			LogErr2(L"UnLoad driver error because driver not load. szSvrName : %s", szSvrName);
+		else LogErr2(L"UnLoad driver error in OpenService : %d. szSvrName : %s", GetLastError(), szSvrName);
 		bRet = FALSE;
 		goto BeforeLeave;
 	}
 	//停止驱动程序，如果停止失败，只有重新启动才能，再动态加载。 
 	if (!ControlService(hServiceDDK, SERVICE_CONTROL_STOP, &SvrSta)) {
-		LogErr(L"UnLoad driver error in ControlService : %d", GetLastError());
+		LogErr2(L"UnLoad driver error in ControlService : %d. szSvrName : %s", GetLastError(), szSvrName);
 	}
 	//动态卸载驱动程序。 
 	if (!DeleteService(hServiceDDK)) {
-		LogErr(L"UnLoad driver error in DeleteService : %d", GetLastError());
+		LogErr2(L"UnLoad driver error in DeleteService : %d. szSvrName : %s", GetLastError(), szSvrName);
 		bRet = FALSE;
 	}
 	else bDeleted = TRUE;

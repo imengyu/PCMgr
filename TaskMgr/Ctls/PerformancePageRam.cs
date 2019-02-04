@@ -125,6 +125,8 @@ namespace PCMgr.Ctls
         }
         public void PageInit()
         {
+            contextMenuStrip.Renderer = new Helpers.ClassicalMenuRender(Handle);
+
             item_ramuseage = new PerformanceInfos.PerformanceInfoSpeicalItem();
             item_ramcanuse = new PerformanceInfos.PerformanceInfoSpeicalItem();
             item_sended = new PerformanceInfos.PerformanceInfoSpeicalItem();
@@ -163,6 +165,10 @@ namespace PCMgr.Ctls
             fTipVauleStandby = LanuageMgr.GetStr("MemTipStandby");
             fTipVauleUsing = LanuageMgr.GetStr("MemTipUsing");
         }
+        public void PageShowRightMenu()
+        {
+            contextMenuStrip.Show(this, System.Drawing.Point.Empty);
+        }
 
         PerformanceInfos.PerformanceInfoSpeicalItem item_ramuseage = null;
         PerformanceInfos.PerformanceInfoSpeicalItem item_ramcanuse = null;
@@ -179,6 +185,7 @@ namespace PCMgr.Ctls
 
         public event SwithGraphicViewEventHandler SwithGraphicView;
         public event OpeningPageMenuEventHandler OpeningPageMenu;
+        public event EventHandler AppKeyDown;
 
         private void 复制ToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -212,7 +219,9 @@ namespace PCMgr.Ctls
                 if (e.Button == MouseButtons.Left && e.Clicks == 1)
                     NativeMethods.MAppWorkCall3(165, IntPtr.Zero, IntPtr.Zero);
         }
-
-
+        private void PerformancePageRam_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Apps) AppKeyDown?.Invoke(this, e);
+        }
     }
 }

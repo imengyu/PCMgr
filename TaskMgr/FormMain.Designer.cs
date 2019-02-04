@@ -54,11 +54,11 @@
             this.lbProcessCount = new System.Windows.Forms.Label();
             this.expandFewerDetals = new PCMgr.Aero.ExpandButton();
             this.tabPageKernelCtl = new System.Windows.Forms.TabPage();
-            this.sp5 = new System.Windows.Forms.PictureBox();
-            this.linkLabelShowKernelTools = new System.Windows.Forms.LinkLabel();
             this.pl_driverNotLoadTip = new System.Windows.Forms.Panel();
             this.linkRestartAsAdminDriver = new System.Windows.Forms.LinkLabel();
             this.lbRestartAsAdminDriver = new System.Windows.Forms.Label();
+            this.sp5 = new System.Windows.Forms.PictureBox();
+            this.linkLabelShowKernelTools = new System.Windows.Forms.LinkLabel();
             this.lbDriversCount = new System.Windows.Forms.Label();
             this.listDrivers = new System.Windows.Forms.ListView();
             this.columnHeader15 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -142,10 +142,10 @@
             this.网络ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.百分比ToolStripMenuItemNet = new System.Windows.Forms.ToolStripMenuItem();
             this.值ToolStripMenuItemNet = new System.Windows.Forms.ToolStripMenuItem();
-            this.fileSystemWatcher = new System.IO.FileSystemWatcher();
-            this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.contextMenuStripPerfListLeft = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.隐藏图形ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.fileSystemWatcher = new System.IO.FileSystemWatcher();
+            this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerPerfCtls)).BeginInit();
             this.splitContainerPerfCtls.Panel1.SuspendLayout();
             this.splitContainerPerfCtls.SuspendLayout();
@@ -158,8 +158,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.sp4)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.spl1)).BeginInit();
             this.tabPageKernelCtl.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.sp5)).BeginInit();
             this.pl_driverNotLoadTip.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.sp5)).BeginInit();
             this.tabPagePerfCtl.SuspendLayout();
             this.tabPageUWPCtl.SuspendLayout();
             this.pl_UWPEnumFailTip.SuspendLayout();
@@ -177,8 +177,8 @@
             this.contextMenuStripProcDetalsCol.SuspendLayout();
             this.contextMenuStripTray.SuspendLayout();
             this.contextMenuStripMainHeader.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.fileSystemWatcher)).BeginInit();
             this.contextMenuStripPerfListLeft.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.fileSystemWatcher)).BeginInit();
             this.SuspendLayout();
             // 
             // splitContainerPerfCtls
@@ -377,29 +377,14 @@
             // 
             // tabPageKernelCtl
             // 
+            this.tabPageKernelCtl.Controls.Add(this.pl_driverNotLoadTip);
             this.tabPageKernelCtl.Controls.Add(this.sp5);
             this.tabPageKernelCtl.Controls.Add(this.linkLabelShowKernelTools);
-            this.tabPageKernelCtl.Controls.Add(this.pl_driverNotLoadTip);
             this.tabPageKernelCtl.Controls.Add(this.lbDriversCount);
             this.tabPageKernelCtl.Controls.Add(this.listDrivers);
             resources.ApplyResources(this.tabPageKernelCtl, "tabPageKernelCtl");
             this.tabPageKernelCtl.Name = "tabPageKernelCtl";
             this.tabPageKernelCtl.UseVisualStyleBackColor = true;
-            // 
-            // sp5
-            // 
-            resources.ApplyResources(this.sp5, "sp5");
-            this.sp5.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(207)))), ((int)(((byte)(207)))), ((int)(((byte)(207)))));
-            this.sp5.Name = "sp5";
-            this.sp5.TabStop = false;
-            // 
-            // linkLabelShowKernelTools
-            // 
-            resources.ApplyResources(this.linkLabelShowKernelTools, "linkLabelShowKernelTools");
-            this.linkLabelShowKernelTools.LinkBehavior = System.Windows.Forms.LinkBehavior.HoverUnderline;
-            this.linkLabelShowKernelTools.LinkColor = System.Drawing.Color.DodgerBlue;
-            this.linkLabelShowKernelTools.Name = "linkLabelShowKernelTools";
-            this.linkLabelShowKernelTools.TabStop = true;
             // 
             // pl_driverNotLoadTip
             // 
@@ -421,6 +406,21 @@
             // 
             resources.ApplyResources(this.lbRestartAsAdminDriver, "lbRestartAsAdminDriver");
             this.lbRestartAsAdminDriver.Name = "lbRestartAsAdminDriver";
+            // 
+            // sp5
+            // 
+            resources.ApplyResources(this.sp5, "sp5");
+            this.sp5.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(207)))), ((int)(((byte)(207)))), ((int)(((byte)(207)))));
+            this.sp5.Name = "sp5";
+            this.sp5.TabStop = false;
+            // 
+            // linkLabelShowKernelTools
+            // 
+            resources.ApplyResources(this.linkLabelShowKernelTools, "linkLabelShowKernelTools");
+            this.linkLabelShowKernelTools.LinkBehavior = System.Windows.Forms.LinkBehavior.HoverUnderline;
+            this.linkLabelShowKernelTools.LinkColor = System.Drawing.Color.DodgerBlue;
+            this.linkLabelShowKernelTools.Name = "linkLabelShowKernelTools";
+            this.linkLabelShowKernelTools.TabStop = true;
             // 
             // lbDriversCount
             // 
@@ -952,13 +952,15 @@
             // 
             // 百分比ToolStripMenuItemRam
             // 
-            this.百分比ToolStripMenuItemRam.Name = "百分比ToolStripMenuItemRam";
             resources.ApplyResources(this.百分比ToolStripMenuItemRam, "百分比ToolStripMenuItemRam");
+            this.百分比ToolStripMenuItemRam.Name = "百分比ToolStripMenuItemRam";
             // 
             // 值ToolStripMenuItemRam
             // 
-            this.值ToolStripMenuItemRam.Name = "值ToolStripMenuItemRam";
+            this.值ToolStripMenuItemRam.Checked = true;
+            this.值ToolStripMenuItemRam.CheckState = System.Windows.Forms.CheckState.Checked;
             resources.ApplyResources(this.值ToolStripMenuItemRam, "值ToolStripMenuItemRam");
+            this.值ToolStripMenuItemRam.Name = "值ToolStripMenuItemRam";
             // 
             // 磁盘ToolStripMenuItem
             // 
@@ -970,13 +972,15 @@
             // 
             // 百分比ToolStripMenuItemDisk
             // 
-            this.百分比ToolStripMenuItemDisk.Name = "百分比ToolStripMenuItemDisk";
             resources.ApplyResources(this.百分比ToolStripMenuItemDisk, "百分比ToolStripMenuItemDisk");
+            this.百分比ToolStripMenuItemDisk.Name = "百分比ToolStripMenuItemDisk";
             // 
             // 值ToolStripMenuItemDisk
             // 
-            this.值ToolStripMenuItemDisk.Name = "值ToolStripMenuItemDisk";
+            this.值ToolStripMenuItemDisk.Checked = true;
+            this.值ToolStripMenuItemDisk.CheckState = System.Windows.Forms.CheckState.Checked;
             resources.ApplyResources(this.值ToolStripMenuItemDisk, "值ToolStripMenuItemDisk");
+            this.值ToolStripMenuItemDisk.Name = "值ToolStripMenuItemDisk";
             // 
             // 网络ToolStripMenuItem
             // 
@@ -988,13 +992,29 @@
             // 
             // 百分比ToolStripMenuItemNet
             // 
-            this.百分比ToolStripMenuItemNet.Name = "百分比ToolStripMenuItemNet";
             resources.ApplyResources(this.百分比ToolStripMenuItemNet, "百分比ToolStripMenuItemNet");
+            this.百分比ToolStripMenuItemNet.Name = "百分比ToolStripMenuItemNet";
             // 
             // 值ToolStripMenuItemNet
             // 
-            this.值ToolStripMenuItemNet.Name = "值ToolStripMenuItemNet";
+            this.值ToolStripMenuItemNet.Checked = true;
+            this.值ToolStripMenuItemNet.CheckState = System.Windows.Forms.CheckState.Checked;
             resources.ApplyResources(this.值ToolStripMenuItemNet, "值ToolStripMenuItemNet");
+            this.值ToolStripMenuItemNet.Name = "值ToolStripMenuItemNet";
+            // 
+            // contextMenuStripPerfListLeft
+            // 
+            this.contextMenuStripPerfListLeft.ImageScalingSize = new System.Drawing.Size(32, 32);
+            this.contextMenuStripPerfListLeft.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.隐藏图形ToolStripMenuItem});
+            this.contextMenuStripPerfListLeft.Name = "contextMenuStripMainHeader";
+            this.contextMenuStripPerfListLeft.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
+            resources.ApplyResources(this.contextMenuStripPerfListLeft, "contextMenuStripPerfListLeft");
+            // 
+            // 隐藏图形ToolStripMenuItem
+            // 
+            resources.ApplyResources(this.隐藏图形ToolStripMenuItem, "隐藏图形ToolStripMenuItem");
+            this.隐藏图形ToolStripMenuItem.Name = "隐藏图形ToolStripMenuItem";
             // 
             // fileSystemWatcher
             // 
@@ -1008,30 +1028,16 @@
             this.notifyIcon.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon_MouseDoubleClick);
             this.notifyIcon.MouseMove += new System.Windows.Forms.MouseEventHandler(this.notifyIcon_MouseMove);
             // 
-            // contextMenuStripPerfListLeft
-            // 
-            this.contextMenuStripPerfListLeft.ImageScalingSize = new System.Drawing.Size(32, 32);
-            this.contextMenuStripPerfListLeft.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.隐藏图形ToolStripMenuItem});
-            this.contextMenuStripPerfListLeft.Name = "contextMenuStripMainHeader";
-            this.contextMenuStripPerfListLeft.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
-            resources.ApplyResources(this.contextMenuStripPerfListLeft, "contextMenuStripPerfListLeft");
-            // 
-            // 隐藏图形ToolStripMenuItem
-            // 
-            this.隐藏图形ToolStripMenuItem.Name = "隐藏图形ToolStripMenuItem";
-            resources.ApplyResources(this.隐藏图形ToolStripMenuItem, "隐藏图形ToolStripMenuItem");
-            // 
             // FormMain
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
             this.Controls.Add(this.spBottom);
-            this.Controls.Add(this.lbStartingStatus);
             this.Controls.Add(this.tabControlMain);
             this.Controls.Add(this.pl_simple);
             this.Controls.Add(this.pl_perfGridHost);
+            this.Controls.Add(this.lbStartingStatus);
             this.Cursor = System.Windows.Forms.Cursors.AppStarting;
             this.Name = "FormMain";
             this.Activated += new System.EventHandler(this.FormMain_Activated);
@@ -1053,8 +1059,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.spl1)).EndInit();
             this.tabPageKernelCtl.ResumeLayout(false);
             this.tabPageKernelCtl.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.sp5)).EndInit();
             this.pl_driverNotLoadTip.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.sp5)).EndInit();
             this.tabPagePerfCtl.ResumeLayout(false);
             this.tabPageUWPCtl.ResumeLayout(false);
             this.pl_UWPEnumFailTip.ResumeLayout(false);
@@ -1074,8 +1080,8 @@
             this.contextMenuStripProcDetalsCol.ResumeLayout(false);
             this.contextMenuStripTray.ResumeLayout(false);
             this.contextMenuStripMainHeader.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.fileSystemWatcher)).EndInit();
             this.contextMenuStripPerfListLeft.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.fileSystemWatcher)).EndInit();
             this.ResumeLayout(false);
 
         }

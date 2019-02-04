@@ -123,13 +123,10 @@
   </data>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="button_save.Location" type="System.Drawing.Point, System.Drawing">
-    <value>682, 822</value>
-  </data>
-  <data name="button_save.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 6, 6, 6</value>
+    <value>341, 329</value>
   </data>
   <data name="button_save.Size" type="System.Drawing.Size, System.Drawing">
-    <value>150, 46</value>
+    <value>75, 23</value>
   </data>
   <assembly alias="mscorlib" name="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="button_save.TabIndex" type="System.Int32, mscorlib">
@@ -154,13 +151,10 @@
     <value>Bottom, Right</value>
   </data>
   <data name="button_cancel.Location" type="System.Drawing.Point, System.Drawing">
-    <value>520, 822</value>
-  </data>
-  <data name="button_cancel.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 6, 6, 6</value>
+    <value>260, 329</value>
   </data>
   <data name="button_cancel.Size" type="System.Drawing.Size, System.Drawing">
-    <value>150, 46</value>
+    <value>75, 23</value>
   </data>
   <data name="button_cancel.TabIndex" type="System.Int32, mscorlib">
     <value>1</value>
@@ -190,13 +184,10 @@
     <value>True</value>
   </data>
   <data name="checkBoxShowHotKey.Location" type="System.Drawing.Point, System.Drawing">
-    <value>30, 270</value>
-  </data>
-  <data name="checkBoxShowHotKey.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 6, 6, 6</value>
+    <value>15, 135</value>
   </data>
   <data name="checkBoxShowHotKey.Size" type="System.Drawing.Size, System.Drawing">
-    <value>28, 27</value>
+    <value>15, 14</value>
   </data>
   <data name="checkBoxShowHotKey.TabIndex" type="System.Int32, mscorlib">
     <value>14</value>
@@ -217,13 +208,10 @@
     <value>True</value>
   </data>
   <data name="label8.Location" type="System.Drawing.Point, System.Drawing">
-    <value>284, 274</value>
-  </data>
-  <data name="label8.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 0, 6, 0</value>
+    <value>142, 137</value>
   </data>
   <data name="label8.Size" type="System.Drawing.Size, System.Drawing">
-    <value>54, 31</value>
+    <value>28, 17</value>
   </data>
   <data name="label8.TabIndex" type="System.Int32, mscorlib">
     <value>13</value>
@@ -250,13 +238,10 @@
     <value>NoControl</value>
   </data>
   <data name="label7.Location" type="System.Drawing.Point, System.Drawing">
-    <value>528, 274</value>
-  </data>
-  <data name="label7.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 0, 6, 0</value>
+    <value>264, 137</value>
   </data>
   <data name="label7.Size" type="System.Drawing.Size, System.Drawing">
-    <value>32, 31</value>
+    <value>17, 17</value>
   </data>
   <data name="label7.TabIndex" type="System.Int32, mscorlib">
     <value>12</value>
@@ -391,13 +376,10 @@
     <value>F12</value>
   </data>
   <data name="comboBoxShowHotKey2.Location" type="System.Drawing.Point, System.Drawing">
-    <value>562, 264</value>
-  </data>
-  <data name="comboBoxShowHotKey2.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 6, 6, 6</value>
+    <value>281, 132</value>
   </data>
   <data name="comboBoxShowHotKey2.Size" type="System.Drawing.Size, System.Drawing">
-    <value>96, 39</value>
+    <value>50, 25</value>
   </data>
   <data name="comboBoxShowHotKey2.TabIndex" type="System.Int32, mscorlib">
     <value>11</value>
@@ -418,13 +400,10 @@
     <value>True</value>
   </data>
   <data name="label6.Location" type="System.Drawing.Point, System.Drawing">
-    <value>382, 274</value>
-  </data>
-  <data name="label6.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 0, 6, 0</value>
+    <value>191, 137</value>
   </data>
   <data name="label6.Size" type="System.Drawing.Size, System.Drawing">
-    <value>32, 31</value>
+    <value>17, 17</value>
   </data>
   <data name="label6.TabIndex" type="System.Int32, mscorlib">
     <value>10</value>
@@ -460,13 +439,10 @@
     <value>(None)</value>
   </data>
   <data name="comboBoxShowHotKey1.Location" type="System.Drawing.Point, System.Drawing">
-    <value>416, 264</value>
-  </data>
-  <data name="comboBoxShowHotKey1.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 6, 6, 6</value>
+    <value>208, 132</value>
   </data>
   <data name="comboBoxShowHotKey1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>96, 39</value>
+    <value>50, 25</value>
   </data>
   <data name="comboBoxShowHotKey1.TabIndex" type="System.Int32, mscorlib">
     <value>9</value>
@@ -487,13 +463,10 @@
     <value>True</value>
   </data>
   <data name="label5.Location" type="System.Drawing.Point, System.Drawing">
-    <value>68, 274</value>
-  </data>
-  <data name="label5.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 0, 6, 0</value>
+    <value>34, 137</value>
   </data>
   <data name="label5.Size" type="System.Drawing.Size, System.Drawing">
-    <value>182, 62</value>
+    <value>92, 34</value>
   </data>
   <data name="label5.TabIndex" type="System.Int32, mscorlib">
     <value>8</value>
@@ -515,13 +488,10 @@
     <value>6</value>
   </data>
   <data name="textBoxTitle.Location" type="System.Drawing.Point, System.Drawing">
-    <value>228, 198</value>
-  </data>
-  <data name="textBoxTitle.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 6, 6, 6</value>
+    <value>114, 99</value>
   </data>
   <data name="textBoxTitle.Size" type="System.Drawing.Size, System.Drawing">
-    <value>510, 39</value>
+    <value>257, 23</value>
   </data>
   <data name="textBoxTitle.TabIndex" type="System.Int32, mscorlib">
     <value>7</value>
@@ -542,13 +512,10 @@
     <value>True</value>
   </data>
   <data name="label4.Location" type="System.Drawing.Point, System.Drawing">
-    <value>26, 204</value>
-  </data>
-  <data name="label4.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 0, 6, 0</value>
+    <value>13, 102</value>
   </data>
   <data name="label4.Size" type="System.Drawing.Size, System.Drawing">
-    <value>158, 31</value>
+    <value>80, 17</value>
   </data>
   <data name="label4.TabIndex" type="System.Int32, mscorlib">
     <value>6</value>
@@ -578,13 +545,10 @@
     <value>NoControl</value>
   </data>
   <data name="checkBox2.Location" type="System.Drawing.Point, System.Drawing">
-    <value>30, 482</value>
-  </data>
-  <data name="checkBox2.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 6, 6, 6</value>
+    <value>15, 241</value>
   </data>
   <data name="checkBox2.Size" type="System.Drawing.Size, System.Drawing">
-    <value>310, 35</value>
+    <value>159, 21</value>
   </data>
   <data name="checkBox2.TabIndex" type="System.Int32, mscorlib">
     <value>5</value>
@@ -611,13 +575,10 @@
     <value>NoControl</value>
   </data>
   <data name="checkBoxSelfProtect.Location" type="System.Drawing.Point, System.Drawing">
-    <value>30, 526</value>
-  </data>
-  <data name="checkBoxSelfProtect.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 6, 6, 6</value>
+    <value>15, 263</value>
   </data>
   <data name="checkBoxSelfProtect.Size" type="System.Drawing.Size, System.Drawing">
-    <value>526, 35</value>
+    <value>267, 21</value>
   </data>
   <data name="checkBoxSelfProtect.TabIndex" type="System.Int32, mscorlib">
     <value>4</value>
@@ -647,13 +608,10 @@
     <value>NoControl</value>
   </data>
   <data name="label3.Location" type="System.Drawing.Point, System.Drawing">
-    <value>14, 428</value>
-  </data>
-  <data name="label3.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 0, 6, 0</value>
+    <value>7, 214</value>
   </data>
   <data name="label3.Size" type="System.Drawing.Size, System.Drawing">
-    <value>160, 24</value>
+    <value>83, 12</value>
   </data>
   <data name="label3.TabIndex" type="System.Int32, mscorlib">
     <value>3</value>
@@ -677,13 +635,10 @@
     <value>True</value>
   </data>
   <data name="checkBoxCloseHide.Location" type="System.Drawing.Point, System.Drawing">
-    <value>30, 122</value>
-  </data>
-  <data name="checkBoxCloseHide.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 6, 6, 6</value>
+    <value>15, 61</value>
   </data>
   <data name="checkBoxCloseHide.Size" type="System.Drawing.Size, System.Drawing">
-    <value>277, 35</value>
+    <value>143, 21</value>
   </data>
   <data name="checkBoxCloseHide.TabIndex" type="System.Int32, mscorlib">
     <value>2</value>
@@ -707,13 +662,10 @@
     <value>True</value>
   </data>
   <data name="checkBoxTop.Location" type="System.Drawing.Point, System.Drawing">
-    <value>30, 78</value>
-  </data>
-  <data name="checkBoxTop.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 6, 6, 6</value>
+    <value>15, 39</value>
   </data>
   <data name="checkBoxTop.Size" type="System.Drawing.Size, System.Drawing">
-    <value>190, 35</value>
+    <value>99, 21</value>
   </data>
   <data name="checkBoxTop.TabIndex" type="System.Int32, mscorlib">
     <value>1</value>
@@ -740,13 +692,10 @@
     <value>宋体, 9pt, style=Bold</value>
   </data>
   <data name="label2.Location" type="System.Drawing.Point, System.Drawing">
-    <value>14, 30</value>
-  </data>
-  <data name="label2.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 0, 6, 0</value>
+    <value>7, 15</value>
   </data>
   <data name="label2.Size" type="System.Drawing.Size, System.Drawing">
-    <value>110, 24</value>
+    <value>57, 12</value>
   </data>
   <data name="label2.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
@@ -767,16 +716,13 @@
     <value>14</value>
   </data>
   <data name="tabPage1.Location" type="System.Drawing.Point, System.Drawing">
-    <value>8, 45</value>
-  </data>
-  <data name="tabPage1.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 6, 6, 6</value>
+    <value>4, 26</value>
   </data>
   <data name="tabPage1.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 6, 6, 6</value>
+    <value>3, 3, 3, 3</value>
   </data>
   <data name="tabPage1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>836, 733</value>
+    <value>418, 281</value>
   </data>
   <data name="tabPage1.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
@@ -806,13 +752,10 @@
     <value>NoControl</value>
   </data>
   <data name="checkBoxAbortShutdown.Location" type="System.Drawing.Point, System.Drawing">
-    <value>40, 438</value>
-  </data>
-  <data name="checkBoxAbortShutdown.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 6, 6, 6</value>
+    <value>31, 363</value>
   </data>
   <data name="checkBoxAbortShutdown.Size" type="System.Drawing.Size, System.Drawing">
-    <value>342, 66</value>
+    <value>175, 38</value>
   </data>
   <data name="checkBoxAbortShutdown.TabIndex" type="System.Int32, mscorlib">
     <value>29</value>
@@ -837,13 +780,10 @@
     <value>True</value>
   </data>
   <data name="checkBoxNTOSPDB.Location" type="System.Drawing.Point, System.Drawing">
-    <value>40, 1090</value>
-  </data>
-  <data name="checkBoxNTOSPDB.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 6, 6, 6</value>
+    <value>31, 692</value>
   </data>
   <data name="checkBoxNTOSPDB.Size" type="System.Drawing.Size, System.Drawing">
-    <value>454, 66</value>
+    <value>231, 38</value>
   </data>
   <data name="checkBoxNTOSPDB.TabIndex" type="System.Int32, mscorlib">
     <value>28</value>
@@ -871,13 +811,10 @@
     <value>NoControl</value>
   </data>
   <data name="checkBoxUseMyDbgView.Location" type="System.Drawing.Point, System.Drawing">
-    <value>40, 1352</value>
-  </data>
-  <data name="checkBoxUseMyDbgView.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 6, 6, 6</value>
+    <value>31, 112</value>
   </data>
   <data name="checkBoxUseMyDbgView.Size" type="System.Drawing.Size, System.Drawing">
-    <value>251, 35</value>
+    <value>130, 21</value>
   </data>
   <data name="checkBoxUseMyDbgView.TabIndex" type="System.Int32, mscorlib">
     <value>27</value>
@@ -900,14 +837,14 @@
   <data name="checkBoxAutoLoadDriver.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
   </data>
-  <data name="checkBoxAutoLoadDriver.Location" type="System.Drawing.Point, System.Drawing">
-    <value>40, 38</value>
+  <data name="checkBoxAutoLoadDriver.Font" type="System.Drawing.Font, System.Drawing">
+    <value>微软雅黑, 9pt, style=Bold</value>
   </data>
-  <data name="checkBoxAutoLoadDriver.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 6, 6, 6</value>
+  <data name="checkBoxAutoLoadDriver.Location" type="System.Drawing.Point, System.Drawing">
+    <value>20, 152</value>
   </data>
   <data name="checkBoxAutoLoadDriver.Size" type="System.Drawing.Size, System.Drawing">
-    <value>190, 35</value>
+    <value>99, 21</value>
   </data>
   <data name="checkBoxAutoLoadDriver.TabIndex" type="System.Int32, mscorlib">
     <value>26</value>
@@ -934,13 +871,10 @@
     <value>NoControl</value>
   </data>
   <data name="checkBoxHighLightNoSystetm.Location" type="System.Drawing.Point, System.Drawing">
-    <value>40, 1220</value>
-  </data>
-  <data name="checkBoxHighLightNoSystetm.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 6, 6, 6</value>
+    <value>31, 46</value>
   </data>
   <data name="checkBoxHighLightNoSystetm.Size" type="System.Drawing.Size, System.Drawing">
-    <value>478, 35</value>
+    <value>243, 21</value>
   </data>
   <data name="checkBoxHighLightNoSystetm.TabIndex" type="System.Int32, mscorlib">
     <value>25</value>
@@ -970,13 +904,10 @@
     <value>NoControl</value>
   </data>
   <data name="label16.Location" type="System.Drawing.Point, System.Drawing">
-    <value>14, 1170</value>
-  </data>
-  <data name="label16.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 0, 6, 0</value>
+    <value>18, 21</value>
   </data>
   <data name="label16.Size" type="System.Drawing.Size, System.Drawing">
-    <value>60, 24</value>
+    <value>31, 12</value>
   </data>
   <data name="label16.TabIndex" type="System.Int32, mscorlib">
     <value>24</value>
@@ -997,13 +928,10 @@
     <value>5</value>
   </data>
   <data name="label15.Location" type="System.Drawing.Point, System.Drawing">
-    <value>72, 706</value>
-  </data>
-  <data name="label15.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 0, 6, 0</value>
+    <value>47, 497</value>
   </data>
   <data name="label15.Size" type="System.Drawing.Size, System.Drawing">
-    <value>636, 48</value>
+    <value>318, 24</value>
   </data>
   <data name="label15.TabIndex" type="System.Int32, mscorlib">
     <value>23</value>
@@ -1027,13 +955,10 @@
     <value>True</value>
   </data>
   <data name="checkBoxShowDebugWindow.Location" type="System.Drawing.Point, System.Drawing">
-    <value>40, 1308</value>
-  </data>
-  <data name="checkBoxShowDebugWindow.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 6, 6, 6</value>
+    <value>31, 90</value>
   </data>
   <data name="checkBoxShowDebugWindow.Size" type="System.Drawing.Size, System.Drawing">
-    <value>245, 35</value>
+    <value>127, 21</value>
   </data>
   <data name="checkBoxShowDebugWindow.TabIndex" type="System.Int32, mscorlib">
     <value>22</value>
@@ -1063,13 +988,10 @@
     <value>NoControl</value>
   </data>
   <data name="label14.Location" type="System.Drawing.Point, System.Drawing">
-    <value>14, 1268</value>
-  </data>
-  <data name="label14.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 0, 6, 0</value>
+    <value>18, 70</value>
   </data>
   <data name="label14.Size" type="System.Drawing.Size, System.Drawing">
-    <value>110, 24</value>
+    <value>57, 12</value>
   </data>
   <data name="label14.TabIndex" type="System.Int32, mscorlib">
     <value>21</value>
@@ -1093,13 +1015,10 @@
     <value>True</value>
   </data>
   <data name="labelDriverLoadStatus.Location" type="System.Drawing.Point, System.Drawing">
-    <value>244, 38</value>
-  </data>
-  <data name="labelDriverLoadStatus.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 0, 6, 0</value>
+    <value>125, 152</value>
   </data>
   <data name="labelDriverLoadStatus.Size" type="System.Drawing.Size, System.Drawing">
-    <value>110, 31</value>
+    <value>56, 17</value>
   </data>
   <data name="labelDriverLoadStatus.TabIndex" type="System.Int32, mscorlib">
     <value>20</value>
@@ -1129,13 +1048,10 @@
     <value>NoControl</value>
   </data>
   <data name="label13.Location" type="System.Drawing.Point, System.Drawing">
-    <value>14, 2000</value>
-  </data>
-  <data name="label13.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 0, 6, 0</value>
+    <value>18, 756</value>
   </data>
   <data name="label13.Size" type="System.Drawing.Size, System.Drawing">
-    <value>85, 24</value>
+    <value>44, 12</value>
   </data>
   <data name="label13.TabIndex" type="System.Int32, mscorlib">
     <value>19</value>
@@ -1162,13 +1078,10 @@
     <value>NoControl</value>
   </data>
   <data name="radioButtonDrvLog.Location" type="System.Drawing.Point, System.Drawing">
-    <value>40, 1042</value>
-  </data>
-  <data name="radioButtonDrvLog.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 6, 6, 6</value>
+    <value>31, 668</value>
   </data>
   <data name="radioButtonDrvLog.Size" type="System.Drawing.Size, System.Drawing">
-    <value>118, 35</value>
+    <value>64, 21</value>
   </data>
   <data name="radioButtonDrvLog.TabIndex" type="System.Int32, mscorlib">
     <value>18</value>
@@ -1195,13 +1108,10 @@
     <value>NoControl</value>
   </data>
   <data name="radioButtonRefuseNoSginedAndAsk.Location" type="System.Drawing.Point, System.Drawing">
-    <value>40, 974</value>
-  </data>
-  <data name="radioButtonRefuseNoSginedAndAsk.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 6, 6, 6</value>
+    <value>31, 634</value>
   </data>
   <data name="radioButtonRefuseNoSginedAndAsk.Size" type="System.Drawing.Size, System.Drawing">
-    <value>573, 66</value>
+    <value>290, 38</value>
   </data>
   <data name="radioButtonRefuseNoSginedAndAsk.TabIndex" type="System.Int32, mscorlib">
     <value>17</value>
@@ -1226,13 +1136,10 @@
     <value>True</value>
   </data>
   <data name="checkBoxEnableLoadDrvCallback.Location" type="System.Drawing.Point, System.Drawing">
-    <value>192, 880</value>
-  </data>
-  <data name="checkBoxEnableLoadDrvCallback.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 6, 6, 6</value>
+    <value>107, 584</value>
   </data>
   <data name="checkBoxEnableLoadDrvCallback.Size" type="System.Drawing.Size, System.Drawing">
-    <value>362, 35</value>
+    <value>185, 21</value>
   </data>
   <data name="checkBoxEnableLoadDrvCallback.TabIndex" type="System.Int32, mscorlib">
     <value>16</value>
@@ -1259,13 +1166,10 @@
     <value>NoControl</value>
   </data>
   <data name="radioButtonRefuseNoSginedDrv.Location" type="System.Drawing.Point, System.Drawing">
-    <value>40, 930</value>
-  </data>
-  <data name="radioButtonRefuseNoSginedDrv.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 6, 6, 6</value>
+    <value>31, 609</value>
   </data>
   <data name="radioButtonRefuseNoSginedDrv.Size" type="System.Drawing.Size, System.Drawing">
-    <value>334, 35</value>
+    <value>172, 21</value>
   </data>
   <data name="radioButtonRefuseNoSginedDrv.TabIndex" type="System.Int32, mscorlib">
     <value>15</value>
@@ -1295,13 +1199,10 @@
     <value>NoControl</value>
   </data>
   <data name="label12.Location" type="System.Drawing.Point, System.Drawing">
-    <value>14, 882</value>
-  </data>
-  <data name="label12.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 0, 6, 0</value>
+    <value>18, 585</value>
   </data>
   <data name="label12.Size" type="System.Drawing.Size, System.Drawing">
-    <value>160, 24</value>
+    <value>83, 12</value>
   </data>
   <data name="label12.TabIndex" type="System.Int32, mscorlib">
     <value>14</value>
@@ -1328,13 +1229,10 @@
     <value>NoControl</value>
   </data>
   <data name="checkBoxCannotLoadDriver.Location" type="System.Drawing.Point, System.Drawing">
-    <value>40, 362</value>
-  </data>
-  <data name="checkBoxCannotLoadDriver.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 6, 6, 6</value>
+    <value>31, 325</value>
   </data>
   <data name="checkBoxCannotLoadDriver.Size" type="System.Drawing.Size, System.Drawing">
-    <value>190, 35</value>
+    <value>99, 21</value>
   </data>
   <data name="checkBoxCannotLoadDriver.TabIndex" type="System.Int32, mscorlib">
     <value>13</value>
@@ -1361,13 +1259,10 @@
     <value>NoControl</value>
   </data>
   <data name="checkBoxCannoteLoadModule.Location" type="System.Drawing.Point, System.Drawing">
-    <value>40, 318</value>
-  </data>
-  <data name="checkBoxCannoteLoadModule.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 6, 6, 6</value>
+    <value>31, 303</value>
   </data>
   <data name="checkBoxCannoteLoadModule.Size" type="System.Drawing.Size, System.Drawing">
-    <value>190, 35</value>
+    <value>99, 21</value>
   </data>
   <data name="checkBoxCannoteLoadModule.TabIndex" type="System.Int32, mscorlib">
     <value>12</value>
@@ -1394,13 +1289,10 @@
     <value>NoControl</value>
   </data>
   <data name="checkBoxCannotCreateReg.Location" type="System.Drawing.Point, System.Drawing">
-    <value>40, 274</value>
-  </data>
-  <data name="checkBoxCannotCreateReg.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 6, 6, 6</value>
+    <value>31, 281</value>
   </data>
   <data name="checkBoxCannotCreateReg.Size" type="System.Drawing.Size, System.Drawing">
-    <value>310, 35</value>
+    <value>159, 21</value>
   </data>
   <data name="checkBoxCannotCreateReg.TabIndex" type="System.Int32, mscorlib">
     <value>11</value>
@@ -1427,13 +1319,10 @@
     <value>NoControl</value>
   </data>
   <data name="checkBoxCannotCreateFile.Location" type="System.Drawing.Point, System.Drawing">
-    <value>40, 230</value>
-  </data>
-  <data name="checkBoxCannotCreateFile.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 6, 6, 6</value>
+    <value>31, 259</value>
   </data>
   <data name="checkBoxCannotCreateFile.Size" type="System.Drawing.Size, System.Drawing">
-    <value>190, 35</value>
+    <value>99, 21</value>
   </data>
   <data name="checkBoxCannotCreateFile.TabIndex" type="System.Int32, mscorlib">
     <value>10</value>
@@ -1460,13 +1349,10 @@
     <value>NoControl</value>
   </data>
   <data name="checkBoxCannotCreateThread.Location" type="System.Drawing.Point, System.Drawing">
-    <value>40, 186</value>
-  </data>
-  <data name="checkBoxCannotCreateThread.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 6, 6, 6</value>
+    <value>31, 237</value>
   </data>
   <data name="checkBoxCannotCreateThread.Size" type="System.Drawing.Size, System.Drawing">
-    <value>190, 35</value>
+    <value>99, 21</value>
   </data>
   <data name="checkBoxCannotCreateThread.TabIndex" type="System.Int32, mscorlib">
     <value>9</value>
@@ -1490,13 +1376,10 @@
     <value>True</value>
   </data>
   <data name="checkBoxCannotCreateProc.Location" type="System.Drawing.Point, System.Drawing">
-    <value>40, 142</value>
-  </data>
-  <data name="checkBoxCannotCreateProc.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 6, 6, 6</value>
+    <value>31, 215</value>
   </data>
   <data name="checkBoxCannotCreateProc.Size" type="System.Drawing.Size, System.Drawing">
-    <value>190, 35</value>
+    <value>99, 21</value>
   </data>
   <data name="checkBoxCannotCreateProc.TabIndex" type="System.Int32, mscorlib">
     <value>8</value>
@@ -1526,13 +1409,10 @@
     <value>NoControl</value>
   </data>
   <data name="label11.Location" type="System.Drawing.Point, System.Drawing">
-    <value>14, 94</value>
-  </data>
-  <data name="label11.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 0, 6, 0</value>
+    <value>18, 191</value>
   </data>
   <data name="label11.Size" type="System.Drawing.Size, System.Drawing">
-    <value>360, 24</value>
+    <value>187, 12</value>
   </data>
   <data name="label11.TabIndex" type="System.Int32, mscorlib">
     <value>7</value>
@@ -1559,13 +1439,10 @@
     <value>NoControl</value>
   </data>
   <data name="radioButtonApcPspTerProc.Location" type="System.Drawing.Point, System.Drawing">
-    <value>40, 824</value>
-  </data>
-  <data name="radioButtonApcPspTerProc.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 6, 6, 6</value>
+    <value>31, 556</value>
   </data>
   <data name="radioButtonApcPspTerProc.Size" type="System.Drawing.Size, System.Drawing">
-    <value>317, 35</value>
+    <value>164, 21</value>
   </data>
   <data name="radioButtonApcPspTerProc.TabIndex" type="System.Int32, mscorlib">
     <value>6</value>
@@ -1592,13 +1469,10 @@
     <value>NoControl</value>
   </data>
   <data name="radioButtonPspTerProc.Location" type="System.Drawing.Point, System.Drawing">
-    <value>40, 780</value>
-  </data>
-  <data name="radioButtonPspTerProc.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 6, 6, 6</value>
+    <value>31, 534</value>
   </data>
   <data name="radioButtonPspTerProc.Size" type="System.Drawing.Size, System.Drawing">
-    <value>448, 35</value>
+    <value>229, 21</value>
   </data>
   <data name="radioButtonPspTerProc.TabIndex" type="System.Int32, mscorlib">
     <value>5</value>
@@ -1622,13 +1496,10 @@
     <value>True</value>
   </data>
   <data name="label10.Location" type="System.Drawing.Point, System.Drawing">
-    <value>14, 610</value>
-  </data>
-  <data name="label10.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 0, 6, 0</value>
+    <value>18, 449</value>
   </data>
   <data name="label10.Size" type="System.Drawing.Size, System.Drawing">
-    <value>731, 31</value>
+    <value>368, 17</value>
   </data>
   <data name="label10.TabIndex" type="System.Int32, mscorlib">
     <value>3</value>
@@ -1658,13 +1529,10 @@
     <value>NoControl</value>
   </data>
   <data name="label9.Location" type="System.Drawing.Point, System.Drawing">
-    <value>14, 654</value>
-  </data>
-  <data name="label9.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 0, 6, 0</value>
+    <value>18, 471</value>
   </data>
   <data name="label9.Size" type="System.Drawing.Size, System.Drawing">
-    <value>248, 24</value>
+    <value>129, 12</value>
   </data>
   <data name="label9.TabIndex" type="System.Int32, mscorlib">
     <value>2</value>
@@ -1685,16 +1553,13 @@
     <value>26</value>
   </data>
   <data name="tabPage4.Location" type="System.Drawing.Point, System.Drawing">
-    <value>8, 45</value>
-  </data>
-  <data name="tabPage4.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 6, 6, 6</value>
+    <value>4, 26</value>
   </data>
   <data name="tabPage4.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 6, 6, 6</value>
+    <value>3, 3, 3, 3</value>
   </data>
   <data name="tabPage4.Size" type="System.Drawing.Size, System.Drawing">
-    <value>836, 733</value>
+    <value>418, 281</value>
   </data>
   <data name="tabPage4.TabIndex" type="System.Int32, mscorlib">
     <value>3</value>
@@ -1715,16 +1580,13 @@
     <value>1</value>
   </data>
   <data name="tabPage2.Location" type="System.Drawing.Point, System.Drawing">
-    <value>8, 45</value>
-  </data>
-  <data name="tabPage2.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 6, 6, 6</value>
+    <value>4, 26</value>
   </data>
   <data name="tabPage2.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 6, 6, 6</value>
+    <value>3, 3, 3, 3</value>
   </data>
   <data name="tabPage2.Size" type="System.Drawing.Size, System.Drawing">
-    <value>836, 733</value>
+    <value>418, 281</value>
   </data>
   <data name="tabPage2.TabIndex" type="System.Int32, mscorlib">
     <value>1</value>
@@ -1748,19 +1610,13 @@
     <value>中文</value>
   </data>
   <data name="comboBox_lg.Items1" xml:space="preserve">
-    <value>繁体中文</value>
-  </data>
-  <data name="comboBox_lg.Items2" xml:space="preserve">
     <value>English</value>
   </data>
   <data name="comboBox_lg.Location" type="System.Drawing.Point, System.Drawing">
-    <value>134, 42</value>
-  </data>
-  <data name="comboBox_lg.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 6, 6, 6</value>
+    <value>67, 21</value>
   </data>
   <data name="comboBox_lg.Size" type="System.Drawing.Size, System.Drawing">
-    <value>456, 39</value>
+    <value>230, 25</value>
   </data>
   <data name="comboBox_lg.TabIndex" type="System.Int32, mscorlib">
     <value>1</value>
@@ -1781,13 +1637,10 @@
     <value>True</value>
   </data>
   <data name="label1.Location" type="System.Drawing.Point, System.Drawing">
-    <value>40, 48</value>
-  </data>
-  <data name="label1.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 0, 6, 0</value>
+    <value>20, 24</value>
   </data>
   <data name="label1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>62, 31</value>
+    <value>32, 17</value>
   </data>
   <data name="label1.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
@@ -1808,16 +1661,13 @@
     <value>1</value>
   </data>
   <data name="tabPage3.Location" type="System.Drawing.Point, System.Drawing">
-    <value>8, 45</value>
-  </data>
-  <data name="tabPage3.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 6, 6, 6</value>
+    <value>4, 26</value>
   </data>
   <data name="tabPage3.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 6, 6, 6</value>
+    <value>3, 3, 3, 3</value>
   </data>
   <data name="tabPage3.Size" type="System.Drawing.Size, System.Drawing">
-    <value>836, 733</value>
+    <value>418, 281</value>
   </data>
   <data name="tabPage3.TabIndex" type="System.Int32, mscorlib">
     <value>2</value>
@@ -1841,13 +1691,10 @@
     <value>微软雅黑, 9pt</value>
   </data>
   <data name="tabControl1.Location" type="System.Drawing.Point, System.Drawing">
-    <value>2, 24</value>
-  </data>
-  <data name="tabControl1.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 6, 6, 6</value>
+    <value>1, 12</value>
   </data>
   <data name="tabControl1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>852, 786</value>
+    <value>426, 311</value>
   </data>
   <data name="tabControl1.TabIndex" type="System.Int32, mscorlib">
     <value>2</value>
@@ -1871,10 +1718,10 @@
     <value>True</value>
   </metadata>
   <data name="$this.AutoScaleDimensions" type="System.Drawing.SizeF, System.Drawing">
-    <value>12, 24</value>
+    <value>6, 12</value>
   </data>
   <data name="$this.ClientSize" type="System.Drawing.Size, System.Drawing">
-    <value>856, 892</value>
+    <value>428, 358</value>
   </data>
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
@@ -1900,11 +1747,8 @@
         AADMZwAA/H8AAA==
 </value>
   </data>
-  <data name="$this.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 6, 6, 6</value>
-  </data>
   <data name="$this.MinimumSize" type="System.Drawing.Size, System.Drawing">
-    <value>796, 755</value>
+    <value>406, 397</value>
   </data>
   <data name="$this.StartPosition" type="System.Windows.Forms.FormStartPosition, System.Windows.Forms">
     <value>CenterParent</value>

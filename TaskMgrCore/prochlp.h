@@ -85,8 +85,10 @@ typedef struct tag_PEOCESSKINFO {
 	WCHAR ImageFullName[MAX_PATH];
 }PEOCESSKINFO,*PPEOCESSKINFO;
 typedef struct tag_PROCHANDLE_STORAGE {
+	struct tag_PROCHANDLE_STORAGE*Prv;
 	DWORD pid;
 	HANDLE hProcess;
+	struct tag_PROCHANDLE_STORAGE*Next;
 }PROCHANDLE_STORAGE,*PPROCHANDLE_STORAGE;
 
 //Not use
@@ -328,6 +330,8 @@ EXTERN_C M_API NTSTATUS MGetProcessDebugObject(HANDLE ProcessHandle, PHANDLE Deb
 NTSTATUS MSetProcessPriorityClass(HANDLE ProcessHandle, UCHAR PriorityClass);
 NTSTATUS MSetProcessAffinityMask(HANDLE ProcessHandle, ULONG_PTR AffinityMask);
 
+
+EXTERN_C M_API BOOL MGetUWPPackageIdName(HANDLE handle, LPWSTR buffer, int len);
 //获取UWP应用完整包名
 //    handle：进程句柄
 //    [OUT] len：输出字符串缓冲区字符个数

@@ -38,6 +38,27 @@ typedef struct tag_COMMAND {
 list<PCOMMAND> *allCommands;
 MCmdRunner *staticCmdRunner;
 
+M_CAPI(int) MAppCmdRunner(BOOL isMain, COS_FOR_ALLOC_EXIT_CALLBACK callback)
+{
+REENTER:
+	printf_s("\n>");
+
+	char maxbuf[260];
+	gets_s(maxbuf);
+
+	char *buf = maxbuf;
+	if (maxbuf[0] == '>')
+		buf = maxbuf + 1;
+
+	if (MAppCmdRunOne(isMain, maxbuf)) goto QUIT;
+	if (MAppCmdCanRun()) goto REENTER;
+
+QUIT:
+	if (callback) callback();
+	MAppCmdOnExit();
+	return 0;
+}
+
 M_CAPI(MCmdRunner*) MGetStaticCmdRunner() {
 	return staticCmdRunner;
 }

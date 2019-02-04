@@ -110,6 +110,7 @@ _GetPerTcpConnectionEStats dGetPerTcpConnectionEStats;
 _GetPerTcp6ConnectionEStats dGetPerTcp6ConnectionEStats;
 _GetExtendedTcpTable dGetExtendedTcpTable;
 _SetPerTcpConnectionEStats dSetPerTcpConnectionEStats;
+_SetPerTcp6ConnectionEStats dSetPerTcp6ConnectionEStats;
 //imahlp api
 extern fnIMAGELOAD ImageLoad;
 extern fnIMAGEUNLOAD ImageUnload;
@@ -121,6 +122,12 @@ _WinStationFreeMemory WinStationFreeMemory;
 _WinStationEnumerateW WinStationEnumerateW;
 _WinStationQueryInformationW WinStationQueryInformationW;
 _MGetCurrentPeb dMGetCurrentPeb;
+//
+_WSAStartup dWSAStartup;
+_WSAGetLastError dWSAGetLastError;
+_GetNameInfoW dGetNameInfoW;
+_gethostbyaddr dgethostbyaddr;
+_RtlIpv6AddressToStringW dRtlIpv6AddressToStringW;
 
 //Enum apis
 extern BOOL MAppVProcessAllWindows();
@@ -139,7 +146,7 @@ BOOL CALLBACK lpEnumProcWinsFunc(HWND hWnd, LPARAM lParam)
 	return TRUE;
 }
 
-std::list<PPROCHANDLE_STORAGE> processHandleStorage;
+PPROCHANDLE_STORAGE processHandleStorage;
 
 void MFroceKillProcessUser()
 {
@@ -274,7 +281,6 @@ BOOL MDetachFromDebuggerProcess(DWORD pid)
 	return TRUE;
 }
 
-
 DWORD WINAPI CreateMiniDumpForProcessThread(LPVOID lpParameter)
 {
 	HWND hWnd = (HWND)lpParameter;
@@ -370,23 +376,44 @@ BOOL MCreateMiniDumpForProcess(DWORD pid)
 
 void MProcessHANDLEStorageDestroyItem(DWORD pid) {
 	PPROCHANDLE_STORAGE target = NULL;
-	for (auto it = processHandleStorage.begin(); it != processHandleStorage.end(); it++)
-	{
-		if ((*it)->pid == pid) {
-			target = *it;
-			break;
-		}
+	PPROCHANDLE_STORAGE pi = processHandleStorage;
+	if (pi) {
+		PPROCHANDLE_STORAGE pn = pi->Next;
+		do {
+			pn = pi->Next;
+			if (pi->pid == pid) {
+				target = pi;
+				break;
+			}
+			pi = pn;
+		} while (pn);
 	}
 	if (target) {
 		MCloseHandle(target->hProcess);
-		processHandleStorage.remove(target);
+		if (target->Prv) 
+			target->Prv->Next = target->Next;
+		if (target->Next) {
+			target->Next->Prv = target->Prv;
+			if (target == processHandleStorage)
+				processHandleStorage = target->Next;
+		}
+		else if (target == processHandleStorage) 
+			processHandleStorage = NULL;
+
 		MFree(target);
 	}
 }
 void MProcessHANDLEStorageDestroy() {
-	for (auto it = processHandleStorage.begin(); it != processHandleStorage.end(); it++)
-		MFree(*it);
-	processHandleStorage.clear();
+	PPROCHANDLE_STORAGE pi = processHandleStorage;
+	if (pi) {
+		PPROCHANDLE_STORAGE pn = pi->Next;
+		do {
+			pn = pi->Next;
+			MCloseHandle(pi->hProcess);
+			free(pi);
+			pi = pn;
+		} while (pn);
+	}
 }
 BOOL MTryGetProcessExitStatus(HANDLE hProcess) {
 	NTSTATUS exitStatus = 0;
@@ -400,15 +427,19 @@ BOOL MTryGetProcessExitStatus(HANDLE hProcess) {
 HANDLE MTryFindOpenedProcessHANDLE(DWORD pid) {
 	if(pid<=4 )	return NULL;
 	PPROCHANDLE_STORAGE target = NULL;
-	for (auto it = processHandleStorage.begin(); it != processHandleStorage.end(); it++)
-	{
-		if ((*it)->pid == pid) {
-			target = *it;
-			break;
-		}
+	PPROCHANDLE_STORAGE pi = processHandleStorage;
+	if (pi) {
+		PPROCHANDLE_STORAGE pn = pi->Next;
+		do {
+			pn = pi->Next;
+			if (pi->pid == pid) {
+				target = pi;
+				break;
+			}
+			pi = pn;
+		} while (pn);
+		if (target) return target->hProcess;
 	}
-	if (target)
-		return target->hProcess;
 	return NULL;
 }
 HANDLE MTryOpenProcess(DWORD pid) {
@@ -422,9 +453,14 @@ HANDLE MTryOpenProcess(DWORD pid) {
 	NTSTATUS status = MOpenProcessNt(pid, &hProcess);
 	if (NT_SUCCESS(status) && hProcess) {
 		PPROCHANDLE_STORAGE item = (PPROCHANDLE_STORAGE)MAlloc(sizeof(PROCHANDLE_STORAGE));
+		memset(item, 0, sizeof(PROCHANDLE_STORAGE));
 		item->hProcess = hProcess;
 		item->pid = pid;
-		processHandleStorage.push_back(item);
+		if (processHandleStorage) {
+			item->Next = processHandleStorage;
+			processHandleStorage->Prv = item;
+		}
+		processHandleStorage = item;
 		return hProcess;
 	}
 	return NULL;
@@ -963,21 +999,30 @@ M_API BOOL MShowExeFileSignatureInfo(LPCWSTR pwszSourceFile)
 		pwszSourceFile,
 		CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED_EMBED, CERT_QUERY_FORMAT_FLAG_BINARY,
 		0, &dwEncoding, &dwContentType, &dwFormatType, &hStore, &hMsg, NULL);
-	if (!fResult) goto RETURN;
+	if (!fResult) {
+		LogErr2(L"CryptQueryObject failed with %x\n", GetLastError());
+		goto RETURN;
+	}
 
 	fResult = CryptMsgGetParam(hMsg,
 		CMSG_SIGNER_INFO_PARAM,
 		0,
 		NULL,
 		&dwSignerInfo);
-	if (!fResult) goto RETURN;
+	if (!fResult) {
+		LogErr2(L"CryptMsgGetParam failed with %x\n", GetLastError());
+		goto RETURN;
+	}
 	pSignerInfo = (PCMSG_SIGNER_INFO)MAlloc(dwSignerInfo);
 	fResult = CryptMsgGetParam(hMsg,
 		CMSG_SIGNER_INFO_PARAM,
 		0,
 		(PVOID)pSignerInfo,
 		&dwSignerInfo);
-	if (!fResult) goto RETURN;
+	if (!fResult) {
+		LogErr2(L"CryptMsgGetParam failed with %x\n", GetLastError());
+		goto RETURN;
+	}
 
 	CertInfo.Issuer = pSignerInfo->Issuer;
 	CertInfo.SerialNumber = pSignerInfo->SerialNumber;
@@ -1001,7 +1046,7 @@ M_API BOOL MShowExeFileSignatureInfo(LPCWSTR pwszSourceFile)
 		fResult = dCryptUIDlgViewContext(CERT_STORE_CERTIFICATE_CONTEXT, pCertContext, hWndMain, NULL, 0, 0);
 		CertFreeCertificateContext(pCertContext);
 	}
-	else LogErr(_T("CertFindCertificateInStore failed with %x\n"),	GetLastError());
+	else LogErr2(_T("CertFindCertificateInStore failed with %x\n"),	GetLastError());
 RETURN:
 	if (pSignerInfo)MFree(pSignerInfo);
 	if (hStore != NULL) CertCloseStore(hStore, 0);
@@ -1019,12 +1064,14 @@ M_API BOOL MGetExeFileTrust(LPCWSTR lpFileName)
 		HCATADMIN hCatAdmin = NULL;
 		if (!CryptCATAdminAcquireContext(&hCatAdmin, NULL, 0))
 		{
+			LogErr2(L"CryptCATAdminAcquireContext failed with %d\n", GetLastError());
 			return FALSE;
 		}
 		HANDLE hFile = CreateFileW(lpFileName, GENERIC_READ, FILE_SHARE_READ,
 			NULL, OPEN_EXISTING, 0, NULL);
 		if (INVALID_HANDLE_VALUE == hFile)
 		{
+			LogErr2(L"CreateFileW at %s failed with %d\n", lpFileName, GetLastError());
 			CryptCATAdminReleaseContext(hCatAdmin, 0);
 			return FALSE;
 		}
@@ -1076,6 +1123,8 @@ M_API BOOL MGetExeFileTrust(LPCWSTR lpFileName)
 		GUID action = GUID{ 0x00AAC56B, 0xCD44, 0x11d0, 0x8C, 0xC2, 0x00, 0xC0, 0x4F, 0xC2, 0x95, 0xEE };
 		HRESULT hr = WinVerifyTrust(NULL, &action, &wd);
 		bRet = SUCCEEDED(hr);
+		if(!bRet)			
+			LogErr2(L"WinVerifyTrust failed with HRESULT : 0x%x\n", hr);
 		if (NULL != hCatInfo)
 		{
 			CryptCATAdminReleaseCatalogContext(hCatAdmin, hCatInfo, 0);
@@ -1746,10 +1795,29 @@ M_API BOOL MGetUWPPackageFullName(HANDLE handle, int*len, LPWSTR buffer)
 		if (buffer)
 		{
 			UINT32 len2 = static_cast<UINT32>(*len); ;
-			return dGetPackageFullName(handle, &len2, buffer) == ERROR_SUCCESS;
+			if (dGetPackageFullName(handle, &len2, buffer) == ERROR_SUCCESS) return TRUE;
+			else LogErr2(L"GetPackageFullName failed with %d\n", GetLastError());
 		}
 	}
 	return 0;
+}
+M_API BOOL MGetUWPPackageIdName(HANDLE handle, LPWSTR buffer, int len)
+{
+	BOOL success = FALSE;
+	if (buffer)
+	{
+		UINT32 len2 = 0;
+		dGetPackageId(handle, &len2, NULL);
+		PACKAGE_ID *pid = (PACKAGE_ID *)malloc(len2);
+		if (dGetPackageId(handle, &len2, (BYTE*)pid) == ERROR_SUCCESS)
+		{
+			wcscpy_s(buffer, len, pid->name);
+			success = TRUE;
+		}
+		else LogErr2(L"GetPackageId failed with %d\n", GetLastError());
+		free(pid);
+	}
+	return success;
 }
 M_API BOOL MUnInstallUWPApp(LPWSTR name)
 {
@@ -1774,7 +1842,7 @@ M_API NTSTATUS MSuspendProcessNt(DWORD dwPId, HANDLE handle)
 				if (rs == STATUS_SUCCESS)
 					return STATUS_SUCCESS;
 				else {
-					LogErr(L"SuspendProcess failed (PID : %d) NTSTATUS : 0x%08X", dwPId, rs);
+					LogErr2(L"SuspendProcess failed (PID : %d) NTSTATUS : 0x%08X", dwPId, rs);
 					return rs;
 				}
 			}
@@ -1783,7 +1851,7 @@ M_API NTSTATUS MSuspendProcessNt(DWORD dwPId, HANDLE handle)
 					LogWarn(L"SuspendProcess failed in OpenProcess : (PID : %d) , Use kernel mode to Suspend it.");
 					M_SU_SuspendProcess(dwPId, &rs);
 					if (rs != STATUS_SUCCESS)
-						LogErr(L"SuspendProcess failed in kernel : (PID : %d) NTSTATUS : 0x%08X", dwPId, rs);
+						LogErr2(L"SuspendProcess failed in kernel : (PID : %d) NTSTATUS : 0x%08X", dwPId, rs);
 				}
 				else LogErr(L"SuspendProcess failed in OpenProcess : (PID : %d) NTSTATUS : 0x%08X", dwPId, rs);
 			}
@@ -1792,9 +1860,9 @@ M_API NTSTATUS MSuspendProcessNt(DWORD dwPId, HANDLE handle)
 			LogWarn(L"SuspendProcess failed in OpenProcess : (PID : %d) , Use kernel mode to Suspend it.");
 			M_SU_SuspendProcess(dwPId, &rs);
 			if (rs != STATUS_SUCCESS)
-				LogErr(L"SuspendProcess failed in kernel : (PID : %d) NTSTATUS : 0x%08X", dwPId, rs);
+				LogErr2(L"SuspendProcess failed in kernel : (PID : %d) NTSTATUS : 0x%08X", dwPId, rs);
 		}
-		else LogErr(L"SuspendProcess failed in OpenProcess : (PID : %d) NTSTATUS : 0x%08X", dwPId, rs);
+		else LogErr2(L"SuspendProcess failed in OpenProcess : (PID : %d) NTSTATUS : 0x%08X", dwPId, rs);
 		return rs;
 	}
 	else if (handle)
@@ -1820,7 +1888,7 @@ M_API NTSTATUS MResumeProcessNt(DWORD dwPId, HANDLE handle)
 				MCloseHandle(hProcess);
 				if (rs == STATUS_SUCCESS) return STATUS_SUCCESS;
 				else {
-					LogErr(L"RusemeProcess failed (PID : %d) NTSTATUS : 0x%08X", dwPId, rs);
+					LogErr2(L"RusemeProcess failed (PID : %d) NTSTATUS : 0x%08X", dwPId, rs);
 					return rs;
 				}
 			}
@@ -1829,18 +1897,18 @@ M_API NTSTATUS MResumeProcessNt(DWORD dwPId, HANDLE handle)
 					LogWarn(L"RusemeProcess failed in OpenProcess : (PID : %d) , Use kernel mode to Ruseme it.");
 					M_SU_ResumeProcess(dwPId, &rs);
 					if (rs != STATUS_SUCCESS)
-						LogErr(L"RusemeProcess failed in kernel : (PID : %d) NTSTATUS : 0x%08X", dwPId, rs);
+						LogErr2(L"RusemeProcess failed in kernel : (PID : %d) NTSTATUS : 0x%08X", dwPId, rs);
 				}
-				else LogErr(L"RusemeProcess failed in OpenProcess : (PID : %d) NTSTATUS : 0x%08X", dwPId, rs);
+				else LogErr2(L"RusemeProcess failed in OpenProcess : (PID : %d) NTSTATUS : 0x%08X", dwPId, rs);
 			}
 		}
 		else if (rs == STATUS_ACCESS_DENIED && MCanUseKernel()) {
 			LogWarn(L"RusemeProcess failed in OpenProcess : (PID : %d) , Use kernel mode to Ruseme it.");
 			M_SU_ResumeProcess(dwPId, &rs);
 			if (rs != STATUS_SUCCESS)
-				LogErr(L"RusemeProcess failed in kernel : (PID : %d) NTSTATUS : 0x%08X", dwPId, rs);
+				LogErr2(L"RusemeProcess failed in kernel : (PID : %d) NTSTATUS : 0x%08X", dwPId, rs);
 		}
-		else LogErr(L"RusemeProcess failed in OpenProcess : (PID : %d) NTSTATUS : 0x%08X", dwPId, rs);
+		else LogErr2(L"RusemeProcess failed in OpenProcess : (PID : %d) NTSTATUS : 0x%08X", dwPId, rs);
 		return rs;
 	}
 	else if (handle)
@@ -1849,7 +1917,7 @@ M_API NTSTATUS MResumeProcessNt(DWORD dwPId, HANDLE handle)
 		if (rs == 0)return STATUS_SUCCESS;
 		else
 		{
-			LogErr(L"RusemeProcess failed NTSTATUS : 0x%08X", rs);
+			LogErr2(L"RusemeProcess failed NTSTATUS : 0x%08X", rs);
 			return rs;
 		}
 	}
@@ -1889,7 +1957,7 @@ M_API NTSTATUS MTerminateProcessNt(DWORD dwId, HANDLE handle)
 		NTSTATUS rs = NtTerminateProcess(handle, 0);
 		if (rs == 0) return STATUS_SUCCESS;
 		else {
-			LogErr(L"TerminateProcess failed NTSTATUS : 0x%08X", rs);
+			LogErr2(L"TerminateProcess failed NTSTATUS : 0x%08X", rs);
 			return rs;
 		}
 	}
@@ -1904,7 +1972,7 @@ M_API NTSTATUS MTerminateProcessNt(DWORD dwId, HANDLE handle)
 				MCloseHandle(hProcess);
 				if (rs == 0) return STATUS_SUCCESS;
 				else {
-					LogErr(L"TerminateProcess failed : (PID : %d) NTSTATUS : 0x%08X", dwId, rs);
+					LogErr2(L"TerminateProcess failed : (PID : %d) NTSTATUS : 0x%08X", dwId, rs);
 					return rs;
 				}
 			}
@@ -1912,7 +1980,7 @@ M_API NTSTATUS MTerminateProcessNt(DWORD dwId, HANDLE handle)
 				if (rs == STATUS_ACCESS_DENIED && MCanUseKernel())
 					LogWarn(L"TerminateProcess failed in OpenProcess : (PID : %d) NTSTATUS : STATUS_ACCESS_DENIED\n\
                     You can Terminate it in kernel mode.", dwId, rs);
-				else LogErr(L"TerminateProcess failed in OpenProcess : (PID : %d) NTSTATUS : 0x%08X", dwId, rs);
+				else LogErr2(L"TerminateProcess failed in OpenProcess : (PID : %d) NTSTATUS : 0x%08X", dwId, rs);
 			}
 			return rs;
 		}
@@ -1938,7 +2006,7 @@ M_CAPI(BOOL) MEnumProcessPrivileges(DWORD dwId, EnumPrivilegesCallBack callBack)
 
 		if (!OpenProcessToken(hProcess, TOKEN_ALL_ACCESS, &hToken))
 		{
-			LogErr(L"OpenProcessToken failed pid : %d Error : %d", dwId, GetLastError());
+			LogErr2(L"OpenProcessToken failed pid : %d Error : %d", dwId, GetLastError());
 			return 0;
 		}
 		// 试探一下需要分配多少内存
@@ -1948,7 +2016,7 @@ M_CAPI(BOOL) MEnumProcessPrivileges(DWORD dwId, EnumPrivilegesCallBack callBack)
 		if (!GetTokenInformation(hToken, TokenPrivileges, pTp, dwNeededSize, &dwNeededSize))
 		{
 			MFree(pTp);
-			LogErr(L"GetTokenInformation failed pid : %d Error : %d", dwId, GetLastError());
+			LogErr2(L"GetTokenInformation failed pid : %d Error : %d", dwId, GetLastError());
 			return 0;
 		}
 		else
@@ -2072,7 +2140,7 @@ int MAppWorkShowMenuProcess(LPWSTR strFilePath, LPWSTR strFileName, DWORD pid, H
 			pt.y = y;
 		}
 
-		if (pid == 4) {
+		if (pid == 4 || type == 4) {
 			EnableMenuItem(hpop, IDM_SUPROC, MF_DISABLED);
 			EnableMenuItem(hpop, IDM_RESPROC, MF_DISABLED);
 			EnableMenuItem(hpop, IDM_KILLKERNEL, MF_DISABLED);
@@ -2268,6 +2336,7 @@ HINSTANCE hComBase;
 HINSTANCE hClr;
 HINSTANCE hGdiPlus;
 HINSTANCE hWinsta;
+HINSTANCE hws2_32;
 
 NTSTATUS MReadVirtualMemory(_In_ HANDLE ProcessHandle, _In_opt_ PVOID BaseAddress, _Out_writes_bytes_(BufferSize) PVOID Buffer, _In_ SIZE_T BufferSize, _Out_opt_ PSIZE_T NumberOfBytesRead)
 {
@@ -2291,6 +2360,7 @@ BOOL LoadDll()
 	hComBase = LoadLibrary(L"combase.dll");
 	hGdiPlus = LoadLibrary(L"GdiPlus.dll");
 	hWinsta = LoadLibrary(L"WinSta.dll");
+	hws2_32 = LoadLibrary(L"ws2_32.dll");
 	thisCommandPath = new WCHAR[260];
 	thisCommandName = new WCHAR[260];
 	thisCommandUWPName = new WCHAR[260];
@@ -2340,7 +2410,7 @@ BOOL LoadDll()
 		NtClose = (NtCloseFun)GetProcAddress(hNtDll, "NtClose");
 		NtSetInformationDebugObject = (NtSetInformationDebugObjectFun)GetProcAddress(hNtDll, "NtSetInformationDebugObject");
 		NtRemoveProcessDebug = (NtRemoveProcessDebugFun)GetProcAddress(hNtDll, "NtRemoveProcessDebug");
-
+		dRtlIpv6AddressToStringW = (_RtlIpv6AddressToStringW)GetProcAddress(hNtDll, "RtlIpv6AddressToStringW");
 
 		//shell32
 		RunFileDlg = (_RunFileDlg)MGetProcedureAddress(hShell32, NULL, 61);
@@ -2364,6 +2434,7 @@ BOOL LoadDll()
 		dGetExtendedTcpTable = (_GetExtendedTcpTable)GetProcAddress(hIphlpapi, "GetExtendedTcpTable");
 		dGetPerTcp6ConnectionEStats = (_GetPerTcp6ConnectionEStats)GetProcAddress(hIphlpapi, "GetPerTcp6ConnectionEStats");
 		dSetPerTcpConnectionEStats = (_SetPerTcpConnectionEStats)GetProcAddress(hIphlpapi, "SetPerTcpConnectionEStats");
+		dSetPerTcp6ConnectionEStats = (_SetPerTcp6ConnectionEStats)GetProcAddress(hIphlpapi, "SetPerTcp6ConnectionEStats");
 		//
 		ImageLoad = (fnIMAGELOAD)GetProcAddress(hImghlp, "ImageLoad");
 		ImageUnload = (fnIMAGEUNLOAD)GetProcAddress(hImghlp, "ImageUnload");
@@ -2374,6 +2445,15 @@ BOOL LoadDll()
 		WinStationFreeMemory = (_WinStationFreeMemory)GetProcAddress(hWinsta, "WinStationFreeMemory");
 		WinStationEnumerateW = (_WinStationEnumerateW)GetProcAddress(hWinsta, "WinStationEnumerateW");
 		WinStationQueryInformationW = (_WinStationQueryInformationW)GetProcAddress(hWinsta, "WinStationQueryInformationW");
+
+		dWSAStartup = (_WSAStartup)GetProcAddress(hws2_32, "WSAStartup");
+		dWSAGetLastError = (_WSAGetLastError)GetProcAddress(hws2_32, "WSAGetLastError");
+		dGetNameInfoW = (_GetNameInfoW)GetProcAddress(hws2_32, "GetNameInfoW");
+		dgethostbyaddr = (_gethostbyaddr)GetProcAddress(hws2_32, "gethostbyaddr");
+
+		// Make sure WSA is initialized.
+		WSADATA wsaData;
+		if (dWSAStartup) dWSAStartup(MAKEWORD(2, 2), &wsaData);
 
 		return TRUE;
 	}
@@ -2386,6 +2466,7 @@ void FreeDll()
 	FreeLibrary(hIphlpapi);
 	FreeLibrary(hImghlp);
 	FreeLibrary(hWinsta);
+	FreeLibrary(hws2_32);
 
 	delete thisCommandUWPName;
 	delete thisCommandPath;

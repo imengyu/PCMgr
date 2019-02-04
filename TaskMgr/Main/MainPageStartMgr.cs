@@ -357,7 +357,7 @@ namespace PCMgr.Main
             {
                 if (listStartup.SelectedItem != null)
                 {
-                    Point p = listStartup.GetiItemPoint(listStartup.SelectedItem);
+                    Point p = listStartup.GetItemPoint(listStartup.SelectedItem);
                     p = listStartup.PointToScreen(p);
                     startitem item = (startitem)listStartup.SelectedItem.Tag;
                     MStartupsMgr_ShowMenu(item.rootregpath, item.path, item.filepath, item.valuename, item.id, p.X, p.Y);

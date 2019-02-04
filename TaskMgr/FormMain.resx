@@ -251,7 +251,7 @@
         AAEAAAD/////AQAAAAAAAAAMAgAAAFdTeXN0ZW0uV2luZG93cy5Gb3JtcywgVmVyc2lvbj00LjAuMC4w
         LCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODkFAQAAACZTeXN0
         ZW0uV2luZG93cy5Gb3Jtcy5JbWFnZUxpc3RTdHJlYW1lcgEAAAAERGF0YQcCAgAAAAkDAAAADwMAAADw
-        CAAAAk1TRnQBSQFMAgEBAwEAAawBCQGsAQkBEAEAARABAAT/ASEBAAj/AUIBTQE2BwABNgMAASgDAAFA
+        CAAAAk1TRnQBSQFMAgEBAwEAAUQBCgFEAQoBEAEAARABAAT/ASEBAAj/AUIBTQE2BwABNgMAASgDAAFA
         AwABEAMAAQEBAAEgBgABELYAAlgBYgHvAlgBYgHvDAACWAFiAe8CWAFiAe+EAAGyAgAB/wwAAmIBWAHv
         AdwBjwEAAf8B6AGXAQAB/wHoAZcBAAH/AegBlwEAAf8BwwIAAf8CRwFGAYAcAAGOAeQC/wGNAeMC/wGL
         AeMC/wGKAeIC/wGIAeIC/wGHAeEC/wIAAb4B/wIAAeYB/wIAAbwB/wEAAdYB/AH/AgABuQH/AgAB3gH/
@@ -384,7 +384,7 @@
         AAEAAAD/////AQAAAAAAAAAMAgAAAFdTeXN0ZW0uV2luZG93cy5Gb3JtcywgVmVyc2lvbj00LjAuMC4w
         LCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODkFAQAAACZTeXN0
         ZW0uV2luZG93cy5Gb3Jtcy5JbWFnZUxpc3RTdHJlYW1lcgEAAAAERGF0YQcCAgAAAAkDAAAADwMAAACw
-        BAAAAk1TRnQBSQFMAwEBAAF0AQkBdAEJARABAAEQAQAE/wEhAQAI/wFCAU0BNgcAATYDAAEoAwABQAMA
+        BAAAAk1TRnQBSQFMAwEBAAEMAQoBDAEKARABAAEQAQAE/wEhAQAI/wFCAU0BNgcAATYDAAEoAwABQAMA
         ARADAAEBAQABIAYAARA8AAHNAf8MAAJQAVEBnwJQAVEBn8wAAvsB+gH/AvsB+gH/AvsB+gH/AvsB+gH/
         AvsB+gH/AvsB+gH/A/0B/wIAAdsB/wIAAdkB/wP9Af8CUAFRAZ8CAAHeAf8CUAFRAZ/MAAP7Af8B9wL2
         Af8B9wH2AfUB/wH3AfYB9QH/AfcB9gH1Af8B9wH2AfUB/wH3AfYB9QH/AvsB+gH/AgAB2wH/AgAB2QH/
@@ -513,10 +513,10 @@
     <value>NoControl</value>
   </data>
   <data name="check_showAllProcess.Location" type="System.Drawing.Point, System.Drawing">
-    <value>215, 381</value>
+    <value>214, 380</value>
   </data>
   <data name="check_showAllProcess.Size" type="System.Drawing.Size, System.Drawing">
-    <value>190, 23</value>
+    <value>190, 27</value>
   </data>
   <data name="check_showAllProcess.TabIndex" type="System.Int32, mscorlib">
     <value>3</value>
@@ -734,63 +734,6 @@
   <data name="&gt;&gt;tabPageProcCtl.ZOrder" xml:space="preserve">
     <value>0</value>
   </data>
-  <data name="sp5.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
-    <value>Bottom, Left</value>
-  </data>
-  <data name="sp5.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
-    <value>NoControl</value>
-  </data>
-  <data name="sp5.Location" type="System.Drawing.Point, System.Drawing">
-    <value>93, 538</value>
-  </data>
-  <data name="sp5.Size" type="System.Drawing.Size, System.Drawing">
-    <value>1, 14</value>
-  </data>
-  <data name="sp5.TabIndex" type="System.Int32, mscorlib">
-    <value>14</value>
-  </data>
-  <data name="&gt;&gt;sp5.Name" xml:space="preserve">
-    <value>sp5</value>
-  </data>
-  <data name="&gt;&gt;sp5.Type" xml:space="preserve">
-    <value>System.Windows.Forms.PictureBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;sp5.Parent" xml:space="preserve">
-    <value>tabPageKernelCtl</value>
-  </data>
-  <data name="&gt;&gt;sp5.ZOrder" xml:space="preserve">
-    <value>0</value>
-  </data>
-  <data name="linkLabelShowKernelTools.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
-    <value>Bottom, Left</value>
-  </data>
-  <data name="linkLabelShowKernelTools.AutoSize" type="System.Boolean, mscorlib">
-    <value>True</value>
-  </data>
-  <data name="linkLabelShowKernelTools.Location" type="System.Drawing.Point, System.Drawing">
-    <value>102, 536</value>
-  </data>
-  <data name="linkLabelShowKernelTools.Size" type="System.Drawing.Size, System.Drawing">
-    <value>104, 17</value>
-  </data>
-  <data name="linkLabelShowKernelTools.TabIndex" type="System.Int32, mscorlib">
-    <value>13</value>
-  </data>
-  <data name="linkLabelShowKernelTools.Text" xml:space="preserve">
-    <value>显示内核管理工具</value>
-  </data>
-  <data name="&gt;&gt;linkLabelShowKernelTools.Name" xml:space="preserve">
-    <value>linkLabelShowKernelTools</value>
-  </data>
-  <data name="&gt;&gt;linkLabelShowKernelTools.Type" xml:space="preserve">
-    <value>System.Windows.Forms.LinkLabel, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;linkLabelShowKernelTools.Parent" xml:space="preserve">
-    <value>tabPageKernelCtl</value>
-  </data>
-  <data name="&gt;&gt;linkLabelShowKernelTools.ZOrder" xml:space="preserve">
-    <value>1</value>
-  </data>
   <data name="pl_driverNotLoadTip.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>None</value>
   </data>
@@ -894,6 +837,63 @@
     <value>tabPageKernelCtl</value>
   </data>
   <data name="&gt;&gt;pl_driverNotLoadTip.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="sp5.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
+    <value>Bottom, Left</value>
+  </data>
+  <data name="sp5.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="sp5.Location" type="System.Drawing.Point, System.Drawing">
+    <value>93, 538</value>
+  </data>
+  <data name="sp5.Size" type="System.Drawing.Size, System.Drawing">
+    <value>1, 14</value>
+  </data>
+  <data name="sp5.TabIndex" type="System.Int32, mscorlib">
+    <value>14</value>
+  </data>
+  <data name="&gt;&gt;sp5.Name" xml:space="preserve">
+    <value>sp5</value>
+  </data>
+  <data name="&gt;&gt;sp5.Type" xml:space="preserve">
+    <value>System.Windows.Forms.PictureBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;sp5.Parent" xml:space="preserve">
+    <value>tabPageKernelCtl</value>
+  </data>
+  <data name="&gt;&gt;sp5.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="linkLabelShowKernelTools.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
+    <value>Bottom, Left</value>
+  </data>
+  <data name="linkLabelShowKernelTools.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="linkLabelShowKernelTools.Location" type="System.Drawing.Point, System.Drawing">
+    <value>102, 536</value>
+  </data>
+  <data name="linkLabelShowKernelTools.Size" type="System.Drawing.Size, System.Drawing">
+    <value>104, 17</value>
+  </data>
+  <data name="linkLabelShowKernelTools.TabIndex" type="System.Int32, mscorlib">
+    <value>13</value>
+  </data>
+  <data name="linkLabelShowKernelTools.Text" xml:space="preserve">
+    <value>显示内核管理工具</value>
+  </data>
+  <data name="&gt;&gt;linkLabelShowKernelTools.Name" xml:space="preserve">
+    <value>linkLabelShowKernelTools</value>
+  </data>
+  <data name="&gt;&gt;linkLabelShowKernelTools.Type" xml:space="preserve">
+    <value>System.Windows.Forms.LinkLabel, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;linkLabelShowKernelTools.Parent" xml:space="preserve">
+    <value>tabPageKernelCtl</value>
+  </data>
+  <data name="&gt;&gt;linkLabelShowKernelTools.ZOrder" xml:space="preserve">
     <value>2</value>
   </data>
   <data name="lbDriversCount.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
@@ -1637,7 +1637,7 @@
         AAEAAAD/////AQAAAAAAAAAMAgAAAFdTeXN0ZW0uV2luZG93cy5Gb3JtcywgVmVyc2lvbj00LjAuMC4w
         LCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODkFAQAAACZTeXN0
         ZW0uV2luZG93cy5Gb3Jtcy5JbWFnZUxpc3RTdHJlYW1lcgEAAAAERGF0YQcCAgAAAAkDAAAADwMAAACw
-        BAAAAk1TRnQBSQFMAwEBAAF8AQkBfAEJARABAAEQAQAE/wEhAQAI/wFCAU0BNgcAATYDAAEoAwABQAMA
+        BAAAAk1TRnQBSQFMAwEBAAEUAQoBFAEKARABAAEQAQAE/wEhAQAI/wFCAU0BNgcAATYDAAEoAwABQAMA
         ARADAAEBAQABIAYAARA8AAHNAf8MAAJQAVEBnwJQAVEBn8wAAvsB+gH/AvsB+gH/AvsB+gH/AvsB+gH/
         AvsB+gH/AvsB+gH/A/0B/wIAAdsB/wIAAdkB/wP9Af8CUAFRAZ8CAAHeAf8CUAFRAZ/MAAP7Af8B9wL2
         Af8B9wH2AfUB/wH3AfYB9QH/AfcB9gH1Af8B9wH2AfUB/wH3AfYB9QH/AvsB+gH/AgAB2wH/AgAB2QH/
@@ -2010,7 +2010,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;tabControlMain.ZOrder" xml:space="preserve">
-    <value>7</value>
+    <value>6</value>
   </data>
   <data name="lbStartingStatus.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Left, Right</value>
@@ -2019,7 +2019,7 @@
     <value>微软雅黑, 9pt</value>
   </data>
   <data name="lbStartingStatus.Location" type="System.Drawing.Point, System.Drawing">
-    <value>2, 149</value>
+    <value>2, 158</value>
   </data>
   <data name="lbStartingStatus.Size" type="System.Drawing.Size, System.Drawing">
     <value>715, 84</value>
@@ -2043,7 +2043,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;lbStartingStatus.ZOrder" xml:space="preserve">
-    <value>6</value>
+    <value>9</value>
   </data>
   <data name="spBottom.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Bottom, Left, Right</value>
@@ -2245,7 +2245,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;pl_simple.ZOrder" xml:space="preserve">
-    <value>8</value>
+    <value>7</value>
   </data>
   <metadata name="contextMenuStripProcDetalsCol.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>238, 34</value>
@@ -2332,7 +2332,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;pl_perfGridHost.ZOrder" xml:space="preserve">
-    <value>9</value>
+    <value>8</value>
   </data>
   <metadata name="contextMenuStripMainHeader.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>661, 34</value>
@@ -2340,11 +2340,17 @@
   <data name="toolStripSeparator2.Size" type="System.Drawing.Size, System.Drawing">
     <value>109, 6</value>
   </data>
+  <data name="百分比ToolStripMenuItemRam.ImageScaling" type="System.Windows.Forms.ToolStripItemImageScaling, System.Windows.Forms">
+    <value>None</value>
+  </data>
   <data name="百分比ToolStripMenuItemRam.Size" type="System.Drawing.Size, System.Drawing">
     <value>112, 22</value>
   </data>
   <data name="百分比ToolStripMenuItemRam.Text" xml:space="preserve">
     <value>百分比</value>
+  </data>
+  <data name="值ToolStripMenuItemRam.ImageScaling" type="System.Windows.Forms.ToolStripItemImageScaling, System.Windows.Forms">
+    <value>None</value>
   </data>
   <data name="值ToolStripMenuItemRam.Size" type="System.Drawing.Size, System.Drawing">
     <value>112, 22</value>
@@ -2358,11 +2364,17 @@
   <data name="内存ToolStripMenuItem.Text" xml:space="preserve">
     <value>内存</value>
   </data>
+  <data name="百分比ToolStripMenuItemDisk.ImageScaling" type="System.Windows.Forms.ToolStripItemImageScaling, System.Windows.Forms">
+    <value>None</value>
+  </data>
   <data name="百分比ToolStripMenuItemDisk.Size" type="System.Drawing.Size, System.Drawing">
     <value>112, 22</value>
   </data>
   <data name="百分比ToolStripMenuItemDisk.Text" xml:space="preserve">
     <value>百分比</value>
+  </data>
+  <data name="值ToolStripMenuItemDisk.ImageScaling" type="System.Windows.Forms.ToolStripItemImageScaling, System.Windows.Forms">
+    <value>None</value>
   </data>
   <data name="值ToolStripMenuItemDisk.Size" type="System.Drawing.Size, System.Drawing">
     <value>112, 22</value>
@@ -2376,11 +2388,17 @@
   <data name="磁盘ToolStripMenuItem.Text" xml:space="preserve">
     <value>磁盘</value>
   </data>
+  <data name="百分比ToolStripMenuItemNet.ImageScaling" type="System.Windows.Forms.ToolStripItemImageScaling, System.Windows.Forms">
+    <value>None</value>
+  </data>
   <data name="百分比ToolStripMenuItemNet.Size" type="System.Drawing.Size, System.Drawing">
     <value>112, 22</value>
   </data>
   <data name="百分比ToolStripMenuItemNet.Text" xml:space="preserve">
     <value>百分比</value>
+  </data>
+  <data name="值ToolStripMenuItemNet.ImageScaling" type="System.Windows.Forms.ToolStripItemImageScaling, System.Windows.Forms">
+    <value>None</value>
   </data>
   <data name="值ToolStripMenuItemNet.Size" type="System.Drawing.Size, System.Drawing">
     <value>112, 22</value>
@@ -2394,17 +2412,14 @@
   <data name="网络ToolStripMenuItem.Text" xml:space="preserve">
     <value>网络</value>
   </data>
-  <data name="资源值ToolStripMenuItem.Enabled" type="System.Boolean, mscorlib">
-    <value>False</value>
+  <data name="资源值ToolStripMenuItem.ImageScaling" type="System.Windows.Forms.ToolStripItemImageScaling, System.Windows.Forms">
+    <value>None</value>
   </data>
   <data name="资源值ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
     <value>112, 22</value>
   </data>
   <data name="资源值ToolStripMenuItem.Text" xml:space="preserve">
     <value>资源值</value>
-  </data>
-  <data name="资源值ToolStripMenuItem.Visible" type="System.Boolean, mscorlib">
-    <value>False</value>
   </data>
   <data name="contextMenuStripMainHeader.Size" type="System.Drawing.Size, System.Drawing">
     <value>113, 32</value>
@@ -2413,6 +2428,27 @@
     <value>contextMenuStripMainHeader</value>
   </data>
   <data name="&gt;&gt;contextMenuStripMainHeader.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ContextMenuStrip, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <metadata name="contextMenuStripPerfListLeft.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>923, 17</value>
+  </metadata>
+  <data name="隐藏图形ToolStripMenuItem.ImageScaling" type="System.Windows.Forms.ToolStripItemImageScaling, System.Windows.Forms">
+    <value>None</value>
+  </data>
+  <data name="隐藏图形ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>124, 22</value>
+  </data>
+  <data name="隐藏图形ToolStripMenuItem.Text" xml:space="preserve">
+    <value>隐藏图形</value>
+  </data>
+  <data name="contextMenuStripPerfListLeft.Size" type="System.Drawing.Size, System.Drawing">
+    <value>125, 26</value>
+  </data>
+  <data name="&gt;&gt;contextMenuStripPerfListLeft.Name" xml:space="preserve">
+    <value>contextMenuStripPerfListLeft</value>
+  </data>
+  <data name="&gt;&gt;contextMenuStripPerfListLeft.Type" xml:space="preserve">
     <value>System.Windows.Forms.ContextMenuStrip, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <metadata name="fileSystemWatcher.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
@@ -3366,6 +3402,12 @@
   <data name="&gt;&gt;值ToolStripMenuItemNet.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="&gt;&gt;隐藏图形ToolStripMenuItem.Name" xml:space="preserve">
+    <value>隐藏图形ToolStripMenuItem</value>
+  </data>
+  <data name="&gt;&gt;隐藏图形ToolStripMenuItem.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="&gt;&gt;fileSystemWatcher.Name" xml:space="preserve">
     <value>fileSystemWatcher</value>
   </data>
@@ -3377,12 +3419,6 @@
   </data>
   <data name="&gt;&gt;notifyIcon.Type" xml:space="preserve">
     <value>System.Windows.Forms.NotifyIcon, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;隐藏图形ToolStripMenuItem.Name" xml:space="preserve">
-    <value>隐藏图形ToolStripMenuItem</value>
-  </data>
-  <data name="&gt;&gt;隐藏图形ToolStripMenuItem.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;$this.Name" xml:space="preserve">
     <value>FormMain</value>
@@ -4022,23 +4058,5 @@
   </data>
   <data name="notifyIcon.Visible" type="System.Boolean, mscorlib">
     <value>True</value>
-  </data>
-  <metadata name="contextMenuStripPerfListLeft.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>923, 17</value>
-  </metadata>
-  <data name="隐藏图形ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>124, 22</value>
-  </data>
-  <data name="隐藏图形ToolStripMenuItem.Text" xml:space="preserve">
-    <value>隐藏图形</value>
-  </data>
-  <data name="contextMenuStripPerfListLeft.Size" type="System.Drawing.Size, System.Drawing">
-    <value>125, 26</value>
-  </data>
-  <data name="&gt;&gt;contextMenuStripPerfListLeft.Name" xml:space="preserve">
-    <value>contextMenuStripPerfListLeft</value>
-  </data>
-  <data name="&gt;&gt;contextMenuStripPerfListLeft.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ContextMenuStrip, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

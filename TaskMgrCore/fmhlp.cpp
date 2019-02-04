@@ -557,12 +557,12 @@ M_API BOOL MFM_FillData(const wchar_t* szFileDir, BOOL force, UINT fileSize)
 		DWORD written = 0;
 		SetFilePointer(hFile, 0, 0, FILE_BEGIN);
 		BOOL rs = WriteFile(hFile, buffer, fileSize, &written, NULL);
-		if(!rs)LogWarn(L"WriteFile failed (%d)", GetLastError());
+		if(!rs)LogWarn2(L"WriteFile failed (%d)", GetLastError());
 		SetEndOfFile(hFile);
 		CloseHandle(hFile);
 		return rs;
 	}
-	else LogWarn(L"M_SU_CreateFile failed (%s)", szFileDir);
+	else LogWarn2(L"M_SU_CreateFile failed (%s)", szFileDir);
 	return 0;
 }
 M_API BOOL MFM_EmeptyFile(const wchar_t* szFileDir, BOOL force)
@@ -575,7 +575,7 @@ M_API BOOL MFM_EmeptyFile(const wchar_t* szFileDir, BOOL force)
 		CloseHandle(hFile);
 		return TRUE;
 	}
-	else LogWarn(L"M_SU_CreateFile failed (%s)", szFileDir);
+	else LogWarn2(L"M_SU_CreateFile failed (%s)", szFileDir);
 	return 0;
 }
 M_API BOOL MFM_GetFileInformationString(const wchar_t* szFile, LPWSTR strbuf, UINT bufsize)
@@ -606,11 +606,11 @@ M_API BOOL MFM_GetFileInformationString(const wchar_t* szFile, LPWSTR strbuf, UI
 
 			return TRUE;
 		}
-		else LogWarn(L"_wstat failed (%s)", szFile);
+		else LogWarn2(L"_wstat failed (%s)", szFile);
 	}
 	else {
 		swprintf_s(strbuf, bufsize, L"File not exist.");
-		LogWarn(L"File not exist. (%s)", szFile);
+		LogWarn2(L"File not exist. (%s)", szFile);
 		return TRUE;
 	}
 	return 0;
@@ -667,10 +667,10 @@ BOOL MFM_DeleteDirInnern(const wchar_t* szFileDir)
 					if (MShowMessageDialog(hWndMain, path, (LPWSTR)str_item_access_denied.c_str(), str_item_delfailed, 0, MB_RETRYCANCEL) == IDRETRY)
 					{
 						if(!MFM_DeleteFileForce(path))
-							LogWarn(L"Deleting file : %s failed, (use force delete)", path);
+							LogWarn2(L"Deleting file : %s failed, (use force delete)", path);
 					}
 				}
-				LogWarn(L"Deleting file : %s failed, last error : %d", path, lasterr);
+				LogWarn2(L"Deleting file : %s failed, last error : %d", path, lasterr);
 			}
 
 			deletedFileCount++;
@@ -679,7 +679,7 @@ BOOL MFM_DeleteDirInnern(const wchar_t* szFileDir)
 	FindClose(hFind);
 
 	if(!RemoveDirectory(strDir.c_str()))
-		LogWarn(L"Deleting directory : %s failed, last error : %d", strDir.c_str(), GetLastError());
+		LogWarn2(L"Deleting directory : %s failed, last error : %d", strDir.c_str(), GetLastError());
 
 	return TRUE;
 }

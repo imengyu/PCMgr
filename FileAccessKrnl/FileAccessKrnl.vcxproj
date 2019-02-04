@@ -174,6 +174,7 @@
       <EntryPointSymbol>DriverEntry</EntryPointSymbol>
       <AdditionalDependencies>ntoskrnl.lib;wdm.lib;hal.lib;wdmsec.lib;wmilib.lib;fltMgr.lib;</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
+      <Profile>true</Profile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -200,6 +201,7 @@
       <AdditionalDependencies>ntoskrnl.lib;wdm.lib;hal.lib;wdmsec.lib;wmilib.lib;fltMgr.lib;</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
       <EntryPointSymbol>DriverEntry</EntryPointSymbol>
+      <Profile>true</Profile>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

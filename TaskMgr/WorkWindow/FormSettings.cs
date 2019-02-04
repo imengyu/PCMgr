@@ -68,11 +68,8 @@ namespace PCMgr.WorkWindow
                 case "zh":
                     comboBox_lg.SelectedIndex = 0;
                     break;
-                case "zh-Hant":
-                    comboBox_lg.SelectedIndex = 1;
-                    break;
                 case "en":
-                    comboBox_lg.SelectedIndex = 2;
+                    comboBox_lg.SelectedIndex = 1;
                     break;
 
             }
@@ -110,9 +107,6 @@ namespace PCMgr.WorkWindow
                     SetConfig("Lanuage", "AppSetting", "zh");
                     break;
                 case 1:
-                    SetConfig("Lanuage", "AppSetting", "zh-Hant");
-                    break;
-                case 2:
                     SetConfig("Lanuage", "AppSetting", "en");
                     break;
 
@@ -154,7 +148,6 @@ namespace PCMgr.WorkWindow
             FormMain.AppHWNDSendMessage(Win32.WM_COMMAND, new IntPtr(40120), IntPtr.Zero);
             //SetConfigBool("CloseHideToNotfication", "AppSetting", checkBoxCloseHide.Checked);
         }
-
         private void checkBoxCannotCreateProc_CheckedChanged(object sender, EventArgs e)
         {
             if (!M_SU_SetKrlMonSet_CreateProcess(checkBoxCannotCreateProc.Checked))
@@ -169,6 +162,14 @@ namespace PCMgr.WorkWindow
         {
             if (!M_SU_SetKrlMonSet_LoadImage(checkBoxCannotLoadDriver.Checked))
                 MessageBox.Show(LanuageFBuffers.Str_Failed);
+        }
+        private void checkBoxAutoLoadDriver_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBoxAutoLoadDriver.Checked)
+            {
+                if (MAppWorkCall3(155) != 1)
+                    checkBoxAutoLoadDriver.Checked = false;
+            }
         }
 
         private void btnChooseFont_Click(object sender, EventArgs e)

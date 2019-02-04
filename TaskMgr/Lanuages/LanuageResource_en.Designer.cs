@@ -2166,6 +2166,15 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 Please use 64-bit PC Manager for load driver 的本地化字符串。
+        /// </summary>
+        internal static string String1 {
+            get {
+                return ResourceManager.GetString("String1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Committed 的本地化字符串。
         /// </summary>
         internal static string Submited {
@@ -3439,6 +3448,15 @@ namespace PCMgr.Lanuages {
         internal static string WriteSpeed {
             get {
                 return ResourceManager.GetString("WriteSpeed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Please use 64-bit PC Manager for load driver 的本地化字符串。
+        /// </summary>
+        internal static string X64EnumDriver {
+            get {
+                return ResourceManager.GetString("X64EnumDriver", resourceCulture);
             }
         }
         

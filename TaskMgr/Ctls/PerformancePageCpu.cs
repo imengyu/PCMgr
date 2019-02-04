@@ -106,11 +106,15 @@ namespace PCMgr.Ctls
         }
         public void PageInit()
         {
-
+            contextMenuStrip.Renderer = new Helpers.ClassicalMenuRender(Handle);
 
             GetStaticInfos();
             InitRuntimeInfo();
             InitCpusInfo();
+        }
+        public void PageShowRightMenu()
+        {
+            contextMenuStrip.Show(this, Point.Empty);
         }
 
         PerformanceInfos.PerformanceInfoSpeicalItem item_cpuuseage = null;
@@ -308,6 +312,7 @@ namespace PCMgr.Ctls
 
         public event SwithGraphicViewEventHandler SwithGraphicView;
         public event OpeningPageMenuEventHandler OpeningPageMenu;
+        public event EventHandler AppKeyDown;
 
         private void 显示内核时间ToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
         {
@@ -346,6 +351,10 @@ namespace PCMgr.Ctls
             if (PageIsGraphicMode)
                 if (e.Button == MouseButtons.Left && e.Clicks == 1)
                     MAppWorkCall3(165, IntPtr.Zero, IntPtr.Zero);
+        }
+        private void PerformancePageCpu_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Apps) AppKeyDown?.Invoke(this, e);
         }
     }
 }

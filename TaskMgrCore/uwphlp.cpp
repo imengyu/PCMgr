@@ -23,9 +23,11 @@ DEFPROPERTYKEY(PKEY_AppUserModel_PackageFamilyName, 0x9F4C2855, 0x9F79, 0x4B39, 
 DEFPROPERTYKEY(PKEY_AppUserModel_PackageFullName, 0x9F4C2855, 0x9F79, 0x4B39, 0xA8, 0xD0, 0xE1, 0xD4, 0x2D, 0xE1, 0xD5, 0xF3, 0x15);
 DEFPROPERTYKEY(PKEY_AppName, 0xB725F130, 0x47EF, 0x101A, 0xA5, 0xF1, 0x02, 0x60, 0x8C, 0x9E, 0xEB, 0xAC, 0x0A);
 DEFPROPERTYKEY(PKEY_SmallLogoPath, 0x86D40B4D, 0x9069, 0x443C, 0x81, 0x9A, 0x2A, 0x54, 0x09, 0x0D, 0xCC, 0xEC, 0x02);
+DEFPROPERTYKEY(PKEY_LogoBackground, 0x86D40B4D, 0x9069, 0x443C, 0x81, 0x9A, 0x2A, 0x54, 0x09, 0x0D, 0xCC, 0xEC, 0x04);
 
 HRESULT M_GetIsImmersiveApp(IPropertyStore *pPropertyStore, BOOL *isImmersiveApp);
 HRESULT M_IPropertyStore_GetString(REFPROPERTYKEY key, IPropertyStore *pPropertyStore, std::wstring*str);
+HRESULT M_IPropertyStore_GetUint32(REFPROPERTYKEY key, IPropertyStore *pPropertyStore, UINT32*out);
 void M_UWP_ReadUWPApplicationProperty(IPropertyStore *pPropertyStore);
 void M_UWP_ClearAllCache();
 
@@ -403,6 +405,7 @@ void M_UWP_ReadUWPApplicationProperty(IPropertyStore *pPropertyStore)
 	HRESULT hr = S_OK;
 
 	/*
+	
 	DWORD count = 0;
 	pPropertyStore->GetCount(&count);
 	for (DWORD i = 0; i < count; i++) {
@@ -451,7 +454,6 @@ void M_UWP_ReadUWPApplicationProperty(IPropertyStore *pPropertyStore)
 	return;
 
 
-
  [LOG] ==================
  [LOG] VT_BSTR B725F130-47EF-101A-A5F102608C9EEBAC A : ÍøÒ×ÔÆÒôÀÖ
  [LOG] VT_BSTR 86D40B4D-9069-443C-819A2A54090DCCEC 2 : Assets\Logos\Square44x44Logo.png
@@ -480,6 +482,7 @@ void M_UWP_ReadUWPApplicationProperty(IPropertyStore *pPropertyStore)
 		LogErr2(L"M_GetIsImmersiveApp failed : 0x%08x", hr);
 		return;
 	}
+
 	if (isImmersiveApp) {
 		std::wstring buffer;
 		hr = M_IPropertyStore_GetString(PKEY_AppUserModel_ID, pPropertyStore, &buffer);
@@ -499,6 +502,9 @@ void M_UWP_ReadUWPApplicationProperty(IPropertyStore *pPropertyStore)
 				wcscpy_s(info->DisplayName, buffer.c_str());
 			if (SUCCEEDED(M_IPropertyStore_GetString(PKEY_SmallLogoPath, pPropertyStore, &buffer)))
 				wcscpy_s(info->IconPath, buffer.c_str());
+			UINT colorBuffer;
+			if (SUCCEEDED(M_IPropertyStore_GetUint32(PKEY_LogoBackground, pPropertyStore, &colorBuffer)))
+				info->IconBackgroundColor = colorBuffer;
 
 			uwpPackages.push_back(info);
 		}
@@ -528,6 +534,21 @@ HRESULT M_IPropertyStore_GetString(REFPROPERTYKEY key, IPropertyStore *pProperty
 		if (SUCCEEDED(hr)) {
 			if ((pv->vt  & VT_BSTR) == VT_BSTR)
 				*str = pv->bstrVal;
+			else hr = E_FAIL;
+		}
+		CoTaskMemFree(pv);
+	}
+	return hr;
+}
+HRESULT M_IPropertyStore_GetUint32(REFPROPERTYKEY key, IPropertyStore *pPropertyStore, UINT32*out)
+{
+	HRESULT hr = S_OK;
+	if (pPropertyStore) {
+		PROPVARIANT *pv = (PROPVARIANT*)CoTaskMemAlloc(sizeof(PROPVARIANT));
+		hr = pPropertyStore->GetValue(key, pv);
+		if (SUCCEEDED(hr)) {
+			if ((pv->vt  & VT_UI4) == VT_UI4)
+				*out = pv->uiVal;
 			else hr = E_FAIL;
 		}
 		CoTaskMemFree(pv);

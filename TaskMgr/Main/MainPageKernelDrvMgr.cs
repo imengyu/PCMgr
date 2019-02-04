@@ -79,6 +79,13 @@ namespace PCMgr.Main
         {
             if (!Inited)
             {
+#if !_X64_
+                if (MIs64BitOS())
+                {
+                    FormMain.lbRestartAsAdminDriver.Text = LanuageMgr.GetStr("X64EnumDriver", false);
+                    FormMain.linkRestartAsAdminDriver.Visible = false;
+                }
+#endif
                 if (FormMain.IsKernelLoaded)
                 {
                     NativeBridge.enumKernelModulsCallBack = KernelEnumCallBack;
@@ -211,8 +218,11 @@ namespace PCMgr.Main
 
         private void linkRestartAsAdminDriver_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            SetConfig("LoadKernelDriver", "Configure", "TRUE");
-            MAppRebotAdmin2("select kernel");
+            if (MAppWorkCall3(155) == 1)
+            {
+                SetConfig("LoadKernelDriver", "Configure", "TRUE");
+                MAppRebotAdmin2("select kernel");
+            }
         }
         private void linkLabelShowKernelTools_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {

@@ -56,6 +56,7 @@
             this.performanceInfos.MaxSpeicalItemsWidth = 170;
             this.performanceInfos.MaxSpeicalItemsWidthLimit = 250;
             this.performanceInfos.Name = "performanceInfos";
+            this.toolTip1.SetToolTip(this.performanceInfos, resources.GetString("performanceInfos.ToolTip"));
             this.performanceInfos.MouseClick += new System.Windows.Forms.MouseEventHandler(this.PerformancePageNet_MouseClick);
             this.performanceInfos.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.PerformancePageNet_MouseDoubleClick);
             // 
@@ -65,6 +66,7 @@
             this.performanceTitle.Name = "performanceTitle";
             this.performanceTitle.SmallTitleFont = new System.Drawing.Font("微软雅黑", 12F);
             this.performanceTitle.TitleFont = new System.Drawing.Font("微软雅黑", 18F);
+            this.toolTip1.SetToolTip(this.performanceTitle, resources.GetString("performanceTitle.ToolTip"));
             this.performanceTitle.MouseClick += new System.Windows.Forms.MouseEventHandler(this.PerformancePageNet_MouseClick);
             this.performanceTitle.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.PerformancePageNet_MouseDoubleClick);
             this.performanceTitle.MouseDown += new System.Windows.Forms.MouseEventHandler(this.PerformancePageNet_MouseDown);
@@ -92,30 +94,31 @@
             // 
             // contextMenuStrip
             // 
+            resources.ApplyResources(this.contextMenuStrip, "contextMenuStrip");
             this.contextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.图形摘要视图ToolStripMenuItem,
             this.查看ToolStripMenuItem,
             this.复制ToolStripMenuItem});
             this.contextMenuStrip.Name = "contextMenuStrip";
-            resources.ApplyResources(this.contextMenuStrip, "contextMenuStrip");
+            this.toolTip1.SetToolTip(this.contextMenuStrip, resources.GetString("contextMenuStrip.ToolTip"));
             this.contextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip_Opening);
             // 
             // 图形摘要视图ToolStripMenuItem
             // 
+            resources.ApplyResources(this.图形摘要视图ToolStripMenuItem, "图形摘要视图ToolStripMenuItem");
             this.图形摘要视图ToolStripMenuItem.CheckOnClick = true;
             this.图形摘要视图ToolStripMenuItem.Name = "图形摘要视图ToolStripMenuItem";
-            resources.ApplyResources(this.图形摘要视图ToolStripMenuItem, "图形摘要视图ToolStripMenuItem");
             this.图形摘要视图ToolStripMenuItem.Click += new System.EventHandler(this.图形摘要视图ToolStripMenuItem_Click);
             // 
             // 查看ToolStripMenuItem
             // 
-            this.查看ToolStripMenuItem.Name = "查看ToolStripMenuItem";
             resources.ApplyResources(this.查看ToolStripMenuItem, "查看ToolStripMenuItem");
+            this.查看ToolStripMenuItem.Name = "查看ToolStripMenuItem";
             // 
             // 复制ToolStripMenuItem
             // 
-            this.复制ToolStripMenuItem.Name = "复制ToolStripMenuItem";
             resources.ApplyResources(this.复制ToolStripMenuItem, "复制ToolStripMenuItem");
+            this.复制ToolStripMenuItem.Name = "复制ToolStripMenuItem";
             this.复制ToolStripMenuItem.Click += new System.EventHandler(this.复制ToolStripMenuItem_Click);
             // 
             // panelGrid
@@ -124,6 +127,7 @@
             this.panelGrid.Controls.Add(this.performanceTitle);
             this.panelGrid.Controls.Add(this.performanceGrid);
             this.panelGrid.Name = "panelGrid";
+            this.toolTip1.SetToolTip(this.panelGrid, resources.GetString("panelGrid.ToolTip"));
             this.panelGrid.MouseClick += new System.Windows.Forms.MouseEventHandler(this.PerformancePageNet_MouseClick);
             this.panelGrid.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.PerformancePageNet_MouseDoubleClick);
             this.panelGrid.MouseDown += new System.Windows.Forms.MouseEventHandler(this.PerformancePageNet_MouseDown);
@@ -136,7 +140,9 @@
             this.Controls.Add(this.performanceInfos);
             this.Controls.Add(this.panelGrid);
             this.Name = "PerformancePageNet";
+            this.toolTip1.SetToolTip(this, resources.GetString("$this.ToolTip"));
             this.Load += new System.EventHandler(this.PerformancePageNet_Load);
+            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.PerformancePageNet_KeyUp);
             this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.PerformancePageNet_MouseClick);
             this.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.PerformancePageNet_MouseDoubleClick);
             this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.PerformancePageNet_MouseDown);

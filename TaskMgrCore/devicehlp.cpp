@@ -166,6 +166,20 @@ M_CAPI(BOOL) MDEVICE_GetLogicalDiskInfoItem(int index, LPWSTR nameBuffer, LPWSTR
 	return FALSE;
 }
 
+M_CAPI(DWORD) MDEVICE_GetPhysicalDriveIndexInWMI(LPWSTR perfStr) {
+	if (wmiInited)
+	{
+		for (DWORD i = 0; i < diskInfos.size(); i++) {
+			MDevicePhysicalDisk *disk = diskInfos[i];
+			std::wstring index(disk->Name);
+			index = index.substr(index.size() - 1);
+			//	L"\\\\.\\PHYSICALDRIVE"
+			if (index == perfStr)
+				return i;
+		}
+	}
+	return -1;
+}
 M_CAPI(DWORD) MDEVICE_GetPhysicalDriveFromPartitionLetter(CHAR letter)
 {
 	HANDLE hDevice;               // handle to the drive to be examined

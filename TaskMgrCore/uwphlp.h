@@ -31,6 +31,8 @@ typedef struct tag_UWP_PACKAGE_INFO_EX
 	WCHAR InstallPath[MAX_PATH];
 	WCHAR IconPath[MAX_PATH];
 	WCHAR DisplayName[128];
+
+	int IconBackgroundColor;
 }UWP_PACKAGE_INFO_EX, *PUWP_PACKAGE_INFO_EX;
 
 #define DEFPROPERTYKEY(name, g1, g2, g3, b1,b2,b3,b4,b5,b6,b7,b8, pid) const PROPERTYKEY name = { { (long)g1, (short)g2, (short)g3, { b1,b2,b3,b4,b5,b6,b7,b8 } }, pid }

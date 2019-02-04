@@ -42,7 +42,7 @@ namespace PCMgr
         {
             if (agrs.Length > 0)
             {
-                NativeMethods.Log("MainRunAgrs 0 : " + agrs[0]);
+                NativeMethods.LogApi.Log("MainRunAgrs 0 : " + agrs[0]);
                 if (agrs[0].StartsWith("-")) agrs[0] = agrs[0].Remove(0, 1);
                 switch (agrs[0])
                 {
@@ -75,7 +75,7 @@ namespace PCMgr
                                 NativeMethods.MAppVProcessModuls(pid, IntPtr.Zero, agrs.Length > 2 ? agrs[2] : "");
                                 return false;
                             }
-                            else NativeMethods.Log("Invalid args[1] : " + agrs[1]);
+                            else NativeMethods.LogApi.Log("Invalid args[1] : " + agrs[1]);
                         }
                         break;
                     case "vthread":
@@ -87,7 +87,7 @@ namespace PCMgr
                                 NativeMethods.MAppVProcessThreads(pid, IntPtr.Zero, agrs.Length > 2 ? agrs[2] : "");
                                 return false;
                             }
-                            else NativeMethods.Log("Invalid args[1] : " + agrs[1]);
+                            else NativeMethods.LogApi.Log("Invalid args[1] : " + agrs[1]);
                         }
                         break;
                     case "vwin":
@@ -99,7 +99,7 @@ namespace PCMgr
                                 NativeMethods.MAppVProcessWindows(pid, IntPtr.Zero, agrs.Length > 2 ? agrs[2] : "");
                                 return false;
                             }
-                            else NativeMethods.Log("Invalid args[1] : " + agrs[1]);
+                            else NativeMethods.LogApi.Log("Invalid args[1] : " + agrs[1]);
                         }
                         break;
                     case "vhandle":
@@ -111,11 +111,11 @@ namespace PCMgr
                                 Application.Run(new WorkWindow.FormVHandles(pid, agrs.Length > 2 ? agrs[2] : ""));
                                 return false;
                             }
-                            else NativeMethods.Log("Invalid args[1] : " + agrs[1]);
+                            else NativeMethods.LogApi.Log("Invalid args[1] : " + agrs[1]);
                         }
                         break;
                     case "kda":
-                        NativeMethods.Log("MainRunAgrs run kda ");
+                        NativeMethods.LogApi.Log("MainRunAgrs run kda ");
                         Application.Run(new WorkWindow.FormKDA());
                         return false;
                     case "vexp":
@@ -128,7 +128,25 @@ namespace PCMgr
                                 Marshal.FreeHGlobal(file);
                                 return false;
                             }
-                            else NativeMethods.Log("Invalid args[1] : " + agrs[1] + " File not exists");
+                            else NativeMethods.LogApi.Log("Invalid args[1] : " + agrs[1] + " File not exists");
+                        }
+                        break;
+                    case "vpe":
+                        if (agrs.Length > 1)
+                        {
+                            if (NativeMethods.MFM_FileExist(agrs[1]))
+                            {
+                                IntPtr file = Marshal.StringToHGlobalUni(agrs[1]);
+                                NativeMethods.MAppWorkCall3(154, IntPtr.Zero, file);
+                                Marshal.FreeHGlobal(file);
+                                return false;
+                            }
+                            else NativeMethods.LogApi.Log("Invalid args[1] : " + agrs[1] + " File not exists");
+                        }
+                        else
+                        {
+                            NativeMethods.MAppWorkCall3(154, IntPtr.Zero, IntPtr.Zero);
+                            return false;
                         }
                         break;
                     case "vimp":
@@ -141,7 +159,7 @@ namespace PCMgr
                                 Marshal.FreeHGlobal(file);
                                 return false;
                             }
-                            else NativeMethods.Log("Invalid args[1] : " + agrs[1] + " File not exists");
+                            else NativeMethods.LogApi.Log("Invalid args[1] : " + agrs[1] + " File not exists");
                         }
                         break;
                     case "test":
@@ -229,7 +247,7 @@ namespace PCMgr
             var ex = e.ExceptionObject as Exception;
             if (ex != null)
             {
-                NativeMethods.FLogErr(ex.ToString());
+                NativeMethods.LogApi.FLogErr(ex.ToString());
                 DialogResult d = MessageBox.Show("An exception occurs, click \"Abort\" to forec exit process immediately. \n" + ex.ToString(), "Exception ! ", MessageBoxButtons.AbortRetryIgnore, MessageBoxIcon.Error);
                 if (d == DialogResult.Abort) Environment.Exit(0);
             }
@@ -246,7 +264,7 @@ namespace PCMgr
         }
         private static void Application_ThreadException(object sender, System.Threading.ThreadExceptionEventArgs e)
         {
-            NativeMethods.FLogErr(e.Exception.ToString());
+            NativeMethods.LogApi.FLogErr(e.Exception.ToString());
 
             DialogResult d = MessageBox.Show("An exception occurs, click \"Abort\" to forec exit process immediately. \n" + e.Exception.ToString(), "Exception ! ", MessageBoxButtons.AbortRetryIgnore, MessageBoxIcon.Error);
             if (d == DialogResult.Abort) Environment.Exit(0);

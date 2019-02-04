@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using PCMgr.Lanuages;
 using static PCMgr.NativeMethods;
+using static PCMgr.NativeMethods.LogApi;
 
 namespace PCMgr.WorkWindow
 {

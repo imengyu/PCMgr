@@ -265,6 +265,16 @@ namespace PCMgr.Ctls
                     InvalidAItem(selectedItem);
             }
         }
+        [Browsable(false)]
+        public int SelectedIindex
+        {
+            get
+            {
+                if (selectedItem != null && !items.Contains(selectedItem))
+                    return items.IndexOf(selectedItem);
+                return -1;
+            }
+        }
         [Description("列表的表头")]
         public TaskMgrListHeader Header
         {
@@ -484,13 +494,13 @@ namespace PCMgr.Ctls
             }
             return false;
         }
-        public Point GetiItemPoint(TaskMgrListItem item)
+        public Point GetItemPoint(TaskMgrListItem item)
         {
             return new Point(0, item.YPos - yOffest);
         }
 
         private void DrawItem(Graphics g, TaskMgrListItem item, int index, Rectangle rect, bool isChildItem = false)
-        {          
+        {
             if (!isChildItem)
             {
                 showedItems.Add(item);
@@ -513,8 +523,13 @@ namespace PCMgr.Ctls
                     if (item.IsUWPButErrInfo) g.FillRectangle(errTagSolidBrush, new Rectangle(53 - xOffest, item.YPos - yOffest + 11, 6, 6));
                     else g.FillRectangle(defTagSolidBrush, new Rectangle(53 - xOffest, item.YPos - yOffest + 11, 6, 6));
                 }
-                if (item.IsUWPICO) g.FillRectangle(defTagSolidBrush, new Rectangle((noHeader ? 0 : 7) - xOffest + (noHeader ? 8 : 25), item.YPos - YOffest + itemHeight / 2 - 8, 16, 16));
+                if (item.IsUWPICO)
+                {
+                    if(item.UWPIcoCusColor) g.FillRectangle(item.UWPIcoCusBrush, new Rectangle((noHeader ? 0 : 7) - xOffest + (noHeader ? 8 : 25), item.YPos - YOffest + itemHeight / 2 - 8, 16, 16));
+                    else g.FillRectangle(defTagSolidBrush, new Rectangle((noHeader ? 0 : 7) - xOffest + (noHeader ? 8 : 25), item.YPos - YOffest + itemHeight / 2 - 8, 16, 16));
+                }
             }
+
 
             #region SubItems
             if (noHeader)
@@ -596,7 +611,10 @@ namespace PCMgr.Ctls
                         else g.DrawString(item.Childs[i2].Text, fnormalText2, Brushes.Black, new Rectangle(65 - xOffest, item.YPos - yOffest + smallItemHeight * i2 + itemHeight, Width - 2, smallItemHeight), ChildStringFormat);
 
                         if (item.Childs[i2].IsUWPICO)
-                            g.FillRectangle(defTagSolidBrush, new Rectangle(40 - xOffest, item.YPos - yOffest + i2 * smallItemHeight + itemHeight + 4, 16, 16));
+                        {
+                            if (item.UWPIcoCusColor) g.FillRectangle(item.UWPIcoCusBrush, new Rectangle(40 - xOffest, item.YPos - yOffest + i2 * smallItemHeight + itemHeight + 4, 16, 16));
+                            else g.FillRectangle(defTagSolidBrush, new Rectangle(40 - xOffest, item.YPos - yOffest + i2 * smallItemHeight + itemHeight + 4, 16, 16));
+                        }
                         if (item.Childs[i2].Icon != null)
                         {
                             TaskMgrListApis.MDrawIcon(item.Childs[i2].Icon.Handle, g.GetHdc(), 40 - xOffest, item.YPos - yOffest + i2 * smallItemHeight + itemHeight + 4);
@@ -1268,6 +1286,9 @@ namespace PCMgr.Ctls
         private uint pid;
         private TaskMgrListGroup group;
         private List<TaskMgrListViewSubItem> subItem = null;
+        private Color uwpIcoColor;
+        private bool uwpIcoCusColor = false;
+        private SolidBrush uwpIcoCusBrush = new SolidBrush(Color.FromArgb(0, 120, 215));
 
         public class TaskMgrListViewSubItem : ListViewSubItem
         {
@@ -1337,8 +1358,22 @@ namespace PCMgr.Ctls
         }
         public Image Image { get; set; }
 
+
         public bool DrawUWPPaused { get; set; }
         public bool DrawUWPPausedGray { get; set; }
+
+        public Color UWPIcoColor
+        {
+            get { return uwpIcoColor; }
+            set
+            {
+                uwpIcoCusBrush.Color = value;
+                uwpIcoColor = value;
+                uwpIcoCusColor = true;
+            }
+        }
+        public bool UWPIcoCusColor { get { return uwpIcoCusColor; } }
+        public SolidBrush UWPIcoCusBrush { get { return uwpIcoCusBrush; } }
 
         public int DisplayChildValue { get; set; }
         public bool DisplayChildCount { get; set; }
@@ -1377,6 +1412,11 @@ namespace PCMgr.Ctls
                 if (c.Type == TaskMgrListItemType.ItemWindow)
                     if ((IntPtr)c.Tag == tag) return true;
             return rs;
+        }
+
+        public override string ToString()
+        {
+            return Text + " Pid : " + PID + " ItemType : " + Type;
         }
     }
     public class TaskMgrListItemGroup : TaskMgrListItem

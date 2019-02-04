@@ -121,12 +121,6 @@
   <data name="performanceCpus.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
   </data>
-  <data name="performanceCpus.ToolTip" xml:space="preserve">
-    <value />
-  </data>
-  <data name="performanceInfos.ToolTip" xml:space="preserve">
-    <value />
-  </data>
   <data name="performanceGridGlobal.LeftBottomText" xml:space="preserve">
     <value>60 s</value>
   </data>
@@ -136,19 +130,32 @@
   <data name="performanceGridGlobal.ToolTip" xml:space="preserve">
     <value>CPU Time</value>
   </data>
-  <data name="performanceTitle.ToolTip" xml:space="preserve">
-    <value />
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="显示内核时间ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>180, 22</value>
   </data>
-  <data name="performanceCpusAll.ToolTip" xml:space="preserve">
-    <value />
+  <data name="显示内核时间ToolStripMenuItem.Text" xml:space="preserve">
+    <value>Show kernel time</value>
   </data>
-  <data name="contextMenuStrip.ToolTip" xml:space="preserve">
-    <value />
+  <data name="图形摘要视图ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>180, 22</value>
   </data>
-  <data name="panelGrid.ToolTip" xml:space="preserve">
-    <value />
+  <data name="图形摘要视图ToolStripMenuItem.Text" xml:space="preserve">
+    <value>&amp;Graphic View</value>
   </data>
-  <data name="$this.ToolTip" xml:space="preserve">
-    <value />
+  <data name="查看ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>180, 22</value>
+  </data>
+  <data name="查看ToolStripMenuItem.Text" xml:space="preserve">
+    <value>&amp;View</value>
+  </data>
+  <data name="复制ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>180, 22</value>
+  </data>
+  <data name="复制ToolStripMenuItem.Text" xml:space="preserve">
+    <value>&amp;Copy</value>
+  </data>
+  <data name="contextMenuStrip.Size" type="System.Drawing.Size, System.Drawing">
+    <value>177, 92</value>
   </data>
 </root>

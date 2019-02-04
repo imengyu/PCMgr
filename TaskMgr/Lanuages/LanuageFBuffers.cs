@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Reflection;
 
 namespace PCMgr.Lanuages
@@ -33,6 +32,7 @@ namespace PCMgr.Lanuages
         public static string Str_No = "";
         public static string Str_Cancel = "";
         public static string Str_Close = "";
+        [LanuageStr("OpFailed")]
         public static string Str_Failed = "";
         public static string Str_FileNotExist = "";
         public static string Str_DriverLoad = "";
@@ -63,8 +63,9 @@ namespace PCMgr.Lanuages
         [LanuageStr("SystemIdleProcess")]
         public static string Str_IdleProcess = "";
         public static string Str_StatusRunning = "";
-        public static string Str_StatusStoppeed = "";
+        public static string Str_StatusStopped = "";
         public static string Str_StatusPaused = "";
+        [LanuageStr("StatusHang")]
         public static string Str_StatusHung = "";
 
         [LanuageStr("BtnEndTask")]

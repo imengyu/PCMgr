@@ -6,11 +6,7 @@
 #include "loghlp.h"
 #include "prochlp.h"
 #include "StringHlp.h"
-#include <Psapi.h>
-#include <winsock2.h>
-#include <Ws2tcpip.h>
-#include <iphlpapi.h>
-#include <Tcpestats.h>
+#include "MConnectionMonitor.h"
 #include <vector>
 #include <list>
 
@@ -26,18 +22,29 @@ HQUERY hQuery = NULL;
 M_CAPI(BOOL) MPERF_GlobalInit()
 {
 	PDH_STATUS pdhstatus = PdhOpenQuery(0, 0, &hQuery);
-	return (pdhstatus == ERROR_SUCCESS);
+	if (pdhstatus != ERROR_SUCCESS) {
+		LogErr2(L"PdhOpenQuery failed : %d", GetLastError());
+		return FALSE;
+	}
+	return TRUE;
 }
 M_CAPI(VOID) MPERF_GlobalDestroy() {
 	PdhCloseQuery(hQuery);
 }
 M_CAPI(BOOL) MPERF_GlobalUpdatePerformanceCounters()
 {
-	return !PdhCollectQueryData(hQuery);
+	PDH_STATUS pdhstatus = PdhCollectQueryData(hQuery);
+	if (pdhstatus != ERROR_SUCCESS) {
+		LogErr2(L"PdhCollectQueryData failed : %d", GetLastError());
+		return FALSE;
+	}
+	return TRUE;
 }
 M_CAPI(BOOL) MPERF_GlobalUpdateCpu() {
 	return MSystemPerformanctMonitor::UpdateCpuGlobal();
 }
+
+MConnectionMonitor connectionMonitor;
 
 PDH_HCOUNTER *counter3cpuuser = NULL;//CPU性能计数器User
 PDH_HCOUNTER *counter3cpu = NULL;//CPU性能计数器
@@ -73,10 +80,10 @@ M_CAPI(LPWSTR) MPERF_EnumPerformanceCounterInstanceNames(LPWSTR counterName)
 
 		if (status == ERROR_SUCCESS)
 			return pwsInstanceListBuffer;
-		else LogErr(L"Second PdhEnumObjectItems \"Network Interface\" failed : 0x%X (Counter name : %s)", status, counterName);
+		else LogErr2(L"Second PdhEnumObjectItems \"Network Interface\" failed : 0x%X (Counter name : %s)", status, counterName);
 		MFree(pwsInstanceListBuffer);
 	}
-	else LogErr(L"First PdhEnumObjectItems \"Network Interface\" failed : 0x%X (Counter name : %s)", status, counterName);
+	else LogErr2(L"First PdhEnumObjectItems \"Network Interface\" failed : 0x%X (Counter name : %s)", status, counterName);
 	return NULL;
 }
 
@@ -99,21 +106,21 @@ M_CAPI(BOOL) MPERF_Init3PerformanceCounters()
 			if (status != ERROR_SUCCESS) {
 				GlobalFree(counter3cpu);
 				counter3cpu = NULL;
-				LogErr(L"Add Performance Counter \"Processor Information(_Total)\\% Processor Time\" failed : 0x%X", status);
+				LogErr2(L"Add Performance Counter \"Processor Information(_Total)\\% Processor Time\" failed : 0x%X", status);
 			}
 
 			status = PdhAddCounter(hQuery, L"\\Processor Information(_Total)\\% User Time", 0, counter3cpuuser);
 			if (status != ERROR_SUCCESS) {
 				GlobalFree(counter3cpuuser);
 				counter3cpuuser = NULL;
-				LogErr(L"Add Performance Counter \"Processor Information(_Total)\\% User Time\" failed : 0x%X", status);
+				LogErr2(L"Add Performance Counter \"Processor Information(_Total)\\% User Time\" failed : 0x%X", status);
 			}
 
 			status = PdhAddCounter(hQuery, L"\\PhysicalDisk(_Total)\\% Disk Time", 0, counter3disk);
 			if (status != ERROR_SUCCESS) {
 				GlobalFree(counter3disk);
 				counter3disk = NULL;
-				LogErr(L"Add Performance Counter \"PhysicalDisk(_Total)\\% Disk Time\" failed : 0x%X", status);
+				LogErr2(L"Add Performance Counter \"PhysicalDisk(_Total)\\% Disk Time\" failed : 0x%X", status);
 			}
 
 
@@ -224,216 +231,57 @@ M_CAPI(double)MPERF_GetNetWorkUseage()
 	}
 	return 0;
 }
+M_CAPI(ULONGLONG) MPERF_GetRamAll() {
+	MEMORYSTATUSEX tmemory_statuex = { 0 };
+	tmemory_statuex.dwLength = sizeof(tmemory_statuex);
+	if (!GlobalMemoryStatusEx(&tmemory_statuex))	LogErr2(L"GlobalMemoryStatusEx failed : %d", GetLastError());
+	return tmemory_statuex.ullTotalPhys;
+}
 
 //Process Net Work Performance
 
-PMIB_TCPTABLE_OWNER_PID netProcess = NULL;
-PMIB_TCP6TABLE_OWNER_PID net6Process = NULL;
-
-extern _GetPerTcp6ConnectionEStats dGetPerTcp6ConnectionEStats;
-extern _GetPerTcpConnectionEStats dGetPerTcpConnectionEStats;
-extern _GetExtendedTcpTable dGetExtendedTcpTable;
-extern _SetPerTcpConnectionEStats dSetPerTcpConnectionEStats;
-
-M_CAPI(BOOL) MPERF_GetConnectNetWorkAllBuffer(DWORD dwLocalAddr, DWORD dwLocalPort, DWORD dwRemoteAddr, DWORD dwRemotePort, DWORD dwState, MPerfAndProcessData*data)
-{
-	bool setConnectioned = false;
-
-	MIB_TCPROW row;
-	row.dwLocalAddr = dwLocalAddr;
-	row.dwLocalPort = dwLocalPort;
-	row.dwRemoteAddr = dwRemoteAddr;
-	row.dwRemotePort = dwRemotePort;
-	row.dwState = dwState;
-
-	TCP_ESTATS_BANDWIDTH_RW_v0 rw;
-	TCP_ESTATS_BANDWIDTH_ROD_v0 rod;
-	memset(&rod, 0, sizeof(rod));
-	memset(&rw, 0, sizeof(rw));
-
-REGET:
-	ULONG ret = dGetPerTcpConnectionEStats(&row, TcpConnectionEstatsBandwidth, (PUCHAR)&rw, 0, sizeof(rw), 0, 0, 0, (PUCHAR)&rod, 0, sizeof(rod));
-	if (ret == NO_ERROR)
-	{
-		if ((!rw.EnableCollectionInbound || !rw.EnableCollectionOutbound) && !setConnectioned)
-		{
-			rw.EnableCollectionInbound = TcpBoolOptEnabled;
-			rw.EnableCollectionOutbound = TcpBoolOptEnabled;
-
-			dSetPerTcpConnectionEStats(&row, TcpConnectionEstatsBandwidth, (PUCHAR)&row, 0, sizeof(row), 0);
-			setConnectioned = true;
-			goto REGET;
-		}
-
-		data->InBandwidth = rod.InboundBandwidth;
-		data->OutBandwidth = rod.OutboundBandwidth;
-
-		data->ConnectCount++;
-
-		return TRUE;
-	}
-	return 0;
+M_CAPI(ULONG64) MPERF_GetProcessNetworkSpeed(PMPROCESS_ITEM p) {
+	return connectionMonitor.GetProcessConnectSpeed(p);
 }
-M_CAPI(BOOL) MPERF_GetConnectNetWorkAllBuffer6(IN6_ADDR LocalAddr, DWORD dwLocalPort, IN6_ADDR RemoteAddr, DWORD dwRemotePort, MIB_TCP_STATE State, MPerfAndProcessData*data)
-{
-	MIB_TCP6ROW row;
-	memset(&row, 0, sizeof(row));
-
-	row.LocalAddr = LocalAddr;
-	row.dwLocalPort = dwLocalPort;
-	row.RemoteAddr = RemoteAddr;
-	row.dwRemotePort = dwRemotePort;
-	row.State = State;
-
-	PTCP_ESTATS_BANDWIDTH_ROD_v0 rod = (PTCP_ESTATS_BANDWIDTH_ROD_v0)malloc(sizeof(TCP_ESTATS_BANDWIDTH_ROD_v0));
-	ULONG ret = dGetPerTcp6ConnectionEStats(&row, TcpConnectionEstatsBandwidth, NULL, 0, 0, NULL, 0, 0, (LPBYTE)rod, 0, sizeof(TCP_ESTATS_BANDWIDTH_ROD_v0));
-	if (ret == NO_ERROR)
-	{
-		data->InBandwidth6 = rod->InboundBandwidth;
-		data->OutBandwidth6 = rod->OutboundBandwidth;
-
-		data->ConnectCount++;
-
-		free(rod);
-		return TRUE;
-	}
-	else free(rod);
-	return 0;
-}
-
-M_CAPI(ULONG64) MPERF_GetProcessNetworkSpeed(PMPROCESS_ITEM p)
-{
-	if (!p)	return 0;
-
-	MPerfAndProcessData*data = p->PerfData;
-	if (!data) return 0;
-
-	data->ConnectCount = 0;
-
-	ULONG64 data1 = 0;
-	if (netProcess)
-	{
-		for (UINT i = 0; i < netProcess->dwNumEntries; i++)
-		{
-			if (netProcess->table[i].dwOwningPid == p->ProcessId)
-			{
-				MPERF_GetConnectNetWorkAllBuffer(netProcess->table[i].dwLocalAddr, netProcess->table[i].dwLocalPort,
-					netProcess->table[i].dwRemoteAddr, netProcess->table[i].dwRemotePort, netProcess->table[i].dwState, data);
-			}
-		}
-		data1 = ((data->InBandwidth) * 8 + (data->OutBandwidth) * 8);
-	}
-	ULONG64 data2 = 0;
-	/*
-	if (net6Process)
-	{
-		data->NetWorkInBandWidth = 0;
-		data->NetWorkOutBandWidth = 0;
-		for (UINT i = 0; i < net6Process->dwNumEntries; i++)
-		{
-			if (net6Process->table[i].dwOwningPid == pid)
-			{
-				IN6_ADDR remoteaddr = { 0 };
-				IN6_ADDR localaddr = { 0 };
-				memcpy_s(localaddr.u.Byte, 16, net6Process->table[i].ucLocalAddr, 16);
-				memcpy_s(remoteaddr.u.Byte, 16, net6Process->table[i].ucRemoteAddr, 16);
-
-				MPERF_GetConnectNetWorkAllBuffer6(localaddr, net6Process->table[i].dwLocalPort,
-					remoteaddr, net6Process->table[i].dwRemotePort, (MIB_TCP_STATE)net6Process->table[i].dwState, data);
-			}
-		}
-		data2 = ((data->InBandwidth6) * 8 + (data->OutBandwidth6) * 8);
-	}
-	*/
-
-	if (data->ConnectCount == 0) {
-		data->LastBandwidth = 0;
-		return 0;
-	}
-
-	ULONG64 datalast = data->LastBandwidth;
-	ULONG64 datathis = (data1 + data2) / data->ConnectCount;
-
-	data->LastBandwidth = datathis;
-
-	if (datalast > datathis)
-		return datalast - datathis;
-	else return 0;
-}
-
 M_CAPI(BOOL)MPERF_NET_IsProcessInNet(DWORD pid) {
-	BOOL rs = FALSE;
-	if (netProcess) 
-	{
-		for (UINT i = 0; i < netProcess->dwNumEntries; i++)
-		{
-			if (netProcess->table[i].dwOwningPid == pid)
-			{
-				rs = TRUE;
-				break;
-			}
-		}
-	}
-	return rs;
+	return connectionMonitor.IsProcessHasConnection(pid);
 }
-M_CAPI(void)MPERF_NET_FreeAllProcessNetInfo()
+M_CAPI(BOOL)MPERF_NET_UpdateAllProcessNetInfo() {
+	return connectionMonitor.Update();
+}
+M_CAPI(BOOL)MPERF_NET_EnumTcpConnections(MCONNECTION_ENUM_CALLBACK cp) {
+	return connectionMonitor.UpdateListData(cp);
+}
+M_CAPI(PWSTR) MPERF_NET_TcpConnectionStateToString(ULONG State)
 {
-	if (netProcess)
+	switch (State)
 	{
-		free(netProcess);
-		netProcess = NULL;
+	case MIB_TCP_STATE_CLOSED:
+		return L"Closed";
+	case MIB_TCP_STATE_LISTEN:
+		return L"Listen";
+	case MIB_TCP_STATE_SYN_SENT:
+		return L"SYN sent";
+	case MIB_TCP_STATE_SYN_RCVD:
+		return L"SYN received";
+	case MIB_TCP_STATE_ESTAB:
+		return L"Established";
+	case MIB_TCP_STATE_FIN_WAIT1:
+		return L"FIN wait 1";
+	case MIB_TCP_STATE_FIN_WAIT2:
+		return L"FIN wait 2";
+	case MIB_TCP_STATE_CLOSE_WAIT:
+		return L"Close wait";
+	case MIB_TCP_STATE_CLOSING:
+		return L"Closing";
+	case MIB_TCP_STATE_LAST_ACK:
+		return L"Last ACK";
+	case MIB_TCP_STATE_TIME_WAIT:
+		return L"Time wait";
+	case MIB_TCP_STATE_DELETE_TCB:
+		return L"Delete TCB";
 	}	
-	if (net6Process)
-	{
-		free(net6Process);
-		net6Process = NULL;
-	}
-}
-M_CAPI(BOOL)MPERF_NET_UpdateAllProcessNetInfo()
-{
-	MPERF_NET_FreeAllProcessNetInfo();
-	
-	DWORD dwSize = sizeof(MIB_TCPTABLE_OWNER_PID);
-	netProcess = (PMIB_TCPTABLE_OWNER_PID)malloc(sizeof(MIB_TCPTABLE_OWNER_PID));
-	memset(netProcess, 0, sizeof(dwSize));
-	if (dGetExtendedTcpTable(netProcess, &dwSize, TRUE, AF_INET, TCP_TABLE_OWNER_PID_CONNECTIONS, 0) == ERROR_INSUFFICIENT_BUFFER)
-	{
-		free(netProcess);
-
-		netProcess = (PMIB_TCPTABLE_OWNER_PID)malloc(dwSize);
-		memset(netProcess, 0, sizeof(dwSize));
-
-		if (dGetExtendedTcpTable(netProcess, &dwSize, TRUE, AF_INET, TCP_TABLE_OWNER_PID_CONNECTIONS, 0) != NO_ERROR)
-		{
-			MPERF_NET_FreeAllProcessNetInfo();
-			return FALSE;
-		}
-	}
-
-	/*
-	dwSize = sizeof(MIB_TCP6TABLE_OWNER_PID);
-	net6Process = (PMIB_TCP6TABLE_OWNER_PID)malloc(sizeof(MIB_TCP6TABLE_OWNER_PID));
-	memset(net6Process, 0, sizeof(dwSize));
-	if (dGetExtendedTcpTable(net6Process, &dwSize, TRUE, AF_INET6, TCP_TABLE_OWNER_PID_CONNECTIONS, 0) == ERROR_INSUFFICIENT_BUFFER)
-	{
-		free(net6Process);
-		DWORD realSize = sizeof(DWORD) + dwSize * sizeof(MIB_TCP6ROW_OWNER_PID);
-		net6Process = (PMIB_TCP6TABLE_OWNER_PID)malloc(realSize);
-		memset(net6Process, 0, sizeof(realSize));
-
-		if (dGetExtendedTcpTable(net6Process, &dwSize, TRUE, AF_INET6, TCP_TABLE_OWNER_PID_CONNECTIONS, 0) != NO_ERROR)
-		{
-			MPERF_NET_FreeAllProcessNetInfo();
-			return FALSE;
-		}
-	}
-	*/
-
-	return TRUE;
-}
-M_CAPI(void)MPERF_GetNetInfo()
-{
-	MPERF_NET_FreeAllProcessNetInfo();
+	return L"";
 }
 
 //Cpus Performance
@@ -450,14 +298,13 @@ M_CAPI(BOOL) MPERF_InitCpuDetalsPerformanceCounters()
 			{
 				if (wcscmp(pTemp, L"_Total") != 0 && wcscmp(pTemp, L"0,_Total") != 0)
 				{
-					
 					std::wstring cpuCounterName = FormatString(L"\\Processor Information(%s)\\%% Processor Time", pTemp);
 					PDH_HCOUNTER*thisCounter = (PDH_HCOUNTER*)GlobalAlloc(GPTR, (sizeof(PDH_HCOUNTER)));
 					PDH_STATUS status = PdhAddCounter(hQuery, cpuCounterName.c_str(), 0, thisCounter);
 					if (status != ERROR_SUCCESS)
 					{
 						GlobalFree(thisCounter);
-						LogErr(L"Add Performance Counter \"%s\" failed : 0x%X", cpuCounterName.c_str(), status);
+						LogErr2(L"Add Performance Counter \"%s\" failed : 0x%X", cpuCounterName.c_str(), status);
 					}
 					else cpuCounters.push_back(thisCounter);
 				}
@@ -525,7 +372,7 @@ M_CAPI(UINT) MPERF_InitDisksPerformanceCounters()
 					{
 						GlobalFree(data->performanceCounter_avgQue);
 						data->performanceCounter_avgQue = nullptr;
-						LogErr(L"Add Performance Counter \"%s\" failed : 0x%X", cpuCounterName.c_str(), status);
+						LogErr2(L"Add Performance Counter \"%s\" failed : 0x%X", cpuCounterName.c_str(), status);
 					}
 
 					cpuCounterName = FormatString(L"\\PhysicalDisk(%s)\\Disk Reads/sec", pTemp);
@@ -535,7 +382,7 @@ M_CAPI(UINT) MPERF_InitDisksPerformanceCounters()
 					{
 						GlobalFree(data->performanceCounter_avgQue);
 						data->performanceCounter_avgQue = nullptr;
-						LogErr(L"Add Performance Counter \"%s\" failed : 0x%X", cpuCounterName.c_str(), status);
+						LogErr2(L"Add Performance Counter \"%s\" failed : 0x%X", cpuCounterName.c_str(), status);
 					}
 
 					cpuCounterName = FormatString(L"\\PhysicalDisk(%s)\\Disk Writes/sec", pTemp);
@@ -545,7 +392,7 @@ M_CAPI(UINT) MPERF_InitDisksPerformanceCounters()
 					{
 						GlobalFree(data->performanceCounter_write);
 						data->performanceCounter_write = nullptr;
-						LogErr(L"Add Performance Counter \"%s\" failed : 0x%X", cpuCounterName.c_str(), status);
+						LogErr2(L"Add Performance Counter \"%s\" failed : 0x%X", cpuCounterName.c_str(), status);
 					}
 
 					cpuCounterName = FormatString(L"\\PhysicalDisk(%s)\\Disk Read Bytes/sec", pTemp);
@@ -555,7 +402,7 @@ M_CAPI(UINT) MPERF_InitDisksPerformanceCounters()
 					{
 						GlobalFree(data->performanceCounter_readSpeed);
 						data->performanceCounter_readSpeed = nullptr;
-						LogErr(L"Add Performance Counter \"%s\" failed : 0x%X", cpuCounterName.c_str(), status);
+						LogErr2(L"Add Performance Counter \"%s\" failed : 0x%X", cpuCounterName.c_str(), status);
 					}
 
 					cpuCounterName = FormatString(L"\\PhysicalDisk(%s)\\Disk Write Bytes/sec", pTemp);
@@ -565,7 +412,7 @@ M_CAPI(UINT) MPERF_InitDisksPerformanceCounters()
 					{
 						GlobalFree(data->performanceCounter_writeSpeed);
 						data->performanceCounter_writeSpeed = nullptr;
-						LogErr(L"Add Performance Counter \"%s\" failed : 0x%X", cpuCounterName.c_str(), status);
+						LogErr2(L"Add Performance Counter \"%s\" failed : 0x%X", cpuCounterName.c_str(), status);
 					}
 
 					diskCounters.push_back(data);
@@ -703,7 +550,7 @@ M_CAPI(UINT) MPERF_InitNetworksPerformanceCounters()
 				{
 					GlobalFree(data->performanceCounter_sent);
 					data->performanceCounter_sent = 0;
-					LogErr(L"Add Performance Counter \"%s\" failed : 0x%X", cpuCounterName.c_str(), status);
+					LogErr2(L"Add Performance Counter \"%s\" failed : 0x%X", cpuCounterName.c_str(), status);
 				}
 
 				cpuCounterName = FormatString(L"\\Network Interface(%s)\\Bytes Received/sec", pTemp);
@@ -713,7 +560,7 @@ M_CAPI(UINT) MPERF_InitNetworksPerformanceCounters()
 				{
 					GlobalFree(data->performanceCounter_receive);
 					data->performanceCounter_receive = 0;
-					LogErr(L"Add Performance Counter \"%s\" failed : 0x%X", cpuCounterName.c_str(), status);
+					LogErr2(L"Add Performance Counter \"%s\" failed : 0x%X", cpuCounterName.c_str(), status);
 				}
 
 				netCounters.push_back(data);
@@ -745,7 +592,7 @@ M_CAPI(UINT) MPERF_InitNetworksPerformanceCounters2() {
 				{
 					GlobalFree(data->performanceCounter_sent);
 					data->performanceCounter_sent = 0;
-					LogErr(L"Add Performance Counter \"%s\" failed : 0x%X", cpuCounterName.c_str(), status);
+					LogErr2(L"Add Performance Counter \"%s\" failed : 0x%X", cpuCounterName.c_str(), status);
 				}
 
 				cpuCounterName = FormatString(L"\\Network Interface(%s)\\Bytes Received/sec", pTemp);
@@ -755,7 +602,7 @@ M_CAPI(UINT) MPERF_InitNetworksPerformanceCounters2() {
 				{
 					GlobalFree(data->performanceCounter_receive);
 					data->performanceCounter_receive = 0;
-					LogErr(L"Add Performance Counter \"%s\" failed : 0x%X", cpuCounterName.c_str(), status);
+					LogErr2(L"Add Performance Counter \"%s\" failed : 0x%X", cpuCounterName.c_str(), status);
 				}
 
 				netCounters2.push_back(data);
@@ -836,7 +683,7 @@ M_CAPI(MPerfNetData*) MPERF_GetNetworksPerformanceCounterWithName(LPWSTR name)
 		{
 			GlobalFree(data->performanceCounter_sent);
 			data->performanceCounter_sent = 0;
-			LogErr(L"Add Performance Counter \"%s\" failed : 0x%X", cpuCounterName.c_str(), status);
+			LogErr2(L"Add Performance Counter \"%s\" failed : 0x%X", cpuCounterName.c_str(), status);
 		}
 
 		cpuCounterName = FormatString(L"\\Network Interface(%s)\\Bytes Received/sec", name);
@@ -846,7 +693,7 @@ M_CAPI(MPerfNetData*) MPERF_GetNetworksPerformanceCounterWithName(LPWSTR name)
 		{
 			GlobalFree(data->performanceCounter_receive);
 			data->performanceCounter_receive = 0;
-			LogErr(L"Add Performance Counter \"%s\" failed : 0x%X", cpuCounterName.c_str(), status);
+			LogErr2(L"Add Performance Counter \"%s\" failed : 0x%X", cpuCounterName.c_str(), status);
 		}
 
 		netCounters.push_back(data);

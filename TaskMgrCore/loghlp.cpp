@@ -26,6 +26,10 @@ LogLevel currentLogLevel = LogLevel::LogLevDebug;
 LogLevel currentLogLevel = LogLevel::LogLevError;
 #endif
 
+FILE *fileIn;
+FILE *file;
+FILE *fileErr;
+
 static BOOL ConsoleHandlerRoutine(_In_ DWORD dwCtrlType)
 {
 	switch (dwCtrlType)
@@ -33,6 +37,9 @@ static BOOL ConsoleHandlerRoutine(_In_ DWORD dwCtrlType)
 	case CTRL_BREAK_EVENT:
 		M_LOG_CloseConsole(FALSE);
 		return TRUE;
+	case	CTRL_SHUTDOWN_EVENT:
+	case CTRL_LOGOFF_EVENT:
+	case CTRL_C_EVENT:
 	case CTRL_CLOSE_EVENT:
 		M_LOG_CloseConsole(TRUE);
 		return TRUE;
@@ -40,6 +47,14 @@ static BOOL ConsoleHandlerRoutine(_In_ DWORD dwCtrlType)
 	return FALSE;
 }
 
+void M_LOG_OnConsoleExit()
+{
+	SetConsoleCtrlHandler((PHANDLER_ROUTINE)ConsoleHandlerRoutine, FALSE);
+
+	fclose(fileIn);
+	fclose(file);
+	fclose(fileErr);
+}
 void M_LOG_FocusConsoleWindow() {
 	if (showConsole) {
 		HWND hConsole = GetConsoleWindow();
@@ -59,9 +74,6 @@ void M_LOG_CreateConsole()
 	hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
 	SetConsoleCtrlHandler((PHANDLER_ROUTINE)ConsoleHandlerRoutine, TRUE);
 
-	FILE *fileIn;
-	FILE *file;
-	FILE *fileErr;
 	freopen_s(&fileIn, "CONIN$", "r", stdin);
 	freopen_s(&fileErr, "CONOUT$", "w", stderr);
 	freopen_s(&file, "CONOUT$", "w", stdout);
@@ -69,7 +81,7 @@ void M_LOG_CreateConsole()
 	HWND hConsole = GetConsoleWindow();
 	SendMessage(hConsole, WM_SETICON, 0, (LPARAM)LoadIcon(hInst, MAKEINTRESOURCE(IDI_ICONCONSOLE)));
 	SetConsoleTitle(L"PCMgr Debug Console");
-	HMENU menu = GetSystemMenu(GetConsoleWindow(), FALSE);
+	HMENU menu = GetSystemMenu(hConsole, FALSE);
 	EnableMenuItem(menu, SC_CLOSE, MF_GRAYED | MF_DISABLED);
 
 	printf_s("You Can enter \"?\" or \"help\" to show command helps\nEnter \"exit\" to close Console window and back to Main app.\n");
@@ -77,7 +89,7 @@ void M_LOG_CreateConsole()
 	M_LOG_PrintColorTextW(FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE,
 		L"\nIf you close this window directly then the whole app will exit.\n\n");
 
-	MStartRunCmdThread();
+	MStartRunCmdThread(M_LOG_OnConsoleExit);
 }
 void M_LOG_CloseConsole(BOOL callFormCloseEvent, BOOL callFormConsoleApp)
 {
@@ -294,6 +306,14 @@ M_CAPI(void) M_LOG_LogW(wchar_t const* const _Format, ...)
 		va_end(arg);
 	}
 }
+M_CAPI(void) M_LOG_LogTextW(wchar_t const* const _Format, ...)
+{
+	if (currentLogLevel <= LogLevDebug) {
+		M_LOG_LogXW((LPWSTR)_Format, FOREGROUND_INTENSITY | FOREGROUND_RED |
+			FOREGROUND_GREEN |
+			FOREGROUND_BLUE, _Format, nullptr);
+	}
+}
 
 M_CAPI(void) M_LOG_LogErr_WithFunAndLineW(LPSTR fileName, LPSTR funName, INT lineNumber, _In_z_ _Printf_format_string_ wchar_t const* const _Format, ...)
 {
@@ -416,6 +436,14 @@ M_CAPI(void) M_LOG_LogA(char const* const _Format, ...)
 			FOREGROUND_GREEN |
 			FOREGROUND_BLUE, _Format, arg);
 		va_end(arg);
+	}
+}
+M_CAPI(void) M_LOG_LogTextA(char const* const _Format, ...)
+{
+	if (currentLogLevel <= LogLevDebug) {
+		M_LOG_LogXA((LPCSTR)_Format, FOREGROUND_INTENSITY | FOREGROUND_RED |
+			FOREGROUND_GREEN |
+			FOREGROUND_BLUE, _Format, nullptr);
 	}
 }
 

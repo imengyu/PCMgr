@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Reflection;
 
 using System.Text;
+using System.Diagnostics;
 
 namespace PCMgr
 {
@@ -142,6 +143,8 @@ namespace PCMgr
             public static extern int GetDlgCtrlID(IntPtr hWnd);
             [DllImport("user32.dll")]
             public static extern bool DestroyWindow(IntPtr hWnd);
+            [DllImport("user32.dll")]
+            public static extern bool DestroyIcon(IntPtr hIcon);
             [DllImport("user32.dll")]
             public static extern bool GetWindowInfo(IntPtr hWnd, ref WINDOWINFO lpWindowInfo);
             [DllImport("user32.dll")]
@@ -292,6 +295,10 @@ namespace PCMgr
             public const int M_CALLBACK_UWPKILL = 59;
             public const int M_CALLBACK_EXPAND_ALL = 60;
             public const int M_CALLBACK_SHOW_HELP = 61;
+            public const int M_CALLBACK_RUN_APP_CMD = 62;
+            public const int M_CALLBACK_VIEW_TCP = 63;
+
+            
         }
 
 
@@ -325,23 +332,6 @@ namespace PCMgr
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern void M_LOG_Close();
 
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "M_LOG_Error_ForceFileW")]
-        public static extern void FLogErr([MarshalAs(UnmanagedType.LPWStr)]string format);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "M_LOG_Warning_ForceFileW")]
-        public static extern void FLogWarn([MarshalAs(UnmanagedType.LPWStr)]string format);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "M_LOG_Info_ForceFileW")]
-        public static extern void FLogInfo([MarshalAs(UnmanagedType.LPWStr)]string format);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "M_LOG_Str_ForceFileW")]
-        public static extern void FLog([MarshalAs(UnmanagedType.LPWStr)]string format);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "M_LOG_LogErrW")]
-        public static extern void LogErr([MarshalAs(UnmanagedType.LPWStr)]string format);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "M_LOG_LogWarnW")]
-        public static extern void LogWarn([MarshalAs(UnmanagedType.LPWStr)]string format);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "M_LOG_LogInfoW")]
-        public static extern void LogInfo([MarshalAs(UnmanagedType.LPWStr)]string format);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "M_LOG_LogW")]
-        public static extern void Log([MarshalAs(UnmanagedType.LPWStr)]string format);
-
         [return:MarshalAs(UnmanagedType.LPWStr)]
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern string MAppGetName();
@@ -351,6 +341,8 @@ namespace PCMgr
         [return: MarshalAs(UnmanagedType.LPWStr)]
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern string MAppGetBulidDate();
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr MGetShieldIcon2();
 
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern bool MGetPrivileges();
@@ -444,7 +436,18 @@ namespace PCMgr
         public static extern bool MREG_SetCurrentIEVersion(uint ver, [MarshalAs(UnmanagedType.LPWStr)]string currentProcessName);
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern bool MREG_IsCurrentIEVersionOK(uint ver, [MarshalAs(UnmanagedType.LPWStr)]string currentProcessName);
-        
+
+#if _X64_
+        public const string CMDDLLNAME = "PCMgrCmd64.dll";
+#else
+        public const string CMDDLLNAME = "PCMgrCmd32.dll";
+#endif
+
+        [DllImport(CMDDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern uint MAppCmdGetCount();
+        [DllImport(CMDDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+        public static extern bool MAppCmdGetAt(uint i, StringBuilder buf , uint maxbuf);
+
         #endregion
 
         #region PROC API
@@ -618,10 +621,10 @@ namespace PCMgr
         public static extern bool MGetProcessIsUWP(IntPtr handle);
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern bool MGetProcessIs32Bit(IntPtr handle);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool MGetUWPPackageId(IntPtr handle, IntPtr data);
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern bool MGetUWPPackageFullName(IntPtr handle, ref int len, StringBuilder buf);
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern bool MGetUWPPackageIdName(IntPtr handle, StringBuilder buf, int len);
 
         public static void MAppVProcessAllWindowsUWP()
         {
@@ -676,6 +679,9 @@ namespace PCMgr
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern double MPERF_GetNetWorkUseage();
 
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern UInt64 MPERF_GetRamAll();
+
         //3
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern bool MPERF_Destroy3PerformanceCounters();
@@ -694,8 +700,6 @@ namespace PCMgr
         public static extern bool MPERF_NET_UpdateAllProcessNetInfo();
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern bool MPERF_NET_IsProcessInNet(uint pid);
-        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void MPERF_NET_FreeAllProcessNetInfo();
 
         //Cpus
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
@@ -740,6 +744,20 @@ namespace PCMgr
         public static extern IntPtr MPERF_GetNetworksPerformanceCounterWithName([MarshalAs(UnmanagedType.LPWStr)]string name);
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern UInt64 MPERF_GetProcessNetworkSpeed(IntPtr processItem);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public delegate bool MCONNECTION_ENUM_CALLBACK(uint ProcessId, uint Protcol, [MarshalAs(UnmanagedType.LPWStr)]string LocalAddr, uint LocalPort, [MarshalAs(UnmanagedType.LPWStr)]string RemoteAddr, uint RemotePort, uint state);
+
+        public const int M_CONNECTION_TYPE_TCP = 4;
+        public const int M_CONNECTION_TYPE_TCP6 = 6;
+        public const int M_CONNECTION_TYPE_UDP = 2;
+        public const int M_CONNECTION_TYPE_UDP6 = 5;
+
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern bool MPERF_NET_EnumTcpConnections(IntPtr cp);
+        [return: MarshalAs(UnmanagedType.LPWStr)]
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern string MPERF_NET_TcpConnectionStateToString(uint state);
 
         #endregion
 
@@ -982,7 +1000,7 @@ namespace PCMgr
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void EnumServicesCallBack(IntPtr dspName, IntPtr scName, uint scType, uint currentState, uint dwProcessId, bool syssc,
-                uint dwStartType, IntPtr lpBinaryPathName, IntPtr lpLoadOrderGroup);
+                uint dwStartType, IntPtr lpBinaryPathName, IntPtr lpLoadOrderGroup, bool add);
 
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern bool MSCM_Init();
@@ -992,7 +1010,8 @@ namespace PCMgr
         public static extern bool MEnumServices(IntPtr callback);
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern void MSCM_ShowMenu(IntPtr hDlg, [MarshalAs(UnmanagedType.LPWStr)] string serviceName, uint running, uint startType, [MarshalAs(UnmanagedType.LPWStr)] string path, int x, int y);
-
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern bool MSCM_UpdateServiceStatus([MarshalAs(UnmanagedType.LPWStr)] string serviceName, IntPtr callback);
 
         #endregion
 
@@ -1082,8 +1101,18 @@ namespace PCMgr
             public string IconPath;
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
             public string DisplayName;
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
-            public string PublisherDisplayName;
+
+            public int IconBackgroundColor;
+        }
+
+        [DllImport("shlwapi.dll", BestFitMapping = false, CharSet = CharSet.Unicode, ExactSpelling = true, SetLastError = false, ThrowOnUnmappableChar = true)]
+        public static extern int SHLoadIndirectString(string pszSource, StringBuilder pszOutBuf, int cchOutBuf, IntPtr ppvReserved);
+        public static string ExtractStringFromPRIFile(string pathToPRI, string resourceKey)
+        {
+            string sWin8ManifestString = string.Format("@{{{0}?{1}}}", pathToPRI, resourceKey);
+            var outBuff = new StringBuilder(1024);
+            int result = SHLoadIndirectString(sWin8ManifestString, outBuff, outBuff.Capacity, IntPtr.Zero);
+            return outBuff.ToString();
         }
 
         #endregion
@@ -1110,6 +1139,8 @@ namespace PCMgr
             public static extern bool MDEVICE_GetIsSystemDisk([MarshalAs(UnmanagedType.LPStr)]string perfstr);
             [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
             public static extern bool MDEVICE_GetIsPageFileDisk([MarshalAs(UnmanagedType.LPStr)]string perfstr);
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+            public static extern uint MDEVICE_GetPhysicalDriveIndexInWMI([MarshalAs(UnmanagedType.LPWStr)]string perfstr);
 
             [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
             public static extern uint MDEVICE_GetNetworkAdaptersInfo();
@@ -1235,6 +1266,60 @@ namespace PCMgr
             [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
             public static extern void MListViewProcListLock(bool locked);
         }
+        public static class LogApi
+        {
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "M_LOG_Error_ForceFileW")]
+            public static extern void FLogErr([MarshalAs(UnmanagedType.LPWStr)]string format);
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "M_LOG_Warning_ForceFileW")]
+            public static extern void FLogWarn([MarshalAs(UnmanagedType.LPWStr)]string format);
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "M_LOG_Info_ForceFileW")]
+            public static extern void FLogInfo([MarshalAs(UnmanagedType.LPWStr)]string format);
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "M_LOG_Str_ForceFileW")]
+            public static extern void FLog([MarshalAs(UnmanagedType.LPWStr)]string format);
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "M_LOG_LogErrW")]
+            public static extern void LogErr([MarshalAs(UnmanagedType.LPWStr)]string format);
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "M_LOG_LogWarnW")]
+            public static extern void LogWarn([MarshalAs(UnmanagedType.LPWStr)]string format);
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "M_LOG_LogInfoW")]
+            public static extern void LogInfo([MarshalAs(UnmanagedType.LPWStr)]string format);
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "M_LOG_LogW")]
+            public static extern void Log([MarshalAs(UnmanagedType.LPWStr)]string format);
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "M_LOG_LogTextW")]
+            public static extern void LogText([MarshalAs(UnmanagedType.LPWStr)]string format);
+
+            private static void LogX2WithStack(string format, string type)
+            {
+                var st = new StackTrace(new StackFrame(2, true));
+                var stf = st.GetFrame(0);
+                string stack = "\n  [At] " + stf.GetFileName() + "  (" + stf.GetFileLineNumber() + ")  " + stf.GetMethod();
+                switch (type)
+                {
+                    case "Err": LogErr(format + stack);break;
+                    case "Warn": LogWarn(format + stack); break;
+                    case "Info": LogInfo(format + stack); break;
+                    default: Log(format + stack); break;
+                }
+               
+            }
+
+            public static void Log2(string format)
+            {
+                LogX2WithStack(format, "");
+            }
+            public static void LogErr2(string format)
+            {
+                LogX2WithStack(format, "Err");
+            }
+            public static void LogWarn2(string format)
+            {
+                LogX2WithStack(format, "Warn");
+            }
+            public static void LogInfo2(string format)
+            {
+                LogX2WithStack(format, "Info");
+            }
+
+        }
 
         public static class MCpuInfoMonitor
         {
@@ -1326,7 +1411,7 @@ namespace PCMgr
             [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetMemoryCompressionInfo@MSystemMemoryPerformanctMonitor@@SAHPAU_PROCESS_COMPRESSION_INFO@@@Z")]
             public static extern bool GetMemoryCompressionInfo(ref SYSTEM_COMPRESSION_INFO outInfo);
 
-                [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?UpdateMemoryListInfo@MSystemMemoryPerformanctMonitor@@SAHXZ")]
+            [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?UpdateMemoryListInfo@MSystemMemoryPerformanctMonitor@@SAHXZ")]
             public static extern bool UpdateMemoryListInfo();
 
             [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetAllMemory@MSystemMemoryPerformanctMonitor@@SA_KXZ")]

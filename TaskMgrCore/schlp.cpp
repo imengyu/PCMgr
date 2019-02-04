@@ -133,7 +133,7 @@ M_CAPI(BOOL) MSCM_EnumDriverServices() {
 		BOOL bRet = EnumServicesStatusEx(hSCM, SC_ENUM_PROCESS_INFO, SERVICE_DRIVER, SERVICE_STATE_ALL,
 			(LPBYTE)pBufDrvscs, dwBufSize, &dwBufNeed, &dwNumberOfDriverService, NULL, NULL);
 		if (bRet == FALSE) {
-			LogErr(L"EnumServicesStatusEx error : %d", GetLastError());
+			LogErr(L"EnumServicesStatusEx failed : %d", GetLastError());
 			MFree(pBufDrvscs);
 			pBufDrvscs = NULL;
 			return FALSE;
@@ -168,12 +168,12 @@ M_CAPI(BOOL) MSCM_EnumDriverServices() {
 	}
 	return 0;
 }
-M_CAPI(BOOL) MEnumServices(EnumServicesCallBack callback)
+M_CAPI(BOOL) MSCM_EnumCommonServices(EnumServicesCallBack callback)
 {
 	BOOL bRet = FALSE;
 	if (callback && hSCM) {
 		if (pBuf) MFree(pBuf);
-		pBuf = NULL;		
+		pBuf = NULL;
 		// 获取需要的缓冲区大小
 		EnumServicesStatusEx(hSCM, SC_ENUM_PROCESS_INFO, SERVICE_WIN32, SERVICE_STATE_ALL,
 			NULL, dwBufSize, &dwBufNeed, &dwNumberOfService, NULL, NULL);
@@ -189,7 +189,7 @@ M_CAPI(BOOL) MEnumServices(EnumServicesCallBack callback)
 		bRet = EnumServicesStatusEx(hSCM, SC_ENUM_PROCESS_INFO, SERVICE_WIN32, SERVICE_STATE_ALL,
 			(LPBYTE)pBuf, dwBufSize, &dwBufNeed, &dwNumberOfService, NULL, NULL);
 		if (bRet == FALSE) {
-			LogErr(L"EnumServicesStatusEx error : %d", GetLastError());
+			LogErr(L"EnumServicesStatusEx failed : %d", GetLastError());
 			MFree(pBuf);
 			pBuf = NULL;
 			return -1;
@@ -206,12 +206,12 @@ M_CAPI(BOOL) MEnumServices(EnumServicesCallBack callback)
 				if (QueryServiceConfig(hSc, cfg, sizeneed, &sizeneed)) {
 					callback(pServiceInfo[i].lpDisplayName, pServiceInfo[i].lpServiceName, cfg->dwServiceType,
 						pServiceInfo[i].ServiceStatusProcess.dwCurrentState, pServiceInfo[i].ServiceStatusProcess.dwProcessId,
-						pServiceInfo[i].ServiceStatusProcess.dwServiceFlags == 1, cfg->dwStartType, cfg->lpBinaryPathName, MSCM_GetScGroup(cfg->lpBinaryPathName));
-					
+						pServiceInfo[i].ServiceStatusProcess.dwServiceFlags == 1, cfg->dwStartType, cfg->lpBinaryPathName, MSCM_GetScGroup(cfg->lpBinaryPathName), TRUE);
+
 					MFree(cfg);
 				}
 				else {
-					wsprintf(err, L"QueryServiceConfig err : %d .", GetLastError());
+					wsprintf(err, L"QueryServiceConfig failed : %d .", GetLastError());
 					MFree(cfg);
 					CloseServiceHandle(hSc);
 					goto DEFINFO;
@@ -219,15 +219,58 @@ M_CAPI(BOOL) MEnumServices(EnumServicesCallBack callback)
 				CloseServiceHandle(hSc);
 				continue;
 			}
-			else wsprintf(err, L"OpenService err : %d .", GetLastError());
-			DEFINFO:
+			else wsprintf(err, L"OpenService failed : %d .", GetLastError());
+		DEFINFO:
 			callback(pServiceInfo[i].lpDisplayName, pServiceInfo[i].lpServiceName, pServiceInfo[i].ServiceStatusProcess.dwServiceType,
-				pServiceInfo[i].ServiceStatusProcess.dwCurrentState, pServiceInfo[i].ServiceStatusProcess.dwProcessId, 
-				pServiceInfo[i].ServiceStatusProcess.dwServiceFlags == 1, 0x80, err, NULL);
-		
+				pServiceInfo[i].ServiceStatusProcess.dwCurrentState, pServiceInfo[i].ServiceStatusProcess.dwProcessId,
+				pServiceInfo[i].ServiceStatusProcess.dwServiceFlags == 1, 0x80, err, NULL, TRUE);
+
 		}
 	}
 	return bRet;
+}
+M_CAPI(BOOL) MSCM_UpdateServiceStatus(LPWSTR lpServiceName, EnumServicesCallBack callback)
+{
+	SC_HANDLE hSc = OpenService(hSCM, lpServiceName, SERVICE_QUERY_CONFIG);
+	if (hSc) {
+		DWORD sizeNeed = 0;
+		LPSERVICE_STATUS_PROCESS  svcStatus = NULL;
+		LPQUERY_SERVICE_CONFIG svcConfig = NULL;
+
+		QueryServiceStatusEx(hSc, SC_STATUS_PROCESS_INFO, NULL, 0, &sizeNeed);
+		svcStatus = (LPSERVICE_STATUS_PROCESS)MAlloc(sizeNeed);
+		if (!QueryServiceStatusEx(hSc, SC_STATUS_PROCESS_INFO, (LPBYTE)svcStatus, 0, &sizeNeed)) {
+			LogErr2(L"QueryServiceStatusEx failed : %d .", GetLastError());
+			MFree(svcStatus);
+			CloseServiceHandle(hSc);
+			return FALSE;
+		}
+
+		QueryServiceConfig(hSc, NULL, 0, &sizeNeed);
+		svcConfig = (LPQUERY_SERVICE_CONFIG)MAlloc(sizeNeed);
+		if (QueryServiceConfig(hSc, svcConfig, sizeNeed, &sizeNeed)) {
+			callback(svcConfig->lpDisplayName, lpServiceName, svcConfig->dwServiceType,
+				svcStatus->dwCurrentState, svcStatus->dwProcessId,
+				FALSE, svcConfig->dwStartType, svcConfig->lpBinaryPathName, NULL, FALSE);
+			MFree(svcStatus);
+			MFree(svcConfig);
+		}
+		else {
+			LogErr2(L"QueryServiceConfig failed : %d .", GetLastError());
+			MFree(svcConfig);
+			MFree(svcStatus);
+			CloseServiceHandle(hSc);
+		}
+
+		CloseServiceHandle(hSc);
+		return TRUE;
+	}
+	else LogErr2(L"OpenService failed : %d .", GetLastError());
+	return FALSE;
+}
+M_CAPI(BOOL) MEnumServices(EnumServicesCallBack callback)
+{
+	return MSCM_EnumCommonServices(callback);
 }
 M_CAPI(BOOL) MSCM_DeleteService(LPWSTR scname, LPWSTR errText)
 {
@@ -240,7 +283,7 @@ M_CAPI(BOOL) MSCM_DeleteService(LPWSTR scname, LPWSTR errText)
 		if (status.dwCurrentState != SERVICE_STOPPED)
 			ControlService(hSc, SERVICE_CONTROL_STOP, &status);
 		if (!DeleteService(hSc)) {
-			LogErr(L"DeleteService error : %d (%s)", GetLastError(), scname);
+			LogErr2(L"DeleteService failed : %d (%s)", GetLastError(), scname);
 			ThrowErrorAndErrorCodeX(GetLastError(), L"DeleteService", errText, FALSE);
 		}
 		else {
@@ -250,7 +293,7 @@ M_CAPI(BOOL) MSCM_DeleteService(LPWSTR scname, LPWSTR errText)
 		CloseServiceHandle(hSc);
 	}
 	else {
-		LogErr(L"OpenService error : %d (%s)", GetLastError(), scname);
+		LogErr2(L"OpenService failed : %d (%s)", GetLastError(), scname);
 		ThrowErrorAndErrorCodeX(GetLastError(), str_item_opensc_err, errText, FALSE);
 	}
 	return FALSE;
@@ -272,7 +315,7 @@ M_CAPI(BOOL) MSCM_ChangeScStartType(LPWSTR scname, DWORD type, LPWSTR errText)
 		if (!ChangeServiceConfig(hSc, SERVICE_NO_CHANGE, confg->dwStartType,
 			SERVICE_NO_CHANGE, NULL, NULL, NULL, NULL, NULL, NULL, NULL))
 		{
-			LogErr(L"ChangeServiceConfig error : %d", GetLastError());
+			LogErr2(L"ChangeServiceConfig failed : %d", GetLastError());
 			ThrowErrorAndErrorCodeX(GetLastError(), L"ChangeServiceConfig ERROR", errText, FALSE);
 		}
 		else return TRUE;
@@ -280,7 +323,7 @@ M_CAPI(BOOL) MSCM_ChangeScStartType(LPWSTR scname, DWORD type, LPWSTR errText)
 		CloseServiceHandle(hSc);
 	}
 	else {
-		LogErr(L"OpenService error : %d (%s)", GetLastError(), scname);
+		LogErr2(L"OpenService failed : %d (%s)", GetLastError(), scname);
 		ThrowErrorAndErrorCodeX(GetLastError(), str_item_opensc_err, errText, FALSE);
 	}
 	return FALSE;
@@ -298,7 +341,7 @@ M_CAPI(BOOL) MSCM_ControlSc(LPWSTR scname, DWORD targetStatus, DWORD targetCtl, 
 			BOOL rs = ControlService(hSc, targetCtl, &status);
 			CloseServiceHandle(hSc);
 			if (!rs) {
-				LogErr(L"ControlService error : %d", GetLastError());
+				LogErr2(L"ControlService failed : %d", GetLastError());
 				ThrowErrorAndErrorCodeX(GetLastError(), L"ControlService", errText, FALSE);
 			}
 			return rs;
@@ -336,6 +379,7 @@ M_CAPI(void) MSCM_SetCurrSelSc(LPWSTR scname)
 {
 	wcscpy_s(currSc, scname);
 }
+
 
 LRESULT MSCM_HandleWmCommand(WPARAM wParam)
 {
@@ -394,7 +438,8 @@ LRESULT MSCM_HandleWmCommand(WPARAM wParam)
 	}
 	case ID_SCMAIN_START: {
 		if (wcslen(currSc) > 0 || !StrEqual(currSc, L""))
-			MSCM_StartSc(currSc);
+			if (!MSCM_StartSc(currSc))
+				LogErr2(L"StartService failed : %d", GetLastError());
 		break;
 	}	
 	case ID_SCSMALL_STOPSC:
