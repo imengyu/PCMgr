@@ -1,12 +1,12 @@
-﻿﻿# PCMgr [![License](https://img.shields.io/badge/Licence-MIT-blue.svg)]()
+PCMgr [![License](https://img.shields.io/badge/Licence-MIT-blue.svg)]()
 =======================
- Windows任务管理器加强改进版 Advance and more powerful Windows task manager
+ Windows 任务管理器重制版 Rebulid of Windows task manager
 ===
-这是一个 Windows 任务管理器加强版，添加了任务管理器不具有的功能，并且已有与Windows任务管理器可以媲美。<br/>
+这是一个 Windows 任务管理器重制版，添加了任务管理器不具有的功能，并且已有与Windows任务管理器可以媲美。<br/>
 使用WinAPI以及C#开发，可以进行查看进程、进程信息、结束进程等。<br/>
 目前只完成部分功能。<br/>
 
-This is an enhanced rebulid version of the Windows Task Manager that adds features that the Task Manager does not have, And it is very similar to the Windows task manager. <br/>
+This is an rebulid version of the Windows Task Manager that adds features that the Task Manager does not have, And it is very similar to the Windows task manager. <br/>
 Use WinAPI and C# development, you can view the process, process information, end the process, etc. <br/>
 At present, only part of the functions are completed.
 
