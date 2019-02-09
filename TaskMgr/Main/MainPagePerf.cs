@@ -1,17 +1,11 @@
-﻿using PCMgr.Aero.TaskDialog;
-using PCMgr.Ctls;
+﻿using PCMgr.Ctls;
 using PCMgr.Lanuages;
 using PCMgr.WorkWindow;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
-using static PCMgr.Main.MainUtils;
 using static PCMgr.NativeMethods;
 using static PCMgr.NativeMethods.Win32;
 using static PCMgr.NativeMethods.DeviceApi;
@@ -83,7 +77,8 @@ namespace PCMgr.Main
             public PerformanceListItem item = null;
             public IPerformancePage performancePage = null;
 
-            public bool Inited { get; set; }
+            public bool RemovePeding { get; set; } = false;
+            public bool Inited { get; set; } = false;
 
             public override string ToString()
             {
@@ -340,12 +335,14 @@ namespace PCMgr.Main
                 PerfLoadSettings();
 
                 MDEVICE_Init();
+                MWLAN_Init();
 
                 perf_cpu.Name = "CPU";
                 perf_cpu.SmallText = "-- %";
                 perf_cpu.BasePen = new Pen(CpuDrawColor, 2);
                 perf_cpu.BgBrush = new SolidBrush(CpuBgColor);
                 perf_cpu.NoGridImage = Properties.Resources.pointCpu;
+                perf_cpu.Type = PerformanceListItemType.Ram;
                 performanceLeftList.Items.Add(perf_cpu);
 
                 perf_ram.Name = LanuageMgr.GetStr("TitleRam");
@@ -353,12 +350,13 @@ namespace PCMgr.Main
                 perf_ram.BasePen = new Pen(RamDrawColor, 2);
                 perf_ram.BgBrush = new SolidBrush(RamBgColor);
                 perf_ram.NoGridImage = Properties.Resources.pointRam;
+                perf_ram.Type = PerformanceListItemType.Ram;
                 performanceLeftList.Items.Add(perf_ram);
 
                 PerfPagesInit();
 
                 //磁盘页面
-                MDEVICE_GetLogicalDiskInfo();
+                MDEVICE_GetPhysicalDiskInfo();
                 uint count = MPERF_InitDisksPerformanceCounters();
                 for (int i = 0; i < count; i++)
                 {
@@ -376,6 +374,7 @@ namespace PCMgr.Main
                     perfItemHeader.item.BasePen = new Pen(DiskDrawColor);
                     perfItemHeader.item.BgBrush = new SolidBrush(DiskBgColor);
                     perfItemHeader.item.Tag = perfItemHeader;
+                    perfItemHeader.item.Type = PerformanceListItemType.Disk;
                     perfItems.Add(perfItemHeader);
 
                     PerformancePageDisk performancedisk = new PerformancePageDisk(perfItemHeader.performanceCounterNative, diskIndex);
@@ -390,6 +389,10 @@ namespace PCMgr.Main
                     perfItemHeader.item.PageIndex = perfPages.Count - 1;
                     performanceLeftList.Items.Add(perfItemHeader.item);
                 }
+
+                bool wlanCanuse = MWLAN_CanUse();
+                if(wlanCanuse)
+                    MWLAN_Load();
 
                 //网卡页面
                 count = MDEVICE_GetNetworkAdaptersInfo();
@@ -414,12 +417,15 @@ namespace PCMgr.Main
                         perfItemHeader.item.NoGridImage = Properties.Resources.pointNet;
                         perfItemHeader.item.EnableAutoMax = true;
                         perfItemHeader.item.EnableData2 = true;
+                        perfItemHeader.item.Type = PerformanceListItemType.Net;
                         perfItems.Add(perfItemHeader);
 
+                        UInt64 physicalMaxSpeed = 100000000;
                         StringBuilder sbIPV4 = new StringBuilder(32);
                         StringBuilder sbIPV6 = new StringBuilder(64);
+                        StringBuilder sbGUID = new StringBuilder(64);
                         bool enabled = MDEVICE_GetNetworkAdapterInfoFormName(sbName.ToString(),
-                            sbIPV4, 32, sbIPV6, 64);
+                            sbIPV4, 32, sbIPV6, 64, ref physicalMaxSpeed, sbGUID, 64);
                         perfItemHeader.item.Gray = !enabled;
                         if (!enabled)
                             perfItemHeader.item.SmallText = LanuageMgr.GetStr("NotConnect");
@@ -429,6 +435,8 @@ namespace PCMgr.Main
                         performancenet.SwithGraphicView += SwithGraphicViewEventHandler;
                         performancenet.v4 = sbIPV4.ToString();
                         performancenet.v6 = sbIPV6.ToString();
+                        performancenet.GUID = sbGUID.ToString();
+                        performancenet.physicalMaxSpeed = physicalMaxSpeed;
                         performancenet.AppKeyDown += AppKeyDown;
 
                         PerfPagesAddToCtl(performancenet, perfItemHeader.item.Name);
@@ -450,6 +458,122 @@ namespace PCMgr.Main
 
                 Inited = true;
             }
+        }
+        public void PerfReloadMoveableDevices()
+        {
+            for (int i = perfItems.Count - 1; i > 0; i--)
+            {
+                if(perfItems[i].item.Type == PerformanceListItemType.Disk || perfItems[i].item.Type == PerformanceListItemType.Net)
+                {
+                    perfItems[i].performancePage.PageDelete();
+                    perfPages.Remove(perfItems[i].performancePage);
+
+                    performanceLeftList.Items.Remove(perfItems[i].item);
+
+                    perfItems.Remove(perfItems[i]);
+                }
+            }
+
+            //磁盘页面
+            MDEVICE_GetPhysicalDiskInfo();
+            uint count = MPERF_InitDisksPerformanceCounters();
+            for (int i = 0; i < count; i++)
+            {
+                PerfItemHeader perfItemHeader = new PerfItemHeader();
+                perfItemHeader.performanceCounterNative = MPERF_GetDisksPerformanceCounters(i); 
+                perfItemHeader.item = new PerformanceListItem();
+                perfItemHeader.item.NoGridImage = Properties.Resources.pointDisk;
+
+                StringBuilder sb = new StringBuilder(32);
+                MPERF_GetDisksPerformanceCountersInstanceName(perfItemHeader.performanceCounterNative, sb, 32);
+                string index = sb.ToString().Split(' ')[0];
+                uint diskIndex = MDEVICE_GetPhysicalDriveIndexInWMI(index);
+
+                perfItemHeader.item.Name = LanuageMgr.GetStr("TitleDisk") + sb.ToString();
+                perfItemHeader.item.BasePen = new Pen(DiskDrawColor);
+                perfItemHeader.item.BgBrush = new SolidBrush(DiskBgColor);
+                perfItemHeader.item.Tag = perfItemHeader;
+                perfItemHeader.item.Type = PerformanceListItemType.Disk;
+                perfItems.Add(perfItemHeader);
+
+                PerformancePageDisk performancedisk = new PerformancePageDisk(perfItemHeader.performanceCounterNative, diskIndex);
+                performancedisk.OpeningPageMenu += OpeningPageMenuEventHandler;
+                performancedisk.SwithGraphicView += SwithGraphicViewEventHandler;
+                performancedisk.AppKeyDown += AppKeyDown;
+                PerfPagesAddToCtl(performancedisk, perfItemHeader.item.Name);
+                perfPages.Add(performancedisk);
+
+                perfItemHeader.performancePage = performancedisk;
+
+                perfItemHeader.item.PageIndex = perfPages.Count - 1;
+                performanceLeftList.Items.Add(perfItemHeader.item);
+            }
+
+            bool wlanCanuse = MWLAN_CanUse();
+            if (wlanCanuse)
+                MWLAN_Load();
+
+            //网卡页面
+
+            count = MDEVICE_GetNetworkAdaptersInfo();
+            for (int i = 0; i < count; i++)
+            {
+                StringBuilder sbName = new StringBuilder(128);
+                if (MDEVICE_GetNetworkAdapterInfoItem(i, sbName, 128))
+                {
+                    PerfItemHeader perfItemHeader = new PerfItemHeader();
+                    perfItemHeader.performanceCounterNative = MPERF_GetNetworksPerformanceCounterWithName(sbName.ToString());
+                    perfItemHeader.item = new PerformanceListItem();
+
+                    bool isWifi = MDEVICE_GetNetworkAdapterIsWIFI(sbName.ToString());
+
+                    perfItemHeader.item.Name = isWifi ? "Wi-Fi" : LanuageMgr.GetStr("Ethernet");
+                    perfItemHeader.item.BasePen = new Pen(NetDrawColor);
+                    perfItemHeader.item.BgBrush = new SolidBrush(NetBgColor);
+                    perfItemHeader.item.BasePen2 = new Pen(NetDrawColor2);
+                    perfItemHeader.item.BasePen2.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
+                    perfItemHeader.item.BgBrush2 = Brushes.White;
+                    perfItemHeader.item.Tag = perfItemHeader;
+                    perfItemHeader.item.NoGridImage = Properties.Resources.pointNet;
+                    perfItemHeader.item.EnableAutoMax = true;
+                    perfItemHeader.item.EnableData2 = true;
+                    perfItemHeader.item.Type =  PerformanceListItemType.Net;
+                    perfItems.Add(perfItemHeader);
+
+                    UInt64 physicalMaxSpeed = 100000000;
+                    StringBuilder sbIPV4 = new StringBuilder(32);
+                    StringBuilder sbIPV6 = new StringBuilder(64);
+                    StringBuilder sbGUID = new StringBuilder(64);
+                    bool enabled = MDEVICE_GetNetworkAdapterInfoFormName(sbName.ToString(),
+                        sbIPV4, 32, sbIPV6, 64, ref physicalMaxSpeed, sbGUID, 64);
+                    perfItemHeader.item.Gray = !enabled;
+                    if (!enabled)
+                        perfItemHeader.item.SmallText = LanuageMgr.GetStr("NotConnect");
+
+                    PerformancePageNet performancenet = new PerformancePageNet(perfItemHeader.performanceCounterNative, isWifi, sbName.ToString());
+                    performancenet.OpeningPageMenu += OpeningPageMenuEventHandler;
+                    performancenet.SwithGraphicView += SwithGraphicViewEventHandler;
+                    performancenet.v4 = sbIPV4.ToString();
+                    performancenet.v6 = sbIPV6.ToString();
+                    performancenet.GUID = sbGUID.ToString();
+                    performancenet.physicalMaxSpeed = physicalMaxSpeed;
+                    performancenet.AppKeyDown += AppKeyDown;
+
+                    PerfPagesAddToCtl(performancenet, perfItemHeader.item.Name);
+                    perfPages.Add(performancenet);
+
+                    perfItemHeader.performancePage = performancenet;
+
+                    perfItemHeader.item.AutoMaxCallback = performancenet.PageGetSpeedMaxUnit;
+                    perfItemHeader.item.PageIndex = perfPages.Count - 1;
+                    performanceLeftList.Items.Add(perfItemHeader.item);
+                }
+            }
+
+            performanceLeftList.UpdateAll();
+            performanceLeftList.Invalidate();
+
+            PerfPagesResize(new Size(splitContainerPerfCtls.Panel2.Width - (splitContainerPerfCtls.Panel2.VerticalScroll.Visible ? 40 : 30), splitContainerPerfCtls.Panel2.Height - 30));
         }
 
         private void PerfLoadSettings()
@@ -564,7 +688,7 @@ namespace PCMgr.Main
             MPERF_DestroyDisksPerformanceCounters();
             perfItems.Clear();
 
-            MDEVICE_DestroyLogicalDiskInfo();
+            MDEVICE_DestroyPhysicalDiskInfo();
             MDEVICE_DestroyNetworkAdaptersInfo();
             MDEVICE_UnInit();
 

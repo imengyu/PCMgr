@@ -1284,4 +1284,10 @@ PCMgr 需要管理员权限 才能对系统进行控制和管理。
   <data name="X64EnumDriver" xml:space="preserve">
     <value>请使用 64 位的 PC Manager 进行加载驱动</value>
   </data>
+  <data name="ConnectionType" xml:space="preserve">
+    <value>连接类型</value>
+  </data>
+  <data name="LinkQuality" xml:space="preserve">
+    <value>信号强度</value>
+  </data>
 </root>

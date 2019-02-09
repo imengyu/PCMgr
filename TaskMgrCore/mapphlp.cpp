@@ -28,6 +28,7 @@
 #include <Uxtheme.h>
 #include <string.h>
 #include <string>
+#include <dbt.h>
 #include <dbghelp.h>
 #include <mscoree.h>
 #include <Metahost.h>
@@ -47,6 +48,7 @@ processorArchitecture = '*' publicKeyToken = '6595b64144ccf1df' language = '*'\"
 #define WM_S_MESSAGE_EXIT 901
 #define WM_S_MESSAGE_ACTIVE 902
 #define WM_S_MAINTHREAD_ACT 903
+#define WM_S_UPDATE_DEVICE_LIST 904
 
 #define ID_AOP 701
 
@@ -1499,6 +1501,9 @@ LRESULT CALLBACK MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		MAppWorkCall3(208, hWnd, 0);
 		break;
 	}
+	case WM_S_UPDATE_DEVICE_LIST: { 
+		MAppMainCall(M_CALLBACK_RELOAD_PERF_DEVICE_LIST, 0, 0); break;
+	}
 	case WM_COMMAND: {
 		switch (wParam)
 		{
@@ -2166,6 +2171,9 @@ LRESULT CALLBACK MAppWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		}
+	}
+	case WM_DEVICECHANGE: {
+		if (wParam == DBT_DEVNODES_CHANGED) PostMessage(hWnd, WM_S_UPDATE_DEVICE_LIST, 0, 0); break;
 	}
 	default:
 		break;

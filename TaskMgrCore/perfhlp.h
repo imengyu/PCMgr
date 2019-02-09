@@ -86,6 +86,6 @@ struct MPerfNetData
 	WCHAR performanceCounter_Name[64];
 };
 
+M_CAPI(BOOL) MPERF_DestroyNetworksPerformanceCounters();
 
-
-
+M_CAPI(BOOL) MPERF_DestroyDisksPerformanceCounters();

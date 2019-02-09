@@ -6,6 +6,14 @@ using System.Windows.Forms;
 
 namespace PCMgr.Ctls
 {
+    public enum PerformanceListItemType
+    {
+        Cpu,
+        Ram,
+        Disk,
+        Net,
+        Gpu
+    }
     public class PerformanceList : Control
     {
         public const int max_small_data_count = 30;
@@ -50,6 +58,14 @@ namespace PCMgr.Ctls
 
         private void Items_ItemRemoved(PerformanceListItem obj)
         {
+            if (obj == selectedItem)
+            {
+                if (items.Count > 0)
+                {
+                    Selectedtem = items[0];
+                    OnSelectedtndexChanged(EventArgs.Empty);
+                }
+            }
         }
         private void Items_ItemAdd(PerformanceListItem obj)
         {
@@ -86,7 +102,7 @@ namespace PCMgr.Ctls
                 Invalidate();
             }
         }
-        public PerformanceListItem Selectedtem { get { return selectedItem; } set { selectedItem = value;Invalidate(); } }
+        public PerformanceListItem Selectedtem { get { return selectedItem; } set { selectedItem = value;   Invalidate(); } }
         public PerformanceListItemCollection Items { get { return items; } }
 
         private void OnSelectedtndexChanged(EventArgs e)
@@ -235,7 +251,7 @@ namespace PCMgr.Ctls
                 }
 
                 if (it.EnableAutoMax && it.AutoMaxCallback != null)
-                    it.MaxValue = it.AutoMaxCallback(it.DataAvg);
+                    it.MaxValue = (int)it.AutoMaxCallback(it.DataAvg);
 
                 ps.Clear();
                 g.DrawRectangle(it.BorderPen, rect);
@@ -517,11 +533,12 @@ namespace PCMgr.Ctls
         public List<int> Data2 { get { return dataIem2; } }
         public Image NoGridImage { get; set; }
 
+        public PerformanceListItemType Type { get; set; }
         public object Tag { get; set; }
 
         public void AddData(int d)
         {
-            if (d < 0) return;
+            if (d < 0 || double.IsNaN(d)) return;
             if (b)
             {
                 dataIem.RemoveAt(0);
@@ -536,7 +553,7 @@ namespace PCMgr.Ctls
         }
         public void AddData2(int d)
         {
-            if(d < 0) return;
+            if (d < 0 || double.IsNaN(d)) return;
             if (b2)
             {
                 dataIem2.RemoveAt(0);

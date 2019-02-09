@@ -118,6 +118,7 @@ namespace PCMgr.Ctls
         public List<int> Data2 { get { return dataIem2; } }
 
         private PointF[] pts = new PointF[62];
+        private int maxValue = 100;
         private int lastMaxData = 0;
         private int lastDataAverage1 = 0;
         private int lastDataAverage2 = 0;
@@ -165,14 +166,23 @@ namespace PCMgr.Ctls
         /// <summary>
         /// 最大单位
         /// </summary>
-        public int MaxValue { get; set; }
+        public int MaxValue {
+            get {
+                if (maxValue <= 0) maxValue = 100;
+                return maxValue;
+            }
+            set
+            {
+                maxValue = value;
+            }
+        }
 
         /// <summary>
         /// 添加实线数据
         /// </summary>
         public void AddData(int d)
         {
-            if (d < 0) return;
+            if (d < 0 || double.IsNaN(d)) return;
 
             float single = 1.0F * Width / (60 - 1);
             if (xLineOffist < (single * 4))
@@ -188,7 +198,7 @@ namespace PCMgr.Ctls
         /// </summary>
         public void AddData2(int d)
         {
-            if (d < 0) return;
+            if (d < 0 || double.IsNaN(d)) return;
 
             dataIem2.RemoveAt(0);
             dataIem2.Add(d);

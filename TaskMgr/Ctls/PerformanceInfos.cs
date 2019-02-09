@@ -82,6 +82,7 @@ namespace PCMgr.Ctls
         {
             public PerformanceInfoStaticItem()
             {
+                IsIconItem = false;
                 LineSp = false;
             }
             public PerformanceInfoStaticItem(string name, string value)
@@ -89,7 +90,18 @@ namespace PCMgr.Ctls
                 Value = value;
                 Name = name;
                 LineSp = false;
+                IsIconItem = false;
             }
+            public PerformanceInfoStaticItem(string name, Icon value)
+            {
+                IconValue = value;
+                Name = name;
+                LineSp = false;
+                IsIconItem = true;
+            }
+
+            public bool IsIconItem { get; set; }
+            public Icon IconValue { get; set; }
             public string Value { get; set; }
             public string Name { get; set; }
             public bool LineSp { get; set; }
@@ -216,7 +228,8 @@ namespace PCMgr.Ctls
                 for (int i = 0; i < StaticItems.Count; i++)
                 {
                     PerformanceInfoStaticItem it = StaticItems[i];
-                    g.DrawString(it.Value, FontText, brushText, maxWidth, curY);
+                    if (it.IsIconItem) g.DrawIcon(it.IconValue, maxWidth, curY + (FontTextHeight - it.IconValue.Height));
+                    else g.DrawString(it.Value, FontText, brushText, maxWidth, curY);
                     curY += FontTextHeight;
                 }
             }

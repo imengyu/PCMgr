@@ -5,6 +5,7 @@
 #include "fmhlp.h"
 #include "comdlghlp.h"
 #include "mapphlp.h"
+#include "prochlp.h"
 #include "StringHlp.h"
 #include "PathHelper.h"
 #include <dbghelp.h>
@@ -18,7 +19,7 @@ HWND hListTree;
 
 WCHAR currentOpenPEFile[MAX_PATH];
 
-VOID AddAStringItem(HWND hList, LPWSTR str)
+VOID AddAStringItem(HWND hList, const wchar_t*  str)
 {
 	LVITEM li = { 0 };
 	li.mask = LVIF_TEXT;
@@ -27,19 +28,19 @@ VOID AddAStringItem(HWND hList, LPWSTR str)
 	li.cchTextMax = 1;
 	ListView_InsertItem(hList, &li);
 	li.iSubItem = 1;
-	li.pszText = str;
+	li.pszText = (LPWSTR)str;
 	li.cchTextMax = static_cast<int>(wcslen(str) + 1);
 	ListView_SetItem(hList, &li);
 }
-VOID Add2StringItem(HWND hList, LPWSTR str, LPWSTR str2) {
+VOID Add2StringItem(HWND hList, const wchar_t* str, const wchar_t*  str2) {
 	LVITEM li = { 0 };
 	li.iItem = ListView_GetItemCount(hList);
 	li.mask = LVIF_TEXT;
-	li.pszText = str;
+	li.pszText = (LPWSTR)str;
 	li.cchTextMax = static_cast<int>(wcslen(str) + 1);
 	ListView_InsertItem(hList, &li);
 	li.iSubItem = 1;
-	li.pszText = str2;
+	li.pszText = (LPWSTR)str2;
 	li.cchTextMax = static_cast<int>(wcslen(str2) + 1);
 	ListView_SetItem(hList, &li);
 }
@@ -278,7 +279,190 @@ VOID LoadPEInfo(HWND hDlg)
 		return;
 	}
 
+	HANDLE hFile = NULL;
+	HANDLE hFileMapping = NULL;
+	LPBYTE lpBaseAddress = NULL;
 
+	hFile = CreateFile(currentOpenPEFile, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (hFile == INVALID_HANDLE_VALUE)
+	{
+		WCHAR str[32];
+		swprintf_s(str, L"Create file failed : %d", GetLastError());
+		AddAStringItem(hListTables, str);
+
+		return;
+	}
+
+	hFileMapping = CreateFileMapping(hFile, NULL, PAGE_READONLY, 0, 0, NULL);
+	if (hFileMapping == NULL || hFileMapping == INVALID_HANDLE_VALUE)
+	{
+		WCHAR str[55];
+		swprintf_s(str, L"Could not create file mapping object (%d)", GetLastError());
+		AddAStringItem(hListTables, str);
+
+		goto UNMAP_AND_EXIT;
+	}
+
+	lpBaseAddress = (LPBYTE)MapViewOfFile(hFileMapping, FILE_MAP_READ, 0, 0, 0);
+	if (lpBaseAddress == NULL)
+	{
+		WCHAR str[32];
+		swprintf_s(str, L"Could not map view of file (%d)", GetLastError());
+		AddAStringItem(hListTables, str);
+		goto UNMAP_AND_EXIT;
+	}
+
+	PIMAGE_DOS_HEADER pDosHeader = (PIMAGE_DOS_HEADER)lpBaseAddress;
+	PIMAGE_NT_HEADERS pNtHeaders = (PIMAGE_NT_HEADERS)(lpBaseAddress + pDosHeader->e_lfanew);
+
+	AddAStringItem(hListTables, L"");
+	AddAStringItem(hListTables, L"File Info : ");
+
+	std::wstring * filename = Path::GetFileName(currentOpenPEFile);
+	Add2StringItem(hListTables, L"FileName", filename->c_str());
+	delete filename;
+
+	WCHAR filedsb[260];
+	if (MGetExeDescribe(currentOpenPEFile, filedsb, 260))
+		Add2StringItem(hListTables, L"Description", filedsb);
+	WCHAR filecompany[260];
+	if (MGetExeCompany(currentOpenPEFile, filecompany, 260)) {
+		if (MGetExeFileTrust(currentOpenPEFile))
+			wcscat_s(filecompany, L" (Verifed)");
+		Add2StringItem(hListTables, L"Company", filecompany);
+	}
+	AddAStringItem(hListTables, L"");
+	AddAStringItem(hListTables, L"PE Info : ");
+	Add2StringItem(hListTables, L"e_lfanew", FormatString(L"0x%Ix", pDosHeader->e_lfanew).c_str());
+
+	if (pNtHeaders->OptionalHeader.Magic == IMAGE_NT_OPTIONAL_HDR32_MAGIC) {
+		Add2StringItem(hListTables, L"ImageBase", FormatString(L"0x%08x", pNtHeaders->OptionalHeader.ImageBase).c_str());
+		Add2StringItem(hListTables, L"BaseOfCode", FormatString(L"0x%08x", pNtHeaders->OptionalHeader.BaseOfCode).c_str());
+		Add2StringItem(hListTables, L"AddressOfEntryPoint", FormatString(L"0x%08x", pNtHeaders->OptionalHeader.AddressOfEntryPoint).c_str());
+		Add2StringItem(hListTables, L"SizeOfCode", FormatString(L"0x%08x", pNtHeaders->OptionalHeader.SizeOfCode).c_str());
+		Add2StringItem(hListTables, L"SizeOfImage", FormatString(L"0x%08x", pNtHeaders->OptionalHeader.SizeOfImage).c_str());
+	}
+	else {
+		Add2StringItem(hListTables, L"ImageBase", FormatString(L"0x%I64x", ((PIMAGE_OPTIONAL_HEADER64)&pNtHeaders->OptionalHeader)->ImageBase).c_str());
+		Add2StringItem(hListTables, L"BaseOfCode", FormatString(L"0x%I64x", ((PIMAGE_OPTIONAL_HEADER64)&pNtHeaders->OptionalHeader)->BaseOfCode).c_str());
+		//Add2StringItem(hListTables, L"AddressOfEntryPoint", FormatString(L"0x%I64x", ((PIMAGE_OPTIONAL_HEADER64)&pNtHeaders->OptionalHeader)->AddressOfEntryPoint).c_str());
+		Add2StringItem(hListTables, L"SizeOfCode", FormatString(L"0x%I64x", ((PIMAGE_OPTIONAL_HEADER64)&pNtHeaders->OptionalHeader)->SizeOfCode).c_str());
+		Add2StringItem(hListTables, L"SizeOfImage", FormatString(L"0x%I64x", ((PIMAGE_OPTIONAL_HEADER64)&pNtHeaders->OptionalHeader)->SizeOfImage).c_str());
+	}
+	//CheckSum
+	Add2StringItem(hListTables, L"CheckSum", FormatString(L"0x%08x", pNtHeaders->OptionalHeader.CheckSum).c_str());
+	//SubsystemVersion
+	Add2StringItem(hListTables, L"SubsystemVersion", FormatString(L"%u.%u",
+		pNtHeaders->OptionalHeader.MajorSubsystemVersion, // same for 32-bit and 64-bit images
+		pNtHeaders->OptionalHeader.MinorSubsystemVersion).c_str());
+	//Subsystem
+	switch (pNtHeaders->OptionalHeader.Subsystem)
+	{
+	case IMAGE_SUBSYSTEM_NATIVE:
+		Add2StringItem(hListTables, L"Subsystem", L"Native");
+		break;
+	case IMAGE_SUBSYSTEM_WINDOWS_GUI:
+		Add2StringItem(hListTables, L"Subsystem", L"Windows GUI");
+		break;
+	case IMAGE_SUBSYSTEM_WINDOWS_CUI:
+		Add2StringItem(hListTables, L"Subsystem", L"Windows CUI");
+		break;
+	case IMAGE_SUBSYSTEM_OS2_CUI:
+		Add2StringItem(hListTables, L"Subsystem", L"OS/2 CUI");
+		break;
+	case IMAGE_SUBSYSTEM_POSIX_CUI:
+		Add2StringItem(hListTables, L"Subsystem", L"POSIX CUI");
+		break;
+	case IMAGE_SUBSYSTEM_WINDOWS_CE_GUI:
+		Add2StringItem(hListTables, L"Subsystem", L"Windows CE CUI");
+		break;
+	case IMAGE_SUBSYSTEM_EFI_APPLICATION:
+		Add2StringItem(hListTables, L"Subsystem", L"EFI Application");
+		break;
+	case IMAGE_SUBSYSTEM_EFI_BOOT_SERVICE_DRIVER:
+		Add2StringItem(hListTables, L"Subsystem", L"EFI Boot Service Driver");
+		break;
+	case IMAGE_SUBSYSTEM_EFI_RUNTIME_DRIVER:
+		Add2StringItem(hListTables, L"Subsystem", L"EFI Boot Runtime Driver");
+		break;
+	case IMAGE_SUBSYSTEM_EFI_ROM:
+		Add2StringItem(hListTables, L"Subsystem", L"EFI Rom");
+		break;
+	case IMAGE_SUBSYSTEM_XBOX:
+		Add2StringItem(hListTables, L"Subsystem", L"Unknown");
+		break;
+	case IMAGE_SUBSYSTEM_WINDOWS_BOOT_APPLICATION:
+		Add2StringItem(hListTables, L"Subsystem", L"Windows Boot Application");
+		break;
+	default:
+		Add2StringItem(hListTables, L"Subsystem", L"Unknown");
+		break;
+	}
+	//Machine
+	switch (pNtHeaders->FileHeader.Machine)
+	{
+	case IMAGE_FILE_MACHINE_I386: Add2StringItem(hListTables, L"Machine", L"i386");  break;
+	case IMAGE_FILE_MACHINE_AMD64: Add2StringItem(hListTables, L"Machine", L"AMD64"); break;
+	case IMAGE_FILE_MACHINE_IA64: Add2StringItem(hListTables, L"Machine", L"IA64"); break;
+	case IMAGE_FILE_MACHINE_ARMNT: Add2StringItem(hListTables, L"Machine", L"ARM Thumb-2"); break;
+	default: Add2StringItem(hListTables, L"Machine", L"Unknown"); break;
+	}
+
+	Add2StringItem(hListTables, L"Characteristics", L"");
+	if (pNtHeaders->FileHeader.Characteristics & IMAGE_FILE_EXECUTABLE_IMAGE)
+		Add2StringItem(hListTables, L"", L"Executable");
+	if (pNtHeaders->FileHeader.Characteristics & IMAGE_FILE_DLL)
+		Add2StringItem(hListTables, L"", L"DLL");
+	if (pNtHeaders->FileHeader.Characteristics & IMAGE_FILE_LARGE_ADDRESS_AWARE)
+		Add2StringItem(hListTables, L"", L"Large address aware");
+	if (pNtHeaders->FileHeader.Characteristics & IMAGE_FILE_REMOVABLE_RUN_FROM_SWAP)
+		Add2StringItem(hListTables, L"", L"Removable run from swap");
+	if (pNtHeaders->FileHeader.Characteristics & IMAGE_FILE_NET_RUN_FROM_SWAP)
+		Add2StringItem(hListTables, L"", L"Net run from swap");
+	if (pNtHeaders->FileHeader.Characteristics & IMAGE_FILE_SYSTEM)
+		Add2StringItem(hListTables, L"", L"System");
+	if (pNtHeaders->FileHeader.Characteristics & IMAGE_FILE_UP_SYSTEM_ONLY)
+		Add2StringItem(hListTables, L"", L"Uni-processor only");
+	if (pNtHeaders->OptionalHeader.DllCharacteristics & IMAGE_DLLCHARACTERISTICS_HIGH_ENTROPY_VA)
+		Add2StringItem(hListTables, L"", L"High entropy VA");
+	if (pNtHeaders->OptionalHeader.DllCharacteristics & IMAGE_DLLCHARACTERISTICS_DYNAMIC_BASE)
+		Add2StringItem(hListTables, L"", L"Dynamic base");
+	if (pNtHeaders->OptionalHeader.DllCharacteristics & IMAGE_DLLCHARACTERISTICS_FORCE_INTEGRITY)
+		Add2StringItem(hListTables, L"", L"Force integrity check");
+	if (pNtHeaders->OptionalHeader.DllCharacteristics & IMAGE_DLLCHARACTERISTICS_NX_COMPAT)
+		Add2StringItem(hListTables, L"", L"NX compatible");
+	if (pNtHeaders->OptionalHeader.DllCharacteristics & IMAGE_DLLCHARACTERISTICS_NO_ISOLATION)
+		Add2StringItem(hListTables, L"", L"No isolation");
+	if (pNtHeaders->OptionalHeader.DllCharacteristics & IMAGE_DLLCHARACTERISTICS_NO_SEH)
+		Add2StringItem(hListTables, L"", L"No SEH");
+	if (pNtHeaders->OptionalHeader.DllCharacteristics & IMAGE_DLLCHARACTERISTICS_NO_BIND)
+		Add2StringItem(hListTables, L"", L"Do not bind");
+	if (pNtHeaders->OptionalHeader.DllCharacteristics & IMAGE_DLLCHARACTERISTICS_APPCONTAINER)
+		Add2StringItem(hListTables, L"", L"AppContainer");
+	if (pNtHeaders->OptionalHeader.DllCharacteristics & IMAGE_DLLCHARACTERISTICS_WDM_DRIVER)
+		Add2StringItem(hListTables, L"", L"WDM driver");
+	if (pNtHeaders->OptionalHeader.DllCharacteristics & IMAGE_DLLCHARACTERISTICS_GUARD_CF)
+		Add2StringItem(hListTables, L"", L"Control Flow Guard");
+	if (pNtHeaders->OptionalHeader.DllCharacteristics & IMAGE_DLLCHARACTERISTICS_TERMINAL_SERVER_AWARE)
+		Add2StringItem(hListTables, L"", L"Terminal server aware");
+
+	Add2StringItem(hListTables, L"Sections", L"");
+	Add2StringItem(hListTables, L"Name", L"VirtualAddress # VirtualAddress");
+
+	PIMAGE_SECTION_HEADER Sections = (PIMAGE_SECTION_HEADER)(((PCHAR)&pNtHeaders->OptionalHeader) + pNtHeaders->FileHeader.SizeOfOptionalHeader );
+	for (WORD i = 0; i < pNtHeaders->FileHeader.NumberOfSections; i++)
+	{
+		WCHAR sectionName[16] = { 0 };
+		WCHAR address[32] = { 0 };
+		swprintf_s(sectionName, L"%hs", Sections[i].Name);
+		swprintf_s(address, L"0x%Ix   0x%Ix", Sections[i].VirtualAddress, Sections[i].SizeOfRawData);
+		Add2StringItem(hListTables, sectionName, address);
+	}
+
+UNMAP_AND_EXIT:
+	if (lpBaseAddress) UnmapViewOfFile(lpBaseAddress);
+	if (hFileMapping) CloseHandle(hFileMapping);
+	if (hFile) CloseHandle(hFile);
 }
 
 INT_PTR CALLBACK VPEDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)

@@ -83,7 +83,11 @@ namespace PCMgr.Main
                 if (MIs64BitOS())
                 {
                     FormMain.lbRestartAsAdminDriver.Text = LanuageMgr.GetStr("X64EnumDriver", false);
+                    listDrivers.Hide();
+                    FormMain.pl_driverNotLoadTip.Show();
                     FormMain.linkRestartAsAdminDriver.Visible = false;
+                    Inited = true;
+                    return;
                 }
 #endif
                 if (FormMain.IsKernelLoaded)

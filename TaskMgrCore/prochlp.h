@@ -171,12 +171,16 @@ EXTERN_C M_API DWORD MNtPathToDosPath(LPWSTR pszNtPath, LPWSTR pszDosPath, UINT 
 //    pszNtPathSize：输出内核路径缓冲区字符个数
 EXTERN_C M_API DWORD MGetNtPathFromHandle(HANDLE hFile, LPWSTR pszNtPath, UINT pszNtPathSize);
 
-//根据pid获取进程完整路径（R3）
+//根据pid获取进程完整路径（R3 无需管理员权限）
 //    dwPID：进程pid
-//    [OUT] outNter：输出完整路径缓冲区，大小（MAX_PATH）
-//    [OUT] phandle：输出进程句柄（此函数会自动打开进程句柄，无需后续打开，需关闭）
+//    [OUT] pszOutPath：输出完整路径缓冲区，大小（MAX_PATH）
+EXTERN_C M_API  BOOL MGetProcessFullPathForNonAdmin(DWORD dwPID, LPWSTR pszOutPath);
+//根据pid获取进程完整路径（R3 某些进程可能需要管理员权限）
+//    dwPID：进程pid
+//    [OUT] pszOutPath：输出完整路径缓冲区，大小（MAX_PATH）
+//    [OUT] pOutHandle：输出进程句柄（此函数会自动打开进程句柄，无需后续打开，需关闭）
 //    pszExeName：输入进程名称 (*.exe)
-EXTERN_C M_API BOOL MGetProcessFullPathEx(DWORD dwPID, LPWSTR outNter, PHANDLE phandle, LPWSTR pszExeName);
+EXTERN_C M_API BOOL MGetProcessFullPathEx(DWORD dwPID, LPWSTR pszOutPath, PHANDLE pOutHandle, LPWSTR pszExeName);
 //获取PE文件的版权信息
 //    pszFullPath：完整路径
 //    InfoItem：条目，以下对应不同信息

@@ -9,6 +9,7 @@
 
 BOOL _Is64BitOS = -1;
 BOOL _IsRunasAdmin = -1;
+BOOL _IsUserGuset = -1;
 
 DWORD currentWindowsBulidVer = 0;
 DWORD currentWindowsMajor = 0;
@@ -42,15 +43,13 @@ M_CAPI(BOOL) MIs64BitOS()
 {
 	if (_Is64BitOS == -1)
 	{
-		typedef void (WINAPI *LPFN_PGNSI)(LPSYSTEM_INFO);
 		BOOL bRetVal = FALSE;
 		SYSTEM_INFO si = { 0 };
-		LPFN_PGNSI pGNSI = (LPFN_PGNSI)GetProcAddress(GetModuleHandle(L"kernel32.dll"), "GetNativeSystemInfo");
-		if (pGNSI == NULL)
-			return FALSE;
-		pGNSI(&si);
+
+		GetNativeSystemInfo(&si);
 		if (si.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64 ||
-			si.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_IA64)
+			si.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_IA64 || 
+			si.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_ARM64)
 			bRetVal = TRUE;
 		_Is64BitOS = bRetVal;
 	}
@@ -137,6 +136,27 @@ M_CAPI(BOOL) MIsRunasAdmin()
 		_IsRunasAdmin = bElevated;
 	}
 	return _IsRunasAdmin;
+}
+M_CAPI(BOOL) MIsUserGuest()
+{
+	BOOL IsMember;
+	PSID pSid = 0;
+	_SID_IDENTIFIER_AUTHORITY pIdentifierAuthority = { 0 };
+
+	*(WORD *)&pIdentifierAuthority.Value[4] = 1280;
+	*(DWORD *)pIdentifierAuthority.Value = 0;
+	if (_IsUserGuset == -1)
+	{
+		_IsUserGuset = 2;
+		IsMember = 0;
+		if (AllocateAndInitializeSid(&pIdentifierAuthority, 2u, 0x20u, 0x222u, 0, 0, 0, 0, 0, 0, &pSid))
+		{
+			CheckTokenMembership(0, pSid, &IsMember);
+			_IsUserGuset = (IsMember != 1) + 1;
+			FreeSid(pSid);
+		}
+	}
+	return _IsUserGuset == 1;
 }
 
 M_CAPI(PVOID) MGetProcedureAddress(_In_ PVOID DllHandle, _In_opt_ PSTR ProcedureName, _In_opt_ ULONG ProcedureNumber)

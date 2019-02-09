@@ -46,10 +46,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PCMgrRegedit", "PCMgrRegedi
 		{F6BC96EA-82F7-422D-A371-A468F5E1CF22} = {F6BC96EA-82F7-422D-A371-A468F5E1CF22}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FileAccessKrnl", "FileAccessKrnl\FileAccessKrnl.vcxproj", "{5930FE43-1C6C-4CE4-905C-FA0733E3A101}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FileAccess", "FileAccess\FileAccess.vcxproj", "{DC22BB4F-5228-44ED-9185-B5A22067C291}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PCMgrUpdate", "PCMgrUpdate\PCMgrUpdate.csproj", "{2480C1D9-FFAF-41C4-A660-0BB8C42A2739}"
 	ProjectSection(ProjectDependencies) = postProject
 		{F6BC96EA-82F7-422D-A371-A468F5E1CF22} = {F6BC96EA-82F7-422D-A371-A468F5E1CF22}
@@ -61,9 +57,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PCMgrUpdate64", "PCMgrUpdat
 	EndProjectSection
 EndProject
 Global
-	GlobalSection(Performance) = preSolution
-		HasPerformanceSessions = true
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|ARM = Debug|ARM
@@ -252,34 +245,6 @@ Global
 		{45D46754-8DC2-43FF-9251-8D10977F2B95}.Release|x64.Build.0 = Release|x64
 		{45D46754-8DC2-43FF-9251-8D10977F2B95}.Release|x86.ActiveCfg = Release|x86
 		{45D46754-8DC2-43FF-9251-8D10977F2B95}.Release|x86.Build.0 = Release|x86
-		{5930FE43-1C6C-4CE4-905C-FA0733E3A101}.Debug|Any CPU.ActiveCfg = Debug|Win32
-		{5930FE43-1C6C-4CE4-905C-FA0733E3A101}.Debug|ARM.ActiveCfg = Debug|Win32
-		{5930FE43-1C6C-4CE4-905C-FA0733E3A101}.Debug|ARM64.ActiveCfg = Debug|Win32
-		{5930FE43-1C6C-4CE4-905C-FA0733E3A101}.Debug|x64.ActiveCfg = Debug|x64
-		{5930FE43-1C6C-4CE4-905C-FA0733E3A101}.Debug|x64.Build.0 = Debug|x64
-		{5930FE43-1C6C-4CE4-905C-FA0733E3A101}.Debug|x86.ActiveCfg = Debug|Win32
-		{5930FE43-1C6C-4CE4-905C-FA0733E3A101}.Debug|x86.Build.0 = Debug|Win32
-		{5930FE43-1C6C-4CE4-905C-FA0733E3A101}.Release|Any CPU.ActiveCfg = Release|Win32
-		{5930FE43-1C6C-4CE4-905C-FA0733E3A101}.Release|ARM.ActiveCfg = Release|Win32
-		{5930FE43-1C6C-4CE4-905C-FA0733E3A101}.Release|ARM64.ActiveCfg = Release|Win32
-		{5930FE43-1C6C-4CE4-905C-FA0733E3A101}.Release|x64.ActiveCfg = Release|x64
-		{5930FE43-1C6C-4CE4-905C-FA0733E3A101}.Release|x64.Build.0 = Release|x64
-		{5930FE43-1C6C-4CE4-905C-FA0733E3A101}.Release|x86.ActiveCfg = Release|Win32
-		{5930FE43-1C6C-4CE4-905C-FA0733E3A101}.Release|x86.Build.0 = Release|Win32
-		{DC22BB4F-5228-44ED-9185-B5A22067C291}.Debug|Any CPU.ActiveCfg = Debug|Win32
-		{DC22BB4F-5228-44ED-9185-B5A22067C291}.Debug|ARM.ActiveCfg = Debug|Win32
-		{DC22BB4F-5228-44ED-9185-B5A22067C291}.Debug|ARM64.ActiveCfg = Debug|Win32
-		{DC22BB4F-5228-44ED-9185-B5A22067C291}.Debug|x64.ActiveCfg = Debug|x64
-		{DC22BB4F-5228-44ED-9185-B5A22067C291}.Debug|x64.Build.0 = Debug|x64
-		{DC22BB4F-5228-44ED-9185-B5A22067C291}.Debug|x86.ActiveCfg = Debug|Win32
-		{DC22BB4F-5228-44ED-9185-B5A22067C291}.Debug|x86.Build.0 = Debug|Win32
-		{DC22BB4F-5228-44ED-9185-B5A22067C291}.Release|Any CPU.ActiveCfg = Release|Win32
-		{DC22BB4F-5228-44ED-9185-B5A22067C291}.Release|ARM.ActiveCfg = Release|Win32
-		{DC22BB4F-5228-44ED-9185-B5A22067C291}.Release|ARM64.ActiveCfg = Release|Win32
-		{DC22BB4F-5228-44ED-9185-B5A22067C291}.Release|x64.ActiveCfg = Release|x64
-		{DC22BB4F-5228-44ED-9185-B5A22067C291}.Release|x64.Build.0 = Release|x64
-		{DC22BB4F-5228-44ED-9185-B5A22067C291}.Release|x86.ActiveCfg = Release|Win32
-		{DC22BB4F-5228-44ED-9185-B5A22067C291}.Release|x86.Build.0 = Release|Win32
 		{2480C1D9-FFAF-41C4-A660-0BB8C42A2739}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2480C1D9-FFAF-41C4-A660-0BB8C42A2739}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2480C1D9-FFAF-41C4-A660-0BB8C42A2739}.Debug|ARM.ActiveCfg = Debug|Any CPU
@@ -324,5 +289,8 @@ Global
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C111F42C-DADE-4A0B-892C-E4242E2D40C1}
+	EndGlobalSection
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
 	EndGlobalSection
 EndGlobal

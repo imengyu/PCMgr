@@ -1318,25 +1318,35 @@ M_API DWORD MNtPathToDosPath(LPWSTR pszNtPath, LPWSTR pszDosPath, UINT szDosPath
 }
 
 //Process information
-M_API BOOL MGetProcessFullPathEx(DWORD dwPID, LPWSTR outNter, PHANDLE phandle, LPWSTR pszExeName)
+M_API BOOL MGetProcessFullPathForNonAdmin(DWORD dwPID, LPWSTR pszOutPath)
+{
+	ULONG ResultLength = 0;
+	SYSTEM_PROCESS_ID_INFORMATION SystemInformation = { 0 };
+	SystemInformation.ProcessId = (PVOID)(ULONG_PTR)dwPID; 
+	if (!NT_SUCCESS(NtQuerySystemInformation(SystemProcessIdInformation, &SystemInformation, sizeof(SYSTEM_PROCESS_ID_INFORMATION), &ResultLength)))
+		return FALSE;
+	if(MDosPathToNtPath(SystemInformation.ImageName.Buffer, pszOutPath))
+		return FALSE;
+	return FALSE;
+}
+M_API BOOL MGetProcessFullPathEx(DWORD dwPID, LPWSTR pszOutDosPath, PHANDLE pOutHandle, LPWSTR pszExeName)
 {
 	if (dwPID == 0) {
-		wcscpy_s(outNter, 260, str_item_systemidleproc);
-		MOpenProcessNt(dwPID, phandle);
+		wcscpy_s(pszOutDosPath, 260, str_item_systemidleproc);
+		MOpenProcessNt(dwPID, pOutHandle);
 		return 1;
 	}
 
-	//TCHAR szResult[MAX_PATH];
 	TCHAR szImagePath[MAX_PATH];
 	HANDLE hProcess = MTryOpenProcess(dwPID);
-	if (!hProcess) return FALSE;
+	if (!hProcess) return MGetProcessFullPathForNonAdmin(dwPID, pszOutDosPath);
 	if (!NT_SUCCESS(MGetProcessImageFileNameWin32(hProcess, szImagePath, MAX_PATH)))
 		return FALSE;
 	//if (!MDosPathToNtPath(szImagePath, szResult)) return FALSE;
 	//wcscpy_s(outNter, 260, szResult);
-	wcscpy_s(outNter, 260, szImagePath);
+	wcscpy_s(pszOutDosPath, MAX_PATH, szImagePath);
 
-	if (phandle)*phandle = hProcess;
+	if (pOutHandle)*pOutHandle = hProcess;
 	else MCloseHandle(hProcess);
 	return TRUE;
 }

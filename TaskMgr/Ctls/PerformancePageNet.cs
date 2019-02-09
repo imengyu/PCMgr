@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Windows.Forms;
 using PCMgr.Lanuages;
-using System.Text;
 using System.Drawing;
+using static PCMgr.NativeMethods;
+using System.Text;
 
 namespace PCMgr.Ctls
 {
@@ -21,12 +22,18 @@ namespace PCMgr.Ctls
         }
         private bool currNetIsWifi = false;
         public string v4 = "", v6 = "";
+        public UInt64 physicalMaxSpeed = 100000000;
         private string currNetName = "";
         private IntPtr currNet = IntPtr.Zero;
         private int lastMaxSpeed = 100;
+        private uint maxSpeedOverflow = 100;
+        private uint maxpySpeed = 100;
+        private int outLinkQuality = 0;
 
         private double lastReceive = 0;
         private double lastSent = 0;
+
+        public string GUID { get; set; } = "";
 
         public Panel GridPanel => panelGrid;
         public bool PageIsGraphicMode { get; set; }
@@ -68,12 +75,12 @@ namespace PCMgr.Ctls
             //刷新最大单位
             if (lastMaxSpeed > performanceGrid.MaxValue)
             {
-                performanceGrid.MaxValue = GetSpeedMaxUnit();
+                performanceGrid.MaxValue = (int)GetSpeedMaxUnit();
                 performanceGrid.RightText = NativeMethods.FormatNetSpeedUnit(performanceGrid.MaxValue * 1024 / 8);
             }
             else if (lastMaxSpeed < performanceGrid.MaxValue)
             {
-                int maxValue = GetSpeedMaxUnit();
+                int maxValue = (int)GetSpeedMaxUnit();
                 if (performanceGrid.MaxValue > maxValue)
                 {
                     performanceGrid.MaxValue = maxValue;
@@ -112,7 +119,8 @@ namespace PCMgr.Ctls
         }
         public void PageInit()
         {
-            contextMenuStrip.Renderer = new Helpers.ClassicalMenuRender(Handle);
+            maxpySpeed = (uint)(physicalMaxSpeed / 1024);
+            maxSpeedOverflow = (uint)(physicalMaxSpeed * 0.76 / 1024);
 
             performanceTitle.Title = currNetIsWifi ? "Wi-Fi" : LanuageMgr.GetStr("Ethernet");
             performanceTitle.SmallTitle = currNetName;
@@ -139,7 +147,15 @@ namespace PCMgr.Ctls
             if (currNetIsWifi)
             {
                 performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem(LanuageMgr.GetStr("AdapterName"), "WALN"));
-
+                if (MWLAN_CanUse() && GUID != "")
+                {
+                    int bssPhyType = 0;
+                    StringBuilder outSsidName = new StringBuilder(64);
+                    if (MWLAN_GetAdapterWLANInformation(GUID, ref outLinkQuality, outSsidName, 64, ref bssPhyType)) {
+                        performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem(LanuageMgr.GetStr("ConnectionType"), GetWlanConType(bssPhyType)));
+                        performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem("SSID", outSsidName.ToString()));
+                    }
+                }
             }
             else
             {
@@ -149,11 +165,15 @@ namespace PCMgr.Ctls
 
             performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem(LanuageMgr.GetStr("IPV4"), v4));
             performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem(LanuageMgr.GetStr("IPV6"), v6));
+
+            if (currNetIsWifi) performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem(LanuageMgr.GetStr("LinkQuality"), GetWlanLinkQualityIcon(outLinkQuality)));
         }
         public int PageGetSpeedMaxUnit(int speed)
         {
             if (speed > 100)
             {
+                if(speed > maxSpeedOverflow)
+                    return (int)maxpySpeed;//physicalMaxSpeed
                 if (speed < 600)
                     return 500;//500k
                 if (speed < 1030)
@@ -162,7 +182,7 @@ namespace PCMgr.Ctls
                     return 2048;//2m
                 if (speed < 5130)
                     return 5120;//5m
-                if (lastMaxSpeed < 10300)
+                if (speed < 10300)
                     return 10240;//10m
                 if (speed < 20500)
                     return 20480;//20m
@@ -181,6 +201,41 @@ namespace PCMgr.Ctls
             contextMenuStrip.Show(this, Point.Empty);
         }
 
+        private string GetWlanConType(int c)
+        {
+            switch (c)
+            {
+                case 1:
+                    return "FHSS";
+                case 2:
+                case 5:
+                    return "802.11b";
+                case 4:
+                    return "802.11a";
+                case 6:
+                    return "802.11g";
+                case 7:
+                    return "802.11n";
+                case 8:
+                    return "802.11ac";
+                case 9:
+                    return "802.11ad";
+                case 0:
+                default:
+                case 3:
+                    return "";
+            }
+        }
+        private Icon GetWlanLinkQualityIcon(int quality)
+        {
+            if (quality < 5) return Properties.Resources.icoWifiLevel0;
+            else if (quality < 20) return Properties.Resources.icoWifiLevel1;
+            else if (quality < 40) return Properties.Resources.icoWifiLevel2;
+            else if (quality < 60) return Properties.Resources.icoWifiLevel3;
+            else if (quality < 80) return Properties.Resources.icoWifiLevel4;
+            else if (quality >= 80) return Properties.Resources.icoWifiLevel5;
+            else return Properties.Resources.icoWifiLevel0;
+        }
         private int GetSpeedMaxUnit()
         {
             return PageGetSpeedMaxUnit(lastMaxSpeed);
@@ -191,7 +246,7 @@ namespace PCMgr.Ctls
 
         private void PerformancePageNet_Load(object sender, EventArgs e)
         {
-            
+            contextMenuStrip.Renderer = new Helpers.ClassicalMenuRender(Handle);
         }
 
         public event OpeningPageMenuEventHandler OpeningPageMenu;

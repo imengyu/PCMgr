@@ -313,6 +313,15 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 Connection type 的本地化字符串。
+        /// </summary>
+        internal static string ConnectionType {
+            get {
+                return ResourceManager.GetString("ConnectionType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 connect to the session 的本地化字符串。
         /// </summary>
         internal static string ConnectSession {
@@ -1222,6 +1231,15 @@ namespace PCMgr.Lanuages {
         internal static string LanuageChangedTip {
             get {
                 return ResourceManager.GetString("LanuageChangedTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Link quality 的本地化字符串。
+        /// </summary>
+        internal static string LinkQuality {
+            get {
+                return ResourceManager.GetString("LinkQuality", resourceCulture);
             }
         }
         

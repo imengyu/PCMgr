@@ -177,6 +177,12 @@
     <ClInclude Include="MMonitor.h">
       <Filter>头文件\Monitor</Filter>
     </ClInclude>
+    <ClInclude Include="wlanhlp.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="UidHlp.h">
+      <Filter>头文件\HLPS</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -298,6 +304,9 @@
     </ClCompile>
     <ClCompile Include="MMonitor.cpp">
       <Filter>源文件\Monitor</Filter>
+    </ClCompile>
+    <ClCompile Include="wlanhlp.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

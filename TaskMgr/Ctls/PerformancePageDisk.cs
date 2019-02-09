@@ -23,6 +23,8 @@ namespace PCMgr.Ctls
         private int lastDiskTime = 0;
         private int lastMaxSpeed = 100;
 
+        public string GUID { get; set; }
+
         public Panel GridPanel => panelGrid;
         public bool PageIsGraphicMode { get; set; }
         public bool PageIsActive { get; set; }
@@ -203,9 +205,12 @@ namespace PCMgr.Ctls
             StringBuilder stringBuilderModel = new StringBuilder(64);
             StringBuilder stringBuilderName = new StringBuilder(64);
             StringBuilder stringBuilderSize = new StringBuilder(64);
+            StringBuilder stringBuilderGUID = new StringBuilder(64);
 
-            if (MDEVICE_GetLogicalDiskInfoItem((int)currDiskIndex, stringBuilderName, stringBuilderName, ref index, ref size, stringBuilderSize))
+            if (MDEVICE_GetPhysicalDiskInfoItem((int)currDiskIndex, stringBuilderName, stringBuilderName, ref index, ref size, stringBuilderSize, stringBuilderGUID, 64))
             {
+                GUID = stringBuilderGUID.ToString();
+
                 if (stringBuilderSize.Length > 0)
                     size = UInt64.Parse(stringBuilderSize.ToString());
                 performanceInfos.StaticItems.Add(new PerformanceInfos.PerformanceInfoStaticItem(LanuageMgr.GetStr("Capacity"), NativeMethods.FormatFileSizeKBUnit(Convert.ToInt64(size / 1024))));

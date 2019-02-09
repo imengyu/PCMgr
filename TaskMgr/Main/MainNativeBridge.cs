@@ -223,6 +223,12 @@ namespace PCMgr.Main
                         formTcp.Show();
                         break;
                     }
+                case M_CALLBACK_RELOAD_PERF_DEVICE_LIST:
+                    {
+                        if (formMain.MainPagePerf.Inited)
+                            formMain.MainPagePerf.PerfReloadMoveableDevices();
+                        break;
+                    }
             }
         }
 

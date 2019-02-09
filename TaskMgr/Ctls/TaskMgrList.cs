@@ -65,8 +65,12 @@ namespace PCMgr.Ctls
             hotLineColorPen = new Pen(Color.FromArgb(248, 106, 42));
             defBgSolidBrush = new SolidBrush(Color.FromArgb(255, 249, 228));
             defTagSolidBrush = new SolidBrush(Color.FromArgb(0, 120, 215));
-            errTagSolidBrush = new SolidBrush(Color.Orange);
+            errTagSolidBrush = new SolidBrush(Color.OrangeRed);
             defChildColorPen = new Pen(Color.FromArgb(0, 120, 215), 3);
+            dangerTagSolidBrush = new SolidBrush(Color.Orange);
+            warnTagSolidBrush = new SolidBrush(Color.FromArgb(253, 191, 8));
+            darkTagSolidBrush = new SolidBrush(Color.FromArgb(188, 188, 188));
+
             DrawIcon = true;
             PauseUwpIco = Properties.Resources.icoBackgroundUwp;
 
@@ -145,6 +149,9 @@ namespace PCMgr.Ctls
         private int fastOpCount = 0;
         private IntPtr hThemeListView = IntPtr.Zero;
         private IntPtr hThemeTreeView = IntPtr.Zero;
+        private SolidBrush darkTagSolidBrush = null;
+        private SolidBrush warnTagSolidBrush = null;
+        private SolidBrush dangerTagSolidBrush = null;
         private SolidBrush errTagSolidBrush = null;
         private SolidBrush defTagSolidBrush = null;
         private SolidBrush defBgSolidBrush = null;
@@ -518,6 +525,8 @@ namespace PCMgr.Ctls
                     g.ReleaseHdc();
                 }
 
+                if (item.IsUnEndable && !noHeader) g.FillRectangle(darkTagSolidBrush, new Rectangle(53 - xOffest, item.YPos - yOffest + 11, 6, 6)); 
+                if (item.IsDanger && !noHeader) g.FillRectangle(dangerTagSolidBrush, new Rectangle(53 - xOffest, item.YPos - yOffest + 11, 6, 6));
                 if (item.IsUWP && !noHeader)
                 {
                     if (item.IsUWPButErrInfo) g.FillRectangle(errTagSolidBrush, new Rectangle(53 - xOffest, item.YPos - yOffest + 11, 6, 6));
@@ -1385,6 +1394,8 @@ namespace PCMgr.Ctls
         public TaskMgrListItem Parent { get; set; }
         public bool IsUWP { get; set; }
         public bool IsUWPButErrInfo { get; set; }
+        public bool IsDanger { get; set; }
+        public bool IsUnEndable{ get; set; }
         public bool GlyphHoted
         {
             get { return glyphHoted; }

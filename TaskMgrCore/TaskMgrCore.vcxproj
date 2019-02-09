@@ -238,11 +238,13 @@
     <ClInclude Include="sysstructs.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="thdhlp.h" />
+    <ClInclude Include="UidHlp.h" />
     <ClInclude Include="userhlp.h" />
     <ClInclude Include="uwphlp.h" />
     <ClInclude Include="VersionHelpers.h" />
     <ClInclude Include="vprocx.h" />
     <ClInclude Include="DltHlp.h" />
+    <ClInclude Include="wlanhlp.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cmdhlp.cpp" />
@@ -303,6 +305,7 @@
     <ClCompile Include="userhlp.cpp" />
     <ClCompile Include="uwphlp.cpp" />
     <ClCompile Include="vprocx.cpp" />
+    <ClCompile Include="wlanhlp.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="TaskMgrCore.rc" />

@@ -353,6 +353,9 @@ M_CAPI(UINT) MPERF_InitDisksPerformanceCounters()
 {
 	if (hQuery)
 	{
+		if (diskCounters.size() > 0)
+			MPERF_DestroyDisksPerformanceCounters();
+
 		PDH_STATUS status;
 		LPWSTR diskInstanceNames = MPERF_EnumPerformanceCounterInstanceNames(L"PhysicalDisk");
 		if (diskInstanceNames)
@@ -460,6 +463,7 @@ M_CAPI(BOOL) MPERF_DestroyDisksPerformanceCounters()
 
 			MFree(data);
 		}
+		diskCounters.clear();
 	}
 	return FALSE;
 }
@@ -532,6 +536,9 @@ M_CAPI(UINT) MPERF_InitNetworksPerformanceCounters()
 {
 	if (hQuery)
 	{
+		if (netCounters.size() > 0)
+			MPERF_DestroyNetworksPerformanceCounters();
+
 		PDH_STATUS status;
 		DWORD netsInstanceNamesSize = 0;
 		LPWSTR netInstanceNames = MPERF_EnumPerformanceCounterInstanceNames(L"Network Adapter");
@@ -574,6 +581,9 @@ M_CAPI(UINT) MPERF_InitNetworksPerformanceCounters()
 M_CAPI(UINT) MPERF_InitNetworksPerformanceCounters2() {
 	if (hQuery)
 	{
+		if (netCounters2.size() > 0)
+			MPERF_DestroyNetworksPerformanceCounters();
+
 		PDH_STATUS status;
 		DWORD netsInstanceNamesSize = 0;
 		LPWSTR netInstanceNames = MPERF_EnumPerformanceCounterInstanceNames(L"Network Interface");
@@ -632,7 +642,9 @@ M_CAPI(BOOL) MPERF_DestroyNetworksPerformanceCounters()
 			}
 
 			MFree(data);
-		}
+		}		
+		netCounters.clear();
+
 		for (auto it = netCounters2.begin(); it != netCounters2.end(); it++)
 		{
 			MPerfNetData *data = (*it);
@@ -649,6 +661,7 @@ M_CAPI(BOOL) MPERF_DestroyNetworksPerformanceCounters()
 
 			MFree(data);
 		}
+		netCounters2.clear();
 	}
 	return FALSE;
 }

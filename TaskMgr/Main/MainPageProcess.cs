@@ -130,9 +130,6 @@ namespace PCMgr.Main
         private string systemRootPath = "";
         private string svchostPath = "";
         private string svchostPathwow = "";
-        private string wininitPath = "";
-        private string servicePath = "";
-        private string smssPath = "";
 
         private TaskMgrListItem nextKillItem = null;
         private Font smallListFont = null;
@@ -232,31 +229,9 @@ namespace PCMgr.Main
         }
         private bool IsUnAccessableWindowsProcess(string exename, IntPtr hprocess, ref StringBuilder stringBuilder)
         {
-            bool isw = false;
             if (hprocess == Nullptr)
-            { 
-                if (exename == "csrss.exe")
-                {
-                    isw = true;
-                    stringBuilder.Append(csrssPath);
-                }
-                else if (exename == "wininit.exe")
-                {
-                    isw = true;
-                    stringBuilder.Append(wininitPath);
-                }
-                else if (exename == "services.exe")
-                {
-                    isw = true;
-                    stringBuilder.Append(servicePath);
-                }
-                else if (exename == "smss.exe")
-                {
-                    isw = true;
-                    stringBuilder.Append(smssPath);
-                }
-            }
-            return isw;
+                return exename == "csrss.exe" || exename == "wininit.exe" || exename == "services.exe" || exename == "smss.exe";
+            return false;
         }
         private bool IsEndable(PsItem p)
         {
@@ -649,9 +624,6 @@ namespace PCMgr.Main
                     svchostPath = (systemRootPath + @"\System32\svchost.exe").ToLower();
                     svchostPathwow = (systemRootPath + @"\syswow64\svchost.exe").ToLower();
                 }
-                if (wininitPath == "") wininitPath = system32Path + "wininit.exe";
-                if (smssPath == "") smssPath = system32Path + "smss.exe";
-                if (servicePath == "") servicePath = system32Path + "services.exe";
 
                 windowsProcess.Add(@"C:\Program Files\Windows Defender\NisSrv.exe".ToLower());
                 windowsProcess.Add(@"C:\Program Files\Windows Defender\MsMpEng.exe".ToLower());
@@ -1069,6 +1041,8 @@ namespace PCMgr.Main
 
             taskMgrListItem.Type = TaskMgrListItemType.ItemProcess;
             taskMgrListItem.IsFullData = true;
+            taskMgrListItem.IsDanger = IsVeryImporant(p);
+            taskMgrListItem.IsUnEndable = !IsEndable(p);
 
             //Test service
             bool isSvcHoct = false;

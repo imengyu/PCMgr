@@ -6,6 +6,7 @@
 #include <comdef.h>  
 #include <Wbemidl.h>  
 #include <vector>  
+#include <netioapi.h>
 #include <ntddstor.h>
 #include "StringHlp.h"
 #include "StringSplit.h"
@@ -72,12 +73,12 @@ M_CAPI(void) MDEVICE_UnInit()
 
 vector<MDevicePhysicalDisk *> diskInfos;
 
-M_CAPI(BOOL) MDEVICE_GetLogicalDiskInfo()
+M_CAPI(BOOL) MDEVICE_GetPhysicalDiskInfo()
 {
 	if (wmiInited)
 	{
 		if (diskInfos.size() > 0)
-			MDEVICE_DestroyLogicalDiskInfo();
+			MDEVICE_DestroyPhysicalDiskInfo();
 
 		IEnumWbemClassObject* pEnumerator = NULL;
 		HRESULT hres = pSvc->ExecQuery(
@@ -111,6 +112,10 @@ M_CAPI(BOOL) MDEVICE_GetLogicalDiskInfo()
 			if (SUCCEEDED(hr) && (V_VT(&vtProp) == VT_BSTR)) wcscpy_s(disk->Name, vtProp.bstrVal);
 			VariantClear(&vtProp);
 
+			hr = pclsObj->Get(bstr_t(L"GUID"), 0, &vtProp, 0, 0);
+			if (SUCCEEDED(hr) && (V_VT(&vtProp) == VT_BSTR)) wcscpy_s(disk->GUID, vtProp.bstrVal);
+			VariantClear(&vtProp);
+
 			hr = pclsObj->Get(bstr_t(L"Model"), 0, &vtProp, 0, 0);
 			if (SUCCEEDED(hr) && (V_VT(&vtProp) == VT_BSTR)) wcscpy_s(disk->Model, vtProp.bstrVal);
 			VariantClear(&vtProp);
@@ -133,7 +138,7 @@ M_CAPI(BOOL) MDEVICE_GetLogicalDiskInfo()
 	}
 	return FALSE;
 }
-M_CAPI(BOOL) MDEVICE_DestroyLogicalDiskInfo()
+M_CAPI(BOOL) MDEVICE_DestroyPhysicalDiskInfo()
 {
 	if (wmiInited)
 	{
@@ -144,11 +149,11 @@ M_CAPI(BOOL) MDEVICE_DestroyLogicalDiskInfo()
 	}
 	return FALSE;
 }
-M_CAPI(UINT) MDEVICE_GetLogicalDiskInfoSize()
+M_CAPI(UINT) MDEVICE_GetPhysicalDiskInfoSize()
 {
 	return (UINT)diskInfos.size();
 }
-M_CAPI(BOOL) MDEVICE_GetLogicalDiskInfoItem(int index, LPWSTR nameBuffer, LPWSTR modelBuffer, UINT*outIndex, UINT64*outSize, LPWSTR sizeBuffer)
+M_CAPI(BOOL) MDEVICE_GetPhysicalDiskInfoItem(int index, LPWSTR nameBuffer, LPWSTR modelBuffer, UINT*outIndex, UINT64*outSize, LPWSTR sizeBuffer, LPWSTR guidBuffer, int guidBufferSize)
 {
 	if (wmiInited)
 	{
@@ -330,6 +335,10 @@ M_CAPI(BOOL) MDEVICE_GetMemoryDeviceInfo()
 
 			if (0 == uReturn)
 				break;
+
+			hr = pclsObj->Get(bstr_t(L"GUID"), 0, &vtProp, 0, 0);
+			if (SUCCEEDED(hr) && (V_VT(&vtProp) == VT_BSTR)) wcscpy_s(memoryInfo.GUID, vtProp.bstrVal);
+			VariantClear(&vtProp);
 
 			hr = pclsObj->Get(bstr_t(L"FormFactor"), 0, &vtProp, 0, 0);
 			memoryInfo.FormatFactor = vtProp.uiVal;
@@ -619,6 +628,14 @@ M_CAPI(UINT) MDEVICE_GetNetworkAdaptersInfo()
 			MDeviceNetworkAdapter *adapter = (MDeviceNetworkAdapter*)MAlloc(sizeof(MDeviceNetworkAdapter));
 			memset(adapter, 0, sizeof(MDeviceNetworkAdapter));
 
+			hr = pclsObj->Get(bstr_t(L"MaxSpeed"), 0, &vtProp, 0, 0);
+			if (SUCCEEDED(hr)) adapter->MaxSpeed = vtProp.ullVal;
+			VariantClear(&vtProp);
+
+			hr = pclsObj->Get(bstr_t(L"GUID"), 0, &vtProp, 0, 0);
+			if (SUCCEEDED(hr) && (V_VT(&vtProp) == VT_BSTR)) wcscpy_s(adapter->GUID, vtProp.bstrVal);
+			VariantClear(&vtProp);
+
 			hr = pclsObj->Get(bstr_t(L"Description"), 0, &vtProp, 0, 0);
 			if (SUCCEEDED(hr) && (V_VT(&vtProp) == VT_BSTR)) wcscpy_s(adapter->Description, vtProp.bstrVal);
 			VariantClear(&vtProp);
@@ -642,6 +659,7 @@ M_CAPI(UINT) MDEVICE_GetNetworkAdaptersInfo()
 		pEnumerator->Release();
 		MDEVICE_GetNetworkAdaptersIPInfo();
 
+
 		return static_cast<UINT>(netAdapters.size());
 	}
 	return FALSE;
@@ -658,19 +676,19 @@ M_CAPI(BOOL) MDEVICE_GetNetworkAdapterInfoItem(int index, LPWSTR name, int nameV
 	}
 	return FALSE;
 }
-M_CAPI(BOOL) MDEVICE_GetNetworkAdapterInfoFormName(LPWSTR name, LPWSTR ipAddressV4, int ipAddressV4Size, LPWSTR ipAddressV6, int ipAddressV6Size)
+M_CAPI(BOOL) MDEVICE_GetNetworkAdapterInfoFormName(LPWSTR name, LPWSTR ipAddressV4, int ipAddressV4Size, LPWSTR ipAddressV6, int ipAddressV6Size, UINT64*outMaxSpeed, LPWSTR guidBuffer, int guidBufferSize)
 {
 	if (wmiInited)
 	{
 		MDeviceNetworkAdapter*adapter = MDEVICE_FindNetworkAdaptersInfo(name);
 		if (adapter != NULL)
 		{
+			if (outMaxSpeed)*outMaxSpeed = adapter->MaxSpeed;
 			if (ipAddressV4) wcscpy_s(ipAddressV4, ipAddressV4Size, adapter->IPAddressV4);
 			if (ipAddressV6) wcscpy_s(ipAddressV6, ipAddressV6Size, adapter->IPAddressV6);
+			if (guidBuffer) wcscpy_s(guidBuffer, guidBufferSize, adapter->GUID);
 			return adapter->Enabled;
 		}
 	}
 	return 0;
 }
-
-

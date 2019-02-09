@@ -1,8 +1,4 @@
 #pragma once
-#define M_CALLBACK_ 1
-#define M_CALLBACK_ 1
-#define M_CALLBACK_ 1
-#define M_CALLBACK_ 1
 
 #define M_CALLBACK_SW_AOP_WND 1
 #define M_CALLBACK_CLEAR_ILLEGAL_TOP_WND 2
@@ -60,3 +56,7 @@
 #define M_CALLBACK_SHOW_HELP 61
 #define M_CALLBACK_RUN_APP_CMD 62
 #define M_CALLBACK_VIEW_TCP 63
+#define M_CALLBACK_RELOAD_PERF_DEVICE_LIST 64
+#define M_CALLBACK_ 1
+
+

@@ -297,8 +297,8 @@ namespace PCMgr
             public const int M_CALLBACK_SHOW_HELP = 61;
             public const int M_CALLBACK_RUN_APP_CMD = 62;
             public const int M_CALLBACK_VIEW_TCP = 63;
+            public const int M_CALLBACK_RELOAD_PERF_DEVICE_LIST = 64;
 
-            
         }
 
 
@@ -759,6 +759,19 @@ namespace PCMgr
         [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern string MPERF_NET_TcpConnectionStateToString(uint state);
 
+        #region WLAN API
+
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void MWLAN_Init();
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool MWLAN_CanUse();
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool MWLAN_Load();
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern bool MWLAN_GetAdapterWLANInformation([MarshalAs(UnmanagedType.LPWStr)]string pszDeviceGuid, ref int outLinkQuality, StringBuilder outSsidNameBuf, uint outSsidNameBufSize, ref int outBssPhyType);
+
+        #endregion
+
         #endregion
 
         #region FM API
@@ -1125,15 +1138,15 @@ namespace PCMgr
             public static extern void MDEVICE_UnInit();
 
             [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-            public static extern bool MDEVICE_GetLogicalDiskInfo();
+            public static extern bool MDEVICE_GetPhysicalDiskInfo();
             [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-            public static extern bool MDEVICE_DestroyLogicalDiskInfo();
+            public static extern bool MDEVICE_DestroyPhysicalDiskInfo();
             [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
-            public static extern uint MDEVICE_GetLogicalDiskInfoSize();
+            public static extern uint MDEVICE_GetPhysicalDiskInfoSize();
             [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
             public static extern uint MDEVICE_GetPhysicalDriveFromPartitionLetter(char letter);
             [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-            public static extern bool MDEVICE_GetLogicalDiskInfoItem(int index, StringBuilder nameBuffer, StringBuilder modelBuffer, ref UInt32 outIndex, ref UInt64 outSize, StringBuilder sizeBuffer);
+            public static extern bool MDEVICE_GetPhysicalDiskInfoItem(int index, StringBuilder nameBuffer, StringBuilder modelBuffer, ref UInt32 outIndex, ref UInt64 outSize, StringBuilder sizeBuffer, StringBuilder guidBuffer, int guidBufferSize);
 
             [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
             public static extern bool MDEVICE_GetIsSystemDisk([MarshalAs(UnmanagedType.LPStr)]string perfstr);
@@ -1149,7 +1162,7 @@ namespace PCMgr
             [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
             public static extern bool MDEVICE_GetNetworkAdapterInfoFormName(
                 [MarshalAs(UnmanagedType.LPWStr)]string name, StringBuilder sbV4, int bufferSizeV4,
-                StringBuilder sbV6, int bufferSizeV6);
+                StringBuilder sbV6, int bufferSizeV6, ref UInt64 outMaxSpeed, StringBuilder guidBuffer, int guidBufferSize);
             [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
             public static extern bool MDEVICE_GetNetworkAdapterInfoItem(int index, StringBuilder name, int bufferSize);
 

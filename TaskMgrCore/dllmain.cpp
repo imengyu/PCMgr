@@ -11,6 +11,7 @@
 #include "lghlp.h"
 #include "vprocx.h"
 #include "cmdhlp.h"
+#include "wlanhlp.h"
 
 #include "MCpuInfoMonitor.h"
 #include "MSystemPerformanctMonitor.h"
@@ -76,6 +77,8 @@ void DllDestroy() {
 
 	if (M_UWP_IsInited())
 		M_UWP_UnInit();
+
+	MWLAN_Destroy();
 
 	MPERF_GlobalDestroy();
 	WindowEnumDestroy();

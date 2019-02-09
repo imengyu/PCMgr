@@ -138,6 +138,7 @@ namespace PCMgr
         internal MainPageKernelDrvMgr MainPageKernelDrvMgr { get { return mainPageKernelDrvMgr; } }
         internal MainPageStartMgr MainPageStartMgr { get { return mainPageStartMgr; } }
         internal MainSettings MainSettings { get; private set; }
+        internal MainPagePerf MainPagePerf { get { return mainPagePerf; } }
 
         private MainNativeBridge mainNativeBridge = null;
         private MainPageProcess mainPageProcess = null;
