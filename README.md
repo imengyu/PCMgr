@@ -1,4 +1,5 @@
-﻿# PCMgr
+﻿﻿# PCMgr [![License](https://img.shields.io/badge/Licence-MIT-blue.svg)]()
+=======================
  Windows任务管理器加强改进版 Advance and more powerful Windows task manager
 ===
 这是一个 Windows 任务管理器加强版，添加了任务管理器不具有的功能，并且已有与Windows任务管理器可以媲美。<br/>
@@ -8,6 +9,16 @@
 This is an enhanced rebulid version of the Windows Task Manager that adds features that the Task Manager does not have, And it is very similar to the Windows task manager. <br/>
 Use WinAPI and C# development, you can view the process, process information, end the process, etc. <br/>
 At present, only part of the functions are completed.
+
+特点 Features
+---
+- 完全的进程查看以及结束、暂停运行、继续运行进程
+- 查看进程线程、模块、窗口、句柄
+- 与自带任务管理器非常相似
+- 最低支持 Windows7
+- 一些任务管理器没有的功能
+- 内核还未完全开发完成，完成以后可以获取更多更强的权限
+- 这是完全开源的软件，你可以学习其中的原理
 
 编译 Bulid
 ---
@@ -34,3 +45,7 @@ At least in Windows7 and installed .Net Framework 4.0<br/>
 ![Image8](https://raw.githubusercontent.com/717021/PCMgr/master/image8.png)<br/>
 ![Image9](https://raw.githubusercontent.com/717021/PCMgr/master/image9.png)<br/>
 
+许可 License
+---
+本程序遵循 MIT 协议
+Theme PCMgr is covered with MIT license
