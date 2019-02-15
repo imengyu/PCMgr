@@ -517,16 +517,17 @@ namespace PCMgr.Ctls
         {
             if (enteredItem != null)
             {
-                if (lastTooltipItem != null)
-                {
-                    tipToolTip.Hide(this);
-                    lastTooltipItem = null;
-                }
                 enteredItem.MouseEntered = false;
                 enteredItem = null;
                 Invalidate();
             }
+            tipToolTip.Hide(this);
             base.OnMouseLeave(e);
+        }
+        protected override void OnMouseEnter(EventArgs e)
+        {
+            base.OnMouseEnter(e);
+            ShowToolTip();
         }
         protected override void OnPaint(PaintEventArgs e)
         {
@@ -598,6 +599,7 @@ namespace PCMgr.Ctls
 
         }
 
+
         internal void RebulidColumnsIndexForInsert(int insertIndex, TaskMgrListHeaderItem insertItem)
         {
             insertItem.SetDisplayIndex(insertIndex);
@@ -651,9 +653,14 @@ namespace PCMgr.Ctls
                     lastTooltipItem = enteredItem;
                 }
             }
+            else if (enteredItem == null && lastTooltipItem != null)
+            {
+                tipToolTip.Hide(this);
+                lastTooltipItem = null;
+            }
             else if (enteredItem != lastTooltipItem)
             {
-                if (enteredItem!=null && !string.IsNullOrEmpty(enteredItem.ToolTip))
+                if (enteredItem != null && !string.IsNullOrEmpty(enteredItem.ToolTip))
                 {
                     tipToolTip.Show(enteredItem.ToolTip, this, enteredItem.X - xOffiest, Height + 5);
                     lastTooltipItem = enteredItem;
@@ -663,11 +670,6 @@ namespace PCMgr.Ctls
                     tipToolTip.Hide(this);
                     lastTooltipItem = null;
                 }
-            }
-            else
-            {
-                tipToolTip.Hide(this);
-                lastTooltipItem = null;
             }
         }
 

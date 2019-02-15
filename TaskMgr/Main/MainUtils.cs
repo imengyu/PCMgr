@@ -51,6 +51,7 @@ namespace PCMgr.Main
             public uint ppid;
             public string exename;
             public string exepath;
+            public string username;
             public TaskMgrListItem item = null;
             public bool isSvchost = false;
             public bool isUWP = false;
@@ -58,8 +59,6 @@ namespace PCMgr.Main
             public bool isWindowsProcess = false;
             public bool isPaused = false;
             public bool isHung = false;
-
-            public string username;
 
             public IntPtr firstHwnd;
 

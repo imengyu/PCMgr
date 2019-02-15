@@ -183,6 +183,9 @@
     <ClInclude Include="UidHlp.h">
       <Filter>头文件\HLPS</Filter>
     </ClInclude>
+    <ClInclude Include="srumhlp.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -307,6 +310,12 @@
     </ClCompile>
     <ClCompile Include="wlanhlp.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="srumhlp.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="UidHlp.cpp">
+      <Filter>源文件\HLPS</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

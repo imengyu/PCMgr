@@ -9,7 +9,4 @@
     &(stGuid.Data4[4]),&(stGuid.Data4[5]),&(stGuid.Data4[6]),&(stGuid.Data4[7]));\
 }while(0);
 
-inline BOOL operator== (const GUID& guid1, const GUID & guid2)
-{
-	return !memcmp(&guid1, &guid2, sizeof(GUID));
-}
+M_CAPI(int) MGetCurrentUserSid(PSID * outSid);

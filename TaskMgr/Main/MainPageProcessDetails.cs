@@ -4,10 +4,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using static PCMgr.Main.MainUtils;
 using static PCMgr.NativeMethods;
@@ -42,7 +40,6 @@ namespace PCMgr.Main
 
             base.OnLoadControlEvents();
         }
-       
 
         //详细信息 页面代码
 
@@ -108,6 +105,12 @@ namespace PCMgr.Main
             }
             return false;
         }
+        private bool IsEndable(ProcessDetalItem p)
+        {
+            if (p.pid <= 4) return false;
+            if (p.exename == "Registry" || p.exename == "Memory Compression") return false;
+            return true;
+        }
 
         //Find iten
         private bool ProcessListDetailsIsProcessLoaded(uint pid, out ProcessDetalItem item)
@@ -164,6 +167,9 @@ namespace PCMgr.Main
                 if (csrssPath == "") csrssPath = Marshal.PtrToStringUni(MAppWorkCall4(96, Nullptr, Nullptr));
                 if (ntoskrnlPath == "") ntoskrnlPath = Marshal.PtrToStringUni(MAppWorkCall4(97, Nullptr, Nullptr));
 
+                if (!FormMain.IsAdmin)
+                    FormMain.check_showAllProcess.Visible = true;
+
                 windowsProcess.Add(@"C:\Program Files\Windows Defender\NisSrv.exe".ToLower());
                 windowsProcess.Add(@"C:\Program Files\Windows Defender\MsMpEng.exe".ToLower());
                 windowsProcess.Add(svchostPath);
@@ -206,12 +212,12 @@ namespace PCMgr.Main
         private void ProcessListDetailsRemoveItemCallBack(uint pid)
         {
             ProcessDetalItem oldps = ProcessListDetailsFindPsItem(pid);
-            if (oldps != null) ProcessListDetailsFree(oldps);
+            if (oldps != null) ProcessListDetailsFree(oldps); 
             else Log("ProcessListDetailsRemoveItemCallBack for a not found item : pid " + pid);
         }
         private void ProcessListDetailsNewItemCallBack(uint pid, uint parentid, string exename, string exefullpath, IntPtr hProcess, IntPtr processItem)
         {
-            if (!FormMain.IsAdmin && string.IsNullOrEmpty(exefullpath) && pid != 0 && pid != 2 && pid != 4 && pid != 88)
+            if (!FormMain.IsAdmin && hProcess == Nullptr && pid != 0 && pid != 2 && pid != 4 && pid != 88)
                 return;
             ProcessListDetailsLoad(pid, parentid, exename, exefullpath, hProcess, processItem);
         }
@@ -742,7 +748,7 @@ namespace PCMgr.Main
             ProcessDetalItem ps = listProcessDetals.SelectedItems[0].Tag as ProcessDetalItem;
             if (e.Button == MouseButtons.Left)
             {
-                if (ps.pid > 4)
+                if (IsEndable(ps))
                 {
                     btnEndProcessDetals.Enabled = true;
                     MAppWorkShowMenuProcessPrepare(ps.exepath, ps.exename, ps.pid, IsImporant(ps), IsVeryImporant(ps));
@@ -759,7 +765,7 @@ namespace PCMgr.Main
         }
         private void listProcessDetals_SelectedIndexChanged(object sender, EventArgs e)
         {
-            btnEndProcessDetals.Enabled = listProcessDetals.SelectedItems.Count != 0;
+           if(listProcessDetals.SelectedItems.Count == 0) btnEndProcessDetals.Enabled = false;
         }
         private void listProcessDetals_KeyDown(object sender, KeyEventArgs e)
         {
@@ -1147,7 +1153,7 @@ namespace PCMgr.Main
                     ColumnHeader col = listProcessDetals.Columns[index];
                     if (col.Tag != null)
                     {
-                        colsTip.Show(((itemheaderTag)col.Tag).tip, listProcessDetals, p.X, p.Y + 3, 5000);
+                        colsTip.Show(((itemheaderTag)col.Tag).tip, listProcessDetals, p.X, p.Y + 3, 3400);
                     }
                     else
                     {

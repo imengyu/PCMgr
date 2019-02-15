@@ -25,7 +25,9 @@ namespace PCMgr.Ctls
         public UInt64 physicalMaxSpeed = 100000000;
         private string currNetName = "";
         private IntPtr currNet = IntPtr.Zero;
-        private int lastMaxSpeed = 100;
+        private int lastMaxSpeed = 0;
+        private int lastMaxSpeedUpload = 0;
+        private int lastMaxSpeedDownload = 0;
         private uint maxSpeedOverflow = 100;
         private uint maxpySpeed = 100;
         private int outLinkQuality = 0;
@@ -71,7 +73,10 @@ namespace PCMgr.Ctls
             performanceGrid.AddData((int)(receive / 1024 * 8));
 
             //刷新速度标尺
-            lastMaxSpeed = (int)(performanceGrid.DataAverage * 0.7 + performanceGrid.MaxData * 0.3) / 2;
+            lastMaxSpeedDownload = (int)(performanceGrid.DataAverage1) / 2;
+            lastMaxSpeedUpload = (int)(performanceGrid.DataAverage2) / 2;
+            lastMaxSpeed = lastMaxSpeedDownload > lastMaxSpeedUpload ? lastMaxSpeedDownload : lastMaxSpeedUpload;
+
             //刷新最大单位
             if (lastMaxSpeed > performanceGrid.MaxValue)
             {

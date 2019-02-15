@@ -53,6 +53,7 @@ BOOL MWLAN_InitApis() {
 VOID MWLAN_Destroy() {
 	if (wlanClientHandle) dWlanCloseHandle(wlanClientHandle, 0);
 	MWLAN_DestroyInterfaceCaches();
+	FreeLibrary(hWlanapi);
 }
 VOID MWLAN_DestroyInterfaceCaches()
 {

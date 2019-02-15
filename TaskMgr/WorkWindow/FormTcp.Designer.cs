@@ -60,7 +60,7 @@
             this.columnHeaderState});
             this.listTcp.Location = new System.Drawing.Point(12, 44);
             this.listTcp.Name = "listTcp";
-            this.listTcp.Size = new System.Drawing.Size(768, 392);
+            this.listTcp.Size = new System.Drawing.Size(807, 407);
             this.listTcp.TabIndex = 1;
             this.listTcp.UseCompatibleStateImageBehavior = false;
             this.listTcp.View = System.Windows.Forms.View.Details;
@@ -122,21 +122,21 @@
             // 复制ToolStripMenuItem
             // 
             this.复制ToolStripMenuItem.Name = "复制ToolStripMenuItem";
-            this.复制ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.复制ToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
             this.复制ToolStripMenuItem.Text = "复制(&C)";
             this.复制ToolStripMenuItem.Click += new System.EventHandler(this.复制ToolStripMenuItem_Click);
             // 
             // 转到进程ToolStripMenuItem
             // 
             this.转到进程ToolStripMenuItem.Name = "转到进程ToolStripMenuItem";
-            this.转到进程ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.转到进程ToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
             this.转到进程ToolStripMenuItem.Text = "转到进程(&G)";
             this.转到进程ToolStripMenuItem.Click += new System.EventHandler(this.转到进程ToolStripMenuItem_Click);
             // 
             // 刷新ToolStripMenuItem
             // 
             this.刷新ToolStripMenuItem.Name = "刷新ToolStripMenuItem";
-            this.刷新ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.刷新ToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
             this.刷新ToolStripMenuItem.Text = "刷新(&R)";
             this.刷新ToolStripMenuItem.Click += new System.EventHandler(this.刷新ToolStripMenuItem_Click);
             // 
@@ -144,7 +144,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(792, 448);
+            this.ClientSize = new System.Drawing.Size(831, 463);
             this.Controls.Add(this.buttonRefesh);
             this.Controls.Add(this.listTcp);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;

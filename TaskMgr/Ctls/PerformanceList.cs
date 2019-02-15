@@ -73,7 +73,7 @@ namespace PCMgr.Ctls
 
         private void LoadAllFonts()
         {
-            hugeTextFont = new Font(Font.FontFamily, 10.5f);
+            hugeTextFont = new Font(Font.FontFamily, 11.5f);
             smallTextFont = new Font(Font.FontFamily, 9f);
         }
 
@@ -161,27 +161,28 @@ namespace PCMgr.Ctls
                 g.ReleaseHdc();
             }
 
-            g.DrawString(it.Name, hugeTextFont, Brushes.Black, drawDataGrid ? 80 : 35, y + 10);
-            g.DrawString(it.SmallText, smallTextFont, Brushes.Black, drawDataGrid ? 80 : 35, y + 30);
+            g.DrawString(it.Name, hugeTextFont, Brushes.Black, drawDataGrid ? 80 : 35, y + 8);
+            g.DrawString(it.SmallText, smallTextFont, Brushes.Black, drawDataGrid ? 80 : 35, y + 33);
 
             DrawItemDataGrid(g, it, y);
         }
         private void DrawItemDataGridData(Graphics g, PerformanceListItem it, List<PointF> ps, Pen p, Rectangle rect, float single, float division, float offset, int i, bool is2 = false)
         {
             float ypos = rect.Top + rect.Height - (((float)(is2 ? it.Data2[i] : it.Data[i]) / (float)it.MaxValue) * 100) * division;
-            if (ypos < rect.Top) ypos = rect.Top;
-            else if (ypos > rect.Bottom) ypos = rect.Bottom;
+            if (ypos > rect.Bottom) ypos = rect.Bottom;
             ps.Add(new PointF(rect.Left + offset + i * single, ypos));
             g.DrawLine(p, ps[ps.Count - 2], ps[ps.Count - 1]);
         }
         private void DrawItemDataGrid(Graphics g, PerformanceListItem it, int y)
         {
-            Rectangle rect = new Rectangle(10, y + 10, 60, 40);
-            if (it.Gray && drawDataGrid) g.DrawRectangle(Pens.Gray, rect);
+            if (it.Gray && drawDataGrid) g.DrawRectangle(Pens.Gray, new Rectangle(10, y + 10, 60, 40));
             else if (drawDataGrid)
             {
-                g.FillRectangle(Brushes.White, rect);
-                g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                Rectangle rect = new Rectangle(0, 0, 60, 40);
+
+                Graphics gx = Graphics.FromImage(it.DataGridCache);
+                gx.FillRectangle(Brushes.White, rect);
+                gx.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
 
                 float single = 1.0F * rect.Width / (max_small_data_count - 1);
                 float division = 1.0F * rect.Height / 100;
@@ -196,12 +197,12 @@ namespace PCMgr.Ctls
                     for (int i = 0; i < it.Data.Count; i++)
                     {
                         it.DataAvg1 += it.Data[i];
-                        DrawItemDataGridData(g, it, ps, it.BasePen, rect, single, division, offset, i, false);
+                        DrawItemDataGridData(gx, it, ps, it.BasePen, rect, single, division, offset, i, false);
                     }
                     it.DataAvg1 /= it.Data.Count;
 
                     ps.Add(new PointF(rect.Left + rect.Width, rect.Top + rect.Height));
-                    g.FillClosedCurve(it.BgBrush, ps.ToArray(), System.Drawing.Drawing2D.FillMode.Alternate, 0f);
+                    gx.FillClosedCurve(it.BgBrush, ps.ToArray(), System.Drawing.Drawing2D.FillMode.Alternate, 0f);
 
                     if (it.EnableData2)
                     {
@@ -211,7 +212,7 @@ namespace PCMgr.Ctls
                         for (int i = 0; i < it.Data2.Count; i++)
                         {
                             it.DataAvg2 += it.Data2[i];
-                            DrawItemDataGridData(g, it, ps, it.BasePen2, rect, single, division, offset, i, true);
+                            DrawItemDataGridData(gx, it, ps, it.BasePen2, rect, single, division, offset, i, true);
                         }
                         it.DataAvg2 /= it.Data2.Count;
                         it.DataAvg = (it.DataAvg1 + it.DataAvg2) / 2;
@@ -219,7 +220,7 @@ namespace PCMgr.Ctls
                         if (it.BgBrush2 != Brushes.White)
                         {
                             ps.Add(new PointF(rect.Left + rect.Width, rect.Top + rect.Height));
-                            g.FillClosedCurve(it.BgBrush2, ps.ToArray(), System.Drawing.Drawing2D.FillMode.Alternate, 0f);
+                            gx.FillClosedCurve(it.BgBrush2, ps.ToArray(), System.Drawing.Drawing2D.FillMode.Alternate, 0f);
                         }
                     }
                     else it.DataAvg = it.DataAvg1;
@@ -230,7 +231,7 @@ namespace PCMgr.Ctls
                     for (int i = 0; i < it.Data.Count; i++)
                     {
                         it.DataAvg1 += it.Data[i];
-                        DrawItemDataGridData(g, it, ps, it.BasePen, rect, single, division, offset, i, false);
+                        DrawItemDataGridData(gx, it, ps, it.BasePen, rect, single, division, offset, i, false);
                     }
                     it.DataAvg1 /= it.Data.Count;
 
@@ -242,7 +243,7 @@ namespace PCMgr.Ctls
                         for (int i = 0; i < it.Data2.Count; i++)
                         {
                             it.DataAvg2 += it.Data2[i];
-                            DrawItemDataGridData(g, it, ps, it.BasePen2, rect, single, division, offset, i, true);
+                            DrawItemDataGridData(gx, it, ps, it.BasePen2, rect, single, division, offset, i, true);
                         }
                         it.DataAvg2 /= it.Data2.Count;
                         it.DataAvg = (it.DataAvg1 + it.DataAvg2) / 2;
@@ -254,7 +255,10 @@ namespace PCMgr.Ctls
                     it.MaxValue = (int)it.AutoMaxCallback(it.DataAvg);
 
                 ps.Clear();
-                g.DrawRectangle(it.BorderPen, rect);
+                gx.DrawRectangle(it.BorderPen, 0, 0, rect.Width - 1, rect.Height - 1);
+                gx.Dispose();
+
+                g.DrawImage(it.DataGridCache, 10, y + 10);
             }
             else
             {
@@ -491,7 +495,7 @@ namespace PCMgr.Ctls
         }
 
     }
-    public class PerformanceListItem
+    public class PerformanceListItem : IDisposable
     {
         public delegate int GetMaxValCallback(int avg);
 
@@ -505,7 +509,10 @@ namespace PCMgr.Ctls
                 Data2.Add(0);
             Gray = false;
             NoGridImage = Properties.Resources.pointCpu;
+            DataGridCache = new Bitmap(60, 40, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
         }
+
+        public Bitmap DataGridCache { get; set; }
 
         public Pen BorderPen { get; set; }
         public Brush BgBrush { get; set; }
@@ -572,7 +579,14 @@ namespace PCMgr.Ctls
         public bool Gray { get; set; }
         public bool EnableData2 { get; set; } = false;
         public bool EnableAutoMax { get; set; } = false;
-        public int MaxValue { get; set; } = 100;
+        public int MaxValue {
+            get { return maxValue; }
+            set
+            {
+                maxValue = value;
+                if (maxValue <= 0) maxValue = 100;
+            }
+        }
         public int ItemY { get; set; }
         public int ItemHeight { get { return 60; } }
         public string SmallText { get; set; }
@@ -584,8 +598,22 @@ namespace PCMgr.Ctls
         {
             return Name;
         }
+
+        void IDisposable.Dispose()
+        {
+            DataGridCache.Dispose();
+            BorderPen.Dispose();
+            BgBrush.Dispose();
+            BasePen.Dispose();
+            BgBrush2.Dispose();
+            BasePen2.Dispose();
+            dataIem.Clear();
+            dataIem2.Clear();
+        }
+
         private bool b2 = false;
         private bool b = false;
+        private int maxValue = 100;
         private Pen basePen = null;
         private Pen basePen2 = null;
         private List<int> dataIem = null;

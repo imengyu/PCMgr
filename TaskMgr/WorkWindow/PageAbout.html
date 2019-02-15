@@ -141,7 +141,7 @@
                 }
                 if (xhr != null) {
                     xhr.onreadystatechange = check_update_callback;
-                    xhr.open("GET", "http://www.imyzc.com/softs/pcmgr/?checkupdate=" + document.getElementById('txt_current_ver').innerText, true);
+                    xhr.open("GET", "https://www.imyzc.com/softs/pcmgr/?checkupdate=" + document.getElementById('txt_current_ver').innerText, true);
                     xhr.send(null);
                 }
                 else alert("Your browser does not support XMLHTTP.");

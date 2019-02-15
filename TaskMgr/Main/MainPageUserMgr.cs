@@ -224,7 +224,7 @@ namespace PCMgr.Main
             li.SubItems[2].Font = listUsers.Font;
             li.SubItems[3].Font = listUsers.Font;
             li.Tag = sessionId;
-            li.DisplayChildCount = true;
+            li.DisplayChildCount = false;
             li.IsUWPICO = true;
 
             string userFullName, userIcoPath;

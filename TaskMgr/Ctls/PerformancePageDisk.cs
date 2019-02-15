@@ -80,7 +80,7 @@ namespace PCMgr.Ctls
             performanceGridSpeed.AddData(writeKB);
 
             //刷新速度标尺
-            lastMaxSpeed = (int)(performanceGridSpeed.DataAverage * 0.7 + performanceGridSpeed.MaxData * 0.3) / 2;
+            lastMaxSpeed = (int)(performanceGridSpeed.DataAverage * 0.9 + performanceGridSpeed.MaxData * 0.1) / 2;
 
             //刷新最大单位
             if (lastMaxSpeed > performanceGridSpeed.MaxValue)

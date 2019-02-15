@@ -141,7 +141,7 @@
                 }
                 if (xhr != null) {
                     xhr.onreadystatechange = check_update_callback;
-                    xhr.open("GET", "http://www.imyzc.com/softs/pcmgr/?checkupdate=" + document.getElementById('txt_current_ver').innerText, true);
+                    xhr.open("GET", "https://www.imyzc.com/softs/pcmgr/?checkupdate=" + document.getElementById('txt_current_ver').innerText, true);
                     xhr.send(null);
                 }
                 else alert("Your browser does not support XMLHTTP.");
@@ -153,7 +153,7 @@
                 var b = xhr.responseText;
                 if (b == "newupdate") {
                     document.getElementById('txt_updates').innerText = 'New updates are available. Click the button to start update';
-                    document.getElementById('btn_check_update').innerText = '立即更新';
+                    document.getElementById('btn_check_update').innerText = 'Update now';
                 } else if (b == "latest") {
                     document.getElementById('txt_updates').innerText = 'This is the latest version.';
                     document.getElementById('btn_check_update').setAttribute('style', 'display:none');

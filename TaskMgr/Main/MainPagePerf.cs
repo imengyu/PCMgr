@@ -371,7 +371,7 @@ namespace PCMgr.Main
                     uint diskIndex = MDEVICE_GetPhysicalDriveIndexInWMI(index);
 
                     perfItemHeader.item.Name = LanuageMgr.GetStr("TitleDisk") + sb.ToString();
-                    perfItemHeader.item.BasePen = new Pen(DiskDrawColor);
+                    perfItemHeader.item.BasePen = new Pen(DiskDrawColor, 2f);
                     perfItemHeader.item.BgBrush = new SolidBrush(DiskBgColor);
                     perfItemHeader.item.Tag = perfItemHeader;
                     perfItemHeader.item.Type = PerformanceListItemType.Disk;
@@ -408,10 +408,10 @@ namespace PCMgr.Main
                         bool isWifi = MDEVICE_GetNetworkAdapterIsWIFI(sbName.ToString());
 
                         perfItemHeader.item.Name = isWifi ? "Wi-Fi" : LanuageMgr.GetStr("Ethernet");
-                        perfItemHeader.item.BasePen = new Pen(NetDrawColor);
+                        perfItemHeader.item.BasePen = new Pen(NetDrawColor, 2f);
                         perfItemHeader.item.BgBrush = new SolidBrush(NetBgColor);
-                        perfItemHeader.item.BasePen2 = new Pen(NetDrawColor2);
-                        perfItemHeader.item.BasePen2.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
+                        perfItemHeader.item.BasePen2 = new Pen(NetDrawColor2, 2f);
+                        perfItemHeader.item.BasePen2.DashStyle = System.Drawing.Drawing2D.DashStyle.Dot;
                         perfItemHeader.item.BgBrush2 = Brushes.White;
                         perfItemHeader.item.Tag = perfItemHeader;
                         perfItemHeader.item.NoGridImage = Properties.Resources.pointNet;
@@ -490,7 +490,7 @@ namespace PCMgr.Main
                 uint diskIndex = MDEVICE_GetPhysicalDriveIndexInWMI(index);
 
                 perfItemHeader.item.Name = LanuageMgr.GetStr("TitleDisk") + sb.ToString();
-                perfItemHeader.item.BasePen = new Pen(DiskDrawColor);
+                perfItemHeader.item.BasePen = new Pen(DiskDrawColor, 2f);
                 perfItemHeader.item.BgBrush = new SolidBrush(DiskBgColor);
                 perfItemHeader.item.Tag = perfItemHeader;
                 perfItemHeader.item.Type = PerformanceListItemType.Disk;
@@ -528,9 +528,9 @@ namespace PCMgr.Main
                     bool isWifi = MDEVICE_GetNetworkAdapterIsWIFI(sbName.ToString());
 
                     perfItemHeader.item.Name = isWifi ? "Wi-Fi" : LanuageMgr.GetStr("Ethernet");
-                    perfItemHeader.item.BasePen = new Pen(NetDrawColor);
+                    perfItemHeader.item.BasePen = new Pen(NetDrawColor, 2f);
                     perfItemHeader.item.BgBrush = new SolidBrush(NetBgColor);
-                    perfItemHeader.item.BasePen2 = new Pen(NetDrawColor2);
+                    perfItemHeader.item.BasePen2 = new Pen(NetDrawColor2, 2f);
                     perfItemHeader.item.BasePen2.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
                     perfItemHeader.item.BgBrush2 = Brushes.White;
                     perfItemHeader.item.Tag = perfItemHeader;

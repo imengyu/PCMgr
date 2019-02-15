@@ -1320,14 +1320,26 @@ M_API DWORD MNtPathToDosPath(LPWSTR pszNtPath, LPWSTR pszDosPath, UINT szDosPath
 //Process information
 M_API BOOL MGetProcessFullPathForNonAdmin(DWORD dwPID, LPWSTR pszOutPath)
 {
-	ULONG ResultLength = 0;
-	SYSTEM_PROCESS_ID_INFORMATION SystemInformation = { 0 };
-	SystemInformation.ProcessId = (PVOID)(ULONG_PTR)dwPID; 
-	if (!NT_SUCCESS(NtQuerySystemInformation(SystemProcessIdInformation, &SystemInformation, sizeof(SYSTEM_PROCESS_ID_INFORMATION), &ResultLength)))
-		return FALSE;
-	if(MDosPathToNtPath(SystemInformation.ImageName.Buffer, pszOutPath))
-		return FALSE;
-	return FALSE;
+	BOOL bResult = FALSE;
+	NTSTATUS Result = 0;
+	ULONG ResultLength = sizeof(SYSTEM_PROCESS_ID_INFORMATION);
+	PSYSTEM_PROCESS_ID_INFORMATION pSystemInformation = (PSYSTEM_PROCESS_ID_INFORMATION)malloc(ResultLength);
+	memset(pSystemInformation, 0, ResultLength);
+	pSystemInformation->ProcessId = (PVOID)(ULONG_PTR)dwPID;
+	pSystemInformation->ImageName.Buffer = (PWSTR)malloc(sizeof(WCHAR) * MAX_PATH);
+	memset(pSystemInformation->ImageName.Buffer, 0, sizeof(WCHAR) * MAX_PATH);
+	pSystemInformation->ImageName.Length = 0;
+	pSystemInformation->ImageName.MaximumLength = MAX_PATH;
+	Result = NtQuerySystemInformation(SystemProcessIdInformation, pSystemInformation, ResultLength, &ResultLength);
+
+	if (!NT_SUCCESS(Result)) 
+		LogErr2(L"NtQuerySystemInformation failed : %s", MNtStatusToStr(Result));
+	else bResult = MDosPathToNtPath(pSystemInformation->ImageName.Buffer, pszOutPath);
+
+	free(pSystemInformation->ImageName.Buffer);
+	free(pSystemInformation);
+	
+	return bResult;
 }
 M_API BOOL MGetProcessFullPathEx(DWORD dwPID, LPWSTR pszOutDosPath, PHANDLE pOutHandle, LPWSTR pszExeName)
 {
@@ -1336,10 +1348,14 @@ M_API BOOL MGetProcessFullPathEx(DWORD dwPID, LPWSTR pszOutDosPath, PHANDLE pOut
 		MOpenProcessNt(dwPID, pOutHandle);
 		return 1;
 	}
+	if (dwPID == 4 || StrEqual(pszExeName, L"Registry") || StrEqual(pszExeName, L"Memory Compression")) {
+		return TRUE;
+	}
 
 	TCHAR szImagePath[MAX_PATH];
 	HANDLE hProcess = MTryOpenProcess(dwPID);
-	if (!hProcess) return MGetProcessFullPathForNonAdmin(dwPID, pszOutDosPath);
+	if (!hProcess) 
+		return MGetProcessFullPathForNonAdmin(dwPID, pszOutDosPath);
 	if (!NT_SUCCESS(MGetProcessImageFileNameWin32(hProcess, szImagePath, MAX_PATH)))
 		return FALSE;
 	//if (!MDosPathToNtPath(szImagePath, szResult)) return FALSE;

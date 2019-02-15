@@ -493,6 +493,9 @@ namespace PCMgr.Main
             listProcess.Groups.Add(lg3);
             listProcess.Header.CanMoveCloum = true;
 
+            //Net no admin
+            if (!FormMain.IsAdmin) headerTips[3].name = "TipNetNoAdmin";
+
             listProcessAddHeaderMenu("TitleProcName");
             listProcessAddHeaderMenu("TitleType");
             listProcessAddHeaderMenu("TitlePublisher");
@@ -606,12 +609,6 @@ namespace PCMgr.Main
                 currentProcessPid = (uint)MAppWorkCall3(180, IntPtr.Zero, IntPtr.Zero);
 
                 processMonitor = MProcessMonitor.CreateProcessMonitor(NativeBridge.ptrProcessRemoveItemCallBack, NativeBridge.ptrProcessNewItemCallBack, Nullptr);
-
-                if (!FormMain.IsAdmin)
-                {
-                    FormMain.spl1.Visible = true;
-                    FormMain.check_showAllProcess.Visible = true;
-                }
 
                 smallListFont = new Font(FormMain.tabControlMain.Font.FontFamily, 9f);
 
@@ -1105,7 +1102,7 @@ namespace PCMgr.Main
             taskMgrListItem.Tag = p;
 
             //13 empty item
-            for (int i = 0; i < 13; i++) taskMgrListItem.SubItems.Add(new TaskMgrListItem.TaskMgrListViewSubItem());
+            for (int i = 0; i < 13; i++) taskMgrListItem.SubItems.Add(new TaskMgrListItem.TaskMgrListViewSubItem() { Font = listProcess.Font } );
 
             //Add default data col
             {
@@ -1133,6 +1130,9 @@ namespace PCMgr.Main
                     taskMgrListItem.SubItems[netindex].Text = "- Mbps";
                     taskMgrListItem.SubItems[netindex].CustomData = 0;
                     taskMgrListItem.SubItems[netindex].BackColor = dataGridZeroColor;
+
+                    if (!FormMain.IsAdmin)
+                        taskMgrListItem.SubItems[netindex].ForeColor = Color.Gray;
                 }
             }
 
@@ -1224,6 +1224,14 @@ namespace PCMgr.Main
                         }
                         if (nameindex != -1) g.SubItems[nameindex].Text = p.uwpFullName;
                         if (pathindex != -1) g.SubItems[pathindex].Text = uapp.SubItems[3].Text;
+                        if (netindex != -1)
+                        {
+                            g.SubItems[netindex].Text = "- Mbps";
+                            g.SubItems[netindex].CustomData = 0;
+                            g.SubItems[netindex].BackColor = dataGridZeroColor;
+                            if (!FormMain.IsAdmin)
+                                g.SubItems[netindex].ForeColor = Color.Gray;      
+                        }
 
                         g.Tag = parentItem;
 
@@ -1407,7 +1415,7 @@ namespace PCMgr.Main
                         it.SubItems[diskindex].CustomData = 0;
                     }
                 }
-                if (netindex != -1 && ipdateOneDataCloum != netindex)
+                if (netindex != -1 && FormMain.IsAdmin && ipdateOneDataCloum != netindex)
                 {
                     double d = 0;
                     foreach (TaskMgrListItem ix in it.Childs)
@@ -1525,7 +1533,7 @@ namespace PCMgr.Main
                         it.SubItems[netindex].CustomData = 0;
                         it.SubItems[netindex].BackColor = dataGridZeroColor;
                     }
-                    else if (netindex != -1 && ipdateOneDataCloum == netindex)
+                    else if (netindex != -1 && FormMain.IsAdmin && ipdateOneDataCloum == netindex)
                     {
                         if (d < 0.1 && d >= PERF_LIMIT_MIN_DATA_NETWORK) d = 0.1; else if (d < PERF_LIMIT_MIN_DATA_NETWORK) d = 0;
                         if (d != 0)
@@ -1922,6 +1930,7 @@ namespace PCMgr.Main
         }
         private void ProcessListUpdatePerf_Net(uint pid, TaskMgrListItem it, PsItem p)
         {
+            if (!FormMain.IsAdmin) return;
             //if (p.updateLock) { p.updateLock = false; return; }
             if (pid > 4 && MPERF_NET_IsProcessInNet(pid))
             {
@@ -1930,7 +1939,7 @@ namespace PCMgr.Main
                 if (allMBytesPerSec < 0.1 && allMBytesPerSec >= PERF_LIMIT_MIN_DATA_NETWORK) allMBytesPerSec = 0.1;
                 else if (allMBytesPerSec < PERF_LIMIT_MIN_DATA_NETWORK)
                 {
-                    if(isNetPercentage) it.SubItems[netindex].Text = "0.1 %";
+                    if (isNetPercentage) it.SubItems[netindex].Text = "0.1 %";
                     else it.SubItems[netindex].Text = "0.1 Mbps";
                     it.SubItems[netindex].CustomData = allMBytesPerSec;
                     it.SubItems[netindex].BackColor = ProcessListGetColorFormValue(allMBytesPerSec, 16);
@@ -2062,19 +2071,17 @@ namespace PCMgr.Main
             if (oldps != null)
             {
                 ProcessListFree(oldps);
+                Log("Process remove : pid " + pid);
             }
             else
             {
                 TaskMgrListItem li = ProcessListFindItem(pid);
-                if (li != null) ProcessListRemoveItem(li);
+                if (li != null) { ProcessListRemoveItem(li); Log("Process remove : pid " + pid); }
                 else Log("ProcessListRemoveItemCallBack for a not found item : pid " + pid);
             }
         }
         private void ProcessListNewItemCallBack(uint pid, uint parentid, string exename, string exefullpath, IntPtr hProcess, IntPtr processItem)
         {
-            if (!FormMain.IsAdmin && string.IsNullOrEmpty(exefullpath) && pid != 0 && pid != 2 && pid != 4 && pid != 88)
-                return;
-
             ProcessListLoad(pid, parentid, exename, exefullpath, hProcess, processItem);
             if (!isLoadFull) Log("New process item : " + exename + " (" + pid + ")");
         }

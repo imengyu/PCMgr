@@ -70,6 +70,7 @@ namespace PCMgr.Main
             }
         }
 
+        private bool appHistoryInited = false;
         private TaskListViewUWPColumnSorter uWPColumnSorter = new TaskListViewUWPColumnSorter();
         public void UWPListRefesh()
         {
@@ -189,6 +190,20 @@ namespace PCMgr.Main
             li11.TextSmall = LanuageMgr.GetStr("TitleInstallDir", false);
             li11.Width = 260;
             listUwpApps.Colunms.Add(li11);
+        }
+        public void AppHistoryInit()
+        {
+            /*
+            if (MSRUM_Init())
+            {
+                if (!appHistoryInited)
+                    appHistoryInited = MSRUM_LoadSrumData();
+            }
+            */
+        }
+        public void AppHistoryUninit()
+        {
+            //MSRUM_Destroy();
         }
 
         /// <summary>

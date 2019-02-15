@@ -683,7 +683,7 @@ M_CAPI(BOOL) MDEVICE_GetNetworkAdapterInfoFormName(LPWSTR name, LPWSTR ipAddress
 		MDeviceNetworkAdapter*adapter = MDEVICE_FindNetworkAdaptersInfo(name);
 		if (adapter != NULL)
 		{
-			if (outMaxSpeed)*outMaxSpeed = adapter->MaxSpeed;
+			if (adapter->MaxSpeed > 0 && outMaxSpeed)*outMaxSpeed = adapter->MaxSpeed;
 			if (ipAddressV4) wcscpy_s(ipAddressV4, ipAddressV4Size, adapter->IPAddressV4);
 			if (ipAddressV6) wcscpy_s(ipAddressV6, ipAddressV6Size, adapter->IPAddressV6);
 			if (guidBuffer) wcscpy_s(guidBuffer, guidBufferSize, adapter->GUID);

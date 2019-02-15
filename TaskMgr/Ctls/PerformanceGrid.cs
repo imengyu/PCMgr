@@ -168,12 +168,12 @@ namespace PCMgr.Ctls
         /// </summary>
         public int MaxValue {
             get {
-                if (maxValue <= 0) maxValue = 100;
                 return maxValue;
             }
             set
             {
                 maxValue = value;
+                if (maxValue <= 0) maxValue = 100;
             }
         }
 
@@ -208,10 +208,9 @@ namespace PCMgr.Ctls
         {
             base.OnPaint(e);
             Graphics g = e.Graphics;
-            //g.SmoothingMode = SmoothingMode.AntiAlias;     
+            bool hasOverflow = false;
 
-            if (LeftText != "") g.DrawString(LeftText, Font, TextBrush, 0, 0);
-            if (RightText != "") g.DrawString(RightText, Font, TextBrush, new Rectangle(0, 0, Width, TopTextHeight), stringFormatRight);
+            g.SmoothingMode = SmoothingMode.AntiAlias;
 
             float single = 1.0F * Width / (60 - 1);
             float division = 1.0F * (Height - TopTextHeight - BottomTextHeight) / MaxValue;
@@ -253,7 +252,7 @@ namespace PCMgr.Ctls
 
                     pts[i + 1].X = offset + i * single;
                     pts[i + 1].Y = Height - BottomTextHeight - dataIem[i] * division - 1;
-                    if (pts[i + 1].Y < TopTextHeight) pts[i + 1].Y = TopTextHeight;
+                    if (pts[i + 1].Y < TopTextHeight) { hasOverflow = true; }
                 }
                 if (lastDataAverage1_zeroCount != dataIem.Count) lastDataAverage1 /= dataIem.Count - lastDataAverage1_zeroCount;
 
@@ -276,7 +275,7 @@ namespace PCMgr.Ctls
 
                     pts[i + 1].X = offset + i * single;
                     pts[i + 1].Y = Height - BottomTextHeight - dataIem2[i] * division - 1;
-                    if (pts[i + 1].Y < TopTextHeight) pts[i + 1].Y = TopTextHeight;
+                    if (pts[i + 1].Y < TopTextHeight) { hasOverflow = true; }
                 }
                 if(dataIem2.Count != lastDataAverage2_zeroCount) lastDataAverage2 /= dataIem2.Count - lastDataAverage2_zeroCount;
 
@@ -294,12 +293,16 @@ namespace PCMgr.Ctls
                 if (MaxScaleText != "")
                     g.DrawString(MaxScaleText, Font, TextBrush, new Rectangle(Width - 90, y + 2, 90, 20), stringFormatRight);
             }
+            if (hasOverflow)
+                g.FillRectangle(Brushes.White, 0, 0, Width, TopTextHeight - 1);
+
+            if (LeftText != "") g.DrawString(LeftText, Font, TextBrush, 0, 0);
+            if (RightText != "") g.DrawString(RightText, Font, TextBrush, new Rectangle(0, 0, Width, TopTextHeight), stringFormatRight);
 
             if (LeftBottomText != "") g.DrawString(LeftBottomText, Font, TextBrush, 0, Height - BottomTextHeight + 2);
             if (RightBottomText != "") g.DrawString(RightBottomText, Font, TextBrush, new Rectangle(20, Height - BottomTextHeight + 2, Width - 20, BottomTextHeight), stringFormatRight);
 
-
-            g.DrawRectangle(DrawPen, new Rectangle(0, TopTextHeight, Width - 1, Height - 1 - TopTextHeight - BottomTextHeight));
+            g.DrawRectangle(DrawPen, 0, TopTextHeight, Width - 1, Height - 1 - TopTextHeight - BottomTextHeight);
         }
 
     }

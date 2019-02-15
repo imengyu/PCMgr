@@ -91,8 +91,13 @@ BOOL M_DLG_ChooseDir(HWND hWnd, LPWSTR startDir, LPWSTR title, LPWSTR strrs, siz
 			hr = pfd->SetOptions(dwFlags | FOS_PICKFOLDERS | FOS_FORCEFILESYSTEM);
 			if (title != 0) hr = pfd->SetTitle(title);
 			hr = pfd->Show(hWnd);
-			if (hr == ERROR_CANCELLED)
+			if (hr == HRESULT_FROM_WIN32(ERROR_CANCELLED))
 				return FALSE;
+			if (FAILED(hr)) {
+				LogErr2(L"pfd->Show failed with HRESULT : 0x%x", hr);
+				return FALSE;
+			}
+
 			IShellItem*item;			
 			hr = pfd->GetResult(&item);
 			LPWSTR pathrs;

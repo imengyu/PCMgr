@@ -3,6 +3,8 @@ obj/
 bin/
 Debug/
 Debug_64/
+Release/
+Release_64/
 depends.exe - 快捷方式.lnk
 *.pdb
 *.cache
@@ -25,5 +27,3 @@ depends.exe - 快捷方式.lnk
 *.ipdb
 *.enc
 *.ini
-Release_x86_1.2.rar
-Release_x64_1.2.rar

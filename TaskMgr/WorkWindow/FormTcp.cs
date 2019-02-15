@@ -47,7 +47,7 @@ namespace PCMgr.WorkWindow
         }
         private string FindProcessName(uint ProcessId)
         {
-            string rs = "";
+            string rs = " (" + ProcessId + ")";
             if (formMain != null)
             {
                if(formMain.MainPageProcess.Inited)

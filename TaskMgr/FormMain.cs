@@ -379,6 +379,8 @@ namespace PCMgr
                         return 3;
                     if (agrs[1] == "uwpapps")
                         return 4;
+                    if (agrs[1] == "apphistory")
+                        return 4;
                     if (agrs[1] == "services")
                         return 5;
                     if (agrs[1] == "startmgr")
@@ -620,6 +622,7 @@ namespace PCMgr
                 M_LOG_Close();
                 if (SysVer.IsWin8Upper())
                 {
+                    mainPageUwpMgr.AppHistoryUninit();
                     mainPageUwpMgr.UWPListUnInit();
                     M_UWP_UnInit();
                 }
@@ -994,6 +997,7 @@ namespace PCMgr
             else if (e.TabPage == tabPageUWPCtl)
             {
                 mainPageUwpMgr.UWPListInit();
+                mainPageUwpMgr.AppHistoryInit();
             }
             else if (e.TabPage == tabPagePerfCtl)
             {

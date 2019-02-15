@@ -3,7 +3,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LocalDebuggerDebuggerType>Mixed</LocalDebuggerDebuggerType>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>select perf</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>select apphistory</LocalDebuggerCommandArguments>
     <RemoteDebuggerWorkingDirectory>C:\Users\a\Desktop\Debug\</RemoteDebuggerWorkingDirectory>
     <RemoteDebuggerConnection>RemoteWithoutAuthentication</RemoteDebuggerConnection>
     <RemoteDebuggerDebuggerType>NativeOnly</RemoteDebuggerDebuggerType>

@@ -71,6 +71,10 @@ LPWSTR MNtStatusToStr(NTSTATUS status) {
 		return L"STATUS_INVALID_CID";
 	case STATUS_THREAD_IS_TERMINATING:
 		return L"STATUS_THREAD_IS_TERMINATING";
+	case STATUS_INVALID_PARAMETER:
+		return L"STATUS_INVALID_PARAMETER";
+	case STATUS_NOT_SUPPORTED:
+		return L"STATUS_NOT_SUPPORTED";
 	default:
 		swprintf_s(ntStatusStrBuf, L"0x%08X", status);
 		break;

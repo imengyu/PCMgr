@@ -228,6 +228,7 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="schlp.h" />
     <ClInclude Include="settinghlp.h" />
+    <ClInclude Include="srumhlp.h" />
     <ClInclude Include="starthlp.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="StringHlp.h" />
@@ -290,6 +291,7 @@
     <ClCompile Include="reghlp.cpp" />
     <ClCompile Include="schlp.cpp" />
     <ClCompile Include="settinghlp.cpp" />
+    <ClCompile Include="srumhlp.cpp" />
     <ClCompile Include="starthlp.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -302,6 +304,7 @@
     <ClCompile Include="suact.cpp" />
     <ClCompile Include="syshlp.cpp" />
     <ClCompile Include="thdhlp.cpp" />
+    <ClCompile Include="UidHlp.cpp" />
     <ClCompile Include="userhlp.cpp" />
     <ClCompile Include="uwphlp.cpp" />
     <ClCompile Include="vprocx.cpp" />

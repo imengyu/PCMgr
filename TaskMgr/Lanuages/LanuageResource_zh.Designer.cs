@@ -2476,6 +2476,16 @@ namespace PCMgr.Lanuages {
         }
         
         /// <summary>
+        ///   查找类似 当前主要网络上的网络利用率
+        ///(需要管理员权限才能正确获取网络速率) 的本地化字符串。
+        /// </summary>
+        internal static string TipNetNoAdmin {
+            get {
+                return ResourceManager.GetString("TipNetNoAdmin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 由内核或驱动程序代表进程
         ///所分配的不可分页内核内存量 的本地化字符串。
         /// </summary>

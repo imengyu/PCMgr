@@ -47,8 +47,6 @@
             this.tabControlMain = new System.Windows.Forms.TabControl();
             this.tabPageProcCtl = new System.Windows.Forms.TabPage();
             this.sp4 = new System.Windows.Forms.PictureBox();
-            this.check_showAllProcess = new System.Windows.Forms.CheckBox();
-            this.spl1 = new System.Windows.Forms.PictureBox();
             this.btnEndProcess = new System.Windows.Forms.Button();
             this.listProcess = new PCMgr.Ctls.TaskMgrList();
             this.lbProcessCount = new System.Windows.Forms.Label();
@@ -146,6 +144,7 @@
             this.隐藏图形ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.fileSystemWatcher = new System.IO.FileSystemWatcher();
             this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
+            this.check_showAllProcess = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerPerfCtls)).BeginInit();
             this.splitContainerPerfCtls.Panel1.SuspendLayout();
             this.splitContainerPerfCtls.SuspendLayout();
@@ -156,7 +155,6 @@
             this.tabControlMain.SuspendLayout();
             this.tabPageProcCtl.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.sp4)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.spl1)).BeginInit();
             this.tabPageKernelCtl.SuspendLayout();
             this.pl_driverNotLoadTip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.sp5)).BeginInit();
@@ -310,8 +308,6 @@
             // tabPageProcCtl
             // 
             this.tabPageProcCtl.Controls.Add(this.sp4);
-            this.tabPageProcCtl.Controls.Add(this.check_showAllProcess);
-            this.tabPageProcCtl.Controls.Add(this.spl1);
             this.tabPageProcCtl.Controls.Add(this.btnEndProcess);
             this.tabPageProcCtl.Controls.Add(this.listProcess);
             this.tabPageProcCtl.Controls.Add(this.lbProcessCount);
@@ -326,19 +322,6 @@
             this.sp4.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(207)))), ((int)(((byte)(207)))), ((int)(((byte)(207)))));
             this.sp4.Name = "sp4";
             this.sp4.TabStop = false;
-            // 
-            // check_showAllProcess
-            // 
-            resources.ApplyResources(this.check_showAllProcess, "check_showAllProcess");
-            this.check_showAllProcess.Name = "check_showAllProcess";
-            this.check_showAllProcess.UseVisualStyleBackColor = true;
-            // 
-            // spl1
-            // 
-            resources.ApplyResources(this.spl1, "spl1");
-            this.spl1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(207)))), ((int)(((byte)(207)))), ((int)(((byte)(207)))));
-            this.spl1.Name = "spl1";
-            this.spl1.TabStop = false;
             // 
             // btnEndProcess
             // 
@@ -662,6 +645,7 @@
             // 
             // tabPageDetals
             // 
+            this.tabPageDetals.Controls.Add(this.check_showAllProcess);
             this.tabPageDetals.Controls.Add(this.btnEndProcessDetals);
             this.tabPageDetals.Controls.Add(this.listProcessDetals);
             resources.ApplyResources(this.tabPageDetals, "tabPageDetals");
@@ -1028,6 +1012,12 @@
             this.notifyIcon.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon_MouseDoubleClick);
             this.notifyIcon.MouseMove += new System.Windows.Forms.MouseEventHandler(this.notifyIcon_MouseMove);
             // 
+            // check_showAllProcess
+            // 
+            resources.ApplyResources(this.check_showAllProcess, "check_showAllProcess");
+            this.check_showAllProcess.Name = "check_showAllProcess";
+            this.check_showAllProcess.UseVisualStyleBackColor = true;
+            // 
             // FormMain
             // 
             resources.ApplyResources(this, "$this");
@@ -1056,7 +1046,6 @@
             this.tabControlMain.ResumeLayout(false);
             this.tabPageProcCtl.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.sp4)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.spl1)).EndInit();
             this.tabPageKernelCtl.ResumeLayout(false);
             this.tabPageKernelCtl.PerformLayout();
             this.pl_driverNotLoadTip.ResumeLayout(false);
@@ -1095,7 +1084,6 @@
         public System.Windows.Forms.Button btnEndProcess;
         public Ctls.TaskMgrList listProcess;
         public System.Windows.Forms.Label lbProcessCount;
-        public System.Windows.Forms.PictureBox spl1;
         public System.Windows.Forms.Label lbDriversCount;
         public System.Windows.Forms.TabPage tabPageScCtl;
         public System.Windows.Forms.TabPage tabPageStartCtl;
@@ -1131,7 +1119,6 @@
         public System.Windows.Forms.Label lbScNeedAdminTip;
         public System.Windows.Forms.ColumnHeader columnHeader13;
         public System.Windows.Forms.ColumnHeader columnHeader14;
-        public System.Windows.Forms.CheckBox check_showAllProcess;
         public System.Windows.Forms.TabPage tabPageUWPCtl;
         public Ctls.TaskMgrList listUwpApps;
         public System.Windows.Forms.Panel pl_UWPEnumFailTip;
@@ -1204,6 +1191,7 @@
         public System.Windows.Forms.Panel pl_bios_time;
         public System.Windows.Forms.Label lbBiosTime;
         public System.Windows.Forms.ToolStripMenuItem 隐藏图形ToolStripMenuItem;
+        public System.Windows.Forms.CheckBox check_showAllProcess;
     }
 }
 

@@ -1290,4 +1290,8 @@ PCMgr 需要管理员权限 才能对系统进行控制和管理。
   <data name="LinkQuality" xml:space="preserve">
     <value>信号强度</value>
   </data>
+  <data name="TipNetNoAdmin" xml:space="preserve">
+    <value>当前主要网络上的网络利用率
+(需要管理员权限才能正确获取网络速率)</value>
+  </data>
 </root>

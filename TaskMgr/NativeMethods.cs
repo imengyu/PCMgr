@@ -1130,6 +1130,19 @@ namespace PCMgr
 
         #endregion
 
+        #region SRUM API
+
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool MSRUM_Init();
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void MSRUM_Destroy();
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool MSRUM_CanUse();
+        [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool MSRUM_LoadSrumData();
+        
+        #endregion
+
         public static class DeviceApi
         {
             [DllImport(COREDLLNAME, CallingConvention = CallingConvention.Cdecl)]
