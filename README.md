@@ -2,13 +2,19 @@ PCMgr [![License](https://img.shields.io/badge/Licence-MIT-blue.svg)]()
 =======================
  Windows 任务管理器重制版 Rebulid of Windows task manager
 ===
-这是一个 Windows 任务管理器重制版，添加了任务管理器不具有的功能，并且已有与Windows任务管理器可以媲美。<br/>
+这是一个 Windows 任务管理器重制版，添加了任务管理器不具有的功能，并且与 Windows 任务管理器非常相似。<br/>
 使用WinAPI以及C#开发，可以进行查看进程、进程信息、结束进程等。<br/>
 目前只完成部分功能。<br/>
 
 This is an rebulid version of the Windows Task Manager that adds features that the Task Manager does not have, And it is very similar to the Windows task manager. <br/>
 Use WinAPI and C# development, you can view the process, process information, end the process, etc. <br/>
 At present, only part of the functions are completed.
+
+作者的说明 Note
+---
+** 作者已经弃坑。<br/>
+这是本人在高二暑假心血来潮制作的一个小软件，纯粹是为了玩玩而已，那个时候才刚刚接触编程，编程水平不足，所以写的代码也很烂😓，大家不要学我。<br/>
+现在想想这个项目已经没有太多的意义，毕竟微软在 Win10 的更新非常快，这个任务管理器功能已经比不上 Win10 的自带任务管理器，靠自己去猜测系统不公开的功能不仅费时费力，而且随时可能失效，所以我决定不再维护此项目，因此此项目已经非常落后了（不过在 Win7 上运行还勉勉强强），不建议学习。<br/>
 
 特点 Features
 ---
