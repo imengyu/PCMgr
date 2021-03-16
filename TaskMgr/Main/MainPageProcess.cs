@@ -1315,8 +1315,8 @@ namespace PCMgr.Main
             if (pathindex != -1) if (p.exepath != "") it.SubItems[pathindex].Text = p.exepath;
             if (cmdindex != -1 && p.handle != Nullptr)
             {
-                StringBuilder s = new StringBuilder(1024);
-                if (MGetProcessCommandLine(p.handle, s, 1024, pid))
+                StringBuilder s = new StringBuilder(2048);
+                if (MGetProcessCommandLine(p.handle, s, 2048, pid))
                     it.SubItems[cmdindex].Text = s.ToString();
             }
             if (companyindex != -1)
