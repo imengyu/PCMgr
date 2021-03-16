@@ -465,11 +465,16 @@ BOOL MAppVModuls(DWORD dwPID, HWND hDlg, LPWSTR procName)
 	else if (NT_SUCCESS(status) && hProcess) {
 
 		BOOL bRet = FALSE;
-
-#ifndef _AMD64_
 		BOOL bWow64Proc = FALSE;
 		IsWow64Process(hProcess, &bWow64Proc);
+#ifdef _AMD64_
 		if (!bWow64Proc)
+		{
+			SetWindowText(htitle, str_item_PleaseEnumIn64);
+			return FALSE;
+		}
+#else
+		if(bWow64Proc)
 		{
 			SetWindowText(htitle, str_item_PleaseEnumIn64);
 			return FALSE;
