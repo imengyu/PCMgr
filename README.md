@@ -42,11 +42,11 @@ Features
 - Process view and terminate, suspend, resuseme process.
 - View threads, modules, handles, windows of process.
 - Performance chart like windows task manager.
-- Manage systen seervices.
+- Manage system services.
 - Very similar to the windows task manager.
 - Support Windows7.
 - Kernel driver.
-- Full opensource.
+- Full open source.
 
 [Download compiled program(x86)](https://github.com/imengyu/PCMgr/raw/master/Release/Release_x86_1.3.2.6.zip) | 
 [Download compiled program(x64)](https://github.com/imengyu/PCMgr/raw/master/Release_64/Release_64_1.3.2.6.zip)
